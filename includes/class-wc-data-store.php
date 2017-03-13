@@ -71,28 +71,32 @@ class WC_Data_Store {
 
 		if ( array_key_exists( $object_type, $this->stores ) ) {
 			$store = apply_filters( 'woocommerce_' . $object_type . '_data_store', $this->stores[ $object_type ] );
-			if ( ! class_exists( $store ) ) {
-				throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
+			if ( is_object( $store ) ) {
+				if ( ! $store instanceof WC_Object_Data_Store_Interface ) {
+					throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
+				}
+				$this->current_class_name = get_class( $store );
+				$this->instance = $store;
+			} else {
+				if ( ! class_exists( $store ) ) {
+					throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
+				}
+				$this->current_class_name = $store;
+				$this->instance = new $store;
 			}
-			$this->current_class_name = $store;
-			$this->instance           = new $store;
 		} else {
 			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
 	}
 
 	/**
-	 * Loads a data store for us or returns null if an invalid store.
+	 * Loads a data store.
 	 *
 	 * @param string $object_type Name of object.
 	 * @since 2.7.0
 	 */
 	public static function load( $object_type ) {
-		try {
-			return new WC_Data_Store( $object_type );
-		} catch ( Exception $e ) {
-			return null;
-		}
+		return new WC_Data_Store( $object_type );
 	}
 
 	/**

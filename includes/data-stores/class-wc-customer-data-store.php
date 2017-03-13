@@ -56,6 +56,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'shipping_last_name',
 		'wptests_capabilities',
 		'wptests_user_level',
+		'_order_count',
+		'_money_spent',
 	);
 
 	/**
@@ -77,7 +79,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
 			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
-			&& ! strstr( $meta->meta_key, $wpdb->prefix );
+			&& ! strstr( $meta->meta_key, $wpdb->prefix )
+			&& 0 !== stripos( $meta->meta_key, 'wp_' );
 	 }
 
 	/**
@@ -113,6 +116,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 *
 	 * @since 2.7.0
 	 * @param WC_Customer
+	 * @throws Exception
 	 */
 	public function read( &$customer ) {
 		global $wpdb;
@@ -257,6 +261,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_customer_object_updated_props', $customer, $updated_props );
 	}
 
 	/**

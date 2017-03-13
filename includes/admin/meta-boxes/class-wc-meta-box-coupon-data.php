@@ -58,7 +58,7 @@ class WC_Meta_Box_Coupon_Data {
 
 					foreach ( $coupon_data_tabs as $key => $tab ) {
 						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
-							<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
+							<a href="#<?php echo $tab['target']; ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 						</li><?php
 					}
 				?>
@@ -66,19 +66,46 @@ class WC_Meta_Box_Coupon_Data {
 			<div id="general_coupon_data" class="panel woocommerce_options_panel"><?php
 
 				// Type
-				woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => wc_get_coupon_types() ) );
+				woocommerce_wp_select( array(
+					'id'      => 'discount_type',
+					'label'   => __( 'Discount type', 'woocommerce' ),
+					'options' => wc_get_coupon_types(),
+				) );
 
 				// Amount
-				woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => wc_format_localized_price( 0 ), 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array(
+					'id'          => 'coupon_amount',
+					'label'       => __( 'Coupon amount', 'woocommerce' ),
+					'placeholder' => wc_format_localized_price( 0 ),
+					'description' => __( 'Value of the coupon.', 'woocommerce' ),
+					'data_type'   => 'price',
+					'desc_tip'    => true,
+				) );
 
 				// Free Shipping
-				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ) ) );
+				if ( wc_shipping_enabled() ) {
+					woocommerce_wp_checkbox( array(
+						'id'          => 'free_shipping',
+						'label'       => __( 'Allow free shipping', 'woocommerce' ),
+						'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ),
+					) );
+				}
 
 				// Expiry date
 				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
-				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'value' => esc_attr( $expiry_date ), 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => esc_attr__( 'YYYY-MM-DD', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
+				woocommerce_wp_text_input( array(
+					'id'                => 'expiry_date',
+					'value'             => esc_attr( $expiry_date ),
+					'label'             => __( 'Coupon expiry date', 'woocommerce' ),
+					'placeholder'       => 'YYYY-MM-DD',
+					'description'       => '',
+					'class'             => 'date-picker',
+					'custom_attributes' => array(
+						'pattern' => apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ),
+					),
+				) );
 
-				do_action( 'woocommerce_coupon_options' );
+				do_action( 'woocommerce_coupon_options', $coupon->get_id(), $coupon );
 
 			?></div>
 			<div id="usage_restriction_coupon_data" class="panel woocommerce_options_panel"><?php
@@ -86,16 +113,38 @@ class WC_Meta_Box_Coupon_Data {
 				echo '<div class="options_group">';
 
 				// minimum spend
-				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum spend (subtotal, including taxes) allowed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array(
+					'id'          => 'minimum_amount',
+					'label'       => __( 'Minimum spend', 'woocommerce' ),
+					'placeholder' => __( 'No minimum', 'woocommerce' ),
+					'description' => __( 'This field allows you to set the minimum spend (subtotal, including taxes) allowed to use the coupon.', 'woocommerce' ),
+					'data_type'   => 'price',
+					'desc_tip'    => true,
+				) );
 
 				// maximum spend
-				woocommerce_wp_text_input( array( 'id' => 'maximum_amount', 'label' => __( 'Maximum spend', 'woocommerce' ), 'placeholder' => __( 'No maximum', 'woocommerce' ), 'description' => __( 'This field allows you to set the maximum spend (subtotal, including taxes) allowed when using the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array(
+					'id'          => 'maximum_amount',
+					'label'       => __( 'Maximum spend', 'woocommerce' ),
+					'placeholder' => __( 'No maximum', 'woocommerce' ),
+					'description' => __( 'This field allows you to set the maximum spend (subtotal, including taxes) allowed when using the coupon.', 'woocommerce' ),
+					'data_type'   => 'price',
+					'desc_tip'    => true,
+				) );
 
 				// Individual use
-				woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use only', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ) ) );
+				woocommerce_wp_checkbox( array(
+					'id'          => 'individual_use',
+					'label'       => __( 'Individual use only', 'woocommerce' ),
+					'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ),
+				) );
 
 				// Exclude Sale Products
-				woocommerce_wp_checkbox( array( 'id' => 'exclude_sale_items', 'label' => __( 'Exclude sale items', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart.', 'woocommerce' ) ) );
+				woocommerce_wp_checkbox( array(
+					'id'          => 'exclude_sale_items',
+					'label'       => __( 'Exclude sale items', 'woocommerce' ),
+					'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart.', 'woocommerce' ),
+				) );
 
 				echo '</div><div class="options_group">';
 
@@ -184,7 +233,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				echo '</div>';
 
-				do_action( 'woocommerce_coupon_options_usage_restriction' );
+				do_action( 'woocommerce_coupon_options_usage_restriction', $coupon->get_id(), $coupon );
 
 			?></div>
 			<div id="usage_limit_coupon_data" class="panel woocommerce_options_panel"><?php
@@ -228,7 +277,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'                => 'usage_limit_per_user',
 					'label'             => __( 'Usage limit per user', 'woocommerce' ),
 					'placeholder'       => esc_attr__( 'Unlimited usage', 'woocommerce' ),
-					'description'       => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ),
+					'description'       => __( 'How many times this coupon can be used by an individual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ),
 					'desc_tip'          => true,
 					'class'             => 'short',
 					'type'              => 'number',
@@ -241,10 +290,10 @@ class WC_Meta_Box_Coupon_Data {
 
 				echo '</div>';
 
-				do_action( 'woocommerce_coupon_options_usage_limit' );
+				do_action( 'woocommerce_coupon_options_usage_limit', $coupon->get_id(), $coupon );
 
 			?></div>
-			<?php do_action( 'woocommerce_coupon_data_panels' ); ?>
+			<?php do_action( 'woocommerce_coupon_data_panels', $coupon->get_id(), $coupon ); ?>
 			<div class="clear"></div>
 		</div>
 		<?php
@@ -260,7 +309,7 @@ class WC_Meta_Box_Coupon_Data {
 		global $wpdb;
 
 		// Check for dupe coupons
-		$coupon_code  = apply_filters( 'woocommerce_coupon_code', $post->post_title );
+		$coupon_code  = wc_format_coupon_code( $post->post_title );
 		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
 
 		if ( $id_from_code ) {
@@ -291,6 +340,6 @@ class WC_Meta_Box_Coupon_Data {
 			'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 		) );
 		$coupon->save();
-		do_action( 'woocommerce_coupon_options_save', $post_id );
+		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}
 }

@@ -84,17 +84,67 @@ class WC_Emails {
 		) );
 
 		foreach ( $email_actions as $action ) {
-			add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+			add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
+		}
+	}
+
+	/**
+	 * Queue transactional email via cron so it's not sent in current request.
+	 */
+	public static function queue_transactional_email() {
+		$filter     = current_filter();
+		$args       = func_get_args();
+
+		// Remove objects and store IDs.
+		if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
+			$args[1] = $args[1]->get_id();
+		} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
+			$args[0] = $args[0]->get_id();
+		} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
+			$args[0]['product'] = $args[0]['product']->get_id();
+		}
+
+		wp_schedule_single_event( time() + 5, 'woocommerce_send_queued_transactional_email', array(
+			'filter' => $filter,
+			'args'   => $args,
+		) );
+	}
+
+	/**
+	 * Init the mailer instance and call the notifications for the current filter.
+	 *
+	 * @internal
+	 *
+	 * @param string $filter Filter name.
+	 * @param array  $args Email args (default: []).
+	 */
+	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
+		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
+			self::instance(); // Init self so emails exist.
+
+			// Expand objects from IDs.
+			if ( 0 === strpos( $filter, 'woocommerce_order_status_' ) ) {
+				$args[1] = wc_get_order( $args[1] );
+			} elseif ( 'woocommerce_low_stock' === $filter || 'woocommerce_no_stock' === $filter ) {
+				$args[0] = wc_get_product( $args[0] );
+			} elseif ( 'woocommerce_product_on_backorder' === $filter ) {
+				$args[0]['product'] = wc_get_product( $args[0]['product'] );
+			}
+
+			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}
 
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
-	 * @internal param array $args (default: array())
+	 *
+	 * @internal
+	 *
+	 * @param array $args Email args (default: []).
 	 */
-	public static function send_transactional_email() {
+	public static function send_transactional_email( $args = array() ) {
 		$args = func_get_args();
-		self::instance();
+		self::instance(); // Init self so emails exist.
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
@@ -237,7 +287,12 @@ class WC_Emails {
 	 */
 	public function customer_invoice( $order ) {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
-		$email->trigger( $order );
+
+		if ( ! is_object( $order ) ) {
+			$order = wc_get_order( absint( $order ) );
+		}
+
+		$email->trigger( $order->get_id(), $order );
 	}
 
 	/**
@@ -331,12 +386,15 @@ class WC_Emails {
 	/**
 	 * Add customer details to email templates.
 	 *
-	 * @param mixed $order
+	 * @param WC_Order $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
 	 * @return string
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
 		$fields = array();
 
 		if ( $order->get_customer_note() ) {
@@ -351,14 +409,14 @@ class WC_Emails {
 				'label' => __( 'Email address', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_email() ),
 			);
-	    }
+		}
 
-	    if ( $order->get_billing_phone() ) {
+		if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Phone', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_phone() ),
 			);
-	    }
+		}
 
 		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
@@ -373,6 +431,9 @@ class WC_Emails {
 	 * Get the email addresses.
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
 		if ( $plain_text ) {
 			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
 		} else {

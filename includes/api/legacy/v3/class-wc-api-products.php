@@ -318,7 +318,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Attempts to create the new product.
-			$product->create();
+			$product->save();
 			$id = $product->get_id();
 
 			// Checks for an error in the product creation.
@@ -1122,10 +1122,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get standard product data that applies to every product type
 	 *
 	 * @since 2.1
-	 * @param WC_Product $product
+	 * @param WC_Product|int $product
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
+		if ( is_numeric( $product ) ) {
+			$product = wc_get_product( $product );
+		}
+
 		return array(
 			'title'              => $product->get_name(),
 			'id'                 => $product->get_id(),
@@ -1618,7 +1622,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $product->get_stock_amount() );
+					$stock_quantity  = wc_stock_amount( $product->get_stock_quantity() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
@@ -1671,14 +1675,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories.
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
-			$product->set_category_ids( $term_ids );
+			$product->set_category_ids( $data['categories'] );
 		}
 
 		// Product tags.
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			$product->set_tag_ids( $term_ids );
+			$product->set_tag_ids( $data['tags'] );
 		}
 
 		// Downloadable.
@@ -1751,7 +1753,7 @@ class WC_API_Products extends WC_API_Resource {
 		$variations = $request['variations'];
 		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
 
-		foreach ( $variations as $menu_order => $variation ) {
+		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
 			$variation    = new WC_Product_Variation( $variation_id );
 
@@ -1845,7 +1847,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( isset( $data['stock_quantity'] ) ) {
 					$variation->set_stock_quantity( $data['stock_quantity'] );
 				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $variation->get_stock_amount() );
+					$stock_quantity  = wc_stock_amount( $variation->get_stock_quantity() );
 					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
 					$variation->set_stock_quantity( $stock_quantity );
 				}
@@ -1883,10 +1885,10 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
+			if ( isset( $data['attributes'] ) ) {
 				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+				foreach ( $data['attributes'] as $attribute_key => $attribute ) {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
@@ -1997,7 +1999,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -2143,7 +2145,7 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $product->get_id() );
 					}
 
 					$gallery[] = $attachment_id;
@@ -2341,7 +2343,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}

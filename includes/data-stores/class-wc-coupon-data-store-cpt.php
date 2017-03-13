@@ -69,7 +69,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
-			$this->update_post_meta( $coupon, true );
+			$this->update_post_meta( $coupon );
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
@@ -166,13 +166,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 *
 	 * @param WC_Coupon
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	private function update_post_meta( &$coupon, $force = false ) {
+	private function update_post_meta( &$coupon ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $coupon->get_changes() );
-
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
@@ -193,10 +190,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'customer_email'             => 'email_restrictions',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $coupon->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'individual_use' :
@@ -223,6 +218,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
 	}
 
 	/**
@@ -231,13 +228,15 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function increase_usage_count( &$coupon, $used_by = '' ) {
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count( 'edit' ) );
+		$new_count = $this->update_usage_count_meta( $coupon, 'increase' );
 		if ( $used_by ) {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 		}
+		return $new_count;
 	}
 
 	/**
@@ -246,10 +245,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 2.7.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count() );
+		$new_count = $this->update_usage_count_meta( $coupon, 'decrease' );
 		if ( $used_by ) {
 			/**
 			 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes.
@@ -261,6 +261,27 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 			}
 		}
+		return $new_count;
+	}
+
+	/**
+	 * Increase or decrease the usage count for a coupon by 1.
+	 *
+	 * @since 2.7.0
+	 * @param WC_Coupon
+	 * @param string $operation 'increase' or 'decrease'
+	 * @return int New usage count
+	 */
+	private function update_usage_count_meta( &$coupon, $operation = 'increase' ) {
+		global $wpdb;
+		$id = $coupon->get_id();
+		$operator = ( 'increase' === $operation ) ? '+' : '-';
+
+		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
+
+		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
 	}
 
 	/**

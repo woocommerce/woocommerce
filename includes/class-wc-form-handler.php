@@ -393,25 +393,11 @@ class WC_Form_Handler {
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
 
 			$token_id = absint( $wp->query_vars['delete-payment-method'] );
-			$token = WC_Payment_Tokens::get( $token_id );
-			$delete = true;
+			$token    = WC_Payment_Tokens::get( $token_id );
 
-			if ( is_null( $token ) ) {
+			if ( is_null( $token ) || get_current_user_id() !== $token->get_user_id() || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $token_id ) ) {
 				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( get_current_user_id() !== $token->get_user_id() ) {
-				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $token_id ) ) {
-				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( $delete ) {
+			} else {
 				WC_Payment_Tokens::delete( $token_id );
 				wc_add_notice( __( 'Payment method deleted.', 'woocommerce' ) );
 			}
@@ -431,25 +417,11 @@ class WC_Form_Handler {
 		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
 
 			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
-			$token = WC_Payment_Tokens::get( $token_id );
-			$delete = true;
+			$token    = WC_Payment_Tokens::get( $token_id );
 
-			if ( is_null( $token ) ) {
+			if ( is_null( $token ) || get_current_user_id() !== $token->get_user_id() || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'set-default-payment-method-' . $token_id ) ) {
 				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( get_current_user_id() !== $token->get_user_id() ) {
-				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'set-default-payment-method-' . $token_id ) ) {
-				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-				$delete = false;
-			}
-
-			if ( $delete ) {
+			} else {
 				WC_Payment_Tokens::set_users_default( $token->get_user_id(), intval( $token_id ) );
 				wc_add_notice( __( 'This payment method was successfully set as your default.', 'woocommerce' ) );
 			}
@@ -604,7 +576,8 @@ class WC_Form_Handler {
 		}
 
 		// Copy products from the order to the cart
-		foreach ( $order->get_items() as $item ) {
+		$order_items = $order->get_items();
+		foreach ( $order_items as $item ) {
 			// Load all product info including variation data
 			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
 			$quantity     = $item->get_quantity();
@@ -630,8 +603,26 @@ class WC_Form_Handler {
 
 		do_action( 'woocommerce_ordered_again', $order->get_id() );
 
+		$num_items_in_cart = count( WC()->cart->get_cart() );
+		$num_items_in_original_order = count( $order_items );
+
+		if ( $num_items_in_original_order > $num_items_in_cart ) {
+			wc_add_notice(
+				sprintf( _n(
+					'%d item from your previous order is currently unavailable and could not be added to your cart.',
+					'%d items from your previous order are currently unavailable and could not be added to your cart.',
+					$num_items_in_original_order - $num_items_in_cart,
+					'woocommerce'
+				), $num_items_in_original_order - $num_items_in_cart ),
+				'error'
+			);
+		}
+
+		if ( $num_items_in_cart > 0 ) {
+			wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
+		}
+
 		// Redirect to cart
-		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
 		wp_safe_redirect( wc_get_cart_url() );
 		exit;
 	}

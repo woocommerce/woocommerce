@@ -437,7 +437,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'applied_coupon' );
+					$( document.body ).trigger( 'applied_coupon', [ coupon_code ] );
 				},
 				complete: function() {
 					unblock( $form );
@@ -474,7 +474,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'removed_coupon' );
+					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
 					unblock( $wrapper );
 				},
 				complete: function() {
@@ -489,14 +489,14 @@ jQuery( function( $ ) {
 		 * @param {JQuery Object} $form The cart form.
 		 */
 		quantity_update: function( $form ) {
-			// Provide the submit button value because wc-form-handler expects it.
-			$( '<input />' ).attr( 'type', 'hidden' )
-											.attr( 'name', 'update_cart' )
-											.attr( 'value', 'Update Cart' )
-											.appendTo( $form );
-
 			block( $form );
 			block( $( 'div.cart_totals' ) );
+
+			// Provide the submit button value because wc-form-handler expects it.
+			$( '<input />' ).attr( 'type', 'hidden' )
+							.attr( 'name', 'update_cart' )
+							.attr( 'value', 'Update Cart' )
+							.appendTo( $form );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -504,7 +504,9 @@ jQuery( function( $ ) {
 				url:      $form.attr( 'action' ),
 				data:     $form.serialize(),
 				dataType: 'html',
-				success:  update_wc_div,
+				success:  function( response ) {
+					update_wc_div( response );
+				},
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 /**
  * Customer Invoice.
@@ -61,17 +61,17 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Trigger the sending of this email.
 	 *
-	 * @param int|WC_Order $order
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
 	 */
-	public function trigger( $order ) {
-
-		if ( ! is_object( $order ) ) {
-			$order = wc_get_order( absint( $order ) );
+	public function trigger( $order_id, $order = false ) {
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
 		}
 
-		if ( $order ) {
+		if ( is_a( $order, 'WC_Order' ) ) {
 			$this->object                  = $order;
 			$this->recipient               = $this->object->get_billing_email();
 

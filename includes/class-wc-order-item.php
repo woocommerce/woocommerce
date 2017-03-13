@@ -37,7 +37,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order_itemmeta';
+	protected $cache_group = 'order-items';
 
 	/**
 	 * Meta type. This should match up with
@@ -57,7 +57,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item Object
 	 */
 	public function __construct( $item = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
 		parent::__construct( $item );
 
 		if ( $item instanceof WC_Order_Item ) {
@@ -182,18 +181,28 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_formatted_meta_data( $hideprefix = '_' ) {
-		$formatted_meta = array();
-		$meta_data      = $this->get_meta_data();
+		$formatted_meta    = array();
+		$meta_data         = $this->get_meta_data();
+		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
+		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
+			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
+
+			// Skip items with values already in the product details area of the product name
+			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
+
+			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+				continue;
+			}
+
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
-			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
+			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
 
 			if ( taxonomy_exists( $attribute_key ) ) {
@@ -207,7 +216,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				'key'           => $meta->key,
 				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
 			);
 		}
 
@@ -243,7 +252,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 		}
 
-		$this->update_meta_data( '_' . $offset, $value );
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -266,7 +275,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			unset( $this->changes[ $offset ] );
 		}
 
-		$this->delete_meta_data( '_' . $offset );
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
@@ -279,7 +288,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
-		return array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
+		return array_key_exists( $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) ) || array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -289,6 +298,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function offsetGet( $offset ) {
 		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset ) {
 			$return = array();
 
@@ -303,6 +313,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( 'item_meta' === $offset ) {
 			return $meta_values;
+		} elseif ( 'type' === $offset ) {
+			return $this->get_type();
 		} elseif ( array_key_exists( $offset, $this->data ) ) {
 			$getter = "get_$offset";
 			if ( is_callable( array( $this, $getter ) ) ) {
@@ -311,6 +323,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
 			return $meta_values[ '_' . $offset ];
+		} elseif ( array_key_exists( $offset, $meta_values ) ) {
+			return $meta_values[ $offset ];
 		}
 
 		return null;

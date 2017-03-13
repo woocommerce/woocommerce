@@ -74,14 +74,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Logging method.
-	 * @param string $message
+	 *
+	 * @param string $message Log message.
+	 * @param string $level   Optional. Default 'info'.
+	 *     emergency|alert|critical|error|warning|notice|info|debug
 	 */
-	public static function log( $message ) {
+	public static function log( $message, $level = 'info' ) {
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->add( 'paypal', $message );
+			self::$log->log( $level, $message, array( 'source' => 'paypal' ) );
 		}
 	}
 
@@ -281,7 +284,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $this->can_refund_order( $order ) ) {
-			$this->log( 'Refund Failed: No transaction ID' );
+			$this->log( 'Refund Failed: No transaction ID', 'error' );
 			return new WP_Error( 'error', __( 'Refund failed: No transaction ID', 'woocommerce' ) );
 		}
 
@@ -290,11 +293,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$result = WC_Gateway_Paypal_API_Handler::refund_transaction( $order, $amount, $reason );
 
 		if ( is_wp_error( $result ) ) {
-			$this->log( 'Refund Failed: ' . $result->get_error_message() );
+			$this->log( 'Refund Failed: ' . $result->get_error_message(), 'error' );
 			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
-		$this->log( 'Refund Result: ' . print_r( $result, true ) );
+		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
 		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
@@ -320,12 +323,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
 			if ( is_wp_error( $result ) ) {
-				$this->log( 'Capture Failed: ' . $result->get_error_message() );
+				$this->log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
 				$order->add_order_note( sprintf( __( 'Payment could not captured: %s', 'woocommerce' ), $result->get_error_message() ) );
 				return;
 			}
 
-			$this->log( 'Capture Result: ' . print_r( $result, true ) );
+			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {

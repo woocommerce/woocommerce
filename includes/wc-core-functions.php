@@ -29,6 +29,8 @@ include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
 include( 'wc-rest-functions.php' );
+include( 'wc-widget-functions.php' );
+include( 'wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.
@@ -540,9 +542,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'LRD' => '&#36;',
 		'LSL' => 'L',
 		'LYD' => '&#x644;.&#x62f;',
-		'MAD' => '&#x62f;. &#x645;.',
 		'MAD' => '&#x62f;.&#x645;.',
-		'MDL' => 'L',
+		'MDL' => 'MDL',
 		'MGA' => 'Ar',
 		'MKD' => '&#x434;&#x435;&#x43d;',
 		'MMK' => 'Ks',
@@ -757,11 +758,12 @@ function get_woocommerce_api_url( $path ) {
  * Get a log file path.
  *
  * @since 2.2
+ *
  * @param string $handle name.
  * @return string the log file path.
  */
 function wc_get_log_file_path( $handle ) {
-	return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle ) . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+	return WC_Log_Handler_File::get_log_file_path( $handle );
 }
 
 /**
@@ -808,11 +810,10 @@ add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
 function wc_fix_rewrite_rules( $rules ) {
 	global $wp_rewrite;
 
-	$permalinks        = get_option( 'woocommerce_permalinks' );
-	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+	$permalinks = wc_get_permalink_structure();
 
 	// Fix the rewrite rules when the product permalink have %product_cat% flag.
-	if ( preg_match( '`/(.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
+	if ( preg_match( '`/(.+)(/%product_cat%)`' , $permalinks['product_rewrite_slug'], $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
 			if ( preg_match( '`^' . preg_quote( $matches[1], '`' ) . '/\(`', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
 				unset( $rules[ $rule ] );
@@ -821,7 +822,7 @@ function wc_fix_rewrite_rules( $rules ) {
 	}
 
 	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
-	if ( ! empty( $permalinks['use_verbose_page_rules'] ) && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
+	if ( $permalinks['use_verbose_page_rules'] && ( $shop_page_id = wc_get_page_id( 'shop' ) ) ) {
 		$page_rewrite_rules = array();
 		$subpages           = wc_get_page_children( $shop_page_id );
 
@@ -856,9 +857,8 @@ function wc_fix_product_attachment_link( $link, $post_id ) {
 
 	$post = get_post( $post_id );
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
-		$permalinks        = get_option( 'woocommerce_permalinks' );
-		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+		$permalinks = wc_get_permalink_structure();
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $permalinks['product_rewrite_slug'], $matches ) ) {
 			$link = home_url( '/?attachment_id=' . $post->ID );
 		}
 	}
@@ -1260,7 +1260,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	$formatted_postcode = wc_format_postcode( $postcode, $country );
-	$length             = strlen( $formatted_postcode );
+	$length             = function_exists( 'mb_strlen' ) ? mb_strlen( $formatted_postcode ) : strlen( $formatted_postcode );
 	$postcodes          = array(
 		$postcode,
 		$formatted_postcode,
@@ -1268,7 +1268,7 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 	);
 
 	for ( $i = 0; $i < $length; $i ++ ) {
-		$postcodes[] = substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) . '*';
+		$postcodes[] = ( function_exists( 'mb_substr' ) ? mb_substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) : substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) ) . '*';
 	}
 
 	return $postcodes;
@@ -1411,17 +1411,102 @@ function wc_get_rounding_precision() {
 }
 
 /**
- * Returns a new instance of a WC Logger.
- * Use woocommerce_logging_class filter to change the logging class.
+ * Get a shared logger instance.
+ *
+ * Use the woocommerce_logging_class filter to change the logging class. You may provide one of the following:
+ *     - a class name which will be instantiated as `new $class` with no arguments
+ *     - an instance which will be used directly as the logger
+ * In either case, the class or instance *must* implement WC_Logger_Interface.
+ *
+ * @see WC_Logger_Interface
+ *
  * @return WC_Logger
  */
 function wc_get_logger() {
-	if ( ! class_exists( 'WC_Logger' ) ) {
-		include_once( dirname( __FILE__ ) . '/class-wc-logger.php' );
+	static $logger = null;
+	if ( null === $logger ) {
+		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+		$implements = class_implements( $class );
+		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
+			if ( is_object( $class ) ) {
+				$logger = $class;
+			} else {
+				$logger = new $class;
+			}
+		} else {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
+					esc_html( is_object( $class ) ? get_class( $class ) : $class )
+				),
+				'2.7'
+			);
+			$logger = new WC_Logger();
+		}
 	}
-	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
-	return new $class;
+	return $logger;
 }
+
+/**
+ * Prints human-readable information about a variable.
+ *
+ * Some server environments blacklist some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form without calling blacklisted functions.
+ *
+ * @since 2.7
+ *
+ * @param mixed $expression The expression to be printed.
+ * @param bool $return Optional. Default false. Set to true to return the human-readable string.
+ * @return string|bool False if expression could not be printed. True if the expression was printed.
+ *     If $return is true, a string representation will be returned.
+ */
+function wc_print_r( $expression, $return = false ) {
+	$alternatives = array(
+		array( 'func' => 'print_r', 'args' => array( $expression, true ) ),
+		array( 'func' => 'var_export', 'args' => array( $expression, true ) ),
+		array( 'func' => 'json_encode', 'args' => array( $expression ) ),
+		array( 'func' => 'serialize', 'args' => array( $expression ) ),
+	);
+
+	$alternatives = apply_filters( 'woocommerce_print_r_alternatives', $alternatives, $expression );
+
+	foreach ( $alternatives as $alternative ) {
+		if ( function_exists( $alternative['func'] ) ) {
+			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			if ( $return ) {
+				return $res;
+			} else {
+				echo $res;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Registers the default log handler.
+ *
+ * @since 2.7
+ * @param array $handlers
+ * @return array
+ */
+function wc_register_default_log_handler( $handlers ) {
+
+	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
+		$handler_class = WC_LOG_HANDLER;
+		$default_handler = new $handler_class();
+	} else {
+		$default_handler = new WC_Log_Handler_File();
+	}
+
+	array_push( $handlers, $default_handler );
+
+	return $handlers;
+}
+add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
 
 /**
  * Store user agents. Used for tracker.
@@ -1476,4 +1561,35 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 		}
 	}
 	return $newlist;
+}
+
+/**
+ * Get permalink settings for WooCommerce independent of the user locale.
+ *
+ * @since  2.7.0
+ * @return array
+ */
+function wc_get_permalink_structure() {
+	if ( function_exists( 'switch_to_locale' ) && did_action( 'admin_init' ) ) {
+		switch_to_locale( get_locale() );
+	}
+
+	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
+		'product_base'           => '',
+		'category_base'          => '',
+		'tag_base'               => '',
+		'attribute_base'         => '',
+		'use_verbose_page_rules' => false,
+	) );
+
+	// Ensure rewrite slugs are set.
+	$permalinks['product_rewrite_slug']   = untrailingslashit( empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' )             : $permalinks['product_base'] );
+	$permalinks['category_rewrite_slug']  = untrailingslashit( empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' )   : $permalinks['category_base'] );
+	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
+	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
+
+	if ( function_exists( 'restore_current_locale' ) && did_action( 'admin_init' ) ) {
+		restore_current_locale();
+	}
+	return $permalinks;
 }

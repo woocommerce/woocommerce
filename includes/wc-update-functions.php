@@ -18,7 +18,7 @@ function wc_update_200_file_paths() {
 	global $wpdb;
 
 	// Upgrade old style files paths to support multiple file paths
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id, post_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
@@ -192,7 +192,7 @@ function wc_update_200_line_items() {
 	// Now its time for the massive update to line items - move them to the new DB tables
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
 	$order_item_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_items'
 	" );
 
@@ -268,7 +268,7 @@ function wc_update_200_line_items() {
 	// Do the same kind of update for order_taxes - move to lines
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'
 	$order_tax_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_taxes'
 	" );
 
@@ -397,7 +397,7 @@ function wc_update_210_file_paths() {
 	global $wpdb;
 
 	// Upgrade file paths to support multiple file paths + names etc
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
@@ -556,7 +556,7 @@ function wc_update_220_variations() {
 function wc_update_220_attributes() {
 	global $wpdb;
 	// Update taxonomy names with correct sanitized names
-	$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+	$attribute_taxonomies = $wpdb->get_results( "SELECT attribute_name, attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 
 	foreach ( $attribute_taxonomies as $attribute_taxonomy ) {
 		$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_taxonomy->attribute_name );
@@ -886,7 +886,7 @@ function wc_update_260_zone_methods() {
 	 * Migrate the old data out of woocommerce_shipping_zone_shipping_methods into the new table and port over any known options (used by table rates and flat rate boxes).
 	 */
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone_shipping_methods';" ) ) {
-		$old_methods = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
+		$old_methods = $wpdb->get_results( "SELECT zone_id, shipping_method_type, shipping_method_order, shipping_method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
 
 		if ( $old_methods ) {
 			$max_new_id = $wpdb->get_var( "SELECT MAX(instance_id) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" );
@@ -999,7 +999,13 @@ function wc_update_270_webhooks() {
 function wc_update_270_comment_type_index() {
 	global $wpdb;
 
-	$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+
+	if ( is_null( $index_exists ) ) {
+		// Add an index to the field comment_type to improve the response time of the query
+		// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	}
 }
 
 function wc_update_270_grouped_products() {
@@ -1046,7 +1052,7 @@ function wc_update_270_product_visibility() {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
 	}
 
-	if ( $outofstock_term = get_term_by( 'name', 'out-of-stock', 'product_visibility' ) ) {
+	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IN 'outofstock';", $outofstock_term->term_id ) );
 	}
 

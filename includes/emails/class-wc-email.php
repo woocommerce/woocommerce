@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WC_Email' ) ) {
+if ( class_exists( 'WC_Email', false ) ) {
 	return;
 }
 
@@ -418,7 +418,7 @@ class WC_Email extends WC_Settings_API {
 				$content    = $emogrifier->emogrify();
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
-				$logger->add( 'emogrifier', $e->getMessage() );
+				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
 			}
 		}
 		return $content;

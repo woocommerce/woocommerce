@@ -967,6 +967,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 		if ( isset( $item['total'] ) ) {
 			$line_item->set_total( floatval( $item['total'] ) );
+		} elseif ( $creating ) {
+			$total = wc_get_price_excluding_tax( $product, array( 'qty' => $line_item->get_quantity() ) );
+			$line_item->set_total( $total );
+			$line_item->set_subtotal( $total );
 		}
 		if ( isset( $item['total_tax'] ) ) {
 			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
@@ -983,6 +987,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		$item_id = $line_item->save();
+
+		if ( ! $item_id ) {
+			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+		}
 	}
 
 	/**
@@ -1061,6 +1069,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
 			$item = new WC_Order_Item_Shipping();
+			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );
 			$shipping_id = $item->save();
 
@@ -1110,7 +1119,8 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$item = new WC_Order_Item_Fee();
-			$item->set_name( sanitize_title( $fee['title'] ) );
+			$item->set_order_id( $order->get_id() );
+			$item->set_name( wc_clean( $fee['title'] ) );
 			$item->set_total( isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0 );
 
 			// if taxable, tax class and total are required
@@ -1142,7 +1152,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$item = new WC_Order_Item_Fee( $fee['id'] );
 
 			if ( isset( $fee['title'] ) ) {
-				$item->set_name( sanitize_title( $fee['title'] ) );
+				$item->set_name( wc_clean( $fee['title'] ) );
 			}
 
 			if ( isset( $fee['tax_class'] ) ) {

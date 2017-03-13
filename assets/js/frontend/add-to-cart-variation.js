@@ -162,11 +162,13 @@
 				if ( variation ) {
 					form.$form.trigger( 'found_variation', [ variation ] );
 				} else {
-					window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
 					form.$form.trigger( 'reset_data' );
+					form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
+					form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
 				}
 			}
 		} else {
+			form.$form.trigger( 'update_variation_values' );
 			form.$form.trigger( 'reset_data' );
 		}
 
@@ -522,6 +524,25 @@
 	};
 
 	/**
+	 * Reset the slide position if the variation has a different image than the current one
+	 */
+	$.fn.wc_maybe_trigger_slide_position_reset = function( variation ) {
+		var $form = $( this ),
+			reset_slide_position = false,
+			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
+
+		if ( $form.attr( 'current-image' ) !== new_image_id ) {
+			reset_slide_position = true;
+		}
+
+		$form.attr( 'current-image', new_image_id );
+
+		if ( reset_slide_position ) {
+			$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
+		}
+	};
+
+	/**
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function( variation ) {
@@ -544,9 +565,8 @@
 			$product_img.wc_set_variation_attr( 'data-large-image-width', variation.image.full_src_w );
 			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
+			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
 		} else {
-			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
-			$product_img.wc_reset_variation_attr( 'large-image' );
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'width' );
 			$product_img.wc_reset_variation_attr( 'height' );
@@ -554,16 +574,19 @@
 			$product_img.wc_reset_variation_attr( 'sizes' );
 			$product_img.wc_reset_variation_attr( 'title' );
 			$product_img.wc_reset_variation_attr( 'alt' );
-			$gallery_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'data-large-image' );
 			$product_img.wc_reset_variation_attr( 'data-large-image-width' );
 			$product_img.wc_reset_variation_attr( 'data-large-image-height' );
-
-			window.setTimeout( function() {
-				$( window ).trigger( 'resize' );
-			}, 10 );
+			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
+			$product_img.wc_reset_variation_attr( 'large-image' );
+			$gallery_img.wc_reset_variation_attr( 'src' );
 		}
-		$('body').trigger( 'woocommerce_init_gallery' );
+
+		window.setTimeout( function() {
+			$( 'body' ).trigger( 'woocommerce_init_gallery' );
+			$form.wc_maybe_trigger_slide_position_reset( variation );
+			$( window ).trigger( 'resize' );
+		}, 10 );
 	};
 
 	$(function() {

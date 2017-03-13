@@ -23,13 +23,18 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make sure ::load returns null if an invalid store is found.
+	 * Make sure ::load throws an exception for invalid data stores
 	 *
 	 * @since 2.7.0
 	 */
-	function test_invalid_store_load_returns_null() {
-		$product_store = WC_Data_Store::load( 'does-not-exist' );
-		$this->assertNull( $product_store );
+	function test_invalid_store_load_throws_exception() {
+		try {
+			$product_store = WC_Data_Store::load( 'does-not-exist' );
+		} catch ( Exception $e ) {
+			$this->assertEquals( $e->getMessage(), 'Invalid data store.' );
+			return;
+		}
+		$this->fail( 'Invalid data store exception not correctly raised.' );
 	}
 
 	/**

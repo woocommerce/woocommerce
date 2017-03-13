@@ -32,12 +32,12 @@ class WC_Email_New_Order extends WC_Email {
 		$this->template_plain   = 'emails/plain/admin-new-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
 		parent::__construct();
@@ -47,13 +47,18 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Trigger the sending of this email.
 	 *
-	 * @param int $order_id
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
 	 */
-	public function trigger( $order_id ) {
-		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
+	public function trigger( $order_id, $order = false ) {
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
+		}
+
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$this->object                  = $order;
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );

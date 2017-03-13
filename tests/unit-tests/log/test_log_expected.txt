@@ -1,0 +1,8 @@
+%d-%d-%dT%d:%d:%d+%d:%d DEBUG debug
+%d-%d-%dT%d:%d:%d+%d:%d INFO info
+%d-%d-%dT%d:%d:%d+%d:%d NOTICE notice
+%d-%d-%dT%d:%d:%d+%d:%d WARNING warning
+%d-%d-%dT%d:%d:%d+%d:%d ERROR error
+%d-%d-%dT%d:%d:%d+%d:%d CRITICAL critical
+%d-%d-%dT%d:%d:%d+%d:%d ALERT alert
+%d-%d-%dT%d:%d:%d+%d:%d EMERGENCY emergency

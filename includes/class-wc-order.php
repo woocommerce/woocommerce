@@ -110,27 +110,13 @@ class WC_Order extends WC_Abstract_Order {
 			}
 
 			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-				$order_needs_processing = false;
-
-				if ( sizeof( $this->get_items() ) > 0 ) {
-					foreach ( $this->get_items() as $item ) {
-						if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
-							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-							if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-								$order_needs_processing = true;
-								break;
-							}
-						}
-					}
-				}
-
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
-
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
-				$this->set_date_paid( current_time( 'timestamp' ) );
+				if ( ! $this->get_date_paid( 'edit' ) ) {
+					$this->set_date_paid( current_time( 'timestamp' ) );
+				}
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
@@ -240,7 +226,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
 
-		if ( ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
 			$this->status_transition = array(
 				'from'   => ! empty( $this->status_transition['from'] ) ? $this->status_transition['from'] : $result['from'],
 				'to'     => $result['to'],
@@ -248,20 +234,43 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			if ( 'pending' === $result['from'] && ! $manual_update ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
-			}
-
-			if ( ! $this->get_date_paid() && 'pending' === $result['from'] ) {
-				$this->set_date_paid( current_time( 'timestamp' ) );
-			}
-
-			if ( 'completed' === $result['to'] ) {
-				$this->set_date_completed( current_time( 'timestamp' ) );
-			}
+			$this->maybe_set_date_paid();
+			$this->maybe_set_date_completed();
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Maybe set date paid.
+	 *
+	 * Sets the date paid variable when transitioning to the payment complete
+	 * order status. This is either processing or completed. This is not filtered
+	 * to avoid infinite loops e.g. if loading an order via the filter.
+	 *
+	 * Date paid is set once in this manner - only when it is not already set.
+	 * This ensures the data exists even if a gateway does not use the
+	 * `payment_complete` method.
+	 *
+	 * @since 2.7.0
+	 */
+	public function maybe_set_date_paid() {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			$this->set_date_paid( current_time( 'timestamp' ) );
+		}
+	}
+
+	/**
+	 * Maybe set date completed.
+	 *
+	 * Sets the date completed variable when transitioning to completed status.
+	 *
+	 * @since 2.7.0
+	 */
+	protected function maybe_set_date_completed() {
+		if ( $this->has_status( 'completed' ) ) {
+			$this->set_date_completed( current_time( 'timestamp' ) );
+		}
 	}
 
 	/**
@@ -287,14 +296,14 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function status_transition() {
 		if ( $this->status_transition ) {
-			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id() );
+			do_action( 'woocommerce_order_status_' . $this->status_transition['to'], $this->get_id(), $this );
 
 			if ( ! empty( $this->status_transition['from'] ) ) {
 				/* translators: 1: old order status 2: new order status */
 				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['from'] ), wc_get_order_status_name( $this->status_transition['to'] ) );
 
-				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id() );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'] );
+				do_action( 'woocommerce_order_status_' . $this->status_transition['from'] . '_to_' . $this->status_transition['to'], $this->get_id(), $this );
+				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->status_transition['from'], $this->status_transition['to'], $this );
 			} else {
 				/* translators: %s: new order status */
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );
@@ -338,6 +347,25 @@ class WC_Order extends WC_Abstract_Order {
 				'coupon_lines'   => $this->get_items( 'coupon' ),
 			)
 		);
+	}
+
+	/**
+	 * Expands the shipping and billing information in the changes array.
+	 */
+	public function get_changes() {
+		$changed_props = parent::get_changes();
+		$subs          = array( 'shipping', 'billing' );
+		foreach ( $subs as $sub ) {
+			if ( ! empty( $changed_props[ $sub ] ) ) {
+				foreach ( $changed_props[ $sub ] as $sub_prop => $value ) {
+					$changed_props[ $sub . '_' . $sub_prop ] = $value;
+				}
+			}
+		}
+		if ( isset( $changed_props['customer_note'] ) ) {
+			$changed_props['post_excerpt'] = $changed_props['customer_note'];
+		}
+		return $changed_props;
 	}
 
 	/**
@@ -700,7 +728,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_date_paid( $context = 'view' ) {
-		return $this->get_prop( 'date_paid', $context );
+		$date_paid = $this->get_prop( 'date_paid', $context );
+
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '2.7', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			// In view context, return a date if missing.
+			$date_paid = $this->get_date_created( 'edit' );
+		}
+		return $date_paid;
 	}
 
 	/**
@@ -1254,6 +1288,34 @@ class WC_Order extends WC_Abstract_Order {
 		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
 	}
 
+	/**
+	 * See if the order needs processing before it can be completed.
+	 *
+	 * Orders which only contain virtual, downloadable items do not need admin
+	 * intervention.
+	 *
+	 * @since 2.7.0
+	 * @return bool
+	 */
+	public function needs_processing() {
+		$needs_processing = false;
+
+		if ( sizeof( $this->get_items() ) > 0 ) {
+			foreach ( $this->get_items() as $item ) {
+				if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
+					$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+					if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+						$needs_processing = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return $needs_processing;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| URLs and Endpoints
@@ -1449,15 +1511,26 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order refunds.
+	 *
 	 * @since 2.2
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
 		$this->refunds = wc_get_orders( array(
 			'type'   => 'shop_order_refund',
 			'parent' => $this->get_id(),
 			'limit'  => -1,
 		) );
+
+		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
+
 		return $this->refunds;
 	}
 
@@ -1468,7 +1541,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		return $this->data_store->get_total_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1478,7 +1562,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		return $this->data_store->get_total_tax_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_tax_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_tax_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1488,7 +1583,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		return $this->data_store->get_total_shipping_refunded( $this );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_refunded = $this->data_store->get_total_shipping_refunded( $this );
+
+		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
+
+		return $total_refunded;
 	}
 
 	/**
@@ -1508,7 +1614,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$count += $refunded_item->get_quantity();
+				$count += abs( $refunded_item->get_quantity() );
 			}
 		}
 
@@ -1624,5 +1730,59 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_remaining_refund_items() {
 		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+	}
+
+	/**
+	 * Add total row for the payment method.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
+		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
+			$total_rows['payment_method'] = array(
+				'label' => __( 'Payment method:', 'woocommerce' ),
+				'value' => $this->get_payment_method_title(),
+			);
+		}
+	}
+
+	/**
+	 * Add total row for refunds.
+	 *
+	 * @param array $total_rows
+	 * @param string $tax_display
+	 */
+	protected function add_order_item_totals_refund_rows( &$total_rows, $tax_display ) {
+		if ( $refunds = $this->get_refunds() ) {
+			foreach ( $refunds as $id => $refund ) {
+				$total_rows[ 'refund_' . $id ] = array(
+					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value'    => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
+				);
+			}
+		}
+	}
+
+	/**
+	 * Get totals for display on pages and in emails.
+	 *
+	 * @param mixed $tax_display
+	 * @return array
+	 */
+	public function get_order_item_totals( $tax_display = '' ) {
+		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+		$total_rows  = array();
+
+		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_refund_rows( $total_rows, $tax_display );
+		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
+
+		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
 }

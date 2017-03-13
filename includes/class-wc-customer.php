@@ -100,7 +100,12 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		// If we have an ID, load the user from the DB.
 		if ( $this->get_id() ) {
-			$this->data_store->read( $this );
+			try {
+				$this->data_store->read( $this );
+			} catch ( Exception $e ) {
+				$this->set_id( 0 );
+				$this->set_object_read( true );
+			}
 		} else {
 			$this->set_object_read( true );
 		}
@@ -119,7 +124,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_customer_';
+		return 'woocommerce_customer_get_';
 	}
 
 	/**
@@ -785,7 +790,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $city
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_location( $country, $state, $postcode = '', $city = '' ) {
+	public function set_billing_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$billing             = $this->get_prop( 'billing', 'edit' );
 		$billing['country']  = $country;
 		$billing['state']    = $state;

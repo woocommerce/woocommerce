@@ -205,6 +205,10 @@ class WC_Meta_Box_Product_Data {
 					$options = wc_get_text_attributes( $options );
 				}
 
+				if ( empty( $options ) ) {
+					continue;
+				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( $attribute_id );
 				$attribute->set_name( $attribute_name );
@@ -300,6 +304,11 @@ class WC_Meta_Box_Product_Data {
 		if ( is_wp_error( $errors ) ) {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
+
+		/**
+		 * @since 2.7.0 to set props before save.
+		 */
+		do_action( 'woocommerce_admin_process_product_object', $product );
 
 		$product->save();
 

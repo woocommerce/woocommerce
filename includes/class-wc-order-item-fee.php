@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (fee).
  *
+ * Fee is an amount of money charged for a particular piece of work
+ * or for a particular right or service, and not supposed to be negative.
+ *
  * @version     2.7.0
  * @since       2.7.0
  * @package     WooCommerce/Classes
@@ -41,7 +44,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_class( $value ) {
-		if ( $value && ! in_array( $value, WC_Tax::get_tax_classes() ) ) {
+		if ( $value && ! in_array( $value, WC_Tax::get_tax_class_slugs() ) ) {
 			$this->error( 'order_item_fee_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
@@ -64,21 +67,21 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set total.
 	 *
-	 * @param string $value
+	 * @param string $amount Fee amount (do not enter negative amounts).
 	 * @throws WC_Data_Exception
 	 */
-	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+	public function set_total( $amount ) {
+		$this->set_prop( 'total', wc_format_decimal( $amount ) );
 	}
 
 	/**
 	 * Set total tax.
 	 *
-	 * @param string $value
+	 * @param string $amount
 	 * @throws WC_Data_Exception
 	 */
-	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+	public function set_total_tax( $amount ) {
+		$this->set_prop( 'total_tax', wc_format_decimal( $amount ) );
 	}
 
 	/**

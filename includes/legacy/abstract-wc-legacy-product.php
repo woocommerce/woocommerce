@@ -18,13 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Product extends WC_Data {
 
 	/**
-	 * The product's type (simple, variable etc).
-	 * @deprecated 2.7.0 get_type() method should return string instead since this prop should not be changed or be public.
-	 * @var string
-	 */
-	public $product_type = 'simple';
-
-	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 *
 	 * @param  string $key Key name.
@@ -52,6 +45,13 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				'variation_data',
 				'variation_has_stock',
 				'variation_shipping_class_id',
+				'variation_has_sku',
+				'variation_has_length',
+				'variation_has_width',
+				'variation_has_height',
+				'variation_has_weight',
+				'variation_has_tax_class',
+				'variation_has_downloadable_files',
 			) );
 		}
 		return in_array( $key, array_merge( $valid, array_keys( $this->data ) ) ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) || metadata_exists( 'post', $this->get_parent_id(), '_' . $key );
@@ -74,6 +74,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		switch ( $key ) {
 			case 'id' :
 				$value = $this->is_type( 'variation' ) ? $this->get_parent_id() : $this->get_id();
+				break;
+			case 'product_type' :
+				$value = $this->get_type();
 				break;
 			case 'product_attributes' :
 				$value = isset( $this->data['attributes'] ) ? $this->data['attributes'] : '';
@@ -131,6 +134,15 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'variation_shipping_class_id' :
 				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_id() : '';
 				break;
+			case 'variation_has_sku' :
+			case 'variation_has_length' :
+			case 'variation_has_width' :
+			case 'variation_has_height' :
+			case 'variation_has_weight' :
+			case 'variation_has_tax_class' :
+			case 'variation_has_downloadable_files' :
+				$value = true; // These were deprecated in 2.2 and simply returned true in 2.6.x.
+				break;
 			default :
 				if ( in_array( $key, array_keys( $this->data ) ) ) {
 					$value = $this->{"get_$key"}();
@@ -183,7 +195,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function reduce_stock( $amount = 1 ) {
 		wc_deprecated_function( 'WC_Product::reduce_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'decrease' );
+		return wc_update_product_stock( $this, $amount, 'decrease' );
 	}
 
 	/**
@@ -195,7 +207,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function increase_stock( $amount = 1 ) {
 		wc_deprecated_function( 'WC_Product::increase_stock', '2.7', 'wc_update_product_stock' );
-		wc_update_product_stock( $this, $amount, 'increase' );
+		return wc_update_product_stock( $this, $amount, 'increase' );
 	}
 
 	/**
@@ -266,8 +278,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		wc_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_sale_price' );
-		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_sale_price( $from, $to ), $from, $to, $this );
+		wc_deprecated_function( 'WC_Product::get_price_html_from_to', '2.7', 'wc_format_price_range' );
+		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_price_range( $from, $to ), $from, $to, $this );
 	}
 
 	/**
@@ -417,7 +429,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return bool
 	 */
 	public function has_default_attributes() {
-		wc_deprecated_function( 'WC_Product_Variable::has_default_attributes', '2.7', 'Check WC_Product::get_default_attributes directly' );
+		wc_deprecated_function( 'WC_Product_Variable::has_default_attributes', '2.7', 'a check against WC_Product::get_default_attributes directly' );
 		if ( ! $this->get_default_attributes() ) {
 			return true;
 		}
@@ -431,7 +443,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return int
 	 */
 	public function get_variation_id() {
-		wc_deprecated_function( 'WC_Product::get_variation_id', '2.7', 'WC_Product::get_id() will always be the variation ID if this is a variation.' );
+		wc_deprecated_function( 'WC_Product::get_variation_id', '2.7', 'WC_Product::get_id(). It will always be the variation ID if this is a variation.' );
 		return $this->get_id();
 	}
 
@@ -453,7 +465,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return boolean
 	 */
 	public function has_all_attributes_set() {
-		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7', 'Use array filter on get_variation_attributes for a quick solution.' );
+		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '2.7', 'an array filter on get_variation_attributes for a quick solution.' );
 		$set = true;
 
 		// undefined attributes have null strings as array values
@@ -484,7 +496,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @return int
 	 */
 	public function get_total_stock() {
-		wc_deprecated_function( 'WC_Product::get_total_stock', '2.7', 'Use get_stock_quantity on each child. Beware of performance issues in doing so.' );
+		wc_deprecated_function( 'WC_Product::get_total_stock', '2.7', 'get_stock_quantity on each child. Beware of performance issues in doing so.' );
 		if ( sizeof( $this->get_children() ) > 0 ) {
 			$total_stock = max( 0, $this->get_stock_quantity() );
 

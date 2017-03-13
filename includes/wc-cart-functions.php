@@ -82,7 +82,6 @@ function wc_get_raw_referer() {
 /**
  * Add to cart messages.
  *
- * @access public
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
@@ -116,7 +115,12 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
-	$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+	if ( has_filter( 'wc_add_to_cart_message' ) ) {
+		wc_deprecated_function( 'The wc_add_to_cart_message filter', '2.7', 'wc_add_to_cart_message_html' );
+		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+	}
+
+	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products );
 
 	if ( $return ) {
 		return $message;
@@ -216,7 +220,7 @@ function wc_cart_totals_shipping_html() {
 			'show_package_details' => sizeof( $packages ) > 1,
 			'package_details'      => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			// @codingStandardsIgnoreEnd
 			'index'                => $i,
 			'chosen_method'        => $chosen_method,

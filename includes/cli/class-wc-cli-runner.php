@@ -31,6 +31,12 @@ class WC_CLI_Runner {
 	);
 
 	/**
+	 * The version of the REST API we should target to
+	 * generate commands.
+	 */
+	private static $target_rest_version = 'v2';
+
+	/**
 	 * Register's all endpoints as commands once WP and WC have all loaded.
 	 */
 	public static function after_wp_load() {
@@ -48,10 +54,11 @@ class WC_CLI_Runner {
 
 		// Loop through all of our endpoints and register any valid WC endpoints.
 		foreach ( $response_data['routes'] as $route => $route_data ) {
-			// Only register WC endpoints
-			if ( substr( $route, 0, 4 ) !== '/wc/' ) {
+			// Only register endpoints for WC and our target version.
+			if ( substr( $route, 0, 4 + strlen( self::$target_rest_version ) ) !== '/wc/' . self::$target_rest_version ) {
 				continue;
 			}
+
 			// Only register endpoints with schemas
 			if ( empty( $route_data['schema']['title'] ) ) {
 				WP_CLI::debug( sprintf( __( 'No schema title found for %s, skipping REST command registration.', 'woocommerce' ), $route ), 'wc' );
@@ -82,6 +89,18 @@ class WC_CLI_Runner {
 	 * @param array  $command_args
 	 */
 	private static function register_route_commands( $rest_command, $route, $route_data, $command_args = array() ) {
+		// Define IDs that we are looking for in the routes (in addition to id)
+		// so that we can pass it to the rest command, and use it here to generate documentation.
+		$supported_ids = array(
+				'product_id'   => __( 'Product ID.', 'woocommerce' ),
+				'customer_id'  => __( 'Customer ID.', 'woocommerce' ),
+				'order_id'     => __( 'Order ID.', 'woocommerce' ),
+				'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
+				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
+		);
+		$rest_command->set_supported_ids( $supported_ids );
+		$positional_args = array_merge( array( 'id' ), array_keys( $supported_ids ) );
+
 		$parent			 = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
@@ -123,36 +142,15 @@ class WC_CLI_Runner {
 			$synopsis = array();
 			$arg_regs = array();
 
-			if ( strpos( $route, '<product_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'product_id',
-					'type'		  => 'positional',
-					'description' => __( 'Product ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<customer_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'customer_id',
-					'type'		  => 'positional',
-					'description' => __( 'Customer ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<order_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'order_id',
-					'type'		  => 'positional',
-					'description' => __( 'Order ID.', 'woocommerce' ),
-				);
-			}
-
-			if ( strpos( $route, '<refund_id>' ) !== false ) {
-				$synopsis[] = array(
-					'name'		  => 'refund_id',
-					'type'		  => 'positional',
-					'description' => __( 'Refund ID.', 'woocommerce' ),
-				);
+			foreach ( $supported_ids as $id_name => $id_desc ) {
+				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
+					$synopsis[] = array(
+						'name'        => $id_name,
+						'type'        => 'positional',
+						'description' => $id_desc,
+						'optional'    => false,
+					);
+				}
 			}
 
 			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) ) {
@@ -165,12 +163,14 @@ class WC_CLI_Runner {
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
-				$arg_regs[] = array(
-					'name'		  => $name,
-					'type'		  => 'assoc',
-					'description' => ! empty( $args['description'] ) ? $args['description'] : '',
-					'optional'	  => empty( $args['required'] ) ? true : false,
-				);
+				if ( ! in_array( $name, $positional_args ) ) {
+					$arg_regs[] = array(
+						'name'		  => $name,
+						'type'		  => 'assoc',
+						'description' => ! empty( $args['description'] ) ? $args['description'] : '',
+						'optional'	  => empty( $args['required'] ) ? true : false,
+					);
+				}
 			}
 
 			foreach ( $arg_regs as $arg_reg ) {

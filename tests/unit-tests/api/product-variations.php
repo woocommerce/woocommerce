@@ -26,9 +26,9 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations', $routes );
-		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations/(?P<id>[\d]+)', $routes );
-		$this->assertArrayHasKey( '/wc/v1/products/(?P<product_id>[\d]+)/variations/batch', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products/(?P<product_id>[\d]+)/variations', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products/(?P<product_id>[\d]+)/variations/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products/(?P<product_id>[\d]+)/variations/batch', $routes );
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_get_variations() {
 		wp_set_current_user( $this->user );
 		$product    = WC_Helper_Product::create_variation_product();
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $variations ) );
@@ -56,7 +56,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_get_variations_without_permission() {
 		wp_set_current_user( 0 );
 		$product    = WC_Helper_Product::create_variation_product();
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$this->assertEquals( 401, $response->get_status() );
 		$product->delete( true );
 	}
@@ -72,7 +72,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id ) );
 		$variation  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -91,7 +91,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product      = WC_Helper_Product::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id ) );
 		$this->assertEquals( 401, $response->get_status() );
 		$product->delete( true );
 	}
@@ -107,12 +107,12 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 1, count( $variations ) );
 		$product->delete( true );
@@ -129,7 +129,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
@@ -144,7 +144,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_delete_variation_with_invalid_id() {
 		wp_set_current_user( 0 );
 		$product = WC_Helper_Product::create_variation_product();
-		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $product->get_id() . '/variations/0' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/' . $product->get_id() . '/variations/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
@@ -162,7 +162,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
-		$response  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id ) );
+		$response  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id ) );
 		$variation = $response->get_data();
 
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variation['sku'] );
@@ -170,7 +170,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEmpty( $variation['sale_price'] );
 		$this->assertEquals( 'small', $variation['attributes'][0]['option'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_body_params( array(
 			'sku'         => 'FIXED-SKU',
 			'sale_price'  => '8',
@@ -204,7 +204,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_body_params( array(
 			'sku'         => 'FIXED-SKU-NO-PERMISSION',
 		) );
@@ -221,7 +221,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_update_variation_with_invalid_id() {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_variation_product();
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product->get_id() . '/variations/0' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/0' );
 		$request->set_body_params( array(
 			'sku'         => 'FIXED-SKU-NO-PERMISSION',
 		) );
@@ -239,11 +239,11 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_variation_product();
 
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 2, count( $variations ) );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->get_id() . '/variations' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() . '/variations' );
 		$request->set_body_params( array(
 			'sku'            => 'DUMMY SKU VARIABLE MEDIUM',
 			'regular_price'  => '12',
@@ -260,7 +260,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'DUMMY SKU VARIABLE MEDIUM', $variation['sku'] );
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
 
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 3, count( $variations ) );
 		$product->delete( true );
@@ -275,7 +275,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		$product      = WC_Helper_Product::create_variation_product();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->get_id() . '/variations' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() . '/variations' );
 		$request->set_body_params( array(
 			'sku'            => 'DUMMY SKU VARIABLE MEDIUM',
 			'regular_price'  => '12',
@@ -294,7 +294,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product  = WC_Helper_Product::create_variation_product();
 		$children = $product->get_children();
-		$request  = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->get_id() . '/variations/batch' );
+		$request  = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() . '/variations/batch' );
 		$request->set_body_params( array(
 			'update' => array(
 				array(
@@ -304,9 +304,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				),
 			),
 			'delete' => array(
-				array(
-					'id' => $children[1],
-				),
+				$children[1],
 			),
 			'create' => array(
 				array(
@@ -325,7 +323,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'medium', $data['create'][0]['attributes'][0]['option'] );
 		$this->assertEquals( $children[1], $data['delete'][0]['id'] );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v1/products/' . $product->get_id() . '/variations' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 
@@ -341,12 +339,12 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_variation_schema() {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/products/' . $product->get_id() . '/variations' );
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/products/' . $product->get_id() . '/variations' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 33, count( $properties ) );
+		$this->assertEquals( 35, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -380,6 +378,8 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'shipping_class_id', $properties );
 		$this->assertArrayHasKey( 'image', $properties );
 		$this->assertArrayHasKey( 'attributes', $properties );
+		$this->assertArrayHasKey( 'menu_order', $properties );
+		$this->assertArrayHasKey( 'meta_data', $properties );
 		$product->delete( true );
 	}
 

@@ -3,53 +3,48 @@ jQuery( function( $ ) {
 
 	function getEnhancedSelectFormatString() {
 		var formatString = {
-			formatMatches: function( matches ) {
-				if ( 1 === matches ) {
-					return wc_enhanced_select_params.i18n_matches_1;
-				}
-
-				return wc_enhanced_select_params.i18n_matches_n.replace( '%qty%', matches );
-			},
-			formatNoMatches: function() {
+			noResults: function() {
 				return wc_enhanced_select_params.i18n_no_matches;
 			},
-			formatAjaxError: function() {
+			errorLoading: function() {
 				return wc_enhanced_select_params.i18n_ajax_error;
 			},
-			formatInputTooShort: function( input, min ) {
-				var number = min - input.length;
+			inputTooShort: function( args ) {
+				var remainingChars = args.minimum - args.input.length;
 
-				if ( 1 === number ) {
+				if ( 1 === remainingChars ) {
 					return wc_enhanced_select_params.i18n_input_too_short_1;
 				}
 
-				return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', number );
+				return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
 			},
-			formatInputTooLong: function( input, max ) {
-				var number = input.length - max;
+			inputTooLong: function( args ) {
+				var overChars = args.input.length - args.maximum;
 
-				if ( 1 === number ) {
+				if ( 1 === overChars ) {
 					return wc_enhanced_select_params.i18n_input_too_long_1;
 				}
 
-				return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', number );
+				return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
 			},
-			formatSelectionTooBig: function( limit ) {
-				if ( 1 === limit ) {
+			maximumSelected: function( args ) {
+				if ( args.maximum === 1 ) {
 					return wc_enhanced_select_params.i18n_selection_too_long_1;
 				}
 
-				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
+				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
 			},
-			formatLoadMore: function() {
+			loadingMore: function() {
 				return wc_enhanced_select_params.i18n_load_more;
 			},
-			formatSearching: function() {
+			searching: function() {
 				return wc_enhanced_select_params.i18n_searching;
 			}
 		};
+       
+        var language = { 'language' : formatString };
 
-		return formatString;
+		return language;
 	}
 
 	$( document.body )

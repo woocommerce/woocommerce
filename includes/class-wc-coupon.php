@@ -45,7 +45,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
-		'used_by'                     => '',
+		'used_by'                     => array(),
 	);
 
 	// Coupon message codes
@@ -83,8 +83,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $data instanceof WC_Coupon ) {
 			$this->set_id( absint( $data->get_id() ) );
 		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $data ) ) {
-			wc_doing_it_wrong( 'woocommerce_get_shop_coupon_data', 'Reading a manual coupon via woocommerce_get_shop_coupon_data has been deprecated. Please sent an instance of WC_Coupon instead.', '2.7' );
 			$this->read_manual_coupon( $data, $coupon );
+			return;
 		} elseif ( is_numeric( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->set_id( $data );
 		} elseif ( ! empty( $data ) ) {
@@ -116,7 +116,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_coupon_';
+		return 'woocommerce_coupon_get_';
 	}
 
 	/*
@@ -561,7 +561,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
-		$this->set_prop( 'limit_usage_to_x_items', $limit_usage_to_x_items );
+		$this->set_prop( 'limit_usage_to_x_items', absint( $limit_usage_to_x_items ) );
 	}
 
 	/**
@@ -709,8 +709,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function increase_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->data_store ) {
-			$this->set_prop( 'usage_count', ( $this->get_usage_count( 'edit' ) + 1 ) );
-			$this->data_store->increase_usage_count( $this, $used_by );
+			$new_count = $this->data_store->increase_usage_count( $this, $used_by );
+
+			// Bypass set_prop and remove pending changes since the data store saves the count already.
+			$this->data['usage_count'] = $new_count;
+			if ( isset( $this->changes['usage_count'] ) ) {
+				unset( $this->changes['usage_count'] );
+			}
 		}
 	}
 
@@ -721,8 +726,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function decrease_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->get_usage_count() > 0 && $this->data_store ) {
-			$this->set_prop( 'usage_count', ( $this->get_usage_count( 'edit' ) - 1 ) );
-			$this->data_store->decrease_usage_count( $this, $used_by );
+			$new_count = $this->data_store->decrease_usage_count( $this, $used_by );
+
+			// Bypass set_prop and remove pending changes since the data store saves the count already.
+			$this->data['usage_count'] = $new_count;
+			if ( isset( $this->changes['usage_count'] ) ) {
+				unset( $this->changes['usage_count'] );
+			}
 		}
 	}
 

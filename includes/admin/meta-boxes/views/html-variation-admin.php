@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p class="form-row form-row-full options">
 				<label>
 					<?php _e( 'Enabled', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_object->get_status( 'edit' ), 'publish' ); ?> />
+					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ) ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
 					<?php _e( 'Downloadable', 'woocommerce' ); ?>:
@@ -107,6 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'label'         => $label,
 						'data_type'     => 'price',
 						'wrapper_class' => 'form-row form-row-first',
+						'placeholder'   => __( 'Variation price (required)', 'woocommerce' ),
 					) );
 
 					/* translators: %s: currency symbol */
@@ -130,11 +131,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<div class="form-field sale_price_dates_fields hidden">
 						<p class="form-row form-row-first">
 							<label>' . __( 'Sale start date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . $loop . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . $loop . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 						</p>
 						<p class="form-row form-row-last">
 							<label>' . __( 'Sale end date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 						</p>
 					</div>';
 

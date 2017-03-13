@@ -264,7 +264,7 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_description( isset( $data['description'] ) ? $post_content : '' );
 
 			// Attempts to create the new product.
-			$product->create();
+			$product->save();
 			$id = $product->get_id();
 
 			// Checks for an error in the product creation
@@ -676,10 +676,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get standard product data that applies to every product type
 	 *
 	 * @since 2.1
-	 * @param WC_Product $product
+	 * @param WC_Product|int $product
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
+		if ( is_numeric( $product ) ) {
+			$product = wc_get_product( $product );
+		}
+
 		$prices_precision = wc_get_price_decimals();
 		return array(
 			'title'              => $product->get_name(),
@@ -1182,14 +1186,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
-			$product->set_category_ids( $term_ids );
+			$product->set_category_ids( $data['categories'] );
 		}
 
 		// Product tags
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			$product->set_tag_ids( $term_ids );
+			$product->set_tag_ids( $data['tags'] );
 		}
 
 		// Downloadable
@@ -1384,10 +1386,10 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
+			if ( isset( $data['attributes'] ) ) {
 				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+				foreach ( $data['attributes'] as $attribute_key => $attribute ) {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
@@ -1498,7 +1500,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -1643,7 +1645,7 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+						$gallery[] = $this->set_product_image_as_attachment( $upload, $product->get_id() );
 					} else {
 						$gallery[] = $attachment_id;
 					}
@@ -1782,7 +1784,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-			return wc_get_object_terms( $product_id, $attribute['name'], 'name' );
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
 		} elseif ( isset( $attribute['value'] ) ) {
 			return array_map( 'trim', explode( '|', $attribute['value'] ) );
 		}

@@ -34,6 +34,19 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	);
 
 	/**
+	 * Delete a refund - no trash is supported.
+	 * @param WC_Order
+	 * @param array $args Array of args to pass to the delete method.
+	 */
+	public function delete( &$order, $args = array() ) {
+		$id = $order->get_id();
+
+		wp_delete_post( $id );
+		$order->set_id( 0 );
+		do_action( 'woocommerce_delete_order_refund', $id );
+	}
+
+	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order
@@ -57,27 +70,24 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$refund, $force = false ) {
-		parent::update_post_meta( $refund, $force );
+	protected function update_post_meta( &$refund ) {
+		parent::update_post_meta( $refund );
 
 		$updated_props     = array();
-		$changed_props     = $refund->get_changes();
 		$meta_key_to_props = array(
 			'_refund_amount' => 'amount',
 			'_refunded_by'   => 'refunded_by',
 			'_refund_reason' => 'reason',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $refund, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $refund->{"get_$prop"}( 'edit' );
-
-			if ( '' !== $value ? update_post_meta( $refund->get_id(), $meta_key, $value ) : delete_post_meta( $refund->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
-			}
+			update_post_meta( $refund->get_id(), $meta_key, $value );
+			$updated_props[] = $prop;
 		}
+
+		do_action( 'woocommerce_order_refund_object_updated_props', $refund, $updated_props );
 	}
 
 	/**

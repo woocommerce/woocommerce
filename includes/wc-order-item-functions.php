@@ -98,8 +98,8 @@ function wc_delete_order_item( $item_id ) {
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->update_metadata( $item_id, $meta_key, $meta_value, $prev_value ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
+		wp_cache_delete( $cache_key, 'order-items' );
 		return true;
 	}
 	return false;
@@ -118,8 +118,8 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $meta_id = $data_store->add_metadata( $item_id, $meta_key, $meta_value, $unique ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
+		wp_cache_delete( $cache_key, 'order-items' );
 		return $meta_id;
 	}
 	return 0;
@@ -138,8 +138,8 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->delete_metadata( $item_id, $meta_key, $meta_value, $delete_all ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
+		wp_cache_delete( $cache_key, 'order-items' );
 		return true;
 	}
 	return false;
@@ -157,4 +157,15 @@ function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $dele
 function wc_get_order_item_meta( $item_id, $key, $single = true ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	return $data_store->get_metadata( $item_id, $key, $single );
+}
+
+/**
+ * Get order ID by order item ID.
+ *
+ * @param  int $item_id
+ * @return int
+ */
+function wc_get_order_id_by_order_item_id( $item_id ) {
+	$data_store = WC_Data_Store::load( 'order-item' );
+	return $data_store->get_order_id_by_order_item_id( $item_id );
 }

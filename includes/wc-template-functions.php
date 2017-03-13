@@ -257,7 +257,7 @@ function wc_get_loop_class() {
 	global $woocommerce_loop;
 
 	$woocommerce_loop['loop']    = ! empty( $woocommerce_loop['loop'] ) ? $woocommerce_loop['loop'] + 1   : 1;
-	$woocommerce_loop['columns'] = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 );
+	$woocommerce_loop['columns'] = max( 1, ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 ) );
 
 	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
 		return 'first';
@@ -295,13 +295,14 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @return array
  */
 function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
-	if ( ! $post_id || 'product' !== get_post_type( $post_id ) ) {
+	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ) ) ) {
 		return $classes;
 	}
 
 	$product = wc_get_product( $post_id );
 
 	if ( $product ) {
+		$classes[] = 'product';
 		$classes[] = wc_get_loop_class();
 		$classes[] = $product->get_stock_status();
 
@@ -1042,28 +1043,27 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		$defaults = array(
 			'input_name'  => 'quantity',
 			'input_value' => '1',
-			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', '', $product ),
-			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', '', $product ),
-			'step'        => apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
+			'step'        => apply_filters( 'woocommerce_quantity_input_step', 1, $product ),
 			'pattern'     => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
 			'inputmode'   => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 
-		// Set min and max value to empty string if not set.
-		$args['min_value'] = isset( $args['min_value'] ) ? $args['min_value'] : '';
-		$args['max_value'] = isset( $args['max_value'] ) ? $args['max_value'] : '';
+		// Apply sanity to min/max args - min cannot be lower than 0.
+		if ( $args['min_value'] < 0 ) {
+			$args['min_value'] = 0;
+		}
 
-		// Apply sanity to min/max args - min cannot be lower than 0
-		if ( '' !== $args['min_value'] && is_numeric( $args['min_value'] ) && $args['min_value'] < 0 ) {
-			$args['min_value'] = 0; // Cannot be lower than 0
+		if ( '' === $args['max_value'] ) {
+			$args['max_value'] = -1;
 		}
 
 		// Max cannot be lower than 0 or min
-		if ( '' !== $args['max_value'] && is_numeric( $args['max_value'] ) ) {
-			$args['max_value'] = $args['max_value'] < 0 ? 0 : $args['max_value'];
-			$args['max_value'] = $args['max_value'] < $args['min_value'] ? $args['min_value'] : $args['max_value'];
+		if ( 0 < $args['max_value'] && $args['max_value'] < $args['min_value'] ) {
+			$args['max_value'] = $args['min_value'];
 		}
 
 		ob_start();
@@ -1316,26 +1316,29 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
 		global $product, $woocommerce_loop;
 
-		// Get visble upsells then sort them at random.
-		$upsells = array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' );
+		// Handle the legacy filter which controlled posts per page etc.
+		$args = apply_filters( 'woocommerce_upsell_display_args', array(
+			'posts_per_page' => $limit,
+			'orderby'        => $orderby,
+			'columns'        => $columns,
+		) );
+		$woocommerce_loop['name']    = 'up-sells';
+		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns );
+		$orderby                     = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
+		$limit                       = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
-		// Handle orderby and limit results.
-		$orderby = apply_filters( 'woocommerce_upsells_orderby', $orderby );
-		$upsells = wc_products_array_orderby( $upsells, $orderby, $order );
+		// Get visble upsells then sort them at random, then limit result set.
+		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
 		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 
-		// Set global loop values.
-		$woocommerce_loop['name']    = 'up-sells';
-		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_up_sells_columns', $columns );
-
-		wc_get_template( 'single-product/up-sells.php', apply_filters( 'woocommerce_upsell_display_args', array(
-			'upsells'            => $upsells,
+		wc_get_template( 'single-product/up-sells.php', array(
+			'upsells' => $upsells,
 
 			// Not used now, but used in previous version of up-sells.php.
-			'posts_per_page'	 => $limit,
-			'orderby'			 => $orderby,
-			'columns'			 => $columns,
-		) ) );
+			'posts_per_page' => $limit,
+			'orderby'        => $orderby,
+			'columns'        => $columns,
+		) );
 	}
 }
 
@@ -2188,7 +2191,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( ! empty( $options ) ) {
 			if ( $product && taxonomy_exists( $attribute ) ) {
 				// Get terms if this is a taxonomy - ordered. We need the names too.
-				$terms = wc_get_object_terms( $product->get_id(), $attribute );
+				$terms = wc_get_product_terms( $product->get_id(), $attribute, array( 'fields' => 'all' ) );
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {
@@ -2367,17 +2370,17 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		$args     = wp_parse_args( $args, $defaults );
 		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		wc_get_template( $template, array(
+		wc_get_template( $template, apply_filters( 'woocommerce_email_order_items_args', array(
 			'order'               => $order,
 			'items'               => $order->get_items(),
-			'show_download_links' => $order->is_download_permitted(),
+			'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
 			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $order->is_paid(),
+			'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
 			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin'],
-		) );
+		) ) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
 	}
@@ -2396,16 +2399,13 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
 			'before'    => '<ul class="wc-item-meta"><li>',
-			'after'     => '</li></ul>',
-			'separator' => '</li><li>',
-			'echo'      => true,
-			'autop'     => false,
+			'after'		=> '</li></ul>',
+			'separator'	=> '</li><li>',
+			'echo'		=> true,
+			'autop'		=> false,
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
-			if ( '_' === substr( $meta->key, 0, 1 ) ) {
-				continue;
-			}
 			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
 			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
@@ -2478,7 +2478,9 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 	 *
 	 */
 	function woocommerce_photoswipe() {
-		wc_get_template( 'single-product/photoswipe.php' );
+		if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+			wc_get_template( 'single-product/photoswipe.php' );
+		}
 	}
 }
 
@@ -2502,17 +2504,21 @@ function wc_display_product_attributes( $product ) {
  * @return string
  */
 function wc_get_stock_html( $product ) {
-	ob_start();
 
+	$html = '';
 	$availability = $product->get_availability();
 
-	wc_get_template( 'single-product/stock.php', array(
-		'product'      => $product,
-		'class'        => $availability['class'],
-		'availability' => $availability['availability'],
-	) );
+	if ( ! empty( $availability['availability'] ) ) {
+		ob_start();
 
-	$html = ob_get_clean();
+		wc_get_template( 'single-product/stock.php', array(
+			'product'      => $product,
+			'class'        => $availability['class'],
+			'availability' => $availability['availability'],
+		) );
+
+		$html = ob_get_clean();
+	}
 
 	if ( has_filter( 'woocommerce_stock_html' ) ) {
 		wc_deprecated_function( 'The woocommerce_stock_html filter', '', 'woocommerce_get_stock_html' );

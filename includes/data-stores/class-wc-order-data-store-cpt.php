@@ -65,6 +65,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
 		'_shipping_method',
 	);
 
@@ -130,7 +131,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		// Before updating, ensure date paid is set if missing.
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '2.7', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id() ) ) ) {
+			$order->set_date_paid( $order->get_date_created( 'edit' ) );
+		}
+
+		// Update the order.
 		parent::update( $order );
+
 		do_action( 'woocommerce_update_order', $order->get_id() );
 	}
 
@@ -138,12 +146,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$order, $force = false ) {
+	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
-		$changed_props     = $order->get_changes();
+		$id                = $order->get_id();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_id',
@@ -158,15 +165,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_cart_hash'            => 'cart_hash',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-
-			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
-			}
+			update_post_meta( $id, $meta_key, $value );
+			$updated_props[] = $prop;
 		}
 
 		$address_props = array(
@@ -197,35 +200,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		foreach ( $address_props as $props_key => $props ) {
-			foreach ( $props as $meta_key => $prop ) {
-				$prop_key = substr( $prop, 8 );
-				if ( ! $force && ( ! isset( $changed_props[ $props_key ] ) || ! array_key_exists( $prop_key, $changed_props[ $props_key ] ) ) ) {
-					continue;
-				}
+			$props_to_update = $this->get_props_to_update( $order, $props );
+			foreach ( $props_to_update as $meta_key => $prop ) {
 				$value = $order->{"get_$prop"}( 'edit' );
-
-				if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-					$updated_props[] = $prop;
-					$updated_props[] = $props_key;
-				}
+				update_post_meta( $id, $meta_key, $value );
+				$updated_props[] = $prop;
+				$updated_props[] = $props_key;
 			}
 		}
 
-		parent::update_post_meta( $order, $force );
+		parent::update_post_meta( $order );
 
 		// If address changed, store concatinated version to make searches faster.
-		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_billing_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
+		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
+			update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
 		}
-		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_shipping_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
+		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
+			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
 		// If customer changed, update any downloadable permissions.
 		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
 			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
+			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
+
+		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
 	/**
@@ -312,14 +312,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Return count of orders with type.
+	 * Return count of orders with a specific status.
 	 *
-	 * @param  string $type
+	 * @param  string $status
 	 * @return int
 	 */
-	public function get_order_count( $type ) {
+	public function get_order_count( $status ) {
 		global $wpdb;
-		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $type ) ) );
+		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $status ) ) );
 	}
 
 	/**
@@ -365,6 +365,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( ! $args['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
+		}
+
+		if ( ! empty( $args['date_before'] ) ) {
+			$wp_query_args['date_query']['before'] = $args['date_before'];
+		}
+
+		if ( ! empty( $args['date_after'] ) ) {
+			$wp_query_args['date_query']['after'] = $args['date_after'];
 		}
 
 		// Get results.
@@ -551,7 +559,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_coupon_usage_counts', true ) );
 	}
 
 	/**
@@ -562,7 +570,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
 
 	/**
@@ -585,5 +593,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function set_stock_reduced( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Get the order type based on Order ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $order_id
+	 * @return string
+	 */
+	public function get_order_type( $order_id ) {
+		return get_post_type( $order_id );
 	}
 }

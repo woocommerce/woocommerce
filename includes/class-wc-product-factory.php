@@ -86,16 +86,7 @@ class WC_Product_Factory {
 		// Allow the overriding of the lookup in this function. Return the product type here.
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
-			$post_type = get_post_type( $product_id );
-
-			if ( 'product_variation' === $post_type ) {
-				return 'variation';
-			} elseif ( 'product' === $post_type ) {
-				$terms = get_the_terms( $product_id, 'product_type' );
-				return ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
-			} else {
-				return false;
-			}
+			return WC_Data_Store::load( 'product' )->get_product_type( $product_id );
 		} else {
 			return $override;
 		}
@@ -119,7 +110,9 @@ class WC_Product_Factory {
 	 * @return int|bool false on failure
 	 */
 	private function get_product_id( $product ) {
-		if ( is_numeric( $product ) ) {
+		if ( false === $product && isset( $GLOBALS['post'], $GLOBALS['post']->ID ) && 'product' === get_post_type( $GLOBALS['post']->ID ) ) {
+			return $GLOBALS['post']->ID;
+		} elseif ( is_numeric( $product ) ) {
 			return $product;
 		} elseif ( $product instanceof WC_Product ) {
 			return $product->get_id();

@@ -179,7 +179,7 @@ function wc_paying_customer( $order_id ) {
 	$order       = wc_get_order( $order_id );
 	$customer_id = $order->get_customer_id();
 
-	if ( $customer_id > 0 && 'refund' !== $order->get_type() ) {
+	if ( $customer_id > 0 && 'shop_order_refund' !== $order->get_type() ) {
 		$customer = new WC_Customer( $customer_id );
 		$customer->set_is_paying_customer( true );
 		$customer->save();
@@ -295,7 +295,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id  = $args[1];
 				$download = $args[2];
 
-				if ( $user_id == $download->user_id ) {
+				if ( $user_id == $download->get_user_id() ) {
 					$allcaps['download_file'] = true;
 				}
 			break;
@@ -407,7 +407,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$download_file = $_product->get_file( $result->download_id );
 
-			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$_product->get_name() . ' &ndash; ' . $download_file['name'],
@@ -433,9 +433,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'order_id'              => $order->get_id(),
 				'order_key'             => $order->get_order_key(),
 				'downloads_remaining'   => $result->downloads_remaining,
-				'access_expires' 	    => $result->access_expires,
-				'file'                  => $download_file,
-				'file_name'             => $download_file['name'],
+				'access_expires'        => $result->access_expires,
+				'file'                  => array(
+					'name' => $download_file->get_name(),
+					'file' => $download_file->get_file(),
+				),
 			);
 
 			$file_number++;

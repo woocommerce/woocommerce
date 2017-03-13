@@ -81,8 +81,10 @@ class WC_Helper_Order {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$order->add_item( $item );
 
 		// Set payment gateway

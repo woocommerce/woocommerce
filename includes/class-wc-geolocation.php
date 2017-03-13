@@ -185,7 +185,7 @@ class WC_Geolocation {
 		$logger = wc_get_logger();
 
 		if ( ! is_callable( 'gzopen' ) ) {
-			$logger->add( 'geolocation', 'Server does not support gzopen' );
+			$logger->notice( 'Server does not support gzopen', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
@@ -208,11 +208,14 @@ class WC_Geolocation {
 					gzclose( $gzhandle );
 					fclose( $handle );
 				} else {
-					$logger->add( 'geolocation', 'Unable to open database file' );
+					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
 				}
 				@unlink( $tmp_database_path );
 			} else {
-				$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message() );
+				$logger->notice(
+					'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
+					array( 'source' => 'geolocation' )
+				);
 			}
 		}
 	}
@@ -223,8 +226,8 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address ) {
-		if ( ! class_exists( 'WC_Geo_IP' ) ) {
-			include_once( dirname( __FILE__ ) . '/class-wc-geo-ip.php' );
+		if ( ! class_exists( 'WC_Geo_IP', false ) ) {
+			include_once( WC_ABSPATH . 'includes/class-wc-geo-ip.php' );
 		}
 
 		$gi = new WC_Geo_IP();

@@ -43,11 +43,25 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'setup_theme', array( __CLASS__, 'add_default_theme_support' ) );
+	}
+
+	/**
+	 * Add theme support for default WP themes.
+	 *
+	 * @since 2.7.0
+	 */
+	public static function add_default_theme_support() {
+		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+			add_theme_support( 'wc-product-gallery-zoom' );
+			add_theme_support( 'wc-product-gallery-lightbox' );
+			add_theme_support( 'wc-product-gallery-slider' );
+		}
 	}
 
 	/**
 	 * Get styles for the frontend.
-	 * @access private
+	 *
 	 * @return array
 	 */
 	public static function get_styles() {
@@ -57,18 +71,21 @@ class WC_Frontend_Scripts {
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all',
+				'has_rtl' => true,
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
 				'deps'    => 'woocommerce-layout',
 				'version' => WC_VERSION,
 				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')',
+				'has_rtl' => true,
 			),
 			'woocommerce-general' => array(
 				'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all',
+				'has_rtl' => true,
 			),
 		) );
 	}
@@ -125,10 +142,15 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
-	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		self::$styles[] = $handle;
 		wp_register_style( $handle, $path, $deps, $version, $media );
+
+		if ( $has_rtl ) {
+			wp_style_add_data( $handle, 'rtl', 'replace' );
+		}
 	}
 
 	/**
@@ -141,10 +163,11 @@ class WC_Frontend_Scripts {
 	 * @param  string[] $deps
 	 * @param  string   $version
 	 * @param  string   $media
+	 * @param  boolean  $has_rtl
 	 */
-	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all', $has_rtl = false ) {
 		if ( ! in_array( $handle, self::$styles ) && $path ) {
-			self::register_style( $handle, $path, $deps, $version, $media );
+			self::register_style( $handle, $path, $deps, $version, $media, $has_rtl );
 		}
 		wp_enqueue_style( $handle );
 	}
@@ -295,25 +318,29 @@ class WC_Frontend_Scripts {
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => false,
 			),
 			'photoswipe-default-skin' => array(
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.css' ),
 				'deps'    => array( 'photoswipe' ),
 				'version' => WC_VERSION,
+				'has_rtl' => false,
 			),
 			'select2' => array(
 				'src'     => self::get_asset_url( 'assets/css/select2.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => false,
 			),
 			'woocommerce_prettyPhoto_css' => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/css/prettyPhoto.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
+				'has_rtl' => true,
 			),
 		);
 		foreach ( $register_styles as $name => $props ) {
-			self::register_style( $name, $props['src'], $props['deps'], $props['version'] );
+			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
 		}
 	}
 
@@ -354,13 +381,22 @@ class WC_Frontend_Scripts {
 		if ( is_lost_password_page() ) {
 			self::enqueue_script( 'wc-lost-password' );
 		}
+
+		// Load gallery scripts on product pages only if supported.
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
-			self::enqueue_script( 'flexslider' );
-			self::enqueue_script( 'photoswipe-ui-default' );
-			self::enqueue_style( 'photoswipe-default-skin' );
-			self::enqueue_script( 'zoom' );
+			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
+				self::enqueue_script( 'zoom' );
+			}
+			if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
+				self::enqueue_script( 'flexslider' );
+			}
+			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+				self::enqueue_script( 'photoswipe-ui-default' );
+				self::enqueue_style( 'photoswipe-default-skin' );
+			}
 			self::enqueue_script( 'wc-single-product' );
 		}
+
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
 			$ua = wc_get_user_agent(); // Exclude common bots from geolocation by user agent.
 
@@ -376,7 +412,11 @@ class WC_Frontend_Scripts {
 		// CSS Styles
 		if ( $enqueue_styles = self::get_styles() ) {
 			foreach ( $enqueue_styles as $handle => $args ) {
-				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+				if ( ! isset( $args['has_rtl'] ) ) {
+					$args['has_rtl'] = false;
+				}
+
+				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'], $args['has_rtl'] );
 			}
 		}
 	}
@@ -426,12 +466,16 @@ class WC_Frontend_Scripts {
 					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
-						'smoothHeight'   => true,
+						'smoothHeight'   => false,
 						'directionNav'   => false,
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
 						'animationSpeed' => 500,
+						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
+					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
+					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
+					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
 				);
 			break;
 			case 'wc-checkout' :
@@ -496,8 +540,6 @@ class WC_Frontend_Scripts {
 				return array(
 					'countries'                 => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
-					'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
-					'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
 					'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
@@ -514,7 +556,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
-					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
 				);
 			break;
 		}

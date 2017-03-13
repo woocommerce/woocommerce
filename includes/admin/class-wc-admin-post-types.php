@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
+if ( ! class_exists( 'WC_Admin_Post_Types', false ) ) :
 
 /**
  * WC_Admin_Post_Types Class.
@@ -87,7 +87,6 @@ class WC_Admin_Post_Types {
 			include( 'class-wc-admin-duplicate-product.php' );
 		}
 
-		// Meta-Box Class
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
 
 		// Disable DFW feature pointer
@@ -96,11 +95,8 @@ class WC_Admin_Post_Types {
 		// Disable post type view mode options
 		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
 
-		// If first time editing, disable columns by default.
-		if ( false === get_user_option( 'manageedit-shop_ordercolumnshidden' ) ) {
-			$user = wp_get_current_user();
-			update_user_option( $user->ID, 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
-		}
+		// Update the screen options user meta.
+		add_action( 'admin_init', array( $this, 'adjust_shop_order_columns' ) );
 
 		// Show blank state
 		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
@@ -108,6 +104,19 @@ class WC_Admin_Post_Types {
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
 		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
+	}
+
+	/**
+	 * Adjust shop order columns for the user on certain conditions.
+	 */
+	public function adjust_shop_order_columns() {
+		$option_value = get_user_option( 'manageedit-shop_ordercolumnshidden' );
+
+		// If first time editing, disable columns by default. Likewise, CB should never be hidden.
+		if ( false === $option_value || ( is_array( $option_value ) && in_array( 'cb', $option_value ) ) ) {
+			$user = wp_get_current_user();
+			update_user_option( get_current_user_id(), 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
+		}
 	}
 
 	/**
@@ -291,7 +300,6 @@ class WC_Admin_Post_Types {
 		$columns['cb']               = $existing_columns['cb'];
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
-		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
 		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
@@ -355,10 +363,10 @@ class WC_Admin_Post_Types {
 						<div class="visibility">' . esc_html( $the_product->get_catalog_visibility() ) . '</div>
 						<div class="stock_status">' . esc_html( $the_product->get_stock_status() ) . '</div>
 						<div class="stock">' . esc_html( $the_product->get_stock_quantity() ) . '</div>
-						<div class="manage_stock">' . esc_html( $the_product->get_manage_stock() ) . '</div>
-						<div class="featured">' . esc_html( $the_product->get_featured() ) . '</div>
+						<div class="manage_stock">' . esc_html( wc_bool_to_string( $the_product->get_manage_stock() ) ) . '</div>
+						<div class="featured">' . esc_html( wc_bool_to_string( $the_product->get_featured() ) ) . '</div>
 						<div class="product_type">' . esc_html( $the_product->get_type() ) . '</div>
-						<div class="product_is_virtual">' . esc_html( $the_product->get_virtual() ) . '</div>
+						<div class="product_is_virtual">' . esc_html( wc_bool_to_string( $the_product->get_virtual() ) ) . '</div>
 						<div class="tax_status">' . esc_html( $the_product->get_tax_status() ) . '</div>
 						<div class="tax_class">' . esc_html( $the_product->get_tax_class() ) . '</div>
 						<div class="backorders">' . esc_html( $the_product->get_backorders() ) . '</div>
@@ -387,7 +395,7 @@ class WC_Admin_Post_Types {
 					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->get_type() . '" data-tip="' . ucfirst( $the_product->get_type() ) . '"></span>';
+					echo '<span class="product-type tips ' . esc_attr( sanitize_html_class( $the_product->get_type() ) ) . '" data-tip="' . esc_attr( ucfirst( $the_product->get_type() ) ) . '"></span>';
 				}
 				break;
 			case 'price' :
@@ -442,28 +450,29 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_coupon_columns( $column ) {
-		global $post;
+		global $post, $the_coupon;
+
+		if ( empty( $the_coupon ) || $the_coupon->get_id() !== $post->ID ) {
+			$the_coupon = new WC_Coupon( $post->ID );
+		}
 
 		switch ( $column ) {
 			case 'coupon_code' :
 				$edit_link = get_edit_post_link( $post->ID );
-				$title     = _draft_or_post_title();
+				$title     = $the_coupon->get_code();
 
 				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
-
 				_post_states( $post );
-
 				echo '</strong>';
 			break;
 			case 'type' :
-				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
+				echo esc_html( wc_get_coupon_type( $the_coupon->get_discount_type() ) );
 			break;
 			case 'amount' :
-				echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
+				echo esc_html( wc_format_localized_price( $the_coupon->get_amount() ) );
 			break;
 			case 'products' :
-				$product_ids = get_post_meta( $post->ID, 'product_ids', true );
-				$product_ids = $product_ids ? array_map( 'absint', explode( ',', $product_ids ) ) : array();
+				$product_ids = $the_coupon->get_product_ids();
 
 				if ( sizeof( $product_ids ) > 0 ) {
 					echo esc_html( implode( ', ', $product_ids ) );
@@ -472,7 +481,7 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'usage_limit' :
-				$usage_limit = get_post_meta( $post->ID, 'usage_limit', true );
+				$usage_limit = $the_coupon->get_usage_limit();
 
 				if ( $usage_limit ) {
 					echo esc_html( $usage_limit );
@@ -481,28 +490,28 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'usage' :
-				$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
-				$usage_limit = esc_html( get_post_meta( $post->ID, 'usage_limit', true ) );
-				$usage_url   = sprintf( '<a href="%s">%s</a>', admin_url( sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $post->post_title ) ) ), $usage_count );
+				$usage_count = $the_coupon->get_usage_count();
+				$usage_limit = $the_coupon->get_usage_limit();
+				$usage_url   = sprintf( '<a href="%s">%s</a>', admin_url( sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $post->post_title ) ) ), esc_html( $usage_count ) );
 
 				/* translators: 1: count 2: limit */
 				printf(
 					__( '%1$s / %2$s', 'woocommerce' ),
 					$usage_url,
-					$usage_limit ? $usage_limit : '&infin;'
+					esc_html( $usage_limit ? $usage_limit : '&infin;' )
 				);
 			break;
 			case 'expiry_date' :
-				$expiry_date = get_post_meta( $post->ID, 'expiry_date', true );
+				$expiry_date = $the_coupon->get_date_expires();
 
 				if ( $expiry_date ) {
-					echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) );
+					echo esc_html( date_i18n( 'F j, Y', $expiry_date ) );
 				} else {
 					echo '&ndash;';
 				}
 			break;
 			case 'description' :
-				echo wp_kses_post( $post->post_excerpt );
+				echo wp_kses_post( $the_coupon->get_description() ? $the_coupon->get_description() : '&ndash;' );
 			break;
 		}
 	}
@@ -514,27 +523,16 @@ class WC_Admin_Post_Types {
 	public function render_shop_order_columns( $column ) {
 		global $post, $the_order;
 
-		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
+		if ( empty( $the_order ) || $the_order->get_id() !== $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
 		}
 
 		switch ( $column ) {
 			case 'order_status' :
-
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
-
+				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-
-				if ( '0000-00-00 00:00:00' == $post->post_date ) {
-					$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				} else {
-					$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
-				}
-
-				echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
-
+				printf( '<time datetime="%s">%s</time>', esc_attr( date( 'c', $the_order->get_date_created() ) ), esc_html( date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -543,40 +541,6 @@ class WC_Admin_Post_Types {
 					echo '<span class="na">&ndash;</span>';
 				}
 
-			break;
-			case 'order_items' :
-
-				/* translators: %d: order items count */
-				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
-
-				if ( sizeof( $the_order->get_items() ) > 0 ) {
-
-					echo '<table class="order_items" cellspacing="0">';
-
-					foreach ( $the_order->get_items() as $item ) {
-						$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
-						$item_meta      = new WC_Order_Item_Meta( $item, $product );
-						$item_meta_html = $item_meta->display( true, true );
-						?>
-						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
-							<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
-							<td class="name">
-								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->get_id() ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?></a>
-								<?php else : ?>
-									<?php echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ); ?>
-								<?php endif; ?>
-								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<?php echo wc_help_tip( $item_meta_html ); ?>
-								<?php endif; ?>
-							</td>
-						</tr>
-						<?php
-					}
-
-					echo '</table>';
-
-				} else echo '&ndash;';
 			break;
 			case 'billing_address' :
 
@@ -642,32 +606,18 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				if ( $the_order->get_user_id() ) {
-					$user_info = get_userdata( $the_order->get_user_id() );
-				}
-
-				if ( ! empty( $user_info ) ) {
-
-					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
-
-					if ( $user_info->first_name || $user_info->last_name ) {
-						/* translators: 1: first name 2: last name */
-						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
-					} else {
-						$username .= esc_html( ucfirst( $user_info->display_name ) );
-					}
-
+				if ( $the_order->get_customer_id() ) {
+					$user     = get_user_by( 'id', $the_order->get_customer_id() );
+					$username = '<a href="user-edit.php?user_id=' . absint( $the_order->get_customer_id() ) . '">';
+					$username .= esc_html( ucwords( $user->display_name ) );
 					$username .= '</a>';
-
+				} elseif ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
+					/* translators: 1: first name 2: last name */
+					$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
+				} elseif ( $the_order->get_billing_company() ) {
+					$username = trim( $the_order->get_billing_company() );
 				} else {
-					if ( $the_order->get_billing_first_name()|| $the_order->get_billing_last_name() ) {
-						/* translators: 1: first name 2: last name */
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-					} elseif ( $the_order->get_billing_company() ) {
-						$username = trim( $the_order->get_billing_company() );
-					} else {
-						$username = __( 'Guest', 'woocommerce' );
-					}
+					$username = __( 'Guest', 'woocommerce' );
 				}
 
 				/* translators: 1: order and number (i.e. Order #13) 2: user name */
@@ -990,9 +940,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -1129,9 +1080,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -1271,7 +1223,7 @@ class WC_Admin_Post_Types {
 			$manage_stock = $was_managing_stock;
 		}
 
-		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_change_stock'] ) ? wc_stock_amount( $_REQUEST['_change_stock'] ) : '';
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 

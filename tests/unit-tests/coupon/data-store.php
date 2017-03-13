@@ -110,19 +110,19 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $coupon->get_usage_count() );
 		$this->assertEmpty( $coupon->get_used_by() );
 
-		$coupon->inc_usage_count( 'woo@woo.local' );
+		$coupon->increase_usage_count( 'woo@woo.local' );
 
 		$this->assertEquals( 1, $coupon->get_usage_count() );
 		$this->assertEquals( array( 'woo@woo.local' ), $coupon->get_used_by() );
 
-		$coupon->inc_usage_count( $user_id );
-		$coupon->inc_usage_count( $user_id );
+		$coupon->increase_usage_count( $user_id );
+		$coupon->increase_usage_count( $user_id );
 
 		$data_store = WC_Data_Store::load( 'coupon' );
 		$this->assertEquals( 2, $data_store->get_usage_by_user_id( $coupon, $user_id ) );
 
-		$coupon->dcr_usage_count( 'woo@woo.local' );
-		$coupon->dcr_usage_count( $user_id );
+		$coupon->decrease_usage_count( 'woo@woo.local' );
+		$coupon->decrease_usage_count( $user_id );
 		$this->assertEquals( 1, $coupon->get_usage_count() );
 		$this->assertEquals( array( 1 ), $coupon->get_used_by() );
 	}

@@ -99,10 +99,10 @@ class WC_Template_Loader {
 
 		if ( is_product_taxonomy() ) {
 			$term   = get_queried_object();
-			$find[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] = 'taxonomy-' . $term->taxonomy . '.php';
-			$find[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '.php';
+			$search_files[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$search_files[] = 'taxonomy-' . $term->taxonomy . '.php';
+			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '.php';
 		}
 
 		$search_files[] = $default_file;

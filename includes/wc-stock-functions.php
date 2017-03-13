@@ -24,8 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param  string $operation set, increase and decrease.
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	$product = wc_get_product( $product );
-
+	if ( ! $product = wc_get_product( $product ) ) {
+		return false;
+	}
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
 		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
@@ -33,6 +34,8 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
+		delete_transient( 'wc_product_children_' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
+		wp_cache_delete( 'product-' . $product_id_with_stock, 'products' );
 
 		// Re-read product data after updating stock, then have stock status calculated and saved.
 		$product_with_stock = wc_get_product( $product_id_with_stock );

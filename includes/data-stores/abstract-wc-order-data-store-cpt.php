@@ -68,7 +68,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$order->set_id( $id );
-			$this->update_post_meta( $order, true );
+			$this->update_post_meta( $order );
 			$order->save_meta_data();
 			$order->apply_changes();
 			$this->clear_caches( $order );
@@ -82,7 +82,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read( &$order ) {
 		$order->set_defaults();
 
-		if ( ! $order->get_id() || ! ( $post_object = get_post( $order->get_id() ) ) || 'shop_order' !== $post_object->post_type ) {
+		if ( ! $order->get_id() || ! ( $post_object = get_post( $order->get_id() ) ) || ! in_array( $post_object->post_type, wc_get_order_types() ) ) {
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
@@ -96,6 +96,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$this->read_order_data( $order, $post_object );
 		$order->read_meta_data();
 		$order->set_object_read( true );
+
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored. @todo When meta is flattened, handle this during migration.
+		 */
+		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
+			$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
 	}
 
 	/**
@@ -105,15 +114,21 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function update( &$order ) {
 		$order->set_version( WC_VERSION );
 
-		wp_update_post( array(
-			'ID'            => $order->get_id(),
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
-			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'post_parent'   => $order->get_parent_id(),
-			'post_excerpt'  => $this->get_post_excerpt( $order ),
-		) );
+		$changes = $order->get_changes();
 
+		// Only update the post when the post data changes.
+		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
+			wp_update_post( array(
+				'ID'                => $order->get_id(),
+				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
+				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+				'post_parent'       => $order->get_parent_id(),
+				'post_excerpt'      => $this->get_post_excerpt( $order ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+			) );
+		}
 		$this->update_post_meta( $order );
 		$order->save_meta_data();
 		$order->apply_changes();
@@ -205,12 +220,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
 	 * @since 2.7.0
 	 */
-	protected function update_post_meta( &$order, $force = false ) {
+	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $order->get_changes() );
 		$meta_key_to_props = array(
 			'_order_currency'     => 'currency',
 			'_cart_discount'      => 'discount_total',
@@ -222,22 +235,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'_order_version'      => 'version',
 			'_prices_include_tax' => 'prices_include_tax',
 		);
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+
+		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
 
-			if ( '' !== $value ) {
-				$updated = update_post_meta( $order->get_id(), $meta_key, $value );
-			} else {
-				$updated = delete_post_meta( $order->get_id(), $meta_key );
+			if ( 'prices_include_tax' === $prop ) {
+				$value = $value ? 'yes' : 'no';
 			}
 
-			if ( $updated ) {
+			if ( update_post_meta( $order->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
 	/**
@@ -249,6 +262,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
+		wp_cache_delete( 'object-' . $order->get_id(), 'orders' );
 	}
 
 	/**
@@ -261,7 +275,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read_items( $order, $type ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
+		$get_items_sql = $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
 		$items         = $wpdb->get_results( $get_items_sql );
 
 		if ( ! empty( $items ) ) {

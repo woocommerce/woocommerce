@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Order Item Coupon Data Store: Misc Order Item Data functions.
+ * WC Order Item Data Store: Misc Order Item Data functions.
  *
  * @version  2.7.0
  * @category Class
@@ -68,13 +68,13 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Update term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
 	 * @param  string $prev_value (default: '')
 	 * @return bool
 	 */
-	function update_metadata( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	public function update_metadata( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
 		return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
 	}
 
@@ -82,13 +82,13 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Add term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
-	 * @param  mixed $meta_value
-	 * @param  bool $unique (default: false)
-	 * @return int New row ID or 0
+	 * @param  int    $item_id
+	 * @param  string $meta_key
+	 * @param  mixed  $meta_value
+	 * @param  bool   $unique (default: false)
+	 * @return int    New row ID or 0
 	 */
-	function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
+	public function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
 		return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
 	}
 
@@ -96,13 +96,13 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Delete term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $meta_key
+	 * @param  int    $item_id
+	 * @param  string $meta_key
 	 * @param  string $meta_value (default: '')
-	 * @param  bool $delete_all (default: false)
+	 * @param  bool   $delete_all (default: false)
 	 * @return bool
 	 */
-	function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	public function delete_metadata( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
 		return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
 	}
 
@@ -110,13 +110,40 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Get term meta.
 	 *
 	 * @since  2.7.0
-	 * @param  mixed $item_id
-	 * @param  mixed $key
-	 * @param  bool $single (default: true)
+	 * @param  int    $item_id
+	 * @param  string $key
+	 * @param  bool   $single (default: true)
 	 * @return mixed
 	 */
-	function get_metadata( $item_id, $key, $single = true ) {
+	public function get_metadata( $item_id, $key, $single = true ) {
 		return get_metadata( 'order_item', $item_id, $key, $single );
 	}
 
+	/**
+	 * Get order ID by order item ID.
+	 *
+	 * @since 2.7.0
+	 * @param  int $item_id
+	 * @return int
+	 */
+	function get_order_id_by_order_item_id( $item_id ) {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+			$item_id
+		) );
+	}
+
+	/**
+	 * Get the order item type based on Item ID.
+	 *
+	 * @since 2.7.0
+	 * @param int $item_id
+	 * @return string
+	 */
+	public function get_order_item_type( $item_id ) {
+		global $wpdb;
+		$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
+		return $item_data->order_item_type;
+	}
 }
