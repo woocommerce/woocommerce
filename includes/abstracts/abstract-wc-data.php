@@ -313,6 +313,12 @@ abstract class WC_Data {
 				'key'   => $key,
 				'value' => $value,
 			);
+		} elseif ( ! empty( $meta_id ) ) {
+			$this->meta_data[] = (object) array(
+				'id'    => $meta_id,
+				'key'   => $key,
+				'value' => $value,
+			);
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}

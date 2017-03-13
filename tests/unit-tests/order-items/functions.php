@@ -7,6 +7,33 @@
 class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * test_wc_order_item_set_offset
+	 *
+	 * tests WC_Order_Item::setOffset that assigns meta data properly with the
+	 * corresponding id.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_wc_order_item_set_offset() {
+		$items = array();
+
+		$item = new WC_Order_Item_Product();
+
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+
+		$item_id = $item->save();
+
+		$items[ $item_id ] = $item;
+		$items[ $item_id ]['line_subtotal_tax'] = 123;
+
+		$formatted_data = $item->get_formatted_meta_data();
+		$this->assertArrayHasKey( $item_id, $formatted_data );
+	}
+
+	/**
 	 * test_wc_order_item_meta_functions
 	 *
 	 * wc_add_order_item_meta, wc_update_order_item_meta, and
@@ -33,7 +60,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$item_id = $item->get_id();
 
 		// Test that the initial key doesn't exist.
-		$item = new WC_Order_Item_Product( $item_id );;
+		$item = new WC_Order_Item_Product( $item_id );
 		$this->assertEmpty( $item->get_meta( '_test_key' ) );
 		$this->assertEmpty( wc_get_order_item_meta( $item_id, '_test_key' ) );
 
