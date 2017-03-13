@@ -792,7 +792,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_expiry_date() {
-		if ( $this->get_date_expires() && current_time( 'timestamp' ) > $this->get_date_expires()->getTimestamp() ) {
+		if ( $this->get_date_expires() && current_time( 'timestamp', true ) > $this->get_date_expires()->getTimestamp() ) {
 			throw new Exception( $error_code = self::E_WC_COUPON_EXPIRED );
 		}
 	}
