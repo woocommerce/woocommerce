@@ -129,25 +129,13 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	}
 
 	/**
-	 * Prepare a single order output for response.
+	 * Get formatted item data.
 	 *
 	 * @since  2.7.0
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
 	 */
-	public function prepare_object_for_response( $object, $request ) {
-		$this->request = $request;
-		$order         = wc_get_order( (int) $request['order_id'] );
-
-		if ( ! $order ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
-		}
-
-		if ( ! $object || $object->get_parent_id() !== $order->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
-		}
-
+	protected function get_formatted_item_data( $object ) {
 		$data              = $object->get_data();
 		$format_decimal    = array( 'amount' );
 		$format_date       = array( 'date_created' );
@@ -170,18 +158,39 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
-		// Unset unwanted data.
-		unset(
-			$data['parent_id'], $data['status'], $data['currency'], $data['prices_include_tax'],
-			$data['version'], $data['date_modified'], $data['discount_total'], $data['discount_tax'],
-			$data['shipping_total'], $data['shipping_tax'], $data['cart_tax'], $data['cart_total'],
-			$data['total'], $data['total_tax'], $data['tax_lines'], $data['shipping_lines'],
-			$data['fee_lines'], $data['coupon_lines']
-	 	);
+		return array(
+			'id'               => $object->get_id(),
+			'date_created'     => $data['date_created'],
+			'date_created_gmt' => $data['date_created_gmt'],
+			'amount'           => $data['amount'],
+			'reason'           => $data['reason'],
+			'refunded_by'      => $data['refunded_by'],
+			'meta_data'        => $data['meta_data'],
+			'line_items'       => $data['line_items'],
+		);
+	}
 
-		ksort( $data );
+	/**
+	 * Prepare a single order output for response.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data         $object  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$this->request = $request;
+		$order         = wc_get_order( (int) $request['order_id'] );
 
-		$data    = array_merge( array( 'id' => $object->get_id() ), $data );
+		if ( ! $order ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+		}
+
+		if ( ! $object || $object->get_parent_id() !== $order->get_id() ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
+		}
+
+		$data    = $this->get_formatted_item_data( $object );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
