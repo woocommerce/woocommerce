@@ -34,8 +34,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'sku'                => 'TEST SKU',
 			'regular_price'      => 15.00,
 			'sale_price'         => 10.00,
-			'date_on_sale_from'  => '1475798400',
-			'date_on_sale_to'    => '1477267200',
 			'total_sales'        => 20,
 			'tax_status'         => 'none',
 			'tax_class'          => '',
@@ -64,11 +62,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		foreach ( $getters_and_setters as $function => $value ) {
 			$product->{"set_{$function}"}( $value );
 		}
+		$product->set_date_on_sale_from( '1475798400' );
+		$product->set_date_on_sale_to( '1477267200' );
 		$product->save();
 		$product = new WC_Product_Simple( $product->get_id() );
 		foreach ( $getters_and_setters as $function => $value ) {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
+		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
+		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );
 
 		$image_url = media_sideload_image( "https://cldup.com/Dr1Bczxq4q.png", $product->get_id(), '', 'src' );
 		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid='%s';", $image_url ) );
