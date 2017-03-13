@@ -125,8 +125,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'wrapper_class' => 'form-row form-row-last',
 					) );
 
-					$sale_price_dates_from = ( $date = $variation_object->get_date_on_sale_from( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
-					$sale_price_dates_to   = ( $date = $variation_object->get_date_on_sale_to( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
+					$sale_price_dates_from = $variation_object->get_date_on_sale_from( 'edit' ) && ( $date = $variation_object->get_date_on_sale_from( 'edit' )->getTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
+					$sale_price_dates_to   = $variation_object->get_date_on_sale_to( 'edit' ) && ( $date = $variation_object->get_date_on_sale_to( 'edit' )->getTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
 
 					echo '<div class="form-field sale_price_dates_fields hidden">
 						<p class="form-row form-row-first">
