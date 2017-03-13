@@ -358,7 +358,7 @@ class WC_Cart {
 		$weight = 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$weight += $values['data']->get_weight() * $values['quantity'];
+			$weight += (float) $values['data']->get_weight() * $values['quantity'];
 		}
 
 		return apply_filters( 'woocommerce_cart_contents_weight', $weight );
