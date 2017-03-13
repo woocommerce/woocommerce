@@ -10,6 +10,7 @@
 		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		this.$resetVariations     = $form.find( '.reset_variations' );
 		this.$product             = $form.closest( '.product' );
+		this.$product_gallery     = this.$product.find( '.woocommerce-product-gallery' );
 		this.variationData        = $form.data( 'product_variations' );
 		this.useAjax              = false === this.variationData;
 		this.xhr                  = false;
@@ -527,7 +528,9 @@
 	 * Reset the slide position if the variation has a different image than the current one
 	 */
 	$.fn.wc_maybe_trigger_slide_position_reset = function( variation ) {
-		var $form = $( this ),
+		var $form                = $( this ),
+			$product             = $form.closest( '.product' ),
+			$product_gallery     = $product.find( '.woocommerce-product-gallery' ),
 			reset_slide_position = false,
 			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
 
@@ -538,7 +541,7 @@
 		$form.attr( 'current-image', new_image_id );
 
 		if ( reset_slide_position ) {
-			$( 'body' ).trigger( 'woocommerce_gallery_reset_slide_position' );
+			$product_gallery.trigger( 'woocommerce_gallery_reset_slide_position' );
 		}
 	};
 
@@ -548,6 +551,7 @@
 	$.fn.wc_variations_image_update = function( variation ) {
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
+			$product_gallery  = $product.find( '.woocommerce-product-gallery' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
 			$gallery_wrapper  = $product.find( '.woocommerce-product-gallery__wrapper ' ),
 			$product_img_wrap = $gallery_wrapper.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
@@ -583,7 +587,7 @@
 		}
 
 		window.setTimeout( function() {
-			$( 'body' ).trigger( 'woocommerce_init_gallery' );
+			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
 			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
 		}, 10 );
