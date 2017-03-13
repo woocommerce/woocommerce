@@ -451,6 +451,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 					$updated = true;
 					break;
+				case 'date_on_sale_from' :
+				case 'date_on_sale_to' :
+					$updated = update_post_meta( $product->get_id(), $meta_key, $value ? $value->getTimestamp() : '' );
+					break;
 				default :
 					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 					break;

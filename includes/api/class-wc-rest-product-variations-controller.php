@@ -342,8 +342,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			$variation->set_date_on_sale_from( $request['date_on_sale_from'] );
 		}
 
+		if ( isset( $request['date_on_sale_from_gmt'] ) ) {
+			$variation->set_date_on_sale_from( $request['date_on_sale_from_gmt'] ? strtotime( $request['date_on_sale_from_gmt'] ) : null );
+		}
+
 		if ( isset( $request['date_on_sale_to'] ) ) {
 			$variation->set_date_on_sale_to( $request['date_on_sale_to'] );
+		}
+
+		if ( isset( $request['date_on_sale_to_gmt'] ) ) {
+			$variation->set_date_on_sale_to( $request['date_on_sale_to_gmt'] ? strtotime( $request['date_on_sale_to_gmt'] ) : null );
 		}
 
 		// Tax class.
@@ -636,13 +644,23 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from' => array(
-					'description' => __( 'Start date of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_from_gmt' => array(
+					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_to_gmt' => array(
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'on_sale' => array(
