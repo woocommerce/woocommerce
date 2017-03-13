@@ -56,13 +56,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_props( array(
-			'name'              => $post_object->post_title,
-			'slug'              => $post_object->post_name,
-			'date_created'      => $post_object->post_date,
-			'date_modified'     => $post_object->post_modified,
-			'status'            => $post_object->post_status,
-			'menu_order'        => $post_object->menu_order,
-			'reviews_allowed'   => 'open' === $post_object->comment_status,
+			'name'            => $post_object->post_title,
+			'slug'            => $post_object->post_name,
+			'date_created'    => strtotime( $post_object->post_date_gmt ),
+			'date_modified'   => strtotime( $post_object->post_modified_gmt ),
+			'status'          => $post_object->post_status,
+			'menu_order'      => $post_object->menu_order,
+			'reviews_allowed' => 'open' === $post_object->comment_status,
 		) );
 
 		$this->read_product_data( $product );
@@ -92,7 +92,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function create( &$product ) {
-		$product->set_date_created( current_time( 'timestamp' ) );
+		if ( ! $product->get_date_created() ) {
+			$product->set_date_created( current_time( 'timestamp', true ) );
+		}
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
@@ -104,8 +106,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created() ),
-			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created() ) ),
+			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'  => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -146,10 +148,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ),
-				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ) ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
