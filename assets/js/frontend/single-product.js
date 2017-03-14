@@ -158,7 +158,7 @@ jQuery( function( $ ) {
 			var zoom_target = gallery.$images,
 				enable_zoom = false;
 
-			if ( ! wc_single_product_params.flexslider_enabled ) {
+			if ( ! gallery.flexslider_enabled ) {
 				zoom_target = zoom_target.first();
 			}
 
