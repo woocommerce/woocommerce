@@ -505,7 +505,7 @@ class WC_Admin_Post_Types {
 				$expiry_date = $the_coupon->get_date_expires();
 
 				if ( $expiry_date ) {
-					echo esc_html( date_i18n( 'F j, Y', $expiry_date->getTimestamp() ) );
+					echo esc_html( $expiry_date->date_i18n( 'F j, Y' ) );
 				} else {
 					echo '&ndash;';
 				}
