@@ -18,7 +18,7 @@
 							$selected_value = isset( $default_attributes[ sanitize_title( $attribute->get_name() ) ] ) ? $default_attributes[ sanitize_title( $attribute->get_name() ) ] : '';
 							?>
 							<select name="default_attribute_<?php echo sanitize_title( $attribute->get_name() ); ?>" data-current="<?php echo esc_attr( $selected_value ); ?>">
-								<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
+								<option value=""><?php printf( esc_html__( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ); ?></option>
 								<?php if ( $attribute->is_taxonomy() ) : ?>
 									<?php foreach ( $attribute->get_terms() as $option ) : ?>
 										<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name ) ); ?></option>

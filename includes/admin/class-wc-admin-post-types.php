@@ -492,12 +492,11 @@ class WC_Admin_Post_Types {
 			case 'usage' :
 				$usage_count = $the_coupon->get_usage_count();
 				$usage_limit = $the_coupon->get_usage_limit();
-				$usage_url   = sprintf( '<a href="%s">%s</a>', admin_url( sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $post->post_title ) ) ), esc_html( $usage_count ) );
 
 				/* translators: 1: count 2: limit */
 				printf(
 					__( '%1$s / %2$s', 'woocommerce' ),
-					$usage_url,
+					esc_html( $usage_count ),
 					esc_html( $usage_limit ? $usage_limit : '&infin;' )
 				);
 			break;

@@ -187,7 +187,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
