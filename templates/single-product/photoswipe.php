@@ -19,17 +19,12 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
-if ( ! is_product() ) {
-	return;
-}
 ?>
 
 <!-- Root element of PhotoSwipe. Must have class pswp. -->
 <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
 
-	<!-- Background of PhotoSwipe.
-		It's a separate element as animating opacity is faster than rgba(). -->
+	<!-- Background of PhotoSwipe. It's a separate element as animating opacity is faster than rgba(). -->
 	<div class="pswp__bg"></div>
 
 	<!-- Slides wrapper with overflow:hidden. -->
