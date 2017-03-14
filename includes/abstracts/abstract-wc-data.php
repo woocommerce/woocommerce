@@ -257,6 +257,19 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * See if meta data exists, since get_meta always returns a '' or array().
+	 *
+	 * @since  2.7.0
+	 * @param  string $key
+	 * @return boolean
+	 */
+	public function has_meta( $key = '' ) {
+		$this->maybe_read_meta_data();
+		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
+		return in_array( $key, $array_keys );
+	}
+
+	/**
 	 * Set all meta data from array.
 	 *
 	 * @since 2.6.0
