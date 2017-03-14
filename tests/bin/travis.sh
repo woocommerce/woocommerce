@@ -9,7 +9,6 @@ if [ $1 == 'before' ]; then
 	# No Xdebug and therefore no coverage in PHP 5.3
 	[[ ${TRAVIS_PHP_VERSION} == '5.3' ]] && exit;
 
-	composer require phpunit/phpunit:5.6
 	composer self-update
 	composer install --no-interaction
 
