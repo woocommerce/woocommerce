@@ -113,8 +113,9 @@ jQuery( function( $ ) {
 
 			});
 
-			var fieldsets = $('.woocommerce-billing-fields__field-wrapper, .woocommerce-shipping-fields__field-wrapper, .woocommerce-address-fields__field-wrapper, .woocommerce-additional-fields__field-wrapper .woocommerce-account-fields');
+			var fieldsets = $( '.woocommerce-billing-fields__field-wrapper, .woocommerce-shipping-fields__field-wrapper, .woocommerce-address-fields__field-wrapper, .woocommerce-additional-fields__field-wrapper .woocommerce-account-fields' );
 
+			$( 'div.clear', fieldsets ).remove();
 			fieldsets.each( function( index, fieldset ) {
 				var rows    = $( fieldset ).find( '.form-row' );
 				var wrapper = rows.first().parent();
@@ -124,7 +125,7 @@ jQuery( function( $ ) {
 
 				rows.each( function() {
 					if ( ! $( this ).data( 'priority' ) ) {
-						 $( this ).data( 'priority', last_priority + 1 );
+						$( this ).data( 'priority', last_priority + 1 );
 					}
 					last_priority = $( this ).data( 'priority' );
 				} );
@@ -145,5 +146,7 @@ jQuery( function( $ ) {
 
 				rows.detach().appendTo( wrapper );
 			} );
+
+			$( '<div class="clear"></div>' ).insertAfter( '.form-row-last' );
 		});
 });
