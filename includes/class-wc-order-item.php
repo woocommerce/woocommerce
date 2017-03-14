@@ -251,6 +251,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			if ( is_callable( array( $this, $setter ) ) ) {
 				$this->$setter( $value );
 			}
+			return;
 		}
 
 		$this->update_meta_data( $offset, $value );
