@@ -132,9 +132,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->save_meta_data();
 		$object = new WC_Mock_WC_Data( $object_id );
 
-		$this->assertTrue( $object->has_meta( 'test_meta_key' ) );
-		$this->assertTrue( $object->has_meta( 'test_multi_meta_key' ) );
-		$this->assertFalse( $object->has_meta( 'thiskeyisnothere' ) );
+		$this->assertTrue( $object->meta_exists( 'test_meta_key' ) );
+		$this->assertTrue( $object->meta_exists( 'test_multi_meta_key' ) );
+		$this->assertFalse( $object->meta_exists( 'thiskeyisnothere' ) );
 	}
 
 	/**

@@ -462,13 +462,9 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * version and should be removed in future versions.
 	 *
 	 * @deprecated
-	 * @return boolean|array of meta data.
+	 * @return array of meta data.
 	 */
-	public function has_meta( $key = '' ) {
-		if ( ! is_numeric( $key ) ) {
-			return parent::has_meta( $key );
-		}
-
+	public function has_meta( $order_item_id ) {
 		global $wpdb;
 
 		wc_deprecated_function( 'WC_Order::has_meta( $order_item_id )', '2.7', 'WC_Order_item::get_meta_data' );

@@ -263,7 +263,7 @@ abstract class WC_Data {
 	 * @param  string $key
 	 * @return boolean
 	 */
-	public function has_meta( $key = '' ) {
+	public function meta_exists( $key = '' ) {
 		$this->maybe_read_meta_data();
 		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
 		return in_array( $key, $array_keys );
