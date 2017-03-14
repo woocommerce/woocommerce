@@ -227,10 +227,10 @@ jQuery( function( $ ) {
 
 			if ( this.zoom_enabled && this.$images.length > 0 ) {
 				$el.prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
-				$el.on( 'click', '.woocommerce-product-gallery__trigger', { gallery: this }, this.trigger_photoswipe );
+				$el.on( 'click', '.woocommerce-product-gallery__trigger', this.trigger_photoswipe );
 			}
 
-			$el.on( 'click', '.woocommerce-product-gallery__image a', { gallery: this }, this.trigger_photoswipe );
+			$el.on( 'click', '.woocommerce-product-gallery__image a', this.trigger_photoswipe );
 		};
 
 		/**
@@ -238,17 +238,21 @@ jQuery( function( $ ) {
 		 */
 		this.trigger_photoswipe = function( e ) {
 
+			if ( ! gallery.photoswipe_enabled ) {
+				return;
+			}
+
 			e.preventDefault();
 
 			var pswpElement = $( '.pswp' )[0],
-				items  = e.data.gallery.get_gallery_items(),
+				items  = gallery.get_gallery_items(),
 				target = $( e.target ),
 				clicked;
 
 			if ( ! target.is( '.woocommerce-product-gallery__trigger' ) ) {
 				clicked = e.target.closest( '.woocommerce-product-gallery__image' );
 			} else {
-				clicked = e.data.gallery.$el.find( '.flex-active-slide' );
+				clicked = gallery.$el.find( '.flex-active-slide' );
 			}
 
 			var options = {
@@ -261,8 +265,8 @@ jQuery( function( $ ) {
 			};
 
 			// Initializes and opens PhotoSwipe.
-			var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
-			gallery.init();
+			var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
+			photoswipe.init();
 		};
 
 		this.init();
