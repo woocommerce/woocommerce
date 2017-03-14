@@ -121,6 +121,23 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test seeing if meta exists.
+	 */
+	function test_has_meta() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save_meta_data();
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$this->assertTrue( $object->has_meta( 'test_meta_key' ) );
+		$this->assertTrue( $object->has_meta( 'test_multi_meta_key' ) );
+		$this->assertFalse( $object->has_meta( 'thiskeyisnothere' ) );
+	}
+
+	/**
 	 * Test getting meta that hasn't been set
 	 */
 	function test_get_meta_no_meta() {
