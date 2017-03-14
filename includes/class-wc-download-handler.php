@@ -75,7 +75,9 @@ class WC_Download_Handler {
 		$count     = $download->get_download_count();
 		$remaining = $download->get_downloads_remaining();
 		$download->set_download_count( $count + 1 );
-		$download->set_downloads_remaining( $remaining - 1 );
+		if ( '' !== $remaining ) {
+			$download->set_downloads_remaining( $remaining - 1 );
+		}
 		$download->save();
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
