@@ -95,7 +95,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'description'                 => $post_object->post_excerpt,
 			'date_created'                => strtotime( $post_object->post_date_gmt ),
 			'date_modified'               => strtotime( $post_object->post_modified_gmt ),
-			'date_expires'                => get_post_meta( $coupon_id, 'expiry_date', true ),
+			'date_expires'                => metadata_exists( 'post', $coupon_id, 'expiry_date_utc' ) ? get_post_meta( $coupon_id, 'expiry_date_utc', true ) : get_post_meta( $coupon_id, 'expiry_date', true ),
 			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
 			'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
@@ -180,7 +180,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'usage_limit_per_user'       => 'usage_limit_per_user',
 			'limit_usage_to_x_items'     => 'limit_usage_to_x_items',
 			'usage_count'                => 'usage_count',
-			'expiry_date'                => 'date_expires',
+			'expiry_date_utc'            => 'date_expires',
 			'free_shipping'              => 'free_shipping',
 			'product_categories'         => 'product_categories',
 			'exclude_product_categories' => 'excluded_product_categories',
@@ -211,7 +211,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'sanitize_email', $value ) ) );
 					break;
 				case 'date_expires' :
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->date( 'Y-m-d' ) : '' ) );
+					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->getTimestamp() : null ) );
+					update_post_meta( $coupon->get_id(), 'expiry_date', ( $value ? $value->date( 'Y-m-d' ) : '' ) ); // Update the old meta key for backwards compatibility.
 					break;
 				default :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, $value );
