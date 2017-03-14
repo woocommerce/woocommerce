@@ -177,6 +177,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Expands things like term slugs before return.
+	 *
 	 * @param string $hideprefix (default: _)
 	 * @return array
 	 */
@@ -187,7 +188,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
@@ -250,6 +251,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			if ( is_callable( array( $this, $setter ) ) ) {
 				$this->$setter( $value );
 			}
+			return;
 		}
 
 		$this->update_meta_data( $offset, $value );
