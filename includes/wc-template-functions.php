@@ -2054,11 +2054,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			}
 
 			$container_class = esc_attr( implode( ' ', $args['class'] ) );
-			$container_id = esc_attr( $args['id'] ) . '_field';
-
-			$after = ! empty( $args['clear'] ) ? '<div class="clear"></div>' : '';
-
-			$field = sprintf( $field_container, $container_class, $container_id, $field_html ) . $after;
+			$container_id    = esc_attr( $args['id'] ) . '_field';
+			$field           = sprintf( $field_container, $container_class, $container_id, $field_html );
 		}
 
 		$field = apply_filters( 'woocommerce_form_field_' . $args['type'], $field, $key, $args, $value );
