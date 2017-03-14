@@ -211,7 +211,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'sanitize_email', $value ) ) );
 					break;
 				case 'date_expires' :
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->date( 'Y-m-d' ) : '' ) );
+					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? date( 'Y-m-d', $value->getTimestamp() ) : '' ) );
 					break;
 				default :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, $value );
