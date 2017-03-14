@@ -9,6 +9,14 @@ if [ $1 == 'before' ]; then
 	# No Xdebug and therefore no coverage in PHP 5.3
 	[[ ${TRAVIS_PHP_VERSION} == '5.3' ]] && exit;
 
+	export PATH="$HOME/.composer/vendor/bin:$PATH"
+	|
+	if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+		composer global require "phpunit/phpunit=5.7.*"
+	else
+		composer global require "phpunit/phpunit=4.8.*"
+	fi
+
 	composer self-update
 	composer install --no-interaction
 
@@ -26,6 +34,8 @@ if [ $1 == 'before' ]; then
 		# After CodeSniffer install you should refresh your path.
 		phpenv rehash
 	fi
+
+	phpunit --version
 
 elif [ $1 == 'during' ]; then
 
