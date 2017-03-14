@@ -28,6 +28,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		'discount_type',
 		'coupon_amount',
 		'expiry_date',
+		'expiry_date_utc',
 		'usage_count',
 		'individual_use',
 		'product_ids',
