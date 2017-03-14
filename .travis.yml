@@ -21,6 +21,13 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=1 PHP_LATEST_STABLE=7.1
 
 before_script:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+      composer global require "phpunit/phpunit=5.7.*"
+    else
+      composer global require "phpunit/phpunit=4.8.*"
+    fi
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
