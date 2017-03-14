@@ -33,9 +33,9 @@ if ( $attachment_ids && has_post_thumbnail() ) {
 
 		$attributes = array(
 			'title'                   => $image_title,
-			'data-large-image'        => $full_size_image[0],
-			'data-large-image-width'  => $full_size_image[1],
-			'data-large-image-height' => $full_size_image[2],
+			'data-large_image'        => $full_size_image[0],
+			'data-large_image_width'  => $full_size_image[1],
+			'data-large_image_height' => $full_size_image[2],
 		);
 
 		$html  = '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';

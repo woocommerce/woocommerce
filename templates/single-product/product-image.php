@@ -38,10 +38,10 @@ $wrapper_classes   = apply_filters( 'woocommerce_single_product_image_gallery_cl
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
 		$attributes = array(
-			'title'                   => $image_title,
-			'data-large-image'        => $full_size_image[0],
-			'data-large-image-width'  => $full_size_image[1],
-			'data-large-image-height' => $full_size_image[2],
+			'title'             => $image_title,
+			'data-large_image'        => $full_size_image[0],
+			'data-large_image_width'  => $full_size_image[1],
+			'data-large_image_height' => $full_size_image[2],
 		);
 
 		if ( has_post_thumbnail() ) {

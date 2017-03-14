@@ -10,7 +10,6 @@
 		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		this.$resetVariations     = $form.find( '.reset_variations' );
 		this.$product             = $form.closest( '.product' );
-		this.$product_gallery     = this.$product.find( '.woocommerce-product-gallery' );
 		this.variationData        = $form.data( 'product_variations' );
 		this.useAjax              = false === this.variationData;
 		this.xhr                  = false;
@@ -22,10 +21,10 @@
 		this.$attributeFields.unbind( 'change ' );
 
 		// Methods.
-		this.getChosenAttributes = this.getChosenAttributes.bind( this );
+		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
 		this.findMatchingVariations = this.findMatchingVariations.bind( this );
-		this.isMatch = this.isMatch.bind( this );
-		this.toggleResetLink = this.toggleResetLink.bind( this );
+		this.isMatch                = this.isMatch.bind( this );
+		this.toggleResetLink        = this.toggleResetLink.bind( this );
 
 		// Events.
 		$form.on( 'click', '.reset_variations', { variationForm: this }, this.onReset );
@@ -530,7 +529,7 @@
 	$.fn.wc_maybe_trigger_slide_position_reset = function( variation ) {
 		var $form                = $( this ),
 			$product             = $form.closest( '.product' ),
-			$product_gallery     = $product.find( '.woocommerce-product-gallery' ),
+			$product_gallery     = $product.find( '.images' ),
 			reset_slide_position = false,
 			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
 
@@ -551,10 +550,9 @@
 	$.fn.wc_variations_image_update = function( variation ) {
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
-			$product_gallery  = $product.find( '.woocommerce-product-gallery' ),
+			$product_gallery  = $product.find( '.images' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
-			$gallery_wrapper  = $product.find( '.woocommerce-product-gallery__wrapper ' ),
-			$product_img_wrap = $gallery_wrapper.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
+			$product_img_wrap = $product_gallery.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
 			$product_img      = $product_img_wrap.find( '.wp-post-image' );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
@@ -565,9 +563,9 @@
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
 			$product_img.wc_set_variation_attr( 'title', variation.image.title );
 			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
-			$product_img.wc_set_variation_attr( 'data-large-image', variation.image.full_src );
-			$product_img.wc_set_variation_attr( 'data-large-image-width', variation.image.full_src_w );
-			$product_img.wc_set_variation_attr( 'data-large-image-height', variation.image.full_src_h );
+			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
+			$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
+			$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
 			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
 		} else {
@@ -578,11 +576,10 @@
 			$product_img.wc_reset_variation_attr( 'sizes' );
 			$product_img.wc_reset_variation_attr( 'title' );
 			$product_img.wc_reset_variation_attr( 'alt' );
-			$product_img.wc_reset_variation_attr( 'data-large-image' );
-			$product_img.wc_reset_variation_attr( 'data-large-image-width' );
-			$product_img.wc_reset_variation_attr( 'data-large-image-height' );
+			$product_img.wc_reset_variation_attr( 'data-large_image' );
+			$product_img.wc_reset_variation_attr( 'data-large_image_width' );
+			$product_img.wc_reset_variation_attr( 'data-large_image_height' );
 			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
-			$product_img.wc_reset_variation_attr( 'large-image' );
 			$gallery_img.wc_reset_variation_attr( 'src' );
 		}
 
