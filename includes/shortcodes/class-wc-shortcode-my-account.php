@@ -247,7 +247,14 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'email', $login );
 		}
 
-		do_action( 'lostpassword_post' );
+		$errors = new WP_Error();
+
+		do_action( 'lostpassword_post', $errors );
+
+		if ( $errors->get_error_code() ) {
+			wc_add_notice( $allow->get_error_message(), 'error' );
+			return false;
+		}
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
