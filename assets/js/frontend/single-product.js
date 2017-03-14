@@ -103,6 +103,9 @@ jQuery( function( $ ) {
 			this.init_flexslider();
 			this.init_zoom();
 			this.init_photoswipe();
+
+			$el.on( 'woocommerce_gallery_init_zoom', this.init_zoom );
+			$el.on( 'woocommerce_gallery_reset_slide_position', this.reset_slide_position );
 		};
 
 		/**
@@ -141,9 +144,6 @@ jQuery( function( $ ) {
 				}
 			} );
 
-			$el.on( 'woocommerce_gallery_reset_slide_position', this.reset_slide_position );
-
-			$el.on( 'woocommerce_gallery_init_zoom', this.init_zoom );
 		};
 
 		/**
@@ -181,6 +181,11 @@ jQuery( function( $ ) {
 		};
 
 		this.reset_slide_position = function() {
+
+			if ( ! gallery.flexslider_enabled ) {
+				return;
+			}
+
 			$el.flexslider( 0 );
 		};
 
