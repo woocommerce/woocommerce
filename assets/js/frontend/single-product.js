@@ -264,5 +264,7 @@ jQuery( function( $ ) {
 	/*
 	 * Initialize all galleries on page.
 	 */
-	$( '.woocommerce-product-gallery' ).wc_product_gallery();
+	$( '.woocommerce-product-gallery' ).each( function() {
+		$( this ).wc_product_gallery();
+	} );
 } );
