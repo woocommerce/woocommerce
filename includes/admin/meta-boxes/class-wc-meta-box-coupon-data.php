@@ -92,7 +92,7 @@ class WC_Meta_Box_Coupon_Data {
 				}
 
 				// Expiry date
-				$expiry_date = $coupon->get_date_expires() ? $coupon->get_date_expires()->date( 'Y-m-d' ) : '';
+				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires()->getTimestamp() ) : '';
 				woocommerce_wp_text_input( array(
 					'id'                => 'expiry_date',
 					'value'             => esc_attr( $expiry_date ),
