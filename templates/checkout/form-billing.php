@@ -65,6 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
 					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 				<?php endforeach; ?>
+				<div class="clear"></div>
 			</div>
 
 		<?php endif; ?>
