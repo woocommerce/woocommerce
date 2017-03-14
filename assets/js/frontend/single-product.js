@@ -81,7 +81,7 @@ jQuery( function( $ ) {
 		this.$images = $( '.woocommerce-product-gallery__image', $el );
 
 		// Make this object available.
-		$el.data['product_gallery'] = this;
+		$el.data( 'product_gallery', this );
 
 		// Pick functionality to initialize...
 		this.flexslider_enabled = $.isFunction( $.fn.flexslider ) && wc_single_product_params.flexslider_enabled;
