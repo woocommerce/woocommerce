@@ -272,6 +272,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 						break;
 					case 'expiry_date' :
 						$coupon->set_date_expires( $value );
+						break;
 					default :
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
 							$coupon->{"set_{$key}"}( $value );
