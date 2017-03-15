@@ -48,7 +48,7 @@ final class WooCommerce {
 	/**
 	 * Session instance.
 	 *
-	 * @var WC_Session
+	 * @var WC_Session|WC_Session_Handler
 	 */
 	public $session = null;
 
