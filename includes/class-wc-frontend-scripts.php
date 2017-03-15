@@ -393,6 +393,7 @@ class WC_Frontend_Scripts {
 			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
 				self::enqueue_script( 'photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
+				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
 			self::enqueue_script( 'wc-single-product' );
 		}
