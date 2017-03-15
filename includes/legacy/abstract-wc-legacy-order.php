@@ -458,15 +458,16 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	}
 
 	/**
-	 * has_meta function for order items.
+	 * has_meta function for order items. This is different to the WC_Data
+	 * version and should be removed in future versions.
 	 *
-	 * @param string $order_item_id
+	 * @deprecated
 	 * @return array of meta data.
 	 */
 	public function has_meta( $order_item_id ) {
 		global $wpdb;
 
-		wc_deprecated_function( 'has_meta', '2.7', 'WC_Order_item::get_meta_data' );
+		wc_deprecated_function( 'WC_Order::has_meta( $order_item_id )', '2.7', 'WC_Order_item::get_meta_data' );
 
 		return $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id, order_item_id
 			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d

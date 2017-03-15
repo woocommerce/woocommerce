@@ -121,6 +121,23 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test seeing if meta exists.
+	 */
+	function test_has_meta() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save_meta_data();
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$this->assertTrue( $object->meta_exists( 'test_meta_key' ) );
+		$this->assertTrue( $object->meta_exists( 'test_multi_meta_key' ) );
+		$this->assertFalse( $object->meta_exists( 'thiskeyisnothere' ) );
+	}
+
+	/**
 	 * Test getting meta that hasn't been set
 	 */
 	function test_get_meta_no_meta() {
@@ -378,5 +395,65 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		// Restore to UTC.
 		date_default_timezone_set( 'UTC' );
+	}
+
+	/**
+	 * Test applying changes
+	 */
+	function test_apply_changes() {
+		$data = array(
+			'prop1' => 'value1',
+			'prop2' => 'value2',
+		);
+
+		$changes = array(
+			'prop1' => 'new_value1',
+			'prop3' => 'value3'
+		);
+
+		$object = new WC_Mock_WC_Data;
+		$object->set_data( $data );
+		$object->set_changes( $changes );
+		$object->apply_changes();
+
+		$new_data = $object->get_data();
+		$new_changes = $object->get_changes();
+
+		$this->assertEquals( 'new_value1', $new_data['prop1'] );
+		$this->assertEquals( 'value2', $new_data['prop2'] );
+		$this->assertEquals( 'value3', $new_data['prop3'] );
+		$this->assertEmpty( $new_changes );
+	}
+
+	/**
+	 * Test applying changes with a nested array
+	 */
+	function test_apply_changes_nested() {
+		$data = array(
+			'prop1' => 'value1',
+			'prop2' => array(
+				'subprop1' => 1,
+				'subprop2' => 2,
+			),
+		);
+
+		$changes = array(
+			'prop2' => array(
+				'subprop1' => 1000,
+				'subprop3' => 3,
+			),
+		);
+
+		$object = new WC_Mock_WC_Data;
+		$object->set_data( $data );
+		$object->set_changes( $changes );
+		$object->apply_changes();
+
+		$new_data = $object->get_data();
+
+		$this->assertEquals( 'value1', $new_data['prop1'] );
+		$this->assertEquals( 1000, $new_data['prop2']['subprop1'] );
+		$this->assertEquals( 2, $new_data['prop2']['subprop2'] );
+		$this->assertEquals( 3, $new_data['prop2']['subprop3'] );
 	}
 }

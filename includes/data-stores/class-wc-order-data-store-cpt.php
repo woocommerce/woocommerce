@@ -141,7 +141,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		// Before updating, ensure date paid is set if missing.
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '2.7', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id() ) ) ) {
+			$order->set_date_paid( $order->get_date_created( 'edit' ) );
+		}
+
+		// Update the order.
 		parent::update( $order );
+
 		do_action( 'woocommerce_update_order', $order->get_id() );
 	}
 

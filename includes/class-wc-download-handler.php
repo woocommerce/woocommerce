@@ -75,7 +75,9 @@ class WC_Download_Handler {
 		$count     = $download->get_download_count();
 		$remaining = $download->get_downloads_remaining();
 		$download->set_download_count( $count + 1 );
-		$download->set_downloads_remaining( $remaining - 1 );
+		if ( '' !== $remaining ) {
+			$download->set_downloads_remaining( $remaining - 1 );
+		}
 		$download->save();
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
@@ -392,7 +394,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

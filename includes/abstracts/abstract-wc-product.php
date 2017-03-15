@@ -130,7 +130,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 *
-	 * The product_type property is @deprecated but is used here for BW compat with child classes which may be defining product_type and not have a get_type method.
+	 * The product_type property is deprecated but is used here for BW compat with child classes which may be defining product_type and not have a get_type method.
 	 *
 	 * @since 2.7.0
 	 * @return string

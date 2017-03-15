@@ -30,6 +30,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 			'type',
 			'discount_type',
 			'amount',
+			'coupon_amount',
 			'code',
 			'individual_use',
 			'product_ids',
@@ -82,6 +83,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 				$value = $this->get_discount_type();
 			break;
 			case 'amount' :
+			case 'coupon_amount' :
 				$value = $this->get_amount();
 			break;
 			case 'code' :

@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
 					<option value=""><?php
 						/* translators: %s: attribute label */
-						echo sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute->get_name() ) ) );
+						printf( esc_html__( 'Any %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) );
 						?></option>
 					<?php if ( $attribute->is_taxonomy() ) : ?>
 						<?php foreach ( $attribute->get_terms() as $option ) : ?>
@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
+				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
 					<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 				</a>
 			</p>
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'name'          => "variable_sku[{$loop}]",
 						'value'         => $variation_object->get_sku( 'edit' ),
 						'placeholder'   => $variation_object->get_sku(),
-						'label'         => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>',
+						'label'         => '<abbr title="' . esc_attr__( 'Stock Keeping Unit', 'woocommerce' ) . '">' . esc_html__( 'SKU', 'woocommerce' ) . '</abbr>',
 						'desc_tip'      => true,
 						'description'   => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ),
 						'wrapper_class' => 'form-row form-row-last',

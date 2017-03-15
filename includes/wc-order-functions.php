@@ -816,10 +816,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce' :
-					$coupon->dcr_usage_count( $used_by );
+					$coupon->decrease_usage_count( $used_by );
 				break;
 				case 'increase' :
-					$coupon->inc_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by );
 				break;
 			}
 		}

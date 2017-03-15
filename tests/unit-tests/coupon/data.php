@@ -39,6 +39,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'type',
 			'discount_type',
 			'amount',
+			'coupon_amount',
 			'code',
 			'individual_use',
 			'product_ids',
@@ -68,6 +69,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
+		$this->assertEquals( $coupon->get_amount(), $coupon->coupon_amount );
 		$this->assertEquals( $coupon->get_code(), $coupon->code );
 		$this->assertEquals( $coupon->get_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
 		$this->assertEquals( $coupon->get_product_ids(), $coupon->product_ids );

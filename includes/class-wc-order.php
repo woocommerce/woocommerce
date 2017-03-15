@@ -226,7 +226,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
 
-		if ( ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
 			$this->status_transition = array(
 				'from'   => ! empty( $this->status_transition['from'] ) ? $this->status_transition['from'] : $result['from'],
 				'to'     => $result['to'],
@@ -253,11 +253,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * `payment_complete` method.
 	 *
 	 * @since 2.7.0
-	 * @param $date_paid What to set date paid to. Defaults to current time.
 	 */
-	public function maybe_set_date_paid( $date_paid = '' ) {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
-			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp', true ) );
+	public function maybe_set_date_paid() {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
 
@@ -729,7 +728,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_paid( $context = 'view' ) {
-		return $this->get_prop( 'date_paid', $context );
+		$date_paid = $this->get_prop( 'date_paid', $context );
+
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '2.7', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+			// In view context, return a date if missing.
+			$date_paid = $this->get_date_created( 'edit' );
+		}
+		return $date_paid;
 	}
 
 	/**
@@ -1292,7 +1297,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 2.7.0
 	 * @return bool
 	 */
-	protected function needs_processing() {
+	public function needs_processing() {
 		$needs_processing = false;
 
 		if ( sizeof( $this->get_items() ) > 0 ) {

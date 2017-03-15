@@ -479,6 +479,10 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_billing_' . $key;
 				}
 
+				if ( ! isset( $_POST[ $field['id'] ] ) ) {
+					continue;
+				}
+
 				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
 					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
 				} else {
@@ -492,6 +496,10 @@ class WC_Meta_Box_Order_Data {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
+				}
+
+				if ( ! isset( $_POST[ $field['id'] ] ) ) {
+					continue;
 				}
 
 				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {

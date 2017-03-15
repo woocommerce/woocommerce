@@ -814,7 +814,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_billing_state() {
 		$object = new WC_Order();
-		$set_to = 'Boulder';
+		$set_to = 'Oregon';
 		$object->set_billing_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_state() );
 	}
@@ -862,6 +862,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set_to = '123456678';
 		$object->set_billing_phone( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_phone() );
+	}
+
+	/**
+	 * Test: Setting/getting billing settings after an order is saved
+	 */
+	function test_set_billing_after_save() {
+		$object = new WC_Order();
+		$phone = '123456678';
+		$object->set_billing_phone( $phone );
+		$object->save();
+		$state = 'Oregon';
+		$object->set_billing_state( $state );
+
+		$this->assertEquals( $phone, $object->get_billing_phone() );
+		$this->assertEquals( $state, $object->get_billing_state() );
 	}
 
 	/**
@@ -929,7 +944,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_shipping_state() {
 		$object = new WC_Order();
-		$set_to = 'Boulder';
+		$set_to = 'Oregon';
 		$object->set_shipping_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_state() );
 	}
@@ -952,6 +967,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set_to = 'US';
 		$object->set_shipping_country( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_country() );
+	}
+
+	/**
+	 * Test: Setting/getting shipping settings after an order is saved
+	 */
+	function test_set_shipping_after_save() {
+		$object = new WC_Order();
+		$country = 'US';
+		$object->set_shipping_country( $country );
+		$object->save();
+		$state = 'Oregon';
+		$object->set_shipping_state( $state );
+
+		$this->assertEquals( $country, $object->get_shipping_country() );
+		$this->assertEquals( $state, $object->get_shipping_state() );
 	}
 
 	/**
