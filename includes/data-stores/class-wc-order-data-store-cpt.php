@@ -175,17 +175,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 			if ( 'date_paid' === $prop ) {
 				// In 2.7.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '', true );
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
 
 				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '', true );
+				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 
 			} elseif ( 'date_completed' === $prop ) {
 				// In 2.7.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '', true );
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
 
 				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '', true );
+				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 
 			} else {
 				update_post_meta( $id, $meta_key, $value );
@@ -476,7 +476,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
 			AND     posts.post_status = 'wc-pending'
 			AND     posts.post_modified < %s
-		", date( "Y-m-d H:i:s", absint( $date ) ) ) );
+		", date( 'Y-m-d H:i:s', absint( $date ) ) ) );
 
 		return $unpaid_orders;
 	}
