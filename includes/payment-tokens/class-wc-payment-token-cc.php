@@ -36,17 +36,17 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * Get type to display to user.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string
 	 */
-	public function get_display_name( $context = 'view' ) {
+	public function get_display_name( $deprecated = '' ) {
 		/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
 		$display = sprintf(
 			__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce' ),
-			wc_get_credit_card_type_label( $this->get_card_type( $context ) ),
-			$this->get_last4( $context ),
-			$this->get_expiry_month( $context ),
-			substr( $this->get_expiry_year( $context ), 2 )
+			wc_get_credit_card_type_label( $this->get_card_type() ),
+			$this->get_last4(),
+			$this->get_expiry_month(),
+			substr( $this->get_expiry_year(), 2 )
 		);
 		return $display;
 	}

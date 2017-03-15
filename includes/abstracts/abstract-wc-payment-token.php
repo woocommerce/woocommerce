@@ -92,6 +92,7 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	 * Overwritten by child classes.
 	 *
 	 * @since  2.6.0
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
 	public function get_type( $deprecated = '' ) {
@@ -103,10 +104,10 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	 * Get's overwritten by child classes.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string
 	 */
-	public function get_display_name( $context = 'view' ) {
+	public function get_display_name( $deprecated = '' ) {
 		return $this->get_type();
 	}
 

@@ -34,10 +34,10 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * Get type to display to user.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string
 	 */
-	public function get_display_name( $context = 'view' ) {
+	public function get_display_name( $deprecated = '' ) {
 		return __( 'eCheck', 'woocommerce' );
 	}
 
