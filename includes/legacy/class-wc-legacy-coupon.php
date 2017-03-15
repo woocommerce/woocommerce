@@ -109,7 +109,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 				$value = $this->get_usage_count();
 			break;
 			case 'expiry_date' :
-				$value = $this->get_date_expires();
+				$value = ( $this->get_date_expires() ? $this->get_date_expires()->date( 'Y-m-d' ) : '' );
 			break;
 			case 'product_categories' :
 				$value = $this->get_product_categories();

@@ -161,7 +161,6 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'description' => 'hello world',
 			'discount_type' => 'percent',
 			'amount' => 10.50,
-			'date_expires' => time(),
 			'usage_count' => 5,
 			'individual_use' => true,
 			'product_ids' => array( 5, 10 ),
