@@ -449,7 +449,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_classic_settings() {
 		wp_set_current_user( $this->user );
@@ -501,7 +501,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests our email etting registration to make sure settings added for WP-Admin are available over the API.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_email_settings() {
 		wp_set_current_user( $this->user );
@@ -592,7 +592,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of checkbox settings.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_checkbox() {
 		wp_set_current_user( $this->user );
@@ -625,7 +625,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of radio settings.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_radio() {
 		wp_set_current_user( $this->user );
@@ -650,7 +650,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of multiselect.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_multiselect() {
 		wp_set_current_user( $this->user );
@@ -671,7 +671,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of select.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_select() {
 		wp_set_current_user( $this->user );
@@ -701,7 +701,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of image_width.
 	 *
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_image_width() {
 		wp_set_current_user( $this->user );

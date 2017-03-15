@@ -53,7 +53,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Get default arguments for creating/editing a coupon.
-	 * @@since 3.0.0
+	 * @since 3.0.0
 	 * @param  array $args
 	 * @return array
 	 */
