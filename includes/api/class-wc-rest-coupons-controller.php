@@ -127,6 +127,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 		return new WC_Coupon( $id );
 	}
 
+	/**
+	 * Get formatted item data.
+	 *
+	 * @since  3.0.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
+	 */
 	protected function get_formatted_item_data( $object ) {
 		$data = $object->get_data();
 
