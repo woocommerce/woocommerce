@@ -150,9 +150,10 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		$coupon = new WC_Coupon( (int) $post->ID );
 		$_data  = $coupon->get_data();
 
-		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
-		$format_null    = array( 'usage_limit', 'usage_limit_per_user' );
+		$format_decimal  = array( 'amount', 'minimum_amount', 'maximum_amount' );
+		$format_date     = array( 'date_created', 'date_modified' );
+		$format_date_utc = array( 'date_expires' );
+		$format_null     = array( 'usage_limit', 'usage_limit_per_user' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -161,7 +162,10 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $_data[ $key ] ) ) ) : null;
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
+		}
+		foreach( $format_date_utc as $key ) {
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
 		}
 
 		// Format null values.
@@ -269,6 +273,9 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 						break;
 					case 'description' :
 						$coupon->set_description( wp_filter_post_kses( $value ) );
+						break;
+					case 'expiry_date' :
+						$coupon->set_date_expires( $value );
 						break;
 					default :
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
