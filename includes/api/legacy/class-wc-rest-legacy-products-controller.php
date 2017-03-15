@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param array           $args    Request args.
 	 * @param WP_REST_Request $request Request data.
@@ -152,7 +152,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single product output for response.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_Post         $post    Post object.
 	 * @param WP_REST_Request $request Request object.
@@ -197,7 +197,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get product menu order.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product Product instance.
 	 * @return int
 	 */
@@ -208,7 +208,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Save product meta.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
 	 * @return bool
@@ -224,7 +224,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Set product meta.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
 	 * @param WC_Product      $product Product instance.
@@ -514,7 +514,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Save variations.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
 	 * @param WC_Product      $product          Product instance.
@@ -700,7 +700,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Add post meta fields.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_Post         $post    Post data.
 	 * @param WP_REST_Request $request Request data.
@@ -748,7 +748,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Delete post.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param int|WP_Post $id Post ID or WP_Post instance.
 	 */
@@ -778,7 +778,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get post types.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @return array
 	 */
@@ -789,7 +789,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param int $product_id
 	 * @param array $images

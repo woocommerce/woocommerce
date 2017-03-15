@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class 		WC_Shipping_Zone
  * @since		2.6.0
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooCommerce
@@ -225,7 +225,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Set zone locations.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_zone_locations( $locations ) {

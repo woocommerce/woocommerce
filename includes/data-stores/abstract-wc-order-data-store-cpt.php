@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract Order Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -22,7 +22,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -191,7 +191,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order
 	 * @param object $post_object
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
@@ -221,7 +221,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
@@ -258,7 +258,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Clear any caches.
 	 *
 	 * @param WC_Order
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );

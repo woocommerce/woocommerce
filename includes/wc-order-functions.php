@@ -131,7 +131,7 @@ function wc_is_order_status( $maybe_status ) {
 
 /**
  * Get list of statuses which are consider 'paid'.
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_is_paid_statuses() {
@@ -558,7 +558,7 @@ function wc_create_refund( $args = array() ) {
 
 		/**
 		 * Action hook to adjust refund before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
 
@@ -603,7 +603,7 @@ function wc_create_refund( $args = array() ) {
 /**
  * Try to refund the payment for an order via the gateway.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param WC_Order $order
  * @param string $amount
  * @param string $reason
@@ -648,7 +648,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 /**
  * Restock items during refund.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Order $order
  * @param  array $refunded_line_items
  */
@@ -747,7 +747,7 @@ function wc_order_search( $term ) {
 /**
  * Update total sales amount for each product within a paid order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_total_sales_counts( $order_id ) {
@@ -782,7 +782,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 /**
  * Update used coupon amount for each coupon within an order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_coupon_usage_counts( $order_id ) {

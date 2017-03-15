@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by order item store classes.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooCommerce
  */

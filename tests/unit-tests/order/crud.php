@@ -76,7 +76,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_version() {
 		$object = new WC_Order();
-		$set_to = '2.7.0';
+		$set_to = '3.0.0';
 		$object->set_version( $set_to );
 		$this->assertEquals( $set_to, $object->get_version() );
 	}

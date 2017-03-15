@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Wrapper for PHP DateTime.
  *
  * @class    WC_DateTime
- * @since    2.7.0
+ * @since    3.0.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
@@ -18,7 +18,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Output an ISO 8601 date string in local timezone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	public function __toString() {
@@ -28,7 +28,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Missing in PHP 5.2.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return int
 	 */
 	public function getTimestamp() {
@@ -38,7 +38,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Get the timestamp with the WordPress timezone offset added or subtracted.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return int
 	 */
 	public function getOffsetTimestamp() {
@@ -48,7 +48,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Format a date based on the offset timestamp.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $format
 	 * @return string
 	 */
@@ -59,7 +59,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Return a localised date based on offset timestamp. Wrapper for date_i18n function.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $format
 	 * @return string
 	 */

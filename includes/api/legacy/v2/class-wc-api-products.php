@@ -8,7 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
- * @version     2.7
+ * @version     3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -815,7 +815,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @param array $request
 	 * @return WC_Product
@@ -1495,12 +1495,12 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param WC_Product $product
 	 * @param array $downloads
-	 * @param int $deprecated Deprecated since 2.7.
+	 * @param int $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() does not require a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();

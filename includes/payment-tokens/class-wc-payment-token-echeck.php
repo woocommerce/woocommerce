@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Representation of a payment token for eChecks.
  *
  * @class 		WC_Payment_Token_eCheck
- * @version     2.7.0
+ * @version     3.0.0
  * @since		2.6.0
  * @category 	PaymentTokens
  * @package 	WooCommerce/PaymentTokens
@@ -44,7 +44,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	/**
 	 * Hook prefix
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function get_hook_prefix() {
 		return 'woocommerce_payment_token_echeck_get_';

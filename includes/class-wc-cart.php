@@ -538,7 +538,7 @@ class WC_Cart {
 	public function get_item_data( $cart_item, $flat = false ) {
 		$item_data = array();
 
-		// Variation values are shown only if they are not found in the title as of 2.7.
+		// Variation values are shown only if they are not found in the title as of 3.0.
 		// This is because variation titles display the attributes.
 		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
 			foreach ( $cart_item['variation'] as $name => $value ) {
@@ -1454,7 +1454,7 @@ class WC_Cart {
 	/**
 	 * Filter items needing shipping callback.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $item
 	 * @return bool
 	 */
@@ -1466,7 +1466,7 @@ class WC_Cart {
 	/**
 	 * Get only items that need shipping.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	protected function get_items_needing_shipping() {

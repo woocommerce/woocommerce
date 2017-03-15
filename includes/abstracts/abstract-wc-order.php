@@ -12,7 +12,7 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php' );
  * WC_Order (regular orders) and WC_Order_Refund (refunds are negative orders).
  *
  * @class       WC_Abstract_Order
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -20,12 +20,12 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php' );
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
 	 * which is the tax for items only, not shipping.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -48,7 +48,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $items = array();
@@ -56,7 +56,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Order items that need deleting are stored here.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $items_to_delete = array();
@@ -122,7 +122,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all class data in array format.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -159,7 +159,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Save data to the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return int order ID
 	 */
 	public function save() {
@@ -213,7 +213,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get parent order ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return integer
 	 */
@@ -427,7 +427,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid statuses for this order
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array Internal status keys e.g. 'wc-processing'
 	 */
 	protected function get_valid_statuses() {
@@ -441,14 +441,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	|
 	| Functions for setting order data. These should not update anything in the
 	| database itself and should only change what is stored in the class
-	| object. However, for backwards compatibility pre 2.7.0 some of these
+	| object. However, for backwards compatibility pre 3.0.0 some of these
 	| setters may handle both.
 	*/
 
 	/**
 	 * Set parent order ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $value
 	 * @throws WC_Data_Exception
 	 */
@@ -462,7 +462,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order status.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
 	 */
@@ -612,7 +612,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
+			wc_deprecated_argument( 'total_type', '3.0', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
@@ -760,7 +760,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get an order item object, based on it's type.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
 	 */
@@ -771,7 +771,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get key for where a certain item type is stored in _items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  $item object Order item (product, shipping, fee, coupon, tax)
 	 * @return string
 	 */
@@ -811,7 +811,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Adds an order item to this order. The order item will not persist until save.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
 	 */
 	public function add_item( $item ) {
@@ -884,7 +884,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_order_id( $this->get_id() );
 		$item->save();
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '2.7', 'woocommerce_new_order_item action instead' );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 		return $item->get_id();
 	}
 
@@ -977,7 +977,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * Will use the base country unless customer addresses are set.
-	 * @param $args array Added in 2.7.0 to pass things like location.
+	 * @param $args array Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );

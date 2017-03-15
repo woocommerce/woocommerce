@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Coupon Data Store: Custom Post Type.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -14,14 +14,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 	/**
 	 * Internal meta type used to store coupon data.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var string
 	 */
 	protected $meta_type = 'post';
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for a coupon.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -51,7 +51,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Method to create a new coupon in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function create( &$coupon ) {
@@ -80,7 +80,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Method to read a coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function read( &$coupon ) {
@@ -123,7 +123,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Updates a coupon in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function update( &$coupon ) {
@@ -142,7 +142,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Deletes a coupon from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -167,7 +167,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 *
 	 * @param WC_Coupon
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
 		$updated_props     = array();
@@ -230,7 +230,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 * @return int New usage count
@@ -247,7 +247,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
 	 * @return int New usage count
@@ -272,7 +272,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Increase or decrease the usage count for a coupon by 1.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param string $operation 'increase' or 'decrease'
 	 * @return int New usage count
@@ -292,7 +292,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Get the number of uses for a coupon by user ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param id $user_id
 	 * @return int
@@ -305,7 +305,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Return a coupon code for a specific ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $id
 	 * @return string Coupon Code
 	 */
@@ -324,7 +324,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Return an array of IDs for for a specific coupon code.
 	 * Can return multiple to check for existence.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $code
 	 * @return array Array of IDs.
 	 */

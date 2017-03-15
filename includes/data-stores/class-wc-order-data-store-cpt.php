@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -14,7 +14,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -84,7 +84,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @param WC_Order
 	 * @param object $post_object
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		parent::read_order_data( $order, $post_object );
@@ -142,7 +142,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function update( &$order ) {
 		// Before updating, ensure date paid is set if missing.
-		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '2.7', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id() ) ) ) {
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id() ) ) ) {
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
@@ -156,7 +156,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
@@ -181,14 +181,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$value = $order->{"get_$prop"}( 'edit' );
 
 			if ( 'date_paid' === $prop ) {
-				// In 2.7.x we store this as a UTC timestamp.
+				// In 3.0.x we store this as a UTC timestamp.
 				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
 
 				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
 				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 
 			} elseif ( 'date_completed' === $prop ) {
-				// In 2.7.x we store this as a UTC timestamp.
+				// In 3.0.x we store this as a UTC timestamp.
 				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
 
 				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
@@ -499,7 +499,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
-		 * 2.7.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
+		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
 		 * @var array
 		 */
@@ -627,7 +627,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the order type based on Order ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $order_id
 	 * @return string
 	 */

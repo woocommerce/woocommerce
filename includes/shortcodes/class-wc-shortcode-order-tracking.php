@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category Shortcodes
  * @package  WooCommerce/Shortcodes/Order_Tracking
- * @version  2.7.0
+ * @version  3.0.0
  */
 class WC_Shortcode_Order_Tracking {
 

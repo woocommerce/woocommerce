@@ -120,7 +120,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -131,7 +131,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data $object WC_Data instance.
 	 * @return array
 	 */
@@ -173,7 +173,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Prepare a single order output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -240,7 +240,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -256,7 +256,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Prepares one object for create or update operation.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
@@ -306,7 +306,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Save an object data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error

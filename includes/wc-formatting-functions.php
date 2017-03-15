@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Converts a string (e.g. yes or no) to a bool.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @return bool
  */
@@ -26,7 +26,7 @@ function wc_string_to_bool( $string ) {
 
 /**
  * Converts a bool to a string.
- * @since 2.7.0
+ * @since 3.0.0
  * @param bool $bool
  * @return string yes or no
  */
@@ -39,7 +39,7 @@ function wc_bool_to_string( $bool ) {
 
 /**
  * Explode a string into an array by $delimiter and remove empty values.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @param string $delimiter
  * @return array
@@ -314,7 +314,7 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $value
  * @return string
  */
@@ -338,7 +338,7 @@ function wc_clean( $var ) {
 
 /**
  * Run wc_clean over posted textarea but maintain line breaks.
- * @since  2.7.0
+ * @since  3.0.0
  * @param string $var
  * @return string
  */
@@ -582,7 +582,7 @@ function wc_timezone_string() {
 /**
  * Callback which can flatten post meta (gets the first value if it's an array).
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $value
  * @return mixed
  */
@@ -925,7 +925,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 /**
  * Format the stock amount ready for display based on settings.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product Product object for which the stock you need to format.
  * @return string
  */
@@ -954,7 +954,7 @@ function wc_format_stock_for_display( $product ) {
 /**
  * Format the stock quantity ready for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  int  $stock_quantity
  * @param  WC_Product $product so that we can pass through the filters.
  * @return string
@@ -965,7 +965,7 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
 
 /**
  * Format a sale price for display.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $regular_price
  * @param  string $sale_price
  * @return string
@@ -989,7 +989,7 @@ function wc_format_price_range( $from, $to ) {
 /**
  * Format a weight for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  float $weight Weight.
  * @return string
  */
@@ -1008,7 +1008,7 @@ function wc_format_weight( $weight ) {
 /**
  * Format dimensions for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $dimensions Array of dimensions.
  * @return string
  */
@@ -1027,7 +1027,7 @@ function wc_format_dimensions( $dimensions ) {
 /**
  * Format a date for output.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_DateTime $date
  * @param  string $format Defaults to the wc_date_format function if not set.
  * @return string

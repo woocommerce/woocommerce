@@ -2,7 +2,7 @@
 /**
  * Order Item Function Tests
  * @package WooCommerce\Tests\Order_Items
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 
@@ -14,7 +14,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 	 * a datastore. These tests make sure cache is properly busted and
 	 * accessing those values via CRUD returns the correct value.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_wc_order_item_meta_functions() {
 		$meta_value  = 'cat';

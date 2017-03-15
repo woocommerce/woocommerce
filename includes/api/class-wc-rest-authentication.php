@@ -140,7 +140,7 @@ class WC_REST_Authentication {
 	/**
 	 * Parse the Authorization header into parameters.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param string $header Authorization header value (not including "Authorization: " prefix).
 	 *
@@ -173,7 +173,7 @@ class WC_REST_Authentication {
 	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
 	 * `getallheaders` here to try and grab it out instead.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return string Authorization header if set.
 	 */
@@ -198,7 +198,7 @@ class WC_REST_Authentication {
 	/**
 	 * Get oAuth parameters from $_GET, $_POST or request header.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return array|WP_Error
 	 */

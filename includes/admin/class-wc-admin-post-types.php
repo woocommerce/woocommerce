@@ -5,7 +5,7 @@
  * @author   WooCommerce
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.7.0
+ * @version  3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -833,7 +833,7 @@ class WC_Admin_Post_Types {
 	 * Offers a way to hook into save post without causing an infinite loop
 	 * when quick/bulk saving product info.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int    $post_id
 	 * @param object $post
 	 */
@@ -1282,7 +1282,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Handle shop order bulk actions.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $redirect_to URL to redirect to.
 	 * @param  string $action      Action name.
 	 * @param  array  $ids         List of ids.

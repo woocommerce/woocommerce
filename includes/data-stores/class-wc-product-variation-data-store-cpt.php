@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Variation Product Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -31,7 +31,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Reads a product from the database and sets its data to the class.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 */
 	public function read( &$product ) {
@@ -70,9 +70,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		/**
-		 * If a variation title is not in sync with the parent e.g. saved prior to 2.7, or if the parent title has changed, detect here and update.
+		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
-		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.7', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) ) {
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) ) {
 			$new_title = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			wp_update_post( array(
@@ -88,7 +88,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Create a new product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 */
 	public function create( &$product ) {
@@ -132,7 +132,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Updates an existing product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
@@ -181,7 +181,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
 	 * All other products will get a title of the form "Name - Value, Value"
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return string
 	 */
@@ -218,7 +218,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Make sure we store the product version (to track data changes).
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_version_and_type( &$product ) {
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
@@ -227,7 +227,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Read post data.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 */
 	protected function read_product_data( &$product ) {
@@ -285,7 +285,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
 	 */
@@ -300,7 +300,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Update attribute meta values.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
 	 */
@@ -328,7 +328,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
 	 */

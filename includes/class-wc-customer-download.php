@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class for customer download permissions.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -22,7 +22,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Download Data array.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -274,7 +274,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Save data to the database.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return int Item ID
 	 */
 	public function save() {

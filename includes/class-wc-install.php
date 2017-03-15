@@ -228,7 +228,7 @@ class WC_Install {
 	/**
 	 * Get list of DB update callbacks.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public static function get_db_update_callbacks() {

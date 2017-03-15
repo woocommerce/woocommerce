@@ -708,7 +708,7 @@ class WC_Tax {
 	/**
 	 * Get store tax classes as slugs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {

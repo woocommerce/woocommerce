@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Register routes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
@@ -100,7 +100,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Return a single setting.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -119,7 +119,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Return all settings in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -146,7 +146,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @return array|WP_Error
 	 */
@@ -189,7 +189,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get setting data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @param string $setting_id Setting ID.
 	 * @return stdClass|WP_Error
@@ -223,7 +223,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
@@ -250,7 +250,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Update a single setting in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -292,7 +292,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single setting object for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param object $item Setting object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -310,7 +310,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $setting_id Setting ID.
 	 * @param string $group_id Group ID.
 	 * @return array Links for the given setting.
@@ -332,7 +332,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -347,7 +347,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -363,7 +363,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * Filters out bad values from the settings array/filter so we
 	 * only return known values via the API.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array
 	 */
@@ -388,7 +388,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * For image_width, Crop can return "0" instead of false -- so we want
 	 * to make sure we return these consistently the same we accept them.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array
 	 */
@@ -406,7 +406,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each setting response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
@@ -428,7 +428,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Boolean for if a setting type is a valid supported setting type.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $type
 	 * @return bool
 	 */
@@ -451,7 +451,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get the settings schema, conforming to JSON Schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {

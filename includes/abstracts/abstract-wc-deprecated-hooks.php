@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Based on the WCS_Hook_Deprecator class by Prospress.
  *
- * @since 2.7.0
+ * @since 3.0.0
  */
 abstract class WC_Deprecated_Hooks {
 

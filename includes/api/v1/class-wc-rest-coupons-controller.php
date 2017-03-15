@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -379,7 +379,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Saves a coupon to the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|int
 	 */

@@ -75,7 +75,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_V1_Cont
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */

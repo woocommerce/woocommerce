@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles deprecation notices and triggering of legacy action hooks.
  *
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 

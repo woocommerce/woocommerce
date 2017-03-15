@@ -169,7 +169,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	/**
 	 * Test legacy token functions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @expectedDeprecated WC_Payment_Token::read
 	 * @expectedDeprecated WC_Payment_Token::create

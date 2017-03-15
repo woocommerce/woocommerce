@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooCommerce
@@ -123,7 +123,7 @@ class WC_Order_Factory {
 	/**
 	 * Get the order ID depending on what was passed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  mixed $order
 	 * @return int|bool false on failure
 	 */

@@ -24,7 +24,7 @@ function wc_get_text_attributes( $raw_attributes ) {
 
 /**
  * See if an attribute is actually valid.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $value
  * @return bool
  */
@@ -34,7 +34,7 @@ function wc_get_text_attributes_filter_callback( $value ) {
 
 /**
  * Implode an array of attributes using WC_DELIMITER.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $attributes
  * @return string
  */
@@ -290,7 +290,7 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 /**
  * Callback for array filter to get visible only.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product
  * @return bool
  */
@@ -301,7 +301,7 @@ function wc_attributes_array_filter_visible( $attribute ) {
 /**
  * Callback for array filter to get variation attributes only.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product
  * @return bool
  */

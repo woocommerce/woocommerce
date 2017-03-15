@@ -48,7 +48,7 @@ class WC_Helper_Product {
 	/**
 	 * Create external product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_External
 	 */
@@ -73,7 +73,7 @@ class WC_Helper_Product {
 	/**
 	 * Create grouped product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_Grouped
 	 */
@@ -298,7 +298,7 @@ class WC_Helper_Product {
 	/**
 	 * Creates a new product review on a specific product.
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 * @param $product_id integer Product ID that the review is for
 	 * @param $revieww_content string Content to use for the product review
 	 * @return integer Product Review ID

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -15,7 +15,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Data stored in meta keys, but not considered "meta".
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -86,7 +86,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Method to create a new customer in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 */
 	public function create( &$customer ) {
@@ -114,7 +114,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Method to read a customer object.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @throws Exception
 	 */
@@ -149,7 +149,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Updates a customer in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 */
 	public function update( &$customer ) {
@@ -173,7 +173,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Deletes a customer from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -193,7 +193,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 	/**
 	 * Helper method that updates all the meta for a customer. Used for update & create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 */
 	private function update_user_meta( $customer ) {
@@ -268,7 +268,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Gets the customers last order.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return WC_Order|false
 	 */
@@ -295,7 +295,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Return the number of orders this customer has.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return integer
 	 */
@@ -322,7 +322,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Return how much money this customer has spent.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return float
 	 */

@@ -233,7 +233,7 @@ class WC_Webhook {
 	/**
 	 * Get Legacy API payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -284,7 +284,7 @@ class WC_Webhook {
 	/**
 	 * Get WP API integration payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -895,7 +895,7 @@ class WC_Webhook {
 	/**
 	 * Set API version.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
@@ -914,7 +914,7 @@ class WC_Webhook {
 	/**
 	 * API version.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	public function get_api_version() {

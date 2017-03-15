@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooCommerce
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.7.0
+ * @version     3.0.0
  */
 
 if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
@@ -98,7 +98,7 @@ class WC_Admin_Duplicate_Product {
 
 		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
 		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
-		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '2.7', 'Use woocommerce_product_duplicate action instead.' );
+		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '3.0', 'Use woocommerce_product_duplicate action instead.' );
 
 		// Redirect to the edit screen for the new draft page
 		wp_redirect( admin_url( 'post.php?action=edit&post=' . $duplicate->get_id() ) );
@@ -127,7 +127,7 @@ class WC_Admin_Duplicate_Product {
 			$duplicate->delete_meta_data( $meta_key );
 		}
 
-		// This action can be used to modify the object further before it is created - it will be passed by reference. @since 2.7
+		// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
 		do_action( 'woocommerce_product_duplicate_before_save', $duplicate, $product );
 
 		// Save parent product.
@@ -148,7 +148,7 @@ class WC_Admin_Duplicate_Product {
 					$child_duplicate->delete_meta_data( $meta_key );
 				}
 
-				// This action can be used to modify the object further before it is created - it will be passed by reference. @since 2.7
+				// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
 				do_action( 'woocommerce_product_duplicate_before_save', $child_duplicate, $child );
 
 				$child_duplicate->save();
@@ -161,7 +161,7 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Get a product from the database to duplicate.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param mixed $id
 	 * @return WP_Post|bool
 	 * @see duplicate_product
