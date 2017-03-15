@@ -973,7 +973,7 @@ function wc_update_260_db_version() {
 	WC_Install::update_db_version( '2.6.0' );
 }
 
-function wc_update_270_webhooks() {
+function wc_update_300_webhooks() {
 	/**
 	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
 	 * and woocommerce_product_bulk_edit_save hooks.
@@ -996,7 +996,7 @@ function wc_update_270_webhooks() {
  *
  * @return null
  */
-function wc_update_270_comment_type_index() {
+function wc_update_300_comment_type_index() {
 	global $wpdb;
 
 	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
@@ -1008,7 +1008,7 @@ function wc_update_270_comment_type_index() {
 	}
 }
 
-function wc_update_270_grouped_products() {
+function wc_update_300_grouped_products() {
 	global $wpdb;
 	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
 	foreach ( $parents as $parent_id ) {
@@ -1025,7 +1025,7 @@ function wc_update_270_grouped_products() {
 	}
 }
 
-function wc_update_270_settings() {
+function wc_update_300_settings() {
 	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 	if ( '' === $woocommerce_shipping_tax_class ) {
 		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
@@ -1037,7 +1037,7 @@ function wc_update_270_settings() {
 /**
  * Convert meta values into term for product visibility.
  */
-function wc_update_270_product_visibility() {
+function wc_update_300_product_visibility() {
 	global $wpdb;
 
 	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
@@ -1080,6 +1080,6 @@ function wc_update_270_product_visibility() {
 /**
  * Update DB Version.
  */
-function wc_update_270_db_version() {
-	WC_Install::update_db_version( '2.7.0' );
+function wc_update_300_db_version() {
+	WC_Install::update_db_version( '3.0.0' );
 }
