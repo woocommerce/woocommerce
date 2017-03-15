@@ -179,7 +179,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 
 		$updated_props     = array();
 		$extra_data_keys   = $token->get_extra_data_keys();
-		$meta_key_to_props = array_combine( $extra_data_keys, $extra_data_keys );
+		$meta_key_to_props = ! empty( $extra_data_keys ) ? array_combine( $extra_data_keys, $extra_data_keys ) : array();
 		$props_to_update   = $force ? $meta_key_to_props : $this->get_props_to_update( $token, $meta_key_to_props );
 
 		foreach ( $extra_data_keys as $key ) {
