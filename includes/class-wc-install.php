@@ -5,7 +5,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Classes
- * @version  2.4.1
+ * @version  3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -72,12 +72,12 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
-		'2.7.0' => array(
-			'wc_update_270_webhooks',
-			'wc_update_270_grouped_products',
-			'wc_update_270_settings',
-			'wc_update_270_product_visibility',
-			'wc_update_270_db_version',
+		'3.0.0' => array(
+			'wc_update_300_webhooks',
+			'wc_update_300_grouped_products',
+			'wc_update_300_settings',
+			'wc_update_300_product_visibility',
+			'wc_update_300_db_version',
 		),
 	);
 
