@@ -150,9 +150,10 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		$coupon = new WC_Coupon( (int) $post->ID );
 		$_data  = $coupon->get_data();
 
-		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
-		$format_null    = array( 'usage_limit', 'usage_limit_per_user' );
+		$format_decimal  = array( 'amount', 'minimum_amount', 'maximum_amount' );
+		$format_date     = array( 'date_created', 'date_modified' );
+		$format_date_utc = array( 'date_expires' );
+		$format_null     = array( 'usage_limit', 'usage_limit_per_user' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -161,6 +162,9 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
+		}
+		foreach( $format_date_utc as $key ) {
 			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
 		}
 
@@ -419,13 +423,13 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created' => array(
-					'description' => __( "The date the coupon was created, as GMT.", 'woocommerce' ),
+					'description' => __( "The date the coupon was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the coupon was last modified, as GMT.", 'woocommerce' ),
+					'description' => __( "The date the coupon was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -449,7 +453,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'expiry_date' => array(
 					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_count' => array(
