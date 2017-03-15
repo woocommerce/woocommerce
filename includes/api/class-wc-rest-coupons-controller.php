@@ -191,7 +191,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = $this->get_formatted_item_data( $object );
+		$data 	  = $this->get_formatted_item_data( $object );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
