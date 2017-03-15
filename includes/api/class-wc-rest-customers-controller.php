@@ -32,7 +32,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data $object WC_Data instance.
 	 * @return array
 	 */

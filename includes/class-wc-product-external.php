@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * External products cannot be bought; they link offsite. Extends simple products.
  *
  * @class 		WC_Product_External
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -75,7 +75,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Set product URL.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $product_url Product URL.
 	 */
 	public function set_product_url( $product_url ) {
@@ -85,7 +85,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Set button text.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $button_text Button text.
 	 */
 	public function set_button_text( $button_text ) {
@@ -95,7 +95,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * External products cannot be stock managed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param bool
 	 */
 	public function set_manage_stock( $manage_stock ) {
@@ -109,7 +109,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * External products cannot be stock managed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param bool
 	 */
 	public function set_stock_status( $stock_status = '' ) {
@@ -123,7 +123,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * xternal products cannot be backordered.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
 	 */
 	public function set_backorders( $backorders ) {

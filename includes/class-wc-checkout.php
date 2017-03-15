@@ -158,7 +158,7 @@ class WC_Checkout {
 	/**
 	 * Is registration required to checkout?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_required() {
@@ -168,7 +168,7 @@ class WC_Checkout {
 	/**
 	 * Is registration enabled on the checkout page?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_enabled() {
@@ -319,7 +319,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust order before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
 
@@ -366,7 +366,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
@@ -397,7 +397,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
@@ -433,7 +433,7 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
@@ -463,7 +463,7 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
 				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
@@ -489,7 +489,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
@@ -501,7 +501,7 @@ class WC_Checkout {
 	/**
 	 * See if a fieldset should be skipped.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $fieldset_key
 	 * @param array $data
 	 */
@@ -518,7 +518,7 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array of data and errors.
 	 */
 	protected function get_posted_data() {
@@ -570,7 +570,7 @@ class WC_Checkout {
 	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -655,7 +655,7 @@ class WC_Checkout {
 	/**
 	 * Validates that the checkout has enough info to proceed.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -701,7 +701,7 @@ class WC_Checkout {
 	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
@@ -748,7 +748,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that does require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 * @param  string $payment_method
 	 */
@@ -781,7 +781,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that doesn't require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 */
 	protected function process_order_without_payment( $order_id ) {
@@ -854,7 +854,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust customer before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_update_customer', $customer, $data );
 

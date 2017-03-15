@@ -524,7 +524,7 @@ class WC_Emails {
 	/**
 	 * Adds Schema.org markup for order in JSON-LD format.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @see WC_Structured_Data::generate_order_data()
 	 *
 	 * @since 2.6.0
@@ -533,7 +533,7 @@ class WC_Emails {
 	 * @param bool $plain_text (default: false)
 	 */
 	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-		wc_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
+		wc_deprecated_function( 'WC_Emails::order_schema_markup', '3.0', 'WC_Structured_Data::generate_order_data' );
 
 		WC()->structured_data->generate_order_data( $order, $sent_to_admin, $plain_text );
 		WC()->structured_data->output_structured_data();

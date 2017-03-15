@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Variable Product Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -22,7 +22,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Read product data.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
 		parent::read_product_data( $product );
@@ -137,7 +137,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Can be filtered by plugins which modify costs, but otherwise will include the raw meta costs unlike get_price() which runs costs through the woocommerce_get_price filter.
 	 * This is to ensure modified prices are not cached, unless intended.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Product
 	 * @param  bool $include_taxes If taxes should be calculated or not.
 	 * @return array of prices
@@ -227,7 +227,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
 	 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Product
 	 * @param  bool $include_taxes If taxes should be calculated or not.
 	 * @return string
@@ -257,7 +257,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Does a child have a weight set?
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return boolean
 	 */
@@ -270,7 +270,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Does a child have dimensions set?
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return boolean
 	 */
@@ -283,7 +283,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Is a child in stock?
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return boolean
 	 */
@@ -300,7 +300,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product
 	 * @param string $previous_name
 	 * @param string $new_name
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function sync_variation_names( &$product, $previous_name = '', $new_name = '' ) {
 		if ( $new_name !== $previous_name ) {
@@ -325,7 +325,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * This sync function syncs downwards (from parent to child) when the variable product is saved.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function sync_managed_variation_stock_status( &$product ) {
 		global $wpdb;
@@ -351,7 +351,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Sync variable product prices with children.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product|int $product
 	 */
 	public function sync_price( &$product ) {
@@ -378,7 +378,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Sync variable product stock status with children.
 	 * Change does not persist unless saved by caller.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product|int $product
 	 */
 	public function sync_stock_status( &$product ) {
@@ -388,7 +388,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Delete variations of a product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $product_id
 	 * @param $force_delete False to trash.
 	 */

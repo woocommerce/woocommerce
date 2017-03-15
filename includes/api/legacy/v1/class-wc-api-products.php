@@ -8,7 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
- * @version     2.7
+ * @version     3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

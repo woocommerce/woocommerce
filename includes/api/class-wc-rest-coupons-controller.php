@@ -119,7 +119,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -192,7 +192,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Prepare a single coupon output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -221,7 +221,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */

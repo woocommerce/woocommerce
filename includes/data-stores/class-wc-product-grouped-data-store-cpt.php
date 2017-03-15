@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Grouped Product Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -17,7 +17,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 *
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
@@ -40,7 +40,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	/**
 	 * Handle updated meta props after updating meta data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Product $product
 	 */
 	protected function handle_updated_props( &$product ) {
@@ -66,7 +66,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	/**
 	 * Sync grouped product prices with children.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product|int $product
 	 */
 	public function sync_price( &$product ) {

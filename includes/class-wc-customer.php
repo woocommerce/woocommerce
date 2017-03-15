@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
  * @class    WC_Customer
- * @version  2.7.0
+ * @version  3.0.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
@@ -120,7 +120,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -131,7 +131,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Delete a customer and reassign posts..
 	 *
 	 * @param int $reassign Reassign posts and links to new User ID.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function delete_and_reassign( $reassign = null ) {
@@ -165,7 +165,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return this customer's avatar.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_avatar_url() {
@@ -247,7 +247,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get if customer is VAT exempt?
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function get_is_vat_exempt() {
@@ -294,7 +294,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's password.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $password
 	 * @throws WC_Data_Exception
 	 */
@@ -341,7 +341,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the customer's username.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -352,7 +352,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the customer's email.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -363,7 +363,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's first name.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -374,7 +374,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's last name.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -385,7 +385,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's user role.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -396,7 +396,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the date this customer was created.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
@@ -407,7 +407,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the date this customer was last updated.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
@@ -418,7 +418,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Gets a prop for a getter method.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
 	 * @param  string $address billing or shipping.
 	 * @param  string $context What the value is for. Valid values are view and edit.
@@ -660,7 +660,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Is the user a paying customer?
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return bool
 	 */
@@ -677,7 +677,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's username.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $username
 	 * @throws WC_Data_Exception
 	 */
@@ -688,7 +688,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's email.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -702,7 +702,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's first name.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $first_name
 	 * @throws WC_Data_Exception
 	 */
@@ -713,7 +713,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's last name.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $last_name
 	 * @throws WC_Data_Exception
 	 */
@@ -724,7 +724,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's user role(s).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param mixed $role
 	 * @throws WC_Data_Exception
 	 */
@@ -740,7 +740,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
@@ -751,7 +751,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
@@ -762,7 +762,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer address to match shop base address.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_to_base() {
@@ -773,7 +773,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer shipping address to base address.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_to_base() {
@@ -820,7 +820,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Sets a prop for a setter method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value Value of the prop.
@@ -1063,7 +1063,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set if the user a paying customer.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param bool $is_paying_customer
 	 * @throws WC_Data_Exception
 	 */

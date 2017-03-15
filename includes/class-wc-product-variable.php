@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The WooCommerce product class handles individual product data.
  *
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -177,7 +177,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_children( $visible_only = '' ) {
 		if ( is_bool( $visible_only ) ) {
-			wc_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
+			wc_deprecated_argument( 'visible_only', '3.0', 'WC_Product_Variable::get_visible_children' );
 			return $visible_only ? $this->get_visible_children() : $this->get_children();
 		}
 		return apply_filters( 'woocommerce_get_children', $this->children, $this, false );
@@ -186,7 +186,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return a products child ids - visible only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array Children ids
 	 */
 	public function get_visible_children() {
@@ -300,7 +300,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of variation attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_variation_attributes( $variation_attributes ) {
@@ -310,7 +310,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of children for the product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_children( $children ) {
@@ -320,7 +320,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of visible children only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_visible_children( $visible_children ) {
@@ -335,7 +335,7 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Ensure properties are set correctly before save.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function validate_props() {
 		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
@@ -360,7 +360,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function save() {
 		$this->validate_props();
@@ -497,7 +497,7 @@ class WC_Product_Variable extends WC_Product {
 				$product->save();
 			}
 
-			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product' );
+			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '3.0', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product' );
 		}
 		return $product;
 	}

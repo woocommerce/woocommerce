@@ -24,8 +24,8 @@ class WC_Order extends WC_Abstract_Order {
 	protected $status_transition = false;
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -195,7 +195,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Save data to the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return int order ID
 	 */
 	public function save() {
@@ -217,7 +217,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set order status.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual_update is this a manual order status change?
@@ -252,7 +252,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * This ensures the data exists even if a gateway does not use the
 	 * `payment_complete` method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
@@ -265,7 +265,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * Sets the date completed variable when transitioning to completed status.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
@@ -328,7 +328,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get all class data in array format.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -382,7 +382,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get order key.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -422,7 +422,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Gets a prop for a getter method.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
 	 * @param  string $address billing or shipping.
 	 * @param  string $context What the value is for. Valid values are view and edit.
@@ -730,7 +730,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_date_paid( $context = 'view' ) {
 		$date_paid = $this->get_prop( 'date_paid', $context );
 
-		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '2.7', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}
@@ -818,7 +818,7 @@ class WC_Order extends WC_Abstract_Order {
 	|
 	| Functions for setting order data. These should not update anything in the
 	| database itself and should only change what is stored in the class
-	| object. However, for backwards compatibility pre 2.7.0 some of these
+	| object. However, for backwards compatibility pre 3.0.0 some of these
 	| setters may handle both.
 	|
 	*/
@@ -826,7 +826,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Sets a prop for a setter method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value Value of the prop.
@@ -1082,7 +1082,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 *
-	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
+	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 3.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method( $payment_method = '' ) {
@@ -1294,7 +1294,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function needs_processing() {

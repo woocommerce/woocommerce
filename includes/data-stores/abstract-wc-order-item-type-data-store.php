@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Data Store
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -30,7 +30,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Create a new order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function create( &$item ) {
@@ -53,7 +53,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Update a order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function update( &$item ) {
@@ -76,7 +76,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Remove an order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -93,7 +93,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Read a order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function read( &$item ) {
@@ -119,7 +119,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * Saves an item's data to the database / item meta.
 	 * Ran after both create and update, so $item->get_id() will be set.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {}

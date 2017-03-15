@@ -3,7 +3,7 @@
 /**
  * Classes WC_Deprecated_Filter_Hooks & WC_Deprecated_Action_Hooks.
  * @package WooCommerce\Tests\Util
- * @since 2.7
+ * @since 3.0
  */
 class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
@@ -46,7 +46,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test the deprecated hook handlers are initialized
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_deprecated_hook_handlers_exist() {
 		$this->assertArrayHasKey( 'filters', $this->handlers );
@@ -59,7 +59,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test the get_old_hooks method
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_get_old_hooks() {
 		$old_filters = $this->handlers['filters']->get_old_hooks( 'woocommerce_structured_data_order' );
@@ -72,7 +72,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test the hook_in method
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_hook_in() {
 		$this->assertTrue( (bool) has_filter( 'woocommerce_structured_data_order', array( $this->handlers['filters'], 'maybe_handle_deprecated_hook' ) ) );
@@ -82,7 +82,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test the handle_deprecated_hook method in the filters handler
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_handle_deprecated_hook_filter() {
 		$new_hook = 'wc_new_hook';
@@ -99,7 +99,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test the handle_deprecated_hook method in the actions handler
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_handle_deprecated_hook_action() {
 		$new_hook = 'wc_new_hook';
@@ -117,7 +117,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test a complete deprecated filter mapping
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_filter_handler() {
 		$test_width = 1;
@@ -131,7 +131,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	/**
 	 * Test a complete deprecated action mapping
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	function test_action_handler() {
 		$test_product = WC_Helper_Product::create_simple_product();

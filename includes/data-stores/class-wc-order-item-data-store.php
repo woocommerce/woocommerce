@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Data Store: Misc Order Item Data functions.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -15,7 +15,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Add an order item to an order.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int   $order_id
 	 * @param  array $item. order_item_name and order_item_type.
 	 * @return int Order Item ID
@@ -42,7 +42,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Update an order item.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int   $item_id
 	 * @param  array $item. order_item_name or order_item_type.
 	 * @return boolean
@@ -55,7 +55,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Delete an order item.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int   $item_id
 	 */
 	public function delete_order_item( $item_id ) {
@@ -67,7 +67,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Update term meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $item_id
 	 * @param  string $meta_key
 	 * @param  mixed  $meta_value
@@ -81,7 +81,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Add term meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $item_id
 	 * @param  string $meta_key
 	 * @param  mixed  $meta_value
@@ -95,7 +95,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Delete term meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $item_id
 	 * @param  string $meta_key
 	 * @param  string $meta_value (default: '')
@@ -109,7 +109,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Get term meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $item_id
 	 * @param  string $key
 	 * @param  bool   $single (default: true)
@@ -122,7 +122,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Get order ID by order item ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  int $item_id
 	 * @return int
 	 */
@@ -137,7 +137,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Get the order item type based on Item ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $item_id
 	 * @return string
 	 */

@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Structured data's handler and generator using JSON-LD format.
  *
  * @class   WC_Structured_Data
- * @since   2.7.0
- * @version 2.7.0
+ * @since   3.0.0
+ * @version 3.0.0
  * @package WooCommerce/Classes
  * @author  Clément Cazaud <opportus@gmail.com>
  */

@@ -3,14 +3,14 @@
 /**
  * Class WC_Tests_Logger
  * @package WooCommerce\Tests\Log
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 
 	/**
 	 * Test get_level_severity().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_level_severity() {
 		$this->assertEquals( 0,   WC_Log_Levels::get_level_severity( 'unrecognized level' ) );
@@ -27,7 +27,7 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 	/**
 	 * Test get_severity_level().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_severity_level() {
 		$this->assertFalse( WC_Log_Levels::get_severity_level( 0 ) );
@@ -45,7 +45,7 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 	/**
 	 * Test is_valid_level().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_is_valid_level() {
 		$this->assertFalse( WC_Log_Levels::is_valid_level( 'unrecognized level' ) );

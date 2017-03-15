@@ -2,13 +2,13 @@
 /**
  * Data Functions.
  * @package WooCommerce\Tests\Product
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product setters and getters
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_getters_and_setters() {
 		global $wpdb;
@@ -81,7 +81,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product term setters and getters
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_term_getters_and_setters() {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
@@ -107,7 +107,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test grouped product setters and getters
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	 public function test_grouped_product_getters_and_setters() {
 		$getters_and_setters = array(
@@ -123,7 +123,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test external product setters and getters
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	 public function test_external_product_getters_and_setters() {
 		 $time = time();

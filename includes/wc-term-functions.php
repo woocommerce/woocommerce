@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Helper to get cached object terms and filter by field using wp_list_pluck().
  * Works as a cached alternative for wp_get_post_terms() and wp_get_object_terms().
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  int    $object_id Object ID.
  * @param  string $taxonomy  Taxonomy slug.
  * @param  string $field     Field name.
@@ -43,7 +43,7 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
  * Cached version of wp_get_post_terms().
  * This is a private function (internal use ONLY).
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  int    $product_id Product ID.
  * @param  string $taxonomy   Taxonomy slug.
  * @param  array  $args       Query arguments.
@@ -735,7 +735,7 @@ add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
 /**
  * Get full list of product visibilty term ids.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @return int[]
  */
 function wc_get_product_visibility_term_ids() {

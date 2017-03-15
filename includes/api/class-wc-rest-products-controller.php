@@ -127,7 +127,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -138,7 +138,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Prepare a single product output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -178,7 +178,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -1115,12 +1115,12 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 2.7.
+	 * @param int        $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() not requires a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -1163,7 +1163,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product      $product Product instance.
 	 * @param WP_REST_Request $request Request data.

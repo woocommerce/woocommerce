@@ -120,7 +120,7 @@ class WC_Post_Data {
 	/**
 	 * Handle type changes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @param string $from
 	 * @param string $to

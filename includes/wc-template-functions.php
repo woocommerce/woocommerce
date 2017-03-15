@@ -97,7 +97,7 @@ add_action( 'template_redirect', 'wc_prevent_endpoint_indexing' );
 /**
  * Remove adjacent_posts_rel_link_wp_head - pointless for products.
  *
- * @since 2.7.0
+ * @since 3.0.0
  */
 function wc_prevent_adjacent_posts_rel_link_wp_head() {
 	if ( is_singular( 'product' ) ) {
@@ -352,7 +352,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 
 /**
  * Outputs hidden form inputs for each query string variable.
- * @since 2.7.0
+ * @since 3.0.0
  * @param array $values Name value pairs.
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
@@ -2351,7 +2351,7 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 	 * Get HTML for the order items to be shown in emails.
 	 * @param WC_Order $order
 	 * @param array $args
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function wc_get_email_order_items( $order, $args = array() ) {
 		ob_start();
@@ -2386,7 +2386,7 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Item $item
 	 * @param  array   $args
 	 * @return string|void
@@ -2424,7 +2424,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
 	 * Display item download links.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Item $item
 	 * @param  array   $args
 	 * @return string|void
@@ -2483,7 +2483,7 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 
 /**
  * Outputs a list of product attributes for a product.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product
  */
 function wc_display_product_attributes( $product ) {
@@ -2496,7 +2496,7 @@ function wc_display_product_attributes( $product ) {
 
 /**
  * Get HTML to show product stock.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product
  * @return string
  */
@@ -2528,7 +2528,7 @@ function wc_get_stock_html( $product ) {
 /**
  * Get HTML for ratings.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  float $rating Rating being shown.
  * @return string
  */
@@ -2546,7 +2546,7 @@ function wc_get_rating_html( $rating ) {
 /**
  * Returns a 'from' prefix if you want to show where prices start at.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @return string
  */
 function wc_get_price_html_from_text() {

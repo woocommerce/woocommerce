@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -443,7 +443,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get product menu order.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product Product instance.
 	 * @return int
 	 */
@@ -823,7 +823,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param int $product_id
 	 * @param array $images
 	 * @throws WC_REST_Exception
@@ -947,12 +947,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 2.7.
+	 * @param int        $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() not requires a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -995,7 +995,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product      $product Product instance.
 	 * @param WP_REST_Request $request Request data.
@@ -1055,7 +1055,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product meta.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
 	 * @return bool

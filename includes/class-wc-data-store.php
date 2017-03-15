@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Data Store.
  *
- * @since    2.7.0
- * @version  2.7.0
+ * @since    3.0.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -93,7 +93,7 @@ class WC_Data_Store {
 	 * Loads a data store.
 	 *
 	 * @param string $object_type Name of object.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public static function load( $object_type ) {
 		return new WC_Data_Store( $object_type );
@@ -102,7 +102,7 @@ class WC_Data_Store {
 	/**
 	 * Returns the class name of the current data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_current_class_name() {
@@ -112,7 +112,7 @@ class WC_Data_Store {
 	/**
 	 * Reads an object from the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function read( &$data ) {
@@ -122,7 +122,7 @@ class WC_Data_Store {
 	/**
 	 * Create an object in the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function create( &$data ) {
@@ -132,7 +132,7 @@ class WC_Data_Store {
 	/**
 	 * Update an object in the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function update( &$data ) {
@@ -142,7 +142,7 @@ class WC_Data_Store {
 	/**
 	 * Delete an object from the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -155,7 +155,7 @@ class WC_Data_Store {
 	 * some helper methods for increasing or decreasing usage). This passes
 	 * through to the instance if that function exists.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param $method
 	 * @param $parameters
 	 */

@@ -5,7 +5,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ global $product;
 <div class="woocommerce-variation-add-to-cart variations_button">
 	<?php
 		/**
-		 * @since 2.7.0.
+		 * @since 3.0.0.
 		 */
 		do_action( 'woocommerce_before_add_to_cart_quantity' );
 
@@ -25,7 +25,7 @@ global $product;
 		) );
 
 		/**
-		 * @since 2.7.0.
+		 * @since 3.0.0.
 		 */
 		do_action( 'woocommerce_after_add_to_cart_quantity' );
 	?>

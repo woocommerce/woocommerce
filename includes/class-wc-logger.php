@@ -55,7 +55,7 @@ class WC_Logger implements WC_Logger_Interface {
 						__( 'The provided handler <code>%s</code> does not implement WC_Log_Handler_Interface.', 'woocommerce' ),
 						esc_html( is_object( $handler ) ? get_class( $handler ) : $handler )
 					),
-					'2.7'
+					'3.0'
 				);
 			}
 		}
@@ -98,7 +98,7 @@ class WC_Logger implements WC_Logger_Interface {
 	public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 		$this->log( $level, $message, array( 'source' => $handle, '_legacy' => true ) );
-		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '2.7', 'This action has been deprecated with no alternative.' );
+		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '3.0', 'This action has been deprecated with no alternative.' );
 		return true;
 	}
 
@@ -119,7 +119,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '2.7' );
+			wc_doing_it_wrong( __METHOD__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '3.0' );
 		}
 
 		if ( $this->should_handle( $level ) ) {
@@ -229,14 +229,14 @@ class WC_Logger implements WC_Logger_Interface {
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param string $handle
 	 *
 	 * @return bool
 	 */
 	public function clear( $handle ) {
-		wc_deprecated_function( 'WC_Logger::clear', '2.7', 'WC_Log_Handler_File::clear' );
+		wc_deprecated_function( 'WC_Logger::clear', '3.0', 'WC_Log_Handler_File::clear' );
 		$handler = new WC_Log_Handler_File();
 		return $handler->clear( $handle );
 	}

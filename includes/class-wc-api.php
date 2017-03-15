@@ -275,7 +275,7 @@ class WC_API extends WC_Legacy_API {
 
 	/**
 	 * Register WC settings from WP-API to the REST API.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 */
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();

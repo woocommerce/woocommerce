@@ -337,7 +337,7 @@ class WC_Comments {
 	/**
 	 * Get product rating for a product. Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return float
 	 */
@@ -371,7 +371,7 @@ class WC_Comments {
 	/**
 	 * Get product review count for a product (not replies). Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return int
 	 */
@@ -396,7 +396,7 @@ class WC_Comments {
 	/**
 	 * Get product rating count for a product. Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return array of integers
 	 */

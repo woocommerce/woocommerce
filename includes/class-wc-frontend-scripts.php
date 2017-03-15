@@ -49,7 +49,7 @@ class WC_Frontend_Scripts {
 	/**
 	 * Add theme support for default WP themes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public static function add_default_theme_support() {
 		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {

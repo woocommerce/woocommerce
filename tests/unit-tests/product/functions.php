@@ -10,7 +10,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Tests wc_get_products().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_products() {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
@@ -313,7 +313,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_min_max_price_meta_query()
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query( array( 'min_price' => 10, 'max_price' => 100 ) );
@@ -329,7 +329,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_product_force_unique_sku
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_product_force_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();

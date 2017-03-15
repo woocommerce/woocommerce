@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
  *
- * @since  2.7.0 this supports set, increase and decrease.
+ * @since  3.0.0 this supports set, increase and decrease.
  * @param  int|WC_Product $product
  * @param  int|null $stock_quantity
  * @param  string $operation set, increase and decrease.
@@ -65,7 +65,7 @@ function wc_update_product_stock_status( $product_id, $status ) {
 
 /**
  * When a payment is complete, we can reduce stock levels for items within an order.
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_maybe_reduce_stock_levels( $order_id ) {
@@ -79,7 +79,7 @@ add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 
 /**
  * Reduce stock levels for items within an order.
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_reduce_stock_levels( $order_id ) {

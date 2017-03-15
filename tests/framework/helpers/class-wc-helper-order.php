@@ -31,7 +31,7 @@ class WC_Helper_Order {
 	 * Create a order.
 	 *
 	 * @since   2.4
-	 * @version 2.7 New parameter $product.
+	 * @version 3.0 New parameter $product.
 	 *
 	 * @param int        $customer_id
 	 * @param WC_Product $product

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -508,7 +508,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Create base WC Order object.
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param array $data
 	 * @return WC_Order
 	 */
@@ -771,7 +771,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		/**
 		 * Action hook to adjust item before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
