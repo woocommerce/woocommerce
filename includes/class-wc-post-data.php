@@ -254,7 +254,10 @@ class WC_Post_Data {
 					$data['post_parent'] = 0;
 				break;
 			}
+		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
+			$data['post_title'] = 'AUTO-DRAFT';
 		}
+
 		return $data;
 	}
 
