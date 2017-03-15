@@ -477,7 +477,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 62, count( $properties ) );
+		$this->assertEquals( 66, count( $properties ) );
 		$product->delete( true );
 	}
 

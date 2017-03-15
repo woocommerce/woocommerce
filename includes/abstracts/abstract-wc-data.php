@@ -563,7 +563,7 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 */
 	public function apply_changes() {
-		$this->data = array_replace_recursive( $this->data, $this->changes );
+		$this->data    = array_replace_recursive( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
@@ -592,13 +592,38 @@ abstract class WC_Data {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {
-			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
+
 		return $value;
+	}
+
+	/**
+	 * Sets a date prop whilst handling formatting and datatime objects.
+	 *
+	 * @since 2.7.0
+	 * @param string $prop Name of prop to set.
+	 * @param string|integer $value Value of the prop.
+	 */
+	protected function set_date_prop( $prop, $value ) {
+		try {
+			if ( empty( $value ) ) {
+				$datetime = null;
+			} elseif ( is_a( $value, 'WC_DateTime' ) ) {
+				$datetime = $value;
+			} elseif ( is_numeric( $value ) ) {
+				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			} else {
+				$datetime = new WC_DateTime( $value, new DateTimeZone( wc_timezone_string() ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			}
+			$this->set_prop( $prop, $datetime );
+		} catch ( Exception $e ) {}
 	}
 
 	/**

@@ -128,14 +128,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	}
 
 	/**
-	 * Prepare a single coupon output for response.
+	 * Get formatted item data.
 	 *
-	 * @since  2.7.0
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @since  3.0.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
 	 */
-	public function prepare_object_for_response( $object, $request ) {
+	protected function get_formatted_item_data( $object ) {
 		$data = $object->get_data();
 
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
@@ -149,7 +148,9 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
+			$datetime 	  			= $data[ $key ];
+			$data[ $key ] 			= wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] 	= wc_rest_prepare_date_response( $datetime );
 		}
 
 		// Format null values.
@@ -157,6 +158,47 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 			$data[ $key ] = $data[ $key ] ? $data[ $key ] : null;
 		}
 
+		return array(
+			'id'                          => $object->get_id(),
+			'code'                        => $data['code'],
+			'amount'                      => $data['amount'],
+			'date_created'                => $data['date_created'],
+			'date_created_gmt'            => $data['date_created_gmt'],
+			'date_modified'               => $data['date_modified'],
+			'date_modified_gmt'           => $data['date_modified_gmt'],
+			'discount_type'               => $data['discount_type'],
+			'description'                 => $data['description'],
+			'date_expires'                => $data['date_expires'],
+			'date_expires_gmt'            => $data['date_expires_gmt'],
+			'usage_count'                 => $data['usage_count'],
+			'individual_use'              => $data['individual_use'],
+			'product_ids'                 => $data['product_ids'],
+			'excluded_product_ids'        => $data['excluded_product_ids'],
+			'usage_limit'                 => $data['usage_limit'],
+			'usage_limit_per_user'        => $data['usage_limit_per_user'],
+			'limit_usage_to_x_items'      => $data['limit_usage_to_x_items'],
+			'free_shipping'               => $data['free_shipping'],
+			'product_categories'          => $data['product_categories'],
+			'excluded_product_categories' => $data['excluded_product_categories'],
+			'exclude_sale_items'          => $data['exclude_sale_items'],
+			'minimum_amount'              => $data['minimum_amount'],
+			'maximum_amount'              => $data['maximum_amount'],
+			'email_restrictions'          => $data['email_restrictions'],
+			'used_by'                     => $data['used_by'],
+			'meta_data'                   => $data['meta_data'],
+		);
+	}
+
+	/**
+	 * Prepare a single coupon output for response.
+	 *
+	 * @since  2.7.0
+	 * @param  WC_Data         $object  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$data 	  = $this->get_formatted_item_data( $object );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
@@ -307,8 +349,20 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( 'The date the coupon was created, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the coupon was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( 'The date the coupon was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -326,7 +380,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_expires' => array(
-					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
+					'description' => __( "The date the coupon expires, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_expires_gmt' => array(
+					'description' => __( "The date the coupon expires, as GMT.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

@@ -371,14 +371,14 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp' ) );
+	$download->set_access_granted( current_time( 'timestamp', true ) );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
 
 	if ( $expiry > 0 ) {
-		$order_completed_date = date_i18n( "Y-m-d", $order->get_date_completed() );
-		$download->set_access_expires( strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+		$from_date = $order->get_date_completed() ? $order->get_date_completed()->format( 'Y-m-d' ) : current_time( 'mysql', true );
+		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
 	return $download->save();

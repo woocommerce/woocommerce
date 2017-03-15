@@ -411,7 +411,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 38, count( $properties ) );
+		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		wp_delete_post( $order->get_id(), true );
 	}

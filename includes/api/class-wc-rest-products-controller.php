@@ -369,26 +369,30 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 
 			$images[] = array(
-				'id'            => (int) $attachment_id,
-				'date_created'  => wc_rest_prepare_date_response( $attachment_post->post_date_gmt ),
-				'date_modified' => wc_rest_prepare_date_response( $attachment_post->post_modified_gmt ),
-				'src'           => current( $attachment ),
-				'name'          => get_the_title( $attachment_id ),
-				'alt'           => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'position'      => (int) $position,
+				'id'                => (int) $attachment_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
+				'src'               => current( $attachment ),
+				'name'              => get_the_title( $attachment_id ),
+				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+				'position'          => (int) $position,
 			);
 		}
 
 		// Set a placeholder image if the product has no images set.
 		if ( empty( $images ) ) {
 			$images[] = array(
-				'id'            => 0,
-				'date_created'  => wc_rest_prepare_date_response( current_time( 'mysql' ) ), // Default to now.
-				'date_modified' => wc_rest_prepare_date_response( current_time( 'mysql' ) ),
-				'src'           => wc_placeholder_img_src(),
-				'name'          => __( 'Placeholder', 'woocommerce' ),
-				'alt'           => __( 'Placeholder', 'woocommerce' ),
-				'position'      => 0,
+				'id'                => 0,
+				'date_created'      => wc_rest_prepare_date_response( current_time( 'mysql' ), false ), // Default to now.
+				'date_created_gmt'  => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ), // Default to now.
+				'date_modified'     => wc_rest_prepare_date_response( current_time( 'mysql' ), false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ),
+				'src'               => wc_placeholder_img_src(),
+				'name'              => __( 'Placeholder', 'woocommerce' ),
+				'alt'               => __( 'Placeholder', 'woocommerce' ),
+				'position'          => 0,
 			);
 		}
 
@@ -528,8 +532,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'name'                  => $product->get_name(),
 			'slug'                  => $product->get_slug(),
 			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified() ),
+			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created(), false ),
+			'date_created_gmt'      => wc_rest_prepare_date_response( $product->get_date_created() ),
+			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
+			'date_modified_gmt'     => wc_rest_prepare_date_response( $product->get_date_modified() ),
 			'type'                  => $product->get_type(),
 			'status'                => $product->get_status(),
 			'featured'              => $product->is_featured(),
@@ -540,8 +546,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
 			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'date_on_sale_from'     => $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from() ) : '',
-			'date_on_sale_to'       => $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to() ) : '',
+			'date_on_sale_from'     => wc_rest_prepare_date_response( $product->get_date_on_sale_from(), false ),
+			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from() ),
+			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to(), false ),
+			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to() ),
 			'price_html'            => $product->get_price_html(),
 			'on_sale'               => $product->is_on_sale(),
 			'purchasable'           => $product->is_purchasable(),
@@ -811,8 +819,16 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				$product->set_date_on_sale_from( $request['date_on_sale_from'] );
 			}
 
+			if ( isset( $request['date_on_sale_from_gmt'] ) ) {
+				$product->set_date_on_sale_from( $request['date_on_sale_from_gmt'] ? strtotime( $request['date_on_sale_from_gmt'] ) : null );
+			}
+
 			if ( isset( $request['date_on_sale_to'] ) ) {
 				$product->set_date_on_sale_to( $request['date_on_sale_to'] );
+			}
+
+			if ( isset( $request['date_on_sale_to_gmt'] ) ) {
+				$product->set_date_on_sale_to( $request['date_on_sale_to_gmt'] ? strtotime( $request['date_on_sale_to_gmt'] ) : null );
 			}
 		}
 
@@ -1354,8 +1370,20 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( "The date the product was created, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( "The date the product was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1419,13 +1447,23 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from' => array(
-					'description' => __( 'Start date of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_from_gmt' => array(
+					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_to_gmt' => array(
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'price_html' => array(
@@ -1753,8 +1791,20 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
+							'date_created_gmt' => array(
+								'description' => __( "The date the image was created, as GMT.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
 							'date_modified' => array(
 								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'date_modified_gmt' => array(
+								'description' => __( "The date the image was last modified, as GMT.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,

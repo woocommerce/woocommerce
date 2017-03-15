@@ -97,10 +97,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_created() {
 		$object = new WC_Order();
 		$object->set_date_created( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_created() );
+		$this->assertEquals( '1481500800', $object->get_date_created()->getOffsetTimestamp() );
 
 		$object->set_date_created( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_created() );
+		$this->assertEquals( 1481500800, $object->get_date_created()->getTimestamp() );
 	}
 
 	/**
@@ -109,10 +109,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_modified() {
 		$object = new WC_Order();
 		$object->set_date_modified( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_modified() );
+		$this->assertEquals( '1481500800', $object->get_date_modified()->getOffsetTimestamp() );
 
 		$object->set_date_modified( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_modified() );
+		$this->assertEquals( 1481500800, $object->get_date_modified()->getTimestamp() );
 	}
 
 	/**
@@ -1060,10 +1060,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_completed() {
 		$object = new WC_Order();
 		$object->set_date_completed( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_completed() );
+		$this->assertEquals( '1481500800', $object->get_date_completed()->getOffsetTimestamp() );
 
 		$object->set_date_completed( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_completed() );
+		$this->assertEquals( 1481500800, $object->get_date_completed()->getTimestamp() );
 	}
 
 	/**
@@ -1073,10 +1073,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$set_to = 'PayPal';
 		$object->set_date_paid( '2016-12-12' );
-		$this->assertEquals( 1481500800, $object->get_date_paid() );
+		$this->assertEquals( 1481500800, $object->get_date_paid()->getOffsetTimestamp() );
 
 		$object->set_date_paid( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_paid() );
+		$this->assertEquals( 1481500800, $object->get_date_paid()->getTimestamp() );
 	}
 
 	/**

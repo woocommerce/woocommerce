@@ -47,8 +47,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected $data = array(
 		'name'               => '',
 		'slug'               => '',
-		'date_created'       => '',
-		'date_modified'      => '',
+		'date_created'       => null,
+		'date_modified'      => null,
 		'status'             => false,
 		'featured'           => false,
 		'catalog_visibility' => 'visible',
@@ -58,8 +58,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
-		'date_on_sale_from'  => '',
-		'date_on_sale_to'    => '',
+		'date_on_sale_from'  => null,
+		'date_on_sale_to'    => null,
 		'total_sales'        => '0',
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
@@ -174,7 +174,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 2.7.0
 	 * @param  string $context
-	 * @return string Timestamp.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
 		return $this->get_prop( 'date_created', $context );
@@ -185,7 +185,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 2.7.0
 	 * @param  string $context
-	 * @return string Timestamp.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
 		return $this->get_prop( 'date_modified', $context );
@@ -291,7 +291,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 2.7.0
 	 * @param  string $context
-	 * @return string
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_on_sale_from( $context = 'view' ) {
 		return $this->get_prop( 'date_on_sale_from', $context );
@@ -302,7 +302,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 2.7.0
 	 * @param  string $context
-	 * @return string
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_on_sale_to( $context = 'view' ) {
 		return $this->get_prop( 'date_on_sale_to', $context );
@@ -708,20 +708,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set product created date.
 	 *
 	 * @since 2.7.0
-	 * @param string $timestamp Timestamp.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_date_created( $timestamp ) {
-		$this->set_prop( 'date_created', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
 	}
 
 	/**
 	 * Set product modified date.
 	 *
 	 * @since 2.7.0
-	 * @param string $timestamp Timestamp.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_date_modified( $timestamp ) {
-		$this->set_prop( 'date_modified', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
 	}
 
 	/**
@@ -829,20 +829,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set date on sale from.
 	 *
 	 * @since 2.7.0
-	 * @param string $timestamp Sale from date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_date_on_sale_from( $timestamp ) {
-		$this->set_prop( 'date_on_sale_from', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_on_sale_from( $date = null ) {
+		$this->set_date_prop( 'date_on_sale_from', $date );
 	}
 
 	/**
 	 * Set date on sale to.
 	 *
 	 * @since 2.7.0
-	 * @param string $timestamp Sale to date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_date_on_sale_to( $timestamp ) {
-		$this->set_prop( 'date_on_sale_to', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_on_sale_to( $date = null ) {
+		$this->set_date_prop( 'date_on_sale_to', $date );
 	}
 
 	/**
@@ -1409,17 +1409,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
 			$on_sale = true;
 
-			if ( '' !== (string) $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context ) > strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > time() ) {
 				$on_sale = false;
 			}
 
-			if ( '' !== (string) $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < time() ) {
 				$on_sale = false;
 			}
 		} else {
 			$on_sale = false;
 		}
-
 		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 

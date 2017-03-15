@@ -50,12 +50,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function create( &$order ) {
 		$order->set_version( WC_VERSION );
-		$order->set_date_created( current_time( 'timestamp' ) );
+		$order->set_date_created( current_time( 'timestamp', true ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			'post_type'     => $order->get_type( 'edit' ),
 			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 			'ping_status'   => 'closed',
@@ -89,10 +89,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$id = $order->get_id();
 		$order->set_props( array(
 			'parent_id'          => $post_object->post_parent,
-			'date_created'       => $post_object->post_date,
-			'date_modified'      => $post_object->post_modified,
+			'date_created'       => strtotime( $post_object->post_date_gmt ),
+			'date_modified'      => strtotime( $post_object->post_modified_gmt ),
 			'status'             => $post_object->post_status,
 		) );
+
 		$this->read_order_data( $order, $post_object );
 		$order->read_meta_data();
 		$order->set_object_read( true );
@@ -120,13 +121,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
 				'ID'                => $order->get_id(),
-				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 				'post_parent'       => $order->get_parent_id(),
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
 		}
 		$this->update_post_meta( $order );

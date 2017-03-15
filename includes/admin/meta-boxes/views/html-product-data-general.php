@@ -37,8 +37,8 @@
 				'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
 			) );
 
-			$sale_price_dates_from = ( $date = $product_object->get_date_on_sale_from( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
-			$sale_price_dates_to   = ( $date = $product_object->get_date_on_sale_to( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
+			$sale_price_dates_from = $product_object->get_date_on_sale_from( 'edit' ) && ( $date = $product_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
+			$sale_price_dates_to   = $product_object->get_date_on_sale_to( 'edit' ) && ( $date = $product_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
 
 			echo '<p class="form-field sale_price_dates_fields">
 					<label for="_sale_price_dates_from">' . __( 'Sale price dates', 'woocommerce' ) . '</label>

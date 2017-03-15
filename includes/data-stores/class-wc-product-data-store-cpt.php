@@ -77,7 +77,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp' ) );
+			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
@@ -91,8 +91,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created() ),
-			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created() ) ),
+			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'  => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -130,8 +130,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->set_props( array(
 			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
-			'date_created'      => $post_object->post_date,
-			'date_modified'     => $post_object->post_modified,
+			'date_created'      => strtotime( $post_object->post_date_gmt ),
+			'date_modified'     => strtotime( $post_object->post_modified_gmt ),
 			'status'            => $post_object->post_status,
 			'description'       => $post_object->post_content,
 			'short_description' => $post_object->post_excerpt,
@@ -159,7 +159,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
+				'ID'                => $product->get_id(),
 				'post_content'      => $product->get_description( 'edit' ),
 				'post_excerpt'      => $product->get_short_description( 'edit' ),
 				'post_title'        => $product->get_name( 'edit' ),
@@ -167,10 +167,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'comment_status'    => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ),
-				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' ) ) ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
@@ -450,6 +450,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						delete_post_meta( $product->get_id(), '_thumbnail_id' );
 					}
 					$updated = true;
+					break;
+				case 'date_on_sale_from' :
+				case 'date_on_sale_to' :
+					$updated = update_post_meta( $product->get_id(), $meta_key, $value ? $value->getTimestamp() : '' );
 					break;
 				default :
 					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
@@ -811,7 +815,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value > 0
 			AND postmeta.meta_value < %s
 			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp' ) ) );
+		", current_time( 'timestamp', true ) ) );
 	}
 
 	/**
@@ -832,7 +836,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value > 0
 			AND postmeta.meta_value < %s
 			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp' ) ) );
+		", current_time( 'timestamp', true ) ) );
 	}
 
 	/**

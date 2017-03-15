@@ -407,13 +407,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		wc_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.7' );
 
 		if ( 'completed_date' === $key ) {
-			return date( 'Y-m-d H:i:s', $this->get_date_completed() );
+			return $this->get_date_completed() ? gmdate( 'Y-m-d H:i:s', $this->get_date_completed()->getOffsetTimestamp() ) : '';
 		} elseif ( 'paid_date' === $key ) {
-			return $this->get_date_paid();
+			return $this->get_date_paid() ? gmdate( 'Y-m-d H:i:s', $this->get_date_paid()->getOffsetTimestamp() ) : '';
 		} elseif ( 'modified_date' === $key ) {
-			return date( 'Y-m-d H:i:s', $this->get_date_modified() );
+			return $this->get_date_modified() ? gmdate( 'Y-m-d H:i:s', $this->get_date_modified()->getOffsetTimestamp() ) : '';
 		} elseif ( 'order_date' === $key ) {
-			return date( 'Y-m-d H:i:s', $this->get_date_created() );
+			return $this->get_date_created() ? gmdate( 'Y-m-d H:i:s', $this->get_date_created()->getOffsetTimestamp() ) : '';
 		} elseif ( 'id' === $key ) {
 			return $this->get_id();
 		} elseif ( 'post' === $key ) {

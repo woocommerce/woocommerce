@@ -21,7 +21,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $username, $customer->get_username() );
 		$this->assertNotEquals( 0, $customer->get_id() );
-		$this->assertEquals( strtotime( $wp_user->user_registered ), $customer->get_date_created() );
+		$this->assertEquals( strtotime( $wp_user->user_registered ), $customer->get_date_created()->getOffsetTimestamp() );
 	}
 
 	/**
@@ -178,7 +178,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_setters_and_getters() {
 		$time = time();
-		$standard_getters_and_setters = array(
+		$setters = array(
 			'username' => 'test',
 			'email' => 'test@woo.local',
 			'first_name' => 'Bob',
@@ -205,10 +205,22 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		);
 
 		$customer = new WC_Customer;
-		foreach ( $standard_getters_and_setters as $function => $value ) {
-			$customer->{"set_{$function}"}( $value );
-			$this->assertEquals( $value, $customer->{"get_{$function}"}(), $function );
+
+		foreach ( $setters as $method => $value ) {
+			$customer->{"set_{$method}"}( $value );
 		}
+
+		$getters = array();
+
+		foreach ( $setters as $method => $value ) {
+			$getters[ $method ] = $customer->{"get_{$method}"}();
+		}
+
+		// Get timestamps from date_created and date_modified.
+		$getters['date_created'] = $getters['date_created']->getOffsetTimestamp();
+		$getters['date_modified'] = $getters['date_modified']->getOffsetTimestamp();
+
+		$this->assertEquals( $setters, $getters );
 	}
 
 	/**
@@ -274,7 +286,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$user = new WP_User( $customer_id );
-		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created() );
+		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created()->getOffsetTimestamp() );
 	}
 
 	/**
@@ -286,11 +298,11 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$last = get_user_meta( $customer_id, 'last_update', true );
 		sleep( 1 );
-		$this->assertEquals( $last, $customer->get_date_modified() );
+		$this->assertEquals( $last, $customer->get_date_modified()->getOffsetTimestamp() );
 		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();
 		$update = get_user_meta( $customer_id, 'last_update', true );
-		$this->assertEquals( $update, $customer->get_date_modified() );
+		$this->assertEquals( $update, $customer->get_date_modified()->getOffsetTimestamp() );
 		$this->assertNotEquals( $update, $last );
 	}
 
