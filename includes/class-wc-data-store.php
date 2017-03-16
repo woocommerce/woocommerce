@@ -103,7 +103,7 @@ class WC_Data_Store {
 	 * @return array
 	 */
 	public function __sleep() {
-		return [ 'object_type' ];
+		return array( 'object_type' );
 	}
 
 	/**
