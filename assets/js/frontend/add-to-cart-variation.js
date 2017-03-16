@@ -553,7 +553,8 @@
 			$product_gallery  = $product.find( '.images' ),
 			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
 			$product_img_wrap = $product_gallery.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
-			$product_img      = $product_img_wrap.find( '.wp-post-image' );
+			$product_img      = $product_img_wrap.find( '.wp-post-image' ),
+			$product_link     = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image.src );
@@ -568,6 +569,7 @@
 			$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
 			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
+			$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'width' );
@@ -581,6 +583,7 @@
 			$product_img.wc_reset_variation_attr( 'data-large_image_height' );
 			$product_img_wrap.wc_reset_variation_attr( 'data-thumb' );
 			$gallery_img.wc_reset_variation_attr( 'src' );
+			$product_link.wc_reset_variation_attr( 'href' );
 		}
 
 		window.setTimeout( function() {
