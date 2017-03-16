@@ -333,7 +333,7 @@ class WC_REST_Authentication {
 		$base_request_uri = rawurlencode( get_home_url( null, $request_path ) );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature.
-		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );
 		unset( $params['oauth_signature'] );
 
 		// Sort parameters.
