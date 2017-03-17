@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woothemes/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce from our Github repo. This will replace your installed version of WooCommerce with the latest tagged release on Github - use with caution, and not on production sites. You have been warned.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Mike Jolley
  * Author URI: http://woothemes.com/
  * Requires at least: 4.2
@@ -60,7 +60,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 				'plugin_file'        => 'woocommerce/woocommerce.php',
 				'slug'               => 'woocommerce',
 				'proper_folder_name' => 'woocommerce',
-				'api_url'            => 'https://api.github.com/repos/woothemes/woocommerce',
+				'api_url'            => 'https://api.github.com/repos/woocommerce/woocommerce',
 				'github_url'         => 'https://github.com/woothemes/woocommerce',
 				'requires'           => '4.4',
 				'tested'             => '4.4'
@@ -71,7 +71,8 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		}
 
 		/**
-		 * Update args
+		 * Update args.
+		 *
 		 * @return array
 		 */
 		public function set_update_args() {
