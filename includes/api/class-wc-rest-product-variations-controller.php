@@ -217,8 +217,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
 
-
-
 	/**
 	 * Prepare objects query.
 	 *
