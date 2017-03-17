@@ -51,6 +51,7 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 
 /**
  * Define a constant if it is not already defined.
