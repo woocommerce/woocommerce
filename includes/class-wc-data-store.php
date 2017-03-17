@@ -98,7 +98,7 @@ class WC_Data_Store {
 	}
 
 	/**
-	 * Only store the object type to avoid serializing the data store instance
+	 * Only store the object type to avoid serializing the data store instance.
 	 *
 	 * @return array
 	 */
@@ -107,7 +107,7 @@ class WC_Data_Store {
 	}
 
 	/**
-	 * Re-run the constructor with the object type
+	 * Re-run the constructor with the object type.
 	 */
 	public function __wakeup() {
 		$this->__construct( $this->object_type );
