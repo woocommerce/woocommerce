@@ -6,16 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (coupon).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooCommerce
  */
 class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -172,13 +172,5 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 			return true;
 		}
 		return parent::offsetExists( $offset );
-	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
-	 */
-	protected function get_internal_meta_keys() {
-		return array( 'discount_amount', 'discount_amount_tax' );
 	}
 }

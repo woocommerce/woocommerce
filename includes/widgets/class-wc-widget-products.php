@@ -89,10 +89,11 @@ class WC_Widget_Products extends WC_Widget {
 	 * @return WP_Query
 	 */
 	public function get_products( $args, $instance ) {
-		$number  = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$show    = ! empty( $instance['show'] ) ? sanitize_title( $instance['show'] ) : $this->settings['show']['std'];
-		$orderby = ! empty( $instance['orderby'] ) ? sanitize_title( $instance['orderby'] ) : $this->settings['orderby']['std'];
-		$order   = ! empty( $instance['order'] ) ? sanitize_title( $instance['order'] ) : $this->settings['order']['std'];
+		$number                      = ! empty( $instance['number'] ) ? absint( $instance['number'] )           : $this->settings['number']['std'];
+		$show                        = ! empty( $instance['show'] ) ? sanitize_title( $instance['show'] )       : $this->settings['show']['std'];
+		$orderby                     = ! empty( $instance['orderby'] ) ? sanitize_title( $instance['orderby'] ) : $this->settings['orderby']['std'];
+		$order                       = ! empty( $instance['order'] ) ? sanitize_title( $instance['order'] )     : $this->settings['order']['std'];
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		$query_args = array(
 			'posts_per_page' => $number,
@@ -101,10 +102,18 @@ class WC_Widget_Products extends WC_Widget {
 			'no_found_rows'  => 1,
 			'order'          => $order,
 			'meta_query'     => array(),
+			'tax_query'      => array(
+				'relation' => 'AND',
+			),
 		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => is_search() ? $product_visibility_term_ids['exclude-from-search'] : $product_visibility_term_ids['exclude-from-catalog'],
+				'operator' => 'NOT IN',
+			);
 			$query_args['post_parent']  = 0;
 		}
 
@@ -117,14 +126,23 @@ class WC_Widget_Products extends WC_Widget {
 			);
 		}
 
-		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-		$query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['outofstock'],
+					'operator' => 'NOT IN',
+				),
+			);
+		}
 
 		switch ( $show ) {
 			case 'featured' :
-				$query_args['meta_query'][] = array(
-					'key'   => '_featured',
-					'value' => 'yes',
+				$query_args['tax_query'][] = array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['featured'],
 				);
 				break;
 			case 'onsale' :

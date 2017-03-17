@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Data Store
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -30,7 +30,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Create a new order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function create( &$item ) {
@@ -45,6 +45,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$this->save_item_data( $item );
 		$item->save_meta_data();
 		$item->apply_changes();
+		$this->clear_cache( $item );
 
 		do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
@@ -52,7 +53,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Update a order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function update( &$item ) {
@@ -67,6 +68,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$this->save_item_data( $item );
 		$item->save_meta_data();
 		$item->apply_changes();
+		$this->clear_cache( $item );
 
 		do_action( 'woocommerce_update_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
@@ -74,7 +76,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Remove an order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -91,7 +93,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Read a order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function read( &$item ) {
@@ -99,7 +101,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		$item->set_defaults();
 
-		$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+		$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
 
 		if ( ! $data ) {
 			throw new Exception( __( 'Invalid order item.', 'woocommerce' ) );
@@ -111,15 +113,21 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			'type'     => $data->order_item_type,
 		) );
 		$item->read_meta_data();
-		$item->set_object_read( true );
 	}
 
 	/**
 	 * Saves an item's data to the database / item meta.
 	 * Ran after both create and update, so $item->get_id() will be set.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {}
+
+	/**
+	 * Clear meta cachce.
+	 */
+	public function clear_cache( &$item ) {
+		wp_cache_delete( 'object-' . $item->get_id(), 'order-items' );
+	}
 }

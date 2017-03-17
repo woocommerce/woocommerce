@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $attribute->get_variation() ) {
 					continue;
 				}
-				$selected_value = isset( $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ 'attribute_' . sanitize_title( $attribute->get_name() ) ] : '';
+				$selected_value = isset( $attribute_values[ sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ sanitize_title( $attribute->get_name() ) ] : '';
 				?>
 				<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
 					<option value=""><?php
 						/* translators: %s: attribute label */
-						echo sprintf( __( 'Any %s&hellip;', 'woocommerce' ), esc_html( wc_attribute_label( $attribute->get_name() ) ) );
+						printf( esc_html__( 'Any %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) );
 						?></option>
 					<?php if ( $attribute->is_taxonomy() ) : ?>
 						<?php foreach ( $attribute->get_terms() as $option ) : ?>
@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? __( 'Remove this image', 'woocommerce' ) : __( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
+				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
 					<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 				</a>
 			</p>
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'name'          => "variable_sku[{$loop}]",
 						'value'         => $variation_object->get_sku( 'edit' ),
 						'placeholder'   => $variation_object->get_sku(),
-						'label'         => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>',
+						'label'         => '<abbr title="' . esc_attr__( 'Stock Keeping Unit', 'woocommerce' ) . '">' . esc_html__( 'SKU', 'woocommerce' ) . '</abbr>',
 						'desc_tip'      => true,
 						'description'   => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ),
 						'wrapper_class' => 'form-row form-row-last',
@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p class="form-row form-row-full options">
 				<label>
 					<?php _e( 'Enabled', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_object->get_status( 'edit' ), 'publish' ); ?> />
+					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ) ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
 					<?php _e( 'Downloadable', 'woocommerce' ); ?>:
@@ -107,6 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'label'         => $label,
 						'data_type'     => 'price',
 						'wrapper_class' => 'form-row form-row-first',
+						'placeholder'   => __( 'Variation price (required)', 'woocommerce' ),
 					) );
 
 					/* translators: %s: currency symbol */
@@ -114,15 +115,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 						__( 'Sale price (%s)', 'woocommerce' ),
 						get_woocommerce_currency_symbol()
 					);
-
-					woocommerce_wp_text_input( array(
-						'id'            => "variable_regular_price_{$loop}",
-						'name'          => "variable_regular_price[{$loop}]",
-						'value'         => wc_format_localized_price( $variation_object->get_regular_price( 'edit' ) ),
-						'label'         => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-						'data_type'     => 'price',
-						'wrapper_class' => 'form-row form-row-first',
-					) );
 
 					woocommerce_wp_text_input( array(
 						'id'            => "variable_sale_price{$loop}",
@@ -133,17 +125,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'wrapper_class' => 'form-row form-row-last',
 					) );
 
-					$sale_price_dates_from = ( $date = $variation_object->get_date_on_sale_from( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
-					$sale_price_dates_to   = ( $date = $variation_object->get_date_on_sale_to( 'edit' ) ) ? date_i18n( 'Y-m-d', $date ) : '';
+					$sale_price_dates_from = $variation_object->get_date_on_sale_from( 'edit' ) && ( $date = $variation_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
+					$sale_price_dates_to   = $variation_object->get_date_on_sale_to( 'edit' ) && ( $date = $variation_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
 
 					echo '<div class="form-field sale_price_dates_fields hidden">
 						<p class="form-row form-row-first">
 							<label>' . __( 'Sale start date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . $loop . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . $loop . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 						</p>
 						<p class="form-row form-row-last">
 							<label>' . __( 'Sale end date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 						</p>
 					</div>';
 

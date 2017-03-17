@@ -3,7 +3,7 @@
  * Tests for the Shipping Methods REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Shipping_Methods extends WC_REST_Unit_Test_Case {
@@ -22,23 +22,23 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-        $this->assertArrayHasKey( '/wc/v1/shipping_methods', $routes );
-		$this->assertArrayHasKey( '/wc/v1/shipping_methods/(?P<id>[\w-]+)', $routes );
+        $this->assertArrayHasKey( '/wc/v2/shipping_methods', $routes );
+		$this->assertArrayHasKey( '/wc/v2/shipping_methods/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
 	 * Test getting all shipping methods.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_methods() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping_methods' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping_methods' ) );
 		$methods = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -49,12 +49,12 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 			'_links' => array(
 				'self'       => array(
 					array(
-						'href' => rest_url( '/wc/v1/shipping_methods/free_shipping' ),
+						'href' => rest_url( '/wc/v2/shipping_methods/free_shipping' ),
 					),
 				),
 				'collection' => array(
 					array(
-						'href' => rest_url( '/wc/v1/shipping_methods' ),
+						'href' => rest_url( '/wc/v2/shipping_methods' ),
 					),
 				),
 			),
@@ -64,23 +64,23 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure shipping methods cannot viewed without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_methods_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping_methods' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping_methods' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Tests getting a single shipping method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping_methods/local_pickup' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping_methods/local_pickup' ) );
 		$method   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -94,35 +94,35 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single shipping method without the correct permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method_without_permission() {
 		wp_set_current_user( 0 );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping_methods/local_pickup' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping_methods/local_pickup' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Tests getting a shipping method with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method_invalid_id() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping_methods/fake_method' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping_methods/fake_method' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
 	 * Test the shipping method schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_shipping_method_schema() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/shipping_methods' );
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/shipping_methods' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Admin_Reports' ) ) :
+if ( ! class_exists( 'WC_Admin_Reports', false ) ) :
 
 /**
  * WC_Admin_Reports Class.

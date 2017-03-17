@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.7.0
+ * @version  3.0.0
  * @extends  WC_Widget
  */
 class WC_Widget_Top_Rated_Products extends WC_Widget {
@@ -70,9 +70,9 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 			'meta_key'       => '_wc_average_rating',
 			'orderby'        => 'meta_value_num',
 			'order'          => 'DESC',
+			'meta_query'     => WC()->query->get_meta_query(),
+			'tax_query'      => WC()->query->get_tax_query(),
 		);
-
-		$query_args['meta_query'] = WC()->query->get_meta_query();
 
 		$r = new WP_Query( $query_args );
 

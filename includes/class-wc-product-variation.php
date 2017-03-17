@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -27,20 +27,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'sku'            => '',
-		'manage_stock'   => '',
-		'stock_quantity' => '',
-		'weight'         => '',
-		'length'         => '',
-		'width'          => '',
-		'height'         => '',
-		'tax_class'      => '',
+		'title'             => '',
+		'sku'               => '',
+		'manage_stock'      => '',
+		'backorders'        => '',
+		'stock_quantity'    => '',
+		'weight'            => '',
+		'length'            => '',
+		'width'             => '',
+		'height'            => '',
+		'tax_class'         => '',
+		'shipping_class_id' => '',
+		'image_id'          => '',
 	);
 
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -57,7 +61,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * If the stock level comes from another product ID.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return int
 	 */
 	public function get_stock_managed_by_id() {
@@ -65,12 +69,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get variation attribute values.
+	 * Get the product's title. For variations this is the parent product name.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
+	}
+
+	/**
+	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
 	public function get_variation_attributes() {
-		return $this->get_attributes();
+		$attributes           = $this->get_attributes();
+		$variation_attributes = array();
+		foreach ( $attributes as $key => $value ) {
+			$variation_attributes[ 'attribute_' . $key ] = $value;
+		}
+		return $variation_attributes;
 	}
 
 	/**
@@ -87,9 +105,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
 			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
 			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
-			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_attributes() );
+			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
 		} else {
-			$data = $this->get_attributes();
+			$data         = $this->get_variation_attributes();
 		}
 
 		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
@@ -101,7 +119,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		$variation_data = array_map( 'urlencode', $this->get_attributes() );
+		$variation_data = array_map( 'urlencode', $this->get_variation_attributes() );
 		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
@@ -205,7 +223,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Return if product manage stock.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return boolean|string true, false, or parent.
 	 */
@@ -239,7 +257,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get backorders.
 	 *
 	 * @param  string $context
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string yes no or notify
 	 */
 	public function get_backorders( $context = 'view' ) {
@@ -255,7 +273,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -269,6 +287,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return $image_id;
 	}
 
+	/**
+	 * Get shipping class ID.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_shipping_class_id( $context = 'view' ) {
+		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
+
+		if ( 'view' === $context && ! $shipping_class_id ) {
+			$shipping_class_id = $this->parent_data['shipping_class_id'];
+		}
+
+		return $shipping_class_id;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -278,11 +313,21 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Set the parent data array for this variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_parent_data( $parent_data ) {
 		$this->parent_data = $parent_data;
+	}
+
+	/**
+	 * Get the parent data array for this variation.
+	 *
+	 * @since  3.0.0
+	 * @return array
+	 */
+	public function get_parent_data() {
+		return $this->parent_data;
 	}
 
 	/**
@@ -295,9 +340,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$attributes     = array();
 
 		foreach ( $raw_attributes as $key => $value ) {
-			// Add attribute prefix which meta gets stored with.
-			if ( 0 !== strpos( $key, 'attribute_' ) ) {
-				$key = 'attribute_' . $key;
+			// Remove attribute prefix which meta gets stored with.
+			if ( 0 === strpos( $key, 'attribute_' ) ) {
+				$key = substr( $key, 10 );
 			}
 			$attributes[ $key ] = $value;
 		}
@@ -305,7 +350,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Returns array of attribute name value pairs.
+	 * Returns array of attribute name value pairs. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @param  string $context
 	 * @return array

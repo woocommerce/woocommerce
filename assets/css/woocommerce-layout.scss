@@ -15,6 +15,14 @@
  */
 .woocommerce, .woocommerce-page {
 
+	.woocommerce-message,
+	.woocommerce-error,
+	.woocommerce-info {
+		.button {
+			float: right;
+		}
+	}
+
 	/**
 	 * General layout styles
 	 */
@@ -296,9 +304,16 @@
 
 		.form-row-first,
 		.form-row-last {
-			float: left;
 			width: 47%;
 			overflow: visible;
+		}
+
+		.form-row-first {
+			float: left;
+
+			/*rtl:raw:
+			float: right;
+			*/
 		}
 
 		.form-row-last {
@@ -537,15 +552,6 @@
 				float: right;
 			}
 			.col-2 {
-				float: left;
-			}
-		}
-		form {
-			.form-row-first,
-			.form-row-last {
-				float: right;
-			}
-			.form-row-last {
 				float: left;
 			}
 		}

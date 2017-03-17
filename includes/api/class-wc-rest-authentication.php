@@ -18,7 +18,7 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
-		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 100 );
+		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ) );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 	}
@@ -140,7 +140,7 @@ class WC_REST_Authentication {
 	/**
 	 * Parse the Authorization header into parameters.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param string $header Authorization header value (not including "Authorization: " prefix).
 	 *
@@ -173,7 +173,7 @@ class WC_REST_Authentication {
 	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
 	 * `getallheaders` here to try and grab it out instead.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return string Authorization header if set.
 	 */
@@ -198,7 +198,7 @@ class WC_REST_Authentication {
 	/**
 	 * Get oAuth parameters from $_GET, $_POST or request header.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return array|WP_Error
 	 */
@@ -333,7 +333,7 @@ class WC_REST_Authentication {
 		$base_request_uri = rawurlencode( get_home_url( null, $request_path ) );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature.
-		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );
 		unset( $params['oauth_signature'] );
 
 		// Sort parameters.

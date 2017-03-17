@@ -93,7 +93,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$post = get_post( $request['id'] );
+		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
@@ -109,7 +109,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$post = get_post( $request['id'] );
+		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
@@ -324,9 +324,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			$args['date_query'][0]['after'] = $request['after'];
 		}
 
-		if ( is_array( $request['filter'] ) ) {
-			$args = array_merge( $args, $request['filter'] );
-			unset( $args['filter'] );
+		if ( 'wc/v1' === $this->namespace ) {
+			if ( is_array( $request['filter'] ) ) {
+				$args = array_merge( $args, $request['filter'] );
+				unset( $args['filter'] );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -625,16 +627,22 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'        => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
-			'type'               => 'array',
-			'default'            => array(),
-			'sanitize_callback'  => 'wp_parse_id_list',
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
@@ -664,24 +672,34 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
+
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
 				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
+				'items'             => array(
+					'type'          => 'integer',
+				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
 				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
+				'items'             => array(
+					'type'          => 'integer',
+				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
 			);
 		}
 
-		$params['filter'] = array(
-			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
-		);
+		if ( 'wc/v1' === $this->namespace ) {
+			$params['filter'] = array(
+				'type'        => 'object',
+				'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
+			);
+		}
 
 		return $params;
 	}

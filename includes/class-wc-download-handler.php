@@ -21,7 +21,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+		if ( isset( $_GET['download_file'], $_GET['order'], $_GET['email'] ) ) {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -74,8 +74,10 @@ class WC_Download_Handler {
 		);
 		$count     = $download->get_download_count();
 		$remaining = $download->get_downloads_remaining();
-		$download->set_download_count( $count ++ );
-		$download->set_downloads_remaining( $remaining -- );
+		$download->set_download_count( $count + 1 );
+		if ( '' !== $remaining ) {
+			$download->set_downloads_remaining( $remaining - 1 );
+		}
 		$download->save();
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
@@ -98,7 +100,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_downloads_remaining( $download ) {
-		if ( 0 >= $download->get_downloads_remaining() ) {
+		if ( '' !== $download->get_downloads_remaining() && 0 >= $download->get_downloads_remaining() ) {
 			self::download_error( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ), '', 403 );
 		}
 	}
@@ -109,7 +111,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_download_expiry( $download ) {
-		if ( $download->get_access_expires() > 0 && $download->get_access_expires() < strtotime( 'midnight', current_time( 'timestamp' ) ) ) {
+		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', current_time( 'timestamp', true ) ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
@@ -392,7 +394,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

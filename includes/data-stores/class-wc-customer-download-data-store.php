@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Download Data Store.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -20,17 +20,22 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function create( &$download ) {
 		global $wpdb;
 
+		// Always set a access granted date.
+		if ( is_null( $download->get_access_granted( 'edit' ) ) ) {
+			$download->set_access_granted( current_time( 'timestamp', true ) );
+		}
+
 		$data = array(
-			'download_id'         => $download->get_download_id(),
-			'product_id'          => $download->get_product_id(),
-			'user_id'             => $download->get_user_id(),
-			'user_email'          => $download->get_user_email(),
-			'order_id'            => $download->get_order_id(),
-			'order_key'           => $download->get_order_key(),
-			'downloads_remaining' => $download->get_downloads_remaining(),
-			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
-			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : 'NULL',
+			'download_id'         => $download->get_download_id( 'edit' ),
+			'product_id'          => $download->get_product_id( 'edit' ),
+			'user_id'             => $download->get_user_id( 'edit' ),
+			'user_email'          => $download->get_user_email( 'edit' ),
+			'order_id'            => $download->get_order_id( 'edit' ),
+			'order_key'           => $download->get_order_key( 'edit' ),
+			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
+			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+			'download_count'      => $download->get_download_count( 'edit' ),
+			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 		);
 
 		$format = array(
@@ -87,16 +92,16 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$data = array(
-			'download_id'         => $download->get_download_id(),
-			'product_id'          => $download->get_product_id(),
-			'user_id'             => $download->get_user_id(),
-			'user_email'          => $download->get_user_email(),
-			'order_id'            => $download->get_order_id(),
-			'order_key'           => $download->get_order_key(),
-			'downloads_remaining' => $download->get_downloads_remaining(),
-			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
-			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : 'NULL',
+			'download_id'         => $download->get_download_id( 'edit' ),
+			'product_id'          => $download->get_product_id( 'edit' ),
+			'user_id'             => $download->get_user_id( 'edit' ),
+			'user_email'          => $download->get_user_email( 'edit' ),
+			'order_id'            => $download->get_order_id( 'edit' ),
+			'order_key'           => $download->get_order_key( 'edit' ),
+			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
+			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+			'download_count'      => $download->get_download_count( 'edit' ),
+			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 		);
 
 		$format = array(

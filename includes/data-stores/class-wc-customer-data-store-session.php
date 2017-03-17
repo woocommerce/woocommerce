@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store which stores the data in session.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -83,7 +83,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Read customer data from the session.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 */
 	public function read( &$customer ) {
@@ -111,7 +111,6 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	protected function set_defaults( &$customer ) {
 		$default = wc_get_customer_default_location();
 
-		// Set some defaults if some of our values are still not set.
 		if ( ! $customer->get_billing_country() ) {
 			$customer->set_billing_country( $default['country'] );
 		}
@@ -127,12 +126,17 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		if ( ! $customer->get_shipping_state() ) {
 			$customer->set_shipping_state( $customer->get_billing_state() );
 		}
+
+		if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+			$current_user = wp_get_current_user();
+			$customer->set_billing_email( $current_user->user_email );
+		}
 	}
 
 	/**
 	 * Deletes a customer from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -143,7 +147,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Gets the customers last order.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return WC_Order|false
 	 */
@@ -154,7 +158,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Return the number of orders this customer has.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return integer
 	 */
@@ -165,7 +169,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Return how much money this customer has spent.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return float
 	 */

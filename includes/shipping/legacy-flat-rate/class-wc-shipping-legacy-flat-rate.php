@@ -130,7 +130,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$atts = shortcode_atts( array(
 			'percent' => '',
 			'min_fee' => '',
-		), $atts );
+		), $atts, 'fee' );
 
 		$calculated_fee = 0;
 

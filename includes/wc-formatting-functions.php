@@ -16,17 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Converts a string (e.g. yes or no) to a bool.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || '1' === $string );
+	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string );
 }
 
 /**
  * Converts a bool to a string.
- * @since 2.7.0
+ * @since 3.0.0
  * @param bool $bool
  * @return string yes or no
  */
@@ -39,7 +39,7 @@ function wc_bool_to_string( $bool ) {
 
 /**
  * Explode a string into an array by $delimiter and remove empty values.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @param string $delimiter
  * @return array
@@ -253,9 +253,10 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
-	// Remove locale from string
+	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
 	}
 
 	if ( false !== $dp ) {
@@ -313,7 +314,7 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $value
  * @return string
  */
@@ -337,7 +338,7 @@ function wc_clean( $var ) {
 
 /**
  * Run wc_clean over posted textarea but maintain line breaks.
- * @since  2.7.0
+ * @since  3.0.0
  * @param string $var
  * @return string
  */
@@ -581,7 +582,7 @@ function wc_timezone_string() {
 /**
  * Callback which can flatten post meta (gets the first value if it's an array).
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $value
  * @return mixed
  */
@@ -592,7 +593,7 @@ function wc_flatten_meta_callback( $value ) {
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @return string
@@ -614,7 +615,7 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -643,7 +644,7 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 if ( ! function_exists( 'wc_hex_lighter' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours.
+	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -673,7 +674,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 if ( ! function_exists( 'wc_light_or_dark' ) ) {
 
 	/**
-	 * Detect if we should use a light or dark colour on a background colour.
+	 * Detect if we should use a light or dark color on a background color.
 	 *
 	 * @param mixed $color
 	 * @param string $dark (default: '#000000')
@@ -757,7 +758,8 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	return preg_replace( '/[\s\-]/', '', trim( strtoupper( $postcode ) ) );
+	$postcode = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $postcode ) : strtoupper( $postcode );
+	return preg_replace( '/[\s\-]/', '', trim( $postcode ) );
 }
 
 /**
@@ -922,26 +924,27 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 
 /**
  * Format the stock amount ready for display based on settings.
- * @since  2.7.0
- * @param  int  $stock_amount
- * @param  boolean $show_backorder_notification
+ *
+ * @since  3.0.0
+ * @param  WC_Product $product Product object for which the stock you need to format.
  * @return string
  */
-function wc_format_stock_for_display( $stock_amount, $show_backorder_notification = false ) {
-	$display = __( 'In stock', 'woocommerce' );
+function wc_format_stock_for_display( $product ) {
+	$display      = __( 'In stock', 'woocommerce' );
+	$stock_amount = $product->get_stock_quantity();
 
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount' :
 			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $stock_amount );
+				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 			}
 		break;
 		case '' :
-			$display = sprintf( __( '%s in stock', 'woocommerce' ), $stock_amount );
+			$display = sprintf( __( '%s in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 		break;
 	}
 
-	if ( $show_backorder_notification ) {
+	if ( $product->backorders_allowed() && $product->backorders_require_notification() ) {
 		$display .= ' ' . __( '(can be backordered)', 'woocommerce' );
 	}
 
@@ -949,8 +952,20 @@ function wc_format_stock_for_display( $stock_amount, $show_backorder_notificatio
 }
 
 /**
+ * Format the stock quantity ready for display.
+ *
+ * @since  3.0.0
+ * @param  int  $stock_quantity
+ * @param  WC_Product $product so that we can pass through the filters.
+ * @return string
+ */
+function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
+	return apply_filters( 'woocommerce_format_stock_quantity', $stock_quantity, $product );
+}
+
+/**
  * Format a sale price for display.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $regular_price
  * @param  string $sale_price
  * @return string
@@ -974,7 +989,7 @@ function wc_format_price_range( $from, $to ) {
 /**
  * Format a weight for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  float $weight Weight.
  * @return string
  */
@@ -993,7 +1008,7 @@ function wc_format_weight( $weight ) {
 /**
  * Format dimensions for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $dimensions Array of dimensions.
  * @return string
  */
@@ -1007,4 +1022,22 @@ function wc_format_dimensions( $dimensions ) {
 	}
 
 	return apply_filters( 'woocommerce_format_dimensions', $dimension_string, $dimensions );
+}
+
+/**
+ * Format a date for output.
+ *
+ * @since  3.0.0
+ * @param  WC_DateTime $date
+ * @param  string $format Defaults to the wc_date_format function if not set.
+ * @return string
+ */
+function wc_format_datetime( $date, $format = '' ) {
+	if ( ! $format ) {
+		$format = wc_date_format();
+	}
+	if ( ! is_a( $date, 'WC_DateTime' ) ) {
+		return '';
+	}
+	return $date->date_i18n( $format );
 }

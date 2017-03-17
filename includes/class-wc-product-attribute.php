@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Attributes can be global (taxonomy based) or local to the product itself.
  * Uses ArrayAccess to be BW compatible with previous ways of reading attributes.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -18,13 +18,14 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Data array.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
 		'id'        => 0,
 		'name'      => '',
-		'options'   => '',
+		'options'   => array(),
 		'position'  => 0,
 		'visible'   => false,
 		'variation' => false,
@@ -32,6 +33,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Return if this attribute is a taxonomy.
+	 *
 	 * @return boolean
 	 */
 	public function is_taxonomy() {
@@ -40,6 +42,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get taxonomy name if applicable.
+	 *
 	 * @return string
 	 */
 	public function get_taxonomy() {
@@ -48,6 +51,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get taxonomy object.
+	 *
 	 * @return array|null
 	 */
 	public function get_taxonomy_object() {
@@ -57,19 +61,25 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Gets terms from the stored options.
+	 *
 	 * @return array|null
 	 */
 	public function get_terms() {
 		if ( ! $this->is_taxonomy() || ! taxonomy_exists( $this->get_name() ) ) {
 			return null;
 		}
+		$terms = array();
 		foreach ( $this->get_options() as $option ) {
 			if ( is_int( $option ) ) {
 				$term = get_term_by( 'id', $option, $this->get_name() );
 			} else {
 				$term = get_term_by( 'name', $option, $this->get_name() );
-			}
 
+				if ( ! $term || is_wp_error( $term ) ) {
+					$new_term = wp_insert_term( $option, $this->get_name() );
+					$term     = get_term_by( 'id', $new_term['term_id'], $this->get_name() );
+				}
+			}
 			if ( $term && ! is_wp_error( $term ) ) {
 				$terms[] = $term;
 			}
@@ -78,7 +88,36 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
+	 * Gets slugs from the stored options, or just the string if text based.
+	 *
+	 * @return array
+	 */
+	public function get_slugs() {
+		if ( ! $this->is_taxonomy() || ! taxonomy_exists( $this->get_name() ) ) {
+			return $this->get_options();
+		}
+		$terms = array();
+		foreach ( $this->get_options() as $option ) {
+			if ( is_int( $option ) ) {
+				$term = get_term_by( 'id', $option, $this->get_name() );
+			} else {
+				$term = get_term_by( 'name', $option, $this->get_name() );
+
+				if ( ! $term || is_wp_error( $term ) ) {
+					$new_term = wp_insert_term( $option, $this->get_name() );
+					$term     = get_term_by( 'id', $new_term['term_id'], $this->get_name() );
+				}
+			}
+			if ( $term && ! is_wp_error( $term ) ) {
+				$terms[] = $term->slug;
+			}
+		}
+		return $terms;
+	}
+
+	/**
 	 * Returns all data for this object.
+	 *
 	 * @return array
 	 */
 	public function get_data() {
@@ -98,6 +137,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set ID (this is the attribute ID).
+	 *
 	 * @param int $value
 	 */
 	public function set_id( $value ) {
@@ -106,6 +146,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set name (this is the attribute name or taxonomy).
+	 *
 	 * @param int $value
 	 */
 	public function set_name( $value ) {
@@ -114,6 +155,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set options.
+	 *
 	 * @param array $value
 	 */
 	public function set_options( $value ) {
@@ -122,6 +164,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set position.
+	 *
 	 * @param int $value
 	 */
 	public function set_position( $value ) {
@@ -130,6 +173,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set if visible.
+	 *
 	 * @param bool $value
 	 */
 	public function set_visible( $value ) {
@@ -138,6 +182,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Set if variation.
+	 *
 	 * @param bool $value
 	 */
 	public function set_variation( $value ) {
@@ -152,6 +197,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get the ID.
+	 *
 	 * @return int
 	 */
 	public function get_id() {
@@ -160,6 +206,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get name.
+	 *
 	 * @return int
 	 */
 	public function get_name() {
@@ -168,6 +215,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get options.
+	 *
 	 * @return array
 	 */
 	public function get_options() {
@@ -176,6 +224,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get position.
+	 *
 	 * @return int
 	 */
 	public function get_position() {
@@ -184,6 +233,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get if visible.
+	 *
 	 * @return bool
 	 */
 	public function get_visible() {
@@ -192,6 +242,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 	/**
 	 * Get if variation.
+	 *
 	 * @return bool
 	 */
 	public function get_variation() {
@@ -205,7 +256,8 @@ class WC_Product_Attribute implements ArrayAccess {
 	*/
 
 	/**
-	 * offsetGet
+	 * offsetGet.
+	 *
 	 * @param string $offset
 	 * @return mixed
 	 */
@@ -233,7 +285,8 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * offsetSet
+	 * offsetSet.
+	 *
 	 * @param string $offset
 	 * @param mixed $value
 	 */
@@ -257,13 +310,15 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * offsetUnset
+	 * offsetUnset.
+	 *
 	 * @param string $offset
 	 */
 	public function offsetUnset( $offset ) {}
 
 	/**
-	 * offsetExists
+	 * offsetExists.
+	 *
 	 * @param string $offset
 	 * @return bool
 	 */

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,6 +27,12 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)/locations', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -49,7 +55,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$zone = $this->get_zone( $request['id'] );
+		$zone = $this->get_zone( (int) $request['id'] );
 
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
@@ -74,7 +80,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_items( $request ) {
-		$zone = $this->get_zone( $request['id'] );
+		$zone = $this->get_zone( (int) $request['id'] );
 
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
@@ -111,7 +117,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $request['id'] ) );
+		$response->add_links( $this->prepare_links( (int) $request['id'] ) );
 
 		return $response;
 	}

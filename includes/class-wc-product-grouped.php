@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
  * @class 		WC_Product_Grouped
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -24,15 +24,6 @@ class WC_Product_Grouped extends WC_Product {
 	protected $extra_data = array(
 		'children' => array(),
 	);
-
-	/**
-	 * Merges grouped product data into the parent object.
-	 * @param int|WC_Product|object $product Product to init.
-	 */
-	public function __construct( $product = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
-		parent::__construct( $product );
-	}
 
 	/**
 	 * Get internal type.
@@ -55,12 +46,15 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
-	public function is_on_sale() {
+	public function is_on_sale( $context = 'view' ) {
 		global $wpdb;
+
 		$on_sale = $this->get_children() && 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
-		return apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this );
+
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
 
 	/**
@@ -105,7 +99,7 @@ class WC_Product_Grouped extends WC_Product {
 			if ( $is_free ) {
 				$price = apply_filters( 'woocommerce_grouped_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
-				$price = apply_filters( 'woocommerce_grouped_price_html', $price . wc_get_price_suffix( $this ), $this, $child_prices );
+				$price = apply_filters( 'woocommerce_grouped_price_html', $price . $this->get_price_suffix(), $this, $child_prices );
 			}
 		} else {
 			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );

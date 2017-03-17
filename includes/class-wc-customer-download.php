@@ -6,17 +6,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class for customer download permissions.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Customer_Download extends WC_Data implements ArrayAccess {
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'customer_download';
+
+	/**
 	 * Download Data array.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -27,8 +33,8 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		'order_id'            => 0,
 		'order_key'           => '',
 		'downloads_remaining' => '',
-		'access_granted'      => '',
-		'access_expires'      => '',
+		'access_granted'      => null,
+		'access_expires'      => null,
 		'download_count'      => 0,
 	);
 
@@ -58,16 +64,6 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 			$this->data_store->read( $this );
 		}
  	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_download_';
-	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -139,7 +135,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Get downloads_remaining.
 	 *
 	 * @param  string $context
-	 * @return integer
+	 * @return integer|string
 	 */
 	public function get_downloads_remaining( $context = 'view' ) {
 		return $this->get_prop( 'downloads_remaining', $context );
@@ -149,7 +145,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Get access_granted.
 	 *
 	 * @param  string $context
-	 * @return integer
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_granted( $context = 'view' ) {
 		return $this->get_prop( 'access_granted', $context );
@@ -159,7 +155,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Get access_expires.
 	 *
 	 * @param  string $context
-	 * @return integer
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_expires( $context = 'view' ) {
 		return $this->get_prop( 'access_expires', $context );
@@ -237,28 +233,28 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get downloads_remaining.
 	 *
-	 * @param int $value
+	 * @param integer|string $value
 	 */
 	public function set_downloads_remaining( $value ) {
-		$this->set_prop( 'downloads_remaining', absint( $value ) );
+		$this->set_prop( 'downloads_remaining', '' === $value ? '' : absint( $value ) );
 	}
 
 	/**
 	 * Get access_granted.
 	 *
-	 * @param int $timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_access_granted( $timestamp ) {
-		$this->set_prop( 'access_granted', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_access_granted( $date = null ) {
+		$this->set_date_prop( 'access_granted', $date );
 	}
 
 	/**
 	 * Get access_expires.
 	 *
-	 * @param int $timestamp
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-	public function set_access_expires( $timestamp ) {
-		$this->set_prop( 'access_expires', is_numeric( $timestamp ) || is_null( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_access_expires( $date = null ) {
+		$this->set_date_prop( 'access_expires', $date );
 	}
 
 	/**
@@ -278,11 +274,14 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Save data to the database.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return int Item ID
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -337,5 +336,27 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 */
 	public function offsetExists( $offset ) {
 		return in_array( $offset, array_keys( $this->data ) );
+	}
+
+	/**
+	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
+	 *
+	 * @param  string $key Key name.
+	 * @return bool
+	 */
+	public function __isset( $key ) {
+		return in_array( $offset, array_keys( $this->data ) );
+	}
+
+	/**
+	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
+	 *
+	 * @param  string $key Key name.
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		if ( is_callable( array( $this, "get_$key" ) ) ) {
+			return $this->{"get_$key"}( '' );
+		}
 	}
 }

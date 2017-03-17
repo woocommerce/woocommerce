@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Order refund. Refunds are based on orders (essentially negative orders) and
  * contain much of the same data.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
@@ -22,6 +22,12 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	protected $data_store_name = 'order-refund';
 
 	/**
+	 * This is the name of this object type.
+	 * @var string
+	 */
+	protected $object_type = 'order_refund';
+
+	/**
 	 * Stores product data.
 	 *
 	 * @var array
@@ -33,31 +39,11 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	);
 
 	/**
-	 * Extend the abstract _data properties and then read the order object.
-	 *
-	 * @param int|object|WC_Order $read Order to init.
-	 */
-	 public function __construct( $read = 0 ) {
-		$this->data = array_merge( $this->data, $this->extra_data );
-		parent::__construct( $read );
-	}
-
-	/**
 	 * Get internal type (post type.)
 	 * @return string
 	 */
 	public function get_type() {
 		return 'shop_order_refund';
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  2.7.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_get_order_refund_';
 	}
 
 	/**
@@ -103,7 +89,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Get ID of user who did the refund.
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 * @param  string $context
 	 * @return int
 	 */
@@ -159,7 +145,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		wc_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
+		wc_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '3.0' );
 		/**
 		 * Maps legacy vars to new getters.
 		 */
@@ -173,12 +159,12 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Gets an refund from the database.
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 * @param int $id (default: 0).
 	 * @return bool
 	 */
 	public function get_refund( $id = 0 ) {
-		wc_deprecated_function( 'get_refund', '2.7', 'read' );
+		wc_deprecated_function( 'get_refund', '3.0', 'read' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -191,21 +177,21 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Get refund amount.
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 * @return int|float
 	 */
 	public function get_refund_amount() {
-		wc_deprecated_function( 'get_refund_amount', '2.7', 'get_amount' );
+		wc_deprecated_function( 'get_refund_amount', '3.0', 'get_amount' );
 		return $this->get_amount();
 	}
 
 	/**
 	 * Get refund reason.
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 * @return int|float
 	 */
 	public function get_refund_reason() {
-		wc_deprecated_function( 'get_refund_reason', '2.7', 'get_reason' );
+		wc_deprecated_function( 'get_refund_reason', '3.0', 'get_reason' );
 		return $this->get_reason();
 	}
 }

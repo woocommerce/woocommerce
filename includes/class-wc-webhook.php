@@ -137,11 +137,16 @@ class WC_Webhook {
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
 			$should_deliver = false;
+		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
+			// Only deliver deleted event for coupons, orders, and products.
+			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+				$should_deliver = false;
+			}
 
-		// only deliver deleted event for coupons, orders, and products
-		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
-			$should_deliver = false;
-
+			// Check if is delivering for the correct resource.
+			if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+				$should_deliver = false;
+			}
 		} elseif ( 'delete_user' == $current_action ) {
 			$user = get_userdata( absint( $arg ) );
 
@@ -187,7 +192,6 @@ class WC_Webhook {
 	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
-
 		$payload = $this->build_payload( $arg );
 
 		// Setup request args.
@@ -229,7 +233,7 @@ class WC_Webhook {
 	/**
 	 * Get Legacy API payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -280,7 +284,7 @@ class WC_Webhook {
 	/**
 	 * Get WP API integration payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -891,7 +895,7 @@ class WC_Webhook {
 	/**
 	 * Set API version.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
@@ -910,7 +914,7 @@ class WC_Webhook {
 	/**
 	 * API version.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	public function get_api_version() {

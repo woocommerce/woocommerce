@@ -17,44 +17,66 @@ abstract class WC_Data {
 
 	/**
 	 * ID for this object.
+	 *
+	 * @since 3.0.0
 	 * @var int
 	 */
 	protected $id = 0;
 
 	/**
 	 * Core data for this object. Name value pairs (name + default value).
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array();
 
 	/**
 	 * Core data changes for this object.
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $changes = array();
 
 	/**
 	 * This is false until the object is read from the DB.
+	 *
+	 * @since 3.0.0
 	 * @var bool
 	 */
 	protected $object_read = false;
 
 	/**
+	 * This is the name of this object type.
+	 *
+	 * @since 3.0.0
+	 * @var string
+	 */
+	protected $object_type = 'data';
+
+	/**
 	 * Extra data for this object. Name value pairs (name + default value).
 	 * Used as a standard way for sub classes (like product types) to add
 	 * additional information to an inherited class.
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array();
 
 	/**
 	 * Set to _data on construct so we can track and reset data if needed.
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $default_data = array();
 
 	/**
 	 * Contains a reference to the data store for this class.
+	 *
+	 * @since 3.0.0
 	 * @var object
 	 */
 	protected $data_store;
@@ -62,28 +84,36 @@ abstract class WC_Data {
 	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
+	 *
+	 * @since 3.0.0
 	 * @var string
 	 */
 	protected $cache_group = '';
 
 	/**
 	 * Stores additonal meta data.
+	 *
+	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $meta_data = array();
+	protected $meta_data = null;
 
 	/**
 	 * Default constructor.
+	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $read = 0 ) {
+
+		$this->data = array_merge( $this->data, $this->extra_data );
+
 		$this->default_data = $this->data;
 	}
 
 	/**
 	 * Get the data store.
 	 *
-	 * @since 2.7.0
+	 * @since  3.0.0
 	 * @return object
 	 */
 	public function get_data_store() {
@@ -92,6 +122,8 @@ abstract class WC_Data {
 
 	/**
 	 * Returns the unique ID for this object.
+	 *
+	 * @since  2.6.0
 	 * @return int
 	 */
 	public function get_id() {
@@ -101,6 +133,7 @@ abstract class WC_Data {
 	/**
 	 * Delete an object, set the ID to 0, and return result.
 	 *
+	 * @since  2.6.0
 	 * @param  bool $force_delete
 	 * @return bool result
 	 */
@@ -116,10 +149,14 @@ abstract class WC_Data {
 	/**
 	 * Save should create or update based on object existance.
 	 *
+	 * @since  2.6.0
 	 * @return int
 	 */
 	public function save() {
 		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			if ( $this->get_id() ) {
 				$this->data_store->update( $this );
 			} else {
@@ -131,6 +168,8 @@ abstract class WC_Data {
 
 	/**
 	 * Change data to JSON format.
+	 *
+	 * @since  2.6.0
 	 * @return string Data in JSON format.
 	 */
 	public function __toString() {
@@ -139,6 +178,8 @@ abstract class WC_Data {
 
 	/**
 	 * Returns all data for this object.
+	 *
+	 * @since  2.6.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -148,7 +189,7 @@ abstract class WC_Data {
 	/**
 	 * Returns array of expected data keys for this object.
 	 *
-	 * @since 2.7.0
+	 * @since   3.0.0
 	 * @return array
 	 */
 	public function get_data_keys() {
@@ -158,7 +199,7 @@ abstract class WC_Data {
 	/**
 	 * Returns all "extra" data keys for an object (for sub objects like product types).
 	 *
-	 * @since 2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_extra_data_keys() {
@@ -167,6 +208,8 @@ abstract class WC_Data {
 
 	/**
 	 * Filter null meta values from array.
+	 *
+	 * @since  3.0.0
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -175,15 +218,18 @@ abstract class WC_Data {
 
 	/**
 	 * Get All Meta Data.
+	 *
 	 * @since 2.6.0
 	 * @return array
 	 */
 	public function get_meta_data() {
+		$this->maybe_read_meta_data();
 		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
 	 * Get Meta Data by Key.
+	 *
 	 * @since  2.6.0
 	 * @param  string $key
 	 * @param  bool $single return first found meta with key, or all with $key
@@ -191,8 +237,9 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
+		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
-		$value    = '';
+		$value      = $single ? '' : array();
 
 		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
@@ -210,12 +257,27 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * See if meta data exists, since get_meta always returns a '' or array().
+	 *
+	 * @since  3.0.0
+	 * @param  string $key
+	 * @return boolean
+	 */
+	public function meta_exists( $key = '' ) {
+		$this->maybe_read_meta_data();
+		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
+		return in_array( $key, $array_keys );
+	}
+
+	/**
 	 * Set all meta data from array.
+	 *
 	 * @since 2.6.0
 	 * @param array $data Key/Value pairs
 	 */
 	public function set_meta_data( $data ) {
 		if ( ! empty( $data ) && is_array( $data ) ) {
+			$this->maybe_read_meta_data();
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
@@ -231,12 +293,14 @@ abstract class WC_Data {
 
 	/**
 	 * Add meta data.
+	 *
 	 * @since 2.6.0
 	 * @param string $key Meta key
 	 * @param string $value Meta value
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
+		$this->maybe_read_meta_data();
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
@@ -248,17 +312,15 @@ abstract class WC_Data {
 
 	/**
 	 * Update meta data by key or ID, if provided.
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
 	 * @param  string $key
 	 * @param  string $value
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
-		$array_key = '';
-		if ( $meta_id ) {
-			$array_key = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id );
-		}
-		if ( $array_key ) {
+		$this->maybe_read_meta_data();
+		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
 			$this->meta_data[ current( $array_key ) ] = (object) array(
 				'id'    => $meta_id,
 				'key'   => $key,
@@ -271,12 +333,13 @@ abstract class WC_Data {
 
 	/**
 	 * Delete meta data.
+	 *
 	 * @since 2.6.0
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key );
-		if ( $array_keys ) {
+		$this->maybe_read_meta_data();
+		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key ) ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -285,12 +348,13 @@ abstract class WC_Data {
 
 	/**
 	 * Delete meta data.
+	 *
 	 * @since 2.6.0
 	 * @param int $mid Meta ID
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
-		if ( $array_keys ) {
+		$this->maybe_read_meta_data();
+		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid ) ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -298,7 +362,19 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Read meta data if null.
+	 *
+	 * @since 3.0.0
+	 */
+	protected function maybe_read_meta_data() {
+		if ( is_null( $this->meta_data ) ) {
+			$this->read_meta_data();
+		}
+	}
+
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
+	 * Uses it's own caches because get_metadata does not provide meta_ids.
 	 *
 	 * @since 2.6.0
 	 * @param bool $force_read True to force a new DB read (and update cache).
@@ -349,16 +425,18 @@ abstract class WC_Data {
 
 	/**
 	 * Update Meta Data in the database.
+	 *
 	 * @since 2.6.0
 	 */
 	public function save_meta_data() {
-		if ( ! $this->data_store ) {
+		if ( ! $this->data_store || is_null( $this->meta_data ) ) {
 			return;
 		}
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
 					$this->data_store->delete_meta( $this, $meta );
+					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
 				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
@@ -370,13 +448,14 @@ abstract class WC_Data {
 
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			wp_cache_delete( 'object-' . $this->get_id(), $this->cache_group );
 		}
-
-		$this->read_meta_data( true );
 	}
 
 	/**
 	 * Set ID.
+	 *
+	 * @since 3.0.0
 	 * @param int $id
 	 */
 	public function set_id( $id ) {
@@ -385,6 +464,8 @@ abstract class WC_Data {
 
 	/**
 	 * Set all props to default values.
+	 *
+	 * @since 3.0.0
 	 */
 	public function set_defaults() {
 		$this->data        = $this->default_data;
@@ -394,6 +475,8 @@ abstract class WC_Data {
 
 	/**
 	 * Set object read property.
+	 *
+	 * @since 3.0.0
 	 * @param boolean $read
 	 */
 	public function set_object_read( $read = true ) {
@@ -402,6 +485,8 @@ abstract class WC_Data {
 
 	/**
 	 * Get object read property.
+	 *
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function get_object_read() {
@@ -412,7 +497,8 @@ abstract class WC_Data {
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 *
-	 * @param array $props Key value pairs to set. Key is the prop and should map to a setter function name.
+	 * @since  3.0.0
+	 * @param  array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
 	public function set_props( $props, $context = 'set' ) {
@@ -445,7 +531,7 @@ abstract class WC_Data {
 	 * This stores changes in a special array so we can track what needs saving
 	 * the the DB later.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
 	 * @param mixed  $value Value of the prop.
 	 */
@@ -464,7 +550,7 @@ abstract class WC_Data {
 	/**
 	 * Return data changes only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_changes() {
@@ -474,21 +560,21 @@ abstract class WC_Data {
 	/**
 	 * Merge changes with data and clear.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function apply_changes() {
-		$this->data = array_merge( $this->data, $this->changes );
+		$this->data    = array_replace_recursive( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
-		return 'woocommerce_get_';
+		return 'woocommerce_' . $this->object_type . '_get_';
 	}
 
 	/**
@@ -497,7 +583,7 @@ abstract class WC_Data {
 	 * Gets the value from either current pending changes, or the data itself.
 	 * Context controls what happens to the value before it's returned.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
@@ -506,22 +592,51 @@ abstract class WC_Data {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {
-			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
+
 		return $value;
 	}
 
 	/**
-	 * When invalid data is found, throw an exception unless reading from the DB.
-	 * @param string $error_code Error code.
-	 * @param string $error_message Error message.
-	 * @throws WC_Data_Exception
+	 * Sets a date prop whilst handling formatting and datatime objects.
+	 *
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to set.
+	 * @param string|integer $value Value of the prop.
 	 */
-	protected function error( $error_code, $error_message ) {
-		throw new WC_Data_Exception( $error_code, $error_message );
+	protected function set_date_prop( $prop, $value ) {
+		try {
+			if ( empty( $value ) ) {
+				$datetime = null;
+			} elseif ( is_a( $value, 'WC_DateTime' ) ) {
+				$datetime = $value;
+			} elseif ( is_numeric( $value ) ) {
+				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			} else {
+				$datetime = new WC_DateTime( $value, new DateTimeZone( wc_timezone_string() ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			}
+			$this->set_prop( $prop, $datetime );
+		} catch ( Exception $e ) {}
+	}
+
+	/**
+	 * When invalid data is found, throw an exception unless reading from the DB.
+	 *
+	 * @throws WC_Data_Exception
+	 * @since 3.0.0
+	 * @param string $code             Error code.
+	 * @param string $message          Error message.
+	 * @param int    $http_status_code HTTP status code.
+	 * @param array  $data             Extra error data.
+	 */
+	protected function error( $code, $message, $http_status_code = 400, $data = array() ) {
+		throw new WC_Data_Exception( $code, $message, $http_status_code, $data );
 	}
 }

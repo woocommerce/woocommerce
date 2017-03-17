@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Represents a file which can be downloaded.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -15,7 +15,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Data array.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -83,7 +83,7 @@ class WC_Product_Download implements ArrayAccess {
 		if ( 'shortcode' === $this->get_type_of_file_path() ) {
 			return true;
 		}
-		return empty( $this->get_file_extension() ) || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
+		return ! $this->get_file_extension() || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
 	}
 
 	/**

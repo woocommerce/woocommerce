@@ -12,15 +12,15 @@
 		</label>
 
 		<?php foreach ( self::get_product_type_options() as $key => $option ) :
-			if ( $thepostid ) {
-				$selected_value = is_callable( $product_object, "is_$key" ) ? $product_object->{"is_$key"}() : get_post_meta( $post->ID, '_' . $key, true );
+			if ( $product_object ) {
+				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : 'yes' === get_post_meta( $post->ID, '_' . $key, true );
 			} else {
-				$selected_value = isset( $option['default'] ) ? $option['default'] : 'no';
+				$selected_value = 'yes' === ( isset( $option['default'] ) ? $option['default'] : 'no' );
 			}
 			?>
 			<label for="<?php echo esc_attr( $option['id'] ); ?>" class="<?php echo esc_attr( $option['wrapper_class'] ); ?> tips" data-tip="<?php echo esc_attr( $option['description'] ); ?>">
 				<?php echo esc_html( $option['label'] ); ?>:
-				<input type="checkbox" name="<?php echo esc_attr( $option['id'] ); ?>" id="<?php echo esc_attr( $option['id'] ); ?>" <?php echo checked( $selected_value, 'yes', false ); ?> />
+				<input type="checkbox" name="<?php echo esc_attr( $option['id'] ); ?>" id="<?php echo esc_attr( $option['id'] ); ?>" <?php echo checked( $selected_value, true, false ); ?> />
 			</label>
 		<?php endforeach; ?>
 	</span>
@@ -28,7 +28,7 @@
 	<ul class="product_data_tabs wc-tabs">
 		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
 			<li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
-				<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
+				<a href="#<?php echo $tab['target']; ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 			</li>
 		<?php endforeach; ?>
 		<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>

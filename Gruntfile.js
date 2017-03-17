@@ -128,6 +128,21 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Generate RTL .css files
+		rtlcss: {
+			woocommerce: {
+				expand: true,
+				cwd: '<%= dirs.css %>',
+				src: [
+					'*.css',
+					'!select2.css',
+					'!*-rtl.css'
+				],
+				dest: '<%= dirs.css %>/',
+				ext: '-rtl.css'
+			}
+		},
+
 		// Minify all .css files.
 		cssmin: {
 			minify: {
@@ -139,11 +154,21 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Concatenate select2.css onto the admin.css files.
+		concat: {
+			admin: {
+				files: {
+					'<%= dirs.css %>/admin.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin.css'],
+					'<%= dirs.css %>/admin-rtl.css' : ['<%= dirs.css %>/select2.css', '<%= dirs.css %>/admin-rtl.css']
+				}
+			}
+		},
+
 		// Watch changes for assets.
 		watch: {
 			css: {
 				files: ['<%= dirs.css %>/*.scss'],
-				tasks: ['sass', 'cssmin']
+				tasks: ['sass', 'rtlcss', 'cssmin', 'concat']
 			},
 			js: {
 				files: [
@@ -248,6 +273,7 @@ module.exports = function( grunt ) {
 					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
 					'!includes/libraries/**',                                    // Exclude libraries/
 					'!node_modules/**',                                          // Exclude node_modules/
+					'!tests/cli/**',                                             // Exclude tests/cli/
 					'!tmp/**',                                                   // Exclude tmp/
 					'!vendor/**'                                                 // Exclude vendor/
 				]
@@ -258,11 +284,13 @@ module.exports = function( grunt ) {
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
+	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
+	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
@@ -282,9 +310,10 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'css', [
-		'stylelint',
 		'sass',
-		'cssmin'
+		'rtlcss',
+		'cssmin',
+		'concat'
 	]);
 
 	grunt.registerTask( 'docs', [

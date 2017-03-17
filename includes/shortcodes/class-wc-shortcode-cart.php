@@ -53,12 +53,16 @@ class WC_Shortcode_Cart {
 
 	/**
 	 * Output the cart shortcode.
+	 *
+	 * @param array $atts
 	 */
-	public static function output() {
+	public static function output( $atts ) {
 		// Constants
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
+
+		$atts = shortcode_atts( array(), $atts, 'woocommerce_cart' );
 
 		// Update Shipping
 		if ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {

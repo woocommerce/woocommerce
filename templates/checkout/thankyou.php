@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.7.0
+ * @version     3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<li class="woocommerce-order-overview__date date">
 					<?php _e( 'Date:', 'woocommerce' ); ?>
-					<strong><?php echo date_i18n( get_option( 'date_format' ), $order->get_date_created() ); ?></strong>
+					<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
 				</li>
 
 				<li class="woocommerce-order-overview__total total">
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<li class="woocommerce-order-overview__payment-method method">
 					<?php _e( 'Payment method:', 'woocommerce' ); ?>
-					<strong><?php echo $order->get_payment_method_title(); ?></strong>
+					<strong><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></strong>
 				</li>
 
 				<?php endif; ?>

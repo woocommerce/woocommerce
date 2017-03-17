@@ -25,7 +25,6 @@ class WC_Helper_Product {
 	 * @return WC_Product_Simple
 	 */
 	public static function create_simple_product() {
-
 		// Create the product
 		$product = wp_insert_post( array(
 			'post_title'  => 'Dummy Product',
@@ -40,7 +39,6 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 		wp_set_object_terms( $product, 'simple', 'product_type' );
 
@@ -50,7 +48,7 @@ class WC_Helper_Product {
 	/**
 	 * Create external product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_External
 	 */
@@ -75,7 +73,7 @@ class WC_Helper_Product {
 	/**
 	 * Create grouped product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_Grouped
 	 */
@@ -94,7 +92,6 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_tax_status', 'taxable' );
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_visibility', 'visible' );
 		update_post_meta( $product, '_stock_status', 'instock' );
 		wp_set_object_terms( $product, 'grouped', 'product_type' );
 
@@ -137,7 +134,6 @@ class WC_Helper_Product {
 		update_post_meta( $product_id, '_tax_status', 'taxable' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
 		update_post_meta( $product_id, '_virtual', 'no' );
-		update_post_meta( $product_id, '_visibility', 'visible' );
 		update_post_meta( $product_id, '_stock_status', 'instock' );
 
 		// Attributes
@@ -169,6 +165,8 @@ class WC_Helper_Product {
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
 			'post_status' => 'publish',
+			'menu_order'  => 1,
+			'post_date'   => date( 'Y-m-d H:i:s', time() - 30 ), // Makes sure post dates differ if super quick.
 		) );
 
 		// Price related meta
@@ -193,6 +191,7 @@ class WC_Helper_Product {
 			'post_type'   => 'product_variation',
 			'post_parent' => $product_id,
 			'post_status' => 'publish',
+			'menu_order'  => 2,
 		) );
 
 		// Price related meta
@@ -299,7 +298,7 @@ class WC_Helper_Product {
 	/**
 	 * Creates a new product review on a specific product.
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 * @param $product_id integer Product ID that the review is for
 	 * @param $revieww_content string Content to use for the product review
 	 * @return integer Product Review ID

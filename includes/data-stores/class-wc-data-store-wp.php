@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Your own data store doesn't need to use WC_Data_Store_WP -- you can write
  * your own meta handling functions.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -32,7 +32,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an object.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array();
@@ -40,13 +40,18 @@ class WC_Data_Store_WP {
 	/**
 	 * Get and store terms from a taxonomy.
 	 *
-	 * @since  2.7.0
-	 * @param  WC_Data
+	 * @since  3.0.0
+	 * @param  WC_Data|integer $object
 	 * @param  string $taxonomy Taxonomy name e.g. product_cat
 	 * @return array of terms
 	 */
 	protected function get_term_ids( $object, $taxonomy ) {
-		$terms = get_the_terms( $object->get_id(), $taxonomy );
+		if ( is_numeric( $object ) ) {
+			$object_id = $object;
+		} else {
+			$object_id = $object->get_id();
+		}
+		$terms = get_the_terms( $object_id, $taxonomy );
 		if ( false === $terms || is_wp_error( $terms ) ) {
 			return array();
 		}
@@ -56,7 +61,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Returns an array of meta for an object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @return array
 	 */
@@ -64,9 +69,10 @@ class WC_Data_Store_WP {
 		global $wpdb;
 		$db_info       = $this->get_db_info();
 		$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-			SELECT " . $db_info['meta_id_field'] . " as meta_id, meta_key, meta_value
-			FROM " . $db_info['table'] . "
-			WHERE " . $db_info['object_id_field'] . "=%d AND meta_key NOT LIKE 'wp\_%%' ORDER BY " . $db_info['meta_id_field'] . "
+			SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
+			FROM {$db_info['table']}
+			WHERE {$db_info['object_id_field']} = %d
+			ORDER BY {$db_info['meta_id_field']}
 		", $object->get_id() ) );
 
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
@@ -76,7 +82,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing at least ->id)
 	 * @return array
@@ -88,7 +94,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing ->key and ->value)
 	 * @return meta ID
@@ -100,7 +106,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Update meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing ->id, ->key and ->value)
 	 */
@@ -111,7 +117,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Table structure is slightly different between meta types, this function will return what we need to know.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */
 	protected function get_db_info() {
@@ -131,6 +137,7 @@ class WC_Data_Store_WP {
 		// Figure out our field names.
 		if ( 'user' === $this->meta_type ) {
 			$meta_id_field = 'umeta_id';
+			$table         = $wpdb->usermeta;
 		}
 
 		if ( ! empty( $this->object_id_field_for_meta ) ) {
@@ -161,7 +168,30 @@ class WC_Data_Store_WP {
 	 * @return bool
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->internal_meta_keys );
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys ) && 0 !== stripos( $meta->meta_key, 'wp_' );
+	}
+
+	/**
+	 * Gets a list of props and meta keys that need updated based on change state
+	 * or if they are present in the database or not.
+	 *
+	 * @param  WC_Data $object              The WP_Data object (WC_Coupon for coupons, etc).
+	 * @param  array   $meta_key_to_props   A mapping of meta keys => prop names.
+	 * @param  string  $meta_type           The internal WP meta type (post, user, etc).
+	 * @return array                        A mapping of meta keys => prop names, filtered by ones that should be updated.
+	 */
+	protected function get_props_to_update( $object, $meta_key_to_props, $meta_type = 'post' ) {
+		$props_to_update = array();
+		$changed_props   = $object->get_changes();
+
+		// Props should be updated if they are a part of the $changed array or don't exist yet.
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			if ( array_key_exists( $prop, $changed_props ) || ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
+				$props_to_update[ $meta_key ] = $prop;
+			}
+		}
+
+		return $props_to_update;
 	}
 
 }

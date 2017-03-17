@@ -41,21 +41,23 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-					<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
 						$mails            = $mailer->get_emails();
 
-						if ( ! empty( $mails ) ) {
+						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>
+							<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
+							<?php
 							foreach ( $mails as $mail ) {
 								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocomerce' ), esc_html( $mail->title ) ) . '</option>';
+									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocommerce' ), esc_html( $mail->title ) ) . '</option>';
 								}
-							}
+							} ?>
+							</optgroup>
+							<?php
 						}
 						?>
-					</optgroup>
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
@@ -109,23 +111,26 @@ class WC_Meta_Box_Order_Actions {
 
 			if ( strstr( $action, 'send_email_' ) ) {
 
+				// Switch back to the site locale.
+				if ( function_exists( 'switch_to_locale' ) ) {
+					switch_to_locale( get_locale() );
+				}
+
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
-				// Ensure gateways are loaded in case they need to insert data into the emails
+				// Ensure gateways are loaded in case they need to insert data into the emails.
 				WC()->payment_gateways();
 				WC()->shipping();
 
-				// Load mailer
+				// Load mailer.
 				$mailer = WC()->mailer();
-
 				$email_to_send = str_replace( 'send_email_', '', $action );
-
 				$mails = $mailer->get_emails();
 
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->get_id() );
+							$mail->trigger( $order->get_id(), $order );
 							/* translators: %s: email title */
 							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
 						}
@@ -134,7 +139,12 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
-				// Change the post saved message
+				// Restore user locale.
+				if ( function_exists( 'restore_current_locale' ) ) {
+					restore_current_locale();
+				}
+
+				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
 
 			} elseif ( 'regenerate_download_permissions' === $action ) {

@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.7.0
+ * @version     3.0.0
  */
 
 /**
@@ -21,10 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_coupon_types() {
 	return (array) apply_filters( 'woocommerce_coupon_discount_types', array(
-		'fixed_cart'      => __( 'Cart discount', 'woocommerce' ),
-		'percent'         => __( 'Cart % discount', 'woocommerce' ),
-		'fixed_product'   => __( 'Product discount', 'woocommerce' ),
-		'percent_product' => __( 'Product % discount', 'woocommerce' ),
+		'percent'         => __( 'Percentage discount', 'woocommerce' ),
+		'fixed_cart'      => __( 'Fixed cart discount', 'woocommerce' ),
+		'fixed_product'   => __( 'Fixed product discount', 'woocommerce' ),
 	) );
 }
 
@@ -46,7 +45,7 @@ function wc_get_coupon_type( $type = '' ) {
  * @return array
  */
 function wc_get_product_coupon_types() {
-	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent_product' ) );
+	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent' ) );
 }
 
 /**
@@ -56,7 +55,7 @@ function wc_get_product_coupon_types() {
  * @return array
  */
 function wc_get_cart_coupon_types() {
-	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart', 'percent' ) );
+	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart' ) );
 }
 
 /**
@@ -74,7 +73,7 @@ function wc_coupons_enabled() {
 /**
  * Get coupon code by ID.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $id Coupon ID.
  * @return string
  */
@@ -86,7 +85,7 @@ function wc_get_coupon_code_by_id( $id ) {
 /**
  * Get coupon code by ID.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $code
  * @param int $exclude Used to exclude an ID from the check if you're checking existance.
  * @return int

@@ -10,7 +10,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Tests wc_get_products().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_products() {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
@@ -145,6 +145,27 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
+	public function test_wc_update_product_stock_increase_decrease() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
+		wc_update_product_stock( $product->get_id(), 5 );
+
+		$new_value = wc_update_product_stock( $product->get_id(), 1, 'increase' );
+
+		$product = new WC_Product_Simple( $product->get_id() );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
+		$this->assertEquals( 6, $new_value );
+
+		$new_value = wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+
+		$product = new WC_Product_Simple( $product->get_id() );
+		$this->assertEquals( 5, $product->get_stock_quantity() );
+		$this->assertEquals( 5, $new_value );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
 	/**
 	 * Test wc_delete_product_transients().
 	 *
@@ -157,7 +178,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
 		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
 		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->get_id(), '_featured', 'yes' );
 
 		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
 		wc_get_featured_product_ids(); // Creates the transient for featured products
@@ -205,8 +225,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-
-		update_post_meta( $product->get_id(), '_featured', 'yes' );
+		$product->set_featured( true );
+		$product->save();
 
 		$this->assertEquals( array( $product->get_id() ), wc_get_featured_product_ids() );
 
@@ -259,18 +279,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( true, wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
+		$this->assertTrue( wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
 
 		$product_2 = WC_Helper_Product::create_simple_product();
 		// we need to manually set a sku, because WC_Product now uses wc_product_has_unique_sku before setting
 		// so we need to manually set it to test the functionality.
 		update_post_meta( $product_2->get_id(), '_sku', $product_1->get_sku() );
 
-		$this->assertEquals( false, wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
+		$this->assertFalse( wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
 
 		WC_Helper_Product::delete_product( $product_1->get_id() );
 
-		$this->assertEquals( true, wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
+		$this->assertTrue( wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
 
 		WC_Helper_Product::delete_product( $product_2->get_id() );
 	}
@@ -293,7 +313,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_min_max_price_meta_query()
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query( array( 'min_price' => 10, 'max_price' => 100 ) );
@@ -304,5 +324,38 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'compare' => 'BETWEEN',
 			'type'    => 'DECIMAL',
 		), $meta_query );
+	}
+
+	/**
+	 * Test wc_product_force_unique_sku
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_product_force_unique_sku() {
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_3 = WC_Helper_Product::create_simple_product();
+		$product_4 = WC_Helper_Product::create_simple_product();
+
+		$product_1->set_sku( 'some-custom-sku' );
+		$product_2->set_sku( 'another-custom-sku' );
+		$product_3->set_sku( 'another-custom-sku-1' );
+		$product_4->set_sku( '' );
+
+		$product_1_id = $product_1->save();
+		$product_2_id = $product_2->save();
+		$product_3_id = $product_3->save();
+		$product_4_id = $product_4->save();
+
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), '' );
+
+		update_post_meta( $product_4_id, '_sku', 'some-custom-sku' );
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'some-custom-sku-1' );
+
+		update_post_meta( $product_4_id, '_sku', 'another-custom-sku' );
+		wc_product_force_unique_sku( $product_4_id );
+		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
 	}
 }

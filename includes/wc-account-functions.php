@@ -22,10 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
-	$wc_password_reset_url = wc_get_page_permalink( 'myaccount' );
+	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
+	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
+	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	if ( false !== $wc_password_reset_url ) {
-		return wc_get_endpoint_url( 'lost-password', '', $wc_password_reset_url );
+	if ( $wc_account_page_exists && ! empty( $lost_password_endpoint ) ) {
+		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
 		return $default_url;
 	}

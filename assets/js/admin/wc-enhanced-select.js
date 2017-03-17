@@ -3,53 +3,48 @@ jQuery( function( $ ) {
 
 	function getEnhancedSelectFormatString() {
 		var formatString = {
-			formatMatches: function( matches ) {
-				if ( 1 === matches ) {
-					return wc_enhanced_select_params.i18n_matches_1;
-				}
-
-				return wc_enhanced_select_params.i18n_matches_n.replace( '%qty%', matches );
-			},
-			formatNoMatches: function() {
+			noResults: function() {
 				return wc_enhanced_select_params.i18n_no_matches;
 			},
-			formatAjaxError: function() {
+			errorLoading: function() {
 				return wc_enhanced_select_params.i18n_ajax_error;
 			},
-			formatInputTooShort: function( input, min ) {
-				var number = min - input.length;
+			inputTooShort: function( args ) {
+				var remainingChars = args.minimum - args.input.length;
 
-				if ( 1 === number ) {
+				if ( 1 === remainingChars ) {
 					return wc_enhanced_select_params.i18n_input_too_short_1;
 				}
 
-				return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', number );
+				return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
 			},
-			formatInputTooLong: function( input, max ) {
-				var number = input.length - max;
+			inputTooLong: function( args ) {
+				var overChars = args.input.length - args.maximum;
 
-				if ( 1 === number ) {
+				if ( 1 === overChars ) {
 					return wc_enhanced_select_params.i18n_input_too_long_1;
 				}
 
-				return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', number );
+				return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
 			},
-			formatSelectionTooBig: function( limit ) {
-				if ( 1 === limit ) {
+			maximumSelected: function( args ) {
+				if ( args.maximum === 1 ) {
 					return wc_enhanced_select_params.i18n_selection_too_long_1;
 				}
 
-				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
+				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
 			},
-			formatLoadMore: function() {
+			loadingMore: function() {
 				return wc_enhanced_select_params.i18n_load_more;
 			},
-			formatSearching: function() {
+			searching: function() {
 				return wc_enhanced_select_params.i18n_searching;
 			}
 		};
+       
+        var language = { 'language' : formatString };
 
-		return formatString;
+		return language;
 	}
 
 	$( document.body )
@@ -90,9 +85,9 @@ jQuery( function( $ ) {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
 						quietMillis: 250,
-						data: function( term ) {
+						data: function( params ) {
 							return {
-								term:     term,
+								term:     params.term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 								security: wc_enhanced_select_params.search_products_nonce,
 								exclude:  $( this ).data( 'exclude' ),
@@ -100,7 +95,7 @@ jQuery( function( $ ) {
 								limit:    $( this ).data( 'limit' )
 							};
 						},
-						results: function( data ) {
+						processResults: function( data ) {
 							var terms = [];
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -115,49 +110,29 @@ jQuery( function( $ ) {
 					}
 				};
 
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
-
-						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push({
-								id: val,
-								text: data[ val ]
-							});
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {
-							id: element.val(),
-							text: element.attr( 'data-selected' )
-						};
-						return callback( data );
-					};
-				}
-
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
 				if ( $( this ).data( 'sortable' ) ) {
-					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-						containment: 'parent',
-						start: function() { $( this ).select2( 'onSortStart' ); },
-						update: function() { $( this ).select2( 'onSortEnd' ); }
+					var $select = $(this);
+					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
+
+					$list.sortable({
+						placeholder : 'ui-state-highlight select2-selection__choice',
+						forcePlaceholderSize: true,
+						items       : 'li:not(.select2-search__field)',
+						tolerance   : 'pointer',
+						stop: function() {
+							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+								var id     = $( this ).data( 'data' ).id;
+								var option = $select.find( 'option[value="' + id + '"]' )[0];
+								$select.prepend( option );
+							} );
+						}
 					});
 				}
-
 			});
-
-
 
 			// Ajax customer search boxes
 			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
@@ -172,15 +147,15 @@ jQuery( function( $ ) {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
 						quietMillis: 250,
-						data: function( term ) {
+						data: function( params ) {
 							return {
-								term:     term,
+								term:     params.term,
 								action:   'woocommerce_json_search_customers',
 								security: wc_enhanced_select_params.search_customers_nonce,
 								exclude:  $( this ).data( 'exclude' )
 							};
 						},
-						results: function( data ) {
+						processResults: function( data ) {
 							var terms = [];
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -190,59 +165,50 @@ jQuery( function( $ ) {
 									});
 								});
 							}
-							return { results: terms };
+							return {
+								results: terms
+							};
 						},
 						cache: true
 					}
 				};
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
-
-						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push({
-								id: val,
-								text: data[ val ]
-							});
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {
-							id: element.val(),
-							text: element.attr( 'data-selected' )
-						};
-						return callback( data );
-					};
-				}
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
 				if ( $( this ).data( 'sortable' ) ) {
-					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
-						containment: 'parent',
-						start: function() { $( this ).select2( 'onSortStart' ); },
-						update: function() { $( this ).select2( 'onSortEnd' ); }
+					var $select = $(this);
+					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
+
+					$list.sortable({
+						placeholder : 'ui-state-highlight select2-selection__choice',
+						forcePlaceholderSize: true,
+						items       : 'li:not(.select2-search__field)',
+						tolerance   : 'pointer',
+						stop: function() {
+							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+								var id     = $( this ).data( 'data' ).id;
+								var option = $select.find( 'option[value="' + id + '"]' )[0];
+								$select.prepend( option );
+							} );
+						}
 					});
 				}
-
 			});
 		})
 
 		// WooCommerce Backbone Modal
 		.on( 'wc_backbone_modal_before_remove', function() {
-			$( ':input.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).select2( 'close' );
+			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
 		})
 
 		.trigger( 'wc-enhanced-select-init' );
+
+	$( 'html' ).on( 'click', function( event ) {
+		if ( this === event.target ) {
+			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
+		}
+	} );
 
 });

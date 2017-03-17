@@ -4,10 +4,10 @@
  *
  * Extends Exception to provide additional data.
  *
- * @author      WooThemes
- * @category    Core
- * @package     WooCommerce
- * @since       2.7
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce
+ * @since    3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,34 +15,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Data_Exception class
+ * WC_Data_Exception class.
  */
 class WC_Data_Exception extends Exception {
 
-	/** @var string sanitized error code */
+	/**
+	 * Sanitized error code.
+	 *
+	 * @var string
+	 */
 	protected $error_code;
+
+	/**
+	 * Error extra data.
+	 *
+	 * @var array
+	 */
+	protected $error_data;
 
 	/**
 	 * Setup exception.
 	 *
-	 * error code - machine-readable, e.g. `woocommerce_invalid_product_id`
-	 * error message - friendly message, e.g. 'Product ID is invalid'
-	 * http status code - proper HTTP status code to respond with, e.g. 400
-	 *
-	 * @param string $error_code
-	 * @param string $error_message user-friendly translated error message
-	 * @param int $http_status_code HTTP status code to respond with
+	 * @param string $code             Machine-readable error code, e.g `woocommerce_invalid_product_id`.
+	 * @param string $message          User-friendly translated error message, e.g. 'Product ID is invalid'.
+	 * @param int    $http_status_code Proper HTTP status code to respond with, e.g. 400.
+	 * @param array  $data             Extra error data.
 	 */
-	public function __construct( $error_code, $error_message, $http_status_code = 400 ) {
-		$this->error_code = $error_code;
-		parent::__construct( $error_message, $http_status_code );
+	public function __construct( $code, $message, $http_status_code = 400, $data = array() ) {
+		$this->error_code = $code;
+		$this->error_data = array_merge( array( 'status' => $http_status_code ), $data );
+
+		parent::__construct( $message, $http_status_code );
 	}
 
 	/**
-	 * Returns the error code
+	 * Returns the error code.
+	 *
 	 * @return string
 	 */
 	public function getErrorCode() {
 		return $this->error_code;
+	}
+
+	/**
+	 * Returns error data.
+	 *
+	 * @return array
+	 */
+	public function getErrorData() {
+		return $this->error_data;
 	}
 }

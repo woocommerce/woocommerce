@@ -9,12 +9,9 @@
  * @package  WooCommerce/API
  * @since    2.4.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-if ( ! class_exists( 'WC_Auth' ) ) :
 
 class WC_Auth {
 
@@ -710,7 +707,4 @@ class WC_Auth {
 		WC_Cache_Helper::incr_cache_prefix( 'api_keys_count' );
 	}
 }
-
-endif;
-
-return new WC_Auth();
+new WC_Auth();
