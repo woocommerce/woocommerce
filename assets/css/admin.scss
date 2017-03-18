@@ -904,6 +904,7 @@ ul.wc_coupon_list_block {
 
 		.form-field {
 			float: left;
+			clear: left;
 			width: 48%;
 			padding: 0;
 			margin: 9px 0 0;
@@ -942,11 +943,24 @@ ul.wc_coupon_list_block {
 			}
 		}
 
-		.form-field.last {
+		.form-field.last,
+		._billing_last_name_field,
+		._billing_address_2_field,
+		._billing_postcode_field,
+		._billing_state_field,
+		._billing_phone_field,
+		._shipping_last_name_field,
+		._shipping_address_2_field,
+		._shipping_postcode_field,
+		._shipping_state_field {
 			float: right;
+			clear: right;
 		}
 
-		.form-field-wide {
+		.form-field-wide,
+		._billing_company_field,
+		._shipping_company_field,
+		._transaction_id_field {
 			width: 100%;
 			clear: both;
 
@@ -961,41 +975,6 @@ ul.wc_coupon_list_block {
 
 		p.none_set {
 			color: #999;
-		}
-
-		._billing_first_name_field,
-		._billing_address_1_field,
-		._billing_city_field,
-		._billing_country_field,
-		._billing_email_field,
-		._shipping_first_name_field,
-		._shipping_address_1_field,
-		._shipping_city_field,
-		._shipping_country_field {
-			float: left;
-		}
-
-		._billing_last_name_field,
-		._billing_address_2_field,
-		._billing_postcode_field,
-		._billing_state_field,
-		._billing_phone_field,
-		._shipping_last_name_field,
-		._shipping_address_2_field,
-		._shipping_postcode_field,
-		._shipping_state_field {
-			float: right;
-		}
-
-		._billing_company_field,
-		._shipping_company_field,
-		._transaction_id_field {
-			clear: both;
-			width: 100%;
-		}
-
-		._billing_email_field {
-			clear: left;
 		}
 
 		div.edit_address {
@@ -2648,7 +2627,7 @@ table {
 	}
 }
 .wc-shipping-zones-heading .page-title-action {
-	display: inline-block;	
+	display: inline-block;
 }
 table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-classes {
 	td, th {

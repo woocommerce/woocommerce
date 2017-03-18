@@ -95,4 +95,20 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 		$token_read = new WC_Payment_Token_CC( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}
+
+	/*
+	 * Test saving a new value in a token after it has been created.
+	 * @since 3.0.0
+	 */
+	public function test_wc_payment_token_cc_updates_after_create() {
+		$token    = WC_Helper_Payment_Token::create_cc_token();
+		$token_id = $token->get_id();
+		$this->assertEquals( '1234', $token->get_last4() );
+
+		$token->set_last4( '4321' );
+		$token->set_user_id( 3 );
+		$token->save();
+		$this->assertEquals( '4321', $token->get_last4() );
+		$this->assertEquals( 3, $token->get_user_id() );
+	}
 }

@@ -341,7 +341,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		if ( function_exists( 'wp_hash' ) ) {
 			return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '2.7' );
+			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.0' );
 			return false;
 		}
 	}

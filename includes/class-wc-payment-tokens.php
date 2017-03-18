@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * An API for storing and managing tokens for gateways and customers.
  *
  * @class 		WC_Payment_Tokens
- * @version     2.7.0
+ * @version     3.0.0
  * @since		2.6.0
  * @package		WooCommerce/Classes
  * @category	Class

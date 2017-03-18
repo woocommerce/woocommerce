@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -139,8 +139,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'currency'             => $order->get_currency(),
 			'version'              => $order->get_version(),
 			'prices_include_tax'   => $order->get_prices_include_tax(),
-			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),
-			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),  // v1 API used UTC.
+			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ), // v1 API used UTC.
 			'customer_id'          => $order->get_customer_id(),
 			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'discount_tax'         => wc_format_decimal( $order->get_discount_tax(), $dp ),
@@ -158,8 +158,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->get_customer_user_agent(),
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed() ),
-			'date_paid'            => $order->get_date_paid(),
+			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed(), false ), // v1 API used local time.
+			'date_paid'            => wc_rest_prepare_date_response( $order->get_date_paid(), false ), // v1 API used local time.
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
 			'tax_lines'            => array(),
@@ -508,7 +508,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Create base WC Order object.
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param array $data
 	 * @return WC_Order
 	 */
@@ -574,7 +574,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// If items have changed, recalculate order totals.
-			if ( isset( $request['billing'], $request['shipping'], $request['line_items'], $request['shipping_lines'], $request['fee_lines'], $request['coupon_lines'] ) ) {
+			if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
 				$order->calculate_totals();
 			}
 
@@ -771,7 +771,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		/**
 		 * Action hook to adjust item before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
@@ -953,13 +953,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

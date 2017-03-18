@@ -120,7 +120,7 @@ class WC_Post_Data {
 	/**
 	 * Handle type changes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @param string $from
 	 * @param string $to
@@ -254,7 +254,10 @@ class WC_Post_Data {
 					$data['post_parent'] = 0;
 				break;
 			}
+		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
+			$data['post_title'] = 'AUTO-DRAFT';
 		}
+
 		return $data;
 	}
 

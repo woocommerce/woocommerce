@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin/Meta Boxes
- * @version  2.7.0
+ * @version  3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -205,6 +205,10 @@ class WC_Meta_Box_Product_Data {
 					$options = wc_get_text_attributes( $options );
 				}
 
+				if ( empty( $options ) ) {
+					continue;
+				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( $attribute_id );
 				$attribute->set_name( $attribute_name );
@@ -302,7 +306,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		/**
-		 * @since 2.7.0 to set props before save.
+		 * @since 3.0.0 to set props before save.
 		 */
 		do_action( 'woocommerce_admin_process_product_object', $product );
 

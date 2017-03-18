@@ -2,7 +2,7 @@
 /**
  * Allows updates via CLI.
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_Update_Command {

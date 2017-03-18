@@ -8,7 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
- * @version     2.7
+ * @version     3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -318,7 +318,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Attempts to create the new product.
-			$product->create();
+			$product->save();
 			$id = $product->get_id();
 
 			// Checks for an error in the product creation.
@@ -1122,10 +1122,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get standard product data that applies to every product type
 	 *
 	 * @since 2.1
-	 * @param WC_Product $product
+	 * @param WC_Product|int $product
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
+		if ( is_numeric( $product ) ) {
+			$product = wc_get_product( $product );
+		}
+
 		return array(
 			'title'              => $product->get_name(),
 			'id'                 => $product->get_id(),
@@ -1281,7 +1285,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$_product = wc_get_product( $child_id );
 
-			if ( ! $_product->exists() ) {
+			if ( ! $_product || ! $_product->exists() ) {
 				continue;
 			}
 
@@ -1295,7 +1299,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
@@ -1530,17 +1534,17 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $data['sale_price_dates_from'] ) ) {
 				$date_from = $data['sale_price_dates_from'];
 			} else {
-				$date_from = ( $product->get_date_on_sale_from() ) ? date( 'Y-m-d', $date_from ) : '';
+				$date_from = $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from()->getTimestamp() ) : '';
 			}
 
 			if ( isset( $data['sale_price_dates_to'] ) ) {
 				$date_to = $data['sale_price_dates_to'];
 			} else {
-				$date_to = ( $product->get_date_on_sale_to() ) ? date( 'Y-m-d', $date_to ) : '';
+				$date_to = $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() ) : '';
 			}
 
 			if ( $date_to && ! $date_from ) {
-				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+				$date_from = strtotime( 'NOW', current_time( 'timestamp', true ) );
 			}
 
 			$product->set_date_on_sale_to( $date_to );
@@ -1671,14 +1675,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories.
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
-			$product->set_category_ids( $term_ids );
+			$product->set_category_ids( $data['categories'] );
 		}
 
 		// Product tags.
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			$product->set_tag_ids( $term_ids );
+			$product->set_tag_ids( $data['tags'] );
 		}
 
 		// Downloadable.
@@ -1751,7 +1753,7 @@ class WC_API_Products extends WC_API_Resource {
 		$variations = $request['variations'];
 		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
 
-		foreach ( $variations as $menu_order => $variation ) {
+		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
 			$variation    = new WC_Product_Variation( $variation_id );
 
@@ -1883,10 +1885,10 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies.
-			if ( isset( $variation['attributes'] ) ) {
+			if ( isset( $data['attributes'] ) ) {
 				$_attributes = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+				foreach ( $data['attributes'] as $attribute_key => $attribute ) {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
@@ -1992,12 +1994,12 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param WC_Product $product
 	 * @param array $downloads
-	 * @param int $deprecated Deprecated since 2.7.
+	 * @param int $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -2143,7 +2145,7 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $product->get_id() );
 					}
 
 					$gallery[] = $attachment_id;

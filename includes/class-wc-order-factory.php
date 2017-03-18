@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooCommerce
@@ -45,11 +45,11 @@ class WC_Order_Factory {
 
 		try {
 			// Try to get from cache, otherwise create a new object,
-			$order = wp_cache_get( 'order-' . $order_id, 'orders' );
+			$order = wp_cache_get( 'object-' . $order_id, 'orders' );
 
 			if ( ! is_a( $order, 'WC_Order' ) ) {
 				$order = new $classname( $order_id );
-				wp_cache_set( 'order-' . $order_id, $order, 'orders' );
+				wp_cache_set( 'object-' . $order_id, $order, 'orders' );
 			}
 
 			return $order;
@@ -104,11 +104,11 @@ class WC_Order_Factory {
 			if ( $classname ) {
 				try {
 					// Try to get from cache, otherwise create a new object,
-					$item = wp_cache_get( 'order-item-' . $id, 'order-items' );
+					$item = wp_cache_get( 'object-' . $id, 'order-items' );
 
 					if ( ! is_a( $item, 'WC_Order_Item' ) ) {
 						$item = new $classname( $id );
-						wp_cache_set( 'order-item-' . $id, $item, 'order-items' );
+						wp_cache_set( 'object-' . $id, $item, 'order-items' );
 					}
 
 					return $item;
@@ -123,7 +123,7 @@ class WC_Order_Factory {
 	/**
 	 * Get the order ID depending on what was passed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  mixed $order
 	 * @return int|bool false on failure
 	 */

@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by product store classes.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooThemes
  */
@@ -106,7 +106,7 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
-	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @since  3.0.0 this supports set, increase and decrease.
 	 * @param  int
 	 * @param  int|null $quantity
 	 * @param  string $operation set, increase and decrease.

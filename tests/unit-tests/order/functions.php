@@ -151,7 +151,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test the before and after date parameters for wc_get_orders.
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 */
 	public function test_wc_get_orders_date_params() {
 		$order = WC_Helper_Order::create_order();

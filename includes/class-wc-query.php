@@ -503,14 +503,14 @@ class WC_Query {
 	/**
 	 * Order by rating post clauses.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		wc_deprecated_function( 'order_by_rating_post_clauses', '2.7' );
+		wc_deprecated_function( 'order_by_rating_post_clauses', '3.0' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -622,7 +622,7 @@ class WC_Query {
 	/**
 	 * Return a meta query for filtering by rating.
 	 *
-	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @return array
 	 */
 	public function rating_filter_meta_query() {
@@ -632,7 +632,7 @@ class WC_Query {
 	/**
 	 * Returns a meta query to handle product visibility.
 	 *
-	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
@@ -643,7 +643,7 @@ class WC_Query {
 	/**
 	 * Returns a meta query to handle product stock status.
 	 *
-	 * @deprecated 2.7.0 Replaced with taxonomy.
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @param string $status (default: 'instock')
 	 * @return array
 	 */

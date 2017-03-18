@@ -158,7 +158,7 @@ class WC_Checkout {
 	/**
 	 * Is registration required to checkout?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_required() {
@@ -168,7 +168,7 @@ class WC_Checkout {
 	/**
 	 * Is registration enabled on the checkout page?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_enabled() {
@@ -202,7 +202,6 @@ class WC_Checkout {
 					'label'        => __( 'Account username', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
-					'autocomplete' => 'username',
 				);
 			}
 
@@ -212,7 +211,6 @@ class WC_Checkout {
 					'label'        => __( 'Account password', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
-					'autocomplete' => 'password',
 				);
 			}
 
@@ -321,7 +319,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust order before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
 
@@ -368,9 +366,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
+			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -399,9 +397,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
+			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -435,9 +433,9 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
+				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -465,9 +463,9 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
+				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -491,9 +489,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
+			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -503,7 +501,7 @@ class WC_Checkout {
 	/**
 	 * See if a fieldset should be skipped.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $fieldset_key
 	 * @param array $data
 	 */
@@ -520,7 +518,7 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array of data and errors.
 	 */
 	protected function get_posted_data() {
@@ -572,7 +570,7 @@ class WC_Checkout {
 	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -618,10 +616,10 @@ class WC_Checkout {
 					}
 				}
 
-				if ( in_array( 'email', $format ) ) {
+				if ( in_array( 'email', $format ) && '' !== $data[ $key ] ) {
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( '' !== $data[ $key ] && ! is_email( $data[ $key ] ) ) {
+					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
 					}
@@ -657,7 +655,7 @@ class WC_Checkout {
 	/**
 	 * Validates that the checkout has enough info to proceed.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -703,7 +701,7 @@ class WC_Checkout {
 	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
@@ -750,7 +748,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that does require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 * @param  string $payment_method
 	 */
@@ -783,7 +781,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that doesn't require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 */
 	protected function process_order_without_payment( $order_id ) {
@@ -834,8 +832,14 @@ class WC_Checkout {
 		// Add customer info from other fields.
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
-			$customer->set_first_name( $data['billing_first_name'] );
-			$customer->set_last_name( $data['billing_last_name'] );
+
+			if ( ! empty( $data['billing_first_name'] ) ) {
+				$customer->set_first_name( $data['billing_first_name'] );
+			}
+
+			if ( ! empty( $data['billing_last_name'] ) ) {
+				$customer->set_last_name( $data['billing_last_name'] );
+			}
 
 			foreach ( $data as $key => $value ) {
 				// Use setters where available.
@@ -850,7 +854,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust customer before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_update_customer', $customer, $data );
 
@@ -972,7 +976,7 @@ class WC_Checkout {
 
 			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-			if ( $value !== null ) {
+			if ( null !== $value ) {
 				return $value;
 			}
 

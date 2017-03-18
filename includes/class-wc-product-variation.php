@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -44,7 +44,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -61,7 +61,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * If the stock level comes from another product ID.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return int
 	 */
 	public function get_stock_managed_by_id() {
@@ -223,7 +223,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Return if product manage stock.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return boolean|string true, false, or parent.
 	 */
@@ -257,7 +257,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get backorders.
 	 *
 	 * @param  string $context
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string yes no or notify
 	 */
 	public function get_backorders( $context = 'view' ) {
@@ -273,7 +273,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -290,7 +290,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get shipping class ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return int
 	 */
@@ -313,7 +313,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Set the parent data array for this variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_parent_data( $parent_data ) {
@@ -323,7 +323,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get the parent data array for this variation.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_parent_data() {

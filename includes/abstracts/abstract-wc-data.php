@@ -18,7 +18,7 @@ abstract class WC_Data {
 	/**
 	 * ID for this object.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var int
 	 */
 	protected $id = 0;
@@ -26,7 +26,7 @@ abstract class WC_Data {
 	/**
 	 * Core data for this object. Name value pairs (name + default value).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array();
@@ -34,7 +34,7 @@ abstract class WC_Data {
 	/**
 	 * Core data changes for this object.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $changes = array();
@@ -42,7 +42,7 @@ abstract class WC_Data {
 	/**
 	 * This is false until the object is read from the DB.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var bool
 	 */
 	protected $object_read = false;
@@ -50,7 +50,7 @@ abstract class WC_Data {
 	/**
 	 * This is the name of this object type.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var string
 	 */
 	protected $object_type = 'data';
@@ -60,7 +60,7 @@ abstract class WC_Data {
 	 * Used as a standard way for sub classes (like product types) to add
 	 * additional information to an inherited class.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array();
@@ -68,7 +68,7 @@ abstract class WC_Data {
 	/**
 	 * Set to _data on construct so we can track and reset data if needed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $default_data = array();
@@ -76,7 +76,7 @@ abstract class WC_Data {
 	/**
 	 * Contains a reference to the data store for this class.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var object
 	 */
 	protected $data_store;
@@ -85,7 +85,7 @@ abstract class WC_Data {
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var string
 	 */
 	protected $cache_group = '';
@@ -93,7 +93,7 @@ abstract class WC_Data {
 	/**
 	 * Stores additonal meta data.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $meta_data = null;
@@ -113,7 +113,7 @@ abstract class WC_Data {
 	/**
 	 * Get the data store.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return object
 	 */
 	public function get_data_store() {
@@ -189,7 +189,7 @@ abstract class WC_Data {
 	/**
 	 * Returns array of expected data keys for this object.
 	 *
-	 * @since   2.7.0
+	 * @since   3.0.0
 	 * @return array
 	 */
 	public function get_data_keys() {
@@ -199,7 +199,7 @@ abstract class WC_Data {
 	/**
 	 * Returns all "extra" data keys for an object (for sub objects like product types).
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_extra_data_keys() {
@@ -209,7 +209,7 @@ abstract class WC_Data {
 	/**
 	 * Filter null meta values from array.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -239,7 +239,7 @@ abstract class WC_Data {
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->get_meta_data(), 'key' ), $key );
-		$value    = '';
+		$value      = $single ? '' : array();
 
 		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
@@ -254,6 +254,19 @@ abstract class WC_Data {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * See if meta data exists, since get_meta always returns a '' or array().
+	 *
+	 * @since  3.0.0
+	 * @param  string $key
+	 * @return boolean
+	 */
+	public function meta_exists( $key = '' ) {
+		$this->maybe_read_meta_data();
+		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
+		return in_array( $key, $array_keys );
 	}
 
 	/**
@@ -351,7 +364,7 @@ abstract class WC_Data {
 	/**
 	 * Read meta data if null.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function maybe_read_meta_data() {
 		if ( is_null( $this->meta_data ) ) {
@@ -435,13 +448,14 @@ abstract class WC_Data {
 
 		if ( ! empty( $this->cache_group ) ) {
 			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			wp_cache_delete( 'object-' . $this->get_id(), $this->cache_group );
 		}
 	}
 
 	/**
 	 * Set ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $id
 	 */
 	public function set_id( $id ) {
@@ -451,7 +465,7 @@ abstract class WC_Data {
 	/**
 	 * Set all props to default values.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function set_defaults() {
 		$this->data        = $this->default_data;
@@ -462,7 +476,7 @@ abstract class WC_Data {
 	/**
 	 * Set object read property.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param boolean $read
 	 */
 	public function set_object_read( $read = true ) {
@@ -472,7 +486,7 @@ abstract class WC_Data {
 	/**
 	 * Get object read property.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function get_object_read() {
@@ -483,7 +497,7 @@ abstract class WC_Data {
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @return WP_Error|bool
 	 */
@@ -517,7 +531,7 @@ abstract class WC_Data {
 	 * This stores changes in a special array so we can track what needs saving
 	 * the the DB later.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
 	 * @param mixed  $value Value of the prop.
 	 */
@@ -536,7 +550,7 @@ abstract class WC_Data {
 	/**
 	 * Return data changes only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_changes() {
@@ -546,17 +560,17 @@ abstract class WC_Data {
 	/**
 	 * Merge changes with data and clear.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function apply_changes() {
-		$this->data = array_merge( $this->data, $this->changes );
+		$this->data    = array_replace_recursive( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -569,7 +583,7 @@ abstract class WC_Data {
 	 * Gets the value from either current pending changes, or the data itself.
 	 * Context controls what happens to the value before it's returned.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
@@ -578,20 +592,45 @@ abstract class WC_Data {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data ) ) {
-			$value = isset( $this->changes[ $prop ] ) ? $this->changes[ $prop ] : $this->data[ $prop ];
+			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
+
 		return $value;
+	}
+
+	/**
+	 * Sets a date prop whilst handling formatting and datatime objects.
+	 *
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to set.
+	 * @param string|integer $value Value of the prop.
+	 */
+	protected function set_date_prop( $prop, $value ) {
+		try {
+			if ( empty( $value ) ) {
+				$datetime = null;
+			} elseif ( is_a( $value, 'WC_DateTime' ) ) {
+				$datetime = $value;
+			} elseif ( is_numeric( $value ) ) {
+				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			} else {
+				$datetime = new WC_DateTime( $value, new DateTimeZone( wc_timezone_string() ) );
+				$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			}
+			$this->set_prop( $prop, $datetime );
+		} catch ( Exception $e ) {}
 	}
 
 	/**
 	 * When invalid data is found, throw an exception unless reading from the DB.
 	 *
 	 * @throws WC_Data_Exception
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $code             Error code.
 	 * @param string $message          Error message.
 	 * @param int    $http_status_code HTTP status code.

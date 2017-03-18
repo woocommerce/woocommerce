@@ -161,9 +161,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
 			'order_key'                 => $order->get_order_key(),
-			'created_at'                => $this->server->format_datetime( $order->get_date_created(), false, true ),
-			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), false, true ),
-			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), false, true ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created() ? $order->get_date_created()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified() ? $order->get_date_modified()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed() ? $order->get_date_completed()->getTimestamp() : 0, false, false ), // API gives UTC times.
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -178,7 +178,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => 0 < $order->get_date_paid(),
+				'paid'         => ! is_null( $order->get_date_paid() ),
 			),
 			'billing_address' => array(
 				'first_name' => $order->get_billing_first_name(),
@@ -302,7 +302,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$coupon_line = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item->get_code(),
-				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), $dp ),
+				'amount' => wc_format_decimal( $coupon_item->get_discount(), $dp ),
 			);
 
 			if ( in_array( 'coupons', $expand ) ) {
@@ -967,6 +967,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 		if ( isset( $item['total'] ) ) {
 			$line_item->set_total( floatval( $item['total'] ) );
+		} elseif ( $creating ) {
+			$total = wc_get_price_excluding_tax( $product, array( 'qty' => $line_item->get_quantity() ) );
+			$line_item->set_total( $total );
+			$line_item->set_subtotal( $total );
 		}
 		if ( isset( $item['total_tax'] ) ) {
 			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
@@ -983,6 +987,10 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		$item_id = $line_item->save();
+
+		if ( ! $item_id ) {
+			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+		}
 	}
 
 	/**
@@ -1061,6 +1069,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
 			$item = new WC_Order_Item_Shipping();
+			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );
 			$shipping_id = $item->save();
 
@@ -1110,7 +1119,8 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$item = new WC_Order_Item_Fee();
-			$item->set_name( sanitize_title( $fee['title'] ) );
+			$item->set_order_id( $order->get_id() );
+			$item->set_name( wc_clean( $fee['title'] ) );
 			$item->set_total( isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0 );
 
 			// if taxable, tax class and total are required
@@ -1142,7 +1152,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$item = new WC_Order_Item_Fee( $fee['id'] );
 
 			if ( isset( $fee['title'] ) ) {
-				$item->set_name( sanitize_title( $fee['title'] ) );
+				$item->set_name( wc_clean( $fee['title'] ) );
 			}
 
 			if ( isset( $fee['tax_class'] ) ) {
@@ -1579,7 +1589,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( $refund->get_date_created(), false, true ),
+				'created_at' => $this->server->format_datetime( $refund->get_date_created() ? $refund->get_date_created()->getTimestamp() : 0, false, false ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items,

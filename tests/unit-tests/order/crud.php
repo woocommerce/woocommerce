@@ -76,7 +76,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_version() {
 		$object = new WC_Order();
-		$set_to = '2.7.0';
+		$set_to = '3.0.0';
 		$object->set_version( $set_to );
 		$this->assertEquals( $set_to, $object->get_version() );
 	}
@@ -97,10 +97,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_created() {
 		$object = new WC_Order();
 		$object->set_date_created( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_created() );
+		$this->assertEquals( '1481500800', $object->get_date_created()->getOffsetTimestamp() );
 
 		$object->set_date_created( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_created() );
+		$this->assertEquals( 1481500800, $object->get_date_created()->getTimestamp() );
 	}
 
 	/**
@@ -109,10 +109,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_modified() {
 		$object = new WC_Order();
 		$object->set_date_modified( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_modified() );
+		$this->assertEquals( '1481500800', $object->get_date_modified()->getOffsetTimestamp() );
 
 		$object->set_date_modified( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_modified() );
+		$this->assertEquals( 1481500800, $object->get_date_modified()->getTimestamp() );
 	}
 
 	/**
@@ -332,6 +332,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Test mapping from old tax array keys to CRUD functions.
+	 */
+	function test_tax_legacy_arrayaccess() {
+		$tax = new WC_Order_item_Tax();
+		$tax->set_rate_id( 5 );
+		$tax->set_compound( true );
+		$tax->set_tax_total( 2.00 );
+		$tax->set_shipping_tax_total( 1.50 );
+
+		$this->assertEquals( $tax->get_rate_id(), $tax['rate_id'] );
+		$this->assertEquals( $tax->get_compound(), $tax['compound'] );
+		$this->assertEquals( $tax->get_tax_total(), $tax['tax_total'] );
+		$this->assertEquals( $tax->get_tax_total(), $tax['tax_amount'] );
+		$this->assertEquals( $tax->get_shipping_tax_total(), $tax['shipping_tax_total'] );
+		$this->assertEquals( $tax->get_shipping_tax_total(), $tax['shipping_tax_amount'] );
 	}
 
 	/**
@@ -796,7 +814,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_billing_state() {
 		$object = new WC_Order();
-		$set_to = 'Boulder';
+		$set_to = 'Oregon';
 		$object->set_billing_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_state() );
 	}
@@ -844,6 +862,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set_to = '123456678';
 		$object->set_billing_phone( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_phone() );
+	}
+
+	/**
+	 * Test: Setting/getting billing settings after an order is saved
+	 */
+	function test_set_billing_after_save() {
+		$object = new WC_Order();
+		$phone = '123456678';
+		$object->set_billing_phone( $phone );
+		$object->save();
+		$state = 'Oregon';
+		$object->set_billing_state( $state );
+
+		$this->assertEquals( $phone, $object->get_billing_phone() );
+		$this->assertEquals( $state, $object->get_billing_state() );
 	}
 
 	/**
@@ -911,7 +944,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_shipping_state() {
 		$object = new WC_Order();
-		$set_to = 'Boulder';
+		$set_to = 'Oregon';
 		$object->set_shipping_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_state() );
 	}
@@ -934,6 +967,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set_to = 'US';
 		$object->set_shipping_country( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_country() );
+	}
+
+	/**
+	 * Test: Setting/getting shipping settings after an order is saved
+	 */
+	function test_set_shipping_after_save() {
+		$object = new WC_Order();
+		$country = 'US';
+		$object->set_shipping_country( $country );
+		$object->save();
+		$state = 'Oregon';
+		$object->set_shipping_state( $state );
+
+		$this->assertEquals( $country, $object->get_shipping_country() );
+		$this->assertEquals( $state, $object->get_shipping_state() );
 	}
 
 	/**
@@ -1012,10 +1060,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_date_completed() {
 		$object = new WC_Order();
 		$object->set_date_completed( '2016-12-12' );
-		$this->assertEquals( '1481500800', $object->get_date_completed() );
+		$this->assertEquals( '1481500800', $object->get_date_completed()->getOffsetTimestamp() );
 
 		$object->set_date_completed( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_completed() );
+		$this->assertEquals( 1481500800, $object->get_date_completed()->getTimestamp() );
 	}
 
 	/**
@@ -1025,10 +1073,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$set_to = 'PayPal';
 		$object->set_date_paid( '2016-12-12' );
-		$this->assertEquals( 1481500800, $object->get_date_paid() );
+		$this->assertEquals( 1481500800, $object->get_date_paid()->getOffsetTimestamp() );
 
 		$object->set_date_paid( '1481500800' );
-		$this->assertEquals( 1481500800, $object->get_date_paid() );
+		$this->assertEquals( 1481500800, $object->get_date_paid()->getTimestamp() );
 	}
 
 	/**

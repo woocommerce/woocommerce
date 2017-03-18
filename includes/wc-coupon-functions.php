@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.7.0
+ * @version     3.0.0
  */
 
 /**
@@ -73,7 +73,7 @@ function wc_coupons_enabled() {
 /**
  * Get coupon code by ID.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $id Coupon ID.
  * @return string
  */
@@ -85,7 +85,7 @@ function wc_get_coupon_code_by_id( $id ) {
 /**
  * Get coupon code by ID.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $code
  * @param int $exclude Used to exclude an ID from the check if you're checking existance.
  * @return int

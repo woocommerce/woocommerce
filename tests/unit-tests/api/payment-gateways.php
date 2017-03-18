@@ -3,7 +3,7 @@
  * Tests for the Payment Gateways REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Payment_Gateways extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -33,7 +33,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting all payment gateways.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateways() {
 		wp_set_current_user( $this->user );
@@ -69,7 +69,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure payment gateways cannot viewed without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateways_without_permission() {
 		wp_set_current_user( 0 );
@@ -80,7 +80,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single payment gateway.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway() {
 		wp_set_current_user( $this->user );
@@ -104,7 +104,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a payment gateway without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
@@ -115,7 +115,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a payment gateway with an invalid id.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -126,7 +126,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single payment gateway.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway() {
 		wp_set_current_user( $this->user );
@@ -209,7 +209,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a payment gateway without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
@@ -227,7 +227,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a payment gateway with an invalid id.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -242,7 +242,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test the payment gateway schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_payment_gateway_schema() {
 		wp_set_current_user( $this->user );
@@ -266,7 +266,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Loads a particualr gateway's settings so we can correctly test API output.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.
 	 */
 	private function get_settings( $gateway_class ) {

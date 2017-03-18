@@ -407,7 +407,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$download_file = $_product->get_file( $result->download_id );
 
-			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$_product->get_name() . ' &ndash; ' . $download_file['name'],
@@ -433,9 +433,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'order_id'              => $order->get_id(),
 				'order_key'             => $order->get_order_key(),
 				'downloads_remaining'   => $result->downloads_remaining,
-				'access_expires' 	    => $result->access_expires,
-				'file'                  => $download_file,
-				'file_name'             => $download_file['name'],
+				'access_expires'        => $result->access_expires,
+				'file'                  => array(
+					'name' => $download_file->get_name(),
+					'file' => $download_file->get_file(),
+				),
 			);
 
 			$file_number++;
@@ -561,7 +563,7 @@ add_action( 'update_user_meta', 'wc_meta_update_last_update_time', 10, 4 );
  * @param int $user_id The user to set a timestamp for.
  */
 function wc_set_user_last_update_time( $user_id ) {
-	update_user_meta( $user_id, 'last_update', time() );
+	update_user_meta( $user_id, 'last_update', gmdate( 'U' ) );
 }
 
 /**

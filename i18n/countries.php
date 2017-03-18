@@ -121,7 +121,7 @@ return array(
 	'ID' => __( 'Indonesia', 'woocommerce' ),
 	'IR' => __( 'Iran', 'woocommerce' ),
 	'IQ' => __( 'Iraq', 'woocommerce' ),
-	'IE' => __( 'Republic of Ireland', 'woocommerce' ),
+	'IE' => __( 'Ireland', 'woocommerce' ),
 	'IM' => __( 'Isle of Man', 'woocommerce' ),
 	'IL' => __( 'Israel', 'woocommerce' ),
 	'IT' => __( 'Italy', 'woocommerce' ),

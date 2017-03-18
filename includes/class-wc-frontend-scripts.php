@@ -49,7 +49,7 @@ class WC_Frontend_Scripts {
 	/**
 	 * Add theme support for default WP themes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public static function add_default_theme_support() {
 		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -393,6 +393,7 @@ class WC_Frontend_Scripts {
 			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
 				self::enqueue_script( 'photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
+				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
 			self::enqueue_script( 'wc-single-product' );
 		}
@@ -556,7 +557,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
-					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
 				);
 			break;
 		}

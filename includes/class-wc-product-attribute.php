@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Attributes can be global (taxonomy based) or local to the product itself.
  * Uses ArrayAccess to be BW compatible with previous ways of reading attributes.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -19,7 +19,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Data array.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(

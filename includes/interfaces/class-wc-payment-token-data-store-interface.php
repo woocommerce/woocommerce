@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by payment token store classes.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooThemes
  */
@@ -48,7 +48,7 @@ interface WC_Payment_Token_Data_Store_Interface {
 	/**
 	 * Get a token's type by ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param id $token_id
 	 * @return string
 	 */

@@ -195,7 +195,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate a text value for a text based setting.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @param array  $setting
 	 * @return string
@@ -209,7 +209,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate select based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @param array  $setting
 	 * @return string|WP_Error
@@ -225,7 +225,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate multiselect based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $values
 	 * @param array  $setting
 	 * @return string|WP_Error
@@ -252,7 +252,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate image_width based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $value
 	 * @param array $setting
 	 * @return string|WP_Error
@@ -278,7 +278,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate radio based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @param array  $setting
 	 * @return string|WP_Error
@@ -290,7 +290,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate checkbox based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @param array  $setting
 	 * @return string|WP_Error
@@ -309,7 +309,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Validate textarea based settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $value
 	 * @param array  $setting
 	 * @return string
@@ -329,7 +329,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Add meta query.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $args       Query args.
 	 * @param array $meta_query Meta query.
 	 * @return array

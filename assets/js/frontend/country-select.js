@@ -7,49 +7,47 @@ jQuery( function( $ ) {
 	}
 
 	function getEnhancedSelectFormatString() {
-		var formatString = {
-			noResults: function() {
-				return wc_country_select_params.i18n_no_matches;
-			},
-			errorLoading: function() {
-				return wc_country_select_params.i18n_ajax_error;
-			},
-			inputTooShort: function( args ) {
-				var remainingChars = args.minimum - args.input.length;
+		return {
+			'language': {
+				errorLoading: function() {
+					return wc_country_select_params.i18n_ajax_error;
+				},
+				inputTooLong: function( args ) {
+					var overChars = args.input.length - args.maximum;
 
-				if ( 1 === remainingChars ) {
-					return wc_country_select_params.i18n_input_too_short_1;
+					if ( 1 === overChars ) {
+						return wc_country_select_params.i18n_input_too_long_1;
+					}
+
+					return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
+				},
+				inputTooShort: function( args ) {
+					var remainingChars = args.minimum - args.input.length;
+
+					if ( 1 === remainingChars ) {
+						return wc_country_select_params.i18n_input_too_short_1;
+					}
+
+					return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
+				},
+				loadingMore: function() {
+					return wc_country_select_params.i18n_load_more;
+				},
+				maximumSelected: function( args ) {
+					if ( args.maximum === 1 ) {
+						return wc_country_select_params.i18n_selection_too_long_1;
+					}
+
+					return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
+				},
+				noResults: function() {
+					return wc_country_select_params.i18n_no_matches;
+				},
+				searching: function() {
+					return wc_country_select_params.i18n_searching;
 				}
-
-				return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
-			},
-			inputTooLong: function( args ) {
-				var overChars = args.input.length - args.maximum;
-
-				if ( 1 === overChars ) {
-					return wc_country_select_params.i18n_input_too_long_1;
-				}
-
-				return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
-			},
-			maximumSelected: function( args ) {
-				if ( 1 === args.maximum ) {
-					return wc_country_select_params.i18n_selection_too_long_1;
-				}
-
-				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
-			},
-			loadingMore: function() {
-				return wc_country_select_params.i18n_load_more;
-			},
-			searching: function() {
-				return wc_country_select_params.i18n_searching;
 			}
 		};
-       
-        var language = { 'language' : formatString };
-       
-		return language;
 	}
 
 	// Select2 Enhancement if it exists
@@ -62,6 +60,10 @@ jQuery( function( $ ) {
 				}, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
+				// Maintain focus after select https://github.com/select2/select2/issues/4384
+				$( this ).on( 'select2:select', function() {
+					$( this ).focus();
+				} );
 			});
 		};
 

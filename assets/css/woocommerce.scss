@@ -462,6 +462,18 @@ p.demo_store,
 					padding-bottom: 0.5em;
 					border: 0;
 				}
+
+				td:first-child {
+					width: 4em;
+					text-align: center;
+				}
+
+				.wc-grouped-product-add-to-cart-checkbox {
+					display: inline-block;
+					width: auto;
+					margin: 0 auto;
+					transform:scale(1.5, 1.5);
+				}
 			}
 		}
 	}
@@ -1119,30 +1131,24 @@ p.demo_store,
 	}
 
 	td.product-name {
-		dl.variation {
-			margin: 0.25em 0;
-			@include clearfix();
+		dl.variation, .wc-item-meta {
+			list-style: none outside;
 
-			dt,
-			dd {
-				display: inline-block;
+			dt, .wc-item-meta-label {
 				float: left;
-				margin-bottom: 1em;
-			}
-
-			dt {
-				font-weight: 700;
-				padding: 0 0 0.25em;
-				margin: 0 4px 0 0;
-				clear: left;
+				clear: both;
+				margin-right: .25em;
+				display: inline-block;
+				list-style: none outside;
 			}
 
 			dd {
-				padding: 0 0 0.25em;
+				margin: 0;
+			}
 
-				p:last-child {
-					margin-bottom: 0;
-				}
+			p,
+			&:last-child {
+				margin-bottom: 0;
 			}
 		}
 
@@ -1395,9 +1401,9 @@ p.demo_store,
 	/**
 	 * Order page
 	 */
-	.order_details {
+	ul.order_details {
 		@include clearfix();
-		margin: 0 0 1.5em;
+		margin: 0 0 3em;
 		list-style: none;
 
 		li {
@@ -1423,6 +1429,10 @@ p.demo_store,
 				border: none;
 			}
 		}
+	}
+
+	.wc-bacs-bank-details-account-name {
+		font-weight: bold;
 	}
 
 	/**

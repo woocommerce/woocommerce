@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Product Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -15,7 +15,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Data stored in meta keys, but not considered "meta".
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -77,7 +77,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp' ) );
+			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_data', array(
@@ -91,8 +91,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created() ),
-			'post_date_gmt'  => get_gmt_from_date( date( 'Y-m-d H:i:s', $product->get_date_created() ) ),
+			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'  => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -130,8 +130,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->set_props( array(
 			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
-			'date_created'      => $post_object->post_date,
-			'date_modified'     => $post_object->post_modified,
+			'date_created'      => strtotime( $post_object->post_date_gmt ),
+			'date_modified'     => strtotime( $post_object->post_modified_gmt ),
 			'status'            => $post_object->post_status,
 			'description'       => $post_object->post_content,
 			'short_description' => $post_object->post_excerpt,
@@ -157,16 +157,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			wp_update_post( array(
-				'ID'             => $product->get_id(),
-				'post_content'   => $product->get_description( 'edit' ),
-				'post_excerpt'   => $product->get_short_description( 'edit' ),
-				'post_title'     => $product->get_name( 'edit' ),
-				'post_parent'    => $product->get_parent_id( 'edit' ),
-				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
-				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'ID'                => $product->get_id(),
+				'post_content'      => $product->get_description( 'edit' ),
+				'post_excerpt'      => $product->get_short_description( 'edit' ),
+				'post_title'        => $product->get_name( 'edit' ),
+				'post_parent'       => $product->get_parent_id( 'edit' ),
+				'comment_status'    => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
+				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'        => $product->get_menu_order( 'edit' ),
+				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
 		}
 
@@ -219,7 +223,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Read product data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
@@ -281,7 +285,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Read extra data associated with the product, like button text or product URL for external products.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
@@ -297,7 +301,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Catalog visibility valid values are 'visible', 'catalog', 'search', and 'hidden'.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_visibility( &$product ) {
 		$terms           = get_the_terms( $product->get_id(), 'product_visibility' );
@@ -326,7 +330,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Read attributes from post meta.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_attributes( &$product ) {
 		$meta_values = maybe_unserialize( get_post_meta( $product->get_id(), '_product_attributes', true ) );
@@ -359,7 +363,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Read downloads from post meta.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_downloads( &$product ) {
 		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $product->get_id(), '_downloadable_files', true ) ) );
@@ -382,7 +386,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
@@ -447,6 +451,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 					$updated = true;
 					break;
+				case 'date_on_sale_from' :
+				case 'date_on_sale_to' :
+					$updated = update_post_meta( $product->get_id(), $meta_key, $value ? $value->getTimestamp() : '' );
+					break;
 				default :
 					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 					break;
@@ -479,7 +487,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Handle updated meta props after updating meta data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Product $product
 	 */
 	protected function handle_updated_props( &$product ) {
@@ -513,7 +521,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -532,7 +540,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update visibility terms based on props.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param bool Force update. Used during create.
 	 * @param WC_Product
 	 */
@@ -578,7 +586,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product
 	 * @param bool Force update. Used during create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_attributes( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -623,7 +631,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update downloads.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @param bool Force update. Used during create.
 	 * @return bool If updated or not.
@@ -657,7 +665,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Make sure we store the product type and version (to track data changes).
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function update_version_and_type( &$product ) {
 		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
@@ -676,11 +684,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Clear any caches.
 	 *
 	 * @param WC_Product
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
-		wp_cache_delete( 'product-' . $product->get_id(), 'products' );
+		wp_cache_delete( 'object-' . $product->get_id(), 'products' );
 	}
 
 	/*
@@ -694,7 +702,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * ID and parent_id present. Example: $return[0]->id, $return[0]->parent_id.
 	 *
 	 * @return array
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function get_on_sale_products() {
 		global $wpdb;
@@ -722,7 +730,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * some extra meta queries and ALL products (posts_per_page = -1).
 	 *
 	 * @return array
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function get_featured_product_ids() {
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
@@ -752,7 +760,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Check if product sku is found for any other product IDs.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $product_id
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
 	 * @return bool
@@ -773,7 +781,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Return product ID based on SKU.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $sku
 	 * @return int
 	 */
@@ -792,7 +800,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns an array of IDs of products that have sales starting soon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_starting_sales() {
@@ -807,13 +815,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value > 0
 			AND postmeta.meta_value < %s
 			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp' ) ) );
+		", current_time( 'timestamp', true ) ) );
 	}
 
 	/**
 	 * Returns an array of IDs of products that have sales which are due to end.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_ending_sales() {
@@ -828,13 +836,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value > 0
 			AND postmeta.meta_value < %s
 			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp' ) ) );
+		", current_time( 'timestamp', true ) ) );
 	}
 
 	/**
 	 * Find a matching (enabled) variation within a variable product.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Product $product Variable product.
 	 * @param  array $match_attributes Array of attributes we want to try to match.
 	 * @return int Matching variation ID or 0.
@@ -865,7 +873,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				return 0;
 			}
 
-			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+			// Note not wc_clean here to prevent removal of entities.
+			$value = $match_attributes[ $attribute_field_name ];
 
 			$query_args['meta_query'][] = array(
 				'relation' => 'OR',
@@ -914,7 +923,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Return a list of related products (using data like categories and IDs).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
@@ -930,7 +939,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Builds the related posts query.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
@@ -993,7 +1002,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
-	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @since  3.0.0 this supports set, increase and decrease.
 	 * @param  int
 	 * @param  int|null $stock_quantity
 	 * @param  string $operation set, increase and decrease.
@@ -1023,7 +1032,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
-	 * @since  2.7.0 this supports set, increase and decrease.
+	 * @since  3.0.0 this supports set, increase and decrease.
 	 * @param  int
 	 * @param  int|null $quantity
 	 * @param  string $operation set, increase and decrease.
@@ -1051,7 +1060,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update a products average rating meta.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 */
 	public function update_average_rating( $product ) {
@@ -1061,7 +1070,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update a products review count meta.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 */
 	public function update_review_count( $product ) {
@@ -1071,7 +1080,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update a products rating counts.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 */
 	public function update_rating_counts( $product ) {
@@ -1081,7 +1090,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Get shipping class ID by slug.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param $slug string
 	 * @return int|false
 	 */
@@ -1268,7 +1277,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Get the product type based on product ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $product_id
 	 * @return bool|string
 	 */

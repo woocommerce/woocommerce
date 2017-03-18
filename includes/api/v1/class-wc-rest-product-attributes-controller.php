@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -656,7 +656,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Schedule to flush rewrite rules.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function flush_rewrite_rules() {
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );

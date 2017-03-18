@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -150,9 +150,10 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		$coupon = new WC_Coupon( (int) $post->ID );
 		$_data  = $coupon->get_data();
 
-		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
-		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
+		$format_decimal  = array( 'amount', 'minimum_amount', 'maximum_amount' );
+		$format_date     = array( 'date_created', 'date_modified' );
+		$format_date_utc = array( 'date_expires' );
+		$format_null     = array( 'usage_limit', 'usage_limit_per_user' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -161,7 +162,10 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $_data[ $key ] ) ) ) : null;
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
+		}
+		foreach( $format_date_utc as $key ) {
+			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
 		}
 
 		// Format null values.
@@ -257,7 +261,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
 					case 'code' :
-						$coupon_code = apply_filters( 'woocommerce_coupon_code', $value );
+						$coupon_code = wc_format_coupon_code( $value );
 						$id          = $coupon->get_id() ? $coupon->get_id() : 0;
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
@@ -269,6 +273,9 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 						break;
 					case 'description' :
 						$coupon->set_description( wp_filter_post_kses( $value ) );
+						break;
+					case 'expiry_date' :
+						$coupon->set_date_expires( $value );
 						break;
 					default :
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
@@ -372,7 +379,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Saves a coupon to the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|int
 	 */
