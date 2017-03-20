@@ -20,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+global $_align;
+
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -27,8 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php bloginfo( 'charset' ); ?>" />
 		<title><?php echo get_bloginfo( 'name', 'display' ); ?></title>
 	</head>
-	<body <?php echo is_rtl() ? 'rightmargin' : 'leftmargin'; ?>="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
-		<div id="wrapper" dir="<?php echo is_rtl() ? 'rtl' : 'ltr'?>">
+	<body <?php echo $_align['left']; ?>margin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+		<div id="wrapper" dir="<?php echo $_align['ltr']; ?>">
 			<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
 				<tr>
 					<td align="center" valign="top">
