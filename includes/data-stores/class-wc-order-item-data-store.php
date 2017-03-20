@@ -17,7 +17,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 *
 	 * @since  3.0.0
 	 * @param  int   $order_id
-	 * @param  array $item. order_item_name and order_item_type.
+	 * @param  array $item order_item_name and order_item_type.
 	 * @return int Order Item ID
 	 */
 	public function add_order_item( $order_id, $item ) {
@@ -44,7 +44,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 *
 	 * @since  3.0.0
 	 * @param  int   $item_id
-	 * @param  array $item. order_item_name or order_item_type.
+	 * @param  array $item order_item_name or order_item_type.
 	 * @return boolean
 	 */
 	public function update_order_item( $item_id, $item ) {

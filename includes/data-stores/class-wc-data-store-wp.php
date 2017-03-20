@@ -17,7 +17,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'post';
@@ -97,7 +97,7 @@ class WC_Data_Store_WP {
 	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing ->key and ->value)
-	 * @return meta ID
+	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
 		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, $meta->value, false );

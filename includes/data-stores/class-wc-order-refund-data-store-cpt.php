@@ -35,7 +35,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Delete a refund - no trash is supported.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
@@ -49,7 +49,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order
+	 * @param WC_Order $refund
 	 * @param object $post_object
 	 * @since 3.0.0
 	 */
@@ -67,7 +67,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
+	 * @param WC_Order $refund
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$refund ) {
