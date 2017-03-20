@@ -250,10 +250,10 @@ module.exports = function( grunt ) {
 					'php hook-docs.php'
 				].join( '&&' )
 			},
-			frontend_test: {
+			e2e_test: {
 				command: 'npm run test:single tests/frontend-tests/' + grunt.option( 'file' )
 			},
-			frontend_tests: {
+			e2e_tests: {
 				command: 'npm run test'
 			}
 		},
@@ -332,11 +332,11 @@ module.exports = function( grunt ) {
 		'makepot'
 	]);
 
-	grunt.registerTask( 'frontend-tests', [
-		'shell:frontend_tests'
+	grunt.registerTask( 'e2e-tests', [
+		'shell:e2e_tests'
 	]);
 
-	grunt.registerTask( 'frontend-test', [
-		'shell:frontend_test'
+	grunt.registerTask( 'e2e-test', [
+		'shell:e2e_test'
 	]);
 };
