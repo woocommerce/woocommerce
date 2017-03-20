@@ -275,7 +275,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item->get_code(),
-				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), $dp ),
+				'amount' => wc_format_decimal( $coupon_item->get_discount(), $dp ),
 			);
 		}
 

@@ -51,6 +51,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wc_average_rating',
 		'_wc_review_count',
 		'_variation_description',
+		'_wp_old_slug',
+		'_edit_last',
+		'_edit_lock',
 	);
 
 	/**

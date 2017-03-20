@@ -1285,7 +1285,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$_product = wc_get_product( $child_id );
 
-			if ( ! $_product->exists() ) {
+			if ( ! $_product || ! $_product->exists() ) {
 				continue;
 			}
 
