@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store_Interface {
 
 	/**
-	 * Create dowload permission for a user.
+	 * Create download permission for a user.
 	 *
 	 * @param WC_Customer_Download $download
 	 */

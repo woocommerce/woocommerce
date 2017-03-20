@@ -55,6 +55,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_file_paths',
 		'_product_image_gallery',
 		'_product_version',
+		'_wp_old_slug',
+		'_edit_last',
+		'_edit_lock',
 	);
 
 	/**

@@ -220,7 +220,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order
+	 * @param $order WC_Order
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
