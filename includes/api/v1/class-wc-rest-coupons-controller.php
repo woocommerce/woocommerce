@@ -546,7 +546,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'used_by' => array(
-					'description' => __( 'List of user IDs (or guest email addresses) who have used the coupon.', 'woocommerce' ),
+					'description' => __( 'List of user IDs (or guest email addresses) that have used the coupon.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',

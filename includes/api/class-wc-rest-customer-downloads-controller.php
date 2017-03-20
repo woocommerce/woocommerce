@@ -124,19 +124,19 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V
 					'readonly'    => true,
 				),
 				'downloads_remaining' => array(
-					'description' => __( 'Amount of downloads remaining.', 'woocommerce' ),
+					'description' => __( 'Number of downloads remaining.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'access_expires' => array(
-					'description' => __( "The date when the download access expires, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'access_expires_gmt' => array(
-					'description' => __( "The date when the download access expires, as GMT.", 'woocommerce' ),
+					'description' => __( "The date when download access expires, as GMT.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

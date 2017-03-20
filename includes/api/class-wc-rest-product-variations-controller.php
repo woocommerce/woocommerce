@@ -720,13 +720,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
