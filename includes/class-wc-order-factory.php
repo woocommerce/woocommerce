@@ -101,7 +101,7 @@ class WC_Order_Factory {
 					$classname = 'WC_Order_Item_Tax';
 				break;
 				default :
-					$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $item_id );
+					$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
 				break;
 			}
 
