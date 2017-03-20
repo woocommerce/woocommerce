@@ -41,7 +41,7 @@
     "cross-env": "^3.0.0",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
-    "chromedriver": "^2.27.3",
+    "chromedriver": "^2.25.0",
     "wc-e2e-page-objects": "0.2.0"
   },
   "engines": {
