@@ -23,7 +23,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	 * Read/populate data properties specific to this order item.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item_Coupon $item
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
@@ -40,7 +40,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	 * Ran after both create and update, so $item->get_id() will be set.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item_Coupon $item
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();
