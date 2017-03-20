@@ -18,8 +18,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $_align;
-
 // Load colors
 $bg              = get_option( 'woocommerce_email_background_color' );
 $body            = get_option( 'woocommerce_email_body_background_color' );
@@ -106,7 +104,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 	font-size: 14px;
 	line-height: 150%;
-	text-align: <?php echo $_align['left']; ?>;
+	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
 .td {
@@ -135,7 +133,7 @@ h1 {
 	font-weight: 300;
 	line-height: 150%;
 	margin: 0;
-	text-align: <?php echo $_align['left']; ?>;
+	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 	text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
 	-webkit-font-smoothing: antialiased;
 }
@@ -148,7 +146,7 @@ h2 {
 	font-weight: bold;
 	line-height: 130%;
 	margin: 16px 0 8px;
-	text-align: <?php echo $_align['left']; ?>;
+	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
 h3 {
@@ -159,7 +157,7 @@ h3 {
 	font-weight: bold;
 	line-height: 130%;
 	margin: 16px 0 8px;
-	text-align: <?php echo $_align['left']; ?>;
+	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
 a {

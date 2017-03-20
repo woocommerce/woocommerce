@@ -177,27 +177,6 @@ class WC_Emails {
 	 * Init email classes.
 	 */
 	public function init() {
-		// Global variable for aligning to be used in email templates
-		global $_align;
-
-		if ( is_rtl() ) {
-			$_align = array(
-				'left'	=> 'right',
-				'right'	=> 'left',
-				'rtl'	=> 'ltr',
-				'ltr'	=> 'rtl',
-			);
-		} else {
-			$_align = array(
-				'left'	=> 'left',
-				'right'	=> 'right',
-				'rtl'	=> 'rtl',
-				'ltr'	=> 'ltr',
-			);
-		}
-
-		$_align = apply_filters( 'woocommerce_email_aligning', $_align );
-
 		// Include email classes
 		include_once( dirname( __FILE__ ) . '/emails/class-wc-email.php' );
 
