@@ -105,7 +105,7 @@ class WC_Order_Factory {
 				break;
 			}
 
-			if ( class_exists( $classname ) ) {
+			if ( $classname && class_exists( $classname ) ) {
 				try {
 					// Try to get from cache, otherwise create a new object,
 					$item = wp_cache_get( 'object-' . $id, 'order-items' );
