@@ -100,8 +100,12 @@ class WC_Order_Factory {
 				case 'tax' :
 					$classname = 'WC_Order_Item_Tax';
 				break;
+				default :
+					$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $item_id );
+				break;
 			}
-			if ( $classname ) {
+
+			if ( class_exists( $classname ) ) {
 				try {
 					// Try to get from cache, otherwise create a new object,
 					$item = wp_cache_get( 'object-' . $id, 'order-items' );

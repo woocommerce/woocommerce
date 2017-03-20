@@ -652,13 +652,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string group
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = array(
+		$type_to_group = apply_filters( 'woocommerce_order_type_to_group', array(
 			'line_item' => 'line_items',
 			'tax'       => 'tax_lines',
 			'shipping'  => 'shipping_lines',
 			'fee'       => 'fee_lines',
 			'coupon'    => 'coupon_lines',
-		);
+		) );
 		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
