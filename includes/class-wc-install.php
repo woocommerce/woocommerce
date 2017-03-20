@@ -309,7 +309,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Create pages that the plugin relies on, storing page id's in variables.
+	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
 		include_once( dirname( __FILE__ ) . '/admin/wc-admin-functions.php' );
