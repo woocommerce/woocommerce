@@ -1045,7 +1045,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid = true;
 		}
 
-		// Specific product ID's excluded from the discount
+		// Specific product IDs excluded from the discount
 		if ( sizeof( $this->get_excluded_product_ids() ) && sizeof( array_intersect( $product_ids, $this->get_excluded_product_ids() ) ) ) {
 			$valid = false;
 		}

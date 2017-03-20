@@ -744,7 +744,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
+	 * Get an unpaginated list all product IDs (both filtered and unfiltered). Makes use of transients.
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {
