@@ -110,14 +110,13 @@ class WC_Admin_Post_Types {
 	 * Adjust shop order columns for the user on certain conditions.
 	 */
 	public function adjust_shop_order_columns( $hidden, $screen ) {
-		if ( isset( $screen->id ) && $screen->id == 'edit-shop_order' ) {
-			if ( 'disabled' == get_option( 'woocommerce_ship_to_countries' ) ) {
+		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
+			if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
 				$hidden[] = 'shipping_address';
 			} else {
 				$hidden[] = 'billing_address';
 			}
 		}
-		
 		return $hidden;
 	}
 
