@@ -101,7 +101,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		$item->set_defaults();
 
-		$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+		// Get from cache if available.
+		$data = wp_cache_get( 'data-' . $item->get_id(), 'order-items' );
+
+		if ( false === $data ) {
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			wp_cache_set( 'data-' . $item->get_id(), $data, 'order-items' );
+		}
 
 		if ( ! $data ) {
 			throw new Exception( __( 'Invalid order item.', 'woocommerce' ) );
@@ -128,6 +134,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * Clear meta cachce.
 	 */
 	public function clear_cache( &$item ) {
-		wp_cache_delete( 'object-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'data-' . $item->get_id(), 'order-items' );
 	}
 }
