@@ -53,11 +53,11 @@ class WC_Admin_Profile {
 						'description' => '',
 					),
 					'billing_address_1' => array(
-						'label'       => __( 'Address 1', 'woocommerce' ),
+						'label'       => __( 'Address line 1', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_address_2' => array(
-						'label'       => __( 'Address 2', 'woocommerce' ),
+						'label'       => __( 'Address line 2', 'woocommerce' ),
 						'description' => '',
 					),
 					'billing_city' => array(
@@ -106,11 +106,11 @@ class WC_Admin_Profile {
 						'description' => '',
 					),
 					'shipping_address_1' => array(
-						'label'       => __( 'Address 1', 'woocommerce' ),
+						'label'       => __( 'Address line 1', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_address_2' => array(
-						'label'       => __( 'Address 2', 'woocommerce' ),
+						'label'       => __( 'Address line 2', 'woocommerce' ),
 						'description' => '',
 					),
 					'shipping_city' => array(

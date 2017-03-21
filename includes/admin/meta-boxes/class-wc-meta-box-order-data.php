@@ -52,11 +52,11 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'address_1' => array(
-				'label' => __( 'Address 1', 'woocommerce' ),
+				'label' => __( 'Address line 1', 'woocommerce' ),
 				'show'  => false,
 			),
 			'address_2' => array(
-				'label' => __( 'Address 2', 'woocommerce' ),
+				'label' => __( 'Address line 2', 'woocommerce' ),
 				'show'  => false,
 			),
 			'city' => array(
@@ -101,11 +101,11 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'address_1' => array(
-				'label' => __( 'Address 1', 'woocommerce' ),
+				'label' => __( 'Address line 1', 'woocommerce' ),
 				'show'  => false,
 			),
 			'address_2' => array(
-				'label' => __( 'Address 2', 'woocommerce' ),
+				'label' => __( 'Address line 2', 'woocommerce' ),
 				'show'  => false,
 			),
 			'city' => array(
