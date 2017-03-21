@@ -296,7 +296,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
 				'description' => empty( $field['description'] ) ? '' : $field['description'],
 				'type'        => $field['type'],
-				'value'       => $gateway->settings[ $id ],
+				'value'       => empty( $gateway->settings[ $id ] ) ? '' : $gateway->settings[ $id ],
 				'default'     => empty( $field['default'] ) ? '' : $field['default'],
 				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
 				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
