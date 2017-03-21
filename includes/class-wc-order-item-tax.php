@@ -77,7 +77,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_total( $value ) {
-		$this->set_prop( 'tax_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax_total( $value ) {
-		$this->set_prop( 'shipping_tax_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
