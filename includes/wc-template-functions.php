@@ -580,9 +580,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H3.
 	 */
 	function woocommerce_template_loop_product_title() {
-		$tag = is_product_taxonomy() || is_shop() ? 'h2' : 'h3';
-
-		echo '<' . $tag . ' class="woocommerce-loop-product__title">' . get_the_title() . '</' . $tag . '>';
+		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>';
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
