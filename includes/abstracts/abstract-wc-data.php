@@ -119,9 +119,16 @@ abstract class WC_Data {
 
 	/**
 	 * Re-run the constructor with the object ID.
+	 *
+	 * If the object no longer exists, remove the ID.
 	 */
 	public function __wakeup() {
-		$this->__construct( $this->id );
+		try {
+			$this->__construct( absint( $this->id ) );
+		} catch ( Exception $e ) {
+			$this->set_id( 0 );
+			$this->set_object_read( true );
+		}
 	}
 
 	/**
