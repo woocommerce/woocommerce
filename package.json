@@ -10,8 +10,8 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
-    "test": "cross-env NODE_CONFIG_DIR='./tests/frontend-tests/config' BABEL_ENV=commonjs mocha \"tests/frontend-tests\" --compilers js:babel-register --recursive",
-    "test:single": "cross-env NODE_CONFIG_DIR='./tests/frontend-tests/config' BABEL_ENV=commonjs mocha --compilers js:babel-register"
+    "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --compilers js:babel-register --recursive",
+    "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --compilers js:babel-register"
   },
   "devDependencies": {
     "grunt": "~1.0.1",
