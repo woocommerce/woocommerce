@@ -159,7 +159,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		foreach ( $token->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $token, $function ) ) ) {
-				$token->{$function}( get_post_meta( $token->get_id(), $key, true ) );
+				$token->{$function}( get_metadata( 'payment_token', $token->get_id(), $key, true ) );
 			}
 		}
 	}
@@ -188,7 +188,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			}
 			$function = 'get_' . $key;
 			if ( is_callable( array( $token, $function ) ) ) {
-				if ( update_post_meta( $token->get_id(), $key, $token->{$function}( 'edit' ) ) ) {
+				if ( update_metadata( 'payment_token', $token->get_id(), $key, $token->{$function}( 'edit' ) ) ) {
 					$updated_props[] = $key;
 				}
 			}
