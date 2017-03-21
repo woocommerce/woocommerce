@@ -941,7 +941,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'version' => array(
-					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
+					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1178,7 +1178,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'date_paid' => array(
-					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was paid, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
