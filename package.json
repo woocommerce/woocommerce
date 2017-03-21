@@ -42,7 +42,7 @@
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
     "chromedriver": "^2.25.0",
-    "wc-e2e-page-objects": "0.2.0"
+    "wc-e2e-page-objects": "0.2.2"
   },
   "engines": {
     "node": ">=6.9.4",
