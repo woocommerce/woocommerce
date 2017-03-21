@@ -216,12 +216,12 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -279,12 +279,12 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
