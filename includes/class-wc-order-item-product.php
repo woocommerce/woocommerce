@@ -298,7 +298,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get fee taxes.
+	 * Get taxes.
 	 *
 	 * @param  string $context
 	 * @return array
