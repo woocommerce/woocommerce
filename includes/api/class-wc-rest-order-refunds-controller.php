@@ -526,7 +526,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				),
 				'api_refund' => array(
 					'description' => __( 'When true uses the payment gateway API to generate the refund.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'boolean',
 					'context'     => array( 'edit' ),
 					'default'     => true,
 				),
