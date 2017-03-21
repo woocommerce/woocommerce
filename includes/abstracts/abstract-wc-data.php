@@ -104,10 +104,31 @@ abstract class WC_Data {
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
 	 */
 	public function __construct( $read = 0 ) {
-
-		$this->data = array_merge( $this->data, $this->extra_data );
-
+		$this->data         = array_merge( $this->data, $this->extra_data );
 		$this->default_data = $this->data;
+	}
+
+	/**
+	 * Only store the object ID to avoid serializing the data object instance.
+	 *
+	 * @return array
+	 */
+	public function __sleep() {
+		return array( 'id' );
+	}
+
+	/**
+	 * Re-run the constructor with the object ID.
+	 *
+	 * If the object no longer exists, remove the ID.
+	 */
+	public function __wakeup() {
+		try {
+			$this->__construct( absint( $this->id ) );
+		} catch ( Exception $e ) {
+			$this->set_id( 0 );
+			$this->set_object_read( true );
+		}
 	}
 
 	/**
