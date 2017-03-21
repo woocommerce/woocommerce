@@ -1677,7 +1677,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item.
+	 * Get the refunded tax amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
@@ -1688,8 +1688,11 @@ class WC_Order extends WC_Abstract_Order {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$total += $refunded_item->get_total_tax();
+				$refunded_item_id = (int) $refunded_item->get_meta( '_refunded_item_id' );
+				if ( $refunded_item_id === $item_id ) {
+					$taxes = $refunded_item->get_taxes();
+					$total += isset( $taxes['total'][ $tax_id ] ) ? $taxes['total'][ $tax_id ] : 0;
+					break;
 				}
 			}
 		}
