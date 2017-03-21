@@ -472,6 +472,56 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'description' => __( 'Shipping method settings.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
+					'properties' => array(
+						'id' => array(
+							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'label' => array(
+							'description' => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'type' => array(
+							'description' => __( 'Type of setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
+							'readonly'    => true,
+						),
+						'value' => array(
+							'description' => __( 'Setting value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'default' => array(
+							'description' => __( 'Default value for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tip' => array(
+							'description' => __( 'Extra help text explaining the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'placeholder' => array(
+							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
 				),
 			),
 		);

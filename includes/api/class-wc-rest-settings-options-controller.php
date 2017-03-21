@@ -517,12 +517,13 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'readonly'     => true,
 				),
 				'type'             => array(
-					'description'  => __( 'Type of setting. Allowed values: text, email, number, color, password, textarea, select, multiselect, radio, image_width, checkbox.', 'woocommerce' ),
+					'description'  => __( 'Type of setting.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'context'      => array( 'view', 'edit' ),
+					'enum'         => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 					'readonly'     => true,
 				),
 				'options'          => array(
