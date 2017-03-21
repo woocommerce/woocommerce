@@ -43,15 +43,7 @@ class WC_Product_Factory {
 		$classname = $this->get_product_classname( $product_id, $product_type );
 
 		try {
-			// Try to get from cache, otherwise create a new object,
-			$product = wp_cache_get( 'product-' . $product_id, 'products' );
-
-			if ( ! is_a( $product, 'WC_Product' ) ) {
-				$product = new $classname( $product_id, $deprecated );
-				wp_cache_set( 'product-' . $product_id, $product, 'products' );
-			}
-
-			return $product;
+			return new $classname( $product_id, $deprecated );
 		} catch ( Exception $e ) {
 			return false;
 		}
