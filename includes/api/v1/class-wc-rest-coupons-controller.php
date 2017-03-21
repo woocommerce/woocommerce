@@ -164,7 +164,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $format_date as $key ) {
 			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
 		}
-		foreach( $format_date_utc as $key ) {
+		foreach ( $format_date_utc as $key ) {
 			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
 		}
 
