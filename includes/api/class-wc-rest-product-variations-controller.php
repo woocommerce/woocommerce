@@ -835,8 +835,20 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
+						'date_created_gmt' => array(
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'date_modified' => array(
 							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'date_modified_gmt' => array(
+							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
