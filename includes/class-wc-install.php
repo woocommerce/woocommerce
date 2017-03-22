@@ -521,7 +521,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
   order_item_name TEXT NOT NULL,
-  order_item_type varchar(20) NOT NULL DEFAULT '',
+  order_item_type varchar(200) NOT NULL DEFAULT '',
   order_id BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (order_item_id),
   KEY order_id (order_id)
