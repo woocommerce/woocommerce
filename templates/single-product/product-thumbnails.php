@@ -33,6 +33,7 @@ if ( $attachment_ids && has_post_thumbnail() ) {
 
 		$attributes = array(
 			'title'                   => $image_title,
+			'data-src'                => $full_size_image[0],
 			'data-large_image'        => $full_size_image[0],
 			'data-large_image_width'  => $full_size_image[1],
 			'data-large_image_height' => $full_size_image[2],
