@@ -137,7 +137,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'is_paying_customer' => get_user_meta( $customer_id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
 			'username'           => $user_object->user_login,
-			'date_created'       => strtotime( $user_object->user_registered ),
+			'date_created'       => 0 < $user_object->user_registered ? strtotime( $user_object->user_registered . ' GMT' ) : null,
 			'date_modified'      => get_user_meta( $customer_id, 'last_update', true ),
 			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
 		) );
