@@ -695,7 +695,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
-		wp_cache_delete( 'object-' . $product->get_id(), 'products' );
 	}
 
 	/*

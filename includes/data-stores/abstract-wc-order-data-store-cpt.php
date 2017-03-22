@@ -263,7 +263,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
-		wp_cache_delete( 'object-' . $order->get_id(), 'orders' );
+		wp_cache_delete( 'order-items-' . $order->get_id(), 'orders' );
 	}
 
 	/**
@@ -276,8 +276,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read_items( $order, $type ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
-		$items         = $wpdb->get_results( $get_items_sql );
+		// Get from cache if available.
+		$items = wp_cache_get( 'order-items-' . $order->get_id(), 'orders' );
+
+		if ( false === $items ) {
+			$get_items_sql = $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id;", $order->get_id() );
+			$items         = $wpdb->get_results( $get_items_sql );
+			foreach ( $items as $item ) {
+				wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
+			}
+			wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+		}
+
+		$items = wp_list_filter( $items, array( 'order_item_type' => $type ) );
 
 		if ( ! empty( $items ) ) {
 			$items = array_map( array( 'WC_Order_Factory', 'get_order_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
@@ -303,6 +314,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order->get_id() ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() ) );
 		}
+		$this->clear_caches( $order );
 	}
 
 	/**
