@@ -351,8 +351,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_item_downloads() {
-		global $wpdb;
-
 		$files   = array();
 		$product = $this->get_product();
 		$order   = $this->get_order();
