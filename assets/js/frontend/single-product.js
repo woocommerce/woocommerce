@@ -77,6 +77,11 @@ jQuery( function( $ ) {
 		this.$target = $target;
 		this.$images = $( '.woocommerce-product-gallery__image', $target );
 
+		// No images? Abort.
+		if ( 0 === this.$images.length ) {
+			return;
+		}
+
 		// Make this object available.
 		$target.data( 'product_gallery', this );
 
