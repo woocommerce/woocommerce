@@ -147,12 +147,12 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 					'readonly'    => true,
 				),
 				'note' => array(
-					'description' => __( 'Order note.', 'woocommerce' ),
+					'description' => __( 'Order note content.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'customer_note' => array(
-					'description' => __( 'Shows/define if the note is only for reference or for the customer (the user will be notified).', 'woocommerce' ),
+					'description' => __( 'If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
