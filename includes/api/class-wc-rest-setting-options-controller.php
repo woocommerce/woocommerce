@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Settings Options controller
+ * REST API Setting Options controller
  *
  * Handles requests to the /settings/$group/$setting endpoints.
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * REST API Settings Options controller class.
+ * REST API Setting Options controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
@@ -32,7 +32,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings';
+	protected $rest_base = 'settings/(?P<group>[\w-]+)';
 
 	/**
 	 * Register routes.
@@ -40,7 +40,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @since 3.0.0
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			'args' => array(
 				'group' => array(
 					'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -55,23 +55,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/batch', array(
-			'args' => array(
-				'group' => array(
-					'description' => __( 'Settings group ID.', 'woocommerce' ),
-					'type'        => 'string',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<id>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
 			'args' => array(
 				'group' => array(
 					'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -94,6 +78,22 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			'args' => array(
+				'group' => array(
+					'description' => __( 'Settings group ID.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
 	}
 
@@ -316,13 +316,13 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @return array Links for the given setting.
 	 */
 	protected function prepare_links( $setting_id, $group_id ) {
-		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $group_id;
+		$base     = str_replace( '(?P<group>[\w-]+)', $group_id, $this->rest_base );
 		$links = array(
 			'self' => array(
-				'href' => rest_url( trailingslashit( $base ) . $setting_id ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $base, $setting_id ) ),
 			),
 			'collection' => array(
-				'href' => rest_url( $base ),
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 		);
 
