@@ -38,8 +38,8 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'name' => array(
-						'required' => true,
-						'type'     => 'string',
+						'required'    => true,
+						'type'        => 'string',
 						'description' => __( 'Shipping zone name.', 'woocommerce' ),
 					),
 				) ),
