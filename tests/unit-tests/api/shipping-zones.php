@@ -176,9 +176,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertTrue( $properties['id']['readonly'] );
 		$this->assertArrayHasKey( 'name', $properties );
-		$this->assertTrue( $properties['name']['required'] );
 		$this->assertArrayHasKey( 'order', $properties );
-		$this->assertFalse( $properties['order']['required'] );
 	}
 
 	/**
