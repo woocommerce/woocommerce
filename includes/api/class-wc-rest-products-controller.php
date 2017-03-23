@@ -577,7 +577,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'downloads'             => $this->get_downloads( $product ),
 			'download_limit'        => $product->get_download_limit(),
 			'download_expiry'       => $product->get_download_expiry(),
-			'download_type'         => 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'tax_status'            => $product->get_tax_status(),
@@ -1557,13 +1556,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
-				),
-				'download_type' => array(
-					'description' => __( 'Download type, this controls the schema on the front-end.', 'woocommerce' ),
-					'type'        => 'string',
-					'default'     => 'standard',
-					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
