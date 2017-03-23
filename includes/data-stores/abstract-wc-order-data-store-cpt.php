@@ -89,8 +89,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$id = $order->get_id();
 		$order->set_props( array(
 			'parent_id'     => $post_object->post_parent,
-			'date_created'  => 0 < $post_object->post_date_gmt ? strtotime( $post_object->post_date_gmt . ' GMT' ) : null,
-			'date_modified' => 0 < $post_object->post_modified_gmt ? strtotime( $post_object->post_modified_gmt . ' GMT' ) : null,
+			'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified' => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
 			'status'        => $post_object->post_status,
 		) );
 
