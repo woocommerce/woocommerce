@@ -43,7 +43,7 @@ class WC_Meta_Box_Order_Actions {
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 						<?php
 						$mailer           = WC()->mailer();
-						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
+						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
 						$mails            = $mailer->get_emails();
 
 						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>

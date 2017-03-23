@@ -33,7 +33,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$item_id = $item->get_id();
 
 		// Test that the initial key doesn't exist.
-		$item = new WC_Order_Item_Product( $item_id );;
+		$item = new WC_Order_Item_Product( $item_id );
 		$this->assertEmpty( $item->get_meta( '_test_key' ) );
 		$this->assertEmpty( wc_get_order_item_meta( $item_id, '_test_key' ) );
 

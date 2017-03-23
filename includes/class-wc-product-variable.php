@@ -266,12 +266,15 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $variation );
 		}
 
+		// See if prices should be shown for each variation after selection.
+		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
+
 		return apply_filters( 'woocommerce_available_variation', array_merge( $variation->get_data(), array(
 			'attributes'            => $variation->get_variation_attributes(),
 			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
 			'weight_html'           => wc_format_weight( $variation->get_weight() ),
 			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => wc_get_stock_html( $variation ),
 			'variation_id'          => $variation->get_id(),
 			'variation_is_visible'  => $variation->variation_is_visible(),

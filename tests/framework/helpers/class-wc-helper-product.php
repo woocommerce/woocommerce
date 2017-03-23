@@ -277,6 +277,15 @@ class WC_Helper_Product {
 		);
 		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
 
+		// Set product attributes global.
+		global $wc_product_attributes;
+		$wc_product_attributes = array();
+		foreach ( wc_get_attribute_taxonomies() as $tax ) {
+			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
+				$wc_product_attributes[ $name ] = $tax;
+			}
+		}
+
 		return $return;
 	}
 

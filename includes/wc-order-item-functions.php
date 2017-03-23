@@ -20,9 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return mixed
  */
 function wc_add_order_item( $order_id, $item ) {
-	$order_id = absint( $order_id );
-
-	if ( ! $order_id )
+	if ( ! $order_id = absint( $order_id ) )
 		return false;
 
 	$defaults = array(
@@ -69,12 +67,12 @@ function wc_update_order_item( $item_id, $args ) {
  * @return bool
  */
 function wc_delete_order_item( $item_id ) {
-	$item_id    = absint( $item_id );
-	$data_store = WC_Data_Store::load( 'order-item' );
 
-	if ( ! $item_id ) {
+	if ( ! $item_id = absint( $item_id ) ) {
 		return false;
 	}
+
+	$data_store = WC_Data_Store::load( 'order-item' );
 
 	do_action( 'woocommerce_before_delete_order_item', $item_id );
 

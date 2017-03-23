@@ -240,7 +240,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		parent::update_post_meta( $order );
 
-		// If address changed, store concatinated version to make searches faster.
+		// If address changed, store concatenated version to make searches faster.
 		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
 			update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
 		}

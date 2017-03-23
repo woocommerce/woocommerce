@@ -384,17 +384,23 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 */
 	function test_set_date_prop_server_timezone() {
 		// Repeat all tests with different server timezone.
+		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'Pacific/Fiji' );
+		// @codingStandardsIgnoreEnd
 		$this->test_set_date_prop_gmt_offset();
 		$this->test_set_date_prop_timezone_string();
 
 		// Repeat all tests with different server timezone.
+		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'Pacific/Tahiti' );
+		// @codingStandardsIgnoreEnd
 		$this->test_set_date_prop_gmt_offset();
 		$this->test_set_date_prop_timezone_string();
 
 		// Restore to UTC.
+		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -408,7 +414,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		$changes = array(
 			'prop1' => 'new_value1',
-			'prop3' => 'value3'
+			'prop3' => 'value3',
 		);
 
 		$object = new WC_Mock_WC_Data;

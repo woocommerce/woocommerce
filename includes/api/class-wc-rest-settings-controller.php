@@ -203,14 +203,14 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 					),
 				),
 				'label'            => array(
-					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description'      => array(
-					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',

@@ -192,7 +192,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_images( $object ),
+			'image'                 => current( $this->get_images( $object ) ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
@@ -216,8 +216,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
-
-
 
 	/**
 	 * Prepare objects query.
@@ -263,7 +261,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		// Thumbnail.
 		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
 			$image = $request['image'];
-			$image = current( $image );
 			if ( is_array( $image ) ) {
 				$image['position'] = 0;
 			}
@@ -720,13 +717,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
@@ -837,8 +834,20 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
+						'date_created_gmt' => array(
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'date_modified' => array(
 							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'date_modified_gmt' => array(
+							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

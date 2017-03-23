@@ -819,7 +819,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'readonly'    => true,
 				),
 				'version' => array(
-					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
+					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -954,12 +954,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1017,12 +1017,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1064,13 +1064,13 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_paid' => array(
-					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was paid, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_paid_gmt' => array(
-					'description' => __( "The date the order has been paid, as GMT.", 'woocommerce' ),
+					'description' => __( "The date the order was paid, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

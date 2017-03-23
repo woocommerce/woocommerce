@@ -95,8 +95,8 @@ class WC_Admin_Post_Types {
 		// Disable post type view mode options
 		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
 
-		// Update the screen options user meta.
-		add_action( 'admin_init', array( $this, 'adjust_shop_order_columns' ) );
+		// Update the screen options.
+		add_filter( 'default_hidden_columns', array( $this, 'adjust_shop_order_columns' ), 10, 2 );
 
 		// Show blank state
 		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
@@ -109,14 +109,15 @@ class WC_Admin_Post_Types {
 	/**
 	 * Adjust shop order columns for the user on certain conditions.
 	 */
-	public function adjust_shop_order_columns() {
-		$option_value = get_user_option( 'manageedit-shop_ordercolumnshidden' );
-
-		// If first time editing, disable columns by default. Likewise, CB should never be hidden.
-		if ( false === $option_value || ( is_array( $option_value ) && in_array( 'cb', $option_value ) ) ) {
-			$user = wp_get_current_user();
-			update_user_option( get_current_user_id(), 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
+	public function adjust_shop_order_columns( $hidden, $screen ) {
+		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
+			if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
+				$hidden[] = 'shipping_address';
+			} else {
+				$hidden[] = 'billing_address';
+			}
 		}
+		return $hidden;
 	}
 
 	/**
