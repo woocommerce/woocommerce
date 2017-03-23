@@ -820,13 +820,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param array $request
 	 * @return WC_Product
 	 */
-	protected function save_default_attributes( $product, $request  ) {
+	protected function save_default_attributes( $product, $request ) {
 		// Update default attributes options setting.
 		if ( isset( $request['default_attribute'] ) ) {
 			$request['default_attributes'] = $request['default_attribute'];
 		}
 
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
