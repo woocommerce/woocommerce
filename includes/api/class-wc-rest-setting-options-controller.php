@@ -32,7 +32,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings/(?P<group>[\w-]+)';
+	protected $rest_base = 'settings/(?P<group_id>[\w-]+)';
 
 	/**
 	 * Register routes.
@@ -316,7 +316,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @return array Links for the given setting.
 	 */
 	protected function prepare_links( $setting_id, $group_id ) {
-		$base     = str_replace( '(?P<group>[\w-]+)', $group_id, $this->rest_base );
+		$base     = str_replace( '(?P<group_id>[\w-]+)', $group_id, $this->rest_base );
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $base, $setting_id ) ),
