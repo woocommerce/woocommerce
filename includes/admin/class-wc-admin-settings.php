@@ -309,6 +309,7 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
+							&lrm;
 							<?php
 							if ( 'color' == $value['type'] ) {
 								echo '<span class="colorpickpreview" style="background: ' . esc_attr( $option_value ) . ';"></span>';
@@ -318,12 +319,13 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="<?php echo esc_attr( $type ); ?>"
+								dir="ltr"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								value="<?php echo esc_attr( $option_value ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
 								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
-								/> <?php echo $description; ?>
+								/>&lrm; <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
