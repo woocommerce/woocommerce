@@ -28,8 +28,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/settings', $routes );
-		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group>[\w-]+)', $routes );
-		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group>[\w-]+)/(?P<id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group_id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group_id>[\w-]+)/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
@@ -276,13 +276,14 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$request->set_body_params( array(
 			'update' => array(
 				array(
-				'id'    => 'woocommerce_shop_page_display',
-				'value' => 'both',
+					'id'    => 'woocommerce_shop_page_display',
+					'value' => 'both',
 				),
 			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
+
 		$this->assertEquals( 'both', $data['update'][0]['value'] );
 		$this->assertEquals( 'both', get_option( 'woocommerce_shop_page_display' ) );
 
@@ -373,8 +374,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_setting_invalid_setting_type() {
-		// $controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
-		$controller = $this->getMockBuilder( 'WC_Rest_Settings_Options_Controller' )->setMethods( array( 'get_group_settings', 'is_setting_type_valid' ) )->getMock();
+		// $controller = $this->getMock( 'WC_Rest_Setting_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+		$controller = $this->getMockBuilder( 'WC_Rest_Setting_Options_Controller' )->setMethods( array( 'get_group_settings', 'is_setting_type_valid' ) )->getMock();
 
 		$controller
 			->expects( $this->any() )
@@ -433,7 +434,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * Test updating a bad setting ID.
 	 *
 	 * @since 3.0.0
-	 * @covers WC_Rest_Settings_Options_Controller::update_item
+	 * @covers WC_Rest_Setting_Options_Controller::update_item
 	 */
 	public function test_update_setting_bad_setting_id() {
 		wp_set_current_user( $this->user );
