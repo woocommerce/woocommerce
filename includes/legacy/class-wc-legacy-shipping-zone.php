@@ -39,7 +39,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
 	public function update() {
-		wc_deprecated_function( 'WC_Shipping_Zone::update', '3.0', '::save instead.' );
+		wc_deprecated_function( 'WC_Shipping_Zone::update', '3.0', 'WC_Shipping_Zone::save instead.' );
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		try {
 			$data_store->update( $this );
@@ -53,7 +53,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
 	public function create() {
-		wc_deprecated_function( 'WC_Shipping_Zone::create', '3.0', '::save instead.' );
+		wc_deprecated_function( 'WC_Shipping_Zone::create', '3.0', 'WC_Shipping_Zone::save instead.' );
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		try {
 			$data_store->create( $this );
