@@ -1312,6 +1312,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
