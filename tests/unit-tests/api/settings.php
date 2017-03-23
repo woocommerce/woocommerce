@@ -13,7 +13,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Settings_Options_Controller();
+		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
