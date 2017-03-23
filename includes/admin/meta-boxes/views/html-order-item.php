@@ -120,9 +120,13 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 								echo '&ndash;';
 							}
 
-							if ( $item->get_subtotal() !== $item->get_total() ) {
-								echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-							}
+                            if ( $item->get_subtotal() !== $item->get_total() ) {
+                                if ( $tax_item_total == '' ) {
+                                    echo '<span class="wc-order-item-discount">&ndash;</span>';
+                                } else {
+                                    echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+                                }
+                            }
 
 							if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
 								echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
