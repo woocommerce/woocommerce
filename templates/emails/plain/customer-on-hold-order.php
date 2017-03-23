@@ -2,7 +2,7 @@
 /**
  * Customer on-hold order email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-processing-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-on-hold-order.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
