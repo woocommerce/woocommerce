@@ -175,7 +175,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			'sku'         => 'FIXED-SKU',
 			'sale_price'  => '8',
 			'description' => 'O_O',
-			'image'       => array( array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ) ),
+			'image'       => array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ),
 			'attributes'  => array( array( 'name' => 'pa_size', 'option' => 'medium' ) ),
 		) );
 		$response  = $this->server->dispatch( $request );
@@ -187,9 +187,8 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10', $variation['regular_price'] );
 		$this->assertEquals( 'FIXED-SKU', $variation['sku'] );
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
-
-		$this->assertContains( 'Dr1Bczxq4q', $variation['image'][0]['src'] );
-		$this->assertContains( 'test upload image', $variation['image'][0]['alt'] );
+		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'] );
+		$this->assertContains( 'test upload image', $variation['image']['alt'] );
 		$product->delete( true );
 	}
 
@@ -300,7 +299,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				array(
 					'id'          => $children[0],
 					'description' => 'Updated description.',
-					'image'       => array( array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ) ),
+					'image'       => array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ),
 				),
 			),
 			'delete' => array(
