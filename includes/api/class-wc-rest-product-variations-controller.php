@@ -192,7 +192,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_images( $object ),
+			'image'                 => current( $this->get_images( $object ) ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
@@ -261,7 +261,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		// Thumbnail.
 		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
 			$image = $request['image'];
-			$image = current( $image );
 			if ( is_array( $image ) ) {
 				$image['position'] = 0;
 			}
