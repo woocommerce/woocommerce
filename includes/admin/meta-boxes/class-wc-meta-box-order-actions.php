@@ -42,8 +42,14 @@ class WC_Meta_Box_Order_Actions {
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 						<?php
+						$available_emails = array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' );
+
+						if ( count( $theorder->get_refunds() ) > 0 ) {
+							$available_emails[] = 'customer_refunded_order';
+						}
+
+						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', $available_emails );
 						$mailer           = WC()->mailer();
-						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
 						$mails            = $mailer->get_emails();
 
 						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>
@@ -130,7 +136,13 @@ class WC_Meta_Box_Order_Actions {
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->get_id(), $order );
+							if ( 'customer_refunded_order' === $email_to_send ) {
+								$partial_refund = $order->get_remaining_refund_amount() > 0 || $order->get_remaining_refund_items() > 0;
+								$mail->trigger( $order->get_id(), $partial_refund );
+							} else {
+								$mail->trigger( $order->get_id(), $order );
+							}
+
 							/* translators: %s: email title */
 							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
 						}
