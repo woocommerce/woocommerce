@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
+class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
