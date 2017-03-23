@@ -34,7 +34,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->has_fields         = false;
 		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->method_title       = __( 'PayPal', 'woocommerce' );
-		$this->method_description = sprintf( __( 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %1$ssystem status%2$s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
+		$this->method_description = sprintf( __( 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="%s">system status</a> page for more details.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status' ) );
 		$this->supports           = array(
 			'products',
 			'refunds',
@@ -74,14 +74,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Logging method.
-	 * @param string $message
+	 *
+	 * @param string $message Log message.
+	 * @param string $level   Optional. Default 'info'.
+	 *     emergency|alert|critical|error|warning|notice|info|debug
 	 */
-	public static function log( $message ) {
+	public static function log( $message, $level = 'info' ) {
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->add( 'paypal', $message );
+			self::$log->log( $level, $message, array( 'source' => 'paypal' ) );
 		}
 	}
 
@@ -97,7 +100,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
 		}
 
-		$icon_html .= sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;" title="' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $this->get_icon_url( WC()->countries->get_base_country() ) ) );
+		$icon_html .= sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $this->get_icon_url( WC()->countries->get_base_country() ) ) );
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
@@ -281,7 +284,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $this->can_refund_order( $order ) ) {
-			$this->log( 'Refund Failed: No transaction ID' );
+			$this->log( 'Refund Failed: No transaction ID', 'error' );
 			return new WP_Error( 'error', __( 'Refund failed: No transaction ID', 'woocommerce' ) );
 		}
 
@@ -290,11 +293,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$result = WC_Gateway_Paypal_API_Handler::refund_transaction( $order, $amount, $reason );
 
 		if ( is_wp_error( $result ) ) {
-			$this->log( 'Refund Failed: ' . $result->get_error_message() );
+			$this->log( 'Refund Failed: ' . $result->get_error_message(), 'error' );
 			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
-		$this->log( 'Refund Result: ' . print_r( $result, true ) );
+		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
 		switch ( strtolower( $result->ACK ) ) {
 			case 'success':
@@ -320,12 +323,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
 			if ( is_wp_error( $result ) ) {
-				$this->log( 'Capture Failed: ' . $result->get_error_message() );
+				$this->log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
 				$order->add_order_note( sprintf( __( 'Payment could not captured: %s', 'woocommerce' ), $result->get_error_message() ) );
 				return;
 			}
 
-			$this->log( 'Capture Result: ' . print_r( $result, true ) );
+			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {

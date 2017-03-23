@@ -163,9 +163,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		}
 
 		// Show Result
-		echo '<div class="updated settings-error"><p>
-			' . sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ) . '
-		</p></div>';
+		echo '<div class="updated settings-error"><p>';
+		/* translators: %s: tax rates count */
+		printf(
+			__( 'Import complete - imported %s tax rates.', 'woocommerce' ),
+			'<strong>' . $loop . '</strong>'
+		);
+		echo '</p></div>';
 
 		$this->import_end();
 	}
@@ -251,7 +255,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 								<input type="file" id="upload" name="import" size="25" />
 								<input type="hidden" name="action" value="save" />
 								<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
-								<small><?php printf( __( 'Maximum size: %s', 'woocommerce' ), $size ); ?></small>
+								<small><?php
+									/* translators: %s: maximum upload size */
+									printf(
+										__( 'Maximum size: %s', 'woocommerce' ),
+										$size
+									);
+								?></small>
 							</td>
 						</tr>
 						<tr>

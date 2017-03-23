@@ -1,9 +1,9 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes, BFTrick, iCaleb
-Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, claudiulodro, woothemes, iCaleb
+Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
-Tested up to: 4.6
-Stable tag: 2.6.3
+Tested up to: 4.7
+Stable tag: 2.6.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,33 +161,72 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 2.7.0 =
+= 3.0.0 - 2017-04-04 =
+* New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom. Declare support with add_theme_support() - wc-product-gallery-zoom, wc-product-gallery-lightbox, wc-product-gallery-slider
+* Made the store notice dismissible on the frontend.
+* Variable products no longer show striked out prices in combination with ranges for clarity when on sale.
+* Prices no longer display as 'free' instead of 0, to fix issues with ranges and localization and for consistency.
+* Improved structured product data by using JSON-LD instead of inline Microdata.
+* Improved downloads list layout (template file).
 * Respect stock status and prevent the "out of stock threshold" setting affecting existing in-stock products.
-* Added Nigerian Provinces to i18n/state.
 * Improved handling of shop page rewrite rules to allow subpages.
 * Redirect to login after password reset.
 * When using authorizations in PayPal Standard, automatically capture funds when the order goes processing/completed.
 * On multisite, when a user logs into a store with an account on a site, but not the current site, rather than error, add the user to the current site as a customer.
 * Show variable weights/dimensions even when parent values are not set.
 * Automatically sort tax rates rather than allow clunky manual sorting.
+* When deleting a tax rate class, remove it's tax rates.
 * Made WC_Logger pluggable via wc_get_logger function.
 * Use 'average rating' post meta for 'rating' product sorting option.
 * Show better labels in nav menus metabox.
 * Sort “Recently Viewed” products by the view order.
-* Remove checkbox options in system status tools and replace with constants.
-* Allow oAuth1.0a authentication using headers.
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
-* When deleting a tax rate class, remove it's tax rates.
-* Made the store notice dismissible.
 * Improved the zone setup flow.
 * Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
-* New gallery on single product pages with better mobile support, PhotoSwipe and Zoom.
-* Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
+* Use all paid statuses in $customer->get_total_spent().
+* Move location of billing email field to work with password managers.
+* Option to restrict selling locations by country.
+* Added tool to clear orphaned variations in system status.
+* Remove checkbox options in system status tools and replace with constants.
+* Added security section in system status report.
+* Add image_url setting to PayPal Standard.
+* Fixed attribute registration. Attributes are non-hierarchical by default (parent is not supported).
+* Add sort parameter to checkout fields to aid with sorting per locale.
+* Merged percent and percent product coupon types (they provide the same discount).
+* Prevent payment details being cleared after update_checkout events.
+* Performance - Converted _featured and _visibility meta data to terms for faster catalog queries. Upgrade routine handles migration. Developers may need to update queries to reflect this change.
+* Includes product attributes archives links in "Additional Information" tab.
+* Select2 has been upgraded to v4.
+* Improved logging system for extensions.
+* Tax suffix is now hidden on non-taxable products.
+* Performance - Converted rating filters to visibility terms.
+* Performance - Added visibility term for outofstock products to speed those queries up also.
+* Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
+* Performance - Optimised variable product sync. Upper/lower price meta is no longer stored, just the main prices, if a child has weight, and if a child has dimensions.
+* Performance - Removed WP_Query from up-sells.php and related.php and replaced with PHP foreach loop (since we already have the product IDs).
+* Performance - Removed the feature where old orders get access to new downloads on product edit. Looping potentially thousands of orders to do this is too much of a performance burden for stores and this can sometimes be unexpected behavior too. This does however updates *edited* downloads.
+* Performance - Removed 'items' column on orders screen due to loading excessive data.
+* Performance - Deferred email sending for faster checkouts. Now uses CRON.
+* API - New Rest API v2 with support for meta_data amongst other things.
+* API - Removed last order from customers part of the API due to performance concerns - use orders endpoint instead. Other order data on the endpoint is now transient cached.
+* API - Allow oAuth1.0a authentication using headers.
+* API - New Shipping Zones endpoints.
+* API - New variations endpoints.
+* API - New settings endpoints.
+* API - Payment gateways and shipping methods endpoints.
+* API - Prevented the (broken) ability to manipulate variations directly on the products endpoints.
+* CLI - New CLI which uses the REST API endpoints rather than it's own functions.
+* Localization - Improved RTL support.
+* Localization - Added a language independent permalink setting function.
+* Localization - Added inline comments for placeholder strings.
+* Localization - Added Nigerian and Pakistan Provinces to i18n/state.
+* Localization - US and Poland postcode validation.
+* To read more about this release, see our dev blog announcement here: http://wp.me/p6wtcw-Uo
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 
-= 2.6 =
-2.6 is a major update. It is important that you make backups and ensure themes and extensions are 2.6 compatible before upgrading, in particular shipping method extensions (e.g. Table Rate Shipping) since 2.6 introduces Shipping Zone functionality. [Read more here](https://woocommerce.wordpress.com/2016/06/14/say-hello-to-woocommerce-2-6-zipping-zebra/).
+= 3.0 =
+3.0 is a major update. It is important that you make backups and ensure themes and extensions are 3.0 compatible before upgrading.

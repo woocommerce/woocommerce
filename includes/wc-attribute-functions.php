@@ -19,7 +19,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	return array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) );
+	return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
+}
+
+/**
+ * See if an attribute is actually valid.
+ * @since  3.0.0
+ * @param  string $value
+ * @return bool
+ */
+function wc_get_text_attributes_filter_callback( $value ) {
+	return '' !== $value;
+}
+
+/**
+ * Implode an array of attributes using WC_DELIMITER.
+ * @since  3.0.0
+ * @param  array $attributes
+ * @return string
+ */
+function wc_implode_text_attributes( $attributes ) {
+	return implode( ' ' . WC_DELIMITER . ' ', $attributes );
 }
 
 /**
@@ -111,9 +131,16 @@ function wc_attribute_label( $name, $product = '' ) {
 		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
 		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
-	} elseif ( $product && ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ]['name'] ) ) {
-		// Attempt to get label from product, as entered by the user
-		$label = $attributes[ sanitize_title( $name ) ]['name'];
+	} elseif ( $product ) {
+		if ( $product->is_type( 'variation' ) ) {
+			$product = wc_get_product( $product->get_parent_id() );
+		}
+		// Attempt to get label from product, as entered by the user.
+		if ( ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ] ) ) {
+			$label = $attributes[ sanitize_title( $name ) ]->get_name();
+		} else {
+			$label = $name;
+		}
 	} else {
 		$label = $name;
 	}
@@ -258,4 +285,26 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 	);
 
 	return in_array( $attribute_name, $reserved_terms );
+}
+
+/**
+ * Callback for array filter to get visible only.
+ *
+ * @since  3.0.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_attributes_array_filter_visible( $attribute ) {
+	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_visible() && ( ! $attribute->is_taxonomy() || taxonomy_exists( $attribute->get_name() ) );
+}
+
+/**
+ * Callback for array filter to get variation attributes only.
+ *
+ * @since  3.0.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_attributes_array_filter_variation( $attribute ) {
+	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_variation();
 }

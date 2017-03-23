@@ -45,7 +45,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -54,7 +54,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -84,17 +84,48 @@ class WC_Emails {
 		) );
 
 		foreach ( $email_actions as $action ) {
-			add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+			add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
+		}
+	}
+
+	/**
+	 * Queue transactional email via cron so it's not sent in current request.
+	 */
+	public static function queue_transactional_email() {
+		$filter = current_filter();
+		$args   = func_get_args();
+
+		wp_schedule_single_event( time() + 5, 'woocommerce_send_queued_transactional_email', array(
+			'filter' => $filter,
+			'args'   => $args,
+		) );
+	}
+
+	/**
+	 * Init the mailer instance and call the notifications for the current filter.
+	 *
+	 * @internal
+	 *
+	 * @param string $filter Filter name.
+	 * @param array  $args Email args (default: []).
+	 */
+	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
+		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
+			self::instance(); // Init self so emails exist.
+			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}
 
 	/**
 	 * Init the mailer instance and call the notifications for the current filter.
-	 * @internal param array $args (default: array())
+	 *
+	 * @internal
+	 *
+	 * @param array $args Email args (default: []).
 	 */
-	public static function send_transactional_email() {
+	public static function send_transactional_email( $args = array() ) {
 		$args = func_get_args();
-		self::instance();
+		self::instance(); // Init self so emails exist.
 		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
@@ -237,7 +268,12 @@ class WC_Emails {
 	 */
 	public function customer_invoice( $order ) {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
-		$email->trigger( $order );
+
+		if ( ! is_object( $order ) ) {
+			$order = wc_get_order( absint( $order ) );
+		}
+
+		$email->trigger( $order->get_id(), $order );
 	}
 
 	/**
@@ -331,12 +367,15 @@ class WC_Emails {
 	/**
 	 * Add customer details to email templates.
 	 *
-	 * @param mixed $order
+	 * @param WC_Order $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
 	 * @return string
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
 		$fields = array();
 
 		if ( $order->get_customer_note() ) {
@@ -351,14 +390,14 @@ class WC_Emails {
 				'label' => __( 'Email address', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_email() ),
 			);
-	    }
+		}
 
-	    if ( $order->get_billing_phone() ) {
+		if ( $order->get_billing_phone() ) {
 			$fields['billing_phone'] = array(
 				'label' => __( 'Phone', 'woocommerce' ),
 				'value' => wptexturize( $order->get_billing_phone() ),
 			);
-	    }
+		}
 
 		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
@@ -373,6 +412,9 @@ class WC_Emails {
 	 * Get the email addresses.
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
 		if ( $plain_text ) {
 			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
 		} else {
@@ -395,7 +437,12 @@ class WC_Emails {
 	 */
 	public function low_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
-		$message = sprintf( __( '%s is low in stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ) . ' ' . sprintf( __( 'There are %d left', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_total_stock() ) ) );
+		/* translators: 1: product name 2: items in stock */
+		$message = sprintf(
+			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
+			html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			html_entity_decode( strip_tags( $product->get_stock_quantity() ) )
+		);
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product ),
@@ -413,6 +460,7 @@ class WC_Emails {
 	 */
 	public function no_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
+		/* translators: %s: product name */
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
 		wp_mail(
@@ -457,7 +505,7 @@ class WC_Emails {
 	/**
 	 * Adds Schema.org markup for order in JSON-LD format.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @see WC_Structured_Data::generate_order_data()
 	 *
 	 * @since 2.6.0
@@ -466,7 +514,7 @@ class WC_Emails {
 	 * @param bool $plain_text (default: false)
 	 */
 	public function order_schema_markup( $order, $sent_to_admin = false, $plain_text = false ) {
-		_deprecated_function( 'WC_Emails::order_schema_markup', '2.7', 'WC_Structured_Data::generate_order_data' );
+		wc_deprecated_function( 'WC_Emails::order_schema_markup', '3.0', 'WC_Structured_Data::generate_order_data' );
 
 		WC()->structured_data->generate_order_data( $order, $sent_to_admin, $plain_text );
 		WC()->structured_data->output_structured_data();

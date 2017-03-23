@@ -92,6 +92,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'INR' => 'Indian rupee',
 			'IQD' => 'Iraqi dinar',
 			'IRR' => 'Iranian rial',
+			'IRT' => 'Iranian toman',
 			'ISK' => 'Icelandic kr&oacute;na',
 			'JEP' => 'Jersey pound',
 			'JMD' => 'Jamaican dollar',
@@ -238,13 +239,42 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_logger().
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_get_logger() {
+		// This filter should have no effect because the class does not implement WC_Logger_Interface
+		add_filter( 'woocommerce_logging_class', array( $this, 'return_bad_logger' ) );
+
+		$this->setExpectedIncorrectUsage( 'wc_get_logger' );
+		$log_a = wc_get_logger();
+		$log_b = wc_get_logger();
+
+		$this->assertInstanceOf( 'WC_Logger', $log_a );
+		$this->assertInstanceOf( 'WC_Logger', $log_b );
+		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
+	}
+
+	/**
+	 * Return class which does not implement WC_Logger_Interface
+	 *
+	 * This is a helper function to test woocommerce_logging_class filter and wc_get_logger.
+	 *
+	 * @return string Class name
+	 */
+	public function return_bad_logger() {
+		return __CLASS__;
+	}
+
+	/**
 	 * Test wc_get_core_supported_themes().
 	 *
 	 * @since 2.2
 	 */
 	public function test_wc_get_core_supported_themes() {
 
-		$expected_themes = array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+		$expected_themes = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}
@@ -284,5 +314,99 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		// With legacy methods.
 		$this->assertEquals( 0, wc_get_shipping_method_count( true ) );
+	}
+
+	/**
+	 * Test wc_print_r()
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_print_r() {
+		$arr = array( 1, 2, 'a', 'b', 'c' => 'd' );
+
+		// This filter will sequentially remove handlers, allowing us to test as though our
+		// functions were accumulatively blacklisted, adding one on each call.
+		add_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
+
+		$this->expectOutputString(
+			print_r( $arr, true ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			var_export( $arr, true ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			json_encode( $arr ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			serialize( $arr ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			'',
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertFalse( $return_value );
+		ob_clean();
+
+		// Reset filter to include all handlers
+		$this->filter_wc_print_r_alternatives( array(), true );
+
+		$this->assertEquals( print_r( $arr, true ), wc_print_r( $arr, true ) );
+		$this->assertEquals( var_export( $arr, true ), wc_print_r( $arr, true ) );
+		$this->assertEquals( json_encode( $arr ), wc_print_r( $arr, true ) );
+		$this->assertEquals( serialize( $arr ), wc_print_r( $arr, true ) );
+		$this->assertFalse( wc_print_r( $arr, true ) );
+
+		remove_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
+	}
+
+	/**
+	 * Filter function to help test wc_print_r alternatives via filter.
+	 *
+	 * On the first run, all alternatives are returned.
+	 * On each successive run, an alternative is excluded from the beginning.
+	 * Eventually, no handlers are returned.
+	 *
+	 * @param array $alternatives Input array of alternatives.
+	 * @param bool $reset Optional. Default false. True to reset excluded alternatives.
+	 * @return array|bool Alternatives. True on reset.
+	 */
+	public function filter_wc_print_r_alternatives( $alternatives, $reset = false ) {
+		static $skip = 0;
+		if ( $reset ) {
+			$skip = 0;
+			return true;
+		}
+		return array_slice( $alternatives, $skip++ );
+	}
+
+	/**
+	 * Test wc_get_wildcard_postcodes
+	 */
+	public function test_wc_get_wildcard_postcodes() {
+		$postcode  = 'cb23 6as';
+		$country   = 'GB';
+		$wildcards = array( 'cb23 6as', 'CB23 6AS', 'CB23 6AS*', 'CB23 6A*', 'CB23 6*', 'CB23 *', 'CB23*', 'CB2*', 'CB*', 'C*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
+
+		$postcode  = 'GIJóN';
+		$country   = '';
+		$wildcards = array( 'GIJóN', 'GIJÓN', 'GIJÓN*', 'GIJÓ*', 'GIJ*', 'GI*', 'G*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
 	}
 }

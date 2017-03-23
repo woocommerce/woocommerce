@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Payment_Gateways' ) ) :
+if ( ! class_exists( 'WC_Settings_Payment_Gateways', false ) ) :
 
 /**
  * WC_Settings_Payment_Gateways.
@@ -108,7 +108,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'type'            => 'checkbox',
 				'checkboxgroup'   => '',
 				'show_if_checked' => 'option',
-				'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (%1$san SSL Certificate is required%2$s).', 'woocommerce' ), '<a href="https://docs.woocommerce.com/document/ssl-and-https/#section-3" target="_blank">', '</a>' ),
+				'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/#section-3' ),
 			),
 
 			'unforce_ssl_checkout' => array(
@@ -134,7 +134,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Cart page', 'woocommerce' ),
-				'desc'     => __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+				'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
 				'id'       => 'woocommerce_cart_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
@@ -145,7 +145,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Checkout page', 'woocommerce' ),
-				'desc'     => __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+				'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
 				'id'       => 'woocommerce_checkout_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
@@ -175,7 +175,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Pay', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "Checkout" &rarr; "%s" page', 'woocommerce' ), __( 'Pay', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "Checkout &rarr; Pay" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_checkout_pay_endpoint',
 				'type'     => 'text',
 				'default'  => 'order-pay',
@@ -184,7 +184,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Order received', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "Checkout" &rarr; "%s" page', 'woocommerce' ), __( 'Order received', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "Checkout &rarr; Order received" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_checkout_order_received_endpoint',
 				'type'     => 'text',
 				'default'  => 'order-received',
@@ -193,7 +193,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Add payment method', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "Checkout" &rarr; "%s" page', 'woocommerce' ), __( 'Add payment method', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "Checkout &rarr; Add payment method" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_add_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'add-payment-method',
@@ -202,7 +202,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Delete payment method', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the delete payment method page', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the delete payment method page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_delete_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'delete-payment-method',
@@ -211,7 +211,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Set default payment method', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the setting a default payment method page', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the setting a default payment method page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_set_default_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'set-default-payment-method',
@@ -325,7 +325,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 									case 'status' :
 										echo '<td class="status">';
-										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>' : '-';
+										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>' : '-';
 										echo '</td>';
 										break;
 

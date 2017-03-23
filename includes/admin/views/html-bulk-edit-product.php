@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing price by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php echo sprintf( __( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php printf( esc_attr__( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -49,9 +49,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$options = array(
 							'' 	=> __( '— No change —', 'woocommerce' ),
 							'1' => __( 'Change to:', 'woocommerce' ),
-							'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
-							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
-							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' ),
+							'2' => __( 'Increase existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'3' => __( 'Decrease existing sale price by (fixed amount or %):', 'woocommerce' ),
+							'4' => __( 'Set to regular price decreased by (fixed amount or %):', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php echo sprintf( __( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php printf( esc_attr__( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -130,7 +130,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php echo sprintf( __( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
+					<input type="text" name="_weight" class="text weight" placeholder="<?php printf( esc_attr__( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
@@ -154,9 +154,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_length" class="text length" placeholder="<?php echo sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php echo sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php echo sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
@@ -218,12 +218,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
 				<?php
-					$options = array(
-						''           => __( '— No change —', 'woocommerce' ),
-						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' ),
-					);
-					foreach ( $options as $key => $value ) {
+					echo '<option value="">' . esc_html__( '— No Change —', 'woocommerce' ) . '</option>';
+
+					foreach ( wc_get_product_stock_status_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
@@ -277,13 +274,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="input-text-wrap">
 					<select class="backorders" name="_backorders">
 					<?php
-						$options = array(
-							''       => __( '— No change —', 'woocommerce' ),
-							'no'     => __( 'Do not allow', 'woocommerce' ),
-							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-							'yes'    => __( 'Allow', 'woocommerce' ),
-						);
-						foreach ( $options as $key => $value ) {
+						echo '<option value="">' . esc_html__( '— No Change —', 'woocommerce' ) . '</option>';
+
+						foreach ( wc_get_product_backorder_options() as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>

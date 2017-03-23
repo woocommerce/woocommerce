@@ -193,9 +193,11 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_default_product_tabs' );
 add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 
 /**
- * Photoswipe.
+ * Additional Information tab.
+ *
+ * @see wc_display_product_attributes()
  */
-add_action( 'wp_footer', 'woocommerce_photoswipe' );
+add_action( 'woocommerce_product_additional_information', 'wc_display_product_attributes', 10 );
 
 /**
  * Checkout.

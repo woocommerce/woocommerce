@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
@@ -93,6 +93,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 
 			$legend[] = array(
+				/* translators: 1: total items sold 2: category name */
 				'title'            => sprintf( __( '%1$s sales in %2$s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
 				'highlight_series' => $index,
@@ -279,7 +280,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		if ( empty( $this->show_categories ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'woocommerce' ); ?></p>
+				<p class="chart-prompt"><?php _e( 'Choose a category to view stats', 'woocommerce' ); ?></p>
 			</div>
 			<?php
 		} else {

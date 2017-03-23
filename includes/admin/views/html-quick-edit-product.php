@@ -162,11 +162,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
 				<?php
-					$options = array(
-						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' ),
-					);
-					foreach ( $options as $key => $value ) {
+					foreach ( wc_get_product_stock_status_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
@@ -197,12 +193,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="backorders" name="_backorders">
 				<?php
-					$options = array(
-						'no'     => __( 'Do not allow', 'woocommerce' ),
-						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-						'yes'    => __( 'Allow', 'woocommerce' ),
-					);
-					foreach ( $options as $key => $value ) {
+					foreach ( wc_get_product_backorder_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>

@@ -9,12 +9,9 @@
  * @package  WooCommerce/API
  * @since    2.4.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-if ( ! class_exists( 'WC_Auth' ) ) :
 
 class WC_Auth {
 
@@ -173,11 +170,13 @@ class WC_Auth {
 
 		foreach ( $params as $param ) {
 			if ( empty( $_REQUEST[ $param ] ) ) {
+				/* translators: %s: parameter */
 				throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param ) );
 			}
 		}
 
 		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write' ) ) ) {
+			/* translators: %s: scope */
 			throw new Exception( sprintf( __( 'Invalid scope %s', 'woocommerce' ), wc_clean( $_REQUEST['scope'] ) ) );
 		}
 
@@ -185,6 +184,7 @@ class WC_Auth {
 			$param = $this->get_formatted_url( $_REQUEST[ $param ] );
 
 			if ( false === filter_var( $param, FILTER_VALIDATE_URL ) ) {
+				/* translators: %s: url */
 				throw new Exception( sprintf( __( 'The %s is not a valid URL', 'woocommerce' ), $param ) );
 			}
 		}
@@ -210,8 +210,15 @@ class WC_Auth {
 	protected function create_keys( $app_name, $app_user_id, $scope ) {
 		global $wpdb;
 
-		$description = sprintf( __( '%1$s - API %2$s (created on %3$s at %4$s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
-		$user        = wp_get_current_user();
+		/* translators: 1: app name 2: scope 3: date 4: time */
+		$description = sprintf(
+			__( '%1$s - API %2$s (created on %3$s at %4$s).', 'woocommerce' ),
+			wc_clean( $app_name ),
+			$this->get_i18n_scope( $scope ),
+			date_i18n( wc_date_format() ),
+			date_i18n( wc_time_format() )
+		);
+		$user = wp_get_current_user();
 
 		// Created API keys.
 		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $scope ) : 'read';
@@ -372,6 +379,7 @@ class WC_Auth {
 		} catch ( Exception $e ) {
 			$this->maybe_delete_key( $consumer_data );
 
+			/* translators: %s: error messase */
 			wp_die( sprintf( __( 'Error: %s.', 'woocommerce' ), $e->getMessage() ), __( 'Access denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}
@@ -391,7 +399,4 @@ class WC_Auth {
 		}
 	}
 }
-
-endif;
-
-return new WC_Auth();
+new WC_Auth();

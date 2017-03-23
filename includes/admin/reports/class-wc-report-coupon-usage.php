@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
@@ -105,12 +105,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		$total_coupons  = absint( $this->get_order_report_data( $total_coupons_query ) );
 
 		$legend[] = array(
+			/* translators: %s: discount ammount */
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
 			'color' => $this->chart_colours['discount_amount'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
+			/* translators: %s: coupons ammount */
 			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
 			'color' => $this->chart_colours['coupon_count'],
 			'highlight_series' => 0,

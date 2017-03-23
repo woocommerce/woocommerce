@@ -3,8 +3,6 @@
 /**
  * Class WC_Tests_Install.
  * @package WooCommerce\Tests\Util
- *
- * @todo determine if this should be in Util or separate namespace
  */
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
@@ -12,7 +10,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test check version.
 	 */
 	public function test_check_version() {
-		update_option( 'woocommerce_version', WC()->version - 1 );
+		update_option( 'woocommerce_version', ( (float) WC()->version - 1 ) );
 		update_option( 'woocommerce_db_version', WC()->version );
 		WC_Install::check_version();
 

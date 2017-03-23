@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Structured data's handler and generator using JSON-LD format.
  *
  * @class   WC_Structured_Data
- * @since   2.7.0
- * @version 2.7.0
+ * @since   3.0.0
+ * @version 3.0.0
  * @package WooCommerce/Classes
  * @author  Clément Cazaud <opportus@gmail.com>
  */
@@ -33,7 +33,7 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
-		add_action( 'woocommerce_email_order_details', array( $this, 'output_structured_data' ), 30 );
+		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 	}
 
@@ -122,6 +122,20 @@ class WC_Structured_Data {
 	}
 
 	/**
+	 * Makes sure email structured data only outputs on non-plain text versions.
+	 *
+	 * @param WP_Order  $order         Order data.
+	 * @param bool	    $sent_to_admin Send to admin (default: false).
+	 * @param bool	    $plain_text    Plain text email (default: false).
+	 */
+	public function output_email_structured_data( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( $plain_text ) {
+			return;
+		}
+		$this->output_structured_data();
+	}
+
+	/**
 	 * Sanitizes, encodes and outputs structured data.
 	 *
 	 * Hooked into `wp_footer` action hook.
@@ -166,48 +180,48 @@ class WC_Structured_Data {
 			global $product;
 		}
 
+		$shop_name       = get_bloginfo( 'name' );
+		$shop_url        = home_url();
+		$currency        = get_woocommerce_currency();
 		$markup          = array();
 		$markup['@type'] = 'Product';
 		$markup['@id']   = get_permalink( $product->get_id() );
 		$markup['url']   = $markup['@id'];
-		$markup['name']  = $product->get_title();
+		$markup['name']  = $product->get_name();
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 			return;
 		}
 
-		$products = array();
-		if ( $is_variable = $product->is_type( 'variable' ) ) {
-			$variations = $product->get_available_variations();
+		$markup_offer = array(
+			'@type'         => 'Offer',
+			'priceCurrency' => $currency,
+			'availability'  => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+			'sku'           => $product->get_sku(),
+			'image'         => wp_get_attachment_url( $product->get_image_id() ),
+			'description'   => $product->get_description(),
+			'seller'        => array(
+				'@type' => 'Organization',
+				'name'  => $shop_name,
+				'url'   => $shop_url,
+			),
+		);
 
-			foreach ( $variations as $variation ) {
-				$products[] = wc_get_product( $variation['variation_id'] );
-			}
-		} else {
-			$products[] = $product;
-		}
+		if ( $product->is_type( 'variable' ) ) {
+			$prices = $product->get_variation_prices();
 
-		$markup_offers = array();
-		foreach ( $products as $_product ) {
-			$markup_offers[] = array(
-				'@type'         => 'Offer',
-				'priceCurrency' => get_woocommerce_currency(),
-				'price'         => $_product->get_price(),
-				'availability'  => 'http://schema.org/' . $stock = ( $_product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'sku'           => $_product->get_sku(),
-				'image'         => wp_get_attachment_url( $_product->get_image_id() ),
-				'description'   => $is_variable ? $_product->get_variation_description() : '',
-				'seller'        => array(
-					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-					'url'   => get_bloginfo( 'url' ),
-				),
+			$markup_offer['priceSpecification'] = array(
+				'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+				'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
+				'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+				'priceCurrency' => $currency,
 			);
+		} else {
+			$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
 		}
 
-		$markup['description'] = get_the_excerpt( $product->get_id() );
-		$markup['offers']      = $markup_offers;
+		$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 
 		if ( $product->get_rating_count() ) {
 			$markup['aggregateRating'] = array(
@@ -234,14 +248,18 @@ class WC_Structured_Data {
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
 		$markup['description']   = get_comment_text( $comment->comment_ID );
-		$markup['itemReviewed']  = array(
-			'@type' => 'Product',
-			'name'  => get_the_title( $comment->post_ID ),
-		);
-		$markup['reviewRating']  = array(
-			'@type'       => 'rating',
-			'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
-		);
+
+		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
+			$markup['reviewRating']  = array(
+				'@type'       => 'rating',
+				'ratingValue' => $rating,
+			);
+
+		// Skip replies unless they have a rating.
+		} elseif ( $comment->comment_parent ) {
+			return;
+		}
+
 		$markup['author']        = array(
 			'@type' => 'Person',
 			'name'  => get_comment_author( $comment->comment_ID ),
@@ -290,10 +308,10 @@ class WC_Structured_Data {
 		$markup                    = array();
 		$markup['@type']           = 'WebSite';
 		$markup['name']            = get_bloginfo( 'name' );
-		$markup['url']             = get_bloginfo( 'url' );
+		$markup['url']             = home_url();
 		$markup['potentialAction'] = array(
 			'@type'       => 'SearchAction',
-			'target'      => get_bloginfo( 'url' ) . '/?s={search_term_string}&post_type=product',
+			'target'      => home_url( '?s={search_term_string}&post_type=product' ),
 			'query-input' => 'required name=search_term_string',
 		);
 
@@ -310,10 +328,13 @@ class WC_Structured_Data {
 	 * @param bool	    $plain_text    Plain text email (default: false).
 	 */
 	public function generate_order_data( $order, $sent_to_admin = false, $plain_text = false ) {
-		if ( $plain_text ) {
+		if ( $plain_text || ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
+		$shop_name      = get_bloginfo( 'name' );
+		$shop_url       = home_url();
+		$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
 		$order_statuses = array(
 			'pending'    => 'http://schema.org/OrderPaymentDue',
 			'processing' => 'http://schema.org/OrderProcessing',
@@ -333,7 +354,6 @@ class WC_Structured_Data {
 			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
-			$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ) : $order->get_view_order_url();
 
 			$markup_offers[]  = array(
 				'@type'              => 'Offer',
@@ -356,8 +376,8 @@ class WC_Structured_Data {
 				),
 				'seller'             => array(
 					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-					'url'   => get_bloginfo( 'url' ),
+					'name'  => $shop_name,
+					'url'   => $shop_url,
 				),
 			);
 		}
@@ -367,7 +387,7 @@ class WC_Structured_Data {
 		$markup['url']                = $order_url;
 		$markup['orderStatus']        = isset( $order_status[ $order->get_status() ] ) ? $order_status[ $order->get_status() ] : '';
 		$markup['orderNumber']        = $order->get_order_number();
-		$markup['orderDate']          = date( 'c', $order->get_date_created() );
+		$markup['orderDate']          = $order->get_date_created()->format( 'c' );
 		$markup['acceptedOffer']      = $markup_offers;
 		$markup['discount']           = $order->get_total_discount();
 		$markup['discountCurrency']   = $order->get_currency();
@@ -395,8 +415,8 @@ class WC_Structured_Data {
 		);
 		$markup['merchant']           = array(
 			'@type' => 'Organization',
-			'name'  => get_bloginfo( 'name' ),
-			'url'   => get_bloginfo( 'url' ),
+			'name'  => $shop_name,
+			'url'   => $shop_url,
 		);
 		$markup['potentialAction']    = array(
 			'@type'  => 'ViewAction',

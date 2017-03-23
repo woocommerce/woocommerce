@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -48,6 +48,12 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -191,10 +197,23 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 		// Update if this method is enabled or not.
 		if ( isset( $request['enabled'] ) ) {
-			$settings        = $gateway->settings;
-			$gateway->enabled = $settings['enabled'] = (bool) $request['enabled'];
+			$settings         = $gateway->settings;
+			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
 			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
-			$gateway->settings = $settings;
+		}
+
+		// Update title.
+		if ( isset( $request['title'] ) ) {
+			$settings         = $gateway->settings;
+			$gateway->title   = $settings['title'] = $request['title'];
+			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
+		}
+
+		// Update description.
+		if ( isset( $request['description'] ) ) {
+			$settings              = $gateway->settings;
+			$gateway->description  = $settings['description'] = $request['description'];
+			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -277,7 +296,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
 				'description' => empty( $field['description'] ) ? '' : $field['description'],
 				'type'        => $field['type'],
-				'value'       => $gateway->settings[ $id ],
+				'value'       => empty( $gateway->settings[ $id ] ) ? '' : $gateway->settings[ $id ],
 				'default'     => empty( $field['default'] ) ? '' : $field['default'],
 				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
 				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
@@ -324,7 +343,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'id' => array(
 					'description' => __( 'Payment gateway ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Payment gateway title on checkout.', 'woocommerce' ),
@@ -352,17 +372,69 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'method_title' => array(
 					'description' => __( 'Payment gateway method title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_description' => array(
 					'description' => __( 'Payment gateway method description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'settings' => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
+					'properties' => array(
+						'id' => array(
+							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'label' => array(
+							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'type' => array(
+							'description' => __( 'Type of setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
+							'readonly'    => true,
+						),
+						'value' => array(
+							'description' => __( 'Setting value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'default' => array(
+							'description' => __( 'Default value for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tip' => array(
+							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'placeholder' => array(
+							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
 				),
 			),
 		);

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Settings' ) ) :
+if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 /**
  * WC_Admin_Settings Class.
@@ -87,7 +87,7 @@ class WC_Admin_Settings {
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		flush_rewrite_rules();
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 
 		do_action( 'woocommerce_settings_saved' );
 	}
@@ -309,6 +309,7 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
+							&lrm;
 							<?php
 							if ( 'color' == $value['type'] ) {
 								echo '<span class="colorpickpreview" style="background: ' . esc_attr( $option_value ) . ';"></span>';
@@ -318,12 +319,13 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="<?php echo esc_attr( $type ); ?>"
+								dir="ltr"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								value="<?php echo esc_attr( $option_value ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
 								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
-								/> <?php echo $description; ?>
+								/>&lrm; <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -569,7 +571,7 @@ class WC_Admin_Settings {
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tooltip_html; ?>
 						</th>
-						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 						</select> <?php echo $description; ?>
 						</td>
@@ -594,7 +596,7 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp">
-							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 								<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
@@ -737,7 +739,7 @@ class WC_Admin_Settings {
 			 * @deprecated 2.4.0 - doesn't allow manipulation of values!
 			 */
 			if ( has_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ) ) ) {
-				_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
+				wc_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
 				do_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ), $option );
 				continue;
 			}

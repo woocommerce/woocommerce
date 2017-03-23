@@ -1,26 +1,13 @@
 <?php
-/**
- * Used for exposing and testing the various Abstract WC_Data methods.
- */
-class WC_Mock_WC_Data extends WC_Data {
+class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface {
 
-	/**
-	 * Data array
-	 */
-	protected $data = array(
-		'content'    => '',
-		'bool_value' => false,
-	);
-
-	// see WC_Data
-	protected $cache_group = '';
 	protected $meta_type = 'post';
 	protected $object_id_field_for_meta = '';
 	protected $internal_meta_keys = array();
 
 	/*
 	|--------------------------------------------------------------------------
-	| Setters for internal WC_Data properties.
+	| Setters for internal properties.
 	|--------------------------------------------------------------------------
 	| Normally we wouldn't want to be able to change this once the class is defined,
 	| but to make testing different types of meta/storage, we should be able to
@@ -44,6 +31,88 @@ class WC_Mock_WC_Data extends WC_Data {
 		$this->object_id_field_for_meta = $object_id_field;
 	}
 
+	public function create( &$object ) {
+		if ( 'user' === $this->meta_type ) {
+			$content_id = wc_create_new_customer( $object->get_content(), 'username-' . time(), 'hunter2' );
+		} else {
+			$content_id = wp_insert_post( array( 'post_title' => $object->get_content() ) );
+		}
+		if ( $content_id ) {
+			$object->set_id( $content_id );
+		}
+
+		$object->apply_changes();
+	}
+
+	/**
+	 * Simple read.
+	 */
+	public function read( &$object ) {
+		$object->set_defaults();
+		$id = $object->get_id();
+
+		if ( 'user' === $this->meta_type ) {
+			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
+				return;
+			}
+			$object->set_content( $user_object->user_email );
+		} else {
+			if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
+				return;
+			}
+			$object->set_content( $post_object->post_title );
+		}
+
+		$object->read_meta_data();
+		$object->set_object_read( true );
+	}
+
+	/**
+	 * Simple update.
+	 */
+	public function update( &$object ) {
+		global $wpdb;
+		$content_id = $object->get_id();
+
+		if ( 'user' === $this->meta_type ) {
+			wp_update_user( array( 'ID' => $customer_id, 'user_email' => $object->get_content() ) );
+		} else {
+			wp_update_post( array( 'ID' => $content_id, 'post_title' => $object->get_content() ) );
+		}
+	}
+
+	/**
+	 * Simple delete.
+	 */
+	public function delete( &$object, $args = array() ) {
+		if ( 'user' === $this->meta_type ) {
+			wp_delete_user( $object->get_id() );
+		} else {
+			wp_delete_post( $object->get_id() );
+		}
+
+		$object->set_id( 0 );
+	}
+
+}
+
+/**
+ * Used for exposing and testing the various Abstract WC_Data methods.
+ */
+class WC_Mock_WC_Data extends WC_Data {
+
+	/**
+	 * Data array
+	 */
+	protected $data = array(
+		'content'    => '',
+		'bool_value' => false,
+	);
+
+	// see WC_Data
+	protected $cache_group = '';
+	public $data_store;
+
 	/*
 	|--------------------------------------------------------------------------
 	| Abstract methods.
@@ -58,43 +127,57 @@ class WC_Mock_WC_Data extends WC_Data {
 	public function __construct( $id = '' ) {
 		parent::__construct();
 		if ( ! empty( $id ) ) {
-			$this->read( $id );
+			$this->set_id( $id );
+		} else {
+			$this->set_object_read( true );
+		}
+
+		$this->data_store = new WC_Mock_WC_Data_Store;
+
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
 		}
 	}
 
 	/**
 	 * Simple get content.
+	 *
+	 * @param  string $context
 	 * @return string
 	 */
-	public function get_content() {
-		return $this->data['content'];
+	public function get_content( $context = 'view' ) {
+		return $this->get_prop( 'content', $context );
 	}
 
 	/**
 	 * Simple set content.
+	 *
 	 * @param string $content
 	 */
 	public function set_content( $content ) {
-		$this->data['content'] = $content;
+		$this->set_prop( 'content', $content );
 	}
 
 	/**
 	 * Simple get bool value.
+	 *
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function get_bool_value() {
-		return $this->data['bool_value'];
+	public function get_bool_value( $context = 'view' ) {
+		return $this->get_prop( 'bool_value', $context );
 	}
 
 	/**
 	 * Simple set bool value.
+	 *
 	 * @return bool
 	 */
 	public function set_bool_value( $value ) {
 		if ( ! is_bool( $value ) ) {
 			$this->error( 'invalid_bool_value', 'O noes' );
 		}
-		$this->data['bool_value'] = $value;
+		$this->set_prop( 'bool_value', $value );
 	}
 
 	/**
@@ -111,76 +194,33 @@ class WC_Mock_WC_Data extends WC_Data {
 	}
 
 	/**
-	 * Simple create.
+	 * Set the data to any arbitrary data.
+	 * @param array $data
 	 */
-	public function create() {
-		if ( 'user' === $this->meta_type ) {
-			$content_id = wc_create_new_customer( $this->get_content(), 'username-' . time(), 'hunter2' );
-		} else {
-			$content_id = wp_insert_post( array( 'post_title' => $this->get_content() ) );
-		}
-		if ( $content_id ) {
-			$this->set_id( $content_id );
-		}
+	public function set_data( $data ) {
+		$this->data = $data;
 	}
 
 	/**
-	 * Simple read.
+	 * Set the changes to any arbitrary changes.
+	 * @param array $changes
 	 */
-	public function read( $id ) {
-		$this->set_defaults();
-
-		if ( 'user' === $this->meta_type ) {
-			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
-				return;
-			}
-			$this->set_id( absint( $user_object->ID ) );
-			$this->set_content( $user_object->user_email );
-		} else {
-			if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
-				return;
-			}
-			$this->set_id( absint( $post_object->ID ) );
-			$this->set_content( $post_object->post_title );
-		}
-
-		$this->read_meta_data();
-	}
-
-	/**
-	 * Simple update.
-	 */
-	public function update() {
-		global $wpdb;
-		$content_id = $this->get_id();
-
-		if ( 'user' === $this->meta_type ) {
-			wp_update_user( array( 'ID' => $customer_id, 'user_email' => $this->get_content() ) );
-		} else {
-			wp_update_post( array( 'ID' => $content_id, 'post_title' => $this->get_content() ) );
-		}
-	}
-
-	/**
-	 * Simple delete.
-	 */
-	public function delete() {
-		if ( 'user' === $this->meta_type ) {
-			wp_delete_user( $this->get_id() );
-		} else {
-			wp_delete_post( $this->get_id() );
-		}
+	public function set_changes( $changes ) {
+		$this->changes = $changes;
 	}
 
 	/**
 	 * Simple save.
 	 */
 	public function save() {
-		if ( ! $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
+		if ( $this->data_store ) {
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
 		}
 		$this->save_meta_data();
+		return $this->get_id();
 	}
 }

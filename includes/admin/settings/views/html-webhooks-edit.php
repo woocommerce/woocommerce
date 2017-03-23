@@ -110,6 +110,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />
 				</td>
 			</tr>
+			<tr valign="top">
+				<th scope="row" class="titledesc">
+					<label for="webhook_api_version"><?php _e( 'API Version', 'woocommerce' ); ?></label>
+					<?php echo wc_help_tip( __( 'REST API version used in the webhook deliveries.', 'woocommerce' ) ); ?>
+				</th>
+				<td class="forminp">
+					<select name="webhook_api_version" id="webhook_api_version">
+						<option value="wp_api_v1" <?php selected( 'wp_api_v1', $webhook->get_api_version(), true ); ?>><?php _e( 'WP REST API Integration v1', 'woocommerce' ); ?></option>
+						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php _e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?></option>
+					</select>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 

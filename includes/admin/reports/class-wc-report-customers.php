@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
@@ -37,6 +37,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$legend   = array();
 
 		$legend[] = array(
+			/* translators: %s: signups ammount */
 			'title' => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . sizeof( $this->customers ) . '</strong>' ),
 			'color' => $this->chart_colours['signups'],
 			'highlight_series' => 2,

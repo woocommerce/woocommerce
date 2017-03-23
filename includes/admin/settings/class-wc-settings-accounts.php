@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Accounts' ) ) :
+if ( ! class_exists( 'WC_Settings_Accounts', false ) ) :
 
 /**
  * WC_Settings_Accounts.
@@ -44,7 +44,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'My account page', 'woocommerce' ),
-				'desc'     => __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+				'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) ),
 				'id'       => 'woocommerce_myaccount_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
@@ -58,8 +58,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
-				'title'         => __( 'Enable registration', 'woocommerce' ),
-				'desc'          => __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
+				'title'         => __( 'Customer registration', 'woocommerce' ),
+				'desc'          => __( 'Enable customer registration on the "Checkout" page.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -68,7 +68,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'desc'          => __( 'Enable registration on the "My account" page', 'woocommerce' ),
+				'desc'          => __( 'Enable customer registration on the "My account" page.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
 				'type'          => 'checkbox',
@@ -78,7 +78,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'         => __( 'Login', 'woocommerce' ),
-				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page', 'woocommerce' ),
+				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_checkout_login_reminder',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -88,7 +88,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
-				'desc'          => __( 'Automatically generate username from customer email', 'woocommerce' ),
+				'desc'          => __( 'Automatically generate username from customer email.', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_username',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -111,7 +111,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Orders', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Orders', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Orders" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_orders_endpoint',
 				'type'     => 'text',
 				'default'  => 'orders',
@@ -120,7 +120,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'View order', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'View order', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; View order" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_view_order_endpoint',
 				'type'     => 'text',
 				'default'  => 'view-order',
@@ -129,7 +129,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Downloads', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Downloads', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Downloads" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_downloads_endpoint',
 				'type'     => 'text',
 				'default'  => 'downloads',
@@ -138,7 +138,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Edit account', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Edit account', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Edit account" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_edit_account_endpoint',
 				'type'     => 'text',
 				'default'  => 'edit-account',
@@ -147,7 +147,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Addresses', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Addresses', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Addresses" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_edit_address_endpoint',
 				'type'     => 'text',
 				'default'  => 'edit-address',
@@ -156,7 +156,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Payment methods', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Payment methods', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Payment methods" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_payment_methods_endpoint',
 				'type'     => 'text',
 				'default'  => 'payment-methods',
@@ -165,7 +165,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Lost password', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Endpoint for the "My account" &rarr; "%s" page', 'woocommerce' ), __( 'Lost password', 'woocommerce' ) ),
+				'desc'     => __( 'Endpoint for the "My account &rarr; Lost password" page.', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_lost_password_endpoint',
 				'type'     => 'text',
 				'default'  => 'lost-password',
@@ -173,7 +173,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Logout', 'woocommerce' ),
+				'title'    => __( 'Logout', 'woocommerce' ),
 				'desc'     => __( 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true', 'woocommerce' ),
 				'id'       => 'woocommerce_logout_endpoint',
 				'type'     => 'text',

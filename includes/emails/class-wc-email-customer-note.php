@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 
 /**
  * Customer Note Order Email.
@@ -74,7 +74,7 @@ class WC_Email_Customer_Note extends WC_Email {
 				$this->find['order-date']      = '{order_date}';
 				$this->find['order-number']    = '{order_number}';
 
-				$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
+				$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->replace['order-number'] = $this->object->get_order_number();
 			} else {
 				return;

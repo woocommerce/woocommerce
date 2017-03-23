@@ -55,8 +55,7 @@ class WC_Cache_Helper {
 	 * @return string
 	 */
 	public static function geolocation_ajax_get_location_hash() {
-		$customer             = new WC_Customer();
-		$customer->load_session();
+		$customer             = new WC_Customer( 0, true );
 		$location             = array();
 		$location['country']  = $customer->get_billing_country();
 		$location['state']    = $customer->get_billing_state();
@@ -165,9 +164,13 @@ class WC_Cache_Helper {
 
 	/**
 	 * Prevent caching on dynamic pages.
-	 * @access public
 	 */
 	public static function prevent_caching() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
@@ -177,7 +180,7 @@ class WC_Cache_Helper {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach ( $wc_page_uris as $uri ) {
-				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
+				if ( stristr( trailingslashit( $_SERVER['REQUEST_URI'] ), $uri ) ) {
 					self::nocache();
 					break;
 				}
@@ -217,7 +220,7 @@ class WC_Cache_Helper {
 		if ( $enabled && ! in_array( '_wc_session_', $settings ) ) {
 			?>
 			<div class="error">
-				<p><?php printf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add <code>_wc_session_</code> to the "Ignored Query Strings" option in W3 Total Cache settings <a href="%s">here</a>.', 'woocommerce' ), admin_url( 'admin.php?page=w3tc_dbcache' ) ); ?></p>
+				<p><?php printf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add %1$s to the "Ignored Query Strings" option in <a href="%2$s">W3 Total Cache settings</a>.', 'woocommerce' ), '<code>_wc_session_</code>', admin_url( 'admin.php?page=w3tc_dbcache' ) ); ?></p>
 			</div>
 			<?php
 		}

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2>
+<h2 class="wc-shipping-zones-heading">
 	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
 	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
 </h2>
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="wc-shipping-zone-name">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a>
 				<div class="row-actions">
-					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 				</div>
 			</td>
 			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<li><?php _e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
 				</ul>
 				<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
-				<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
+				<a class="button button-primary wc-shipping-zone-add" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
 	<?php endif; ?>
@@ -108,7 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 										if ( ! $method->supports( 'shipping-zones' ) ) {
 											continue;
 										}
-										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->method_title ) . '</li>';
+										echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
 									}
 								?>
 							</select>

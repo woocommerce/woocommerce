@@ -48,6 +48,7 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
 							} elseif ( 'method' === $column_id ) {
 								if ( ! empty( $method['method']['last4'] ) ) {
+									/* translators: 1: credit card type 2: last 4 digits */
 									echo sprintf( __( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
 								} else {
 									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
  * @class    WC_Customer
- * @version  2.7.0
+ * @version  3.0.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
@@ -18,11 +18,12 @@ class WC_Customer extends WC_Legacy_Customer {
 
 	/**
 	 * Stores customer data.
+	 *
 	 * @var array
 	 */
 	protected $data = array(
-		'date_created'       => '',
-		'date_modified'      => '',
+		'date_created'       => null,
+		'date_modified'      => null,
 		'email'              => '',
 		'first_name'         => '',
 		'last_name'          => '',
@@ -56,108 +57,22 @@ class WC_Customer extends WC_Legacy_Customer {
 	);
 
 	/**
-	 * Keys which are also stored in a session (so we can make sure they get updated...)
-	 * @var array
-	 */
-	protected $session_keys = array(
-		'billing_postcode',
-		'billing_city',
-		'billing_address_1',
-		'billing_address',
-		'billing_address_2',
-		'billing_state',
-		'billing_country',
-		'shipping_postcode',
-		'shipping_city',
-		'shipping_address_1',
-		'shipping_address',
-		'shipping_address_2',
-		'shipping_state',
-		'shipping_country',
-		'is_vat_exempt',
-		'calculated_shipping',
-		'billing_first_name',
-		'billing_last_name',
-		'billing_company',
-		'billing_phone',
-		'billing_email',
-		'shipping_first_name',
-		'shipping_last_name',
-		'shipping_company',
-	);
-
-	/**
-	 * Data stored in meta keys, but not considered "meta"
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $internal_meta_keys = array(
-		'billing_postcode',
-		'billing_city',
-		'billing_address_1',
-		'billing_address_2',
-		'billing_state',
-		'billing_country',
-		'shipping_postcode',
-		'shipping_city',
-		'shipping_address_1',
-		'shipping_address_2',
-		'shipping_state',
-		'shipping_country',
-		'paying_customer',
-		'last_update',
-		'first_name',
-		'last_name',
-		'show_admin_bar_front',
-		'use_ssl',
-		'admin_color',
-		'rich_editing',
-		'comment_shortcuts',
-		'dismissed_wp_pointers',
-		'show_welcome_panel',
-		'_woocommerce_persistent_cart',
-		'session_tokens',
-		'nickname',
-		'description',
-		'billing_first_name',
-		'billing_last_name',
-		'billing_company',
-		'billing_phone',
-		'billing_email',
-		'shipping_first_name',
-		'shipping_last_name',
-		'shipping_company',
-		'default_password_nag',
-		'primary_blog',
-		'source_domain',
-	);
-
-	/**
-	 * Internal meta type used to store user data.
-	 * @var string
-	 */
-	protected $meta_type = 'user';
-
-	/**
-	 * If this is the customer session, this is true. When true, guest accounts will not be saved to the DB.
-	 * @var boolean
-	 */
-	protected $is_session = false;
-
-	/**
 	 * Stores a password if this needs to be changed. Write-only and hidden from _data.
+	 *
 	 * @var string
 	 */
 	protected $password = '';
 
 	/**
 	 * Stores if user is VAT exempt for this session.
+	 *
 	 * @var string
 	 */
 	protected $is_vat_exempt = false;
 
 	/**
 	 * Stores if user has calculated shipping in this session.
+	 *
 	 * @var string
 	 */
 	protected $calculated_shipping = false;
@@ -168,145 +83,69 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * If $customer is 'new', you can build a new WC_Customer object. If it's empty, some
 	 * data will be pulled from the session for the current user/customer.
 	 *
-	 * @param int $customer_id Customer ID
+	 * @param WC_Customer|int $data Customer ID or data.
 	 * @param bool $is_session True if this is the customer session
+	 * @throws Exception if customer cannot be read/found and $data is set.
 	 */
-	public function __construct( $customer_id = 0, $is_session = false ) {
-		if ( $customer_id > 0 ) {
-			$this->read( $customer_id );
-		}
-		if ( $is_session ) {
-			$this->is_session = true;
-			$this->load_session();
-			add_action( 'shutdown', array( $this, 'save_to_session' ), 10 );
-		}
-	}
+	public function __construct( $data = 0, $is_session = false ) {
+		parent::__construct( $data );
 
-	/**
-	 * Loads a WC session into the customer class.
-	 */
-	public function load_session() {
-		$data = (array) WC()->session->get( 'customer' );
-		if ( ! empty( $data ) ) {
-			foreach ( $this->session_keys as $session_key ) {
-				$function_key = $session_key;
-				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-					$session_key = str_replace( 'billing_', '', $session_key );
-				}
-				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$function_key}" ) ) ) {
-					$this->{"set_{$function_key}"}( $data[ $session_key ] );
-				}
+		if ( $data instanceof WC_Customer ) {
+			$this->set_id( absint( $data->get_id() ) );
+		} elseif ( is_numeric( $data ) ) {
+			$this->set_id( $data );
+		}
+
+		$this->data_store = WC_Data_Store::load( 'customer' );
+
+		// If we have an ID, load the user from the DB.
+		if ( $this->get_id() ) {
+			try {
+				$this->data_store->read( $this );
+			} catch ( Exception $e ) {
+				$this->set_id( 0 );
+				$this->set_object_read( true );
 			}
-		}
-		$this->load_defaults();
-	}
-
-	/**
-	 * Load default values if props are unset.
-	 */
-	protected function load_defaults() {
-		$default = wc_get_customer_default_location();
-
-		// Set some defaults if some of our values are still not set.
-		if ( ! $this->get_billing_country() ) {
-			$this->set_billing_country( $default['country'] );
-		}
-
-		if ( ! $this->get_shipping_country() ) {
-			$this->set_shipping_country( $this->get_billing_country() );
-		}
-
-		if ( ! $this->get_billing_state() ) {
-			$this->set_billing_state( $default['state'] );
-		}
-
-		if ( ! $this->get_shipping_state() ) {
-			$this->set_shipping_state( $this->get_billing_state() );
-		}
-	}
-
-	/**
-	 * Gets the customers last order.
-	 * @return WC_Order|false
-	 */
-	public function get_last_order() {
-		global $wpdb;
-
-		$last_order = $wpdb->get_var( "SELECT posts.ID
-			FROM $wpdb->posts AS posts
-			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-			WHERE meta.meta_key = '_customer_user'
-			AND   meta.meta_value = '" . esc_sql( $this->get_id() ) . "'
-			AND   posts.post_type = 'shop_order'
-			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			ORDER BY posts.ID DESC
-		" );
-
-		if ( $last_order ) {
-			return wc_get_order( absint( $last_order ) );
 		} else {
-			return false;
+			$this->set_object_read( true );
+		}
+
+		// If this is a session, set or change the data store to sessions. Changes do not persist in the database.
+		if ( $is_session ) {
+			$this->data_store = WC_Data_Store::load( 'customer-session' );
+			$this->data_store->read( $this );
 		}
 	}
 
 	/**
-	 * Return the number of orders this customer has.
-	 * @since 2.7.0
-	 * @return integer
+	 * Prefix for action and filter hooks on data.
+	 *
+	 * @since  3.0.0
+	 * @return string
 	 */
-	public function get_order_count() {
-		$count = get_user_meta( $this->get_id(), '_order_count', true );
-
-		if ( '' === $count ) {
-			global $wpdb;
-
-			$count = $wpdb->get_var( "SELECT COUNT(*)
-				FROM $wpdb->posts as posts
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				WHERE   meta.meta_key = '_customer_user'
-				AND     posts.post_type = 'shop_order'
-				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				AND     meta_value = '" . esc_sql( $this->get_id() ) . "'
-			" );
-			update_user_meta( $this->get_id(), '_order_count', $count );
-		}
-
-		return absint( $count );
+	protected function get_hook_prefix() {
+		return 'woocommerce_customer_get_';
 	}
 
 	/**
-	 * Return how much money this customer has spent.
-	 * @since 2.7.0
-	 * @return float
+	 * Delete a customer and reassign posts..
+	 *
+	 * @param int $reassign Reassign posts and links to new User ID.
+	 * @since 3.0.0
+	 * @return bool
 	 */
-	public function get_total_spent() {
-		$spent = get_user_meta( $this->get_id(), '_money_spent', true );
-
-		if ( '' === $spent ) {
-			global $wpdb;
-
-			$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
-				FROM $wpdb->posts as posts
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-				WHERE   meta.meta_key       = '_customer_user'
-				AND     meta.meta_value     = '" . esc_sql( $this->get_id() ) . "'
-				AND     posts.post_type     = 'shop_order'
-				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
-				AND     meta2.meta_key      = '_order_total'
-			" );
-
-			if ( ! $spent ) {
-				$spent = 0;
-			}
-			update_user_meta( $this->get_id(), '_money_spent', $spent );
+	public function delete_and_reassign( $reassign = null ) {
+		if ( $this->data_store ) {
+			$this->data_store->delete( $this, array( 'force_delete' => true, 'reassign' => $reassign ) );
+			$this->set_id( 0 );
+			return true;
 		}
-
-		return wc_format_decimal( $spent, 2 );
+		return false;
 	}
 
 	/**
 	 * Is customer outside base country (for tax purposes)?
+	 *
 	 * @return bool
 	 */
 	public function is_customer_outside_base() {
@@ -324,76 +163,9 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Is customer VAT exempt?
-	 * @return bool
-	 */
-	public function is_vat_exempt() {
-		return $this->get_is_vat_exempt();
-	}
-
-	/**
-	 * Has calculated shipping?
-	 * @return bool
-	 */
-	public function has_calculated_shipping() {
-		return $this->get_calculated_shipping();
-	}
-
-	/*
-	 |--------------------------------------------------------------------------
-	 | Getters
-	 |--------------------------------------------------------------------------
-	 | Methods for getting data from the customer object.
-	 */
-
-	/**
-	 * Return the customer's username.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_username() {
-		return $this->data['username'];
-	}
-
-	/**
-	 * Return the customer's email.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_email() {
-		return $this->data['email'];
-	}
-
-	/**
-	 * Return customer's first name.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_first_name() {
-		return $this->data['first_name'];
-	}
-
-	/**
-	 * Return customer's last name.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_last_name() {
-		return $this->data['last_name'];
-	}
-
-	/**
-	 * Return customer's user role.
-	 * @since 2.7.0
-	 * @return string
-	 */
-	public function get_role() {
-		return $this->data['role'];
-	}
-
-	/**
 	 * Return this customer's avatar.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_avatar_url() {
@@ -407,217 +179,6 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		return '';
-	}
-
-	/**
-	 * Return the date this customer was created.
-	 * @since 2.7.0
-	 * @return integer
-	 */
-	public function get_date_created() {
-		return absint( $this->data['date_created'] );
-	}
-
-	/**
-	 * Return the date this customer was last updated.
-	 * @since 2.7.0
-	 * @return integer
-	 */
-	public function get_date_modified() {
-		return absint( $this->data['date_modified'] );
-	}
-
-	/**
-	 * Gets customer billing first name.
-	 * @return string
-	 */
-	public function get_billing_first_name() {
-		return $this->data['billing']['first_name'];
-	}
-
-	/**
-	 * Gets customer billing last name.
-	 * @return string
-	 */
-	public function get_billing_last_name() {
-		return $this->data['billing']['last_name'];
-	}
-
-	/**
-	 * Gets customer billing company.
-	 * @return string
-	 */
-	public function get_billing_company() {
-		return $this->data['billing']['company'];
-	}
-
-	/**
-	 * Gets billing phone.
-	 * @return string
-	 */
-	public function get_billing_phone() {
-		return $this->data['billing']['phone'];
-	}
-
-	/**
-	 * Gets billing email.
-	 * @return string
-	 */
-	public function get_billing_email() {
-		return $this->data['billing']['email'];
-	}
-
-	/**
-	 * Gets customer postcode.
-	 * @return string
-	 */
-	public function get_billing_postcode() {
-		return wc_format_postcode( $this->data['billing']['postcode'], $this->get_billing_country() );
-	}
-
-	/**
-	 * Get customer city.
-	 * @return string
-	 */
-	public function get_billing_city() {
-		return $this->data['billing']['city'];
-	}
-
-	/**
-	 * Get customer address.
-	 * @return string
-	 */
-	public function get_billing_address() {
-		return $this->data['billing']['address_1'];
-	}
-
-	/**
-	 * Get customer address.
-	 * @return string
-	 */
-	public function get_billing_address_1() {
-		return $this->get_billing_address();
-	}
-
-	/**
-	 * Get customer's second address.
-	 * @return string
-	 */
-	public function get_billing_address_2() {
-		return $this->data['billing']['address_2'];
-	}
-
-	/**
-	 * Get customer state.
-	 * @return string
-	 */
-	public function get_billing_state() {
-		return $this->data['billing']['state'];
-	}
-
-	/**
-	 * Get customer country.
-	 * @return string
-	 */
-	public function get_billing_country() {
-		return $this->data['billing']['country'];
-	}
-
-	/**
-	 * Gets customer shipping first name.
-	 * @return string
-	 */
-	public function get_shipping_first_name() {
-		return $this->data['shipping']['first_name'];
-	}
-
-	/**
-	 * Gets customer shipping last name.
-	 * @return string
-	 */
-	public function get_shipping_last_name() {
-		return $this->data['shipping']['last_name'];
-	}
-
-	/**
-	 * Gets customer shipping company.
-	 * @return string
-	 */
-	public function get_shipping_company() {
-		return $this->data['shipping']['company'];
-	}
-
-	/**
-	 * Get customer's shipping state.
-	 * @return string
-	 */
-	public function get_shipping_state() {
-		return $this->data['shipping']['state'];
-	}
-
-	/**
-	 * Get customer's shipping country.
-	 * @return string
-	 */
-	public function get_shipping_country() {
-		return $this->data['shipping']['country'];
-	}
-
-	/**
-	 * Get customer's shipping postcode.
-	 * @return string
-	 */
-	public function get_shipping_postcode() {
-		return wc_format_postcode( $this->data['shipping']['postcode'], $this->get_shipping_country() );
-	}
-
-	/**
-	 * Get customer's shipping city.
-	 * @return string
-	 */
-	public function get_shipping_city() {
-		return $this->data['shipping']['city'];
-	}
-
-	/**
-	 * Get customer's shipping address.
-	 * @return string
-	 */
-	public function get_shipping_address() {
-		return $this->data['shipping']['address_1'];
-	}
-
-	/**
-	 * Get customer address.
-	 * @return string
-	 */
-	public function get_shipping_address_1() {
-		return $this->get_shipping_address();
-	}
-
-	/**
-	 * Get customer's second shipping address.
-	 * @return string
-	 */
-	public function get_shipping_address_2() {
-		return $this->data['shipping']['address_2'];
-	}
-
-	/**
-	 * Get if customer is VAT exempt?
-	 * @since 2.7.0
-	 * @return bool
-	 */
-	public function get_is_vat_exempt() {
-		return $this->is_vat_exempt;
-	}
-
-	/**
-	 * Has customer calculated shipping?
-	 * @return bool
-	 */
-	public function get_calculated_shipping() {
-		return $this->calculated_shipping;
 	}
 
 	/**
@@ -654,6 +215,7 @@ class WC_Customer extends WC_Legacy_Customer {
 
 	/**
 	 * Gets a customer's downloadable products.
+	 *
 	 * @return array Array of downloadable products
 	 */
 	public function get_downloadable_products() {
@@ -665,36 +227,468 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Is the user a paying customer?
-	 * @since 2.7.0
+	 * Is customer VAT exempt?
+	 *
 	 * @return bool
 	 */
-	function get_is_paying_customer() {
-		return (bool) $this->data['is_paying_customer'];
+	public function is_vat_exempt() {
+		return $this->get_is_vat_exempt();
+	}
+
+	/**
+	 * Has calculated shipping?
+	 *
+	 * @return bool
+	 */
+	public function has_calculated_shipping() {
+		return $this->get_calculated_shipping();
+	}
+
+	/**
+	 * Get if customer is VAT exempt?
+	 *
+	 * @since 3.0.0
+	 * @return bool
+	 */
+	public function get_is_vat_exempt() {
+		return $this->is_vat_exempt;
+	}
+
+	/**
+	 * Get password (only used when updating the user object).
+	 *
+	 * @return string
+	 */
+	public function get_password() {
+		return $this->password;
+	}
+
+	/**
+	 * Has customer calculated shipping?
+	 *
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_calculated_shipping() {
+		return $this->calculated_shipping;
+	}
+
+	/**
+	 * Set if customer has tax exemption.
+	 *
+	 * @param bool $is_vat_exempt
+	 */
+	public function set_is_vat_exempt( $is_vat_exempt ) {
+		$this->is_vat_exempt = (bool) $is_vat_exempt;
+	}
+
+	/**
+	 * Calculated shipping?
+	 *
+	 * @param boolean $calculated
+	 */
+	public function set_calculated_shipping( $calculated = true ) {
+		$this->calculated_shipping = (bool) $calculated;
+	}
+
+	/**
+	 * Set customer's password.
+	 *
+	 * @since 3.0.0
+	 * @param string $password
+	 * @throws WC_Data_Exception
+	 */
+	public function set_password( $password ) {
+		$this->password = wc_clean( $password );
+	}
+
+	/**
+	 * Gets the customers last order.
+	 *
+	 * @param WC_Customer
+	 * @return WC_Order|false
+	 */
+	public function get_last_order() {
+		return $this->data_store->get_last_order( $this );
+	}
+
+	/**
+	 * Return the number of orders this customer has.
+	 *
+	 * @param WC_Customer
+	 * @return integer
+	 */
+	public function get_order_count() {
+		return $this->data_store->get_order_count( $this );
+	}
+
+	/**
+	 * Return how much money this customer has spent.
+	 *
+	 * @param WC_Customer
+	 * @return float
+	 */
+	public function get_total_spent() {
+		return $this->data_store->get_total_spent( $this );
+	}
+
+	/*
+	 |--------------------------------------------------------------------------
+	 | Getters
+	 |--------------------------------------------------------------------------
+	 */
+
+	/**
+	 * Return the customer's username.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_username( $context = 'view' ) {
+		return $this->get_prop( 'username', $context );
+	}
+
+	/**
+	 * Return the customer's email.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_email( $context = 'view' ) {
+		return $this->get_prop( 'email', $context );
+	}
+
+	/**
+	 * Return customer's first name.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_first_name( $context = 'view' ) {
+		return $this->get_prop( 'first_name', $context );
+	}
+
+	/**
+	 * Return customer's last name.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_last_name( $context = 'view' ) {
+		return $this->get_prop( 'last_name', $context );
+	}
+
+	/**
+	 * Return customer's user role.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_role( $context = 'view' ) {
+		return $this->get_prop( 'role', $context );
+	}
+
+	/**
+	 * Return the date this customer was created.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
+	 */
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
+	}
+
+	/**
+	 * Return the date this customer was last updated.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
+	 */
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
+	}
+
+	/**
+	 * Gets a prop for a getter method.
+	 *
+	 * @since  3.0.0
+	 * @param  string $prop Name of prop to get.
+	 * @param  string $address billing or shipping.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return mixed
+	 */
+	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
+		$value = null;
+
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
+			}
+		}
+		return $value;
+	}
+
+	/**
+	 * Get billing_first_name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_first_name( $context = 'view' ) {
+		return $this->get_address_prop( 'first_name', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_last_name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_last_name( $context = 'view' ) {
+		return $this->get_address_prop( 'last_name', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_company.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_company( $context = 'view' ) {
+		return $this->get_address_prop( 'company', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_address_1.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_address( $context = 'view' ) {
+		return $this->get_billing_address_1( $context );
+	}
+
+	/**
+	 * Get billing_address_1.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_address_1( $context = 'view' ) {
+		return $this->get_address_prop( 'address_1', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_address_2.
+	 *
+	 * @param  string $context
+	 * @return string $value
+	 */
+	public function get_billing_address_2( $context = 'view' ) {
+		return $this->get_address_prop( 'address_2', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_city.
+	 *
+	 * @param  string $context
+	 * @return string $value
+	 */
+	public function get_billing_city( $context = 'view' ) {
+		return $this->get_address_prop( 'city', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_state.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_state( $context = 'view' ) {
+		return $this->get_address_prop( 'state', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_postcode.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_postcode( $context = 'view' ) {
+		return $this->get_address_prop( 'postcode', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_country.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_country( $context = 'view' ) {
+		return $this->get_address_prop( 'country', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_email.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_email( $context = 'view' ) {
+		return $this->get_address_prop( 'email', 'billing', $context );
+	}
+
+	/**
+	 * Get billing_phone.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_billing_phone( $context = 'view' ) {
+		return $this->get_address_prop( 'phone', 'billing', $context );
+	}
+
+	/**
+	 * Get shipping_first_name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_first_name( $context = 'view' ) {
+		return $this->get_address_prop( 'first_name', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_last_name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_last_name( $context = 'view' ) {
+		 return $this->get_address_prop( 'last_name', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_company.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_company( $context = 'view' ) {
+		return $this->get_address_prop( 'company', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_address_1.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_address( $context = 'view' ) {
+		return $this->get_shipping_address_1( $context );
+	}
+
+	/**
+	 * Get shipping_address_1.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_address_1( $context = 'view' ) {
+		return $this->get_address_prop( 'address_1', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_address_2.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_address_2( $context = 'view' ) {
+		return $this->get_address_prop( 'address_2', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_city.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_city( $context = 'view' ) {
+		return $this->get_address_prop( 'city', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_state.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_state( $context = 'view' ) {
+		return $this->get_address_prop( 'state', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_postcode.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_postcode( $context = 'view' ) {
+		return $this->get_address_prop( 'postcode', 'shipping', $context );
+	}
+
+	/**
+	 * Get shipping_country.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_country( $context = 'view' ) {
+		return $this->get_address_prop( 'country', 'shipping', $context );
+	}
+
+	/**
+	 * Is the user a paying customer?
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return bool
+	 */
+	function get_is_paying_customer( $context = 'view' ) {
+		return $this->get_prop( 'is_paying_customer', $context );
 	}
 
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
 	|--------------------------------------------------------------------------
-	| Functions for setting customer data. These should not update anything in the
-	| database itself and should only change what is stored in the class
-	| object.
 	*/
 
 	/**
 	 * Set customer's username.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @param string $username
 	 * @throws WC_Data_Exception
 	 */
 	public function set_username( $username ) {
-		$this->data['username'] = $username;
+		$this->set_prop( 'username', $username );
 	}
 
 	/**
 	 * Set customer's email.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
@@ -702,32 +696,35 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( $value && ! is_email( $value ) ) {
 			$this->error( 'customer_invalid_email', __( 'Invalid email address', 'woocommerce' ) );
 		}
-		$this->data['email'] = sanitize_email( $value );
+		$this->set_prop( 'email', sanitize_email( $value ) );
 	}
 
 	/**
 	 * Set customer's first name.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @param string $first_name
 	 * @throws WC_Data_Exception
 	 */
 	public function set_first_name( $first_name ) {
-		$this->data['first_name'] = $first_name;
+		$this->set_prop( 'first_name', $first_name );
 	}
 
 	/**
 	 * Set customer's last name.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @param string $last_name
 	 * @throws WC_Data_Exception
 	 */
 	public function set_last_name( $last_name ) {
-		$this->data['last_name'] = $last_name;
+		$this->set_prop( 'last_name', $last_name );
 	}
 
 	/**
 	 * Set customer's user role(s).
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @param mixed $role
 	 * @throws WC_Data_Exception
 	 */
@@ -737,67 +734,74 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( $role && ! empty( $wp_roles->roles ) && ! in_array( $role, array_keys( $wp_roles->roles ) ) ) {
 			$this->error( 'customer_invalid_role', __( 'Invalid role', 'woocommerce' ) );
 		}
-		$this->data['role'] = $role;
-	}
-
-	/**
-	 * Set customer's password.
-	 * @since 2.7.0
-	 * @param string $password
-	 * @throws WC_Data_Exception
-	 */
-	public function set_password( $password ) {
-		$this->password = wc_clean( $password );
+		$this->set_prop( 'role', $role );
 	}
 
 	/**
 	 * Set the date this customer was last updated.
-	 * @since 2.7.0
-	 * @param integer $timestamp
+	 *
+	 * @since  3.0.0
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_modified( $timestamp ) {
-		$this->data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
 	}
 
 	/**
 	 * Set the date this customer was last updated.
-	 * @since 2.7.0
-	 * @param integer $timestamp
+	 *
+	 * @since  3.0.0
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_created( $timestamp ) {
-		$this->data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
 	}
 
 	/**
 	 * Set customer address to match shop base address.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_address_to_base() {
 		$base = wc_get_customer_default_location();
-		$this->data['billing']['country']  = $base['country'];
-		$this->data['billing']['state']    = $base['state'];
-		$this->data['billing']['postcode'] = '';
-		$this->data['billing']['city']     = '';
+		$this->set_billing_location( $base['country'], $base['state'], '', '' );
 	}
 
 	/**
 	 * Set customer shipping address to base address.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_address_to_base() {
 		$base = wc_get_customer_default_location();
-		$this->data['shipping']['country']  = $base['country'];
-		$this->data['shipping']['state']    = $base['state'];
-		$this->data['shipping']['postcode'] = '';
-		$this->data['shipping']['city']     = '';
+		$this->set_shipping_location( $base['country'], $base['state'], '', '' );
+	}
+
+	/**
+	 * Sets all address info at once.
+	 *
+	 * @param string $country
+	 * @param string $state
+	 * @param string $postcode
+	 * @param string $city
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_location( $country, $state = '', $postcode = '', $city = '' ) {
+		$billing             = $this->get_prop( 'billing', 'edit' );
+		$billing['country']  = $country;
+		$billing['state']    = $state;
+		$billing['postcode'] = $postcode;
+		$billing['city']     = $city;
+		$this->set_prop( 'billing', $billing );
 	}
 
 	/**
 	 * Sets all shipping info at once.
+	 *
 	 * @param string $country
 	 * @param string $state
 	 * @param string $postcode
@@ -805,462 +809,265 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
-		$this->data['shipping']['country']  = $country;
-		$this->data['shipping']['state']    = $state;
-		$this->data['shipping']['postcode'] = $postcode;
-		$this->data['shipping']['city']     = $city;
+		$shipping             = $this->get_prop( 'shipping', 'edit' );
+		$shipping['country']  = $country;
+		$shipping['state']    = $state;
+		$shipping['postcode'] = $postcode;
+		$shipping['city']     = $city;
+		$this->set_prop( 'shipping', $shipping );
 	}
 
 	/**
-	 * Sets all address info at once.
-	 * @param string $country
-	 * @param string $state
-	 * @param string $postcode
-	 * @param string $city
-	 * @throws WC_Data_Exception
+	 * Sets a prop for a setter method.
+	 *
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to set.
+	 * @param string $address Name of address to set. billing or shipping.
+	 * @param mixed  $value Value of the prop.
 	 */
-	public function set_billing_location( $country, $state, $postcode = '', $city = '' ) {
-		$this->data['billing']['country']  = $country;
-		$this->data['billing']['state']    = $state;
-		$this->data['billing']['postcode'] = $postcode;
-		$this->data['billing']['city']     = $city;
+	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+			if ( true === $this->object_read ) {
+				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {
+					$this->changes[ $address ][ $prop ] = $value;
+				}
+			} else {
+				$this->data[ $address ][ $prop ] = $value;
+			}
+		}
 	}
 
 	/**
-	 * Set billing first name.
-	 * @return string
+	 * Set billing_first_name.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_first_name( $value ) {
-		$this->data['billing']['first_name'] = $value;
+		$this->set_address_prop( 'first_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing last name.
-	 * @return string
+	 * Set billing_last_name.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_last_name( $value ) {
-		$this->data['billing']['last_name'] = $value;
+		$this->set_address_prop( 'last_name', 'billing', $value );
 	}
 
 	/**
-	 * Set billing company.
-	 * @return string
+	 * Set billing_company.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_company( $value ) {
-		$this->data['billing']['company'] = $value;
+		$this->set_address_prop( 'company', 'billing', $value );
 	}
 
 	/**
-	 * Set billing phone.
-	 * @return string
+	 * Set billing_address_1.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_phone( $value ) {
-		$this->data['billing']['phone'] = $value;
+	public function set_billing_address( $value ) {
+		$this->set_billing_address_1( $value );
 	}
 
 	/**
-	 * Set billing email.
+	 * Set billing_address_1.
+	 *
 	 * @param string $value
-	 * @return string
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_address_1( $value ) {
+		$this->set_address_prop( 'address_1', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_address_2.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_address_2( $value ) {
+		$this->set_address_prop( 'address_2', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_city.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_city( $value ) {
+		$this->set_address_prop( 'city', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_state.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_state( $value ) {
+		$this->set_address_prop( 'state', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_postcode.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_postcode( $value ) {
+		$this->set_address_prop( 'postcode', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_country.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_billing_country( $value ) {
+		$this->set_address_prop( 'country', 'billing', $value );
+	}
+
+	/**
+	 * Set billing_email.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
 			$this->error( 'customer_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
 		}
-		$this->data['billing']['email'] = sanitize_email( $value );
+		$this->set_address_prop( 'email', 'billing', sanitize_email( $value ) );
 	}
 
 	/**
-	 * Set customer country.
-	 * @param mixed $country
+	 * Set billing_phone.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_country( $country ) {
-		$this->data['billing']['country'] = $country;
+	public function set_billing_phone( $value ) {
+		$this->set_address_prop( 'phone', 'billing', $value );
 	}
 
 	/**
-	 * Set customer state.
-	 * @param mixed $state
+	 * Set shipping_first_name.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_state( $state ) {
-		$this->data['billing']['state'] = $state;
+	public function set_shipping_first_name( $value ) {
+		$this->set_address_prop( 'first_name', 'shipping', $value );
 	}
 
 	/**
-	 * Sets customer postcode.
-	 * @param mixed $postcode
+	 * Set shipping_last_name.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_postcode( $postcode ) {
-		$this->data['billing']['postcode'] = $postcode;
+	public function set_shipping_last_name( $value ) {
+		$this->set_address_prop( 'last_name', 'shipping', $value );
 	}
 
 	/**
-	 * Sets customer city.
-	 * @param mixed $city
+	 * Set shipping_company.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_city( $city ) {
-		$this->data['billing']['city'] = $city;
+	public function set_shipping_company( $value ) {
+		$this->set_address_prop( 'company', 'shipping', $value );
 	}
 
 	/**
-	 * Set customer address.
-	 * @param mixed $address
+	 * Set shipping_address_1.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_address( $address ) {
-		$this->data['billing']['address_1'] = $address;
+	public function set_shipping_address( $value ) {
+		$this->set_shipping_address_1( $value );
 	}
 
 	/**
-	 * Set customer address.
-	 * @param mixed $address
+	 * Set shipping_address_1.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_address_1( $address ) {
-		$this->set_billing_address( $address );
+	public function set_shipping_address_1( $value ) {
+		$this->set_address_prop( 'address_1', 'shipping', $value );
 	}
 
 	/**
-	 * Set customer's second address.
-	 * @param mixed $address
+	 * Set shipping_address_2.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_billing_address_2( $address ) {
-		$this->data['billing']['address_2'] = $address;
+	public function set_shipping_address_2( $value ) {
+		$this->set_address_prop( 'address_2', 'shipping', $value );
 	}
 
 	/**
-	 * Sets customer shipping first name.
-	 * @param string $first_name
+	 * Set shipping_city.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_shipping_first_name( $first_name ) {
-		$this->data['shipping']['first_name'] = $first_name;
+	public function set_shipping_city( $value ) {
+		$this->set_address_prop( 'city', 'shipping', $value );
 	}
 
 	/**
-	 * Sets customer shipping last name.
-	 * @param string $last_name
+	 * Set shipping_state.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_shipping_last_name( $last_name ) {
-		$this->data['shipping']['last_name'] = $last_name;
+	public function set_shipping_state( $value ) {
+		$this->set_address_prop( 'state', 'shipping', $value );
 	}
 
 	/**
-	 * Sets customer shipping company.
-	 * @param string $company.
+	 * Set shipping_postcode.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_shipping_company( $company ) {
-		$this->data['shipping']['company'] = $company;
+	public function set_shipping_postcode( $value ) {
+		$this->set_address_prop( 'postcode', 'shipping', $value );
 	}
 
 	/**
-	 * Set shipping country.
-	 * @param string $country
+	 * Set shipping_country.
+	 *
+	 * @param string $value
 	 * @throws WC_Data_Exception
 	 */
-	public function set_shipping_country( $country ) {
-		$this->data['shipping']['country'] = $country;
-	}
-
-	/**
-	 * Set shipping state.
-	 * @param string $state
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_state( $state ) {
-		$this->data['shipping']['state'] = $state;
-	}
-
-	/**
-	 * Set shipping postcode.
-	 * @param string $postcode
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_postcode( $postcode ) {
-		$this->data['shipping']['postcode'] = $postcode;
-	}
-
-	/**
-	 * Sets shipping city.
-	 * @param string $city
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_city( $city ) {
-		$this->data['shipping']['city'] = $city;
-	}
-
-	/**
-	 * Set shipping address.
-	 * @param string $address
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_address( $address ) {
-		$this->data['shipping']['address_1'] = $address;
-	}
-
-	/**
-	 * Set customer shipping address.
-	 * @param mixed $address
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_address_1( $address ) {
-		$this->set_shipping_address( $address );
-	}
-
-	/**
-	 * Set second shipping address.
-	 * @param string $address
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_address_2( $address ) {
-		$this->data['shipping']['address_2'] = $address;
+	public function set_shipping_country( $value ) {
+		$this->set_address_prop( 'country', 'shipping', $value );
 	}
 
 	/**
 	 * Set if the user a paying customer.
-	 * @since 2.7.0
-	 * @param boolean $is_paying_customer
+	 *
+	 * @since 3.0.0
+	 * @param bool $is_paying_customer
 	 * @throws WC_Data_Exception
 	 */
 	function set_is_paying_customer( $is_paying_customer ) {
-		$this->data['is_paying_customer'] = (bool) $is_paying_customer;
+		$this->set_prop( 'is_paying_customer', (bool) $is_paying_customer );
 	}
-
-	/**
-	 * Set if customer has tax exemption.
-	 * @param bool $is_vat_exempt
-	 */
-	public function set_is_vat_exempt( $is_vat_exempt ) {
-		$this->is_vat_exempt = (bool) $is_vat_exempt;
-	}
-
-	/**
-	 * Calculated shipping?
-	 * @param boolean $calculated
-	 */
-	public function set_calculated_shipping( $calculated = true ) {
-		$this->calculated_shipping = (bool) $calculated;
-	}
-
-	/*
-	 |--------------------------------------------------------------------------
-	 | CRUD methods
-	 |--------------------------------------------------------------------------
-	 | Methods which create, read, update and delete from the database.
-	 |
-	 | A save method is included for convenience (chooses update or create based
-	 | on if the order exists yet).
-	 */
-
-	 /**
-	  * Create a customer.
-	  * @since 2.7.0.
-	  */
-	public function create() {
-		$customer_id = wc_create_new_customer( $this->get_email(), $this->get_username(), $this->password );
-
-		if ( ! is_wp_error( $customer_id ) ) {
-			$this->set_id( $customer_id );
-			update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
-			update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
-			update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
-			update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
-			update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
-			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
-			update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
-			update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
-			update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
-			update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
-			update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
-			update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-			update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-			update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-			update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
-			update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
-			update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
-			update_user_meta( $this->get_id(), 'shipping_address_2', $this->get_shipping_address_2() );
-			update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
-			update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
-			update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-			update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
-			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
-			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
-			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
-			$wp_user = new WP_User( $this->get_id() );
-			$this->set_date_created( strtotime( $wp_user->user_registered ) );
-			$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
-			$this->read_meta_data();
-		}
-	}
-
-	/**
-	 * Callback which flattens post meta (gets the first value).
-	 * @param  array $value
-	 * @return mixed
-	 */
-	private function flatten_post_meta( $value ) {
-		return is_array( $value ) ? current( $value ) : $value;
-	}
-
-	/**
-	 * Read a customer from the database.
-	 * @since 2.7.0
-	 * @param integer $id
-	 */
-	public function read( $id ) {
-		global $wpdb;
-
-		// User object is required.
-		if ( ! $id || ! ( $user_object = get_user_by( 'id', $id ) ) || empty( $user_object->ID ) ) {
-			$this->set_id( 0 );
-			return;
-		}
-
-		// Only users on this site should be read.
-		if ( is_multisite() && ! is_user_member_of_blog( $id ) ) {
-			$this->set_id( 0 );
-			return;
-		}
-
-		$this->set_id( $user_object->ID );
-		$this->set_props( array_map( array( $this, 'flatten_post_meta' ), get_user_meta( $id ) ) );
-		$this->set_props( array(
-			'is_paying_customer' => get_user_meta( $id, 'paying_customer', true ),
-			'email'              => $user_object->user_email,
-			'username'           => $user_object->user_login,
-			'date_created'       => strtotime( $user_object->user_registered ),
-			'date_modified'      => get_user_meta( $id, 'last_update', true ),
-			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
-		) );
-		$this->read_meta_data();
-	}
-
-	/**
-	 * Update a customer.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		wp_update_user( array( 'ID' => $this->get_id(), 'user_email' => $this->get_email() ) );
-		// Only update password if a new one was set with set_password
-		if ( ! empty( $this->password ) ) {
-			wp_update_user( array( 'ID' => $this->get_id(), 'user_pass' => $this->password ) );
-			$this->password = '';
-		}
-
-		update_user_meta( $this->get_id(), 'billing_first_name', $this->get_billing_first_name() );
-		update_user_meta( $this->get_id(), 'billing_last_name', $this->get_billing_last_name() );
-		update_user_meta( $this->get_id(), 'billing_company', $this->get_billing_company() );
-		update_user_meta( $this->get_id(), 'billing_phone', $this->get_billing_phone() );
-		update_user_meta( $this->get_id(), 'billing_email', $this->get_billing_email() );
-		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
-		update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
-		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
-		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
-		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
-		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
-		update_user_meta( $this->get_id(), 'shipping_first_name', $this->get_shipping_first_name() );
-		update_user_meta( $this->get_id(), 'shipping_last_name', $this->get_shipping_last_name() );
-		update_user_meta( $this->get_id(), 'shipping_company', $this->get_shipping_company() );
-		update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
-		update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
-		update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
-		update_user_meta( $this->get_id(), 'shipping_address_2', $this->get_shipping_address_2() );
-		update_user_meta( $this->get_id(), 'shipping_state', $this->get_shipping_state() );
-		update_user_meta( $this->get_id(), 'shipping_country', $this->get_shipping_country() );
-		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
-		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
-		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
-		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
-		$this->set_date_modified( get_user_meta( $this->get_id(), 'last_update', true ) );
-		$this->save_meta_data();
-	}
-
-	/**
-	 * Delete a customer.
-	 * @since 2.7.0
-	 */
-	public function delete() {
-		if ( ! $this->get_id() ) {
-			return;
-		}
-		return wp_delete_user( $this->get_id() );
-	}
-
-	/**
-	 * Delete a customer and reassign posts..
-	 *
-	 * @param int $reassign Reassign posts and links to new User ID.
-	 * @since 2.7.0
-	 */
-	public function delete_and_reassign( $reassign = null ) {
-		if ( ! $this->get_id() ) {
-			return;
-		}
-		return wp_delete_user( $this->get_id(), $reassign );
-	}
-
-	/**
-	 * Save data. Create when creating a new user/class, update when editing
-	 * an existing user, and save session when working on a logged out guest
-	 * session.
-	 * @since 2.7.0
-	 */
-	public function save() {
-		if ( $this->is_session ) {
-			$this->save_to_session();
-		} elseif ( ! $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
-		}
-	}
-
-	/**
-	 * Saves data to the session only (does not overwrite DB values).
-	 * @since 2.7.0
-	 */
-	public function save_to_session() {
-		$data = array();
-		foreach ( $this->session_keys as $session_key ) {
-			$function_key = $session_key;
-			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-				$session_key = str_replace( 'billing_', '', $session_key );
-			}
-			$data[ $session_key ] = $this->{"get_$function_key"}();
-		}
-		if ( WC()->session->get( 'customer' ) !== $data ) {
-			WC()->session->set( 'customer', $data );
-		}
-	}
-
-	/**
-	 * Callback to remove unwanted meta data.
-	 *
-	 * @param object $meta
-	 * @return bool
-	 */
-	protected function exclude_internal_meta_keys( $meta ) {
-		global $wpdb;
-		return ! in_array( $meta->meta_key, $this->get_internal_meta_keys() )
-			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
-			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
-			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
-			&& ! strstr( $meta->meta_key, $wpdb->prefix );
-	}
-
 }

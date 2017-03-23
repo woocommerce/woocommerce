@@ -4,7 +4,7 @@
  *
  * Provides REST API specific methods and setup/teardown.
  *
- * @since 2.7
+ * @since 3.0
  */
 
  class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {

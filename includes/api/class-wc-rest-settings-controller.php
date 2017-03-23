@@ -1,24 +1,31 @@
 <?php
+/**
+ * REST API Settings controller
+ *
+ * Handles requests to the /settings endpoints.
+ *
+ * @author   WooThemes
+ * @category API
+ * @package  WooCommerce/API
+ * @since    3.0.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * REST API Settings Groups Controller.
- * Handles requests to the /settings and /settings/<group> endpoints.
+ * REST API Settings controller class.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @version  2.7.0
- * @since    2.7.0
+ * @package WooCommerce/API
+ * @extends WC_REST_Controller
  */
 class WC_REST_Settings_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -30,7 +37,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Register routes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
@@ -46,7 +53,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings groups items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -102,7 +109,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param array $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -123,7 +130,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Filters out bad values from the groups array/filter so we
 	 * only return known values via the API.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $group
 	 * @return array
 	 */
@@ -137,7 +144,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each group response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
@@ -148,7 +155,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Returns default settings for groups. null means the field is required.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	protected function group_defaults() {
@@ -164,7 +171,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -179,7 +186,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Get the groups schema, conforming to JSON Schema.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {
@@ -196,14 +203,14 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 					),
 				),
 				'label'            => array(
-					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description'      => array(
-					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces', 'woocommerce' ),
+					'description'  => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',

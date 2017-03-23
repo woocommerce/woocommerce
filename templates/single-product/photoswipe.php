@@ -10,26 +10,21 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.7.0
+ * @see     https://docs.woocommerce.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
-}
-
-if ( ! is_product() ) {
-	return;
 }
 ?>
 
 <!-- Root element of PhotoSwipe. Must have class pswp. -->
 <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
 
-	<!-- Background of PhotoSwipe.
-		It's a separate element as animating opacity is faster than rgba(). -->
+	<!-- Background of PhotoSwipe. It's a separate element as animating opacity is faster than rgba(). -->
 	<div class="pswp__bg"></div>
 
 	<!-- Slides wrapper with overflow:hidden. -->
@@ -53,13 +48,13 @@ if ( ! is_product() ) {
 
 				<div class="pswp__counter"></div>
 
-				<button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+				<button class="pswp__button pswp__button--close" aria-label="<?php esc_attr_e( 'Close (Esc)', 'woocommerce' ); ?>"></button>
 
-				<button class="pswp__button pswp__button--share" title="Share"></button>
+				<button class="pswp__button pswp__button--share" aria-label="<?php esc_attr_e( 'Share', 'woocommerce' ); ?>"></button>
 
-				<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+				<button class="pswp__button pswp__button--fs" aria-label="<?php esc_attr_e( 'Toggle fullscreen', 'woocommerce' ); ?>"></button>
 
-				<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+				<button class="pswp__button pswp__button--zoom" aria-label="<?php esc_attr_e( 'Zoom in/out', 'woocommerce' ); ?>"></button>
 
 				<!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
 				<!-- element will get class pswp__preloader--active when preloader is running -->
@@ -76,11 +71,9 @@ if ( ! is_product() ) {
 				<div class="pswp__share-tooltip"></div>
 			</div>
 
-			<button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-			</button>
+			<button class="pswp__button pswp__button--arrow--left" aria-label="<?php esc_attr_e( 'Previous (arrow left)', 'woocommerce' ); ?>"></button>
 
-			<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-			</button>
+			<button class="pswp__button pswp__button--arrow--right" aria-label="<?php esc_attr_e( 'Next (arrow right)', 'woocommerce' ); ?>"></button>
 
 			<div class="pswp__caption">
 				<div class="pswp__caption__center"></div>

@@ -18,7 +18,7 @@ function wc_update_200_file_paths() {
 	global $wpdb;
 
 	// Upgrade old style files paths to support multiple file paths
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id, post_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
@@ -192,7 +192,7 @@ function wc_update_200_line_items() {
 	// Now its time for the massive update to line items - move them to the new DB tables
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
 	$order_item_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_items'
 	" );
 
@@ -268,7 +268,7 @@ function wc_update_200_line_items() {
 	// Do the same kind of update for order_taxes - move to lines
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'
 	$order_tax_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_taxes'
 	" );
 
@@ -397,7 +397,7 @@ function wc_update_210_file_paths() {
 	global $wpdb;
 
 	// Upgrade file paths to support multiple file paths + names etc
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
@@ -556,7 +556,7 @@ function wc_update_220_variations() {
 function wc_update_220_attributes() {
 	global $wpdb;
 	// Update taxonomy names with correct sanitized names
-	$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+	$attribute_taxonomies = $wpdb->get_results( "SELECT attribute_name, attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 
 	foreach ( $attribute_taxonomies as $attribute_taxonomy ) {
 		$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_taxonomy->attribute_name );
@@ -886,7 +886,7 @@ function wc_update_260_zone_methods() {
 	 * Migrate the old data out of woocommerce_shipping_zone_shipping_methods into the new table and port over any known options (used by table rates and flat rate boxes).
 	 */
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone_shipping_methods';" ) ) {
-		$old_methods = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
+		$old_methods = $wpdb->get_results( "SELECT zone_id, shipping_method_type, shipping_method_order, shipping_method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
 
 		if ( $old_methods ) {
 			$max_new_id = $wpdb->get_var( "SELECT MAX(instance_id) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" );
@@ -973,7 +973,7 @@ function wc_update_260_db_version() {
 	WC_Install::update_db_version( '2.6.0' );
 }
 
-function wc_update_270_webhooks() {
+function wc_update_300_webhooks() {
 	/**
 	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
 	 * and woocommerce_product_bulk_edit_save hooks.
@@ -996,8 +996,90 @@ function wc_update_270_webhooks() {
  *
  * @return null
  */
-function wc_update_270_comment_type_index() {
+function wc_update_300_comment_type_index() {
 	global $wpdb;
 
-	$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+
+	if ( is_null( $index_exists ) ) {
+		// Add an index to the field comment_type to improve the response time of the query
+		// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	}
+}
+
+function wc_update_300_grouped_products() {
+	global $wpdb;
+	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
+	foreach ( $parents as $parent_id ) {
+		$parent = wc_get_product( $parent_id );
+		if ( $parent && $parent->is_type( 'grouped' ) ) {
+			$children_ids = get_posts( array(
+				'post_parent'    => $parent_id,
+				'posts_per_page' => -1,
+				'post_type'      => 'product',
+				'fields'         => 'ids',
+			) );
+			add_post_meta( $parent_id, '_children', $children_ids, true );
+		}
+	}
+}
+
+function wc_update_300_settings() {
+	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+	if ( '' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+	} elseif ( 'standard' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', '' );
+	}
+}
+
+/**
+ * Convert meta values into term for product visibility.
+ */
+function wc_update_300_product_visibility() {
+	global $wpdb;
+
+	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
+	}
+
+	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_id ) );
+	}
+
+	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
+	}
+
+	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_id ) );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_300_db_version() {
+	WC_Install::update_db_version( '3.0.0' );
 }

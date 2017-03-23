@@ -142,7 +142,7 @@ if ( ! function_exists( 'register_api_field' ) ) {
 	 * Backwards compat shim
 	 */
 	function register_api_field( $object_type, $attributes, $args = array() ) {
-		_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
+		wc_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
 		register_rest_field( $object_type, $attributes, $args );
 	}
 }
@@ -166,19 +166,23 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 
 		if ( ! empty( $args['enum'] ) ) {
 			if ( ! in_array( $value, $args['enum'] ) ) {
+				/* translators: 1: parameter 2: arguments */
 				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
 			}
 		}
 
 		if ( 'integer' === $args['type'] && ! is_numeric( $value ) ) {
+			/* translators: 1: parameter 2: integer type */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'integer' ) );
 		}
 
 		if ( 'boolean' === $args['type'] && ! rest_is_boolean( $value ) ) {
+			/* translators: 1: parameter 2: boolean type */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $value, 'boolean' ) );
 		}
 
 		if ( 'string' === $args['type'] && ! is_string( $value ) ) {
+			/* translators: 1: parameter 2: string type */
 			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 		}
 
@@ -197,6 +201,7 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 					break;
 				case 'ipv4' :
 					if ( ! rest_is_ip_address( $value ) ) {
+						/* translators: %s: IP address */
 						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not a valid IP address.', 'woocommerce' ), $value ) );
 					}
 					break;

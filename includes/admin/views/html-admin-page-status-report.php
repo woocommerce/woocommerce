@@ -13,6 +13,7 @@ $environment    = $system_status->get_environment_info();
 $database       = $system_status->get_database_info();
 $active_plugins = $system_status->get_active_plugins();
 $theme          = $system_status->get_theme_info();
+$security       = $system_status->get_security_info();
 $settings       = $system_status->get_settings();
 $pages          = $system_status->get_pages();
 ?>
@@ -55,7 +56,7 @@ $pages          = $system_status->get_pages();
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'To allow logging, make <code>%s</code> writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', $environment['log_directory'] );
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . $environment['log_directory'] . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
 				}
 			?></td>
 		</tr>
@@ -330,6 +331,37 @@ $pages          = $system_status->get_pages();
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
+			<th colspan="3" data-export-label="Security"><h2><?php _e( 'Security', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Secure connection (HTTPS)"><?php _e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Is the connection to your store secure?', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['secure_connection'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Hide errors from visitors"><?php _e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $security['hide_errors'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span><?php _e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ) ?>)"><h2><?php _e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ) ?>)</h2></th>
 		</tr>
 	</thead>
@@ -342,14 +374,15 @@ $pages          = $system_status->get_pages();
 				// Link the plugin name to the plugin url if available.
 				$plugin_name = esc_html( $plugin['name'] );
 				if ( ! empty( $plugin['url'] ) ) {
-					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" title="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
 				$version_string = '';
 				$network_string = '';
 				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
-						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $plugin['version_latest'] ) ) . '</strong>';
+						/* translators: %s: plugin latest version */
+						$version_string = ' &ndash; <strong style="color:red;">' . sprintf( esc_html__( '%s is available', 'woocommerce' ), $plugin['version_latest'] ) . '</strong>';
 					}
 
 					if ( false != $plugin['network_activated'] ) {
@@ -360,7 +393,11 @@ $pages          = $system_status->get_pages();
 				<tr>
 					<td><?php echo $plugin_name; ?></td>
 					<td class="help">&nbsp;</td>
-					<td><?php echo sprintf( _x( 'by %s', 'by author', 'woocommerce' ), $plugin['author_name'] ) . ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string; ?></td>
+					<td><?php
+						/* translators: %s: plugin author */
+						printf( __( 'by %s', 'woocommerce' ), $plugin['author_name'] );
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+					?></td>
 				</tr>
 				<?php
 			}
@@ -436,7 +473,7 @@ $pages          = $system_status->get_pages();
 				$error   = false;
 
 				if ( $page['page_id'] ) {
-					$page_name = '<a href="' . get_edit_post_link( $page['page_id'] ) . '" title="' . sprintf( _x( 'Edit %s page', 'WC Pages links in the System Status', 'woocommerce' ), esc_html( $page['page_name'] ) ) . '">' . esc_html( $page['page_name'] ) . '</a>';
+					$page_name = '<a href="' . get_edit_post_link( $page['page_id'] ) . '" aria-label="' . sprintf( __( 'Edit %s page', 'woocommerce' ), esc_html( $page['page_name'] ) ) . '">' . esc_html( $page['page_name'] ) . '</a>';
 				} else {
 					$page_name = esc_html( $page['page_name'] );
 				}
@@ -452,7 +489,7 @@ $pages          = $system_status->get_pages();
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
 					$error = true;
 				} elseif ( ! $page['page_visible'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %1$spublic%2$s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
 					$error = true;
 				} else {
 					// Shortcode check
@@ -489,6 +526,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['version'] );
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
+					/* translators: %s: theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['version_latest'] ) ) . '</strong>';
 				}
 			?></td>
@@ -519,6 +557,7 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				echo esc_html( $theme['parent_version'] );
 				if ( version_compare( $theme['parent_version'], $theme['parent_version_latest'], '<' ) ) {
+					/* translators: %s: parant theme latest version */
 					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $theme['parent_version_latest'] ) ) . '</strong>';
 				}
 			?></td>
@@ -567,7 +606,13 @@ $pages          = $system_status->get_pages();
 							for ( $i = 0; $i < $total_overrides; $i++ ) {
 								$override = $theme['overrides'][ $i ];
 								if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
-									printf( __( '<code>%1$s</code> version <strong style="color:red">%2$s</strong> is out of date. The core version is %3$s', 'woocommerce' ), $override['file'], $override['version'] ? $override['version'] : '-', $override['core_version'] );
+									$current_version = $override['version'] ? $override['version'] : '-';
+									printf(
+										__( '%1$s version %2$s is out of date. The core version is %3$s', 'woocommerce' ),
+										'<code>' . $override['file'] . '</code>',
+										'<strong style="color:red">' . $current_version . '</strong>',
+										$override['core_version']
+									);
 								} else {
 									echo esc_html( $override['file'] );
 								}
@@ -604,94 +649,3 @@ $pages          = $system_status->get_pages();
 </table>
 
 <?php do_action( 'woocommerce_system_status_report' ); ?>
-
-<script type="text/javascript">
-
-	jQuery( 'a.help_tip, a.woocommerce-help-tip' ).click( function() {
-		return false;
-	});
-
-	jQuery( 'a.debug-report' ).click( function() {
-
-		var report = '';
-
-		jQuery( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
-
-			if ( jQuery( this ).is( 'thead' ) ) {
-
-				var label = jQuery( this ).find( 'th:eq(0)' ).data( 'export-label' ) || jQuery( this ).text();
-				report = report + '\n### ' + jQuery.trim( label ) + ' ###\n\n';
-
-			} else {
-
-				jQuery( 'tr', jQuery( this ) ).each( function() {
-
-					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
-					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
-
-					// Find value
-					var $value_html = jQuery( this ).find( 'td:eq(2)' ).clone();
-					$value_html.find( '.private' ).remove();
-					$value_html.find( '.dashicons-yes' ).replaceWith( '&#10004;' );
-					$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
-
-					// Format value
-					var the_value   = jQuery.trim( $value_html.text() );
-					var value_array = the_value.split( ', ' );
-
-					if ( value_array.length > 1 ) {
-						// If value have a list of plugins ','.
-						// Split to add new line.
-						var temp_line ='';
-						jQuery.each( value_array, function( key, line ) {
-							temp_line = temp_line + line + '\n';
-						});
-
-						the_value = temp_line;
-					}
-
-					report = report + '' + the_name + ': ' + the_value + '\n';
-				});
-
-			}
-		});
-
-		try {
-			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).focus().select();
-			jQuery( this ).fadeOut();
-			return false;
-		} catch ( e ) {
-			/* jshint devel: true */
-			console.log( e );
-		}
-
-		return false;
-	});
-
-	jQuery( document ).ready( function( $ ) {
-
-		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
-			e.clipboardData.clearData();
-			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
-			e.preventDefault();
-		});
-
-		$( document.body ).on( 'aftercopy', '#copy-for-support', function( e ) {
-			if ( true === e.success['text/plain'] ) {
-				$( '#copy-for-support' ).tipTip({
-					'attribute':  'data-tip',
-					'activation': 'focus',
-					'fadeIn':     50,
-					'fadeOut':    50,
-					'delay':      0
-				}).focus();
-			} else {
-				$( '.copy-error' ).removeClass( 'hidden' );
-				$( '#debug-report' ).find( 'textarea' ).focus().select();
-			}
-		});
-
-	});
-
-</script>

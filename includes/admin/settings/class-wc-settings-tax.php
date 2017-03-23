@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Tax' ) ) :
+if ( ! class_exists( 'WC_Settings_Tax', false ) ) :
 
 /**
  * WC_Settings_Tax.
@@ -72,13 +72,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-		$tax_classes     = WC_Tax::get_tax_classes();
-		$classes_options = array();
-
-		foreach ( $tax_classes as $class ) {
-			$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-		}
-
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
 	}
 
@@ -88,9 +81,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output() {
 		global $current_section;
 
-		$tax_classes = WC_Tax::get_tax_classes();
+		$tax_classes = WC_Tax::get_tax_class_slugs();
 
-		if ( 'standard' === $current_section || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes ) ) {
 			$this->output_tax_rates();
 		} else {
 			$settings = $this->get_settings();

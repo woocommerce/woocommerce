@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,6 +42,12 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -60,6 +66,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 				),
@@ -127,7 +134,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			$zone->set_zone_order( $request->get_param( 'order' ) );
 		}
 
-		$zone->create();
+		$zone->save();
 
 		if ( $zone->get_id() !== 0 ) {
 			$request->set_param( 'id', $zone->get_id() );

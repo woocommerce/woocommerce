@@ -30,6 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$curent_user_id = get_current_user_id();
 						$user_id        = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $curent_user_id;
 						$user           = get_user_by( 'id', $user_id );
+						/* translators: 1: user display name 2: user ID 3: user email */
 						$user_string    = sprintf(
 							esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 							$user->display_name,
@@ -37,7 +38,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$user->user_email
 						);
 					?>
-					<input type="hidden" class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true" />
+					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+						<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo $user_string; ?><option>
+					</select>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -77,7 +80,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td class="forminp">
 						<span><?php
 							if ( ! empty( $key_data['last_access'] ) ) {
-								$date = sprintf( _x( '%1$s at %2$s', 'date and time', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
+								/* translators: 1: last access date 2: last access time */
+								$date = sprintf( __( '%1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
 
 								echo apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key_data['last_access'] );
 							} else {

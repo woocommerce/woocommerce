@@ -154,7 +154,7 @@
 		<exclude name="WordPress.VIP.RestrictedFunctions.urlencode" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.url_to_postid" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.user_meta" />
-		<exclude name="WordPress.VIP.RestrictedFunctions.wp_get_post_terms" />
+		<!-- <exclude name="WordPress.VIP.RestrictedFunctions.wp_get_post_terms" /> -->
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_redirect" />
 		<exclude name="WordPress.VIP.RestrictedFunctions.wp_remote_get" />
 		<exclude name="WordPress.VIP.RestrictedVariables.user_meta" />
@@ -189,5 +189,6 @@
 		<!-- <exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" /> -->
 		<exclude name="WordPress.XSS.EscapeOutput.OutputNotEscaped" />
 		<exclude name="WordPress.XSS.EscapeOutput.UnsafePrintingFunction" />
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
 	</rule>
 </ruleset>

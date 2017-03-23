@@ -1,0 +1,2 @@
+WC-CLI and the related testing code is based on wp-cli/restful (which was released under the MIT license https://opensource.org/licenses/MIT) by Daniel Bachhuber
+https://github.com/wp-cli/restful

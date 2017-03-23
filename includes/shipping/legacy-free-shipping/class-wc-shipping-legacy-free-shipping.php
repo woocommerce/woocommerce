@@ -28,7 +28,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	public function __construct() {
 		$this->id 			= 'legacy_free_shipping';
 		$this->method_title = __( 'Free shipping (legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 	}
 
@@ -106,7 +106,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				'title' 		=> __( 'Specific countries', 'woocommerce' ),
 				'type' 			=> 'multiselect',
 				'class'			=> 'wc-enhanced-select',
-				'css'			=> 'width: 450px;',
+				'css'			=> 'width: 400px;',
 				'default' 		=> '',
 				'options'		=> WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(

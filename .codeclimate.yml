@@ -13,6 +13,9 @@ engines:
       languages:
       - php
       - javascript
+ratings:
+  paths:
+    - "includes/*"
 exclude_paths:
   - tests/*
   - apigen/*

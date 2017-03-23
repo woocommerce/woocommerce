@@ -29,6 +29,7 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
 					echo esc_html( $item->get_variation_id() );
 				} else {
+					/* translators: %s: variation id */
 					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 				}
 				echo '</div>';
@@ -90,11 +91,11 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 			<div class="split-input">
 				<div class="input">
 					<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
-					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( $item->get_subtotal() ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( $item->get_subtotal() ); ?>" />
+					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" />
 				</div>
 				<div class="input">
 					<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
-					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( $item->get_total() ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( $item->get_total() ); ?>" />
+					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" />
 				</div>
 			</div>
 		</div>

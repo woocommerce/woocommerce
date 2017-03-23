@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Shipping' ) ) :
+if ( ! class_exists( 'WC_Settings_Shipping', false ) ) :
 
 /**
  * WC_Settings_Shipping.
@@ -206,7 +206,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function zone_methods_screen( $zone_id ) {
 		if ( 'new' === $zone_id ) {
 			$zone = new WC_Shipping_Zone();
-			$zone->set_zone_name( __( 'New zone', 'woocommerce' ) );
 		} else {
 			$zone = WC_Shipping_Zones::get_zone( absint( $zone_id ) );
 		}
@@ -235,15 +234,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		wp_localize_script( 'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
 			'methods'                 => $zone->get_shipping_methods(),
 			'zone_name'               => $zone->get_zone_name(),
-			'zone_id'                 => $zone->get_zone_id(),
+			'zone_id'                 => $zone->get_id(),
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-				'save_changes_prompt'     => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
-				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
-				'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
-				'yes'                     => __( 'Yes', 'woocommerce' ),
-				'no'                      => __( 'No', 'woocommerce' ),
+				'save_changes_prompt' => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
+				'save_failed'         => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'add_method_failed'   => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
+				'yes'                 => __( 'Yes', 'woocommerce' ),
+				'no'                  => __( 'No', 'woocommerce' ),
+				'default_zone_name'   => __( 'Zone', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );

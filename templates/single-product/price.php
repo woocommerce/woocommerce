@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,5 +23,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 ?>
-
 <p class="price"><?php echo $product->get_price_html(); ?></p>

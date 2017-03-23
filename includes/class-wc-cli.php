@@ -1,23 +1,42 @@
 <?php
-
-/**
- * Manage WooCommerce from CLI.
- *
- * @class    WC_CLI
- * @version  2.5.0
- * @package  WooCommerce/CLI
- * @category CLI
- * @author   WooThemes
- */
-class WC_CLI extends WP_CLI_Command {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-WP_CLI::add_command( 'wc',                  'WC_CLI' );
-WP_CLI::add_command( 'wc coupon',           'WC_CLI_Coupon' );
-WP_CLI::add_command( 'wc customer',         'WC_CLI_Customer' );
-WP_CLI::add_command( 'wc order',            'WC_CLI_Order' );
-WP_CLI::add_command( 'wc product',          'WC_CLI_Product' );
-WP_CLI::add_command( 'wc product category', 'WC_CLI_Product_Category' );
-WP_CLI::add_command( 'wc report',           'WC_CLI_Report' );
-WP_CLI::add_command( 'wc tax',              'WC_CLI_Tax' );
-WP_CLI::add_command( 'wc tool',             'WC_CLI_Tool' );
+/**
+ * Enables WooCommerce, via the the command line.
+ *
+ * @version 3.0.0
+ * @package WooCommerce
+ * @author  WooCommerce
+ */
+class WC_CLI {
+	/**
+	 * Load required files and hooks to make the CLI work.
+	 */
+	public function __construct() {
+		$this->includes();
+		$this->hooks();
+	}
+
+	/**
+	 * Load command files.
+	 */
+	private function includes() {
+		require_once __DIR__ . '/cli/class-wc-cli-runner.php';
+		require_once __DIR__ . '/cli/class-wc-cli-rest-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-tool-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-update-command.php';
+	}
+
+	/**
+	 * Sets up and hooks WP CLI to our CLI code.
+	 */
+	private function hooks() {
+		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Runner::after_wp_load' );
+		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tool_Command::register_commands' );
+		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Update_Command::register_commands' );
+	}
+}
+
+new WC_CLI;

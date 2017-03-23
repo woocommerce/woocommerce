@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Emails' ) ) :
+if ( ! class_exists( 'WC_Settings_Emails', false ) ) :
 
 /**
  * WC_Settings_Emails.
@@ -111,14 +111,16 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'css'         => 'width:300px; height: 75px;',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',
-				'default'     => get_bloginfo( 'name', 'display' ) . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
+				/* translators: %s: site name */
+				'default'     => sprintf( __( '%s - Powered by WooCommerce', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
 				'autoload'    => false,
 				'desc_tip'    => true,
 			),
 
 			array(
-				'title'    => __( 'Base colour', 'woocommerce' ),
-				'desc'     => __( 'The base colour for WooCommerce email templates. Default <code>#96588a</code>.', 'woocommerce' ),
+				'title'    => __( 'Base color', 'woocommerce' ),
+				/* translators: %s: default color */
+				'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
 				'id'       => 'woocommerce_email_base_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -128,8 +130,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Background colour', 'woocommerce' ),
-				'desc'     => __( 'The background colour for WooCommerce email templates. Default <code>#f7f7f7</code>.', 'woocommerce' ),
+				'title'    => __( 'Background color', 'woocommerce' ),
+				/* translators: %s: default color */
+				'desc'     => sprintf( __( 'The background color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#f7f7f7</code>' ),
 				'id'       => 'woocommerce_email_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -139,8 +142,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Body background colour', 'woocommerce' ),
-				'desc'     => __( 'The main body background colour. Default <code>#ffffff</code>.', 'woocommerce' ),
+				'title'    => __( 'Body background color', 'woocommerce' ),
+				/* translators: %s: default color */
+				'desc'     => sprintf( __( 'The main body background color. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
 				'id'       => 'woocommerce_email_body_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -150,8 +154,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Body text colour', 'woocommerce' ),
-				'desc'     => __( 'The main body text colour. Default <code>#3c3c3c</code>.', 'woocommerce' ),
+				'title'    => __( 'Body text color', 'woocommerce' ),
+				/* translators: %s: default color */
+				'desc'     => sprintf( __( 'The main body text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
 				'id'       => 'woocommerce_email_text_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
@@ -264,11 +269,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">';
 
 										if ( $email->is_manual() ) {
-											echo '<span class="status-manual tips" data-tip="' . __( 'Manually sent', 'woocommerce' ) . '">' . __( 'Manual', 'woocommerce' ) . '</span>';
+											echo '<span class="status-manual tips" data-tip="' . esc_attr__( 'Manually sent', 'woocommerce' ) . '">' . esc_html__( 'Manual', 'woocommerce' ) . '</span>';
 										} elseif ( $email->is_enabled() ) {
-											echo '<span class="status-enabled tips" data-tip="' . __( 'Enabled', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+											echo '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Enabled', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
 										} else {
-											echo '<span class="status-disabled tips" data-tip="' . __( 'Disabled', 'woocommerce' ) . '">-</span>';
+											echo '<span class="status-disabled tips" data-tip="' . esc_attr__( 'Disabled', 'woocommerce' ) . '">-</span>';
 										}
 
 										echo '</td>';
@@ -280,7 +285,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									break;
 									case 'actions' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a class="button alignright tips" data-tip="' . __( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . __( 'Configure', 'woocommerce' ) . '</a>
+											<a class="button alignright tips" data-tip="' . esc_attr__( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . esc_html__( 'Configure', 'woocommerce' ) . '</a>
 										</td>';
 									break;
 									default :

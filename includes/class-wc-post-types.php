@@ -29,23 +29,41 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
+		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 	}
 
 	/**
 	 * Register core taxonomies.
 	 */
 	public static function register_taxonomies() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( taxonomy_exists( 'product_type' ) ) {
 			return;
 		}
 
 		do_action( 'woocommerce_register_taxonomy' );
 
-		$permalinks = get_option( 'woocommerce_permalinks' );
+		$permalinks = wc_get_permalink_structure();
 
 		register_taxonomy( 'product_type',
 			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_type', array(
+				'hierarchical'      => false,
+				'show_ui'           => false,
+				'show_in_nav_menus' => false,
+				'query_var'         => is_admin(),
+				'rewrite'           => false,
+				'public'            => false,
+			) )
+		);
+
+		register_taxonomy( 'product_visibility',
+			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
+			apply_filters( 'woocommerce_taxonomy_args_product_visibility', array(
 				'hierarchical'      => false,
 				'show_ui'           => false,
 				'show_in_nav_menus' => false,
@@ -83,8 +101,8 @@ class WC_Post_types {
 					'delete_terms' => 'delete_product_terms',
 					'assign_terms' => 'assign_product_terms',
 				),
-				'rewrite'               => array(
-					'slug'         => empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'],
+				'rewrite'          => array(
+					'slug'         => $permalinks['category_rewrite_slug'],
 					'with_front'   => false,
 					'hierarchical' => true,
 				),
@@ -122,7 +140,7 @@ class WC_Post_types {
 					'assign_terms' => 'assign_product_terms',
 				),
 				'rewrite'               => array(
-					'slug'       => empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'],
+					'slug'       => $permalinks['tag_rewrite_slug'],
 					'with_front' => false,
 				),
 			) )
@@ -172,7 +190,7 @@ class WC_Post_types {
 					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					$wc_product_attributes[ $name ] = $tax;
 					$taxonomy_data                  = array(
-						'hierarchical'          => true,
+						'hierarchical'          => false,
 						'update_count_callback' => '_update_post_term_count',
 						'labels'                => array(
 								'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
@@ -207,7 +225,7 @@ class WC_Post_types {
 
 					if ( 1 === $tax->attribute_public ) {
 						$taxonomy_data['rewrite'] = array(
-							'slug'         => empty( $permalinks['attribute_base'] ) ? '' : trailingslashit( $permalinks['attribute_base'] ) . sanitize_title( $tax->attribute_name ),
+							'slug'         => trailingslashit( $permalinks['attribute_rewrite_slug'] ) . sanitize_title( $tax->attribute_name ),
 							'with_front'   => false,
 							'hierarchical' => true,
 						);
@@ -225,14 +243,13 @@ class WC_Post_types {
 	 * Register core post types.
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists( 'product' ) ) {
+		if ( ! is_blog_installed() || post_type_exists( 'product' ) ) {
 			return;
 		}
 
 		do_action( 'woocommerce_register_post_type' );
 
-		$permalinks        = get_option( 'woocommerce_permalinks' );
-		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+		$permalinks = wc_get_permalink_structure();
 
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
@@ -270,9 +287,9 @@ class WC_Post_types {
 					'publicly_queryable'  => true,
 					'exclude_from_search' => false,
 					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
-					'rewrite'             => $product_permalink ? array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true ) : false,
+					'rewrite'             => $permalinks['product_rewrite_slug'] ? array( 'slug' => $permalinks['product_rewrite_slug'], 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
-					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes', 'publicize', 'wpcom-markdown' ),
+					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'publicize', 'wpcom-markdown' ),
 					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
@@ -283,11 +300,12 @@ class WC_Post_types {
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'label'        => __( 'Variations', 'woocommerce' ),
-					'public'       => false,
-					'hierarchical' => false,
-					'supports'     => false,
+					'label'           => __( 'Variations', 'woocommerce' ),
+					'public'          => false,
+					'hierarchical'    => false,
+					'supports'        => false,
 					'capability_type' => 'product',
+					'rewrite'         => false,
 				)
 			)
 		);
@@ -349,6 +367,7 @@ class WC_Post_types {
 					'exclude_from_order_reports'       => false,
 					'exclude_from_order_sales_reports' => true,
 					'class_name'                       => 'WC_Order_Refund',
+					'rewrite'                          => false,
 				)
 			)
 		);
@@ -501,6 +520,13 @@ class WC_Post_types {
 		foreach ( $order_statuses as $order_status => $values ) {
 			register_post_status( $order_status, $values );
 		}
+	}
+
+	/**
+	 * Flush rewrite rules.
+	 */
+	public static function flush_rewrite_rules() {
+		flush_rewrite_rules();
 	}
 
 	/**

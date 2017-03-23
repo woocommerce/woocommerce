@@ -38,7 +38,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Define user set variables
 		$this->title        = $this->get_option( 'title' );
 		$this->description  = $this->get_option( 'description' );
-		$this->instructions = $this->get_option( 'instructions', $this->description );
+		$this->instructions = $this->get_option( 'instructions' );
 
 		// BACS account fields shown on the thanks page and in emails
 		$this->account_details = get_option( 'woocommerce_bacs_accounts',
@@ -279,20 +279,24 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
 		if ( ! empty( $bacs_accounts ) ) {
-			echo '<h2 class="wc-bacs-bank-details-heading">' . __( 'Our bank details', 'woocommerce' ) . '</h2>' . PHP_EOL;
+			$account_html = '';
+			$has_details  = false;
 
 			foreach ( $bacs_accounts as $bacs_account ) {
-
 				$bacs_account = (object) $bacs_account;
 
-				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
-					echo '<h3>' . wp_unslash( implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) ) . '</h3>' . PHP_EOL;
+				if ( $bacs_account->account_name ) {
+					$account_html .= '<h3 class="wc-bacs-bank-details-account-name">' . wp_kses_post( wp_unslash( $bacs_account->account_name ) ) . ':</h3>' . PHP_EOL;
 				}
 
-				echo '<ul class="wc-bacs-bank-details order_details bacs_details">' . PHP_EOL;
+				$account_html .= '<ul class="wc-bacs-bank-details order_details bacs_details">' . PHP_EOL;
 
 				// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
+					'bank_name' => array(
+						'label' => __( 'Bank', 'woocommerce' ),
+						'value' => $bacs_account->bank_name,
+					),
 					'account_number' => array(
 						'label' => __( 'Account number', 'woocommerce' ),
 						'value' => $bacs_account->account_number,
@@ -313,11 +317,16 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 				foreach ( $account_fields as $field_key => $field ) {
 					if ( ! empty( $field['value'] ) ) {
-						echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
+						$account_html .= '<li class="' . esc_attr( $field_key ) . '">' . wp_kses_post( $field['label'] ) . ': <strong>' . wp_kses_post( wptexturize( $field['value'] ) ) . '</strong></li>' . PHP_EOL;
+						$has_details   = true;
 					}
 				}
 
-				echo '</ul>';
+				$account_html .= '</ul>';
+			}
+
+			if ( $has_details ) {
+				echo '<section class="woocommerce-bacs-bank-details"><h2 class="wc-bacs-bank-details-heading">' . __( 'Our bank details', 'woocommerce' ) . '</h2>' . PHP_EOL . $account_html . '</section>';
 			}
 		}
 
