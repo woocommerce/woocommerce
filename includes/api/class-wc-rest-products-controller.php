@@ -1921,7 +1921,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				'variations' => array(
 					'description' => __( 'List of variations IDs.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'    => 'integer',
 					),
