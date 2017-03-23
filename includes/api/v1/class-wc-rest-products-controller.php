@@ -1914,7 +1914,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'default'     => 'standard',
 					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
