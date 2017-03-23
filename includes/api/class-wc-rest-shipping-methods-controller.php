@@ -196,16 +196,19 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 					'description' => __( 'Method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'description' => array(
 					'description' => __( 'Shipping method description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);
