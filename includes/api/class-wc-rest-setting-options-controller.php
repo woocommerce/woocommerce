@@ -105,7 +105,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['id'] );
+		$setting = $this->get_setting( $request['group_id'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -124,7 +124,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$settings = $this->get_group_settings( $request['group'] );
+		$settings = $this->get_group_settings( $request['group_id'] );
 
 		if ( is_wp_error( $settings ) ) {
 			return $settings;
@@ -255,7 +255,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['id'] );
+		$setting = $this->get_setting( $request['group_id'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -303,7 +303,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $data['id'], $request['group'] ) );
+		$response->add_links( $this->prepare_links( $data['id'], $request['group_id'] ) );
 		return $response;
 	}
 
