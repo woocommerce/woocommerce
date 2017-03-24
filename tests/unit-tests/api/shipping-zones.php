@@ -452,7 +452,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 				'type' => 'country',
 			),
 			array(
-				'code' => 'US', // test that locations missing "type" aren't saved
+				'code' => 'US', // test that locations missing "type" treated as country.
 			),
 			array(
 				'code' => 'SW1A0AA',
@@ -469,6 +469,22 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array(
 			array(
 				'code'   => 'UK',
+				'type'   => 'country',
+				'_links' => array(
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $zone->get_id() . '/locations' ),
+						),
+					),
+					'describes' => array(
+						array(
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $zone->get_id() ),
+						),
+					),
+				),
+			),
+			array(
+				'code' => 'US',
 				'type'   => 'country',
 				'_links' => array(
 					'collection' => array(
