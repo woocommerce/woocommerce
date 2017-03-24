@@ -191,44 +191,39 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'setting_group',
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'               => array(
-					'description'  => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_title',
-					),
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'setting_group',
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array(
+					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'label'            => array(
-					'description'  => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'label' => array(
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'description'      => array(
-					'description'  => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'description' => array(
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'parent_id'        => array(
-					'description'  => __( 'ID of parent grouping.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'parent_id' => array(
+					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'sub_groups'        => array(
-					'description'  => __( 'IDs for settings sub groups.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'sub_groups' => array(
+					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);
