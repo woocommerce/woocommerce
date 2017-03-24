@@ -467,7 +467,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 
-		$this->assertEquals( count( $data ), 2 );
+		$this->assertEquals( 3, count( $data ) );
 		$this->assertEquals( array(
 			array(
 				'code'   => 'UK',
