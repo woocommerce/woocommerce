@@ -159,10 +159,12 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Update settings if present
+		// Get settings.
+		$gateway->init_form_fields();
+		$settings = $gateway->settings;
+
+		// Update settings.
 		if ( isset( $request['settings'] ) ) {
-			$gateway->init_form_fields();
-			$settings     = $gateway->settings;
 			$errors_found = false;
 			foreach ( $gateway->form_fields as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
@@ -182,10 +184,26 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			if ( $errors_found ) {
 				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
-
-			$gateway->settings = $settings;
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
+
+		// Update if this method is enabled or not.
+		if ( isset( $request['enabled'] ) ) {
+			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+		}
+
+		// Update title.
+		if ( isset( $request['title'] ) ) {
+			$gateway->title = $settings['title'] = $request['title'];
+		}
+
+		// Update description.
+		if ( isset( $request['description'] ) ) {
+			$gateway->description = $settings['description'] = $request['description'];
+		}
+
+		// Update options.
+		$gateway->settings = $settings;
+		update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 
 		// Update order
 		if ( isset( $request['order'] ) ) {
@@ -193,27 +211,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			$order[ $gateway->id ] = $request['order'];
 			update_option( 'woocommerce_gateway_order', $order );
 			$gateway->order = absint( $request['order'] );
-		}
-
-		// Update if this method is enabled or not.
-		if ( isset( $request['enabled'] ) ) {
-			$settings         = $gateway->settings;
-			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
-		}
-
-		// Update title.
-		if ( isset( $request['title'] ) ) {
-			$settings         = $gateway->settings;
-			$gateway->title   = $settings['title'] = $request['title'];
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
-		}
-
-		// Update description.
-		if ( isset( $request['description'] ) ) {
-			$settings              = $gateway->settings;
-			$gateway->description  = $settings['description'] = $request['description'];
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
