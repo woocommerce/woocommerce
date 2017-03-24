@@ -97,9 +97,8 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	protected function prepare_links( $group_id ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
-			'item' => array(
-				'href'       => rest_url( trailingslashit( $base ) . $group_id ),
-				'embeddable' => true,
+			'options' => array(
+				'href' => rest_url( trailingslashit( $base ) . $group_id ),
 			),
 		);
 

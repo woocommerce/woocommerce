@@ -52,10 +52,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'description' => 'My awesome test settings.',
 			'sub_groups'  => array( 'sub-test' ),
 			'_links'      => array(
-				'item' => array(
+				'options' => array(
 					array(
-						'href'       => rest_url( '/wc/v2/settings/test' ),
-						'embeddable' => true,
+						'href' => rest_url( '/wc/v2/settings/test' ),
 					),
 				),
 			),
@@ -68,10 +67,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'description' => '',
 			'sub_groups'  => array(),
 			'_links'      => array(
-				'item' => array(
+				'options' => array(
 					array(
-						'href'       => rest_url( '/wc/v2/settings/sub-test' ),
-						'embeddable' => true,
+						'href' => rest_url( '/wc/v2/settings/sub-test' ),
 					),
 				),
 			),
