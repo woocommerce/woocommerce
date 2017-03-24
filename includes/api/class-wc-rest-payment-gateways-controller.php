@@ -288,6 +288,10 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			if ( 'title' === $field['type'] ) {
 				continue;
 			}
+			// Ignore 'enabled' and 'description' which get included elsewhere.
+			if ( in_array( $id, array( 'enabled', 'description' ) ) ) {
+				continue;
+			}
 			$data = array(
 				'id'          => $id,
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
