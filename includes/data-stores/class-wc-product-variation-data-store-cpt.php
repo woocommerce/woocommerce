@@ -58,8 +58,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_props( array(
 			'name'            => $post_object->post_title,
 			'slug'            => $post_object->post_name,
-			'date_created'    => strtotime( $post_object->post_date_gmt ),
-			'date_modified'   => strtotime( $post_object->post_modified_gmt ),
+			'date_created'    => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified'   => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
 			'status'          => $post_object->post_status,
 			'menu_order'      => $post_object->menu_order,
 			'reviews_allowed' => 'open' === $post_object->comment_status,
@@ -106,8 +106,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt'  => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -148,10 +148,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
+				'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
 		}
 

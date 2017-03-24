@@ -104,7 +104,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
 		) );
 		$wp_user = new WP_User( $customer->get_id() );
-		$customer->set_date_created( strtotime( $wp_user->user_registered ) );
+		$customer->set_date_created( $wp_user->user_registered );
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
@@ -137,7 +137,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'is_paying_customer' => get_user_meta( $customer_id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
 			'username'           => $user_object->user_login,
-			'date_created'       => strtotime( $user_object->user_registered ),
+			'date_created'       => $user_object->user_registered, // Mysql string in local format.
 			'date_modified'      => get_user_meta( $customer_id, 'last_update', true ),
 			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
 		) );

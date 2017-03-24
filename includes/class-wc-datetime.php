@@ -16,6 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_DateTime extends DateTime {
 
 	/**
+	 * UTC Offset if needed.
+	 * @var integer
+	 */
+	protected $utc_offset = 0;
+
+	/**
 	 * Output an ISO 8601 date string in local timezone.
 	 *
 	 * @since  3.0.0
@@ -23,6 +29,33 @@ class WC_DateTime extends DateTime {
 	 */
 	public function __toString() {
 		return $this->format( DATE_ATOM );
+	}
+
+	/**
+	 * Set UTC offset.
+	 */
+	public function set_utc_offset( $offset ) {
+		$this->utc_offset = intval( $offset );
+	}
+
+	/**
+	 * getOffset.
+	 */
+	public function getOffset() {
+		if ( $this->utc_offset ) {
+			return $this->utc_offset;
+		} else {
+			return parent::getOffset();
+		}
+	}
+
+	/**
+	 * Set timezone.
+	 * @param DateTimeZone $timezone
+	 */
+	public function setTimezone( $timezone ) {
+		$this->utc_offset = 0;
+		return parent::setTimezone( $timezone );
 	}
 
 	/**
