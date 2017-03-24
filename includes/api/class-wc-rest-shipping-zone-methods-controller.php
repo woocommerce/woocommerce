@@ -42,7 +42,13 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'method_id' => array(
+						'required'    => true,
+						'readonly'    => false,
+						'description' => __( 'Shipping method ID.', 'woocommerce' ),
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -440,21 +446,17 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'description' => __( 'Shipping method sort order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
 				),
 				'enabled' => array(
 					'description' => __( 'Shipping method enabled status.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
 				),
 				'method_id' => array(
-					'description' => __( 'Shipping method ID. Write on create only.', 'woocommerce' ),
+					'description' => __( 'Shipping method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
