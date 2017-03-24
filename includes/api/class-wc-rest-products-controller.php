@@ -1188,7 +1188,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$attributes = $product->get_variation_attributes();
+
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $attribute ) {
