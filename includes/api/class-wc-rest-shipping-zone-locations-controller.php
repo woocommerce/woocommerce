@@ -90,10 +90,20 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		$locations     = array();
 
 		foreach ( (array) $raw_locations as $raw_location ) {
-			if ( empty( $raw_location['code'] ) || empty( $raw_location['type'] ) ) {
+			if ( empty( $raw_location['code'] ) ) {
 				continue;
 			}
-			$locations[] = $raw_location;
+
+			$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
+
+			if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+				continue;
+			}
+
+			$locations[] = array(
+				'code' => sanitize_text_field( $raw_location['code'] ),
+				'type' => sanitize_text_field( $type ),
+			);
 		}
 
 		$zone->set_locations( $locations );
@@ -157,25 +167,18 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 					'description' => __( 'Shipping zone location code.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
 				'type' => array(
 					'description' => __( 'Shipping zone location type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+					'default'     => 'country',
 					'enum'        => array(
 						'postcode',
 						'state',
 						'country',
 						'continent',
 					),
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 		);
