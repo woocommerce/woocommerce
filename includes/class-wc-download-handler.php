@@ -205,6 +205,10 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
+		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+			$remote_file = false;
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
+
 		// Check if we have an absolute path
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
 			$remote_file = false;
