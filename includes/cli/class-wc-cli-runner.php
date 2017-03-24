@@ -19,9 +19,9 @@ class WC_CLI_Runner {
 	 */
 	private static $disabled_endpoints = array(
 		'settings',
-		'settings/(?P<group>[\w-]+)',
-		'settings/(?P<group>[\w-]+)/batch',
-		'settings/(?P<group>[\w-]+)/(?P<id>[\w-]+)',
+		'settings/(?P<group_id>[\w-]+)',
+		'settings/(?P<group_id>[\w-]+)/batch',
+		'settings/(?P<group_id>[\w-]+)/(?P<id>[\w-]+)',
 		'system_status',
 		'system_status/tools',
 		'system_status/tools/(?P<id>[\w-]+)',
