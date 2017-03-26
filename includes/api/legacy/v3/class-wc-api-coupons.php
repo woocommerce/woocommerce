@@ -118,6 +118,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			$coupon_data = array(
+				'enabled'                      => $coupon->get_enabled(),
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
 				'type'                         => $coupon->get_discount_type(),
@@ -230,6 +231,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			$defaults = array(
+                'enabled'                      => true,
 				'type'                         => 'fixed_cart',
 				'amount'                       => 0,
 				'individual_use'               => false,
@@ -273,6 +275,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			// Set coupon meta
+            update_post_meta( $id, 'enabled', ( true === $coupon_data['enabled'] ) ? 'yes' : 'no' );
 			update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 			update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
 			update_post_meta( $id, 'individual_use', ( true === $coupon_data['individual_use'] ) ? 'yes' : 'no' );
@@ -326,7 +329,11 @@ class WC_API_Coupons extends WC_API_Resource {
 
 			$data = apply_filters( 'woocommerce_api_edit_coupon_data', $data, $id, $this );
 
-			if ( isset( $data['code'] ) ) {
+            if ( isset( $data['enabled'] ) ) {
+                update_post_meta( $id, 'enabled', ( true === $data['enabled'] ) ? 'yes' : 'no' );
+            }
+
+            if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
 				$coupon_code  = wc_format_coupon_code( $data['code'] );

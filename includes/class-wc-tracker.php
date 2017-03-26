@@ -68,7 +68,7 @@ class WC_Tracker {
 				'blocking'    => false,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body'        => json_encode( $params ),
-				'cookies'     => array(),
+				'cookies'     => array()
 			)
 		);
 	}
@@ -128,9 +128,6 @@ class WC_Tracker {
 		// Template overrides
 		$data['template_overrides'] = self::get_all_template_overrides();
 
-		// Template overrides
-		$data['admin_user_agents']  = self::get_admin_user_agents();
-
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
 
@@ -139,11 +136,21 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_theme_info() {
-		$theme_data        = wp_get_theme();
-		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support  = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+		$wp_version = get_bloginfo( 'version' );
 
-		return array( 'name' => $theme_data->Name, 'version' => $theme_data->Version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
+		if ( version_compare( $wp_version, '3.4', '<' ) ) {
+			$theme_data = get_theme_data( get_stylesheet_directory() . '/style.css' );
+			$theme_name = $theme_data['Name'];
+			$theme_version = $theme_data['Version'];
+		} else {
+			$theme_data = wp_get_theme();
+			$theme_name = $theme_data->Name;
+			$theme_version = $theme_data->Version;
+		}
+		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
+		$theme_wc_support = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+
+		return array( 'name' => $theme_name, 'version' => $theme_version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
 	}
 
 	/**
@@ -161,7 +168,7 @@ class WC_Tracker {
 		}
 
 		$wp_data['memory_limit'] = size_format( $memory );
-		$wp_data['debug_mode']   = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'Yes' : 'No';
+		$wp_data['debug_mode']   = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
 		$wp_data['locale']       = get_locale();
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
@@ -209,7 +216,7 @@ class WC_Tracker {
 	 */
 	private static function get_all_plugins() {
 		// Ensure get_plugins function is loaded
-		if ( ! function_exists( 'get_plugins' ) ) {
+		if( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
 		}
 
@@ -235,10 +242,10 @@ class WC_Tracker {
 			}
 			if ( in_array( $k, $active_plugins_keys ) ) {
 				// Remove active plugins from list so we can show active and inactive separately
-				unset( $plugins[ $k ] );
-				$active_plugins[ $k ] = $formatted;
+				unset( $plugins[$k] );
+				$active_plugins[$k] = $formatted;
 			} else {
-				$plugins[ $k ] = $formatted;
+				$plugins[$k] = $formatted;
 			}
 		}
 
@@ -302,7 +309,7 @@ class WC_Tracker {
 		$active_gateways = array();
 		$gateways        = WC()->payment_gateways->payment_gateways();
 		foreach ( $gateways as $id => $gateway ) {
-			if ( isset( $gateway->enabled ) && 'yes' === $gateway->enabled ) {
+			if ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) {
 				$active_gateways[ $id ] = array( 'title' => $gateway->title, 'supports' => $gateway->supports );
 			}
 		}
@@ -318,7 +325,7 @@ class WC_Tracker {
 		$active_methods   = array();
 		$shipping_methods = WC()->shipping->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
-			if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
+			if ( isset( $shipping_method->enabled ) && $shipping_method->enabled == 'yes' ) {
 				$active_methods[ $id ] = array( 'title' => $shipping_method->title, 'tax_status' => $shipping_method->tax_status );
 			}
 		}
@@ -343,7 +350,7 @@ class WC_Tracker {
 			'download_require_login'                => get_option( 'woocommerce_downloads_require_login' ),
 			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
 			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
-			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout' ),
+			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout'),
 			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
 			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
@@ -375,26 +382,18 @@ class WC_Tracker {
 					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+				} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 					$theme_file = get_template_directory() . '/woocommerce/' . $file;
 				} else {
 					$theme_file = false;
 				}
 
-				if ( false !== $theme_file ) {
+				if ( $theme_file !== false ) {
 					$override_data[] = basename( $theme_file );
 				}
 			}
 		}
 		return $override_data;
-	}
-
-	/**
-	 * When an admin user logs in, there user agent is tracked in user meta and collected here.
-	 * @return array
-	 */
-	private static function get_admin_user_agents() {
-		return array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
 	}
 }
 

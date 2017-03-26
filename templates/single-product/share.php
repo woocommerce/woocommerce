@@ -24,6 +24,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<?php do_action( 'woocommerce_share' ); // Sharing plugins can hook into here
-
-/* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */
+<?php do_action( 'woocommerce_share' ); // Sharing plugins can hook into here ?>

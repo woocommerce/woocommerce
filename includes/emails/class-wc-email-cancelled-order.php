@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
+if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
 
 /**
  * Cancelled Order Email.
@@ -32,8 +32,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
-		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();
@@ -43,21 +43,16 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	}
 
 	/**
-	 * Trigger the sending of this email.
+	 * Trigger.
 	 *
-	 * @param int $order_id The order ID.
-	 * @param WC_Order $order Order object.
+	 * @param int $order_id
 	 */
-	public function trigger( $order_id, $order = false ) {
-		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
-			$order = wc_get_order( $order_id );
-		}
-
-		if ( is_a( $order, 'WC_Order' ) ) {
-			$this->object                  = $order;
+	public function trigger( $order_id ) {
+		if ( $order_id ) {
+			$this->object                  = wc_get_order( $order_id );
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
+			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
@@ -80,7 +75,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => false,
-			'email'			=> $this,
+			'email'			=> $this
 		) );
 	}
 
@@ -95,7 +90,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => true,
-			'email'			=> $this,
+			'email'			=> $this
 		) );
 	}
 
@@ -108,34 +103,31 @@ class WC_Email_Cancelled_Order extends WC_Email {
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),
 				'type'          => 'checkbox',
 				'label'         => __( 'Enable this email notification', 'woocommerce' ),
-				'default'       => 'yes',
+				'default'       => 'yes'
 			),
 			'recipient' => array(
 				'title'         => __( 'Recipient(s)', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: admin email */
-				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'woocommerce' ), '<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>' ),
+				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true,
+				'desc_tip'      => true
 			),
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
+				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true,
+				'desc_tip'      => true
 			),
 			'heading' => array(
-				'title'         => __( 'Email heading', 'woocommerce' ),
+				'title'         => __( 'Email Heading', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
+				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true,
+				'desc_tip'      => true
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),
@@ -144,8 +136,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
 				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true,
-			),
+				'desc_tip'      => true
+			)
 		);
 	}
 }

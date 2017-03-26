@@ -24,6 +24,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @var array
 	 */
 	protected $data = array(
+		'enabled'                     => true,
 		'code'                        => '',
 		'amount'                      => 0,
 		'date_created'                => '',
@@ -127,6 +128,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 | Methods for getting data from the coupon object.
 	 |
 	 */
+
+	/**
+	 * Get the "enabled" checkbox status.
+	 * @since  2.7.0
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_enabled( $context = 'view' ) {
+		return $this->get_prop( 'enabled', $context );
+	}
 
 	/**
 	 * Get coupon code.
@@ -419,6 +430,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 
 	/**
+	 * Set if this coupon will be used only if active.
+	 * @since  2.7.0
+	 * @param  bool $is_enabled
+	 * @throws WC_Data_Exception
+	 */
+	public function set_enabled( $is_enabled ) {
+		$this->set_prop( 'enabled', (bool) $is_enabled );
+	}
+
+	/**
 	 * Set coupon code.
 	 * @since  2.7.0
 	 * @param  string $code
@@ -685,6 +706,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 						$coupon[ $key ] = wc_string_to_array( $value );
 					}
 					break;
+				case 'enabled' :
 				case 'individual_use' :
 				case 'free_shipping' :
 				case 'exclude_sale_items' :

@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author        WooThemes
  * @package       WooCommerce/Templates
- * @version       2.7.0
+ * @version       2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,12 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product;
 
-$heading = esc_html( apply_filters( 'woocommerce_product_additional_information_heading', __( 'Additional information', 'woocommerce' ) ) );
+$heading = apply_filters( 'woocommerce_product_additional_information_heading', __( 'Additional Information', 'woocommerce' ) );
 
 ?>
 
-<?php if ( $heading ) : ?>
+<?php if ( $heading ): ?>
 	<h2><?php echo $heading; ?></h2>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_product_additional_information', $product ); ?>
+<?php $product->list_attributes(); ?>

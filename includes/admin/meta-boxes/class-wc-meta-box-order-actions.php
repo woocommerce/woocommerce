@@ -41,32 +41,30 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+					<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
 						$mails            = $mailer->get_emails();
 
-						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>
-							<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
-							<?php
+						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
 								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocommerce' ), esc_html( $mail->title ) ) . '</option>';
+									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
 								}
-							} ?>
-							</optgroup>
-							<?php
+							}
 						}
 						?>
+					</optgroup>
 
 					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
-					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
 				</select>
 
-				<button class="button wc-reload"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
+				<button class="button wc-reload" title="<?php esc_attr_e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
 			<li class="wide">
@@ -75,15 +73,15 @@ class WC_Meta_Box_Order_Actions {
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __( 'Delete permanently', 'woocommerce' );
+							$delete_text = __( 'Delete Permanently', 'woocommerce' );
 						} else {
-							$delete_text = __( 'Move to trash', 'woocommerce' );
+							$delete_text = __( 'Move to Trash', 'woocommerce' );
 						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -130,8 +128,7 @@ class WC_Meta_Box_Order_Actions {
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->get_id(), $order );
-							/* translators: %s: email title */
+							$mail->trigger( $order->id );
 							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
 						}
 					}
@@ -149,9 +146,13 @@ class WC_Meta_Box_Order_Actions {
 
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
-				$data_store = WC_Data_Store::load( 'customer-download' );
-				$data_store->delete_by_order_id( $post_id );
-				wc_downloadable_product_permissions( $post_id, true );
+				delete_post_meta( $post_id, '_download_permissions_granted' );
+				$wpdb->delete( 
+					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+					array( 'order_id' => $post_id ),
+					array( '%d' )
+				);
+				wc_downloadable_product_permissions( $post_id );
 
 			} else {
 
@@ -176,4 +177,5 @@ class WC_Meta_Box_Order_Actions {
 	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
 	}
+
 }

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Emails', false ) ) :
+if ( ! class_exists( 'WC_Settings_Emails' ) ) :
 
 /**
  * WC_Settings_Emails.
@@ -40,7 +40,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Email options', 'woocommerce' ),
+			'' => __( 'Email Options', 'woocommerce' )
 		);
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
@@ -53,7 +53,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	public function get_settings() {
 		$settings = apply_filters( 'woocommerce_email_settings', array(
 
-			array( 'title' => __( 'Email notifications', 'woocommerce' ),  'desc' => __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.', 'woocommerce' ), 'type' => 'title', 'id' => 'email_notification_settings' ),
+			array( 'title' => __( 'Email Notifications', 'woocommerce' ),  'desc' => __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.', 'woocommerce' ), 'type' => 'title', 'id' => 'email_notification_settings' ),
 
 			array( 'type' => 'email_notification' ),
 
@@ -61,39 +61,39 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 
-			array( 'title' => __( 'Email sender options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'email_options' ),
+			array( 'title' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'email_options' ),
 
 			array(
-				'title'    => __( '"From" name', 'woocommerce' ),
+				'title'    => __( '"From" Name', 'woocommerce' ),
 				'desc'     => __( 'How the sender\'s name appears in outgoing WooCommerce emails.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_from_name',
 				'type'     => 'text',
 				'css'      => 'min-width:300px;',
 				'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
 				'autoload' => false,
-				'desc_tip' => true,
+				'desc_tip' => true
 			),
 
 			array(
-				'title'             => __( '"From" address', 'woocommerce' ),
+				'title'             => __( '"From" Address', 'woocommerce' ),
 				'desc'              => __( 'How the sender\'s email appears in outgoing WooCommerce emails.', 'woocommerce' ),
 				'id'                => 'woocommerce_email_from_address',
 				'type'              => 'email',
 				'custom_attributes' => array(
-					'multiple' => 'multiple',
+					'multiple' => 'multiple'
 				),
 				'css'               => 'min-width:300px;',
 				'default'           => get_option( 'admin_email' ),
 				'autoload'          => false,
-				'desc_tip'          => true,
+				'desc_tip'          => true
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'email_options' ),
 
-			array( 'title' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf( __( 'This section lets you customize the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>.', 'woocommerce' ), wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ), 'id' => 'email_template_options' ),
+			array( 'title' => __( 'Email Template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__( 'This section lets you customize the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>.', 'woocommerce' ), wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ), 'id' => 'email_template_options' ),
 
 			array(
-				'title'       => __( 'Header image', 'woocommerce' ),
+				'title'       => __( 'Header Image', 'woocommerce' ),
 				'desc'        => __( 'URL to an image you want to show in the email header. Upload images using the media uploader (Admin > Media).', 'woocommerce' ),
 				'id'          => 'woocommerce_email_header_image',
 				'type'        => 'text',
@@ -101,71 +101,66 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
 				'autoload'    => false,
-				'desc_tip'    => true,
+				'desc_tip'    => true
 			),
 
 			array(
-				'title'       => __( 'Footer text', 'woocommerce' ),
+				'title'       => __( 'Footer Text', 'woocommerce' ),
 				'desc'        => __( 'The text to appear in the footer of WooCommerce emails.', 'woocommerce' ),
 				'id'          => 'woocommerce_email_footer_text',
 				'css'         => 'width:300px; height: 75px;',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',
-				/* translators: %s: site name */
-				'default'     => sprintf( __( '%s - Powered by WooCommerce', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
+				'default'     => get_bloginfo( 'name', 'display' ) . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
 				'autoload'    => false,
-				'desc_tip'    => true,
+				'desc_tip'    => true
 			),
 
 			array(
-				'title'    => __( 'Base color', 'woocommerce' ),
-				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
+				'title'    => __( 'Base Colour', 'woocommerce' ),
+				'desc'     => __( 'The base colour for WooCommerce email templates. Default <code>#557da1</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_base_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#96588a',
+				'default'  => '#557da1',
 				'autoload' => false,
-				'desc_tip' => true,
+				'desc_tip' => true
 			),
 
 			array(
-				'title'    => __( 'Background color', 'woocommerce' ),
-				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The background color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#f7f7f7</code>' ),
+				'title'    => __( 'Background Colour', 'woocommerce' ),
+				'desc'     => __( 'The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#f7f7f7',
+				'default'  => '#f5f5f5',
 				'autoload' => false,
-				'desc_tip' => true,
+				'desc_tip' => true
 			),
 
 			array(
-				'title'    => __( 'Body background color', 'woocommerce' ),
-				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The main body background color. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
+				'title'    => __( 'Body Background Colour', 'woocommerce' ),
+				'desc'     => __( 'The main body background colour. Default <code>#fdfdfd</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_body_background_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#ffffff',
+				'default'  => '#fdfdfd',
 				'autoload' => false,
-				'desc_tip' => true,
+				'desc_tip' => true
 			),
 
 			array(
-				'title'    => __( 'Body text color', 'woocommerce' ),
-				/* translators: %s: default color */
-				'desc'     => sprintf( __( 'The main body text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
+				'title'    => __( 'Body Text Colour', 'woocommerce' ),
+				'desc'     => __( 'The main body text colour. Default <code>#505050</code>.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_text_color',
 				'type'     => 'color',
 				'css'      => 'width:6em;',
-				'default'  => '#3c3c3c',
+				'default'  => '#505050',
 				'autoload' => false,
-				'desc_tip' => true,
+				'desc_tip' => true
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
+			array( 'type' => 'sectionend', 'id' => 'email_notification_settings' ),
 
 		) );
 
@@ -209,7 +204,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ) ) ) {
 				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
-					if ( sanitize_title( $email_id ) === $current_section ) {
+					if ( $current_section === sanitize_title( $email_id ) ) {
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
 					}
 				}
@@ -236,9 +231,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 								$columns = apply_filters( 'woocommerce_email_setting_columns', array(
 									'status'     => '',
 									'name'       => __( 'Email', 'woocommerce' ),
-									'email_type' => __( 'Content type', 'woocommerce' ),
+									'email_type' => __( 'Content Type', 'woocommerce' ),
 									'recipient'  => __( 'Recipient(s)', 'woocommerce' ),
-									'actions'    => '',
+									'actions'    => ''
 								) );
 								foreach ( $columns as $key => $column ) {
 									echo '<th class="wc-email-settings-table-' . esc_attr( $key ) . '">' . esc_html( $column ) . '</th>';

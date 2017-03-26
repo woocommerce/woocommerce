@@ -18,7 +18,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Load colors
+// Load colours
 $bg              = get_option( 'woocommerce_email_background_color' );
 $body            = get_option( 'woocommerce_email_body_background_color' );
 $base            = get_option( 'woocommerce_email_base_color' );

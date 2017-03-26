@@ -8,47 +8,53 @@ jQuery( function( $ ) {
 
 	function getEnhancedSelectFormatString() {
 		var formatString = {
-			noResults: function() {
+			formatMatches: function( matches ) {
+				if ( 1 === matches ) {
+					return wc_country_select_params.i18n_matches_1;
+				}
+
+				return wc_country_select_params.i18n_matches_n.replace( '%qty%', matches );
+			},
+			formatNoMatches: function() {
 				return wc_country_select_params.i18n_no_matches;
 			},
-			errorLoading: function() {
+			formatAjaxError: function() {
 				return wc_country_select_params.i18n_ajax_error;
 			},
-			inputTooShort: function( args ) {
-				var remainingChars = args.minimum - args.input.length;
+			formatInputTooShort: function( input, min ) {
+				var number = min - input.length;
 
-				if ( 1 === remainingChars ) {
+				if ( 1 === number ) {
 					return wc_country_select_params.i18n_input_too_short_1;
 				}
 
-				return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
+				return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', number );
 			},
-			inputTooLong: function( args ) {
-				var overChars = args.input.length - args.maximum;
+			formatInputTooLong: function( input, max ) {
+				var number = input.length - max;
 
-				if ( 1 === overChars ) {
+				if ( 1 === number ) {
 					return wc_country_select_params.i18n_input_too_long_1;
 				}
 
-				return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
+				return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', number );
 			},
-			maximumSelected: function( args ) {
-				if ( 1 === args.maximum ) {
+			formatSelectionTooBig: function( limit ) {
+				if ( 1 === limit ) {
 					return wc_country_select_params.i18n_selection_too_long_1;
 				}
 
-				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
+				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
 			},
-			loadingMore: function() {
+			formatLoadMore: function() {
 				return wc_country_select_params.i18n_load_more;
 			},
-			searching: function() {
+			formatSearching: function() {
 				return wc_country_select_params.i18n_searching;
 			}
 		};
 
-		var language = { 'language' : formatString };
-		return language;
+		return formatString;
 	}
 
 	// Select2 Enhancement if it exists
@@ -61,10 +67,6 @@ jQuery( function( $ ) {
 				}, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
-				// Maintain focus after select https://github.com/select2/select2/issues/4384
-				$( this ).on( 'select2:select', function() {
-					$( this ).focus();
-				} );
 			});
 		};
 

@@ -27,5 +27,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>><?php echo esc_html( $name ); ?></option>
 		<?php endforeach; ?>
 	</select>
-	<?php wc_query_string_form_fields( null, array( 'orderby', 'submit' ) ); ?>
+	<?php
+		// Keep query string vars intact
+		foreach ( $_GET as $key => $val ) {
+			if ( 'orderby' === $key || 'submit' === $key ) {
+				continue;
+			}
+			if ( is_array( $val ) ) {
+				foreach( $val as $innerVal ) {
+					echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $innerVal ) . '" />';
+				}
+			} else {
+				echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '" />';
+			}
+		}
+	?>
 </form>
