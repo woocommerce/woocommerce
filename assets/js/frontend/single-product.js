@@ -176,10 +176,16 @@ jQuery( function( $ ) {
 
 		// But only zoom if the img is larger than its container.
 		if ( zoomEnabled ) {
-			zoomTarget.trigger( 'zoom.destroy' );
-			zoomTarget.zoom( {
+			var zoom_options = {
 				touch: false
-			} );
+			};
+
+			if ( 'ontouchstart' in window ) {
+				zoom_options.on = 'click';
+			}
+
+			zoomTarget.trigger( 'zoom.destroy' );
+			zoomTarget.zoom( zoom_options );
 		}
 	};
 
