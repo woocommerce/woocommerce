@@ -375,7 +375,7 @@ class WC_Install {
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
 	 */
-	private static function create_terms() {
+	public static function create_terms() {
 		$taxonomies = array(
 			'product_type' => array(
 				'simple',

@@ -1040,6 +1040,8 @@ function wc_update_300_settings() {
 function wc_update_300_product_visibility() {
 	global $wpdb;
 
+	WC_Install::create_terms();
+
 	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
 		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
 	}
