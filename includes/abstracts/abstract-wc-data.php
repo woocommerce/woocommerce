@@ -99,6 +99,14 @@ abstract class WC_Data {
 	protected $meta_data = null;
 
 	/**
+	 * Core data changes for this object's meta data.
+	 *
+	 * @since 3.0.0
+	 * @var array
+	 */
+	protected $meta_data_changes = null;
+
+	/**
 	 * Default constructor.
 	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
@@ -307,6 +315,7 @@ abstract class WC_Data {
 						'key'   => $meta['key'],
 						'value' => $meta['value'],
 					);
+					$this->meta_data_changes[ $meta['id'] ] = $meta['value'];
 				}
 			}
 		}
@@ -430,11 +439,14 @@ abstract class WC_Data {
 			$raw_meta_data   = $this->data_store->read_meta( $this );
 			if ( $raw_meta_data ) {
 				foreach ( $raw_meta_data as $meta ) {
+					$value = maybe_unserialize( $meta->meta_value );
 					$this->meta_data[] = (object) array(
 						'id'    => (int) $meta->meta_id,
 						'key'   => $meta->meta_key,
-						'value' => maybe_unserialize( $meta->meta_value ),
+						'value' => $value,
 					);
+
+					$this->meta_data_changes[ $meta->meta_id ] = $value;
 				}
 
 				if ( ! empty( $this->cache_group ) ) {
@@ -462,9 +474,12 @@ abstract class WC_Data {
 			} elseif ( empty( $meta->id ) ) {
 				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
 				$this->meta_data[ $array_key ]->id = $new_meta_id;
-			} else {
+				$this->meta_data_changes[ $array_key ]  = $meta->value;
+			} else if ( empty( $this->meta_data_changes[ $meta->id ] ) || $this->meta_data_changes[ $meta->id ] !== $meta->value ) {
 				$this->data_store->update_meta( $this, $meta );
+				$this->meta_data_changes[ $meta->id ]  = $meta->value;
 			}
+
 		}
 
 		if ( ! empty( $this->cache_group ) ) {
