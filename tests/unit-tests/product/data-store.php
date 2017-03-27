@@ -350,6 +350,37 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'green', $_attribute['color'] );
 	}
 
+	function test_variable_child_has_dimensions() {
+		$product = new WC_Product_Variable;
+		$product->save();
+
+		$variation = new WC_Product_variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_width( 10 );
+		$variation->save();
+
+		$product = wc_get_product( $product->get_id() );
+
+		$store = new WC_Product_Variable_Data_Store_CPT();
+
+		$this->assertTrue( $store->child_has_dimensions( $product ) );
+	}
+
+	function test_variable_child_has_dimensions_no_dimensions() {
+		$product = new WC_Product_Variable;
+		$product->save();
+
+		$variation = new WC_Product_variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$product = wc_get_product( $product->get_id() );
+
+		$store = new WC_Product_Variable_Data_Store_CPT();
+
+		$this->assertFalse( $store->child_has_dimensions( $product ) );
+	}
+
 	function test_get_on_sale_products() {
 		$product_store = new WC_Product_Data_Store_CPT();
 
