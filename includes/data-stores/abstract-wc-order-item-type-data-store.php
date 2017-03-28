@@ -61,7 +61,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		$changes = $item->get_changes();
 
-		if ( ! empty( $changes ) ) {
+		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
 			$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
 				'order_item_name' => $item->get_name(),
 				'order_item_type' => $item->get_type(),
