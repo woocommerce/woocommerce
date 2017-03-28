@@ -449,6 +449,8 @@ class WC_Post_types {
 				)
 			)
 		);
+
+		do_action( 'woocommerce_after_register_post_type' );
 	}
 
 	/**
