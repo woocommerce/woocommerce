@@ -155,31 +155,27 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -190,15 +186,17 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'][] = array(
+			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'     => '_sku',
-				'value'   => $request['sku'],
-				'compare' => '=',
-			);
+				'value'   => $skus,
+				'compare' => 'IN',
+			) );
 		}
 
 		// Apply all WP_Query filters again.
@@ -209,7 +207,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Force the post_type argument, since it's not a user input variable.
 		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = $this->get_post_types();
+			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
 		}
