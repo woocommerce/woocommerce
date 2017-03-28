@@ -102,7 +102,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $this->generate_product_title( $product ),
 			'post_content'   => '',
-			'post_parent'    => $product->get_parent_id(),
+			'post_parent'    => $product->get_parent_id( 'edit' ),
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
@@ -112,6 +112,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+
+			delete_transient( 'wc_product_children_' . $product->get_parent_id( 'edit' ) );
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
