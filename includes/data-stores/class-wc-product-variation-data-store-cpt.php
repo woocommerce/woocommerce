@@ -125,7 +125,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->clear_caches( $product );
 
-			do_action( 'woocommerce_create_product_variation', $id );
+			do_action( 'woocommerce_new_product_variation', $id );
 		}
 	}
 

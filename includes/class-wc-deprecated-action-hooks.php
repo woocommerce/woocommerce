@@ -32,6 +32,8 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 			'woocommerce_order_update_fee',
 			'woocommerce_order_update_tax',
 		),
+		'woocommerce_new_payment_token' => 'woocommerce_payment_token_created',
+		'woocommerce_new_product_variation' => 'woocommerce_create_product_variation',
 	);
 
 	/**

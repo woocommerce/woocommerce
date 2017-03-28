@@ -150,4 +150,25 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$this->assertTrue( $order_update_worked );
 		$this->assertTrue( $item_update_worked );
 	}
+
+	/**
+	 * Test the mapping of deprecated created_* hooks to new_* hooks
+	 *
+	 * @since 3.0
+	 */
+	function test_created_actions_deprecation() {
+		add_filter( 'woocommerce_payment_token_created', '__return_true' );
+		add_filter( 'woocommerce_create_product_variation', '__return_true' );
+
+		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token->save();
+
+		$product = new WC_Product_Variation;
+		$product->save();
+
+		$this->assertEquals( 1, did_action( 'woocommerce_payment_token_created' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_new_payment_token' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_create_product_variation' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_new_product_variation' ) );
+	}
 }
