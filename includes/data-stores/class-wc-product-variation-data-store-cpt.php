@@ -155,11 +155,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			) );
 		}
 
-		if ( isset( $changes['parent_id'] ) ) {
-			delete_transient( 'wc_product_children_' . $product->get_parent_id( 'edit' ) );
-			delete_transient( 'wc_product_children_' . $this->data['parent_id'] );
-		}
-
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
 		$this->update_attributes( $product );
