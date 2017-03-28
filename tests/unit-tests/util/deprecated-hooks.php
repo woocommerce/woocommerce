@@ -10,7 +10,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	protected $handlers = array();
 
 	/**
-	 * Generic toggle value function that can be hooked to a filter for testing
+	 * Generic toggle value function that can be hooked to a filter for testing.
 	 * @param bool/int $value
 	 * @return bool/int
 	 */
@@ -19,7 +19,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Generic toggle value function that can be hooked to an action for testing
+	 * Generic toggle value function that can be hooked to an action for testing.
 	 * @param bool/int $value
 	 */
 	function toggle_value_by_ref( &$value ) {
@@ -27,7 +27,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Generic meta setting function that can be hooked to an action for testing
+	 * Generic meta setting function that can be hooked to an action for testing.
 	 * @param int $item1_id
 	 * @param int $item2_id (default: false)
 	 */
@@ -44,7 +44,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the deprecated hook handlers are initialized
+	 * Test the deprecated hook handlers are initialized.
 	 *
 	 * @since 3.0
 	 */
@@ -57,7 +57,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the get_old_hooks method
+	 * Test the get_old_hooks method.
 	 *
 	 * @since 3.0
 	 */
@@ -70,7 +70,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the hook_in method
+	 * Test the hook_in method.
 	 *
 	 * @since 3.0
 	 */
@@ -80,7 +80,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the handle_deprecated_hook method in the filters handler
+	 * Test the handle_deprecated_hook method in the filters handler.
 	 *
 	 * @since 3.0
 	 */
@@ -97,7 +97,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the handle_deprecated_hook method in the actions handler
+	 * Test the handle_deprecated_hook method in the actions handler.
 	 *
 	 * @since 3.0
 	 */
@@ -115,7 +115,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test a complete deprecated filter mapping
+	 * Test a complete deprecated filter mapping.
 	 *
 	 * @since 3.0
 	 */
@@ -129,7 +129,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test a complete deprecated action mapping
+	 * Test a complete deprecated action mapping.
 	 *
 	 * @since 3.0
 	 */
@@ -149,5 +149,26 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $order_update_worked );
 		$this->assertTrue( $item_update_worked );
+	}
+
+	/**
+	 * Test the mapping of deprecated created_* hooks to new_* hooks.
+	 *
+	 * @since 3.0
+	 */
+	function test_created_actions_deprecation() {
+		add_filter( 'woocommerce_payment_token_created', '__return_true' );
+		add_filter( 'woocommerce_create_product_variation', '__return_true' );
+
+		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token->save();
+
+		$product = new WC_Product_Variation;
+		$product->save();
+
+		$this->assertEquals( 1, did_action( 'woocommerce_payment_token_created' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_new_payment_token' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_create_product_variation' ) );
+		$this->assertEquals( 1, did_action( 'woocommerce_new_product_variation' ) );
 	}
 }
