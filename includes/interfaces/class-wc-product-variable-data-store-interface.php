@@ -66,7 +66,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * Delete variations of a product.
 	 *
 	 * @param int $product_id
-	 * @param $force_delete False to trash.
+	 * @param bool $force_delete False to trash.
 	 */
 	public function delete_variations( $product_id, $force_delete = false );
 
