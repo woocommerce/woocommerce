@@ -360,7 +360,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->save();
 
 		$product = wc_get_product( $product->get_id() );
-		$product->sync( $product );
 
 		$store = new WC_Product_Variable_Data_Store_CPT();
 
@@ -376,7 +375,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->save();
 
 		$product = wc_get_product( $product->get_id() );
-		$product->sync( $product );
 
 		$store = new WC_Product_Variable_Data_Store_CPT();
 
