@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Rest Controler Class
+ * Abstract Rest Controller Class
  *
  * @author   WooThemes
  * @category API

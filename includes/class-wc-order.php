@@ -309,7 +309,7 @@ class WC_Order extends WC_Abstract_Order {
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );
 			}
 
-			// Note the transition occured
+			// Note the transition occurred
 			$this->add_order_note( trim( $this->status_transition['note'] . ' ' . $transition_note ), 0, $this->status_transition['manual'] );
 
 			// This has ran, so reset status transition variable

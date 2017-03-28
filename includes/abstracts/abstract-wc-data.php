@@ -91,7 +91,7 @@ abstract class WC_Data {
 	protected $cache_group = '';
 
 	/**
-	 * Stores additonal meta data.
+	 * Stores additional meta data.
 	 *
 	 * @since 3.0.0
 	 * @var array
@@ -168,7 +168,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Save should create or update based on object existance.
+	 * Save should create or update based on object existence.
 	 *
 	 * @since  2.6.0
 	 * @return int

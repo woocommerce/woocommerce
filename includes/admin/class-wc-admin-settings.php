@@ -618,7 +618,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Helper function to get the formated description and tip HTML for a
+	 * Helper function to get the formatted description and tip HTML for a
 	 * given form field. Plugins can call this when implementing their own custom
 	 * settings types.
 	 *

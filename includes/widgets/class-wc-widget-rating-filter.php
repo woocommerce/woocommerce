@@ -91,7 +91,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	}
 
 	/**
-	 * Count products after other filters have occured by adjusting the main query.
+	 * Count products after other filters have occurred by adjusting the main query.
 	 * @param  int $rating
 	 * @return int
 	 */

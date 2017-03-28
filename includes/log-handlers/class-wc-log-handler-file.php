@@ -78,7 +78,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 *     @type string $source Optional. Determines log file to write to. Default 'log'.
 	 *     @type bool $_legacy Optional. Default false. True to use outdated log format
-	 *         orignally used in deprecated WC_Logger::add calls.
+	 *         originally used in deprecated WC_Logger::add calls.
 	 * }
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
