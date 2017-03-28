@@ -981,8 +981,8 @@ class WC_Checkout {
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}();
-			} else {
+				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+			} elseif ( WC()->customer->meta_exists( $input ) ) {
 				$value = WC()->customer->get_meta( $input, true );
 			}
 
