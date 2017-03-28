@@ -43,7 +43,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
-		$paypal_args = http_build_query( array_filter( $this->get_paypal_args( $order ) ), '', '&' );
+		$paypal_args = http_build_query( $this->get_paypal_args( $order ), '', '&' );
 
 		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . wc_print_r( $paypal_args, true ) );
 
