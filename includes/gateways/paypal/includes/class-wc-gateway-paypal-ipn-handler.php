@@ -283,7 +283,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a reveral.
+	 * Handle a reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */
@@ -297,7 +297,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a cancelled reveral.
+	 * Handle a cancelled reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */

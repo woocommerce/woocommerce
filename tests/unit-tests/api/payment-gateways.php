@@ -264,7 +264,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Loads a particualr gateway's settings so we can correctly test API output.
+	 * Loads a particular gateway's settings so we can correctly test API output.
 	 *
 	 * @since 3.0.0
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.

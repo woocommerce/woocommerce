@@ -1128,7 +1128,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'order'          => $args['order'],
 			'tax_query'      => array(),
 		);
-		// Do not load unneccessary post data if the user only wants IDs.
+		// Do not load unnecessary post data if the user only wants IDs.
 		if ( 'ids' === $args['return'] ) {
 			$wp_query_args['fields'] = 'ids';
 		}
