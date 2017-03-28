@@ -268,6 +268,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
+	$discount_amount_html = '';
+
 	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
 		$discount_amount_html = '-' . wc_price( $amount );
 	} elseif ( $coupon->get_free_shipping() ) {
