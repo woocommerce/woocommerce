@@ -272,6 +272,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$discount_amount_html = '-' . wc_price( $amount );
 	} elseif ( $coupon->get_free_shipping() ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
+	} else {
+		$discount_amount_html = '';
 	}
 
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
