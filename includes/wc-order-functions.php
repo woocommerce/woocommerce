@@ -93,8 +93,8 @@ function wc_get_orders( $args ) {
  * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+	if ( ! did_action( 'woocommerce_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_register_post_type action).', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
