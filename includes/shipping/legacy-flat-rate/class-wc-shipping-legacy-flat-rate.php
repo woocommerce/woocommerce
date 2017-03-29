@@ -23,8 +23,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'legacy_flat_rate';
-		$this->method_title       = __( 'Flat Rate (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title       = __( 'Flat rate (legacy)', 'woocommerce' );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -130,7 +130,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$atts = shortcode_atts( array(
 			'percent' => '',
 			'min_fee' => '',
-		), $atts );
+		), $atts, 'fee' );
 
 		$calculated_fee = 0;
 
@@ -273,7 +273,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @deprecated 2.4.0
 	 *
-	 * Additonal rates defined like this:
+	 * Additional rates defined like this:
 	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
 	public function calculate_extra_shipping( $method, $rate ) {

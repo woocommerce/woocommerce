@@ -15,28 +15,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
+ * Parses and formats a date for ISO8601/RFC3339.
  *
  * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
- * @since 2.6.0
- * @param string       $date
+ * @since  2.6.0
+ * @param  string|null|WC_DateTime $date
+ * @param  bool Send false to get local/offset time.
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_prepare_date_response( $date ) {
-	// Check if mysql_to_rfc3339 exists first!
-	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
+function wc_rest_prepare_date_response( $date, $utc = true ) {
+	if ( is_numeric( $date ) ) {
+		$date = new WC_DateTime( "@$date", new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	} elseif ( is_string( $date ) ) {
+		$date = new WC_DateTime( $date, new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	}
+
+	if ( ! is_a( $date, 'WC_DateTime' ) ) {
 		return null;
 	}
 
-	// Return null if $date is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date || empty( $date ) ) {
-		return null;
-	}
-
-	// Return the formatted datetime.
-	return mysql_to_rfc3339( $date );
+	// Get timestamp before changing timezone to UTC.
+	return gmdate( 'Y-m-d\TH:i:s', $utc ? $date->getTimestamp() : $date->getOffsetTimestamp() );
 }
 
 /**

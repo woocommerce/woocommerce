@@ -88,13 +88,14 @@ class WC_Query {
 
 		switch ( $endpoint ) {
 			case 'order-pay' :
-				$title = __( 'Pay for Order', 'woocommerce' );
+				$title = __( 'Pay for order', 'woocommerce' );
 			break;
 			case 'order-received' :
-				$title = __( 'Order Received', 'woocommerce' );
+				$title = __( 'Order received', 'woocommerce' );
 			break;
 			case 'orders' :
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					/* translators: %s: page */
 					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
 				} else {
 					$title = __( 'Orders', 'woocommerce' );
@@ -102,32 +103,33 @@ class WC_Query {
 			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
+				/* translators: %s: order number */
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
 			break;
 			case 'downloads' :
 				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
-				$title = __( 'Account Details', 'woocommerce' );
+				$title = __( 'Account details', 'woocommerce' );
 			break;
 			case 'edit-address' :
 				$title = __( 'Addresses', 'woocommerce' );
 			break;
 			case 'payment-methods' :
-				$title = __( 'Payment Methods', 'woocommerce' );
+				$title = __( 'Payment methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
-				$title = __( 'Add Payment Method', 'woocommerce' );
+				$title = __( 'Add payment method', 'woocommerce' );
 			break;
 			case 'lost-password' :
-				$title = __( 'Lost Password', 'woocommerce' );
+				$title = __( 'Lost password', 'woocommerce' );
 			break;
 			default :
-				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
+				$title = '';
 			break;
 		}
 
-		return $title;
+		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint );
 	}
 
 	/**
@@ -136,7 +138,7 @@ class WC_Query {
 	 * @since 2.6.2
 	 * @return int
 	 */
-	protected function get_endpoints_mask() {
+	public function get_endpoints_mask() {
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$page_on_front     = get_option( 'page_on_front' );
 			$myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
@@ -171,7 +173,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			$vars[] = $key;
 		}
 		return $vars;
@@ -183,7 +185,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_query_vars() {
-		return $this->query_vars;
+		return apply_filters( 'woocommerce_get_query_vars', $this->query_vars );
 	}
 
 	/**
@@ -208,7 +210,7 @@ class WC_Query {
 		global $wp;
 
 		// Map query vars to their keys, or get them if endpoints are not supported
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			if ( isset( $_GET[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $_GET[ $var ];
 			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
@@ -283,7 +285,9 @@ class WC_Query {
 			}
 
 			// Define a variable so we know this is the front page shop later on
-			define( 'SHOP_IS_ON_FRONT', true );
+			if ( ! defined( 'SHOP_IS_ON_FRONT' ) ) {
+				define( 'SHOP_IS_ON_FRONT', true );
+			}
 
 			// Get the actual WP page to avoid errors and let us use is_front_page()
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
@@ -388,11 +392,11 @@ class WC_Query {
 		}
 
 		// Query vars that affect posts shown
-		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ) ) );
-		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
+		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
+		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
-		$q->set( 'post__in', array_unique( apply_filters( 'loop_shop_post_in', array() ) ) );
+		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -499,14 +503,14 @@ class WC_Query {
 	/**
 	 * Order by rating post clauses.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param array $args
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		_deprecated_function( 'order_by_rating_post_clauses', '2.7', '' );
+		wc_deprecated_function( 'order_by_rating_post_clauses', '3.0' );
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
 		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
@@ -524,19 +528,79 @@ class WC_Query {
 	 * Appends meta queries to an array.
 	 *
 	 * @param  array $meta_query
+	 * @param  bool $main_query
 	 * @return array
 	 */
-	public function get_meta_query( $meta_query = array() ) {
+	public function get_meta_query( $meta_query = array(), $main_query = false ) {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-
-		$meta_query['visibility']    = $this->visibility_meta_query();
-		$meta_query['stock_status']  = $this->stock_status_meta_query();
 		$meta_query['price_filter']  = $this->price_filter_meta_query();
-		$meta_query['rating_filter'] = $this->rating_filter_meta_query();
-
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
+	}
+
+	/**
+	 * Appends tax queries to an array.
+	 * @param array $tax_query
+	 * @param bool  $main_query
+	 * @return array
+	 */
+	public function get_tax_query( $tax_query = array(), $main_query = false ) {
+		if ( ! is_array( $tax_query ) ) {
+			$tax_query = array( 'relation' => 'AND' );
+		}
+
+		// Layered nav filters on terms.
+		if ( $main_query && ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) ) {
+			foreach ( $_chosen_attributes as $taxonomy => $data ) {
+				$tax_query[] = array(
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false,
+				);
+			}
+		}
+
+		$product_visibility_terms  = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+
+		// Hide out of stock products.
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+		}
+
+		// Filter by rating.
+		if ( isset( $_GET['rating_filter'] ) ) {
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
+			$rating_terms  = array();
+			for ( $i = 1; $i <= 5; $i ++ ) {
+				if ( in_array( $i, $rating_filter ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
+					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
+				}
+			}
+			if ( ! empty( $rating_terms ) ) {
+				$tax_query[] = array(
+					'taxonomy'      => 'product_visibility',
+					'field'         => 'term_taxonomy_id',
+					'terms'         => $rating_terms,
+					'operator'      => 'IN',
+					'rating_filter' => true,
+				);
+			}
+		}
+
+		if ( ! empty( $product_visibility_not_in ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			);
+		}
+
+		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
 	}
 
 	/**
@@ -545,104 +609,45 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
-			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
+			$meta_query = wc_get_min_max_price_meta_query( $_GET );
+			$meta_query['price_filter'] = true;
 
-			/**
-			 * Adjust if the store taxes are not displayed how they are stored.
-			 * Max is left alone because the filter was already increased.
-			 * Kicks in when prices excluding tax are displayed including tax.
-			 */
-			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-				$class_min   = $min;
-
-				foreach ( $tax_classes as $tax_class ) {
-					if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-						$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-					}
-				}
-
-				$min = $class_min;
-			}
-
-			return array(
-				'key'          => '_price',
-				'value'        => array( $min, $max ),
-				'compare'      => 'BETWEEN',
-				'type'         => 'DECIMAL',
-				'price_filter' => true,
-			);
+			return $meta_query;
 		}
+
 		return array();
 	}
 
 	/**
 	 * Return a meta query for filtering by rating.
+	 *
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @return array
 	 */
 	public function rating_filter_meta_query() {
-		return isset( $_GET['min_rating'] ) ? array(
-			'key'           => '_wc_average_rating',
-			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
-			'compare'       => '>=',
-			'type'          => 'DECIMAL',
-			'rating_filter' => true,
-		) : array();
+		return array();
 	}
 
 	/**
 	 * Returns a meta query to handle product visibility.
+	 *
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
-		return array(
-			'key'     => '_visibility',
-			'value'   => is_search() ? array( 'visible', 'search' ) : array( 'visible', 'catalog' ),
-			'compare' => $compare,
-		);
+		return array();
 	}
 
 	/**
 	 * Returns a meta query to handle product stock status.
 	 *
-	 * @access public
+	 * @deprecated 3.0.0 Replaced with taxonomy.
 	 * @param string $status (default: 'instock')
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
-		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
-			'key' 		=> '_stock_status',
-			'value' 	=> $status,
-			'compare' 	=> '=',
-		) : array();
-	}
-
-	/**
-	 * Appends tax queries to an array.
-	 * @param array $tax_query
-	 * @return array
-	 */
-	public function get_tax_query( $tax_query = array() ) {
-		if ( ! is_array( $tax_query ) ) {
-			$tax_query = array();
-		}
-
-		// Layered nav filters on terms
-		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
-			foreach ( $_chosen_attributes as $taxonomy => $data ) {
-				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'slug',
-					'terms'    => $data['terms'],
-					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
-					'include_children' => false,
-				);
-			}
-		}
-
-		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
+		return array();
 	}
 
 	/**
@@ -652,32 +657,7 @@ class WC_Query {
 	public static function get_main_tax_query() {
 		global $wp_the_query;
 
-		$args      = $wp_the_query->query_vars;
-		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
-
-		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
-			$tax_query[ $args['taxonomy'] ] = array(
-				'taxonomy' => $args['taxonomy'],
-				'terms'    => array( $args['term'] ),
-				'field'    => 'slug',
-			);
-		}
-
-		if ( ! empty( $args['product_cat'] ) ) {
-			$tax_query['product_cat'] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => array( $args['product_cat'] ),
-				'field'    => 'slug',
-			);
-		}
-
-		if ( ! empty( $args['product_tag'] ) ) {
-			$tax_query['product_tag'] = array(
-				'taxonomy' => 'product_tag',
-				'terms'    => array( $args['product_tag'] ),
-				'field'    => 'slug',
-			);
-		}
+		$tax_query = isset( $wp_the_query->tax_query, $wp_the_query->tax_query->queries ) ? $wp_the_query->tax_query->queries : array();
 
 		return $tax_query;
 	}
@@ -759,15 +739,15 @@ class WC_Query {
 	 * @deprecated 2.6.0
 	 */
 	public function layered_nav_init() {
-		_deprecated_function( 'layered_nav_init', '2.6', '' );
+		wc_deprecated_function( 'layered_nav_init', '2.6' );
 	}
 
 	/**
-	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
+	 * Get an unpaginated list all product IDs (both filtered and unfiltered). Makes use of transients.
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {
-		_deprecated_function( 'get_products_in_view', '2.6', '' );
+		wc_deprecated_function( 'get_products_in_view', '2.6' );
 	}
 
 	/**
@@ -775,6 +755,6 @@ class WC_Query {
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		_deprecated_function( 'layered_nav_query', '2.6', '' );
+		wc_deprecated_function( 'layered_nav_query', '2.6' );
 	}
 }

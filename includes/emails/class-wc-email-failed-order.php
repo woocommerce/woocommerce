@@ -4,10 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Email_Failed_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 
 /**
- * Failed Order Email
+ * Failed Order Email.
  *
  * An email sent to the admin when payment fails to go through.
  *
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order' ) ) :
 class WC_Email_Failed_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id               = 'failed_order';
@@ -32,8 +32,8 @@ class WC_Email_Failed_Order extends WC_Email {
 		$this->template_plain   = 'emails/plain/admin-failed-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_failed_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_failed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_failed_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_on-hold_to_failed_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
 		parent::__construct();
@@ -43,16 +43,21 @@ class WC_Email_Failed_Order extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Trigger the sending of this email.
 	 *
-	 * @param int $order_id
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
 	 */
-	public function trigger( $order_id ) {
-		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
+	public function trigger( $order_id, $order = false ) {
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
+		}
+
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$this->object                  = $order;
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
+			$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
@@ -108,7 +113,7 @@ class WC_Email_Failed_Order extends WC_Email {
 			'recipient' => array(
 				'title'         => __( 'Recipient(s)', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option( 'admin_email' ) ) ),
+				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'woocommerce' ), '<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
@@ -116,15 +121,15 @@ class WC_Email_Failed_Order extends WC_Email {
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
+				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
 			),
 			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
+				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
+				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,

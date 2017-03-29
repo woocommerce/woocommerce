@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 $product      = $item->get_product();
-$product_link = $product ? admin_url( 'post.php?post=' . $product->get_id() . '&action=edit' ) : '';
+$product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 ?>
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item, $order ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
@@ -29,7 +29,8 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
 					echo esc_html( $item->get_variation_id() );
 				} else {
-					echo esc_html( $item->get_variation_id() ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
+					/* translators: %s: variation id */
+					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 				}
 				echo '</div>';
 			}
@@ -90,11 +91,11 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 			<div class="split-input">
 				<div class="input">
 					<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
-					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( $item->get_subtotal() ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( $item->get_subtotal() ); ?>" />
+					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" />
 				</div>
 				<div class="input">
 					<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
-					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( $item->get_total() ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( $item->get_total() ); ?>" />
+					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" />
 				</div>
 			</div>
 		</div>
@@ -120,7 +121,11 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 							}
 
 							if ( $item->get_subtotal() !== $item->get_total() ) {
-								echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+								if ( '' === $tax_item_total ) {
+									echo '<span class="wc-order-item-discount">&ndash;</span>';
+								} else {
+									echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+								}
 							}
 
 							if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {

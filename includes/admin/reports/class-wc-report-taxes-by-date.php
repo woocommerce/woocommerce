@@ -47,8 +47,8 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
@@ -150,10 +150,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			<thead>
 				<tr>
 					<th><?php _e( 'Period', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Order Total' field within your orders.", 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Number of orders', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _e( 'Total sales', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Order total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total shipping', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Shipping total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "Total sales minus shipping and tax.", 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>

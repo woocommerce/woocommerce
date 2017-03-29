@@ -6,21 +6,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (tax).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $_data = array(
-		'order_id'           => 0,
-		'id'                 => 0,
+	protected $extra_data = array(
 		'rate_code'          => '',
 		'rate_id'            => 0,
 		'label'              => '',
@@ -29,48 +27,179 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		'shipping_tax_total' => 0,
 	);
 
+	/*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
-	 * Read/populate data properties specific to this order item.
+	 * Set order item name.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$this->set_props( array(
-			'rate_id'            => get_metadata( 'order_item', $this->get_id(), 'rate_id', true ),
-			'label'              => get_metadata( 'order_item', $this->get_id(), 'label', true ),
-			'compound'           => get_metadata( 'order_item', $this->get_id(), 'compound', true ),
-			'tax_total'          => get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ),
-			'shipping_tax_total' => get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ),
-		) );
+	public function set_name( $value ) {
+		$this->set_rate_code( $value );
 	}
 
 	/**
-	 * Save properties specific to this order item.
-	 * @return int Item ID
+	 * Set item name.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
-	public function save() {
-		parent::save();
-		if ( $this->get_id() ) {
-			wc_update_order_item_meta( $this->get_id(), 'rate_id', $this->get_rate_id() );
-			wc_update_order_item_meta( $this->get_id(), 'label', $this->get_label() );
-			wc_update_order_item_meta( $this->get_id(), 'compound', $this->get_compound() );
-			wc_update_order_item_meta( $this->get_id(), 'tax_amount', $this->get_tax_total() );
-			wc_update_order_item_meta( $this->get_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
-		}
-
-		return $this->get_id();
+	public function set_rate_code( $value ) {
+		$this->set_prop( 'rate_code', wc_clean( $value ) );
 	}
 
 	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
+	 * Set item name.
+	 * @param string $value
+	 * @throws WC_Data_Exception
 	 */
-	protected function get_internal_meta_keys() {
-		return array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
+	public function set_label( $value ) {
+		$this->set_prop( 'label', wc_clean( $value ) );
+	}
+
+	/**
+	 * Set tax rate id.
+	 * @param int $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_rate_id( $value ) {
+		$this->set_prop( 'rate_id', absint( $value ) );
+	}
+
+	/**
+	 * Set tax total.
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_tax_total( $value ) {
+		$this->set_prop( 'tax_total', $value ? wc_format_decimal( $value ) : 0 );
+	}
+
+	/**
+	 * Set shipping_tax_total
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_shipping_tax_total( $value ) {
+		$this->set_prop( 'shipping_tax_total', $value ? wc_format_decimal( $value ) : 0 );
+	}
+
+	/**
+	 * Set compound
+	 * @param bool $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_compound( $value ) {
+		$this->set_prop( 'compound', (bool) $value );
+	}
+
+	/**
+	 * Set properties based on passed in tax rate by ID.
+	 * @param int $tax_rate_id
+	 * @throws WC_Data_Exception
+	 */
+	public function set_rate( $tax_rate_id ) {
+		$tax_rate = WC_Tax::_get_tax_rate( $tax_rate_id, OBJECT );
+
+		$this->set_rate_id( $tax_rate_id );
+		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate ) );
+		$this->set_label( WC_Tax::get_rate_label( $tax_rate ) );
+		$this->set_compound( WC_Tax::is_compound( $tax_rate ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get order item type.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return 'tax';
+	}
+
+	/**
+	 * Get rate code/name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		return $this->get_rate_code( $context );
+	}
+
+	/**
+	 * Get rate code/name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_rate_code( $context = 'view' ) {
+		return $this->get_prop( 'rate_code', $context );
+	}
+
+	/**
+	 * Get label.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_label( $context = 'view' ) {
+		$label = $this->get_prop( 'label', $context );
+		if ( 'view' === $context ) {
+			return $label ? $label : __( 'Tax', 'woocommerce' );
+		} else {
+			return $label;
+		}
+	}
+
+	/**
+	 * Get tax rate ID.
+	 *
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_rate_id( $context = 'view' ) {
+		return $this->get_prop( 'rate_id', $context );
+	}
+
+	/**
+	 * Get tax_total
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_total( $context = 'view' ) {
+		return $this->get_prop( 'tax_total', $context );
+	}
+
+	/**
+	 * Get shipping_tax_total
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_shipping_tax_total( $context = 'view' ) {
+		return $this->get_prop( 'shipping_tax_total', $context );
+	}
+
+	/**
+	 * Get compound.
+	 *
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_compound( $context = 'view' ) {
+		return $this->get_prop( 'compound', $context );
 	}
 
 	/**
@@ -83,152 +212,52 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Setters
+	| Array Access Methods
 	|--------------------------------------------------------------------------
+	|
+	| For backwards compat with legacy arrays.
+	|
 	*/
 
 	/**
-	 * Set order item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @return mixed
 	 */
-	public function set_name( $value ) {
-		$this->set_rate_code( $value );
+	public function offsetGet( $offset ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		return parent::offsetGet( $offset );
 	}
 
 	/**
-	 * Set item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @param mixed $value
 	 */
-	public function set_rate_code( $value ) {
-		$this->_data['rate_code'] = wc_clean( $value );
+	public function offsetSet( $offset, $value ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		parent::offsetSet( $offset, $value );
 	}
 
 	/**
-	 * Set item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_label( $value ) {
-		$this->_data['label'] = wc_clean( $value );
-	}
-
-	/**
-	 * Set tax rate id.
-	 * @param int $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_rate_id( $value ) {
-		$this->_data['rate_id'] = absint( $value );
-	}
-
-	/**
-	 * Set tax total.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_tax_total( $value ) {
-		$this->_data['tax_total'] = wc_format_decimal( $value );
-	}
-
-	/**
-	 * Set shipping_tax_total
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_shipping_tax_total( $value ) {
-		$this->_data['shipping_tax_total'] = wc_format_decimal( $value );
-	}
-
-	/**
-	 * Set compound
-	 * @param bool $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_compound( $value ) {
-		$this->_data['compound'] = (bool) $value;
-	}
-
-	/**
-	 * Set properties based on passed in tax rate by ID.
-	 * @param int $tax_rate_id
-	 * @throws WC_Data_Exception
-	 */
-	public function set_rate( $tax_rate_id ) {
-		$this->set_rate_id( $tax_rate_id );
-		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Get order item type.
-	 * @return string
-	 */
-	public function get_type() {
-		return 'tax';
-	}
-
-	/**
-	 * Get rate code/name.
-	 * @return string
-	 */
-	public function get_name() {
-		return $this->get_rate_code();
-	}
-
-	/**
-	 * Get rate code/name.
-	 * @return string
-	 */
-	public function get_rate_code() {
-		return $this->_data['rate_code'];
-	}
-
-	/**
-	 * Get label.
-	 * @return string
-	 */
-	public function get_label() {
-		return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce' );
-	}
-
-	/**
-	 * Get tax rate ID.
-	 * @return int
-	 */
-	public function get_rate_id() {
-		return absint( $this->_data['rate_id'] );
-	}
-
-	/**
-	 * Get tax_total
-	 * @return string
-	 */
-	public function get_tax_total() {
-		return wc_format_decimal( $this->_data['tax_total'] );
-	}
-
-	/**
-	 * Get shipping_tax_total
-	 * @return string
-	 */
-	public function get_shipping_tax_total() {
-		return wc_format_decimal( $this->_data['shipping_tax_total'] );
-	}
-
-	/**
-	 * Get compound.
+	 * offsetExists for ArrayAccess
+	 * @param string $offset
 	 * @return bool
 	 */
-	public function get_compound() {
-		return (bool) $this->_data['compound'];
+	public function offsetExists( $offset ) {
+		if ( in_array( $offset, array( 'tax_amount', 'shipping_tax_amount' ) ) ) {
+			return true;
+		}
+		return parent::offsetExists( $offset );
 	}
 }

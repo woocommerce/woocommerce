@@ -25,7 +25,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: WC_Shipping_Zones::get_zone_id
+	 * Test: WC_Shipping_Zones::get_id
 	 */
 	public function test_get_zone_id() {
 		// Setup
@@ -35,7 +35,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 
 		// Assert
-		$this->assertEquals( $zone->get_zone_id(), 1 );
+		$this->assertEquals( $zone->get_id(), 1 );
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -264,11 +264,11 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 
 		// Assert
 		$this->assertEquals( $zone->get_zone_locations(), array(
-			2 => (object) array(
+			0 => (object) array(
 				'code' => 'US',
 				'type' => 'country',
 			),
-			3 => (object) array(
+			1 => (object) array(
 				'code' => '90210',
 				'type' => 'postcode',
 			),
@@ -320,4 +320,42 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
+
+	/**
+	 * Test legacy zone functions.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @expectedDeprecated WC_Shipping_Zone::read
+	 * @expectedDeprecated WC_Shipping_Zone::create
+	 * @expectedDeprecated WC_Shipping_Zone::update
+	 */
+	public function test_wc_shipping_zone_legacy() {
+		// Create a single zone.
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Local' );
+		$zone->set_zone_order( 1 );
+		$zone->add_location( 'GB', 'country' );
+		$zone->add_location( 'CB*', 'postcode' );
+		$zone->save();
+		$zone_id = $zone->get_id();
+
+		$zone_read = new WC_Shipping_Zone();
+		$zone_read->read( $zone_id );
+		$this->assertEquals( $zone_id, $zone_read->get_id() );
+
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Test' );
+		$zone->set_zone_order( 2 );
+		$zone->create();
+
+		$this->assertEquals( 'Test', $zone->get_zone_name() );
+		$this->assertNotEmpty( $zone->get_id() );
+
+		$zone->set_zone_name( 'Test 2' );
+		$zone->update();
+
+		$this->assertEquals( 'Test 2', $zone->get_zone_name() );
+	}
+
 }

@@ -111,21 +111,18 @@ class WC_API_Coupons extends WC_API_Resource {
 				return $id;
 			}
 
-			// get the coupon code
-			$code = wc_get_coupon_code_by_id( $id );
+			$coupon = new WC_Coupon( $id );
 
-			if ( empty( $code ) ) {
+			if ( 0 === $coupon->get_id() ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), 404 );
 			}
 
-			$coupon      = new WC_Coupon( $code );
-			$coupon_post = get_post( $coupon->get_id() );
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
 				'type'                         => $coupon->get_discount_type(),
-				'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
-				'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
+				'created_at'                   => $this->server->format_datetime( $coupon->get_date_created() ? $coupon->get_date_created()->getTimestamp() : 0 ), // API gives UTC times.
+				'updated_at'                   => $this->server->format_datetime( $coupon->get_date_modified() ? $coupon->get_date_modified()->getTimestamp() : 0 ), // API gives UTC times.
 				'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
 				'individual_use'               => $coupon->get_individual_use(),
 				'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
@@ -134,7 +131,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
 				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
 				'usage_count'                  => (int) $coupon->get_usage_count(),
-				'expiry_date'                  => $coupon->get_date_expires() ? $this->server->format_datetime( $coupon->get_date_expires() ) : null,
+				'expiry_date'                  => $coupon->get_date_expires() ? $this->server->format_datetime( $coupon->get_date_expires()->getTimestamp() ) : null, // API gives UTC times.
 				'enable_free_shipping'         => $coupon->get_free_shipping(),
 				'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
 				'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
@@ -142,7 +139,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
 				'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
 				'customer_emails'              => $coupon->get_email_restrictions(),
-				'description'                  => $coupon_post->post_excerpt,
+				'description'                  => $coupon->get_description(),
 			);
 
 			return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
@@ -225,7 +222,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), 400 );
 			}
 
-			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+			$coupon_code  = wc_format_coupon_code( $data['code'] );
 			$id_from_code = wc_get_coupon_id_by_code( $coupon_code );
 
 			if ( $id_from_code ) {
@@ -286,6 +283,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
 			update_post_meta( $id, 'usage_count', absint( $coupon_data['usage_count'] ) );
 			update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $coupon_data['expiry_date'] ) ) );
+			update_post_meta( $id, 'date_expires', $this->get_coupon_expiry_date( wc_clean( $coupon_data['expiry_date'] ), true ) );
 			update_post_meta( $id, 'free_shipping', ( true === $coupon_data['enable_free_shipping'] ) ? 'yes' : 'no' );
 			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_category_ids'] ) ) );
 			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_category_ids'] ) ) );
@@ -332,7 +330,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
-				$coupon_code  = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+				$coupon_code  = wc_format_coupon_code( $data['code'] );
 				$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 				if ( $id_from_code ) {
@@ -396,6 +394,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 			if ( isset( $data['expiry_date'] ) ) {
 				update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
+				update_post_meta( $id, 'date_expires', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ), true ) );
 			}
 
 			if ( isset( $data['enable_free_shipping'] ) ) {
@@ -460,10 +459,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @since  2.3.0
 	 * @param  string $expiry_date
-	 * @return string
+	 * @param bool $as_timestamp (default: false)
+	 * @return string|int
 	 */
-	protected function get_coupon_expiry_date( $expiry_date ) {
+	protected function get_coupon_expiry_date( $expiry_date, $as_timestamp = false ) {
 		if ( '' != $expiry_date ) {
+			if ( $as_timestamp ) {
+				return strtotime( $expiry_date );
+			}
+
 			return date( 'Y-m-d', strtotime( $expiry_date ) );
 		}
 
@@ -512,7 +516,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_coupons_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_coupons_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$coupons = array();

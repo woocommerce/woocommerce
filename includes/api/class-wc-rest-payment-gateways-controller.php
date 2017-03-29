@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -48,6 +48,12 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -153,10 +159,12 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Update settings if present
+		// Get settings.
+		$gateway->init_form_fields();
+		$settings = $gateway->settings;
+
+		// Update settings.
 		if ( isset( $request['settings'] ) ) {
-			$gateway->init_form_fields();
-			$settings     = $gateway->settings;
 			$errors_found = false;
 			foreach ( $gateway->form_fields as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
@@ -176,10 +184,26 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			if ( $errors_found ) {
 				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
-
-			$gateway->settings = $settings;
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 		}
+
+		// Update if this method is enabled or not.
+		if ( isset( $request['enabled'] ) ) {
+			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+		}
+
+		// Update title.
+		if ( isset( $request['title'] ) ) {
+			$gateway->title = $settings['title'] = $request['title'];
+		}
+
+		// Update description.
+		if ( isset( $request['description'] ) ) {
+			$gateway->description = $settings['description'] = $request['description'];
+		}
+
+		// Update options.
+		$gateway->settings = $settings;
+		update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 
 		// Update order
 		if ( isset( $request['order'] ) ) {
@@ -187,14 +211,6 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			$order[ $gateway->id ] = $request['order'];
 			update_option( 'woocommerce_gateway_order', $order );
 			$gateway->order = absint( $request['order'] );
-		}
-
-		// Update if this method is enabled or not.
-		if ( isset( $request['enabled'] ) ) {
-			$settings        = $gateway->settings;
-			$gateway->enabled = $settings['enabled'] = (bool) $request['enabled'];
-			update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
-			$gateway->settings = $settings;
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -272,12 +288,16 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			if ( 'title' === $field['type'] ) {
 				continue;
 			}
+			// Ignore 'enabled' and 'description' which get included elsewhere.
+			if ( in_array( $id, array( 'enabled', 'description' ) ) ) {
+				continue;
+			}
 			$data = array(
 				'id'          => $id,
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
 				'description' => empty( $field['description'] ) ? '' : $field['description'],
 				'type'        => $field['type'],
-				'value'       => $gateway->settings[ $id ],
+				'value'       => empty( $gateway->settings[ $id ] ) ? '' : $gateway->settings[ $id ],
 				'default'     => empty( $field['default'] ) ? '' : $field['default'],
 				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
 				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
@@ -324,7 +344,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'id' => array(
 					'description' => __( 'Payment gateway ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Payment gateway title on checkout.', 'woocommerce' ),
@@ -352,17 +373,69 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 				'method_title' => array(
 					'description' => __( 'Payment gateway method title.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_description' => array(
 					'description' => __( 'Payment gateway method description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'settings' => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
+					'properties' => array(
+						'id' => array(
+							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'label' => array(
+							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'type' => array(
+							'description' => __( 'Type of setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
+							'readonly'    => true,
+						),
+						'value' => array(
+							'description' => __( 'Setting value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'default' => array(
+							'description' => __( 'Default value for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tip' => array(
+							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'placeholder' => array(
+							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
 				),
 			),
 		);

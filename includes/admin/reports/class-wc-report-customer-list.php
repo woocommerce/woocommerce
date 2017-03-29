@@ -127,13 +127,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 				$orders = wc_get_orders( array(
 					'limit'    => 1,
-					'status'   => array( 'wc-completed', 'wc-processing' ),
+					'status'   => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 					'customer' => $user->ID,
 				) );
 
 				if ( ! empty( $orders ) ) {
 					$order = $orders[0];
-					return '<a href="' . admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), $order->get_date_created() );
+					return '<a href="' . admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . wc_format_datetime( $order->get_date_created() );
 				} else {
 					return '-';
 				}
@@ -168,7 +168,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						$orders = wc_get_orders( array(
 							'limit'          => 1,
-							'status'         => array( 'wc-completed', 'wc-processing' ),
+							'status'         => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 							'customer'       => array( array( 0, $user->user_email ) ),
 						) );
 
@@ -210,7 +210,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 			'email'           => __( 'Email', 'woocommerce' ),
 			'location'        => __( 'Location', 'woocommerce' ),
 			'orders'          => __( 'Orders', 'woocommerce' ),
-			'spent'           => __( 'Money Spent', 'woocommerce' ),
+			'spent'           => __( 'Money spent', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
 			'user_actions'    => __( 'Actions', 'woocommerce' ),
 		);

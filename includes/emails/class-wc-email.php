@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WC_Email' ) ) {
+if ( class_exists( 'WC_Email', false ) ) {
 	return;
 }
 
@@ -281,8 +281,9 @@ class WC_Email extends WC_Settings_API {
 		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
 
 		if ( 'new_order' === $this->id ) {
-			$header .= "Reply-to: {$this->object->billing_first_name} {$this->object->billing_last_name} <{$this->object->billing_email}>\r\n";
+			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
 		}
+
 		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
 	}
 
@@ -417,7 +418,7 @@ class WC_Email extends WC_Settings_API {
 				$content    = $emogrifier->emogrify();
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
-				$logger->add( 'emogrifier', $e->getMessage() );
+				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
 			}
 		}
 		return $content;
@@ -489,17 +490,19 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'yes',
 			),
 			'subject'         => array(
-				'title'       => __( 'Email Subject', 'woocommerce' ),
+				'title'       => __( 'Email subject', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				/* translators: %s: default subject */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,
 			),
 			'heading'         => array(
-				'title'       => __( 'Email Heading', 'woocommerce' ),
+				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				/* translators: %s: default heading */
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,
@@ -577,7 +580,7 @@ class WC_Email extends WC_Settings_API {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
 			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
-			$code   = stripslashes( $template_code );
+			$code   = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );
@@ -623,7 +626,7 @@ class WC_Email extends WC_Settings_API {
 
 					// Locate template file
 					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
+					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 
 					// Copy template file
 					copy( $template_file, $theme_file );
@@ -711,7 +714,7 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to Emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
+		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
 
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
@@ -752,7 +755,7 @@ class WC_Email extends WC_Settings_API {
 
 					$local_file    = $this->get_theme_template_file( $template );
 					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base );
+					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 					$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
 					?>
 					<div class="template <?php echo $template_type; ?>">
@@ -768,7 +771,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
-								<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'This template has been overridden by your theme and can be found in: %s.', 'woocommerce' ), '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>
 
 							<div class="editor" style="display:none">
@@ -784,7 +787,7 @@ class WC_Email extends WC_Settings_API {
 									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%1$s</code> to your theme folder: <code>%2$s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template ); ?>
+								<?php printf( __( 'To override and edit this email template copy %1$s to your theme folder: %2$s.', 'woocommerce' ), '<code>' . plugin_basename( $template_file ) . '</code>', '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>
 
 							<div class="editor" style="display:none">

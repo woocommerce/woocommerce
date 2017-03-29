@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Admin_Reports' ) ) :
+if ( ! class_exists( 'WC_Admin_Reports', false ) ) :
 
 /**
  * WC_Admin_Reports Class.
@@ -74,13 +74,13 @@ class WC_Admin_Reports {
 				'title'  => __( 'Customers', 'woocommerce' ),
 				'reports' => array(
 					"customers" => array(
-						'title'       => __( 'Customers vs. Guests', 'woocommerce' ),
+						'title'       => __( 'Customers vs. guests', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"customer_list" => array(
-						'title'       => __( 'Customer List', 'woocommerce' ),
+						'title'       => __( 'Customer list', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),

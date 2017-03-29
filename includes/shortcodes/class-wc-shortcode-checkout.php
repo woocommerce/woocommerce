@@ -34,9 +34,11 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
+		$atts = shortcode_atts( array(), $atts, 'woocommerce_checkout' );
+
 		// Backwards compat with old pay and thanks link arguments
 		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) {
-			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
+			wc_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
 
 			// Get the order to work out what we are showing
 			$order_id = absint( $_GET['order'] );
@@ -86,7 +88,7 @@ class WC_Shortcode_Checkout {
 			$order                = wc_get_order( $order_id );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
+				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My account', 'woocommerce' ) . '</a>' . '</div>';
 				return;
 			}
 
@@ -131,12 +133,12 @@ class WC_Shortcode_Checkout {
 					?>
 					<ul class="order_details">
 						<li class="order">
-							<?php _e( 'Order Number:', 'woocommerce' ); ?>
+							<?php _e( 'Order number:', 'woocommerce' ); ?>
 							<strong><?php echo $order->get_order_number(); ?></strong>
 						</li>
 						<li class="date">
 							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ); ?></strong>
+							<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
 						</li>
 						<li class="total">
 							<?php _e( 'Total:', 'woocommerce' ); ?>
@@ -144,9 +146,9 @@ class WC_Shortcode_Checkout {
 						</li>
 						<?php if ( $order->get_payment_method_title() ) : ?>
 						<li class="method">
-							<?php _e( 'Payment Method:', 'woocommerce' ); ?>
+							<?php _e( 'Payment method:', 'woocommerce' ); ?>
 							<strong><?php
-								echo $order->get_payment_method_title();
+								echo wp_kses_post( $order->get_payment_method_title() );
 							?></strong>
 						</li>
 						<?php endif; ?>
@@ -234,7 +236,7 @@ class WC_Shortcode_Checkout {
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
 			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout )
-				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
+				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );
 
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 

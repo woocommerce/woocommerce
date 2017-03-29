@@ -6,25 +6,131 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (coupon).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
- * @author      WooThemes
+ * @author      WooCommerce
  */
 class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $_data = array(
-		'order_id'     => 0,
-		'id'           => 0,
+	protected $extra_data = array(
 		'code'         => '',
 		'discount'     => 0,
 		'discount_tax' => 0,
 	);
+
+	/*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Set order item name.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_name( $value ) {
+		return $this->set_code( $value );
+	}
+
+	/**
+	 * Set code.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_code( $value ) {
+		$this->set_prop( 'code', wc_clean( $value ) );
+	}
+
+	/**
+	 * Set discount amount.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_discount( $value ) {
+		$this->set_prop( 'discount', wc_format_decimal( $value ) );
+	}
+
+	/**
+	 * Set discounted tax amount.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_discount_tax( $value ) {
+		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get order item type.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return 'coupon';
+	}
+
+	/**
+	 * Get order item name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		return $this->get_code( $context );
+	}
+
+	/**
+	 * Get coupon code.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_code( $context = 'view' ) {
+		return $this->get_prop( 'code', $context );
+	}
+
+	/**
+	 * Get discount amount.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_discount( $context = 'view' ) {
+		return $this->get_prop( 'discount', $context );
+	}
+
+	/**
+	 * Get discounted tax amount.
+	 * @return string
+	 */
+	public function get_discount_tax( $context = 'view' ) {
+		return $this->get_prop( 'discount_tax', $context );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Array Access Methods
+	|--------------------------------------------------------------------------
+	|
+	| For backwards compat with legacy arrays.
+	|
+	*/
 
 	/**
 	 * offsetGet for ArrayAccess/Backwards compatibility.
@@ -66,131 +172,5 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 			return true;
 		}
 		return parent::offsetExists( $offset );
-	}
-
-	/**
-	 * Read/populate data properties specific to this order item.
-	 */
-	public function read( $id ) {
-		parent::read( $id );
-
-		if ( ! $this->get_id() ) {
-			return;
-		}
-
-		$this->set_props( array(
-			'discount'     => get_metadata( 'order_item', $this->get_id(), 'discount_amount', true ),
-			'discount_tax' => get_metadata( 'order_item', $this->get_id(), 'discount_amount_tax', true ),
-		) );
-	}
-
-	/**
-	 * Save properties specific to this order item.
-	 * @return int Item ID
-	 */
-	public function save() {
-		parent::save();
-		if ( $this->get_id() ) {
-			wc_update_order_item_meta( $this->get_id(), 'discount_amount', $this->get_discount() );
-			wc_update_order_item_meta( $this->get_id(), 'discount_amount_tax', $this->get_discount_tax() );
-		}
-
-		return $this->get_id();
-	}
-
-	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
-	 * @return array()
-	 */
-	protected function get_internal_meta_keys() {
-		return array( 'discount_amount', 'discount_amount_tax' );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Setters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Set order item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_name( $value ) {
-		return $this->set_code( $value );
-	}
-
-	/**
-	 * Set code.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_code( $value ) {
-		$this->_data['code'] = wc_clean( $value );
-	}
-
-	/**
-	 * Set discount amount.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_discount( $value ) {
-		$this->_data['discount'] = wc_format_decimal( $value );
-	}
-
-	/**
-	 * Set discounted tax amount.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	public function set_discount_tax( $value ) {
-		$this->_data['discount_tax'] = wc_format_decimal( $value );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Get order item type.
-	 * @return string
-	 */
-	public function get_type() {
-		return 'coupon';
-	}
-
-	/**
-	 * Get order item name.
-	 * @return string
-	 */
-	public function get_name() {
-		return $this->get_code();
-	}
-
-	/**
-	 * Get coupon code.
-	 * @return string
-	 */
-	public function get_code() {
-		return $this->_data['code'];
-	}
-
-	/**
-	 * Get discount amount.
-	 * @return string
-	 */
-	public function get_discount() {
-		return wc_format_decimal( $this->_data['discount'] );
-	}
-
-	/**
-	 * Get discounted tax amount.
-	 * @return string
-	 */
-	public function get_discount_tax() {
-		return wc_format_decimal( $this->_data['discount_tax'] );
 	}
 }

@@ -287,9 +287,11 @@ class WC_Admin_Addons {
 			<div class="addons-small-dark-items">
 				<?php foreach ( $block->items as $item ) : ?>
 					<div class="addons-small-dark-item">
-						<div class="addons-small-dark-item-icon">
-							<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
-						</div>
+						<?php if ( ! empty( $item->image ) ) : ?>
+							<div class="addons-small-dark-item-icon">
+								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+							</div>
+						<?php endif; ?>
 						<?php
 							self::output_button(
 								$item->href,

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.7.0
+ * @version  3.0.0
  * @extends  WC_Widget
  */
 class WC_Widget_Top_Rated_Products extends WC_Widget {
@@ -24,11 +24,11 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_top_rated_products';
 		$this->widget_description = __( 'Display a list of your top rated products on your site.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_top_rated_products';
-		$this->widget_name        = __( 'WooCommerce Top Rated Products', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce top rated products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Top Rated Products', 'woocommerce' ),
+				'std'   => __( 'Top rated products', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
@@ -70,9 +70,9 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 			'meta_key'       => '_wc_average_rating',
 			'orderby'        => 'meta_value_num',
 			'order'          => 'DESC',
+			'meta_query'     => WC()->query->get_meta_query(),
+			'tax_query'      => WC()->query->get_tax_query(),
 		);
-
-		$query_args['meta_query'] = WC()->query->get_meta_query();
 
 		$r = new WP_Query( $query_args );
 

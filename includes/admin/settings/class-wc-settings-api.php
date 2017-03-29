@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Rest_API' ) ) :
+if ( ! class_exists( 'WC_Settings_Rest_API', false ) ) :
 
 /**
  * WC_Settings_Rest_API.
@@ -58,7 +58,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	public function get_settings() {
 		$settings = apply_filters( 'woocommerce_settings_rest_api', array(
 			array(
-				'title' => __( 'General Options', 'woocommerce' ),
+				'title' => __( 'General options', 'woocommerce' ),
 				'type'  => 'title',
 				'desc'  => '',
 				'id'    => 'general_options',

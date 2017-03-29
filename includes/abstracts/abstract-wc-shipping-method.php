@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
@@ -274,7 +274,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$items_in_package = array();
 			foreach ( $args['package']['contents'] as $item ) {
 				$product = $item['data'];
-				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
+				$items_in_package[] = $product->get_name() . ' &times; ' . $item['quantity'];
 			}
 			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}

@@ -106,7 +106,7 @@ class WC_Embed {
 		$button   = '<a href="%s" class="wp-embed-more wc-embed-button">%s</a>';
 
 		if ( $_product->is_type( 'simple' ) && $_product->is_purchasable() && $_product->is_in_stock() ) {
-			$buttons[] = sprintf( $button, esc_url( add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ) ), esc_html__( 'Buy Now', 'woocommerce' ) );
+			$buttons[] = sprintf( $button, esc_url( add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ) ), esc_html__( 'Buy now', 'woocommerce' ) );
 		}
 
 		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read more', 'woocommerce' ) );
@@ -124,7 +124,13 @@ class WC_Embed {
 		if ( self::is_embedded_product() && ( $_product = wc_get_product( get_the_ID() ) ) && $_product->get_average_rating() > 0 ) {
 			?>
 			<div class="wc-embed-rating">
-				<?php echo esc_html( sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() ) ); ?>
+				<?php
+					/* translators: %s: average rating */
+					printf(
+						esc_html_( 'Rated %s out of 5', 'woocommerce' ),
+						esc_html( $_product->get_average_rating() )
+					);
+				?>
 			</div>
 			<?php
 		}

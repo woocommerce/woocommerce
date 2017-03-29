@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.7.0
+ * @version     3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,7 +51,7 @@ foreach ( $items as $item_id => $item ) :
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}
 	// Note
-	if ( $show_purchase_note && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) {
+	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = $product->get_purchase_note() ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
 	echo "\n\n";

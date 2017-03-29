@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
@@ -37,6 +37,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$legend   = array();
 
 		$legend[] = array(
+			/* translators: %s: signups amount */
 			'title' => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . sizeof( $this->customers ) . '</strong>' ),
 			'color' => $this->chart_colours['signups'],
 			'highlight_series' => 2,
@@ -105,8 +106,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 		<div class="chart-container">
 			<div class="chart-placeholder customers_vs_guests pie-chart" style="height:200px"></div>
 			<ul class="pie-chart-legend">
-				<li style="border-color: <?php echo $this->chart_colours['customers']; ?>"><?php _e( 'Customer Sales', 'woocommerce' ); ?></li>
-				<li style="border-color: <?php echo $this->chart_colours['guests']; ?>"><?php _e( 'Guest Sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo $this->chart_colours['customers']; ?>"><?php _e( 'Customer sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo $this->chart_colours['guests']; ?>"><?php _e( 'Guest sales', 'woocommerce' ); ?></li>
 			</ul>
 		</div>
 		<script type="text/javascript">
@@ -115,12 +116,12 @@ class WC_Report_Customers extends WC_Admin_Report {
 					jQuery('.chart-placeholder.customers_vs_guests'),
 					[
 						{
-							label: '<?php _e( 'Customer Orders', 'woocommerce' ); ?>',
+							label: '<?php _e( 'Customer orders', 'woocommerce' ); ?>',
 							data:  "<?php echo $customer_order_totals->total_orders ?>",
 							color: '<?php echo $this->chart_colours['customers']; ?>'
 						},
 						{
-							label: '<?php _e( 'Guest Orders', 'woocommerce' ); ?>',
+							label: '<?php _e( 'Guest orders', 'woocommerce' ); ?>',
 							data:  "<?php echo $guest_order_totals->total_orders ?>",
 							color: '<?php echo $this->chart_colours['guests']; ?>'
 						}
@@ -160,9 +161,9 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' ),
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
+			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -312,7 +313,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 				var drawGraph = function( highlight ) {
 					var series = [
 							{
-								label: "<?php echo esc_js( __( 'Customer Orders', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Customer orders', 'woocommerce' ) ) ?>",
 								data: chart_data.customer_orders,
 								color: '<?php echo $this->chart_colours['customers']; ?>',
 								bars: { fillColor: '<?php echo $this->chart_colours['customers']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
@@ -322,7 +323,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 								stack: true,
 							},
 							{
-								label: "<?php echo esc_js( __( 'Guest Orders', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Guest orders', 'woocommerce' ) ) ?>",
 								data: chart_data.guest_orders,
 								color: '<?php echo $this->chart_colours['guests']; ?>',
 								bars: { fillColor: '<?php echo $this->chart_colours['guests']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },

@@ -151,14 +151,12 @@ class WC_API_Orders extends WC_API_Resource {
 		// Get the decimal precession
 		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 		$order      = wc_get_order( $id );
-		$order_post = get_post( $id );
-
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created() ) ) ),
-			'updated_at'                => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified() ) ) ),
-			'completed_at'              => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_completed() ) ) ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created() ? $order->get_date_created()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified() ? $order->get_date_modified()->getTimestamp() : 0, false, false ), // API gives UTC times.
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed() ? $order->get_date_completed()->getTimestamp() : 0, false, false ), // API gives UTC times.
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -173,7 +171,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => 0 < $order->get_date_paid(),
+				'paid'         => ! is_null( $order->get_date_paid() ),
 			),
 			'billing_address' => array(
 				'first_name' => $order->get_billing_first_name(),
@@ -230,7 +228,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
 				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'quantity'     => $item->get_qty(),
+				'quantity'     => $item->get_quantity(),
 				'tax_class'    => $item->get_tax_class(),
 				'name'         => $item->get_name(),
 				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
@@ -277,7 +275,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item->get_code(),
-				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), $dp ),
+				'amount' => wc_format_decimal( $coupon_item->get_discount(), $dp ),
 			);
 		}
 
@@ -385,7 +383,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// make sure customer exists
 				if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
 				$default_order_args['customer_id'] = $data['customer_id'];
@@ -445,7 +443,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( isset( $data['currency'] ) ) {
 
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid.', 'woocommerce' ), 400 );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -459,7 +457,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 
@@ -531,7 +529,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( isset( $data['customer_id'] ) && $data['customer_id'] != $order->get_user_id() ) {
 				// Make sure customer exists.
 				if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
 				update_post_meta( $order->get_id(), '_customer_user', $data['customer_id'] );
@@ -596,7 +594,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// Set order currency.
 			if ( isset( $data['currency'] ) ) {
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
-					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid.', 'woocommerce' ), 400 );
 				}
 
 				update_post_meta( $order->get_id(), '_order_currency', $data['currency'] );
@@ -620,7 +618,7 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
-			wc_delete_shop_order_transients( $order->get_id() );
+			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
 
@@ -837,7 +835,7 @@ class WC_API_Orders extends WC_API_Resource {
 			) );
 
 			if ( is_null( $result ) ) {
-				throw new WC_API_Exception( 'woocommerce_invalid_item_id', __( 'Order item ID provided is not associated with order', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
 			}
 		}
 
@@ -893,52 +891,56 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product', __( 'Product is invalid', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product', __( 'Product is invalid.', 'woocommerce' ), 400 );
 		}
 
 		// quantity must be positive float
 		if ( isset( $item['quantity'] ) && floatval( $item['quantity'] ) <= 0 ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity must be a positive float', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity must be a positive float.', 'woocommerce' ), 400 );
 		}
 
 		// quantity is required when creating
 		if ( $creating && ! isset( $item['quantity'] ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity is required', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity is required.', 'woocommerce' ), 400 );
 		}
 
 		if ( $creating ) {
-			$item = new WC_Order_Item_Product();
+			$line_item = new WC_Order_Item_Product();
 		} else {
-			$item = new WC_Order_Item_Product( $item['id'] );
+			$line_item = new WC_Order_Item_Product( $item['id'] );
 		}
 
-		$item->set_product( $product );
-		$item->set_order_id( $order->id );
+		$line_item->set_product( $product );
+		$line_item->set_order_id( $order->get_id() );
 
 		if ( isset( $item['quantity'] ) ) {
-			$item->set_quantity( $item['quantity'] );
+			$line_item->set_quantity( $item['quantity'] );
 		}
 		if ( isset( $item['total'] ) ) {
-			$item->set_total( floatval( $item['total'] ) );
+			$line_item->set_total( floatval( $item['total'] ) );
+		} elseif ( $creating ) {
+			$total = wc_get_price_excluding_tax( $product, array( 'qty' => $line_item->get_quantity() ) );
+			$line_item->set_total( $total );
+			$line_item->set_subtotal( $total );
 		}
 		if ( isset( $item['total_tax'] ) ) {
-			$item->set_total_tax( floatval( $item['total_tax'] ) );
+			$line_item->set_total_tax( floatval( $item['total_tax'] ) );
 		}
 		if ( isset( $item['subtotal'] ) ) {
-			$item->set_subtotal( floatval( $item['subtotal'] ) );
+			$line_item->set_subtotal( floatval( $item['subtotal'] ) );
 		}
 		if ( isset( $item['subtotal_tax'] ) ) {
-			$item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
+			$line_item->set_subtotal_tax( floatval( $item['subtotal_tax'] ) );
 		}
 		if ( $variation_id ) {
-			$item->set_variation_id( $variation_id );
-			$item->set_variation( $item['variations'] );
+			$line_item->set_variation_id( $variation_id );
+			$line_item->set_variation( $item['variations'] );
 		}
 
-		$item_id = $item->save();
+		$item_id = $line_item->save();
 
 		if ( ! $item_id ) {
-			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ), 500 );
+			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
 		}
 	}
 
@@ -1005,23 +1007,24 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// total must be a positive float
 		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 ) {
-			throw new WC_API_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount.', 'woocommerce' ), 400 );
 		}
 
 		if ( 'create' === $action ) {
 
 			// method ID is required
 			if ( ! isset( $shipping['method_id'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_invalid_shipping_item', __( 'Shipping method ID is required', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
 			}
 
 			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
 			$item = new WC_Order_Item_Shipping();
+			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );
 			$shipping_id = $item->save();
 
 			if ( ! $shipping_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again.', 'woocommerce' ), 500 );
 			}
 		} else {
 
@@ -1042,7 +1045,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$shipping_id = $item->save();
 
 			if ( ! $shipping_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again.', 'woocommerce' ), 500 );
 			}
 		}
 	}
@@ -1066,13 +1069,14 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$item = new WC_Order_Item_Fee();
-			$item->set_name( sanitize_title( $fee['title'] ) );
+			$item->set_order_id( $order->get_id() );
+			$item->set_name( wc_clean( $fee['title'] ) );
 			$item->set_total( isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0 );
 
 			// if taxable, tax class and total are required
 			if ( ! empty( $fee['taxable'] ) ) {
 				if ( ! isset( $fee['tax_class'] ) ) {
-					throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable', 'woocommerce' ), 400 );
+					throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable.', 'woocommerce' ), 400 );
 				}
 
 				$item->set_tax_status( 'taxable' );
@@ -1091,14 +1095,14 @@ class WC_API_Orders extends WC_API_Resource {
 			$fee_id = $item->save();
 
 			if ( ! $fee_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again.', 'woocommerce' ), 500 );
 			}
 		} else {
 
 			$item = new WC_Order_Item_Fee( $fee['id'] );
 
 			if ( isset( $fee['title'] ) ) {
-				$item->set_name( sanitize_title( $fee['title'] ) );
+				$item->set_name( wc_clean( $fee['title'] ) );
 			}
 
 			if ( isset( $fee['tax_class'] ) ) {
@@ -1116,7 +1120,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$fee_id = $item->save();
 
 			if ( ! $fee_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again.', 'woocommerce' ), 500 );
 			}
 		}
 	}
@@ -1134,17 +1138,18 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// coupon amount must be positive float
 		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 ) {
-			throw new WC_API_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount.', 'woocommerce' ), 400 );
 		}
 
 		if ( 'create' === $action ) {
 
 			// coupon code is required
 			if ( empty( $coupon['code'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$item = new WC_Order_Item_Coupon( array(
+			$item = new WC_Order_Item_Coupon();
+			$item->set_props( array(
 				'code'         => $coupon['code'],
 				'discount'     => isset( $coupon['amount'] ) ? floatval( $coupon['amount'] ) : 0,
 				'discount_tax' => 0,
@@ -1153,7 +1158,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$coupon_id = $item->save();
 
 			if ( ! $coupon_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again.', 'woocommerce' ), 500 );
 			}
 		} else {
 
@@ -1170,7 +1175,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$coupon_id = $item->save();
 
 			if ( ! $coupon_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again.', 'woocommerce' ), 500 );
 			}
 		}
 	}
@@ -1299,7 +1304,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$note_id = $order->add_order_note( $data['note'], $is_customer_note );
 
 			if ( ! $note_id ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), 500 );
 			}
 
 			// HTTP 201 Created
@@ -1491,14 +1496,14 @@ class WC_API_Orders extends WC_API_Resource {
 			$id = absint( $id );
 
 			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 400 );
 			}
 
 			$order  = wc_get_order( $order_id );
 			$refund = wc_get_order( $id );
 
 			if ( ! $refund ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found.', 'woocommerce' ), 404 );
 			}
 
 			$line_items = array();
@@ -1534,7 +1539,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'created_at' => $this->server->format_datetime( get_gmt_from_date( date( 'Y-m-d H:i:s', $refund->get_date_created() ) ) ),
+				'created_at' => $this->server->format_datetime( $refund->get_date_created() ? $refund->get_date_created()->getTimestamp() : 0, false, false ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
 				'line_items' => $line_items,
@@ -1578,9 +1583,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Refund amount is required
 			if ( ! isset( $data['amount'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund', __( 'Refund amount is required', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund', __( 'Refund amount is required.', 'woocommerce' ), 400 );
 			} elseif ( 0 > $data['amount'] ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund', __( 'Refund amount must be positive', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund', __( 'Refund amount must be positive.', 'woocommerce' ), 400 );
 			}
 
 			$data['order_id']  = $order_id;
@@ -1590,7 +1595,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$refund = wc_create_refund( $data );
 
 			if ( ! $refund ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order_refund', __( 'Cannot create order refund, please try again', 'woocommerce' ), 500 );
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
 			}
 
 			// Refund via API
@@ -1607,7 +1612,7 @@ class WC_API_Orders extends WC_API_Resource {
 					if ( is_wp_error( $result ) ) {
 						return $result;
 					} elseif ( ! $result ) {
-						throw new WC_API_Exception( 'woocommerce_api_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API', 'woocommerce' ), 500 );
+						throw new WC_API_Exception( 'woocommerce_api_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
 					}
 				}
 			}
@@ -1653,19 +1658,19 @@ class WC_API_Orders extends WC_API_Resource {
 			$id = absint( $id );
 
 			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 400 );
 			}
 
 			// Ensure order ID is valid
 			$refund = get_post( $id );
 
 			if ( ! $refund ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found.', 'woocommerce' ), 404 );
 			}
 
 			// Ensure refund ID is associated with given order
 			if ( $refund->post_parent != $order_id ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order.', 'woocommerce' ), 400 );
 			}
 
 			$data = apply_filters( 'woocommerce_api_edit_order_refund_data', $data, $refund->ID, $order_id, $this );
@@ -1714,19 +1719,19 @@ class WC_API_Orders extends WC_API_Resource {
 			$id = absint( $id );
 
 			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 400 );
 			}
 
 			// Ensure refund ID is valid
 			$refund = get_post( $id );
 
 			if ( ! $refund ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found.', 'woocommerce' ), 404 );
 			}
 
 			// Ensure refund ID is associated with given order
 			if ( $refund->post_parent != $order_id ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order.', 'woocommerce' ), 400 );
 			}
 
 			wc_delete_shop_order_transients( $order_id );
@@ -1760,7 +1765,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_orders_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_orders_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$orders = array();

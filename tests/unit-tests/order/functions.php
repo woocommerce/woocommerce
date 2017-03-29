@@ -15,9 +15,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_order_statuses() {
 
 		$order_statuses = apply_filters( 'wc_order_statuses', array(
-			'wc-pending'    => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
+			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-			'wc-on-hold'    => _x( 'On Hold', 'Order status', 'woocommerce' ),
+			'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
 			'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
 			'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 			'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
@@ -33,9 +33,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_order_status() {
-
-		$this->assertEquals( true,  wc_is_order_status( 'wc-pending' ) );
-		$this->assertEquals( false, wc_is_order_status( 'wc-another-status' ) );
+		$this->assertTrue( wc_is_order_status( 'wc-pending' ) );
+		$this->assertFalse( wc_is_order_status( 'wc-another-status' ) );
 	}
 
 	/**
@@ -45,14 +44,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_status_name() {
 
-		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
-		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
+		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
+		$this->assertEquals( _x( 'Pending payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
 	}
 
 	/**
 	 * Test wc_processing_order_count().
-	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_processing_order_count() {
@@ -61,8 +58,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_orders_count().
-	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_orders_count() {
@@ -84,10 +79,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$default = get_option( 'woocommerce_ship_to_destination' );
 
 		update_option( 'woocommerce_ship_to_destination', 'shipping' );
-		$this->assertEquals( false, wc_ship_to_billing_address_only() );
+		$this->assertFalse( wc_ship_to_billing_address_only() );
 
 		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
-		$this->assertEquals( true, wc_ship_to_billing_address_only() );
+		$this->assertTrue( wc_ship_to_billing_address_only() );
 
 		update_option( 'woocommerce_ship_to_destination', $default );
 	}
@@ -151,5 +146,46 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order->add_payment_token( $token );
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
+	}
+
+	/**
+	 * Test the before and after date parameters for wc_get_orders.
+	 *
+	 * @since 3.0
+	 */
+	public function test_wc_get_orders_date_params() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_created( '2015-01-01 05:20:30' );
+		$order->save();
+		$order_1 = $order->get_id();
+		$order   = WC_Helper_Order::create_order();
+		$order->set_date_created( '2017-01-01' );
+		$order->save();
+		$order_2 = $order->get_id();
+		$order   = WC_Helper_Order::create_order();
+		$order->set_date_created( '2017-01-01' );
+		$order->save();
+		$order_3 = $order->get_id();
+
+		$orders   = wc_get_orders( array( 'date_before' => '2017-01-15', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_before' => '2017-01-01', 'return' => 'ids' ) );
+		$expected = array( $order_1 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_before' => '2016-12-31', 'return' => 'ids' ) );
+		$expected = array( $order_1 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_after' => '2015-01-01 00:00:00', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
+		$orders   = wc_get_orders( array( 'date_after' => '2016-01-01', 'return' => 'ids' ) );
+		$expected = array( $order_2, $order_3 );
+		$this->assertEquals( sort( $expected ), sort( $orders ) );
+
 	}
 }

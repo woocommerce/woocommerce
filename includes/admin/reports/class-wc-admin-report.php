@@ -220,10 +220,9 @@ class WC_Admin_Report {
 		}
 
 		if ( $filter_range ) {
-
 			$query['where'] .= "
-				AND 	posts.post_date >= '" . date( 'Y-m-d', $this->start_date ) . "'
-				AND 	posts.post_date < '" . date( 'Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
+				AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
 
@@ -325,7 +324,7 @@ class WC_Admin_Report {
 
 		if ( $debug ) {
 			echo '<pre>';
-			print_r( $query );
+			wc_print_r( $query );
 			echo '</pre>';
 		}
 
@@ -355,20 +354,32 @@ class WC_Admin_Report {
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
 
-		// Ensure all days (or months) have values first in this range
-		for ( $i = 0; $i <= $interval; $i ++ ) {
-			switch ( $group_by ) {
-				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
-				break;
-				case 'month' :
-				default :
-					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
-				break;
-			}
+		// Ensure all days (or months) have values in this range.
+		if ( 'day' === $group_by ) {
+			for ( $i = 0; $i <= $interval; $i ++ ) {
+				$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 
-			if ( ! isset( $prepared_data[ $time ] ) ) {
-				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				if ( ! isset( $prepared_data[ $time ] ) ) {
+					$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				}
+			}
+		} else {
+			$current_yearnum  = date( 'Y', $start_date );
+			$current_monthnum = date( 'm', $start_date );
+
+			for ( $i = 0; $i <= $interval; $i ++ ) {
+				$time = strtotime( $current_yearnum . str_pad( $current_monthnum, 2, '0', STR_PAD_LEFT ) . '01' ) . '000';
+
+				if ( ! isset( $prepared_data[ $time ] ) ) {
+					$prepared_data[ $time ] = array( esc_js( $time ), 0 );
+				}
+
+				$current_monthnum ++;
+
+				if ( $current_monthnum > 12 ) {
+					$current_monthnum = 1;
+					$current_yearnum  ++;
+				}
 			}
 		}
 
@@ -480,8 +491,10 @@ class WC_Admin_Report {
 		}
 
 		if ( 'sales' === $type ) {
+			/* translators: 1: total income 2: days */
 			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
+			/* translators: 1: total items sold 2: days */
 			$tooltip = sprintf( _n( 'Sold 1 item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
 		}
 
@@ -501,10 +514,11 @@ class WC_Admin_Report {
 
 			case 'custom' :
 				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
-				if ( ! $this->end_date ) {
-					$this->end_date = current_time( 'timestamp' );
+				if ( empty( $_GET['end_date'] ) ) {
+					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
+				} else {
+					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 				}
 
 				$interval = 0;
@@ -560,9 +574,9 @@ class WC_Admin_Report {
 			case 'month' :
 				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date)';
 				$this->chart_interval = 0;
-				$min_date             = $this->start_date;
+				$min_date             = strtotime( date( 'Y-m-01', $this->start_date ) );
 
-				while ( ( $min_date   = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
 					$this->chart_interval ++;
 				}
 

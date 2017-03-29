@@ -5,8 +5,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <h2>
-	<?php _e( 'Shipping Classes', 'woocommerce' ); ?>
-	<?php echo wc_help_tip( __( 'Shipping classes can be used to group products of similar type and can be used by some Shipping Methods (such as Flat Rate Shipping) to provide different rates to different classes of product.', 'woocommerce' ) ); ?>
+	<?php _e( 'Shipping classes', 'woocommerce' ); ?>
+	<?php echo wc_help_tip( __( 'Shipping classes can be used to group products of similar type and can be used by some Shipping Methods (such as "Flat rate shipping") to provide different rates to different classes of product.', 'woocommerce' ) ); ?>
 </h2>
 
 <table class="wc-shipping-classes widefat">
@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tfoot>
 		<tr>
 			<td colspan="<?php echo absint( sizeof( $shipping_class_columns ) ); ?>">
-				<input type="submit" name="save" class="button button-primary wc-shipping-class-save" value="<?php esc_attr_e( 'Save Shipping Classes', 'woocommerce' ); ?>" disabled />
-				<a class="button button-secondary wc-shipping-class-add" href="#"><?php esc_html_e( 'Add Shipping Class', 'woocommerce' ); ?></a>
+				<input type="submit" name="save" class="button button-primary wc-shipping-class-save" value="<?php esc_attr_e( 'Save shipping classes', 'woocommerce' ); ?>" disabled />
+				<a class="button button-secondary wc-shipping-class-add" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
 	</tfoot>
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-class-row-blank">
 	<tr>
-		<td class="wc-shipping-classes-blank-state" colspan="<?php echo absint( sizeof( $shipping_class_columns ) ); ?>"><p><?php _e( 'No Shipping classes have been created.', 'woocommerce' ); ?></p></td>
+		<td class="wc-shipping-classes-blank-state" colspan="<?php echo absint( sizeof( $shipping_class_columns ) ); ?>"><p><?php _e( 'No shipping classes have been created.', 'woocommerce' ); ?></p></td>
 	</tr>
 </script>
 
@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							</div>
 						</div>
 						<div class="edit">
-							<input type="text" name="name[{{ data.term_id }}]" data-attribute="name" value="{{ data.name }}" placeholder="<?php esc_attr_e( 'Shipping Class Name', 'woocommerce' ); ?>" />
+							<input type="text" name="name[{{ data.term_id }}]" data-attribute="name" value="{{ data.name }}" placeholder="<?php esc_attr_e( 'Shipping class name', 'woocommerce' ); ?>" />
 							<div class="row-actions">
 								<a class="wc-shipping-class-cancel-edit" href="#"><?php _e( 'Cancel changes', 'woocommerce' ); ?></a>
 							</div>

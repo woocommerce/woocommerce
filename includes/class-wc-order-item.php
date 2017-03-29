@@ -9,22 +9,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A class which represents an item within an order and handles CRUD.
  * Uses ArrayAccess to be BW compatible with WC_Orders::get_items().
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
 		'order_id' => 0,
 		'name'     => '',
-		'type'     => '',
 	);
 
 	/**
@@ -38,7 +37,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order_itemmeta';
+	protected $cache_group = 'order-items';
 
 	/**
 	 * Meta type. This should match up with
@@ -48,30 +47,66 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $meta_type = 'order_item';
 
 	/**
-	 * Constructor.
-	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
+	 * This is the name of this object type.
+	 * @var string
 	 */
-	public function __construct( $read = 0 ) {
-		parent::__construct( $read );
+	protected $object_type = 'order_item';
 
-		if ( $read instanceof WC_Order_Item ) {
-			if ( $this->is_type( $read->get_type() ) ) {
-				$this->set_props( $read->get_data() );
-			}
-		} elseif ( is_array( $read ) ) {
-			$this->set_props( $read );
+	/**
+	 * Constructor.
+	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item Object
+	 */
+	public function __construct( $item = 0 ) {
+		parent::__construct( $item );
+
+		if ( $item instanceof WC_Order_Item ) {
+			$this->set_id( $item->get_id() );
+		} elseif ( is_numeric( $item ) && $item > 0 ) {
+			$this->set_id( $item );
 		} else {
-			$this->read( $read );
+			$this->set_object_read( true );
+		}
+
+		$type = 'line_item' === $this->get_type() ? 'product' : $this->get_type();
+		$this->data_store = WC_Data_Store::load( 'order-item-' . $type );
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
 		}
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
-	 * Type checking
-	 * @param  string|array  $Type
-	 * @return boolean
+	 * Get order ID this meta belongs to.
+	 *
+	 * @param  string $context
+	 * @return int
 	 */
-	public function is_type( $type ) {
-		return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
+	public function get_order_id( $context = 'view' ) {
+		return $this->get_prop( 'order_id', $context );
+	}
+
+	/**
+	 * Get order item name.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		return $this->get_prop( 'name', $context );
+	}
+
+	/**
+	 * Get order item type. Overridden by child classes.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return;
 	}
 
 	/**
@@ -95,168 +130,43 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Getters
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Get order ID this meta belongs to.
-	 * @return int
-	 */
-	public function get_order_id() {
-		return $this->data['order_id'];
-	}
-
-	/**
-	 * Get order item name.
-	 * @return string
-	 */
-	public function get_name() {
-		return $this->data['name'];
-	}
-
-	/**
-	 * Get order item type.
-	 * @return string
-	 */
-	public function get_type() {
-		return $this->data['type'];
-	}
-
-	/*
-	|--------------------------------------------------------------------------
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
 
 	/**
 	 * Set order ID.
-	 * @param int $value
+	 *
+	 * @param  int $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_id( $value ) {
-		$this->data['order_id'] = absint( $value );
+		$this->set_prop( 'order_id', absint( $value ) );
 	}
 
 	/**
 	 * Set order item name.
-	 * @param string $value
+	 *
+	 * @param  string $value
 	 * @throws WC_Data_Exception
 	 */
 	public function set_name( $value ) {
-		$this->data['name'] = wc_clean( $value );
-	}
-
-	/**
-	 * Set order item type.
-	 * @param string $value
-	 * @throws WC_Data_Exception
-	 */
-	protected function set_type( $value ) {
-		$this->data['type'] = wc_clean( $value );
+		$this->set_prop( 'name', wc_clean( $value ) );
 	}
 
 	/*
 	|--------------------------------------------------------------------------
-	| CRUD methods
+	| Other Methods
 	|--------------------------------------------------------------------------
-	|
-	| Methods which create, read, update and delete data from the database.
-	|
 	*/
 
 	/**
-	 * Insert data into the database.
-	 * @since 2.7.0
+	 * Type checking
+	 * @param  string|array  $Type
+	 * @return boolean
 	 */
-	public function create() {
-		global $wpdb;
-
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $this->get_name(),
-			'order_item_type' => $this->get_type(),
-			'order_id'        => $this->get_order_id(),
-		) );
-		$this->set_id( $wpdb->insert_id );
-
-		do_action( 'woocommerce_new_order_item', $this->get_id(), $this, $this->get_order_id() );
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.7.0
-	 */
-	public function update() {
-		global $wpdb;
-
-		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $this->get_name(),
-			'order_item_type' => $this->get_type(),
-			'order_id'        => $this->get_order_id(),
-		), array( 'order_item_id' => $this->get_id() ) );
-
-		do_action( 'woocommerce_update_order_item', $this->get_id(), $this, $this->get_order_id() );
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.7.0
-	 * @param int|object $item ID of object to read, or already queried object.
-	 */
-	public function read( $item ) {
-		global $wpdb;
-
-		$this->set_defaults();
-
-		if ( is_numeric( $item ) && ! empty( $item ) ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
-		} elseif ( ! empty( $item->order_item_id ) ) {
-			$data = $item;
-		} else {
-			$data = false;
-		}
-
-		if ( ! $data ) {
-			return;
-		}
-
-		$this->set_id( $data->order_item_id );
-		$this->set_props( array(
-			'order_id' => $data->order_id,
-			'name'     => $data->order_item_name,
-			'type'     => $data->order_item_type,
-		) );
-		$this->read_meta_data();
-	}
-
-	/**
-	 * Save data to the database.
-	 * @since 2.7.0
-	 * @return int Item ID
-	 */
-	public function save() {
-		if ( ! $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
-		}
-		$this->save_meta_data();
-
-		return $this->get_id();
-	}
-
-	/**
-	 * Delete data from the database.
-	 * @since 2.7.0
-	 */
-	public function delete() {
-		if ( $this->get_id() ) {
-			global $wpdb;
-			do_action( 'woocommerce_before_delete_order_item', $this->get_id() );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_itemmeta', array( 'order_item_id' => $this->get_id() ) );
-			do_action( 'woocommerce_delete_order_item', $this->get_id() );
-		}
+	public function is_type( $type ) {
+		return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
 	}
 
 	/*
@@ -267,22 +177,25 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Expands things like term slugs before return.
+	 *
 	 * @param string $hideprefix (default: _)
 	 * @return array
 	 */
 	public function get_formatted_meta_data( $hideprefix = '_' ) {
-		$formatted_meta = array();
-		$meta_data      = $this->get_meta_data();
+		$formatted_meta    = array();
+		$meta_data         = $this->get_meta_data();
+		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
+		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
-			$meta->key     = rawurldecode( $meta->key );
-			$meta->value   = rawurldecode( $meta->value );
+			$meta->key     = rawurldecode( (string) $meta->key );
+			$meta->value   = rawurldecode( (string) $meta->value );
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
-			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
+			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
 
 			if ( taxonomy_exists( $attribute_key ) ) {
@@ -292,11 +205,18 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
+			// Skip items with values already in the product details area of the product name
+			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $display_value, '/' ) . "/i";
+
+			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+				continue;
+			}
+
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => apply_filters( 'woocommerce_order_item_display_meta_value', wpautop( make_clickable( $display_value ) ) ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
 			);
 		}
 
@@ -326,10 +246,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		if ( array_key_exists( $offset, $this->data ) ) {
-			$this->data[ $offset ] = $value;
+			$setter = "set_$offset";
+			if ( is_callable( array( $this, $setter ) ) ) {
+				$this->$setter( $value );
+			}
+			return;
 		}
 
-		$this->update_meta_data( '_' . $offset, $value );
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -337,6 +261,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $offset
 	 */
 	public function offsetUnset( $offset ) {
+		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
 			$this->meta_data = array();
 			return;
@@ -346,7 +272,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			unset( $this->data[ $offset ] );
 		}
 
-		$this->delete_meta_data( '_' . $offset );
+		if ( array_key_exists( $offset, $this->changes ) ) {
+			unset( $this->changes[ $offset ] );
+		}
+
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
@@ -355,10 +285,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
+		$this->maybe_read_meta_data();
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
-		return array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
+		return array_key_exists( $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) ) || array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -367,6 +298,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
+		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset ) {
 			$return = array();
 
@@ -381,11 +314,18 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 		if ( 'item_meta' === $offset ) {
 			return $meta_values;
+		} elseif ( 'type' === $offset ) {
+			return $this->get_type();
 		} elseif ( array_key_exists( $offset, $this->data ) ) {
-			return $this->data[ $offset ];
+			$getter = "get_$offset";
+			if ( is_callable( array( $this, $getter ) ) ) {
+				return $this->$getter();
+			}
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
 			return $meta_values[ '_' . $offset ];
+		} elseif ( array_key_exists( $offset, $meta_values ) ) {
+			return $meta_values[ $offset ];
 		}
 
 		return null;

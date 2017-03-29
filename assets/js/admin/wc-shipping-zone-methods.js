@@ -13,27 +13,42 @@
 				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
 
-					_.each( changedRows, function( row, id ) {
-						changes[ id ] = _.extend( changes[ id ] || { instance_id : id }, row );
+					_.each( changedRows.methods, function( row, id ) {
+						changes.methods = changes.methods || { methods : {} };
+						changes.methods[ id ] = _.extend( changes.methods[ id ] || { instance_id : id }, row );
 					} );
+
+					if ( typeof changedRows.zone_name !== 'undefined' ) {
+						changes.zone_name = changedRows.zone_name;
+					}
+
+					if ( typeof changedRows.zone_locations !== 'undefined' ) {
+						changes.zone_locations = changedRows.zone_locations;
+					}
+
+					if ( typeof changedRows.zone_postcodes !== 'undefined' ) {
+						changes.zone_postcodes = changedRows.zone_postcodes;
+					}
 
 					this.changes = changes;
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
-					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
-							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
-							changes                 : this.changes,
-							zone_id                 : data.zone_id
-						}, this.onSaveResponse, 'json' );
-					} else {
-						shippingMethod.trigger( 'saved:methods' );
-					}
+					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
+						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+						changes                 : this.changes,
+						zone_id                 : data.zone_id
+					}, this.onSaveResponse, 'json' );
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
+							if ( response.data.zone_id !== data.zone_id ) {
+								data.zone_id = response.data.zone_id;
+								if ( window.history.pushState ) {
+									window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+								}
+							}
 							shippingMethod.set( 'methods', response.data.methods );
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
@@ -57,12 +72,28 @@
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 
-					// Settings modals
+					$( document.body ).on( 'input change', '#zone_name, #zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
+					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+				},
+				onUpdateZone: function( event ) {
+					var view      = event.data.view,
+						model     = view.model,
+						value     = $( this ).val(),
+						$target   = $( event.target ),
+						attribute = $target.data( 'attribute' ),
+						changes   = {};
+
+					event.preventDefault();
+
+					changes[ attribute ] = value;
+					model.set( attribute, value );
+					model.logChanges( changes );
+					view.render();
 				},
 				block: function() {
 					$( this.el ).block({
@@ -78,7 +109,11 @@
 				},
 				render: function() {
 					var methods     = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
+						zone_name   = this.model.get( 'zone_name' ),
 						view        = this;
+
+					// Set name.
+					$('.wc-shipping-zone-name').text( zone_name ? zone_name : data.strings.default_zone_name );
 
 					// Blank out the contents.
 					this.$el.empty();
@@ -93,9 +128,9 @@
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
 							if ( 'yes' === rowData.enabled ) {
-								rowData.enabled_icon = '<span class="status-enabled">' + data.strings.yes + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' + data.strings.yes + '</span>';
 							} else {
-								rowData.enabled_icon = '<span class="status-disabled">' + data.strings.no + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' + data.strings.no + '</span>';
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -137,7 +172,8 @@
 					event.preventDefault();
 
 					delete methods[ instance_id ];
-					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { deleted : 'deleted' } );
+					changes.methods = changes.methods || { methods : {} };
+					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { deleted : 'deleted' } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
 					view.render();
@@ -153,7 +189,8 @@
 
 					event.preventDefault();
 					methods[ instance_id ].enabled = enabled;
-					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { enabled : enabled } );
+					changes.methods = changes.methods || { methods : {} };
+					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { enabled : enabled } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
 					view.render();
@@ -183,8 +220,8 @@
 						changes = {};
 
 					if ( methods[ instance_id ][ attribute ] !== value ) {
-						changes[ instance_id ] = {};
-						changes[ instance_id ][ attribute ] = value;
+						changes.methods[ instance_id ] = {};
+						changes.methods[ instance_id ][ attribute ] = value;
 						methods[ instance_id ][ attribute ]   = value;
 					}
 
@@ -201,7 +238,9 @@
 						var new_position = parseInt( $table.find( 'tr[data-id="' + method.instance_id + '"]').index() + 1, 10 );
 
 						if ( old_position !== new_position ) {
-							changes[ method.instance_id ] = _.extend( changes[ method.instance_id ] || {}, { method_order : new_position } );
+							methods[ method.instance_id ].method_order = new_position;
+							changes.methods = changes.methods || { methods : {} };
+							changes.methods[ method.instance_id ] = _.extend( changes.methods[ method.instance_id ] || {}, { method_order : new_position } );
 						}
 					} );
 
@@ -300,6 +339,12 @@
 							zone_id                 : data.zone_id
 						}, function( response, textStatus ) {
 							if ( 'success' === textStatus && response.success ) {
+								if ( response.data.zone_id !== data.zone_id ) {
+									data.zone_id = response.data.zone_id;
+									if ( window.history.pushState ) {
+										window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+									}
+								}
 								// Trigger save if there are changes, or just re-render
 								if ( _.size( shippingMethodView.model.changes ) ) {
 									shippingMethodView.model.save();
@@ -317,12 +362,19 @@
 				onChangeShippingMethodSelector: function() {
 					var description = $( this ).find( 'option:selected' ).data( 'description' );
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
-					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
+					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
 					$( this ).closest( 'article' ).height( $( this ).parent().height() );
+				},
+				onTogglePostcodes: function( event ) {
+					event.preventDefault();
+					var $tr = $( this ).closest( 'tr');
+					$tr.find( '.wc-shipping-zone-postcodes' ).show();
+					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
 				}
 			} ),
 			shippingMethod = new ShippingMethod({
-				methods: data.methods
+				methods: data.methods,
+				zone_name: data.zone_name
 			} ),
 			shippingMethodView = new ShippingMethodView({
 				model:    shippingMethod,

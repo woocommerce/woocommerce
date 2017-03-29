@@ -27,7 +27,7 @@ $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_q
 
 if ( $customer_orders ) : ?>
 
-	<h2><?php echo apply_filters( 'woocommerce_my_account_my_orders_title', __( 'Recent Orders', 'woocommerce' ) ); ?></h2>
+	<h2><?php echo apply_filters( 'woocommerce_my_account_my_orders_title', __( 'Recent orders', 'woocommerce' ) ); ?></h2>
 
 	<table class="shop_table shop_table_responsive my_account_orders">
 
@@ -56,13 +56,16 @@ if ( $customer_orders ) : ?>
 								</a>
 
 							<?php elseif ( 'order-date' === $column_id ) : ?>
-								<time datetime="<?php echo date( 'Y-m-d', $order->get_date_created() ); ?>" title="<?php echo esc_attr( $order->get_date_created() ); ?>"><?php echo date_i18n( get_option( 'date_format' ), $order->get_date_created() ); ?></time>
+								<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
 
 							<?php elseif ( 'order-status' === $column_id ) : ?>
-								<?php echo wc_get_order_status_name( $order->get_status() ); ?>
+								<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
 
 							<?php elseif ( 'order-total' === $column_id ) : ?>
-								<?php echo sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
+								<?php
+								/* translators: 1: formatted order total 2: total order items */
+								printf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count );
+								?>
 
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php

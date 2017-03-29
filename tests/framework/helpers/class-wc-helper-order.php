@@ -30,14 +30,20 @@ class WC_Helper_Order {
 	/**
 	 * Create a order.
 	 *
-	 * @since 2.4
+	 * @since   2.4
+	 * @version 3.0 New parameter $product.
 	 *
-	 * @return WC_Order Order object.
+	 * @param int        $customer_id
+	 * @param WC_Product $product
+	 *
+	 * @return WC_Order
 	 */
-	public static function create_order( $customer_id = 1 ) {
+	public static function create_order( $customer_id = 1, $product = null ) {
 
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = WC_Helper_Product::create_simple_product();
+		}
+
 		WC_Helper_Shipping::create_simple_flat_rate();
 
 		$order_data = array(
@@ -69,13 +75,16 @@ class WC_Helper_Order {
 		// Add shipping costs
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
 		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping( array(
+		$item   = new WC_Order_Item_Shipping();
+		$item->set_props( array(
 			'method_title' => $rate->label,
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$order->add_item( $item );
 
 		// Set payment gateway

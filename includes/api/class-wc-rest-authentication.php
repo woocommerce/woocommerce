@@ -18,7 +18,7 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
-		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 100 );
+		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ) );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 	}
@@ -121,7 +121,7 @@ class WC_REST_Authentication {
 
 		// Validate user secret.
 		if ( ! hash_equals( $user->consumer_secret, $consumer_secret ) ) {
-			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Secret is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
+			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer secret is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 
 			return false;
 		}
@@ -140,7 +140,7 @@ class WC_REST_Authentication {
 	/**
 	 * Parse the Authorization header into parameters.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param string $header Authorization header value (not including "Authorization: " prefix).
 	 *
@@ -173,7 +173,7 @@ class WC_REST_Authentication {
 	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
 	 * `getallheaders` here to try and grab it out instead.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return string Authorization header if set.
 	 */
@@ -198,7 +198,7 @@ class WC_REST_Authentication {
 	/**
 	 * Get oAuth parameters from $_GET, $_POST or request header.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return array|WP_Error
 	 */
@@ -288,7 +288,7 @@ class WC_REST_Authentication {
 		$user = $this->get_user_data_by_consumer_key( $params['oauth_consumer_key'] );
 
 		if ( empty( $user ) ) {
-			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
+			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 
 			return false;
 		}
@@ -333,12 +333,12 @@ class WC_REST_Authentication {
 		$base_request_uri = rawurlencode( get_home_url( null, $request_path ) );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature.
-		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );
 		unset( $params['oauth_signature'] );
 
 		// Sort parameters.
 		if ( ! uksort( $params, 'strcmp' ) ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - failed to sort parameters.', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - failed to sort parameters.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		// Normalize parameter key/values.
@@ -357,7 +357,7 @@ class WC_REST_Authentication {
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
 		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - signature method is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - signature method is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
@@ -365,7 +365,7 @@ class WC_REST_Authentication {
 		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		return true;
@@ -538,7 +538,7 @@ class WC_REST_Authentication {
 		global $wc_rest_authentication_error;
 
 		if ( is_wp_error( $wc_rest_authentication_error ) && is_ssl() ) {
-			$auth_message = __( 'WooCommerce API - Use a consumer key in the username field and a consumer secret in the password field.', 'woocommerce' );
+			$auth_message = __( 'WooCommerce API. Use a consumer key in the username field and a consumer secret in the password field.', 'woocommerce' );
 			$response->header( 'WWW-Authenticate', 'Basic realm="' . $auth_message . '"', true );
 		}
 

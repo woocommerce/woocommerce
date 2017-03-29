@@ -75,8 +75,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
-		$validate_ipn = array( 'cmd' => '_notify-validate' );
-		$validate_ipn += wp_unslash( $_POST );
+		$validate_ipn        = wp_unslash( $_POST );
+		$validate_ipn['cmd'] = '_notify-validate';
 
 		// Send back post vars to paypal
 		$params = array(
@@ -91,8 +91,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
-		WC_Gateway_Paypal::log( 'IPN Request: ' . print_r( $params, true ) );
-		WC_Gateway_Paypal::log( 'IPN Response: ' . print_r( $response, true ) );
+		WC_Gateway_Paypal::log( 'IPN Request: ' . wc_print_r( $params, true ) );
+		WC_Gateway_Paypal::log( 'IPN Response: ' . wc_print_r( $response, true ) );
 
 		// Check to see if the request was valid.
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
@@ -174,7 +174,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param array $posted
 	 */
 	protected function payment_status_completed( $order, $posted ) {
-		if ( $order->has_status( array( 'processing', 'completed' ) ) ) {
+		if ( $order->has_status( wc_get_is_paid_statuses() ) ) {
 			WC_Gateway_Paypal::log( 'Aborting, Order #' . $order->get_id() . ' is already complete.' );
 			exit;
 		}
@@ -186,6 +186,10 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$this->save_paypal_meta_data( $order, $posted );
 
 		if ( 'completed' === $posted['payment_status'] ) {
+			if ( $order->has_status( 'cancelled' ) ) {
+				$this->payment_status_paid_cancelled_order( $order, $posted );
+			}
+
 			$this->payment_complete( $order, ( ! empty( $posted['txn_id'] ) ? wc_clean( $posted['txn_id'] ) : '' ), __( 'IPN payment completed', 'woocommerce' ) );
 
 			if ( ! empty( $posted['mc_fee'] ) ) {
@@ -247,6 +251,19 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
+	 * When a user cancelled order is marked paid.
+	 *
+	 * @param WC_Order $order
+	 * @param array $posted
+	 */
+	protected function payment_status_paid_cancelled_order( $order, $posted ) {
+		$this->send_ipn_email_notification(
+			sprintf( __( 'Payment for cancelled order %s received', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
+			sprintf( __( 'Order #%1$s has been marked paid by PayPal IPN, but was previously cancelled. Admin handling required.', 'woocommerce' ), $order->get_order_number() )
+		);
+	}
+
+	/**
 	 * Handle a refunded order.
 	 * @param WC_Order $order
 	 * @param array $posted
@@ -266,7 +283,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a reveral.
+	 * Handle a reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */
@@ -280,7 +297,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a cancelled reveral.
+	 * Handle a cancelled reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */
