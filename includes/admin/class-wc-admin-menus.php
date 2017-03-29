@@ -38,8 +38,8 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
-		// Add endpoints custom URLs in Appearance > Menus > Pages
-		add_action( 'admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
+		// Add endpoints custom URLs in Appearance > Menus > Pages.
+		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
 		// Admin bar menus
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
