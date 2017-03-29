@@ -519,7 +519,7 @@ class WC_Checkout {
 	 * Get posted data from the checkout form.
 	 *
 	 * @since  3.0.0
-	 * @return array of data and errors.
+	 * @return array of data.
 	 */
 	protected function get_posted_data() {
 		$skipped = array();
