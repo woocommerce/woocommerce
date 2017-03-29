@@ -396,10 +396,11 @@ class WC_Checkout {
 			) );
 
 			/**
-			 * Action hook to adjust item before save.
+			 * Filter hook to adjust item before save.
 			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
+//			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
+			$item = apply_filters( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
