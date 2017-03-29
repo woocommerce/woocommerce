@@ -299,19 +299,3 @@ function wc_save_order_items( $order_id, $items ) {
 	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }
-
-/**
- * Get the URL for the next step in the setup wizard.
- *
- * @since 3.1
- * @return string URL for step or empty string if called outside the setup wizard
- */
-function woocommerce_setup_wizard_get_next_step_link() {
-	$wizard = WC()->setup_wizard;
-
-	if ( ! $wizard ) {
-		return "";
-	}
-
-	return $wizard->get_next_step_link();
-}

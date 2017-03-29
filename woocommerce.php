@@ -109,13 +109,6 @@ final class WooCommerce {
 	public $structured_data = null;
 
 	/**
-	 * Setup Wizard instance.
-	 *
-	 * @var WC_Admin_Setup_Wizard
-	 */
-	public $setup_wizard = null;
-
-	/**
 	 * Array of deprecated hook handlers.
 	 *
 	 * @var array of WC_Deprecated_Hooks
