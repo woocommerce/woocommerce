@@ -249,6 +249,12 @@ module.exports = function( grunt ) {
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )
+			},
+			e2e_test: {
+				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
+			},
+			e2e_tests: {
+				command: 'npm run --silent test'
 			}
 		},
 
@@ -324,5 +330,13 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'dev', [
 		'default',
 		'makepot'
+	]);
+
+	grunt.registerTask( 'e2e-tests', [
+		'shell:e2e_tests'
+	]);
+
+	grunt.registerTask( 'e2e-test', [
+		'shell:e2e_test'
 	]);
 };
