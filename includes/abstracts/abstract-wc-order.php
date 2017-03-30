@@ -412,7 +412,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->rate_id           = $tax->get_rate_id();
 			$tax_totals[ $code ]->is_compound       = $tax->is_compound();
 			$tax_totals[ $code ]->label             = $tax->get_label();
-			$tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
+			$tax_totals[ $code ]->amount           += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
 		}
 

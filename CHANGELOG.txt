@@ -93,7 +93,7 @@
 * Fix - API - Allow API to save refund reason.
 * Fix - API - Resolved encoding issues with attribute and variation slugs.
 * Fix - API - get_attributes should return term name, not slug.
-* Fix - API - Product "filter" and "sku" paramaters.
+* Fix - API - Product "filter" and "sku" parameters.
 * Fix - Handle info notices in cart, not just error messages.
 * Fix - Don't remove hyphens in attribute labels.
 * Fix - Start sales on variations after they are saved, if applicable.
@@ -766,7 +766,7 @@
 * Tweak - Use 30 days instead of year for transients to avoid bugs in memcache plugins.
 * Tweak - Add reports menu item if user can access reports but not the main WC section.
 * Tweak - Improve grouped product quantity inputs.
-* Tweak - Load the persistant cart if cart is empty.
+* Tweak - Load the persistent cart if cart is empty.
 * Tweak - Prevent cart being cleared when accessing the login page.
 * Tweak - Shipping calculator - Made state/postcode respect country locale like checkout.
 * Tweak - Move default customer location to general settings tab.
@@ -849,7 +849,7 @@
 * Fix - Added WC version of GEOIP classes to prevent conflicts with other plugins.
 
 = 2.3.0 - 2015-02-11 =
-* Feature - Option to geo-locate the customer's inital location.
+* Feature - Option to geo-locate the customer's initial location.
 * Feature - Display taxes in store based on the customer location, rather than the shop base.
 * Feature - Made tax importer expand postcode ranges.
 * Feature - Print styles for reports.
@@ -1108,7 +1108,7 @@
 * Dev - Introduces the WC_Order::needs_shipping_address() method.
 * Dev - Gateways can set transaction ID for the order.
 * Dev - Gateways can do refunds via the Payment Gateway API.
-* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woocommerce/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
+* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additional overhead to order queries in reports. https://github.com/woocommerce/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
@@ -1130,7 +1130,7 @@
 * Fix - Saving tax rates threw notices (missing git cherry pick).
 
 = 2.1.10 - 2014-06-03 =
-* Fix - Removed unecessary localization from edit account.
+* Fix - Removed unnecessary localization from edit account.
 * Fix - Admin welcome screen css.
 * Fix - Fixed my account setting values to wrong user submitted strings.
 * Fix - Menu order terms were coming back empty.

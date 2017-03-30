@@ -77,6 +77,11 @@ jQuery( function( $ ) {
 		this.$target = $target;
 		this.$images = $( '.woocommerce-product-gallery__image', $target );
 
+		// No images? Abort.
+		if ( 0 === this.$images.length ) {
+			return;
+		}
+
 		// Make this object available.
 		$target.data( 'product_gallery', this );
 
@@ -171,10 +176,16 @@ jQuery( function( $ ) {
 
 		// But only zoom if the img is larger than its container.
 		if ( zoomEnabled ) {
-			zoomTarget.trigger( 'zoom.destroy' );
-			zoomTarget.zoom( {
+			var zoom_options = {
 				touch: false
-			} );
+			};
+
+			if ( 'ontouchstart' in window ) {
+				zoom_options.on = 'click';
+			}
+
+			zoomTarget.trigger( 'zoom.destroy' );
+			zoomTarget.zoom( zoom_options );
 		}
 	};
 

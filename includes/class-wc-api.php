@@ -189,7 +189,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-report-top-sellers-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-controller.php' );
-		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-settings-options-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-setting-options-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zones-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-locations-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-methods-controller.php' );
@@ -253,7 +253,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',
 			'WC_REST_Settings_Controller',
-			'WC_REST_Settings_Options_Controller',
+			'WC_REST_Setting_Options_Controller',
 			'WC_REST_Shipping_Zones_Controller',
 			'WC_REST_Shipping_Zone_Locations_Controller',
 			'WC_REST_Shipping_Zone_Methods_Controller',

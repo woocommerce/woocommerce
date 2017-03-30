@@ -7,6 +7,27 @@
 class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
+	 * Restore UTC on failire.
+	 */
+	 public function tearDown() {
+ 		parent::tearDown();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+		update_option( 'gmt_offset', 0 );
+		update_option( 'timezone_string', '' );
+	}
+
+	public function onNotSuccessfulTest( $e ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+		update_option( 'gmt_offset', 0 );
+		update_option( 'timezone_string', '' );
+		parent::onNotSuccessfulTest( $e );
+	}
+
+	/**
 	 * Create a test post we can add/test meta against.
 	 */
 	public function create_test_post() {
@@ -294,7 +315,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
 	 */
-	function test_set_date_prop_gmt_offset() {
+	function set_date_prop_gmt_offset( $timezone = 'UTC' ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( $timezone );
+
 		$object = new WC_Order();
 
 		// Change timezone in WP.
@@ -306,9 +330,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		// Set date to a string without timezone info. This will be assumed in local timezone and thus should match the offset timestamp.
 		$object->set_date_created( '2017-01-02' );
+		$this->assertEquals( -14400, $object->get_date_created()->getOffset() );
+		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
 		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
-		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
 
 		// Date time with no timezone.
 		$object->set_date_created( '2017-01-02T00:00' );
@@ -333,12 +358,18 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		// Restore default.
 		update_option( 'gmt_offset', 0 );
+
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
 	 */
-	function test_set_date_prop_timezone_string() {
+	function set_date_prop_timezone_string( $timezone = 'UTC' ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( $timezone );
+
 		$object = new WC_Order();
 
 		// Repeat tests with timezone_string. America/New_York is -5 in the winter and -4 in summer.
@@ -377,24 +408,25 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		// Restore default.
 		update_option( 'timezone_string', '' );
+
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
 	 */
 	function test_set_date_prop_server_timezone() {
-		// Repeat all tests with different server timezone.
-		date_default_timezone_set( 'Pacific/Fiji' );
-		$this->test_set_date_prop_gmt_offset();
-		$this->test_set_date_prop_timezone_string();
+		$this->set_date_prop_gmt_offset();
+		$this->set_date_prop_timezone_string();
 
 		// Repeat all tests with different server timezone.
-		date_default_timezone_set( 'Pacific/Tahiti' );
-		$this->test_set_date_prop_gmt_offset();
-		$this->test_set_date_prop_timezone_string();
+		$this->set_date_prop_gmt_offset( 'Pacific/Fiji' );
+		$this->set_date_prop_timezone_string( 'Pacific/Fiji' );
 
-		// Restore to UTC.
-		date_default_timezone_set( 'UTC' );
+		// Repeat all tests with different server timezone.
+		$this->set_date_prop_gmt_offset( 'Pacific/Tahiti' );
+		$this->set_date_prop_timezone_string( 'Pacific/Tahiti' );
 	}
 
 	/**
@@ -408,7 +440,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		$changes = array(
 			'prop1' => 'new_value1',
-			'prop3' => 'value3'
+			'prop3' => 'value3',
 		);
 
 		$object = new WC_Mock_WC_Data;

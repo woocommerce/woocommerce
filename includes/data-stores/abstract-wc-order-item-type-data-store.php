@@ -59,11 +59,15 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	public function update( &$item ) {
 		global $wpdb;
 
-		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $item->get_name(),
-			'order_item_type' => $item->get_type(),
-			'order_id'        => $item->get_order_id(),
-		), array( 'order_item_id' => $item->get_id() ) );
+		$changes = $item->get_changes();
+
+		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
+			$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
+				'order_item_name' => $item->get_name(),
+				'order_item_type' => $item->get_type(),
+				'order_id'        => $item->get_order_id(),
+			), array( 'order_item_id' => $item->get_id() ) );
+		}
 
 		$this->save_item_data( $item );
 		$item->save_meta_data();
@@ -101,7 +105,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		$item->set_defaults();
 
-		$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+		// Get from cache if available.
+		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
+
+		if ( false === $data ) {
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
+		}
 
 		if ( ! $data ) {
 			throw new Exception( __( 'Invalid order item.', 'woocommerce' ) );
@@ -110,7 +120,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->set_props( array(
 			'order_id' => $data->order_id,
 			'name'     => $data->order_item_name,
-			'type'     => $data->order_item_type,
 		) );
 		$item->read_meta_data();
 	}
@@ -128,6 +137,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * Clear meta cachce.
 	 */
 	public function clear_cache( &$item ) {
-		wp_cache_delete( 'object-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
 	}
 }

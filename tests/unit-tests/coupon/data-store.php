@@ -106,7 +106,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	function test_coupon_date_saving() {
 		$expiry_date = time() - 10;
 
-		$coupon = WC_Helper_Coupon::create_coupon( 'coupon-' . time());
+		$coupon = WC_Helper_Coupon::create_coupon( 'coupon-' . time() );
 		$coupon->set_date_expires( $expiry_date );
 		$coupon->save();
 

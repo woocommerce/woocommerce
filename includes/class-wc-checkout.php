@@ -519,7 +519,7 @@ class WC_Checkout {
 	 * Get posted data from the checkout form.
 	 *
 	 * @since  3.0.0
-	 * @return array of data and errors.
+	 * @return array of data.
 	 */
 	protected function get_posted_data() {
 		$skipped = array();
@@ -981,8 +981,8 @@ class WC_Checkout {
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}();
-			} else {
+				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+			} elseif ( WC()->customer->meta_exists( $input ) ) {
 				$value = WC()->customer->get_meta( $input, true );
 			}
 

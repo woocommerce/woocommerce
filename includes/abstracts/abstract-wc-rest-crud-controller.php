@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Rest CRUD Controler Class
+ * Abstract Rest CRUD Controller Class
  *
  * @author   Automattic
  * @category API

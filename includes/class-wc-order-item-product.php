@@ -298,7 +298,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get fee taxes.
+	 * Get taxes.
 	 *
 	 * @param  string $context
 	 * @return array
@@ -310,7 +310,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the associated product.
 	 *
-	 * @param  string $context
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
@@ -351,8 +350,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_item_downloads() {
-		global $wpdb;
-
 		$files   = array();
 		$product = $this->get_product();
 		$order   = $this->get_order();

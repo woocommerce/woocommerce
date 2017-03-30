@@ -9,7 +9,7 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "*",
+    "wp-coding-standards/wpcs": "0.10.0",
     "wimg/php-compatibility": "*",
     "simplyadmire/composer-plugins" : "@dev"
   },

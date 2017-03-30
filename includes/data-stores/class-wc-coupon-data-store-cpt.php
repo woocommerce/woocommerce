@@ -64,8 +64,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_title'    => $coupon->get_code(),
 			'post_content'  => '',
 			'post_excerpt'  => $coupon->get_description(),
-			'post_date'     => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
-			'post_date_gmt' => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
 
 		if ( $coupon_id ) {
@@ -94,8 +94,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->set_props( array(
 			'code'                        => $post_object->post_title,
 			'description'                 => $post_object->post_excerpt,
-			'date_created'                => strtotime( $post_object->post_date_gmt ),
-			'date_modified'               => strtotime( $post_object->post_modified_gmt ),
+			'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
 			'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ),
 			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),

@@ -324,6 +324,11 @@ class WC_Admin_Post_Types {
 			$the_product = wc_get_product( $post );
 		}
 
+		// Only continue if we have a product.
+		if ( empty( $the_product ) ) {
+			return;
+		}
+
 		switch ( $column ) {
 			case 'thumb' :
 				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'thumbnail' ) . '</a>';

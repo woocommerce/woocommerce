@@ -514,10 +514,11 @@ class WC_Admin_Report {
 
 			case 'custom' :
 				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
-				if ( ! $this->end_date ) {
-					$this->end_date = current_time( 'timestamp' );
+				if ( empty( $_GET['end_date'] ) ) {
+					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
+				} else {
+					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 				}
 
 				$interval = 0;

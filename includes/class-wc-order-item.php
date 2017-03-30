@@ -194,14 +194,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
-
-			// Skip items with values already in the product details area of the product name
-			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
-
-			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
-				continue;
-			}
-
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
@@ -211,6 +203,13 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
 					$display_value = $term->name;
 				}
+			}
+
+			// Skip items with values already in the product details area of the product name
+			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $display_value, '/' ) . "/i";
+
+			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+				continue;
 			}
 
 			$formatted_meta[ $meta->id ] = (object) array(
