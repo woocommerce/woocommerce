@@ -205,6 +205,11 @@ class WC_Comments {
 				return;
 			}
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
+
+			$post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
+			if ( $post_id ) {
+				self::clear_transients( $post_id );
+			}
 		}
 	}
 
