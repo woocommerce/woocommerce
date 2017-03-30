@@ -168,7 +168,7 @@ jQuery( function( $ ) {
 		$( zoomTarget ).each( function( index, target ) {
 			var image = $( target ).find( 'img' );
 
-			if ( image.attr( 'width' ) > galleryWidth ) {
+			if ( image.data( 'large_image_width' ) > galleryWidth ) {
 				zoomEnabled = true;
 				return false;
 			}
