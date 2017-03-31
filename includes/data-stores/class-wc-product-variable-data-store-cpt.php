@@ -95,7 +95,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Get possible values for this attribute, for only visible variations.
 				$values = array_unique( $wpdb->get_col( $wpdb->prepare(
-					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'esc_sql', $child_ids ) ) . ")",
+					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ")",
 					wc_variation_attribute_name( $attribute['name'] )
 				) ) );
 
