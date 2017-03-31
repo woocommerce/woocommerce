@@ -519,7 +519,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order_ids = array_unique( array_merge(
 				$order_ids,
 				$wpdb->get_col(
-					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%';", wc_clean( $term ) )
+					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE '%%%s%%'", $wpdb->esc_like( wc_clean( $term ) ) ) . " AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')"
 				),
 				$wpdb->get_col(
 					$wpdb->prepare( "
@@ -527,7 +527,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 						FROM {$wpdb->prefix}woocommerce_order_items as order_items
 						WHERE order_item_name LIKE '%%%s%%'
 						",
-						$term
+						$wpdb->esc_like( wc_clean( $term ) )
 					)
 				)
 			) );
