@@ -108,6 +108,8 @@ jQuery( function( $ ) {
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider();
 			$target.on( 'woocommerce_gallery_reset_slide_position', this.onResetSlidePosition );
+		} else {
+			$( '.woocommerce-product-gallery' ).css( 'opacity', 1 );
 		}
 
 		if ( this.zoom_enabled ) {
@@ -136,6 +138,9 @@ jQuery( function( $ ) {
 			animationSpeed: wc_single_product_params.flexslider.animationSpeed,
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
 			start: function() {
+				// Fade in.
+				$( '.woocommerce-product-gallery' ).css( 'opacity', 1 );
+
 				var largest_height = 0;
 
 				images.each( function() {
