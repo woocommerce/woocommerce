@@ -166,21 +166,29 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $product->get_id(),
-				'post_content'      => $product->get_description( 'edit' ),
-				'post_excerpt'      => $product->get_short_description( 'edit' ),
-				'post_title'        => $product->get_name( 'edit' ),
-				'post_parent'       => $product->get_parent_id( 'edit' ),
-				'comment_status'    => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
-				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-				'post_name'         => $product->get_slug( 'edit' ),
-			) );
+			$post_data = array(
+				'ID'             => $product->get_id(),
+				'post_content'   => $product->get_description( 'edit' ),
+				'post_excerpt'   => $product->get_short_description( 'edit' ),
+				'post_title'     => $product->get_name( 'edit' ),
+				'post_parent'    => $product->get_parent_id( 'edit' ),
+				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
+				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'post_name'      => $product->get_slug( 'edit' ),
+			);
+			if ( $product->get_date_created( 'edit' ) ) {
+				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() );
+			}
+			if ( isset( $changes['date_modified'] ) && $product->get_date_modified( 'edit' ) ) {
+				$post_data['post_modified']     = gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_modified_gmt'] = gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() );
+			} else {
+				$post_data['post_modified']     = current_time( 'mysql' );
+				$post_data['post_modified_gmt'] = current_time( 'mysql', 1 );
+			}
+			wp_update_post( $post_data );
 		}
 
 		$this->update_post_meta( $product );
