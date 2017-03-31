@@ -215,6 +215,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'_billing_email'      => 'billing_email',
 				'_billing_phone'      => 'billing_phone',
 			),
+			'shipping' => array(),
 		);
 
 		$shipping_props = array(
@@ -232,8 +233,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( wc_shipping_enabled() ) {
 			$address_props['shipping'] = $shipping_props;
 		} else {
-			$address_props['shipping'] = array();
-
 			// If shipping is disabled, only update the fields that have set info or already exist.
 			foreach ( $shipping_props as $meta_key => $prop ) {
 				if ( $order->{"get_$prop"}( 'edit' ) || metadata_exists( 'post', $id, $meta_key ) ) {
