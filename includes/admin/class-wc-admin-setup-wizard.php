@@ -118,7 +118,7 @@ class WC_Admin_Setup_Wizard {
 		) );
 
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
-			call_user_func( $this->steps[ $this->step ]['handler'], $this->get_next_step_link() );
+			call_user_func( $this->steps[ $this->step ]['handler'], $this );
 		}
 
 		ob_start();
@@ -129,13 +129,30 @@ class WC_Admin_Setup_Wizard {
 		exit;
 	}
 
-	public function get_next_step_link() {
+	/**
+	 * Get the URL for the next step's screen.
+	 * @param string step   slug (default: current step)
+	 * @return string       URL for next step if a next step exists.
+	 *                      Admin URL if it's the last step.
+	 *                      Empty string on failure.
+	 * @since 3.1.0
+	 */
+	public function get_next_step_link( $step = '' ) {
+		if ( ! $step ) {
+			$step = $this->step;
+		}
+
 		$keys = array_keys( $this->steps );
-		if ( end( $keys ) === $this->step ) {
+		if ( end( $keys ) === $step ) {
 			return admin_url();
 		}
 
-		return add_query_arg( 'step', $keys[ array_search( $this->step, $keys ) + 1 ] );
+		$step_index = array_search( $step, $keys );
+		if ( false === $step_index ) {
+			return "";
+		}
+
+		return add_query_arg( 'step', $keys[ $step_index + 1 ] );
 	}
 
 	/**
@@ -197,20 +214,20 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
-		call_user_func( $this->steps[ $this->step ]['view'], $this->get_next_step_link() );
+		call_user_func( $this->steps[ $this->step ]['view'], $this );
 		echo '</div>';
 	}
 
 	/**
 	 * Introduction step.
 	 */
-	public function wc_setup_introduction( $next_step_link ) {
+	public function wc_setup_introduction() {
 		?>
 		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
 		<p><?php esc_html_e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
-			<a href="<?php echo esc_url( $next_step_link ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( 'Let\'s go!', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( 'Let\'s go!', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
@@ -219,7 +236,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Page setup.
 	 */
-	public function wc_setup_pages( $next_step_link ) {
+	public function wc_setup_pages() {
 		?>
 		<h1><?php esc_html_e( 'Page setup', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -259,7 +276,7 @@ class WC_Admin_Setup_Wizard {
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $next_step_link ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -269,18 +286,18 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save Page Settings.
 	 */
-	public function wc_setup_pages_save( $next_step_link ) {
+	public function wc_setup_pages_save() {
 		check_admin_referer( 'wc-setup' );
 
 		WC_Install::create_pages();
-		wp_redirect( esc_url_raw( $next_step_link ) );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
 	/**
 	 * Locale settings.
 	 */
-	public function wc_setup_locale( $next_step_link ) {
+	public function wc_setup_locale() {
 		$user_location  = WC_Geolocation::geolocate_ip();
 		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
 		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
@@ -375,7 +392,7 @@ class WC_Admin_Setup_Wizard {
 			</table>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $next_step_link ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -385,7 +402,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save Locale Settings.
 	 */
-	public function wc_setup_locale_save( $next_step_link ) {
+	public function wc_setup_locale_save() {
 		check_admin_referer( 'wc-setup' );
 
 		$store_location = sanitize_text_field( $_POST['store_location'] );
@@ -406,14 +423,14 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		wp_redirect( esc_url_raw( $next_step_link ) );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
 	/**
 	 * Shipping and taxes.
 	 */
-	public function wc_setup_shipping_taxes( $next_step_link ) {
+	public function wc_setup_shipping_taxes() {
 		?>
 		<h1><?php esc_html_e( 'Shipping &amp; Tax setup', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -496,7 +513,7 @@ class WC_Admin_Setup_Wizard {
 			</table>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $next_step_link ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -506,7 +523,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save shipping and tax options.
 	 */
-	public function wc_setup_shipping_taxes_save( $next_step_link ) {
+	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
 		$enable_shipping = isset( $_POST['woocommerce_calc_shipping'] );
@@ -557,7 +574,7 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		wp_redirect( esc_url_raw( $next_step_link ) );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -642,7 +659,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Payments Step.
 	 */
-	public function wc_setup_payments( $next_step_link ) {
+	public function wc_setup_payments() {
 		$gateways = $this->get_wizard_payment_gateways();
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
@@ -689,7 +706,7 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $next_step_link ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -699,7 +716,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Payments Step save.
 	 */
-	public function wc_setup_payments_save( $next_step_link ) {
+	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
 		$gateways = $this->get_wizard_payment_gateways();
@@ -723,7 +740,7 @@ class WC_Admin_Setup_Wizard {
 			update_option( $settings_key, $settings );
 		}
 
-		wp_redirect( esc_url_raw( $next_step_link ) );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -745,7 +762,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Final step.
 	 */
-	public function wc_setup_ready( $next_step_link ) {
+	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
 		shuffle( $this->tweets );
 		?>
