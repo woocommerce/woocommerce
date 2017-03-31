@@ -846,11 +846,11 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order_key.
 	 *
-	 * @param string $value Max length 20 chars.
+	 * @param string $value Max length 22 chars.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
+		$this->set_prop( 'order_key', substr( $value, 0, 22 ) );
 	}
 
 	/**
