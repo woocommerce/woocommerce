@@ -138,6 +138,9 @@ jQuery( function( $ ) {
 			animationSpeed: wc_single_product_params.flexslider.animationSpeed,
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
 			start: function() {
+				// Fade in.
+				$( '.woocommerce-product-gallery' ).css( 'opacity', 1 );
+
 				var largest_height = 0;
 
 				images.each( function() {
@@ -151,12 +154,6 @@ jQuery( function( $ ) {
 				images.each( function() {
 					$( this ).css( 'min-height', largest_height );
 				} );
-			},
-			init: function() {
-				window.setTimeout( function() {
-					// Fade in after init.
-					$( '.woocommerce-product-gallery' ).css( 'opacity', 1 );
-				}, 20 );
 			}
 		} );
 	};
