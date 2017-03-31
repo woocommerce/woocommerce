@@ -7,47 +7,39 @@
 class WC_Tests_Orders_Data_Store extends WC_Unit_Test_Case {
 
 	/**
-	 * Test: Saving creates shipping data if shipping enabled.
+	 * Test: New saved objects create shipping data.
 	 */
-	function test_shipping_saving_shipping_enabled() {
-		add_filter( 'wc_shipping_enabled', '__return_true' );
+	function test_shipping_meta_saving_new_data() {
 
+		// Should be able to create data on a fresh object.
 		$order = new WC_Order;
-		$order->save();
-
-		// Should create empty data if shipping is enabled.
-		$this->assertTrue( metadata_exists( 'post', $order->get_id(), '_shipping_first_name' ) );
-
 		$order->set_shipping_first_name( 'test' );
 		$order->save();
-
-		// Should be able to update data if shipping is enabled.
 		$this->assertEquals( 'test', get_post_meta( $order->get_id(), '_shipping_first_name', true ) );
+
+		// Default data doesn't get saved to the DB.
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_shipping_last_name' ) );
 	}
 
 	/**
-	 * Test: Saving doesn't always create shipping data if shipping disabled.
+	 * Test: Existing saved objects update properly.
 	 */
-	function test_shipping_saving_shipping_disabled() {
-		add_filter( 'wc_shipping_enabled', '__return_false' );
+	function test_shipping_meta_saving() {
 
+		// Should not create DB data if no title set.
 		$order = new WC_Order;
 		$order->save();
-
-		// Should not create empty data if shipping disabled.
 		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_shipping_first_name' ) );
 
+		// Should be able to update data.
 		$order->set_shipping_first_name( 'test' );
 		$order->save();
-
-		// Should save shipping data when manually set even if shipping disabled.
 		$this->assertEquals( 'test', get_post_meta( $order->get_id(), '_shipping_first_name', true ) );
-
 		$order->set_shipping_first_name( '' );
 		$order->save();
-
-		// Should save empty shipping data if shipping metadata already exists.
 		$this->assertEquals( '', get_post_meta( $order->get_id(), '_shipping_first_name', true ) );
-	}
 
+		// Default data doesn't get saved to the DB.
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_shipping_last_name' ) );
+	}
 }

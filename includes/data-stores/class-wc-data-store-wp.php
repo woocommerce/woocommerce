@@ -183,10 +183,12 @@ class WC_Data_Store_WP {
 	protected function get_props_to_update( $object, $meta_key_to_props, $meta_type = 'post' ) {
 		$props_to_update = array();
 		$changed_props   = $object->get_changes();
+		$object_class = get_class( $object );
+		$default = new $object_class;
 
-		// Props should be updated if they are a part of the $changed array or don't exist yet.
+		// Props should be updated if they are a part of the $changed array or something meaningful was set.
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( array_key_exists( $prop, $changed_props ) || ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
+			if ( array_key_exists( $prop, $changed_props ) || $default->{"get_$prop"}( 'edit' ) !== $object->{"get_$prop"}( 'edit' )  ) {
 				$props_to_update[ $meta_key ] = $prop;
 			}
 		}
