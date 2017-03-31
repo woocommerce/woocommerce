@@ -342,7 +342,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_values = maybe_unserialize( get_post_meta( $product->get_id(), '_product_attributes', true ) );
+		$meta_values = get_post_meta( $product->get_id(), '_product_attributes', true );
 
 		if ( $meta_values ) {
 			$attributes = array();
@@ -375,7 +375,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function read_downloads( &$product ) {
-		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $product->get_id(), '_downloadable_files', true ) ) );
+		$meta_values = array_filter( (array) get_post_meta( $product->get_id(), '_downloadable_files', true ) );
 
 		if ( $meta_values ) {
 			$downloads = array();
