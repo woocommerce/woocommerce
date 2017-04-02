@@ -73,6 +73,16 @@ class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 	}
 
 	/**
+	 * Get the default REST API version.
+	 *
+	 * @since  3.0.0
+	 * @return string
+	 */
+	protected function get_default_api_version() {
+		return 'wp_api_v2';
+	}
+
+	/**
 	 * Get the Webhook's schema, conforming to JSON Schema.
 	 *
 	 * @return array
