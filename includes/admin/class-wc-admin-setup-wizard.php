@@ -149,7 +149,7 @@ class WC_Admin_Setup_Wizard {
 
 		$step_index = array_search( $step, $keys );
 		if ( false === $step_index ) {
-			return "";
+			return '';
 		}
 
 		return add_query_arg( 'step', $keys[ $step_index + 1 ] );
