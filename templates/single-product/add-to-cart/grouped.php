@@ -30,14 +30,14 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				$quantites_required = false;
 
 				foreach ( $grouped_products as $grouped_product ) {
-					$post_object = get_post( $grouped_product->get_id() );
-					$quantites_required = $quantites_required || $grouped_product->is_purchasable();
+					$post_object        = get_post( $grouped_product->get_id() );
+					$quantites_required = $quantites_required || ( $grouped_product->is_purchasable() && ! $grouped_product->has_options() );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 					?>
 					<tr id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<td>
-							<?php if ( ! $grouped_product->is_purchasable() ) : ?>
+							<?php if ( ! $grouped_product->is_purchasable() || $grouped_product->has_options() ) : ?>
 								<?php woocommerce_template_loop_add_to_cart(); ?>
 
 							<?php elseif ( $grouped_product->is_sold_individually() ) : ?>
