@@ -134,6 +134,16 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get the default REST API version.
+	 *
+	 * @since  3.0.0
+	 * @return string
+	 */
+	protected function get_default_api_version() {
+		return 'wp_api_v2';
+	}
+
+	/**
 	 * Create a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -185,8 +195,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 		// Set secret.
 		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : '' );
 
-		// Set API version to WP API integration v1.
-		$webhook->set_api_version( 'wp_api_v1' );
+		// Set API version to WP API integration.
+		$webhook->set_api_version( $this->get_default_api_version() );
 
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
