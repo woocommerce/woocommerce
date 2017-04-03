@@ -605,14 +605,14 @@ function wc_timezone_string() {
  * Get timezone offset in seconds.
  *
  * @since  3.0.0
- * @return integer
+ * @return float
  */
 function wc_timezone_offset() {
 	if ( $timezone = get_option( 'timezone_string' ) ) {
 		$timezone_object = new DateTimeZone( $timezone );
 		return $timezone_object->getOffset( new DateTime( 'now' ) );
 	} else {
-		return intval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+		return floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
 	}
 }
 
