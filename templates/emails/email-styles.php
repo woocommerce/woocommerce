@@ -97,14 +97,18 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #body_content td ul.wc-item-meta {
 	font-size: small;
-	margin-left: 0;
-	padding-left: 0;
+	margin: 1em 0 0;
+	padding: 0;
 	list-style: none;
 }
 
 #body_content td ul.wc-item-meta li {
-	margin-left: 0;
-	padding-left: 0;
+	margin: 0.5em 0 0;
+	padding: 0;
+}
+
+#body_content td ul.wc-item-meta li p {
+	margin: 0;
 }
 
 #body_content p {
