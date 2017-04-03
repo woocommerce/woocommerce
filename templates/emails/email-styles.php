@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Emails
  * @version 2.3.0
@@ -93,6 +93,18 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #body_content table td th {
 	padding: 12px;
+}
+
+#body_content td ul.wc-item-meta {
+	font-size: 0.875em;
+	margin-left: 0;
+	padding-left: 0;
+	list-style: none;
+}
+
+#body_content td ul.wc-item-meta li {
+	margin-left: 0;
+	padding-left: 0;
 }
 
 #body_content p {
