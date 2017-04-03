@@ -1239,10 +1239,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_product_search_fields', array(
 			'_sku',
 		) ) );
-		$like_term  = '%' . $wpdb->esc_like( $term ) . '%';
-		$post_types = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$type_join  = '';
-		$type_where = '';
+		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
+		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
+		$type_join     = '';
+		$type_where    = '';
 
 		if ( $type ) {
 			if ( in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
@@ -1264,7 +1265,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					)
 				)
 				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
-				AND posts.post_status = 'publish'
+				AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "')
 				$type_where
 				ORDER BY posts.post_parent ASC, posts.post_title ASC
 				",
