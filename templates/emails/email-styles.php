@@ -96,7 +96,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content td ul.wc-item-meta {
-	font-size: 0.875em;
+	font-size: small;
 	margin-left: 0;
 	padding-left: 0;
 	list-style: none;
