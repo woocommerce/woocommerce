@@ -612,7 +612,7 @@ function wc_timezone_offset() {
 		$timezone_object = new DateTimeZone( $timezone );
 		return $timezone_object->getOffset( new DateTime( 'now' ) );
 	} else {
-		return intval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+		return floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
 	}
 }
 
