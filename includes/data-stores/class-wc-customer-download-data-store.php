@@ -236,7 +236,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		$allowed_orders = array( 'permission_id', 'download_id', 'product_id', 'order_id', 'order_key', 'user_email', 'user_id', 'downloads_remaining', 'access_granted', 'access_expires', 'download_count' );
 		$order          = in_array( $args['order'], $allowed_orders ) ? $args['order'] : 'permission_id';
 		$orderby        = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
-		$orderby_sql    = sanitize_sql_orderby( "{$orderby} {$order}" );
+		$orderby_sql    = sanitize_sql_orderby( "{$order} {$orderby}" );
 		$query[]        = "ORDER BY {$orderby_sql}";
 
 		if ( 0 < $args['limit'] ) {
