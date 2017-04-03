@@ -1581,6 +1581,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->is_downloadable() && $this->get_file( $download_id );
 	}
 
+	/**
+	 * Returns whether or not the product has additonal options that need
+	 * selecting before adding to cart.
+	 *
+	 * @since  3.0.0
+	 * @return boolean
+	 */
+	public function has_options() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
