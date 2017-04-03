@@ -513,7 +513,13 @@ class WC_Admin_Report {
 		switch ( $current_range ) {
 
 			case 'custom' :
-				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
+
+				if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( $_GET['wc_reports_nonce'], 'custom_range' ) ) {
+					wp_safe_redirect( remove_query_arg( array( 'start_date', 'end_date', 'range', 'wc_reports_nonce' ) ) );
+					exit;
+				}
+
+				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
 
 				if ( empty( $_GET['end_date'] ) ) {
 					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );

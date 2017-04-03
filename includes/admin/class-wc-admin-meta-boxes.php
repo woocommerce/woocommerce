@@ -91,7 +91,7 @@ class WC_Admin_Meta_Boxes {
 	 * Show any stored error messages.
 	 */
 	public function output_errors() {
-		$errors = maybe_unserialize( get_option( 'woocommerce_meta_box_errors' ) );
+		$errors = array_filter( (array) get_option( 'woocommerce_meta_box_errors' ) );
 
 		if ( ! empty( $errors ) ) {
 

@@ -224,7 +224,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		if ( $args['user_id'] ) {
-			$where[] = 'user_id = ' . absint( $args['user_id'] );
+			$where[] = $wpdb->prepare( 'user_id = %d', absint( $args['user_id'] ) );
 		}
 
 		if ( $args['gateway_id'] ) {
@@ -238,7 +238,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
 
 		if ( $args['type'] ) {
-			$where[] = 'type = ' . esc_sql( $args['type'] );
+			$where[] = $wpdb->prepare( 'type = %s', $args['type'] );
 		}
 
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) );
