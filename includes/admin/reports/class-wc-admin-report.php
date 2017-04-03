@@ -519,7 +519,7 @@ class WC_Admin_Report {
 					exit;
 				}
 
-				$this->start_date = max( 1262304000, strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
+				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
 
 				if ( empty( $_GET['end_date'] ) ) {
 					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
