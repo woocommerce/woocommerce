@@ -135,7 +135,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return string       URL for next step if a next step exists.
 	 *                      Admin URL if it's the last step.
 	 *                      Empty string on failure.
-	 * @since 3.1.0
+	 * @since 3.0.0
 	 */
 	public function get_next_step_link( $step = '' ) {
 		if ( ! $step ) {
