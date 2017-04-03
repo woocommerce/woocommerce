@@ -605,7 +605,7 @@ function wc_timezone_string() {
  * Get timezone offset in seconds.
  *
  * @since  3.0.0
- * @return integer
+ * @return float
  */
 function wc_timezone_offset() {
 	if ( $timezone = get_option( 'timezone_string' ) ) {
