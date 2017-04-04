@@ -174,9 +174,6 @@
 
 		// Show reset link.
 		form.toggleResetLink( attributes.chosenCount > 0 );
-
-		// added to get around variation image flicker issue
-		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
 	};
 
 	/**

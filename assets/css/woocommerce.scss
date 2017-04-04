@@ -2163,13 +2163,6 @@ button.pswp__button--zoom:hover {
 	display: block;
 }
 
-/* added to get around variation image flicker issue */
-.product.has-default-attributes.has-children {
-	> .images {
-		opacity: 0;
-	}
-}
-
 /**
  * Twenty Eleven specific styles
  */

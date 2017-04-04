@@ -470,6 +470,17 @@ class WC_Product_Variable extends WC_Product {
 		return parent::has_weight() || $this->child_has_weight();
 	}
 
+	/**
+	 * Returns whether or not the product has additonal options that need
+	 * selecting before adding to cart.
+	 *
+	 * @since  3.0.0
+	 * @return boolean
+	 */
+	public function has_options() {
+		return true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Sync with child variations.

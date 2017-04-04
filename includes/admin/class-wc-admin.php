@@ -48,6 +48,7 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-post-types.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-menus.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-customize.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-notices.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-assets.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );

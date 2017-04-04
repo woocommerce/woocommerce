@@ -1752,7 +1752,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id         = $product->get_id();
 		$variations = $request['variations'];
-		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
+		$attributes = (array) get_post_meta( $id, '_product_attributes', true );
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;

@@ -161,7 +161,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'readonly'    => true,
 						),
 						'date_created_gmt' => array(
-							'description' => __( 'The date the image was created, as GMT', 'woocommerce' ),
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

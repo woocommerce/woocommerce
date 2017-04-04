@@ -157,7 +157,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Webhook_Deliveries_V
 					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
-					'description' => __( 'The date the webhook delivery was logged, GMT.', 'woocommerce' ),
+					'description' => __( 'The date the webhook delivery was logged, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
