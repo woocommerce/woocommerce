@@ -120,7 +120,7 @@ class WC_Meta_Box_Product_Data {
 			),
 		) );
 
-		// Sort tabs based on priority
+		// Sort tabs based on priority.
 		uasort( $tabs, array( __CLASS__, 'product_data_tabs_sort' ) );
 
 		return $tabs;
@@ -128,10 +128,22 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Callback to sort product data tabs on priority.
+	 *
+	 * @since 3.1.0
+	 * @param int $a First item.
+	 * @param int $b Second item.
+	 *
+	 * @return bool
 	 */
 	private static function product_data_tabs_sort( $a, $b ) {
-		if ( ! isset( $a['priority'], $b['priority'] ) ) return -1;
-		if ( $a['priority'] == $b['priority'] ) return 0;
+		if ( ! isset( $a['priority'], $b['priority'] ) ) {
+			return -1;
+		}
+
+		if ( $a['priority'] == $b['priority'] ) {
+			return 0;
+		}
+
 		return $a['priority'] < $b['priority'] ? -1 : 1;
 	}
 

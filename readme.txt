@@ -163,7 +163,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 = 3.1.0 - 2017-xx-xx =
 * Included WooCommerce endpoints as options nav menu settings on Customize.
-* Updated Emogrifier to version 1.2.
+* Dev - Updated Emogrifier to version 1.2.
+* Dev - Sort product data tabs by priority in admin screen.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
