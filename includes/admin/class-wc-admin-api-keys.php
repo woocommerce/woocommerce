@@ -79,8 +79,6 @@ class WC_Admin_API_Keys {
 	 * @return array
 	 */
 	private static function get_key_data( $key_id ) {
-		global $wpdb;
-
 		$empty = array(
 			'key_id'        => 0,
 			'user_id'       => '',
@@ -94,17 +92,13 @@ class WC_Admin_API_Keys {
 			return $empty;
 		}
 
-		$key = $wpdb->get_row( $wpdb->prepare( "
-			SELECT key_id, user_id, description, permissions, truncated_key, last_access
-			FROM {$wpdb->prefix}woocommerce_api_keys
-			WHERE key_id = %d
-		", $key_id ), ARRAY_A );
+		$key = WC_Auth::get_api_key_data( $key_id );
 
-		if ( is_null( $key ) ) {
+		if ( ! $key ) {
 			return $empty;
 		}
 
-		return $key;
+		return (array) $key;
 	}
 
 	/**
@@ -181,11 +175,7 @@ class WC_Admin_API_Keys {
 	 * @return bool
 	 */
 	private function remove_key( $key_id ) {
-		global $wpdb;
-
-		$delete = $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
-
-		return $delete;
+		return WC_Auth::delete_api_key( $key_id );
 	}
 }
 

@@ -359,6 +359,8 @@ class WC_API_Authentication {
 			array( '%s' ),
 			array( '%d' )
 		);
+
+		WC_Auth::clear_api_key_cache( $keys['key_id'] );
 	}
 
 	/**
@@ -405,5 +407,7 @@ class WC_API_Authentication {
 			array( '%s' ),
 			array( '%d' )
 		);
+
+		WC_Auth::clear_api_key_cache( $key_id );
 	}
 }
