@@ -974,7 +974,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 
 		wc_get_template( 'single-product/add-to-cart/grouped.php', array(
 			'grouped_product'    => $product,
-			'grouped_products'   => array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible' ),
+			'grouped_products'   => array_map( 'wc_get_product', $product->get_children() ),
 			'quantites_required' => false,
 		) );
 	}
