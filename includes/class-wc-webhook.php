@@ -351,7 +351,7 @@ class WC_Webhook {
 				'id' => $resource_id,
 			);
 		} else {
-			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2', true ) ) ) {
+			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2' ), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 			} else {
 				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
