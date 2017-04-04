@@ -439,7 +439,7 @@ class WC_Admin_Post_Types {
 				}
 
 				if ( $the_product->managing_stock() ) {
-					$stock_html .= ' (' . $the_product->get_stock_quantity() . ')';
+					$stock_html .= ' (' . wc_stock_amount( $the_product->get_stock_quantity() ) . ')';
 				}
 
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );
