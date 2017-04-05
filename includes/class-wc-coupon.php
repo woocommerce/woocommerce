@@ -159,7 +159,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get coupon code.
+	 * Get coupon amount.
 	 * @since  3.0.0
 	 * @param  string $context
 	 * @return float
