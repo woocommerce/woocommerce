@@ -559,7 +559,6 @@ class WC_Countries {
 				'label'        => __( 'Last name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-last' ),
-				'clear'        => true,
 				'autocomplete' => 'family-name',
 				'priority'     => 20,
 			),
@@ -612,7 +611,6 @@ class WC_Countries {
 				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
-				'clear'        => true,
 				'validate'     => array( 'postcode' ),
 				'autocomplete' => 'postal-code',
 				'priority'     => 90,
@@ -1086,7 +1084,6 @@ class WC_Countries {
 			$address_fields['billing_email'] = array(
 				'label'        => __( 'Email address', 'woocommerce' ),
 				'required'     => true,
-				'clear'        => true,
 				'type'         => 'email',
 				'class'        => array( 'form-row-last' ),
 				'validate'     => array( 'email' ),

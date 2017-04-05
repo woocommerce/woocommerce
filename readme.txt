@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Check for invalid objects in WC_Register_WP_Admin_Settings.
 * Check for error object in wc_get_object_terms.
 * Use wc_deprecated_function in WC_Deprecated_Hooks so notices aren't output in ajax requests.
+* Removed unused legacy clear parameter from addresses.
 
 = 3.0.0 - 2017-04-04 =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom. Declare support with add_theme_support() - wc-product-gallery-zoom, wc-product-gallery-lightbox, wc-product-gallery-slider
