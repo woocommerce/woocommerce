@@ -126,10 +126,10 @@ class WC_Post_Data {
 	 * @param string $to
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		if ( 'variable' === $from ) {
+		if ( 'variable' === $from && 'variable' !== $to ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
-			$data_store->delete_variations( $product );
+			$data_store->delete_variations( $product->get_id() );
 		}
 	}
 
