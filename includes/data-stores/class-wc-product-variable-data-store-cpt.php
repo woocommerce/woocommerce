@@ -393,6 +393,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param $force_delete False to trash.
 	 */
 	public function delete_variations( $product_id, $force_delete = false ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
+			return;
+		}
+
 		$variation_ids = wp_parse_id_list( get_posts( array(
 			'post_parent' => $product_id,
 			'post_type'   => 'product_variation',
