@@ -78,6 +78,22 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Get variation description.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_description( $context = 'view' ) {
+		$value = $this->get_prop( 'description', $context );
+
+		if ( 'view' === $context ) {
+			return wpautop( do_shortcode( wp_kses_post( $value ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @return array of attributes and their values for this variation
