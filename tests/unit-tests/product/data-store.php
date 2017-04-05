@@ -456,4 +456,33 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$loaded_variation = wc_get_product( $variation->get_id() );
 		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
+
+	/**
+	 * Test to make sure meta can still be set while hooked using save_post.
+	 * https://github.com/woocommerce/woocommerce/issues/13960
+	 * @since 3.0.01
+	 */
+	function test_product_meta_save_post() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+		update_post_meta( $product->get_id(), '_test2', 'default' ); // this is the value we don't want to get back.
+
+		// This takes place of WC_Meta_Box do_action( 'woocommerce_admin_process_product_object ' ) just adding simple meta.
+		$product->update_meta_data( '_test', 'hello' );
+		$product->set_name( 'Test Product_' );
+
+		add_action( 'save_post', array( 'WC_Helper_Product', 'save_post_test_update_meta_data_direct' ), 11 );
+		$product->save();
+
+		$test  = get_post_meta( $product->get_id(), '_test', true );
+		$test2 = get_post_meta( $product->get_id(), '_test2', true );
+
+		$this->assertEquals( 'hello', $test );
+		$this->assertEquals( 'world', $test2 ); // this would be 'default' without the force meta refresh in WC_Product_Data_Store::update();
+		$this->assertEquals( 'world', $product->get_meta( '_test2' ) );
+		$this->assertEquals( 'Test Product_', $product->get_name() );
+
+		remove_action( 'save_post', array( 'WC_Helper_Product', 'save_post_test_update_meta_data_direct' ) );
+	}
 }
