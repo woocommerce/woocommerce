@@ -457,7 +457,7 @@ class WC_Frontend_Scripts {
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'home_url'     => home_url(),
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
-					'hash'         => isset( $_GET['version'] ) ? wc_clean( $_GET['version'] ) : '',
+					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '',
 				);
 			break;
 			case 'wc-single-product' :
