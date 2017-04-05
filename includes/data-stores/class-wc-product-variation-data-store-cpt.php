@@ -280,6 +280,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
 			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
 		) );
+
+		// Use the parent sold_individually settings since variations don't have a user-facing way to set sold_individually.
+		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
 	}
 
 	/**
