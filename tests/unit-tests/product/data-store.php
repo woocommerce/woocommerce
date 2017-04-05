@@ -460,7 +460,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Test to make sure meta can still be set while hooked using save_post.
 	 * https://github.com/woocommerce/woocommerce/issues/13960
-	 * @since 3.0.01
+	 * @since 3.0.1
 	 */
 	function test_product_meta_save_post() {
 		$product = new WC_Product;
