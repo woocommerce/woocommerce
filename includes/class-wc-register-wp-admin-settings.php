@@ -24,7 +24,12 @@ class WC_Register_WP_Admin_Settings {
 	 * @param string                    $type   Type of settings to register (email or page).
 	 */
 	public function __construct( $object, $type ) {
+		if ( ! is_object( $object ) ) {
+			return;
+		}
+
 		$this->object = $object;
+
 		if ( 'page' === $type ) {
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_page_group' ) );
 			add_filter( 'woocommerce_settings-' . $this->object->get_id(),  array( $this, 'register_page_settings' ) );

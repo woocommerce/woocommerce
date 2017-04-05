@@ -26,9 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key = null ) {
-	// Test if terms exists.
-	// get_the_terms() return false when don't found terms.
-	if ( $terms = get_the_terms( $object_id, $taxonomy ) ) {
+	// Test if terms exists. get_the_terms() return false when it finds no terms.
+	$terms = get_the_terms( $object_id, $taxonomy );
+
+	if ( $terms && ! is_wp_error( $terms ) ) {
 		if ( ! is_null( $field ) ) {
 			$terms = wp_list_pluck( $terms, $field, $index_key );
 		}
