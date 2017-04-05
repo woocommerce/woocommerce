@@ -1,12 +1,12 @@
-*EXPLANATION OF THE ISSUE*
+### EXPLANATION OF THE ISSUE
 
 <!-- What happens, under which versions, under what conditions, when, and what were you expecting instead. -->
 
-*STEPS TO REPRODUCE THE ISSUE*
+### STEPS TO REPRODUCE THE ISSUE
 
 <!-- 1. List steps to reproduce your issue so we can replicate. -->
 
-*SYSTEM STATUS*
+### SYSTEM STATUS
 
 <details>
 ```
