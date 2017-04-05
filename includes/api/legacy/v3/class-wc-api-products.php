@@ -1751,8 +1751,7 @@ class WC_API_Products extends WC_API_Resource {
 		global $wpdb;
 
 		$id         = $product->get_id();
-		$variations = $request['variations'];
-		$attributes = (array) get_post_meta( $id, '_product_attributes', true );
+		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
