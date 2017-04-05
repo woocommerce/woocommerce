@@ -204,14 +204,15 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$args = wp_parse_args( $args, array(
-			'user_email' => '',
-			'order_id'   => '',
-			'order_key'  => '',
-			'product_id' => '',
-			'orderby'    => 'permission_id',
-			'order'      => 'DESC',
-			'limit'      => -1,
-			'return'     => 'objects',
+			'user_email'  => '',
+			'order_id'    => '',
+			'order_key'   => '',
+			'product_id'  => '',
+			'download_id' => '',
+			'orderby'     => 'permission_id',
+			'order'       => 'DESC',
+			'limit'       => -1,
+			'return'      => 'objects',
 		) );
 
 		$query   = array();
@@ -231,6 +232,10 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		if ( $args['product_id'] ) {
 			$query[] = $wpdb->prepare( "AND product_id = %d", $args['product_id'] );
+		}
+
+		if ( $args['download_id'] ) {
+			$query[] = $wpdb->prepare( "AND download_id = %s", $args['download_id'] );
 		}
 
 		$allowed_orders = array( 'permission_id', 'download_id', 'product_id', 'order_id', 'order_key', 'user_email', 'user_id', 'downloads_remaining', 'access_granted', 'access_expires', 'download_count' );
