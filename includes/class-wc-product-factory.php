@@ -45,6 +45,7 @@ class WC_Product_Factory {
 		try {
 			return new $classname( $product_id, $deprecated );
 		} catch ( Exception $e ) {
+			trigger_error( $e->getMessage(), E_USER_NOTICE );
 			return false;
 		}
 	}
