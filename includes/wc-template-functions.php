@@ -1375,11 +1375,15 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	 * @param  string $order (default: 'desc')
 	 */
 	function woocommerce_cross_sell_display( $limit = 2, $columns = 2, $orderby = 'rand', $order = 'desc' ) {
+		global $woocommerce_loop;
+
 		if ( is_checkout() ) {
 			return;
 		}
 		// Get visble cross sells then sort them at random.
-		$cross_sells = array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
+		$cross_sells                 = array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
+		$woocommerce_loop['name']    = 'cross-sells';
+		$woocommerce_loop['columns'] = $columns;
 
 		// Handle orderby and limit results.
 		$orderby     = apply_filters( 'woocommerce_cross_sells_orderby', $orderby );
