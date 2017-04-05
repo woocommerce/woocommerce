@@ -186,6 +186,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
 			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
@@ -208,7 +209,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			// Skip items with values already in the product details area of the product name
 			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $display_value, '/' ) . "/i";
 
-			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
+			if ( $product && preg_match( $value_in_product_name_regex, $order_item_name ) ) {
 				continue;
 			}
 
