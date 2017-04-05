@@ -162,6 +162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
@@ -189,6 +190,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$post_data['post_modified_gmt'] = current_time( 'mysql', 1 );
 			}
 			wp_update_post( $post_data );
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
@@ -198,7 +200,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_version_and_type( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->clear_caches( $product );

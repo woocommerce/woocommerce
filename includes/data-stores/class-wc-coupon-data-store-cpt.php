@@ -127,14 +127,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon
 	 */
 	public function update( &$coupon ) {
+		$coupon->save_meta_data();
 		$post_data = array(
 			'ID'           => $coupon->get_id(),
 			'post_title'   => $coupon->get_code(),
 			'post_excerpt' => $coupon->get_description(),
 		);
 		wp_update_post( $post_data );
+		$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
 		$this->update_post_meta( $coupon );
-		$coupon->save_meta_data();
 		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
 	}

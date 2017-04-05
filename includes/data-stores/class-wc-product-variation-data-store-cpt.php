@@ -136,6 +136,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
 		$changes = $product->get_changes();
 		$title   = $this->generate_product_title( $product );
 
@@ -153,6 +154,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
@@ -160,7 +162,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->update_attributes( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->update_version_and_type( $product );
