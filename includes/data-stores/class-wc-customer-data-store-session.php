@@ -109,28 +109,30 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @param WC_Customer
 	 */
 	protected function set_defaults( &$customer ) {
-		$default = wc_get_customer_default_location();
+		try {
+			$default = wc_get_customer_default_location();
 
-		if ( ! $customer->get_billing_country() ) {
-			$customer->set_billing_country( $default['country'] );
-		}
+			if ( ! $customer->get_billing_country() ) {
+				$customer->set_billing_country( $default['country'] );
+			}
 
-		if ( ! $customer->get_shipping_country() ) {
-			$customer->set_shipping_country( $customer->get_billing_country() );
-		}
+			if ( ! $customer->get_shipping_country() ) {
+				$customer->set_shipping_country( $customer->get_billing_country() );
+			}
 
-		if ( ! $customer->get_billing_state() ) {
-			$customer->set_billing_state( $default['state'] );
-		}
+			if ( ! $customer->get_billing_state() ) {
+				$customer->set_billing_state( $default['state'] );
+			}
 
-		if ( ! $customer->get_shipping_state() ) {
-			$customer->set_shipping_state( $customer->get_billing_state() );
-		}
+			if ( ! $customer->get_shipping_state() ) {
+				$customer->set_shipping_state( $customer->get_billing_state() );
+			}
 
-		if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$customer->set_billing_email( $current_user->user_email );
-		}
+			if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+				$current_user = wp_get_current_user();
+				$customer->set_billing_email( $current_user->user_email );
+			}
+		} catch ( WC_Data_Exception $e ) {}
 	}
 
 	/**
