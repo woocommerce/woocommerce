@@ -471,7 +471,8 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params['context'] = $this->get_context_param();
+		$params                       = array();
+		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
