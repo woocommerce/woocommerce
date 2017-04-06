@@ -209,6 +209,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Improved logging system for extensions.
 * Tax suffix is now hidden on non-taxable products.
 * Grouped products are linked from the parent rather than the children. Children can be in more than one group.
+* Removed coupon usage link in coupons admin screen.
 * Performance - Converted rating filters to visibility terms.
 * Performance - Added visibility term for outofstock products to speed those queries up also.
 * Performance - Introduced a new CRUD (create, read, update, delete) system for Products, Orders, Customers and Shipping Zones.
