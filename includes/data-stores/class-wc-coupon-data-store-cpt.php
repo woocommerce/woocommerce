@@ -105,7 +105,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'excluded_product_ids'        => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ),
 			'usage_limit'                 => get_post_meta( $coupon_id, 'usage_limit', true ),
 			'usage_limit_per_user'        => get_post_meta( $coupon_id, 'usage_limit_per_user', true ),
-			'limit_usage_to_x_items'      => get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ),
+			'limit_usage_to_x_items'      => 0 < get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) ? get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) : null,
 			'free_shipping'               => 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ),
 			'product_categories'          => array_filter( (array) get_post_meta( $coupon_id, 'product_categories', true ) ),
 			'excluded_product_categories' => array_filter( (array) get_post_meta( $coupon_id, 'exclude_product_categories', true ) ),
