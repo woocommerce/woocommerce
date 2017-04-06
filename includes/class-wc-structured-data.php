@@ -132,7 +132,10 @@ class WC_Structured_Data {
 		if ( $plain_text ) {
 			return;
 		}
-		$this->output_structured_data();
+
+		if ( apply_filters( 'woocommerce_allow_structured_data_in_emails', false ) ) {
+			$this->output_structured_data();
+		}
 	}
 
 	/**
