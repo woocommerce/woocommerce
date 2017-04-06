@@ -31,8 +31,8 @@ class WC_Report_Stock extends WP_List_Table {
 	public function __construct() {
 
 		parent::__construct( array(
-			'singular'  => __( 'Stock', 'woocommerce' ),
-			'plural'    => __( 'Stock', 'woocommerce' ),
+			'singular'  => 'stock',
+			'plural'    => 'stock',
 			'ajax'      => false,
 		) );
 	}
