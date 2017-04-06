@@ -836,8 +836,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_images() {
-		global $product;
-		if ( ! $product ) {
+		if ( ! $GLOBALS['product'] ) {
 			return;
 		}
 
@@ -885,8 +884,7 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_rating() {
-		global $product;
-		if ( ! $product ) {
+		if ( ! $GLOBALS['product'] ) {
 			return;
 		}
 
@@ -901,8 +899,7 @@ if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_price() {
-		global $product;
-		if ( ! $product ) {
+		if ( ! $GLOBALS['product'] ) {
 			return;
 		}
 
@@ -928,8 +925,7 @@ if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_meta() {
-		global $product;
-		if ( ! $product ) {
+		if ( ! $GLOBALS['product'] ) {
 			return;
 		}
 
@@ -955,8 +951,7 @@ if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_sale_flash() {
-		global $product;
-		if ( ! $product ) {
+		if ( ! $GLOBALS['product'] ) {
 			return;
 		}
 
