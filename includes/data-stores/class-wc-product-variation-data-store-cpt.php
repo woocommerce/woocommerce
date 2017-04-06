@@ -284,6 +284,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Pull data from the parent when there is no user-facing way to set props.
 		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
 		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
+		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
 	}
 
 	/**
