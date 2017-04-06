@@ -112,6 +112,11 @@ class WC_Emails {
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
 		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
 			self::instance(); // Init self so emails exist.
+
+			// Ensure gateways are loaded in case they need to insert data into the emails.
+			WC()->payment_gateways();
+			WC()->shipping();
+
 			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}

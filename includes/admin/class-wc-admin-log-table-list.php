@@ -23,8 +23,8 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct( array(
-			'singular' => __( 'log',  'woocommerce' ),
-			'plural'   => __( 'logs', 'woocommerce' ),
+			'singular' => 'log',
+			'plural'   => 'logs',
 			'ajax'     => false,
 		) );
 	}
