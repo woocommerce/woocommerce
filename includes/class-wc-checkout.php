@@ -558,7 +558,7 @@ class WC_Checkout {
 			}
 		}
 
-		if ( in_array( 'shipping', $skipped ) && WC()->cart->needs_shipping_address() ) {
+		if ( in_array( 'shipping', $skipped ) && ( WC()->cart->needs_shipping_address() || wc_ship_to_billing_address_only() ) ) {
 			foreach ( $this->get_checkout_fields( 'shipping' ) as $key => $field ) {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
 			}
