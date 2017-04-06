@@ -836,6 +836,11 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_images() {
+		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		wc_get_template( 'single-product/product-image.php' );
 	}
 }
@@ -880,6 +885,11 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_rating() {
+		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		wc_get_template( 'single-product/rating.php' );
 	}
 }
@@ -891,6 +901,11 @@ if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_price() {
+		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		wc_get_template( 'single-product/price.php' );
 	}
 }
@@ -913,6 +928,11 @@ if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_meta() {
+		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		wc_get_template( 'single-product/meta.php' );
 	}
 }
@@ -935,6 +955,11 @@ if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_sale_flash() {
+		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		wc_get_template( 'single-product/sale-flash.php' );
 	}
 }
@@ -948,6 +973,10 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
+		if ( ! $product ) {
+			return;
+		}
+
 		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 	}
 }
@@ -971,6 +1000,9 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	 */
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
+		if ( ! $product ) {
+			return;
+		}
 
 		wc_get_template( 'single-product/add-to-cart/grouped.php', array(
 			'grouped_product'    => $product,
@@ -988,6 +1020,9 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	 */
 	function woocommerce_variable_add_to_cart() {
 		global $product;
+		if ( ! $product ) {
+			return;
+		}
 
 		// Enqueue variation scripts
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
@@ -1012,8 +1047,7 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	 */
 	function woocommerce_external_add_to_cart() {
 		global $product;
-
-		if ( ! $product->add_to_cart_url() ) {
+		if ( ! $product || ! $product->add_to_cart_url() ) {
 			return;
 		}
 
@@ -1135,7 +1169,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		}
 
 		// Reviews tab - shows comments
-		if ( comments_open() ) {
+		if ( $product && comments_open() ) {
 			$tabs['reviews'] = array(
 				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), $product->get_review_count() ),
 				'priority' => 30,
@@ -1319,6 +1353,10 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns );
 		$orderby                     = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
 		$limit                       = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
+
+		if ( ! $product ) {
+			return;
+		}
 
 		// Get visble upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
@@ -2480,6 +2518,10 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
  * @param  WC_Product $product
  */
 function wc_display_product_attributes( $product ) {
+	if ( ! $product ) {
+		return;
+	}
+
 	wc_get_template( 'single-product/product-attributes.php', array(
 		'product'            => $product,
 		'attributes'         => array_filter( $product->get_attributes(), 'wc_attributes_array_filter_visible' ),
@@ -2494,6 +2536,9 @@ function wc_display_product_attributes( $product ) {
  * @return string
  */
 function wc_get_stock_html( $product ) {
+	if ( ! $product ) {
+		return;
+	}
 
 	$html = '';
 	$availability = $product->get_availability();

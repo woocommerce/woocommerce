@@ -30,6 +30,10 @@ class WC_Meta_Box_Product_Data {
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 
+		if ( ! $product_object ) {
+			return;
+		}
+
 		include( 'views/html-product-data-panel.php' );
 	}
 

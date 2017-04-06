@@ -180,6 +180,10 @@ class WC_Structured_Data {
 			global $product;
 		}
 
+		if ( ! $product ) {
+			return;
+		}
+
 		$shop_name       = get_bloginfo( 'name' );
 		$shop_url        = home_url();
 		$currency        = get_woocommerce_currency();
