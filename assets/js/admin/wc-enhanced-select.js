@@ -84,8 +84,8 @@ jQuery( function( $ ) {
 						ajax: {
 							url:         wc_enhanced_select_params.ajax_url,
 							dataType:    'json',
-							quietMillis: 250,
-							data: function( params ) {
+							delay:       250,
+							data:        function( params ) {
 								return {
 									term:     params.term,
 									action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
