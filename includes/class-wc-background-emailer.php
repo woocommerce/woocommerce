@@ -6,10 +6,10 @@
  * in the background.
  *
  * @class    WC_Background_Emailer
- * @version  3.0.0
+ * @version  3.0.1
  * @package  WooCommerce/Classes
  * @category Class
- * @author   WooThemes
+ * @author   WooCommerce
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
