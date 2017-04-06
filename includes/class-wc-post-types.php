@@ -223,7 +223,7 @@ class WC_Post_types {
 						),
 					);
 
-					if ( 1 === $tax->attribute_public ) {
+					if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
 						$taxonomy_data['rewrite'] = array(
 							'slug'         => trailingslashit( $permalinks['attribute_rewrite_slug'] ) . sanitize_title( $tax->attribute_name ),
 							'with_front'   => false,
