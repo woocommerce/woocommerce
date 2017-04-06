@@ -168,6 +168,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Check for error object in wc_get_object_terms.
 * Use wc_deprecated_function in WC_Deprecated_Hooks so notices aren't output in ajax requests.
 * Removed unused legacy clear parameter from addresses.
+* Added back the ability to include extra items to the System Status using a new `woocommerce_system_status_environment_rows` filter.
+* Prevent fatal errors in when setting customer is missing in emails.
+* Fallback to home URL if no shop page is set for system status security check for HTTPS.
+* Using WPDB to quicker update and sync title for variations.
+* Updated single-product/up-sells.php template version to 3.0.0.
+* Use parent settings for determining if variations are sold individually.
+* Prevented a bug that deleted all variations when product type changes.
+* Fixed a bug on downloads list that always called only the first download.
+* Include clearfix on billing and shipping wrappers
+* Fixed a bug that caused pages to permanently reloading if selected "Default customer location" as "Geolocate (with page caching support)".
+* Fixed cross sells classes and columns.
+* Fixed alignment of the fields in admin settings.
+* REST API - Fixed missing array declaration in CRUD controller.
+* REST API - Removed extra `exclude`, `include` and `search` parameters from taxes endpoint.
 
 = 3.0.0 - 2017-04-04 =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom. Declare support with add_theme_support() - wc-product-gallery-zoom, wc-product-gallery-lightbox, wc-product-gallery-slider
