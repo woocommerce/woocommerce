@@ -1845,7 +1845,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the availability of the product.
 	 *
-	 * @return string
+	 * @return string[]
 	 */
 	public function get_availability() {
 		return apply_filters( 'woocommerce_get_availability', array(
