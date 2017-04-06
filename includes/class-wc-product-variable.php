@@ -349,6 +349,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
+			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -416,14 +417,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_is_in_stock() {
-		$transient_name = 'wc_child_is_in_stock_' . $this->get_id();
-		$in_stock       = get_transient( $transient_name );
-
-		if ( false === $in_stock ) {
-			$in_stock = $this->data_store->child_is_in_stock( $this );
-			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
-		}
-		return (bool) $in_stock;
+		return $this->data_store->child_is_in_stock( $this );
 	}
 
 	/**
