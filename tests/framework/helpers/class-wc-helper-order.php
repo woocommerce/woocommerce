@@ -57,12 +57,15 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$item_1 = new WC_Order_Item_Product();
-		$item_1->set_props( array(
+		$item = new WC_Order_Item_Product();
+		$item->set_props( array(
 			'product'  => $product,
 			'quantity' => 4,
+			'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+			'total' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
 		) );
-		$order->add_item( $item_1 );
+		$item->save();
+		$order->add_item( $item );
 
 		// Set billing address
 		$order->set_billing_first_name( 'Jeroen' );
