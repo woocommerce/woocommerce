@@ -54,7 +54,8 @@ if ( wc_tax_enabled() ) {
 		<?php
             $order_total = 0;
 			foreach ( $line_items as $item_id => $item ) {
-                $order_total += $item['line_total'];
+			    $order_total += $item['line_total'];
+
 				do_action( 'woocommerce_before_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );
 
 				include( 'html-order-item.php' );
