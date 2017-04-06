@@ -202,6 +202,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Hide structured data in hidden element in emails to prevent errors in some email gateways.
 * Prevents session data overwriting customer data on login.
 * Show a sale price on variable products if on sale and all prices are the same.
+* Display messages when saving not allowed download file types.
+* Fixed created date when duplicating products.
+* Removed slashes in shipping meta data in order edit screen.
+* Fix variation category restriction and limit to x uses.
 * REST API - Fixed missing array declaration in CRUD controller.
 * REST API - Removed extra `exclude`, `include` and `search` parameters from taxes endpoint.
 * REST API - Fixed variation description formatting.
