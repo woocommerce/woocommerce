@@ -681,7 +681,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 				}
 				// Don't use array_merge here because keys are numeric
-				$items = $items + $this->items[ $group ];
+				$items = array_filter( $items + $this->items[ $group ] );
 			}
 		}
 
