@@ -294,7 +294,7 @@ class WC_Product_Variable extends WC_Product {
 			'is_downloadable'       => $variation->is_downloadable(),
 			'is_virtual'            => $variation->is_virtual(),
 			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description' => $variation->get_description(),
+			'variation_description' => wc_format_content( $variation->get_description() ),
 		) ), $this, $variation );
 	}
 
