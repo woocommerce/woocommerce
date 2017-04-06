@@ -172,7 +172,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Prevent fatal errors in when setting customer is missing in emails.
 * Fallback to home URL if no shop page is set for system status security check for HTTPS.
 * Using WPDB to quicker update and sync title for variations.
-* Updated single-product/up-sells.php template version to 3.0.0.
 * Use parent settings for determining if variations are sold individually.
 * Prevented a bug that deleted all variations when product type changes.
 * Fixed a bug on downloads list that always called only the first download.
@@ -180,8 +179,34 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fixed a bug that caused pages to permanently reloading if selected "Default customer location" as "Geolocate (with page caching support)".
 * Fixed cross sells classes and columns.
 * Fixed alignment of the fields in admin settings.
+* Exclude deprecated properties and saving new customer.
+* Include try/catch wrapper to prevent issues with Select2.
+* Fixed variable product stock syncing.
+* Fixed cross-sell products for variable products.
+* Send emails in background instead of use CRON.
+* Fixed errors while trying to order again.
+* Fixed shortcodes in variable description.
+* Allow use HTML in variation description again.
+* Fixed saving meta when using `save_post` action.
+* Fixed issues with taxonomy names and link base.
+* Pull tax status from parent since there is no UI to set at variation level.
+* Use placeholder text for external products add to cart text if not set.
+* Allow search customers by ID in edit order screen.
+* Prevented errors if product type is not posted.
+* Ensure gateways are loaded in emails.
+* Compare to the order item title instead of variation title.
+* Updated `single-product/up-sells.php`, `loop/add-to-cart.php`, `loop/rating.php`, `checkout/form-billing.php`, and `content-product.php` template version to 3.0.0.
+* Fixed styling of logs table in some languages.
+* Prevent errors when `$wpdb->prefix` is empty.
+* When forcing shipping to billing, set the shipping fields in the order itself.
+* Hide structured data in hidden element in emails to prevent errors in some email gateways.
+* Prevents session data overwriting customer data on login.
+* Show a sale price on variable products if on sale and all prices are the same.
 * REST API - Fixed missing array declaration in CRUD controller.
 * REST API - Removed extra `exclude`, `include` and `search` parameters from taxes endpoint.
+* REST API - Fixed variation description formatting.
+* REST API - Fixed incorrect attribute check in products endpoint in Legacy REST API.
+* REST API - Allow variation image to be unset.
 
 = 3.0.0 - 2017-04-04 =
 * New gallery on single product pages with better mobile support, using PhotoSwipe and Zoom. Declare support with add_theme_support() - wc-product-gallery-zoom, wc-product-gallery-lightbox, wc-product-gallery-slider
