@@ -180,7 +180,7 @@ class WC_Structured_Data {
 			global $product;
 		}
 
-		if ( ! $product ) {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
 			return;
 		}
 
