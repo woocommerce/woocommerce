@@ -138,15 +138,15 @@ jQuery( function( $ ) {
 				var select2_args = {
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' ),
-					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
+					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '1',
 					escapeMarkup: function( m ) {
 						return m;
 					},
 					ajax: {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
-						quietMillis: 250,
-						data: function( params ) {
+						delay:       250,
+						data:        function( params ) {
 							return {
 								term:     params.term,
 								action:   'woocommerce_json_search_customers',
