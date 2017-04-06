@@ -138,14 +138,15 @@ class WC_Product_Variable extends WC_Product {
 			return apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		}
 
-		$min_price         = current( $prices['price'] );
-		$max_regular_price = end( $prices['regular_price'] );
-		$max_price         = end( $prices['price'] );
+		$min_price     = current( $prices['price'] );
+		$max_price     = end( $prices['price'] );
+		$min_reg_price = current( $prices['regular_price'] );
+		$max_reg_price = end( $prices['regular_price'] );
 
 		if ( $min_price !== $max_price ) {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
-		} elseif ( $this->is_on_sale() ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_regular_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
+		} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
 		} else {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
 		}
