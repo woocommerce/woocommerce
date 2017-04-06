@@ -153,7 +153,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_related_',
 		'wc_child_has_weight_',
 		'wc_child_has_dimensions_',
-		'wc_child_is_in_stock_',
 	);
 
 	if ( $post_id > 0 ) {
@@ -1136,4 +1135,19 @@ function wc_products_array_orderby_price( $a, $b ) {
 		return 0;
 	}
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
+}
+
+/**
+ * Queue a product for syncing at the end of the request.
+ *
+ * @param  int $product_id
+ */
+function wc_deferred_product_sync( $product_id ) {
+	global $wc_deferred_product_sync;
+
+	if ( empty( $wc_deferred_product_sync ) ) {
+		$wc_deferred_product_sync = array();
+	}
+
+	$wc_deferred_product_sync[] = $product_id;
 }
