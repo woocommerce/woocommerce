@@ -285,10 +285,10 @@ $pages          = $system_status->get_pages();
 			}
 			?>
 			<tr>
-				<td data-export-label="<?php esc_attr_e( $row['name'] ); ?>"><?php esc_html_e( $row['name'] ); ?>:</td>
+				<td data-export-label="<?php esc_attr( $row['name'] ); ?>"><?php esc_html( $row['name'] ); ?>:</td>
 				<td class="help"><?php echo isset( $row['help'] ) ? $row['help'] : ''; ?></td>
 				<td>
-						<mark class="<?php esc_attr_e( $css_class ); ?>">
+						<mark class="<?php esc_attr( $css_class ); ?>">
 							<?php echo $icon; ?>  <?php echo ! empty( $row['note'] ) ? wp_kses_data( $row['note'] ) : ''; ?>
 						</mark>
 				</td>
