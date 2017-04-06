@@ -189,7 +189,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
-				foreach ( $items as $item_key => $item ) {
+				foreach ( array_filter( $items ) as $item_key => $item ) {
 					$item->set_order_id( $this->get_id() );
 					$item_id = $item->save();
 
