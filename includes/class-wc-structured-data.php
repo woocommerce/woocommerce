@@ -132,7 +132,9 @@ class WC_Structured_Data {
 		if ( $plain_text ) {
 			return;
 		}
+		echo '<div style="display: none; font-size: 0; max-height: 0; line-height: 0; padding: 0; mso-hide: all;">';
 		$this->output_structured_data();
+		echo '</div>';
 	}
 
 	/**
