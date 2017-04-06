@@ -24,6 +24,11 @@ class WC_Emails {
 	protected static $_instance = null;
 
 	/**
+	 * Background emailer class.
+	 */
+	protected static $background_emailer;
+
+	/**
 	 * Main WC_Emails Instance.
 	 *
 	 * Ensures only one instance of WC_Emails is loaded or can be loaded.
@@ -83,21 +88,26 @@ class WC_Emails {
 			'woocommerce_created_customer',
 		) );
 
-		foreach ( $email_actions as $action ) {
-			add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
+		if ( apply_filters( 'woocommerce_defer_transactional_emails', true ) ) {
+			self::$background_emailer = new WC_Background_Emailer();
+
+			foreach ( $email_actions as $action ) {
+				add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
+			}
+		} else {
+			foreach ( $email_actions as $action ) {
+				add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+			}
 		}
 	}
 
 	/**
-	 * Queue transactional email via cron so it's not sent in current request.
+	 * Queue transactional email so it's not sent in current request.
 	 */
 	public static function queue_transactional_email() {
-		$filter = current_filter();
-		$args   = func_get_args();
-
-		wp_schedule_single_event( time() + 5, 'woocommerce_send_queued_transactional_email', array(
-			'filter' => $filter,
-			'args'   => $args,
+		self::$background_emailer->push_to_queue( array(
+			'filter' => current_filter(),
+			'args'   => func_get_args(),
 		) );
 	}
 
