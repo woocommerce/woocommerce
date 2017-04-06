@@ -2537,7 +2537,7 @@ function wc_display_product_attributes( $product ) {
  */
 function wc_get_stock_html( $product ) {
 	if ( ! $product ) {
-		return;
+		return '';
 	}
 
 	$html = '';
