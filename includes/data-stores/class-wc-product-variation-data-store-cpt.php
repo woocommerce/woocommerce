@@ -238,7 +238,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
 			'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
 			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
-			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
 			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
@@ -281,8 +280,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
 		) );
 
-		// Use the parent sold_individually settings since variations don't have a user-facing way to set sold_individually.
+		// Pull data from the parent when there is no user-facing way to set props.
 		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
+		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
 	}
 
 	/**
