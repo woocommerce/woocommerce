@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,51 +161,45 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.1 - 2017-04-xx =
-* Stop filter hidden grouped products.
-* Fade gallery in if no images are set.
-* Check for invalid objects in WC_Register_WP_Admin_Settings.
-* Check for error object in wc_get_object_terms.
-* Use wc_deprecated_function in WC_Deprecated_Hooks so notices aren't output in ajax requests.
-* Removed unused legacy clear parameter from addresses.
-* Added back the ability to include extra items to the System Status using a new `woocommerce_system_status_environment_rows` filter.
-* Prevent fatal errors in when setting customer is missing in emails.
-* Fallback to home URL if no shop page is set for system status security check for HTTPS.
-* Using WPDB to quicker update and sync title for variations.
-* Use parent settings for determining if variations are sold individually.
-* Prevented a bug that deleted all variations when product type changes.
-* Fixed a bug on downloads list that always called only the first download.
-* Include clearfix on billing and shipping wrappers
-* Fixed a bug that caused pages to permanently reloading if selected "Default customer location" as "Geolocate (with page caching support)".
-* Fixed cross sells classes and columns.
-* Fixed alignment of the fields in admin settings.
-* Exclude deprecated properties and saving new customer.
-* Include try/catch wrapper to prevent issues with Select2.
-* Fixed variable product stock syncing.
-* Fixed cross-sell products for variable products.
-* Send emails in background instead of use CRON.
-* Fixed errors while trying to order again.
-* Fixed shortcodes in variable description.
-* Allow use HTML in variation description again.
-* Fixed saving meta when using `save_post` action.
-* Fixed issues with taxonomy names and link base.
-* Pull tax status from parent since there is no UI to set at variation level.
-* Use placeholder text for external products add to cart text if not set.
-* Allow search customers by ID in edit order screen.
-* Prevented errors if product type is not posted.
-* Ensure gateways are loaded in emails.
-* Compare to the order item title instead of variation title.
-* Updated `single-product/up-sells.php`, `loop/add-to-cart.php`, `loop/rating.php`, `checkout/form-billing.php`, and `content-product.php` template version to 3.0.0.
-* Fixed styling of logs table in some languages.
-* Prevent errors when `$wpdb->prefix` is empty.
-* When forcing shipping to billing, set the shipping fields in the order itself.
-* Hide structured data in hidden element in emails to prevent errors in some email gateways.
-* Prevents session data overwriting customer data on login.
-* Show a sale price on variable products if on sale and all prices are the same.
-* Display messages when saving not allowed download file types.
-* Fixed created date when duplicating products.
-* Removed slashes in shipping meta data in order edit screen.
-* Fix variation category restriction and limit to x uses.
+= 3.0.1 - 2017-04-06 =
+* Fix - Show catalog hidden products within grouped products.
+* Fix - Fade in the gallery in if no images are set or it's custom.
+* Fix - Use wc_deprecated_function in WC_Deprecated_Hooks so notices aren't output in ajax requests.
+* Fix - Added back the ability to include extra items to the System Status using the `woocommerce_system_status_environment_rows` filter.
+* Fix - Coupon category restrictions and limits for variations.
+* Fix - Allow shortcodes and HTML in variation descriptions like in 2.6.
+* Fix - Unset post date when duplicating products.
+* Fix - Show a sale price on variable products if on sale and all prices are the same.
+* Fix - Corrected download links when a product has multiple downloads.
+* Fix - Prevented potential errors if the product type was not posted for any reason on save.
+* Fix - Updated `single-product/up-sells.php`, `loop/add-to-cart.php`, `loop/rating.php`, `checkout/form-billing.php`, and `content-product.php` template version to 3.0.0.
+* Fix - Included clearfixes on billing and shipping field wrappers,
+* Fix - Fixed styling of logs table in some languages.
+* Fix - Fixed display of variation attributes on old orders.
+* Fix - Use placeholder text for external products add to cart button text if left blank.
+* Fix - Fallback to home URL if no shop page is set for system status security check for HTTPS.
+* Fix - For variations, pull tax status and sold individually from the parent since there is no UI to set this at variation level.
+* Fix - Moved cron emails to background processing to avoid multiple sends.
+* Fix - Wrapped structured data in a hidden element when added to emails.
+* Fix - Missing gateway information in queued emails.
+* Fix - Fixed a bug that caused pages to permanently reload if "Default customer location" was set to "Geolocate (with page caching support)".
+* Fix - When forcing shipping to billing, set the shipping fields in the order itself.
+* Fix - Check for invalid objects in WC_Register_WP_Admin_Settings.
+* Fix - Check for error object in wc_get_object_terms.
+* Fix - Removed slashes in shipping meta data on the order edit screen.
+* Fix - Prevented permalink rewrites for attributes with missing names.
+* Fix - Fixed saving of meta data when multiple extensions use the `save_post` action.
+* Fix - Allow search customers by ID in edit order screen.
+* Fix - Prevents session data overwriting customer data on login.
+* Fix - Fixed cross-sell column display and variation support.
+* Fix - Fixed variable product stock syncing on save.
+* Fix - Included try/catch wrapper to prevent issues with Select2.
+* Fix - Prevented a bug that deleted all variations when the product type was change from variable to simple.
+* Fix - Switched to WPDB to quicker update when syncing titles for variations.
+* Fix - Exclude deprecated properties when loading a customer object.
+* Fix - Fixed notices while trying to order again.
+* Fix - Fixed notices when `$wpdb->prefix` is empty.
+* Fix - Prevent errors when loading a product with an invalid download file types.
 * REST API - Fixed missing array declaration in CRUD controller.
 * REST API - Removed extra `exclude`, `include` and `search` parameters from taxes endpoint.
 * REST API - Fixed variation description formatting.
@@ -281,5 +275,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.0 =
+= 3.0.1 =
 3.0 is a major update. It is important that you make backups and ensure themes and extensions are 3.0 compatible before upgrading.
