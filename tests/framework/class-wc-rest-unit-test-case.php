@@ -16,6 +16,9 @@
      */
     public function setUp() {
         parent::setUp();
+        if ( ! defined( 'REST_REQUEST' ) ) {
+        	define( 'REST_REQUEST', true );
+        }
         global $wp_rest_server;
         $this->server = $wp_rest_server = new WP_Test_Spy_REST_Server;
         do_action( 'rest_api_init' );
