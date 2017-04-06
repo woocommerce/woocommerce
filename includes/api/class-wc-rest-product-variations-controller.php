@@ -259,13 +259,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		}
 
 		// Thumbnail.
-		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
-			$image = $request['image'];
-			if ( is_array( $image ) ) {
-				$image['position'] = 0;
-			}
+		if ( isset( $request['image'] ) ) {
+			if ( is_array( $request['image'] ) ) {
+				$image = $request['image'];
+				if ( is_array( $image ) ) {
+					$image['position'] = 0;
+				}
 
-			$variation = $this->set_product_images( $variation, array( $image ) );
+				$variation = $this->set_product_images( $variation, array( $image ) );
+			} else {
+				$variation->set_image_id( '' );
+			}
 		}
 
 		// Virtual variation.
