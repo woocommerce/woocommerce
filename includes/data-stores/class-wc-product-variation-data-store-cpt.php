@@ -256,7 +256,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'length'            => get_post_meta( $id, '_length', true ),
 			'width'             => get_post_meta( $id, '_width', true ),
 			'height'            => get_post_meta( $id, '_height', true ),
-			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
+			'tax_class'         => ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : get_post_meta( $id, '_tax_class', true ),
 		) );
 
 		if ( $product->is_on_sale( 'edit' ) ) {
