@@ -1383,7 +1383,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		// Get visble cross sells then sort them at random.
 		$cross_sells                 = array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
 		$woocommerce_loop['name']    = 'cross-sells';
-		$woocommerce_loop['columns'] = $columns;
+		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_cross_sells_columns', $columns );
 
 		// Handle orderby and limit results.
 		$orderby     = apply_filters( 'woocommerce_cross_sells_orderby', $orderby );
