@@ -309,7 +309,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_attributes( &$product ) {
 		$meta_values = maybe_unserialize( get_post_meta( $product->get_id(), '_product_attributes', true ) );
 
-		if ( $meta_values ) {
+		if ( $meta_values && !empty( $meta_values ) ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
