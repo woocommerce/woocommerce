@@ -123,9 +123,13 @@ class WC_Admin_Duplicate_Product {
 		}
 		$duplicate->set_status( 'draft' );
 
-		foreach ( $meta_to_exclude as $meta_key ) {
-			$duplicate->delete_meta_data( $meta_key );
-		}
+        //Copy parent product meta
+        $meta_data = $product->get_meta_data();
+        foreach ( $meta_data as $meta ) {
+            if( !in_array( $meta->key, $meta_to_exclude ) ){
+               $duplicate->add_meta_data( $meta->key, $meta->value );
+            }
+        }
 
 		// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
 		do_action( 'woocommerce_product_duplicate_before_save', $duplicate, $product );
