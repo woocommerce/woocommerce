@@ -356,6 +356,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $meta_values ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
+				$meta_value = array_merge( array(
+					'name'         => '',
+					'value'        => '',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				), (array) $meta_value );
+
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
@@ -364,6 +373,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
 				$attribute->set_name( $meta_value['name'] );
