@@ -767,7 +767,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variation = wc_get_product( $child_id );
 
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 
