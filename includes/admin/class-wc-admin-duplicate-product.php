@@ -115,6 +115,7 @@ class WC_Admin_Duplicate_Product {
 		// Filter to allow us to unset/remove data we don't want to copy to the duplicate. @since 2.6
 		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
 
+		$product->get_meta_data();
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
 		$duplicate->set_total_sales( 0 );
@@ -137,6 +138,7 @@ class WC_Admin_Duplicate_Product {
 		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );
+				$child->get_meta_data();
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
