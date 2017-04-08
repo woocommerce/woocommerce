@@ -125,6 +125,10 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_status( 'draft' );
 		$duplicate->set_date_created( null );
 
+		foreach ( $duplicate->get_meta_data() as $key => $value ) {
+			unset( $value->id );
+		}
+
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
 		}
@@ -145,6 +149,10 @@ class WC_Admin_Duplicate_Product {
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
+				}
+
+				foreach ( $child_duplicate->get_meta_data() as $key => $value ) {
+					unset( $value->id );
 				}
 
 				foreach ( $meta_to_exclude as $meta_key ) {
