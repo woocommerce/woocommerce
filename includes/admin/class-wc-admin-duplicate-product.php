@@ -123,6 +123,7 @@ class WC_Admin_Duplicate_Product {
 		}
 		$duplicate->set_status( 'draft' );
 		$duplicate->set_date_created( null );
+		$duplicate->set_slug( null );
 
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
