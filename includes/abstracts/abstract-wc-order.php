@@ -1311,6 +1311,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_currency() ) );
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
+        
+    /**
+	 * Gets order total Amount - formatted for display.
+	 *
+	 * @return string
+	 */
+	public function get_formatted_order_total_amount( $order_total ) {
+		$formatted_total = wc_price( $order_total, array( 'currency' => $this->get_order_currency() ) );
+		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
+	}
 
 	/**
 	 * Gets subtotal - subtotal is shown before discounts, but with localised taxes.
