@@ -117,6 +117,7 @@ class WC_Admin_Duplicate_Product {
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
+		$duplicate->set_name( sprintf( __( '%s (Copy)' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
