@@ -999,7 +999,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $cross_sell_ids IDs from the cross-sell products.
 	 */
 	public function set_cross_sell_ids( $cross_sell_ids ) {
-		$this->set_prop( 'cross_sell_ids', array_filter( (array) $cross_sell_ids ) );
+		$this->set_prop( 'cross_sell_ids', array_unique( array_filter( (array) $cross_sell_ids ) ) );
 	}
 
 	/**
