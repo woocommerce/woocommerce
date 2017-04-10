@@ -91,7 +91,7 @@ class WC_Checkout {
 			case 'enable_guest_checkout' :
 				$bool_value = wc_string_to_bool( $value );
 
-				if ( $bool_value !== $this->is_registration_required() ) {
+				if ( $bool_value === $this->is_registration_required() ) {
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_true', 0 );
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_false', 0 );
 					add_filter( 'woocommerce_checkout_registration_required', $bool_value ? '__return_false' : '__return_true', 0 );
