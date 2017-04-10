@@ -25,6 +25,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
+		'enabled',
 		'discount_type',
 		'coupon_amount',
 		'expiry_date',
@@ -92,6 +93,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		$coupon_id = $coupon->get_id();
 		$coupon->set_props( array(
+			'enabled'                     => 'yes' === get_post_meta( $coupon_id, 'enabled', true ),
 			'code'                        => $post_object->post_title,
 			'description'                 => $post_object->post_excerpt,
 			'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
@@ -174,6 +176,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	private function update_post_meta( &$coupon ) {
 		$updated_props     = array();
 		$meta_key_to_props = array(
+            'enabled'                    => 'enabled',
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
 			'individual_use'             => 'individual_use',
@@ -197,6 +200,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $coupon->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
+				case 'enabled' :
 				case 'individual_use' :
 				case 'free_shipping' :
 				case 'exclude_sale_items' :

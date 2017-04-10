@@ -159,6 +159,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 		}
 
 		return array(
+            'enabled'                     => ( 'yes' === $data['enabled'] ),
 			'id'                          => $object->get_id(),
 			'code'                        => $data['code'],
 			'amount'                      => $data['amount'],
@@ -327,6 +328,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 			'title'      => $this->post_type,
 			'type'       => 'object',
 			'properties' => array(
+				'enabled' => array(
+					'description' => __( 'Whether coupon can be enabled or disabled to use.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => true,
+					'context'     => array( 'view', 'edit' ),
+				),
 				'id' => array(
 					'description' => __( 'Unique identifier for the object.', 'woocommerce' ),
 					'type'        => 'integer',

@@ -65,6 +65,13 @@ class WC_Meta_Box_Coupon_Data {
 			</ul>
 			<div id="general_coupon_data" class="panel woocommerce_options_panel"><?php
 
+				// Individual use
+				woocommerce_wp_checkbox( array(
+                    'id' => 'enabled',
+                    'label' => __( 'With this option permits to add a coupon without enabled, being able to become Enabled thought API.', 'woocommerce' ),
+                    'description' => __( 'Check this box if the coupon will be enabled to use right now.', 'woocommerce' ),
+                ) );
+
 				// Type
 				woocommerce_wp_select( array(
 					'id'      => 'discount_type',
@@ -321,6 +328,7 @@ class WC_Meta_Box_Coupon_Data {
 
 		$coupon = new WC_Coupon( $post_id );
 		$coupon->set_props( array(
+            'enabled'                     => isset( $_POST['enabled'] ) ? 'yes' : 'no',
 			'code'                        => $post->post_title,
 			'discount_type'               => wc_clean( $_POST['discount_type'] ),
 			'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),

@@ -24,6 +24,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @var array
 	 */
 	protected $data = array(
+		'enabled'                     => false,
 		'code'                        => '',
 		'amount'                      => 0,
 		'date_created'                => null,
@@ -127,6 +128,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 | Methods for getting data from the coupon object.
 	 |
 	 */
+
+	/**
+	 * Get status if coupon is ready to use.
+	 * @since  3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_enabled( $context = 'view' ) {
+		return $this->get_prop( 'enabled', $context );
+	}
 
 	/**
 	 * Get coupon code.
@@ -420,6 +431,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 
 	/**
+	 * Set status of coupon to ready to use or not.
+	 * @since  3.0.0
+	 * @param  string $enabled
+	 * @throws WC_Data_Exception
+	 */
+	public function set_enabled( $enabled ) {
+		$this->set_prop( 'enabled', (bool) $enabled );
+	}
+
+	/**
 	 * Set coupon code.
 	 * @since  3.0.0
 	 * @param  string $code
@@ -686,6 +707,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 						$coupon[ $key ] = wc_string_to_array( $value );
 					}
 					break;
+				case 'enabled' :
 				case 'individual_use' :
 				case 'free_shipping' :
 				case 'exclude_sale_items' :
@@ -751,6 +773,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_error_message() {
 		return $this->error_message;
+	}
+
+	/**
+	 * Ensure coupon exists or throw exception.
+	 *
+	 * @throws Exception
+	 */
+	private function validate_enabled() {
+		if ( ! $this->get_enabled() ) {
+			throw new Exception( self::E_WC_COUPON_NOT_EXIST );
+		}
 	}
 
 	/**
@@ -985,6 +1018,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function is_valid() {
 		try {
 			$this->validate_exists();
+            $this->validate_enabled();
 			$this->validate_usage_limit();
 			$this->validate_user_usage_limit();
 			$this->validate_expiry_date();

@@ -174,6 +174,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$data = array(
+            'enabled'                     => ( 'yes' === $_data['enabled'] ),
 			'id'                          => $_data['id'],
 			'code'                        => $_data['code'],
 			'date_created'                => $_data['date_created'],
@@ -411,6 +412,12 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 			'title'      => $this->post_type,
 			'type'       => 'object',
 			'properties' => array(
+                'enabled' => array(
+                    'description' => __( 'Whether coupon can be enabled or disabled to use.', 'woocommerce' ),
+                    'type'        => 'boolean',
+                    'default'     => true,
+                    'context'     => array( 'view', 'edit' ),
+                ),
 				'id' => array(
 					'description' => __( 'Unique identifier for the object.', 'woocommerce' ),
 					'type'        => 'integer',
