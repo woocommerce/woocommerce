@@ -139,12 +139,12 @@ class WC_Webhook {
 			$should_deliver = false;
 		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
 			// Only deliver deleted event for coupons, orders, and products.
-			if ( ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 				$should_deliver = false;
 			}
 
 			// Check if is delivering for the correct resource.
-			if ( str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+			if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
 				$should_deliver = false;
 			}
 		} elseif ( 'delete_user' == $current_action ) {
@@ -233,7 +233,7 @@ class WC_Webhook {
 	/**
 	 * Get Legacy API payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -284,19 +284,21 @@ class WC_Webhook {
 	/**
 	 * Get WP API integration payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
+		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
+
 		switch ( $resource ) {
 			case 'coupon' :
 			case 'customer' :
 			case 'order' :
 			case 'product' :
-				$class      = 'WC_REST_' . ucfirst( $resource ) . 's_Controller';
+				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
 				$request    = new WP_REST_Request( 'GET' );
 				$controller = new $class;
 
@@ -349,7 +351,7 @@ class WC_Webhook {
 				'id' => $resource_id,
 			);
 		} else {
-			if ( 'wp_api_v1' === $this->get_api_version() ) {
+			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2' ), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 			} else {
 				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
@@ -895,17 +897,18 @@ class WC_Webhook {
 	/**
 	 * Set API version.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
 		$versions = array(
+			'wp_api_v2',
 			'wp_api_v1',
 			'legacy_v3',
 		);
 
 		if ( ! in_array( $version, $versions, true ) ) {
-			$version = 'wp_api_v1';
+			$version = 'wp_api_v2';
 		}
 
 		update_post_meta( $this->id, '_api_version', $version );
@@ -914,7 +917,7 @@ class WC_Webhook {
 	/**
 	 * API version.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	public function get_api_version() {

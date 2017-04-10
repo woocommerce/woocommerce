@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -14,7 +14,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -65,6 +65,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
 		'_shipping_method',
 	);
 
@@ -83,11 +84,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @param WC_Order
 	 * @param object $post_object
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		parent::read_order_data( $order, $post_object );
-		$id = $order->get_id();
+		$id             = $order->get_id();
+		$date_completed = get_post_meta( $id, '_date_completed', true );
+		$date_paid      = get_post_meta( $id, '_date_paid', true );
+
+		if ( ! $date_completed ) {
+			$date_completed = get_post_meta( $id, '_completed_date', true );
+		}
+
+		if ( ! $date_paid ) {
+			$date_paid = get_post_meta( $id, '_paid_date', true );
+		}
 
 		$order->set_props( array(
 			'order_key'            => get_post_meta( $id, '_order_key', true ),
@@ -118,8 +129,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
 			'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
 			'created_via'          => get_post_meta( $id, '_created_via', true ),
-			'date_completed'       => get_post_meta( $id, '_completed_date', true ),
-			'date_paid'            => get_post_meta( $id, '_paid_date', true ),
+			'date_completed'       => $date_completed,
+			'date_paid'            => $date_paid,
 			'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
 			'customer_note'        => $post_object->post_excerpt,
 		) );
@@ -130,7 +141,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		// Before updating, ensure date paid is set if missing.
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id() ) ) ) {
+			$order->set_date_paid( $order->get_date_created( 'edit' ) );
+		}
+
+		// Update the order.
 		parent::update( $order );
+
 		do_action( 'woocommerce_update_order', $order->get_id() );
 	}
 
@@ -138,12 +156,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
-	protected function update_post_meta( &$order, $force = false ) {
+	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
-		$changed_props     = $order->get_changes();
+		$id                = $order->get_id();
 		$meta_key_to_props = array(
 			'_order_key'            => 'order_key',
 			'_customer_user'        => 'customer_id',
@@ -153,20 +170,35 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_customer_ip_address'  => 'customer_ip_address',
 			'_customer_user_agent'  => 'customer_user_agent',
 			'_created_via'          => 'created_via',
-			'_completed_date'       => 'date_completed',
-			'_paid_date'            => 'date_paid',
+			'_date_completed'       => 'date_completed',
+			'_date_paid'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! array_key_exists( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
 
-			if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-				$updated_props[] = $prop;
+			if ( 'date_paid' === $prop ) {
+				// In 3.0.x we store this as a UTC timestamp.
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
+
+				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
+
+			} elseif ( 'date_completed' === $prop ) {
+				// In 3.0.x we store this as a UTC timestamp.
+				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
+
+				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
+
+			} else {
+				update_post_meta( $id, $meta_key, $value );
 			}
+
+			$updated_props[] = $prop;
 		}
 
 		$address_props = array(
@@ -197,35 +229,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		foreach ( $address_props as $props_key => $props ) {
-			foreach ( $props as $meta_key => $prop ) {
-				$prop_key = substr( $prop, 8 );
-				if ( ! $force && ( ! isset( $changed_props[ $props_key ] ) || ! array_key_exists( $prop_key, $changed_props[ $props_key ] ) ) ) {
-					continue;
-				}
+			$props_to_update = $this->get_props_to_update( $order, $props );
+			foreach ( $props_to_update as $meta_key => $prop ) {
 				$value = $order->{"get_$prop"}( 'edit' );
-
-				if ( '' !== $value ? update_post_meta( $order->get_id(), $meta_key, $value ) : delete_post_meta( $order->get_id(), $meta_key ) ) {
-					$updated_props[] = $prop;
-					$updated_props[] = $props_key;
-				}
+				update_post_meta( $id, $meta_key, $value );
+				$updated_props[] = $prop;
+				$updated_props[] = $props_key;
 			}
 		}
 
-		parent::update_post_meta( $order, $force );
+		parent::update_post_meta( $order );
 
-		// If address changed, store concatinated version to make searches faster.
-		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_billing_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
+		// If address changed, store concatenated version to make searches faster.
+		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
+			update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
 		}
-		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $order->get_id(), '_shipping_address_index' ) ) {
-			update_post_meta( $order->get_id(), '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
+		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
+			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
 		// If customer changed, update any downloadable permissions.
 		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
 			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
+			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
+
+		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
 	/**
@@ -312,14 +341,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Return count of orders with type.
+	 * Return count of orders with a specific status.
 	 *
-	 * @param  string $type
+	 * @param  string $status
 	 * @return int
 	 */
-	public function get_order_count( $type ) {
+	public function get_order_count( $status ) {
 		global $wpdb;
-		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $type ) ) );
+		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status = %s", $status ) ) );
 	}
 
 	/**
@@ -365,6 +394,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( ! $args['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
+		}
+
+		if ( ! empty( $args['date_before'] ) ) {
+			$wp_query_args['date_query']['before'] = $args['date_before'];
+		}
+
+		if ( ! empty( $args['date_after'] ) ) {
+			$wp_query_args['date_query']['after'] = $args['date_after'];
 		}
 
 		// Get results.
@@ -446,7 +483,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
 			AND     posts.post_status = 'wc-pending'
 			AND     posts.post_modified < %s
-		", date( "Y-m-d H:i:s", absint( $date ) ) ) );
+		", date( 'Y-m-d H:i:s', absint( $date ) ) ) );
 
 		return $unpaid_orders;
 	}
@@ -462,7 +499,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
-		 * 2.7.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
+		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
 		 * @var array
 		 */
@@ -482,7 +519,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order_ids = array_unique( array_merge(
 				$order_ids,
 				$wpdb->get_col(
-					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%';", wc_clean( $term ) )
+					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE '%%%s%%'", $wpdb->esc_like( wc_clean( $term ) ) ) . " AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')"
 				),
 				$wpdb->get_col(
 					$wpdb->prepare( "
@@ -490,7 +527,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 						FROM {$wpdb->prefix}woocommerce_order_items as order_items
 						WHERE order_item_name LIKE '%%%s%%'
 						",
-						$term
+						$wpdb->esc_like( wc_clean( $term ) )
 					)
 				)
 			) );
@@ -551,7 +588,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_sales', true ) );
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_coupon_usage_counts', true ) );
 	}
 
 	/**
@@ -562,7 +599,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
-		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
 
 	/**
@@ -585,5 +622,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function set_stock_reduced( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Get the order type based on Order ID.
+	 *
+	 * @since 3.0.0
+	 * @param int $order_id
+	 * @return string
+	 */
+	public function get_order_type( $order_id ) {
+		return get_post_type( $order_id );
 	}
 }

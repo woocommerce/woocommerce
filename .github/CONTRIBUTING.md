@@ -6,7 +6,7 @@ When contributing please ensure you follow the guidelines below to help us keep 
 
 __Please Note:__
 
-GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooThemes Support](https://support.woothemes.com) for customer support, [WordPress.org](https://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
+GitHub is for _bug reports and contributions only_ - if you have a support question or a request for a customization this is not the right place to post it. Use [WooCommerce Support](https://support.woocommerce.com) for customer support, [WordPress.org](https://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
 
 - [WooExperts](https://woocommerce.com/experts/)
 - [Codeable](https://codeable.io/)
@@ -86,7 +86,7 @@ If WooCommerce is already 100% translated for your language, join the team anywa
 
 ### Translating Video Tutorials
 
-Another valuable way to help is by translating our growing library of WooCommerce video tutorials. Check out our [Video SRTs project](https://www.transifex.com/projects/p/video-srts/) and join the team for your language. If there isn't one, please request the new language and we will add it for you.
+Another valuable way to help is by translating our growing library of WooCommerce video tutorials. Check out the [Translating  Our Videos](https://docs.woocommerce.com/document/translating-our-videos/) doc and join in!
 
 By translating video tutorials you'll be helping non-English speaking users and people affected by disabilities to get to grips with using WooCommerce for the first time, and to go on and create their businesses and make a living! That's something to be proud of and if you choose to dive into this area, we salute you.
 
@@ -96,4 +96,4 @@ By translating video tutorials you'll be helping non-English speaking users and 
 * [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
 * [Translator Handbook](https://make.wordpress.org/polyglots/handbook/)
 * [WooCommerce Docs](https://docs.woocommerce.com/)
-* [WooThemes Support](https://support.woothemes.com)
+* [WooCommerce Support](https://support.woocommerce.com)

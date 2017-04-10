@@ -325,9 +325,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_shipping     = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping' ) ) - $this->report_data->total_shipping_refunded, 2 );
 		$this->report_data->total_shipping_tax = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping_tax' ) ) - $this->report_data->total_shipping_tax_refunded, 2 );
 
-		// Total the refunds and sales amounts. Sales subract refunds. Note - sales also includes shipping costs.
+		// Total the refunds and sales amounts. Sales subract refunds. Note - total_sales also includes shipping costs.
 		$this->report_data->total_sales = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_sales' ) ) - $this->report_data->total_refunds, 2 );
-		$this->report_data->net_sales   = wc_format_decimal( $this->report_data->total_sales - $this->report_data->total_tax - $this->report_data->total_shipping_tax, 2 );
+		$this->report_data->net_sales   = wc_format_decimal( $this->report_data->total_sales - $this->report_data->total_shipping - $this->report_data->total_tax - $this->report_data->total_shipping_tax, 2 );
+
 		// Calculate average based on net
 		$this->report_data->average_sales       = wc_format_decimal( $this->report_data->net_sales / ( $this->chart_interval + 1 ), 2 );
 		$this->report_data->average_total_sales = wc_format_decimal( $this->report_data->total_sales / ( $this->chart_interval + 1 ), 2 );

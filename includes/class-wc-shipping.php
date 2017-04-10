@@ -238,7 +238,7 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		$this->shipping_total = null;
+		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->packages       = array();
 
@@ -393,7 +393,7 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
-		$this->shipping_total = null;
+		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->packages = array();
 	}

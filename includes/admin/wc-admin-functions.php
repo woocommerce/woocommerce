@@ -132,7 +132,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  */
 function woocommerce_admin_fields( $options ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
 		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
@@ -147,7 +147,7 @@ function woocommerce_admin_fields( $options ) {
  */
 function woocommerce_update_options( $options, $data = null ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
 		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
@@ -163,7 +163,7 @@ function woocommerce_update_options( $options, $data = null ) {
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
 		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
 	}
 
@@ -224,7 +224,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -250,6 +250,7 @@ function wc_save_order_items( $order_id, $items ) {
 			'shipping_cost'         => 0,
 			'shipping_taxes'        => array(),
 		);
+
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
 				continue;
@@ -258,7 +259,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$item_data = array();
 
 			foreach ( $data_keys as $key => $default ) {
-				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? $items[ $key ][ $item_id ] : $default;
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
 			$item->set_props( array(
@@ -272,7 +273,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {

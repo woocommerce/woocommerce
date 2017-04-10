@@ -220,10 +220,9 @@ class WC_Admin_Report {
 		}
 
 		if ( $filter_range ) {
-
 			$query['where'] .= "
-				AND 	posts.post_date >= '" . date( 'Y-m-d', $this->start_date ) . "'
-				AND 	posts.post_date < '" . date( 'Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
+				AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
 
@@ -325,7 +324,7 @@ class WC_Admin_Report {
 
 		if ( $debug ) {
 			echo '<pre>';
-			print_r( $query );
+			wc_print_r( $query );
 			echo '</pre>';
 		}
 
@@ -514,11 +513,18 @@ class WC_Admin_Report {
 		switch ( $current_range ) {
 
 			case 'custom' :
-				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
-				if ( ! $this->end_date ) {
-					$this->end_date = current_time( 'timestamp' );
+				if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( $_GET['wc_reports_nonce'], 'custom_range' ) ) {
+					wp_safe_redirect( remove_query_arg( array( 'start_date', 'end_date', 'range', 'wc_reports_nonce' ) ) );
+					exit;
+				}
+
+				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
+
+				if ( empty( $_GET['end_date'] ) ) {
+					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
+				} else {
+					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 				}
 
 				$interval = 0;

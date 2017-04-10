@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store which stores the data in session.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -83,7 +83,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Read customer data from the session.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 */
 	public function read( &$customer ) {
@@ -95,7 +95,10 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
 				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
-					$customer->{"set_{$function_key}"}( $data[ $session_key ] );
+					// Only set from session if data is already missing.
+					if ( ! $customer->{"get_{$function_key}"}() ) {
+						$customer->{"set_{$function_key}"}( $data[ $session_key ] );
+					}
 				}
 			}
 		}
@@ -109,34 +112,36 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @param WC_Customer
 	 */
 	protected function set_defaults( &$customer ) {
-		$default = wc_get_customer_default_location();
+		try {
+			$default = wc_get_customer_default_location();
 
-		if ( ! $customer->get_billing_country() ) {
-			$customer->set_billing_country( $default['country'] );
-		}
+			if ( ! $customer->get_billing_country() ) {
+				$customer->set_billing_country( $default['country'] );
+			}
 
-		if ( ! $customer->get_shipping_country() ) {
-			$customer->set_shipping_country( $customer->get_billing_country() );
-		}
+			if ( ! $customer->get_shipping_country() ) {
+				$customer->set_shipping_country( $customer->get_billing_country() );
+			}
 
-		if ( ! $customer->get_billing_state() ) {
-			$customer->set_billing_state( $default['state'] );
-		}
+			if ( ! $customer->get_billing_state() ) {
+				$customer->set_billing_state( $default['state'] );
+			}
 
-		if ( ! $customer->get_shipping_state() ) {
-			$customer->set_shipping_state( $customer->get_billing_state() );
-		}
+			if ( ! $customer->get_shipping_state() ) {
+				$customer->set_shipping_state( $customer->get_billing_state() );
+			}
 
-		if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$customer->set_billing_email( $current_user->user_email );
-		}
+			if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+				$current_user = wp_get_current_user();
+				$customer->set_billing_email( $current_user->user_email );
+			}
+		} catch ( WC_Data_Exception $e ) {}
 	}
 
 	/**
 	 * Deletes a customer from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -147,7 +152,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Gets the customers last order.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return WC_Order|false
 	 */
@@ -158,7 +163,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Return the number of orders this customer has.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return integer
 	 */
@@ -169,7 +174,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Return how much money this customer has spent.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Customer
 	 * @return float
 	 */

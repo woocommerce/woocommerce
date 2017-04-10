@@ -15,14 +15,11 @@
  * @package 	WooCommerce/Templates
  * @version     2.1.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-?>
-
-<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
+do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
 <p class="cart">
 	<a href="<?php echo esc_url( $product_url ); ?>" rel="nofollow" class="single_add_to_cart_button button alt"><?php echo ! empty( $button_text ) ? esc_html( $button_text ) : 'Buy product' ; ?></a>

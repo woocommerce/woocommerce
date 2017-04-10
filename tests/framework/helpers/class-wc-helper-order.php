@@ -30,14 +30,20 @@ class WC_Helper_Order {
 	/**
 	 * Create a order.
 	 *
-	 * @since 2.4
+	 * @since   2.4
+	 * @version 3.0 New parameter $product.
 	 *
-	 * @return WC_Order Order object.
+	 * @param int        $customer_id
+	 * @param WC_Product $product
+	 *
+	 * @return WC_Order
 	 */
-	public static function create_order( $customer_id = 1 ) {
+	public static function create_order( $customer_id = 1, $product = null ) {
 
-		// Create product
-		$product = WC_Helper_Product::create_simple_product();
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = WC_Helper_Product::create_simple_product();
+		}
+
 		WC_Helper_Shipping::create_simple_flat_rate();
 
 		$order_data = array(
@@ -51,7 +57,15 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$order->add_product( $product, 4 );
+		$item = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => $product,
+			'quantity' => 4,
+			'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+			'total' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+		) );
+		$item->save();
+		$order->add_item( $item );
 
 		// Set billing address
 		$order->set_billing_first_name( 'Jeroen' );
@@ -75,8 +89,10 @@ class WC_Helper_Order {
 			'method_id'    => $rate->id,
 			'total'        => wc_format_decimal( $rate->cost ),
 			'taxes'        => $rate->taxes,
-			'meta_data'    => $rate->get_meta_data(),
 		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
 		$order->add_item( $item );
 
 		// Set payment gateway

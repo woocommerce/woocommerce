@@ -31,7 +31,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		// Get settings
 		$this->title              = $this->get_option( 'title' );
 		$this->description        = $this->get_option( 'description' );
-		$this->instructions       = $this->get_option( 'instructions', $this->description );
+		$this->instructions       = $this->get_option( 'instructions' );
 		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
 		$this->enable_for_virtual = $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes' ? true : false;
 
@@ -96,7 +96,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
-				'css'               => 'width: 450px;',
+				'css'               => 'width: 400px;',
 				'default'           => '',
 				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
 				'options'           => $shipping_methods,

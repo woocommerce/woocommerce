@@ -22,11 +22,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
-	$wc_password_reset_url  = wc_get_page_permalink( 'myaccount' );
+	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], network_admin_url() ) ) {
+		return $default_url;
+	}
+
+	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
+	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	if ( false !== $wc_password_reset_url && ! empty( $lost_password_endpoint ) ) {
-		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_password_reset_url );
+	if ( $wc_account_page_exists && ! empty( $lost_password_endpoint ) ) {
+		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
 		return $default_url;
 	}

@@ -5,7 +5,7 @@
  * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
  * https://github.com/wp-cli/restful
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_Tool_Command {
@@ -21,6 +21,9 @@ class WC_CLI_Tool_Command {
 		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
 		$response      = $wp_rest_server->dispatch( $request );
 		$response_data = $response->get_data();
+		if ( empty( $response_data ) ) {
+			return;
+		}
 
 		$parent	            = "wc tool";
 		$supported_commands = array( 'list', 'run' );

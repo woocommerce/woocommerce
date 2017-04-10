@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Coupon Data Store: Custom Post Type.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -14,20 +14,21 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 	/**
 	 * Internal meta type used to store coupon data.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var string
 	 */
 	protected $meta_type = 'post';
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for a coupon.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
 		'discount_type',
 		'coupon_amount',
 		'expiry_date',
+		'date_expires',
 		'usage_count',
 		'individual_use',
 		'product_ids',
@@ -50,11 +51,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Method to create a new coupon in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function create( &$coupon ) {
-		$coupon->set_date_created( current_time( 'timestamp' ) );
+		$coupon->set_date_created( current_time( 'timestamp', true ) );
 
 		$coupon_id = wp_insert_post( apply_filters( 'woocommerce_new_coupon_data', array(
 			'post_type'     => 'shop_coupon',
@@ -63,13 +64,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_title'    => $coupon->get_code(),
 			'post_content'  => '',
 			'post_excerpt'  => $coupon->get_description(),
-			'post_date'     => date( 'Y-m-d H:i:s', $coupon->get_date_created() ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $coupon->get_date_created() ) ),
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
-			$this->update_post_meta( $coupon, true );
+			$this->update_post_meta( $coupon );
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
@@ -79,13 +80,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Method to read a coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function read( &$coupon ) {
 		$coupon->set_defaults();
 
-		if ( ! $coupon->get_id() || ! ( $post_object = get_post( $coupon->get_id() ) ) ) {
+		if ( ! $coupon->get_id() || ! ( $post_object = get_post( $coupon->get_id() ) ) || 'shop_coupon' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid coupon.', 'woocommerce' ) );
 		}
 
@@ -93,9 +94,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->set_props( array(
 			'code'                        => $post_object->post_title,
 			'description'                 => $post_object->post_excerpt,
-			'date_created'                => $post_object->post_date,
-			'date_modified'               => $post_object->post_modified,
-			'date_expires'                => get_post_meta( $coupon_id, 'expiry_date', true ),
+			'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+			'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ),
 			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
 			'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
@@ -104,7 +105,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'excluded_product_ids'        => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ),
 			'usage_limit'                 => get_post_meta( $coupon_id, 'usage_limit', true ),
 			'usage_limit_per_user'        => get_post_meta( $coupon_id, 'usage_limit_per_user', true ),
-			'limit_usage_to_x_items'      => get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ),
+			'limit_usage_to_x_items'      => 0 < get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) ? get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) : null,
 			'free_shipping'               => 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ),
 			'product_categories'          => array_filter( (array) get_post_meta( $coupon_id, 'product_categories', true ) ),
 			'excluded_product_categories' => array_filter( (array) get_post_meta( $coupon_id, 'exclude_product_categories', true ) ),
@@ -122,18 +123,20 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Updates a coupon in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 */
 	public function update( &$coupon ) {
+		$coupon->save_meta_data();
 		$post_data = array(
 			'ID'           => $coupon->get_id(),
 			'post_title'   => $coupon->get_code(),
 			'post_excerpt' => $coupon->get_description(),
 		);
 		wp_update_post( $post_data );
+		$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
 		$this->update_post_meta( $coupon );
-		$coupon->save_meta_data();
 		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
 	}
@@ -141,7 +144,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Deletes a coupon from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -155,23 +158,21 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $coupon->get_id() );
 			$coupon->set_id( 0 );
+			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
 			wp_trash_post( $coupon->get_id() );
+			do_action( 'woocommerce_trash_coupon', $id );
 		}
-		do_action( 'woocommerce_delete_coupon', $id );
 	}
 
 	/**
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 *
 	 * @param WC_Coupon
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
-	private function update_post_meta( &$coupon, $force = false ) {
+	private function update_post_meta( &$coupon ) {
 		$updated_props     = array();
-		$changed_props     = array_keys( $coupon->get_changes() );
-
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
@@ -182,7 +183,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'usage_limit_per_user'       => 'usage_limit_per_user',
 			'limit_usage_to_x_items'     => 'limit_usage_to_x_items',
 			'usage_count'                => 'usage_count',
-			'expiry_date'                => 'date_expires',
+			'date_expires'            	 => 'date_expires',
 			'free_shipping'              => 'free_shipping',
 			'product_categories'         => 'product_categories',
 			'exclude_product_categories' => 'excluded_product_categories',
@@ -192,10 +193,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'customer_email'             => 'email_restrictions',
 		);
 
-		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			if ( ! in_array( $prop, $changed_props ) && ! $force ) {
-				continue;
-			}
+		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
+		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $coupon->{"get_$prop"}( 'edit' );
 			switch ( $prop ) {
 				case 'individual_use' :
@@ -214,6 +213,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				case 'email_restrictions' :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'sanitize_email', $value ) ) );
 					break;
+				case 'date_expires' :
+					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->getTimestamp() : null ) );
+					update_post_meta( $coupon->get_id(), 'expiry_date', ( $value ? $value->date( 'Y-m-d' ) : '' ) ); // Update the old meta key for backwards compatibility.
+					break;
 				default :
 					$updated = update_post_meta( $coupon->get_id(), $meta_key, $value );
 					break;
@@ -222,33 +225,38 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
 	}
 
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function increase_usage_count( &$coupon, $used_by = '' ) {
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count( 'edit' ) );
+		$new_count = $this->update_usage_count_meta( $coupon, 'increase' );
 		if ( $used_by ) {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 		}
+		return $new_count;
 	}
 
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param string $used_by Either user ID or billing email
+	 * @return int New usage count
 	 */
 	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
-		update_post_meta( $coupon->get_id(), 'usage_count', $coupon->get_usage_count() );
+		$new_count = $this->update_usage_count_meta( $coupon, 'decrease' );
 		if ( $used_by ) {
 			/**
 			 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes.
@@ -260,12 +268,33 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 			}
 		}
+		return $new_count;
+	}
+
+	/**
+	 * Increase or decrease the usage count for a coupon by 1.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Coupon
+	 * @param string $operation 'increase' or 'decrease'
+	 * @return int New usage count
+	 */
+	private function update_usage_count_meta( &$coupon, $operation = 'increase' ) {
+		global $wpdb;
+		$id = $coupon->get_id();
+		$operator = ( 'increase' === $operation ) ? '+' : '-';
+
+		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
+
+		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
 	}
 
 	/**
 	 * Get the number of uses for a coupon by user ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Coupon
 	 * @param id $user_id
 	 * @return int
@@ -278,7 +307,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Return a coupon code for a specific ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $id
 	 * @return string Coupon Code
 	 */
@@ -297,7 +326,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Return an array of IDs for for a specific coupon code.
 	 * Can return multiple to check for existence.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $code
 	 * @return array Array of IDs.
 	 */

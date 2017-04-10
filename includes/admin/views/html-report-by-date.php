@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			/* translators: 1: start date 2: end date */
 			printf(
 				esc_html__( 'From %1$s to %2$s', 'woocommerce' ),
-				wc_clean( $_GET['start_date'] ),
-				wc_clean( $_GET['end_date'] )
+				esc_html( wc_clean( $_GET['start_date'] ) ),
+				esc_html( wc_clean( $_GET['end_date'] ) )
 			);
 		?></h3>
 	<?php else : ?>
@@ -54,6 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<span>&ndash;</span>
 							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" name="end_date" class="range_datepicker to" />
 							<input type="submit" class="button" value="<?php esc_attr_e( 'Go', 'woocommerce' ); ?>" />
+							<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
 						</div>
 					</form>
 				</li>

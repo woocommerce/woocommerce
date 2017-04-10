@@ -119,7 +119,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'title'             => __( 'Specific countries', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
-				'css'               => 'width: 450px;',
+				'css'               => 'width: 400px;',
 				'default'           => '',
 				'options'           => WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(

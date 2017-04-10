@@ -114,12 +114,6 @@ jQuery( function( $ ) {
 
 	}).change();
 
-	$( document.body ).on( 'woocommerce-product-type-change', function( e, select_val ) {
-		if ( 'variable' !== select_val && 0 < $( '#variable_product_options' ).find( 'input[name^=variable_sku]' ).length && $( document.body ).triggerHandler( 'woocommerce-display-product-type-alert', select_val ) !== false ) {
-			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
-		}
-	});
-
 	$( 'input#_downloadable, input#_virtual' ).change( function() {
 		show_and_hide_panels();
 	});
@@ -413,7 +407,7 @@ jQuery( function( $ ) {
 					window.alert( response.error );
 				} else if ( response.slug ) {
 					// Success.
-					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.slug + '" selected="selected">' + response.name + '</option>' );
+					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
 					$wrapper.find( 'select.attribute_values' ).change();
 				}
 
@@ -439,10 +433,11 @@ jQuery( function( $ ) {
 		});
 
 		var data = {
-			post_id:  woocommerce_admin_meta_boxes.post_id,
-			data:     $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
-			action:   'woocommerce_save_attributes',
-			security: woocommerce_admin_meta_boxes.save_attributes_nonce
+			post_id     : woocommerce_admin_meta_boxes.post_id,
+			product_type: $( '#product-type' ).val(),
+			data        : $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			action      : 'woocommerce_save_attributes',
+			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {

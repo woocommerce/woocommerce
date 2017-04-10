@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      limit int Maximum of orders to retrieve.
  *      offset int Offset of orders to retrieve.
  *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ *      date_before string Get orders before a certain date ( strtotime() compatibile string )
+ *      date_after string Get orders after a certain date ( strtotime() compatibile string )
  *      exclude array Order IDs to exclude from the query.
  *      orderby string Order by date, title, id, modified, rand etc
  *      order string ASC or DESC
@@ -46,19 +48,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_orders( $args ) {
 	$args = wp_parse_args( $args, array(
-		'status'   => array_keys( wc_get_order_statuses() ),
-		'type'     => wc_get_order_types( 'view-orders' ),
-		'parent'   => null,
-		'customer' => null,
-		'email'    => '',
-		'limit'    => get_option( 'posts_per_page' ),
-		'offset'   => null,
-		'page'     => 1,
-		'exclude'  => array(),
-		'orderby'  => 'date',
-		'order'    => 'DESC',
-		'return'   => 'objects',
-		'paginate' => false,
+		'status'      => array_keys( wc_get_order_statuses() ),
+		'type'        => wc_get_order_types( 'view-orders' ),
+		'parent'      => null,
+		'customer'    => null,
+		'email'       => '',
+		'limit'       => get_option( 'posts_per_page' ),
+		'offset'      => null,
+		'page'        => 1,
+		'exclude'     => array(),
+		'orderby'     => 'date',
+		'order'       => 'DESC',
+		'return'      => 'objects',
+		'paginate'    => false,
+		'date_before' => '',
+		'date_after'  => '',
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
@@ -89,8 +93,8 @@ function wc_get_orders( $args ) {
  * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -100,6 +104,7 @@ function wc_get_order( $the_order = false ) {
  * Get all order statuses.
  *
  * @since 2.2
+ * @used-by WC_Order::set_status
  * @return array
  */
 function wc_get_order_statuses() {
@@ -127,7 +132,7 @@ function wc_is_order_status( $maybe_status ) {
 
 /**
  * Get list of statuses which are consider 'paid'.
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_is_paid_statuses() {
@@ -162,7 +167,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 /**
  * Get all registered order types.
  *
- * $for optionally define what you are getting order types for so only relevent types are returned.
+ * $for optionally define what you are getting order types for so only relevant types are returned.
  *
  * e.g. for 'order-meta-boxes', 'order-count'
  *
@@ -367,14 +372,14 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp' ) );
+	$download->set_access_granted( current_time( 'timestamp', true ) );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
 
 	if ( $expiry > 0 ) {
-		$order_completed_date = date_i18n( "Y-m-d", $order->get_date_completed() );
-		$download->set_access_expires( strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+		$from_date = $order->get_date_completed() ? $order->get_date_completed()->format( 'Y-m-d' ) : current_time( 'mysql', true );
+		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
 	return $download->save();
@@ -477,26 +482,32 @@ function wc_ship_to_billing_address_only() {
  */
 function wc_create_refund( $args = array() ) {
 	$default_args = array(
-		'amount'     => 0,
-		'reason'     => null,
-		'order_id'   => 0,
-		'refund_id'  => 0,
-		'line_items' => array(),
+		'amount'         => 0,
+		'reason'         => null,
+		'order_id'       => 0,
+		'refund_id'      => 0,
+		'line_items'     => array(),
+		'refund_payment' => false,
+		'restock_items'  => false,
 	);
 
 	try {
-		$args   = wp_parse_args( $args, $default_args );
-		$order  = wc_get_order( $args['order_id'] );
-		$refund = new WC_Order_Refund( $args['refund_id'] );
+		$args = wp_parse_args( $args, $default_args );
 
-		if ( ! $order ) {
+		if ( ! $order = wc_get_order( $args['order_id'] ) ) {
 			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
 
-		// prevent negative refunds
-		if ( 0 > $args['amount'] ) {
-			$args['amount'] = 0;
+		$remaining_refund_amount = $order->get_remaining_refund_amount();
+		$remaining_refund_items  = $order->get_remaining_refund_items();
+		$refund_item_count       = 0;
+		$refund                  = new WC_Order_Refund( $args['refund_id'] );
+
+		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
+			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
 		}
+
+		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
@@ -538,19 +549,128 @@ function wc_create_refund( $args = array() ) {
 				}
 
 				$refund->add_item( $refunded_item );
+				$refund_item_count += $qty;
 			}
 		}
 
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
-		$refund->save();
+
+		/**
+		 * Action hook to adjust refund before save.
+		 * @since 3.0.0
+		 */
+		do_action( 'woocommerce_create_refund', $refund, $args );
+
+		if ( $refund->save() ) {
+			if ( $args['refund_payment'] ) {
+				$result = wc_refund_payment( $order, $refund->get_amount(), $refund->get_reason() );
+
+				if ( is_wp_error( $result ) ) {
+					$refund->delete();
+					return $result;
+				}
+			}
+
+			if ( $args['restock_items'] ) {
+				wc_restock_refunded_items( $order, $args['line_items'] );
+			}
+
+			// Trigger notification emails
+			if ( ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ) ) {
+				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
+			} else {
+				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
+
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+
+				if ( $parent_status ) {
+					$order->update_status( $parent_status );
+				}
+			}
+		}
+
+		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
+		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
 	} catch ( Exception $e ) {
 		return new WP_Error( 'error', $e->getMessage() );
 	}
 
 	return $refund;
+}
+
+/**
+ * Try to refund the payment for an order via the gateway.
+ *
+ * @since 3.0.0
+ * @param WC_Order $order
+ * @param string $amount
+ * @param string $reason
+ * @return bool|WP_Error
+ */
+function wc_refund_payment( $order, $amount, $reason = '' ) {
+	try {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
+		}
+
+		$gateway_controller = WC_Payment_Gateways::instance();
+		$all_gateways       = $gateway_controller->payment_gateways();
+		$payment_method     = $order->get_payment_method();
+		$gateway            = isset( $all_gateways[ $payment_method ] ) ? $all_gateways[ $payment_method ] : false;
+
+		if ( ! $gateway ) {
+			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );
+		}
+
+		if ( ! $gateway->supports( 'refunds' ) ) {
+			throw new Exception( __( 'The payment gateway for this order does not support automatic refunds.', 'woocommerce' ) );
+		}
+
+		$result = $gateway->process_refund( $order->get_id(), $amount, $reason );
+
+		if ( ! $result ) {
+			throw new Exception( __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ) );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			throw new Exception( $result->get_error_message() );
+		}
+
+		return true;
+
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
+	}
+}
+
+/**
+ * Restock items during refund.
+ *
+ * @since  3.0.0
+ * @param  WC_Order $order
+ * @param  array $refunded_line_items
+ */
+function wc_restock_refunded_items( $order, $refunded_line_items ) {
+	$line_items = $order->get_items();
+
+	foreach ( $line_items as $item_id => $item ) {
+		if ( ! isset( $refunded_line_items[ $item_id ], $refunded_line_items[ $item_id ]['qty'] ) ) {
+			continue;
+		}
+		$product = $item->get_product();
+
+		if ( $product && $product->managing_stock() ) {
+			$old_stock = $product->get_stock_quantity();
+			$new_stock = wc_update_product_stock( $product, $refunded_line_items[ $item_id ]['qty'], 'increase' );
+
+			$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+
+			do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
+		}
+	}
 }
 
 /**
@@ -610,8 +730,6 @@ function wc_order_fully_refunded( $order_id ) {
 		'order_id'   => $order_id,
 		'line_items' => array(),
 	) );
-
-	wc_delete_shop_order_transients( $order );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
@@ -630,7 +748,7 @@ function wc_order_search( $term ) {
 /**
  * Update total sales amount for each product within a paid order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_total_sales_counts( $order_id ) {
@@ -642,9 +760,9 @@ function wc_update_total_sales_counts( $order_id ) {
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
-			if ( $product = $item->get_product() ) {
-				$product->set_total_sales( $product->get_total_sales() + absint( $item['qty'] ) );
-				$product->save();
+			if ( $product_id = $item->get_product_id() ) {
+				$data_store = WC_Data_Store::load( 'product' );
+				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
 			}
 		}
 	}
@@ -665,7 +783,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 /**
  * Update used coupon amount for each coupon within an order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_coupon_usage_counts( $order_id ) {
@@ -699,10 +817,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce' :
-					$coupon->dcr_usage_count( $used_by );
+					$coupon->decrease_usage_count( $used_by );
 				break;
 				case 'increase' :
-					$coupon->inc_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by );
 				break;
 			}
 		}

@@ -76,6 +76,7 @@
 
 	ul.page-numbers {
 		padding: 0;
+		display: block;
 	}
 
 	span.page-numbers,
@@ -280,16 +281,24 @@ a.remove {
 	}
 }
 
-dl.variation {
-	dt {
+dl.variation, .wc-item-meta {
+	list-style: none outside;
+
+	dt, .wc-item-meta-label {
 		float: left;
 		clear: both;
 		margin-right: .25em;
 		display: inline-block;
+		list-style: none outside;
 	}
 
 	dd {
 		margin: 0;
+	}
+
+	p,
+	&:last-child {
+		margin-bottom: 0;
 	}
 }
 
@@ -339,6 +348,9 @@ dl.variation {
 			padding-top: .72em;
 			padding-bottom: .72em;
 		}
+		.button.disabled {
+			opacity: 0.2;
+		}
 	}
 }
 
@@ -358,6 +370,11 @@ table.variations {
 
 	figure {
 		margin: 0;
+	}
+
+	.woocommerce-product-gallery__image:nth-child(n+2) {
+		width: 25%;
+		display: inline-block;
 	}
 
 	.flex-control-thumbs {
@@ -512,6 +529,26 @@ table.variations {
 			}
 		}
 	}
+}
+
+/**
+ * Photoswipe
+ * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
+ */
+
+button.pswp__button,
+button.pswp__button:hover,
+button.pswp__button--arrow--left::before,
+button.pswp__button--arrow--right::before {
+	background-color: transparent !important; /* 1 */
+}
+
+button.pswp__button--close:hover {
+	background-position: 0 -44px;
+}
+
+button.pswp__button--zoom:hover {
+	background-position: -88px 0;
 }
 
 /**
@@ -749,6 +786,23 @@ table.variations {
 	.quantity {
 		input {
 			width: 4em;
+		}
+	}
+}
+
+#shipping_method {
+	list-style: none;
+	margin-top: 1em;
+
+	li {
+		margin-bottom: .5em;
+
+		input {
+			float: left;
+		}
+
+		label {
+			line-height: 1.15;
 		}
 	}
 }

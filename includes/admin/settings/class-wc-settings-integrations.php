@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Integrations' ) ) :
+if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 
 /**
  * WC_Settings_Integrations.

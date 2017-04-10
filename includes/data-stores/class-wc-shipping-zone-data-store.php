@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Shipping Zone Data Store.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -15,7 +15,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Method to create a new shipping zone.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Shipping_Zone
 	 */
 	public function create( &$zone ) {
@@ -35,7 +35,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Update zone in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Shipping_Zone
 	 */
 	public function update( &$zone ) {
@@ -56,7 +56,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Method to read a shipping zone from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Shipping_Zone
 	 */
 	public function read( &$zone ) {
@@ -67,7 +67,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			$zone->read_meta_data();
 			$zone->set_object_read( true );
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
-		} elseif ( $zone_data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1;", $zone->get_id() ) ) ) {
+		} elseif ( $zone_data = $wpdb->get_row( $wpdb->prepare( "SELECT zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1;", $zone->get_id() ) ) ) {
 			$zone->set_zone_name( $zone_data->zone_name );
 			$zone->set_zone_order( $zone_data->zone_order );
 			$this->read_zone_locations( $zone );
@@ -82,7 +82,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Deletes a shipping zone from the database.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Shipping_Zone
 	 * @param  array $args Array of args to pass to the delete method.
 	 * @return bool result
@@ -94,14 +94,18 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone->get_id() ) );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $zone->get_id() ) );
 			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			$id = $zone->get_id();
 			$zone->set_id( null );
+			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+			do_action( 'woocommerce_delete_shipping_zone', $id );
 		}
 	}
 
 	/**
 	 * Get a list of shipping methods for a specific zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int   $zone_id      Zone ID
 	 * @param  bool  $enabled_only True to request enabled methods only.
 	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
@@ -115,7 +119,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Get count of methods for a zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int Zone ID
 	 * @return int Method Count
 	 */
@@ -127,7 +131,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Add a shipping method to a zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $zone_id Zone ID
 	 * @param  string $type    Method Type/ID
 	 * @param  int    $order   Method Order
@@ -154,30 +158,31 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Delete a method instance.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $instance_id
 	 */
 	public function delete_method( $instance_id ) {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'instance_id' => $instance_id ) );
+		do_action( 'woocommerce_delete_shipping_zone_method', $instance_id );
 	}
 
 	/**
 	 * Get a shipping zone method instance.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int
 	 * @return object
 	 */
 	public function get_method( $instance_id ) {
 		global $wpdb;
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d LIMIT 1;", $instance_id ) );
+		return $wpdb->get_row( $wpdb->prepare( "SELECT zone_id, method_id, instance_id, method_order, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d LIMIT 1;", $instance_id ) );
 	}
 
 	/**
 	 * Find a matching zone ID for a given package.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  object $package
 	 * @return int
 	 */
@@ -221,7 +226,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Return an ordered list of zones.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array An array of objects containing a zone_id, zone_name, and zone_order.
 	 */
 	public function get_zones() {
@@ -233,7 +238,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Return a zone ID from an instance ID.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int
 	 * @return int
 	 */
@@ -249,7 +254,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	private function read_zone_locations( &$zone ) {
 		global $wpdb;
-		if ( $locations = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d;", $zone->get_id() ) ) ) {
+		if ( $locations = $wpdb->get_results( $wpdb->prepare( "SELECT location_code, location_type FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d;", $zone->get_id() ) ) ) {
 			foreach ( $locations as $location ) {
 				$zone->add_location( $location->location_code, $location->location_type );
 			}
@@ -260,7 +265,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Save locations to the DB.
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Shipping_Zone
 	 */
 	private function save_locations( &$zone ) {

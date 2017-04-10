@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handles Refunds and other API requests such as capture.
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Gateway_Paypal_API_Handler {
 
@@ -88,7 +88,7 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'DoCapture Response: ' . print_r( $raw_response, true ) );
+		WC_Gateway_Paypal::log( 'DoCapture Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( empty( $raw_response['body'] ) ) {
 			return new WP_Error( 'paypal-api', 'Empty Response' );
@@ -120,7 +120,7 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'Refund Response: ' . print_r( $raw_response, true ) );
+		WC_Gateway_Paypal::log( 'Refund Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( empty( $raw_response['body'] ) ) {
 			return new WP_Error( 'paypal-api', 'Empty Response' );
@@ -136,7 +136,7 @@ class WC_Gateway_Paypal_API_Handler {
 
 /**
  * Here for backwards compatibility.
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
 	public static function get_request( $order, $amount = null, $reason = '' ) {

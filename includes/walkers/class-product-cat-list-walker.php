@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Product_Cat_List_Walker' ) ) :
+if ( ! class_exists( 'WC_Product_Cat_List_Walker', false ) ) :
 
 class WC_Product_Cat_List_Walker extends Walker {
 

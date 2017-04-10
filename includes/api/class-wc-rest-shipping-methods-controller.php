@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -48,6 +48,12 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -190,16 +196,19 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 					'description' => __( 'Method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'description' => array(
 					'description' => __( 'Shipping method description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);

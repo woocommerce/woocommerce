@@ -182,23 +182,16 @@ class WC_Comments {
 
 	/**
 	 * Validate the comment ratings.
+	 *
 	 * @param  array $comment_data
 	 * @return array
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if (
-			! is_admin()
-			&& 'product' === get_post_type( $_POST['comment_post_ID'] )
-			&& empty( $_POST['rating'] )
-			&& '' === $comment_data['comment_type']
-			&& 'yes' === get_option( 'woocommerce_enable_review_rating' )
-			&& 'yes' === get_option( 'woocommerce_review_rating_required' )
-		) {
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( $_POST['comment_post_ID'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_enable_review_rating' ) && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
-
 		return $comment_data;
 	}
 
@@ -212,6 +205,11 @@ class WC_Comments {
 				return;
 			}
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
+
+			$post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
+			if ( $post_id ) {
+				self::clear_transients( $post_id );
+			}
 		}
 	}
 
@@ -344,7 +342,7 @@ class WC_Comments {
 	/**
 	 * Get product rating for a product. Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return float
 	 */
@@ -378,7 +376,7 @@ class WC_Comments {
 	/**
 	 * Get product review count for a product (not replies). Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return int
 	 */
@@ -403,7 +401,7 @@ class WC_Comments {
 	/**
 	 * Get product rating count for a product. Please note this is not cached.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Product $product
 	 * @return array of integers
 	 */

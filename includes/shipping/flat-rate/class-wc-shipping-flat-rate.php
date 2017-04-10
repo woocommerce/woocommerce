@@ -100,7 +100,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'percent' => '',
 			'min_fee' => '',
 			'max_fee' => '',
-		), $atts );
+		), $atts, 'fee' );
 
 		$calculated_fee = 0;
 

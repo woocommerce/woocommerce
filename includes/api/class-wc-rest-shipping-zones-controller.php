@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,12 +36,24 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'name' => array(
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Shipping zone name.', 'woocommerce' ),
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -60,6 +72,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 				),
@@ -268,7 +281,6 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 					'description' => __( 'Shipping zone name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -277,10 +289,6 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 					'description' => __( 'Shipping zone order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
 				),
 			),
 		);

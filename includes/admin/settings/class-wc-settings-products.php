@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Products' ) ) :
+if ( ! class_exists( 'WC_Settings_Products', false ) ) :
 
 /**
  * WC_Settings_Products.
@@ -335,16 +335,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Stock display format', 'woocommerce' ),
-					'desc'     => __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
+					'desc'     => __( 'This controls how stock quantities are displayed on the frontend.', 'woocommerce' ),
 					'id'       => 'woocommerce_stock_format',
 					'css'      => 'min-width:150px;',
 					'class'    => 'wc-enhanced-select',
 					'default'  => '',
 					'type'     => 'select',
 					'options'  => array(
-						''           => __( 'Always show stock e.g. "12 in stock"', 'woocommerce' ),
-						'low_amount' => __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In stock"', 'woocommerce' ),
-						'no_amount'  => __( 'Never show stock amount', 'woocommerce' ),
+						''           => __( 'Always show quantity remaining in stock e.g. "12 in stock"', 'woocommerce' ),
+						'low_amount' => __( 'Only show quantity remaining in stock when low e.g. "Only 2 left in stock"', 'woocommerce' ),
+						'no_amount'  => __( 'Never show quantity remaining in stock', 'woocommerce' ),
 					),
 					'desc_tip' => true,
 				),

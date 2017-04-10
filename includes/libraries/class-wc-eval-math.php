@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Eval_Math' ) ) {
+if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 	/**
 	 * Class WC_Eval_Math. Supports basic math only (removed eval function).
 	 *
@@ -208,7 +208,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				} elseif ( in_array( $op, $ops ) and ! $expecting_op ) {
 					return self::trigger( "unexpected operator '$op'" );
 				} else { // I don't even want to know what you did to get here
-					return self::trigger( "an unexpected error occured" );
+					return self::trigger( "an unexpected error occurred" );
 				}
 				if ( strlen( $expr ) == $index ) {
 					if ( in_array( $op, $ops ) ) { // did we end with an operator? bad.
