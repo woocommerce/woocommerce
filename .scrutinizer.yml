@@ -1,0 +1,32 @@
+filter:
+  excluded_paths:
+  - tests/*
+  - apigen/*
+  - dummy-data/*
+  - i18n/*
+  - includes/api/legacy/*
+  - includes/legacy/*
+  - includes/libraries/*
+  - includes/updates/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
+
+checks:
+  php:
+    variable_existence: false
+    verify_access_scope_valid: false
+    verify_argument_usable_as_reference: false
+    verify_property_names: false
+    no_global_keyword: false
+    psr2_switch_declaration: false
+    psr2_control_structure_declaration: false
+    psr2_class_declaration: false
+    one_class_per_file: false
+    no_exit: false
+    avoid_superglobals: false
+    avoid_closing_tag: false
+
+tools:
+  sensiolabs_security_checker: true

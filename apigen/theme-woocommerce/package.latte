@@ -1,0 +1,23 @@
+{layout '@layout.latte'}
+{var $active = 'package'}
+
+{block title}{if $package != 'None'}Package {$package}{else}No package{/if}{/block}
+
+{block content}
+<div id="content" class="package">
+	<h1>{if $package != 'None'}Package {$package|packageLinks:false|noescape}{else}No package{/if}</h1>
+
+	{if $subpackages}
+	<div class="panel panel-default">
+		<div class="panel-heading"><h2>Packages summary</h2></div>
+		<table class="summary table table-bordered table-striped" id="packages">
+		<tr n:foreach="$subpackages as $package">
+			<td class="name"><a href="{$package|packageUrl}">{$package}</a></td>
+		</tr>
+		</table>
+	</div>
+	{/if}
+
+	{include '@elementlist.latte'}
+</div>
+{/block}
