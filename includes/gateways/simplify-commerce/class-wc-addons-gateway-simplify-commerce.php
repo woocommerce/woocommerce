@@ -213,7 +213,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				}
 
 				// Reduce stock levels
-				wc_reduce_stock_levels( $order_id );
+				wc_reduce_stock_levels( $order );
 
 				// Remove cart
 				WC()->cart->empty_cart();
