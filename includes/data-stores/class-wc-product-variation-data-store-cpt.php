@@ -179,32 +179,32 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 	/**
 	 * Generates a title with attribute information for a variation.
-	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
-	 * All other products will get a title of the form "Name - Value, Value"
+	 * Products will get a title of the form "Name - Value, Value" or just "Name".
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$include_attribute_names = false;
 		$attributes = (array) $product->get_attributes();
 
-		// Determine whether to include attribute names through counting the number of one-word attribute values.
-		$one_word_attributes = 0;
-		foreach ( $attributes as $name => $value ) {
-			if ( false === strpos( $value, '-' ) ) {
-				++$one_word_attributes;
-			}
-			if ( $one_word_attributes > 1 ) {
-				$include_attribute_names = true;
-				break;
+		// Don't include attributes if the product has 3+ attributes.
+		$should_include_attributes = count( $attributes ) < 3;
+
+		// Don't include attributes if an attribute name has 2+ words.
+		if ( $should_include_attributes ) {
+			foreach( $attributes as $name => $value ) {
+				if ( false !== strpos( $name, '-' ) ) {
+					$should_include_attributes = false;
+					break;
+				}
 			}
 		}
 
-		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
+		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
+
 		$title_base_text         = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_attributes_text   = wc_get_formatted_variation( $product, true, $include_attribute_names );
+		$title_attributes_text   = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 		$separator               = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
 
 		return apply_filters( 'woocommerce_product_variation_title',
