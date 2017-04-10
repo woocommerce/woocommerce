@@ -609,7 +609,7 @@ class WC_Cart {
 	 */
 	public function get_cross_sells() {
 		$cross_sells = array();
-		$in_cart = array();
+		$in_cart     = array();
 		if ( ! $this->is_empty() ) {
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
 				if ( $values['quantity'] > 0 ) {
@@ -619,7 +619,7 @@ class WC_Cart {
 			}
 		}
 		$cross_sells = array_diff( $cross_sells, $in_cart );
-		return $cross_sells;
+		return wp_parse_id_list( $cross_sells );
 	}
 
 	/**
