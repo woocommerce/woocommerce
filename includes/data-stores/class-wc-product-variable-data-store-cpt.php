@@ -289,9 +289,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_is_in_stock( $product ) {
 		global $wpdb;
-		$children            = $product->get_visible_children();
-		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : 0;
-		return $children > $oufofstock_children;
+		$children            = $product->get_children();
+		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'outofstock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . " )" ) : 0;
+		return count( $children ) > $oufofstock_children;
 	}
 
 	/**
@@ -393,6 +393,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param $force_delete False to trash.
 	 */
 	public function delete_variations( $product_id, $force_delete = false ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
+			return;
+		}
+
 		$variation_ids = wp_parse_id_list( get_posts( array(
 			'post_parent' => $product_id,
 			'post_type'   => 'product_variation',

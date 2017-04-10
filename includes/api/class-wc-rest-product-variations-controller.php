@@ -158,7 +158,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
 			'date_modified'         => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
 			'date_modified_gmt'     => wc_rest_prepare_date_response( $object->get_date_modified() ),
-			'description'           => $object->get_description(),
+			'description'           => wc_format_content( $object->get_description() ),
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
 			'price'                 => $object->get_price(),
@@ -259,13 +259,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		}
 
 		// Thumbnail.
-		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
-			$image = $request['image'];
-			if ( is_array( $image ) ) {
-				$image['position'] = 0;
-			}
+		if ( isset( $request['image'] ) ) {
+			if ( is_array( $request['image'] ) ) {
+				$image = $request['image'];
+				if ( is_array( $image ) ) {
+					$image['position'] = 0;
+				}
 
-			$variation = $this->set_product_images( $variation, array( $image ) );
+				$variation = $this->set_product_images( $variation, array( $image ) );
+			} else {
+				$variation->set_image_id( '' );
+			}
 		}
 
 		// Virtual variation.

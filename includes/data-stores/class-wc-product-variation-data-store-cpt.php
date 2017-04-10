@@ -73,12 +73,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
 		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) ) {
+			global $wpdb;
+
 			$new_title = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
-			wp_update_post( array(
-				'ID'         => $product->get_id(),
-				'post_title' => $new_title,
-			) );
+			$wpdb->update( $wpdb->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
+			clean_post_cache( $product->get_id() );
 		}
 
 		// Set object_read true once all data is read.
@@ -136,6 +136,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
 		$changes = $product->get_changes();
 		$title   = $this->generate_product_title( $product );
 
@@ -153,6 +154,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
@@ -160,7 +162,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->update_attributes( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->update_version_and_type( $product );
@@ -238,7 +239,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
 			'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
 			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
-			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
 			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
@@ -256,7 +256,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'length'            => get_post_meta( $id, '_length', true ),
 			'width'             => get_post_meta( $id, '_width', true ),
 			'height'            => get_post_meta( $id, '_height', true ),
-			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
+			'tax_class'         => ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : get_post_meta( $id, '_tax_class', true ),
 		) );
 
 		if ( $product->is_on_sale( 'edit' ) ) {
@@ -280,6 +280,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
 			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
 		) );
+
+		// Pull data from the parent when there is no user-facing way to set props.
+		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
+		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
+		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
 	}
 
 	/**

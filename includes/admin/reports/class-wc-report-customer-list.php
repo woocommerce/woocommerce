@@ -24,8 +24,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	public function __construct() {
 
 		parent::__construct( array(
-			'singular'  => __( 'Customer', 'woocommerce' ),
-			'plural'    => __( 'Customers', 'woocommerce' ),
+			'singular'  => 'customer',
+			'plural'    => 'customers',
 			'ajax'      => false,
 		) );
 	}

@@ -847,7 +847,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * @return string
  */
 function wc_format_content( $raw_string ) {
-	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
+	return apply_filters( 'woocommerce_format_content', wpautop( do_shortcode( wp_kses_post( $raw_string ) ) ), $raw_string );
 }
 
 /**

@@ -1,0 +1,53 @@
+source: ./
+
+destination: wc-apidocs
+
+templateConfig: apigen/theme-woocommerce/config.neon
+
+# list of scanned file extensions (e.g. php5, phpt...)
+extensions: [php]
+
+# directories and files matching this file mask will not be parsed
+exclude:
+    - includes/libraries/
+    - includes/api/legacy/
+    - i18n/
+    - node_modules/
+    - wc-apidocs/
+    - tmp/
+    - tests/
+    - .sass-cache/
+    - apigen/
+
+# character set of source files; if you use only one across your files, we recommend you name it
+charset: [UTF-8]
+
+# elements with this name prefix will be considered as the "main project" (the rest will be considered as libraries)
+main: WC
+
+# title of generated documentation
+title: WooCommerce 3.0.x Code Reference
+
+# base url used for sitemap (useful for public doc)
+baseUrl: https://docs.woocommerce.com/wc-apidocs/
+
+# choose ApiGen template theme
+templateTheme: default
+
+# generate documentation for PHP internal classes
+php: false
+
+# generate highlighted source code for elements
+sourceCode: true
+
+# generate tree view of classes, interfaces, traits and exceptions
+tree: true
+
+# generate documentation for deprecated elements
+deprecated: true
+
+# generate list of tasks with @ todo annotation
+todo: true
+
+# add link to ZIP archive of documentation
+download: false

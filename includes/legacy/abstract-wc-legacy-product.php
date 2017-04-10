@@ -535,10 +535,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		}
 
 		// Sync prices with children
-		self::sync( $product_id );
-
-		// Re-load prices
-		$this->read_product_data();
+		if ( is_callable( array( __CLASS__, 'sync' ) ) ) {
+			self::sync( $product_id );
+		}
 	}
 
 	/**

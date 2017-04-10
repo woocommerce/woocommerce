@@ -586,10 +586,10 @@ class WC_Form_Handler {
 			$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
 
 			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->meta_key ) ) {
-					$variations[ $meta->meta_key ] = $meta->meta_value;
-				} elseif ( meta_is_product_attribute( $meta->meta_key, $meta->meta_value, $product_id ) ) {
-					$variations[ $meta->meta_key ] = $meta->meta_value;
+				if ( taxonomy_is_product_attribute( $meta->key ) ) {
+					$variations[ $meta->key ] = $meta->value;
+				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+					$variations[ $meta->key ] = $meta->value;
 				}
 			}
 

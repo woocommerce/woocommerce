@@ -113,6 +113,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		$order->save_meta_data();
 		$order->set_version( WC_VERSION );
 
 		$changes = $order->get_changes();
@@ -129,9 +130,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			) );
+			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 		$this->update_post_meta( $order );
-		$order->save_meta_data();
 		$order->apply_changes();
 		$this->clear_caches( $order );
 	}

@@ -1,0 +1,24 @@
+{
+  "name": "woocommerce/woocommerce",
+  "description": "An e-commerce toolkit that helps you sell anything. Beautifully.",
+  "homepage": "https://woocommerce.com/",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0+",
+  "require": {
+    "composer/installers": "~1.2"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "*",
+    "wp-coding-standards/wpcs": "0.10.0",
+    "wimg/php-compatibility": "*",
+    "simplyadmire/composer-plugins" : "@dev"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
+    ],
+    "post-update-cmd": [
+      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
+    ]
+  }
+}
