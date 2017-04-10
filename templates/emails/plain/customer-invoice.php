@@ -23,14 +23,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 echo "= " . $email_heading . " =\n\n";
 
 if ( $order->has_status( 'pending' ) ) {
-	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name', 'display' ), $order->get_checkout_payment_url() ) . "\n\n";
+	echo sprintf( __( 'An order has been created for you on %1$s. To pay for this order please use the following link: %2$s', 'woocommerce' ), get_bloginfo( 'name', 'display' ), $order->get_checkout_payment_url() ) . "\n\n";
 }
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /**
  * @hooked WC_Emails::order_details() Shows the order details table.
- * @hooked WC_Emails::order_schema_markup() Adds Schema.org markup.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
  * @since 2.5.0
  */
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );

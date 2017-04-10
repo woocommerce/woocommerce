@@ -46,15 +46,16 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 							<?php
 							if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
-							} else if ( 'method' === $column_id ) {
-								if ( ! empty ( $method['method']['last4'] ) ) {
-									echo sprintf( __( '%s ending in %s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
+							} elseif ( 'method' === $column_id ) {
+								if ( ! empty( $method['method']['last4'] ) ) {
+									/* translators: 1: credit card type 2: last 4 digits */
+									echo sprintf( __( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
 								} else {
 									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
 								}
-							} else if ( 'expires' === $column_id ) {
+							} elseif ( 'expires' === $column_id ) {
 								echo esc_html( $method['expires'] );
-							} else if ( 'actions' === $column_id ) {
+							} elseif ( 'actions' === $column_id ) {
 								foreach ( $method['actions'] as $key => $action ) {
 									echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>&nbsp;';
 								}
@@ -75,4 +76,4 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 
 <?php do_action( 'woocommerce_after_account_payment_methods', $has_methods ); ?>
 
-<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'add-payment-method' ) ); ?>"><?php esc_html_e( 'Add Payment Method', 'woocommerce' ); ?></a>
+<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'add-payment-method' ) ); ?>"><?php esc_html_e( 'Add payment method', 'woocommerce' ); ?></a>

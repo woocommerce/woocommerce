@@ -11,14 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
-	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
-	<h1>
-		<?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?>
-	</h1>
+	<h1><?php echo get_admin_page_title(); ?></h1>
+
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
 			<?php foreach ( $sections as $section_id => $section ) : ?>
-				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php if ( $section_id !== end( $section_keys ) ) echo ' |'; ?></li>
+				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php if ( end( $section_keys ) !== $section_id ) echo ' |'; ?></li>
 			<?php endforeach; ?>
 		</ul>
 		<br class="clear" />
@@ -52,10 +50,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( 'Storefront' !== $theme['Name'] && 'featured' !== $current_section ) : ?>
 		<div class="storefront">
-			<a href="https://woocommerce.com/storefront/" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
+			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
 			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
-			<p><?php printf( __( 'We recommend Storefront, the %sofficial%s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
-			<p><?php printf( __( 'Storefront is an intuitive, flexible and %sfree%s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+			<p><?php _e( 'We recommend Storefront, the <em>official</em> WooCommerce theme.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ); ?></p>
 			<p>
 				<a href="https://woocommerce.com/storefront/" target="_blank" class="button"><?php _e( 'Read all about it', 'woocommerce' ) ?></a>
 				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>

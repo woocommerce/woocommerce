@@ -22,7 +22,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	public function __construct( $instance_id = 0 ) {
 		$this->id                    = 'flat_rate';
 		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Flat Rate', 'woocommerce' );
+		$this->method_title          = __( 'Flat rate', 'woocommerce' );
 		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
@@ -66,11 +66,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );
@@ -100,7 +100,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'percent' => '',
 			'min_fee' => '',
 			'max_fee' => '',
-		), $atts );
+		), $atts, 'fee' );
 
 		$calculated_fee = 0;
 
@@ -136,7 +136,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
 		$cost      = $this->get_option( 'cost' );
 
-		if ( $cost !== '' ) {
+		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
@@ -144,7 +144,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			) );
 		}
 
-		// Add shipping class costs
+		// Add shipping class costs.
 		$shipping_classes = WC()->shipping->get_shipping_classes();
 
 		if ( ! empty( $shipping_classes ) ) {
@@ -156,24 +156,24 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
-				if ( $class_cost_string === '' ) {
+				if ( '' === $class_cost_string ) {
 					continue;
 				}
 
 				$has_costs  = true;
 				$class_cost = $this->evaluate_cost( $class_cost_string, array(
 					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 				) );
 
-				if ( $this->type === 'class' ) {
+				if ( 'class' === $this->type ) {
 					$rate['cost'] += $class_cost;
 				} else {
 					$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
 				}
 			}
 
-			if ( $this->type === 'order' && $highest_class_cost ) {
+			if ( 'order' === $this->type && $highest_class_cost ) {
 				$rate['cost'] += $highest_class_cost;
 			}
 		}

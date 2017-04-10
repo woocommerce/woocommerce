@@ -1,4 +1,4 @@
-/* global wc_enhanced_select_params, shippingZonesLocalizeScript, ajaxurl */
+/* global shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-zones' ),
@@ -6,14 +6,6 @@
 			$save_button    = $( '.wc-shipping-zone-save' ),
 			$row_template   = wp.template( 'wc-shipping-zone-row' ),
 			$blank_template = wp.template( 'wc-shipping-zone-row-blank' ),
-			select2_args    = $.extend({
-				minimumResultsForSearch: 10,
-				allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
-				placeholder: $( this ).data( 'placeholder' ),
-				matcher: function( term, text, opt ) {
-					return text.toUpperCase().indexOf( term.toUpperCase() ) >= 0 || opt.attr( 'alt' ).toUpperCase().indexOf( term.toUpperCase() ) >= 0;
-				}
-			}, getEnhancedSelectFormatString() ),
 
 			// Backbone model
 			ShippingZone       = Backbone.Model.extend({
@@ -87,11 +79,7 @@
 					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
-					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$( document.body ).on( 'click', '.add_shipping_method:not(.disabled)', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
-					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
-					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -137,57 +125,9 @@
 					var view = this;
 					var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
 
-					// Select values in region select
-					_.each( rowData.zone_locations, function( location ) {
-						if ( 'string' === jQuery.type( location ) ) {
-							$tr.find( 'option[value="' + location + '"]' ).prop( 'selected', true );
-						} else {
-							if ( 'postcode' === location.type ) {
-								var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
-
-								if ( postcode_field.val() ) {
-									postcode_field.val( postcode_field.val() + '\n' + location.code );
-								} else {
-									postcode_field.val( location.code );
-								}
-								$tr.find( '.wc-shipping-zone-postcodes' ).show();
-								$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
-							} else {
-								$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
-							}
-						}
-					} );
-
-					if ( rowData.zone_postcodes ) {
-						_.each( rowData.zone_postcodes, function( location ) {
-							var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
-
-							if ( postcode_field.val() ) {
-								postcode_field.val( postcode_field.val() + '\n' + location.code );
-							} else {
-								postcode_field.val( location.code );
-							}
-							$tr.find( '.wc-shipping-zone-postcodes' ).show();
-							$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
-						} );
-					}
-
 					// List shipping methods
 					view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
-
-					// Make the row function
-					$tr.find( '.view' ).show();
-					$tr.find( '.edit' ).hide();
-					$tr.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
-					$tr.find( '.wc-shipping-zone-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
 					$tr.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
-
-					// Editing?
-					if ( true === rowData.editing ) {
-						$tr.addClass( 'editing' );
-						$tr.find( '.wc-shipping-zone-edit' ).trigger( 'click' );
-					}
 				},
 				initRows: function() {
 					// Stripe
@@ -196,7 +136,6 @@
 					} else {
 						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
 					}
-
 					// Tooltips
 					$( '#tiptip_holder' ).removeAttr( 'style' );
 					$( '#tiptip_arrow' ).removeAttr( 'style' );
@@ -209,90 +148,22 @@
 					$method_list.find( '.wc-shipping-zone-method' ).remove();
 
 					if ( _.size( shipping_methods ) ) {
-						_.each( shipping_methods, function( shipping_method, instance_id ) {
+						shipping_methods = _.sortBy( shipping_methods, function( method ) {
+							return parseInt( method.method_order, 10 );
+						} );
+
+						_.each( shipping_methods, function( shipping_method ) {
 							var class_name = 'method_disabled';
 
 							if ( 'yes' === shipping_method.enabled ) {
 								class_name = 'method_enabled';
 							}
 
-							$method_list.prepend( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
+							$method_list.append( '<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method.title + '</li>' );
 						} );
 					} else {
-						$method_list.prepend( '<li class="wc-shipping-zone-method">' + data.strings.no_shipping_methods_offered + '</li>' );
+						$method_list.append( '<li class="wc-shipping-zone-method">' + data.strings.no_shipping_methods_offered + '</li>' );
 					}
-				},
-				onSubmit: function( event ) {
-					event.data.view.block();
-					event.data.view.model.save();
-					event.preventDefault();
-				},
-				onAddNewRow: function( event ) {
-					event.preventDefault();
-
-					var view    = event.data.view,
-						model   = view.model,
-						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
-						changes = {},
-						size    = _.size( zones ),
-						newRow  = _.extend( {}, data.default_zone, {
-							zone_id  : 'new-' + size + '-' + Date.now(),
-							editing  : true
-						} );
-
-					$( '.wc-shipping-zones-blank-state' ).closest( 'tr' ).remove();
-
-					newRow.zone_order = 1 + _.max(
-						_.pluck( zones, 'zone_order' ),
-						function ( val ) {
-							// Cast them all to integers, because strings compare funky. Sighhh.
-							return parseInt( val, 10 );
-						}
-					);
-
-					changes[ newRow.zone_id ] = newRow;
-
-					model.logChanges( changes );
-					view.renderRow( newRow );
-					view.initRows();
-				},
-				onTogglePostcodes: function( event ) {
-					event.preventDefault();
-					var $tr = $( this ).closest( 'tr');
-					$tr.find( '.wc-shipping-zone-postcodes' ).show();
-					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
-				},
-				onEditRow: function( event ) {
-					event.preventDefault();
-					event.data.view.model.trigger( 'change:zones' );
-					$( this ).closest('tr').addClass( 'editing' );
-					$( this ).closest('tr').find('.view').hide();
-					$( this ).closest('tr').find('.edit').show();
-					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
-					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
-
-					var addShippingMethod = $( this ).closest('tr').find('.add_shipping_method');
-					addShippingMethod.addClass( 'disabled' );
-					addShippingMethod.tipTip({ 'attribute': 'data-disabled-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
-				},
-				onCancelEditRow: function( event ) {
-					var view    = event.data.view,
-						model   = view.model,
-						row     = $( this ).closest('tr'),
-						zone_id = row.data('id'),
-						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' );
-
-					event.preventDefault();
-					model.discardChanges( zone_id );
-
-					if ( zones[ zone_id ] ) {
-						zones[ zone_id ].editing = false;
-						row.after( view.rowTemplate( zones[ zone_id ] ) );
-						view.initRow( zones[ zone_id ] );
-					}
-
-					row.remove();
-					view.initRows();
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
@@ -300,19 +171,20 @@
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {},
 						row     = $( this ).closest('tr'),
-						zone_id = $( this ).closest('tr').data('id');
+						zone_id = row.data('id');
 
 					event.preventDefault();
 
-					if ( zones[ zone_id ] ) {
-						delete zones[ zone_id ];
-						changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
-						model.set( 'zones', zones );
-						model.logChanges( changes );
+					if ( window.confirm( data.strings.delete_confirmation_msg ) ) {
+						if ( zones[ zone_id ] ) {
+							delete zones[ zone_id ];
+							changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
+							model.set( 'zones', zones );
+							model.logChanges( changes );
+							event.data.view.block();
+							event.data.view.model.save();
+						}
 					}
-
-					row.remove();
-					view.initRows();
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
@@ -369,45 +241,9 @@
 
 					if ( _.size( changes ) ) {
 						model.logChanges( changes );
+						event.data.view.block();
+						event.data.view.model.save();
 					}
-				},
-				onAddShippingMethod: function( event ) {
-					var zone_id = $( this ).closest('tr').data('id');
-
-					event.preventDefault();
-
-					$( this ).WCBackboneModal({
-						template : 'wc-modal-add-shipping-method',
-						variable : {
-							zone_id : zone_id
-						}
-					});
-
-					$( '.wc-shipping-zone-method-selector select' ).change();
-				},
-				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
-					if ( 'wc-modal-add-shipping-method' === target ) {
-						shippingZoneView.block();
-
-						// Add method to zone via ajax call
-						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
-							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
-							method_id               : posted_data.add_method_id,
-							zone_id                 : posted_data.zone_id
-						}, function( response, textStatus ) {
-							if ( 'success' === textStatus && response.success ) {
-								// Method was added. Render methods.
-								shippingZoneView.renderShippingMethods( posted_data.zone_id, response.data.methods );
-							}
-							shippingZoneView.unblock();
-						}, 'json' );
-					}
-				},
-				onChangeShippingMethodSelector: function() {
-					var description = $( this ).find( 'option:selected' ).data( 'description' );
-					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
-					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
-					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				}
 			} ),
 			shippingZone = new ShippingZone({
@@ -427,55 +263,5 @@
 			handle: 'td.wc-shipping-zone-sort',
 			scrollSensitivity: 40
 		});
-
-		function getEnhancedSelectFormatString() {
-			var formatString = {
-				formatMatches: function( matches ) {
-					if ( 1 === matches ) {
-						return wc_enhanced_select_params.i18n_matches_1;
-					}
-					return wc_enhanced_select_params.i18n_matches_n.replace( '%qty%', matches );
-				},
-				formatNoMatches: function() {
-					return wc_enhanced_select_params.i18n_no_matches;
-				},
-				formatAjaxError: function() {
-					return wc_enhanced_select_params.i18n_ajax_error;
-				},
-				formatInputTooShort: function( input, min ) {
-					var number = min - input.length;
-
-					if ( 1 === number ) {
-						return wc_enhanced_select_params.i18n_input_too_short_1;
-					}
-
-					return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', number );
-				},
-				formatInputTooLong: function( input, max ) {
-					var number = input.length - max;
-
-					if ( 1 === number ) {
-						return wc_enhanced_select_params.i18n_input_too_long_1;
-					}
-
-					return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', number );
-				},
-				formatSelectionTooBig: function( limit ) {
-					if ( 1 === limit ) {
-						return wc_enhanced_select_params.i18n_selection_too_long_1;
-					}
-
-					return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
-				},
-				formatLoadMore: function() {
-					return wc_enhanced_select_params.i18n_load_more;
-				},
-				formatSearching: function() {
-					return wc_enhanced_select_params.i18n_searching;
-				}
-			};
-
-			return formatString;
-		}
 	});
 })( jQuery, shippingZonesLocalizeScript, wp, ajaxurl );

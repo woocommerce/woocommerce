@@ -22,5 +22,5 @@ $states['GR'] = array(
 	'J' => __( 'Πελοπόννησος', 'woocommerce' ),
 	'K' => __( 'Βόρειο Αιγαίο', 'woocommerce' ),
 	'L' => __( 'Νότιο Αιγαίο', 'woocommerce' ),
-	'M' => __( 'Κρήτη', 'woocommerce' )
+	'M' => __( 'Κρήτη', 'woocommerce' ),
 );

@@ -31,7 +31,7 @@ class WC_Breadcrumb {
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
 			strip_tags( $name ),
-			$link
+			$link,
 		);
 	}
 
@@ -71,10 +71,10 @@ class WC_Breadcrumb {
 			'is_tag',
 			'is_author',
 			'is_date',
-			'is_tax'
+			'is_tax',
 		);
 
-		if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
+		if ( ( ! is_front_page() && ! ( is_post_type_archive() && intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 			foreach ( $conditionals as $conditional ) {
 				if ( call_user_func( $conditional ) ) {
 					call_user_func( array( $this, 'add_crumbs_' . substr( $conditional, 3 ) ) );
@@ -95,7 +95,7 @@ class WC_Breadcrumb {
 	 * Prepend the shop page to shop breadcrumbs.
 	 */
 	private function prepend_shop_page() {
-		$permalinks   = get_option( 'woocommerce_permalinks' );
+		$permalinks   = wc_get_permalink_structure();
 		$shop_page_id = wc_get_page_id( 'shop' );
 		$shop_page    = get_post( $shop_page_id );
 

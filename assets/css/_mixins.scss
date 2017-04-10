@@ -5,13 +5,13 @@
 @mixin clearfix() {
 	*zoom: 1;
 
-	&:before,
-	&:after {
-		content: " ";
+	&::before,
+	&::after {
+		content: ' ';
 		display: table;
 	}
 
-	&:after {
+	&::after {
 		clear: both;
 	}
 }
@@ -105,7 +105,7 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin transition($selector: all, $animation: ease-in-out, $duration: .2s) {
+@mixin transition($selector: all, $animation: ease-in-out, $duration: 0.2s) {
 	transition: $selector $animation $duration;
 }
 
@@ -126,10 +126,11 @@
 	box-sizing: border-box;
 }
 
-@mixin darkorlighttextshadow($a, $opacity: .8) {
+@mixin darkorlighttextshadow($a, $opacity: 0.8) {
 	@if lightness($a) >= 65% {
 		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
-	} @else {
+	}
+	@else {
 		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
 	}
 }
@@ -171,7 +172,7 @@
 	width: 1em;
 }
 
-@mixin icon( $glyph: "\e001" ) {
+@mixin icon( $glyph: '\e001' ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -190,7 +191,7 @@
 	content: $glyph;
 }
 
-@mixin icon_dashicons( $glyph: "\f333" ) {
+@mixin icon_dashicons( $glyph: '\f333' ) {
 	font-family: 'Dashicons';
 	speak: none;
 	font-weight: normal;
@@ -209,7 +210,7 @@
 	content: $glyph;
 }
 
-@mixin iconbefore( $glyph: "\e001" ) {
+@mixin iconbefore( $glyph: '\e001' ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -217,12 +218,12 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-right: .618em;
+	margin-right: 0.618em;
 	content: $glyph;
 	text-decoration: none;
 }
 
-@mixin iconbeforedashicons( $glyph: "\f333" ) {
+@mixin iconbeforedashicons( $glyph: '\f333' ) {
 	font-family: 'Dashicons';
 	speak: none;
 	font-weight: normal;
@@ -230,12 +231,11 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-right: .618em;
 	content: $glyph;
 	text-decoration: none;
 }
 
-@mixin iconafter( $glyph: "\e001" ) {
+@mixin iconafter( $glyph: '\e001' ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -243,29 +243,28 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-left: .618em;
+	margin-left: 0.618em;
 	content: $glyph;
 	text-decoration: none;
 }
 
 @mixin loader() {
-	&:before {
+	&::before {
 		height: 1em;
 		width: 1em;
 		display: block;
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		margin-left: -.5em;
-		margin-top: -.5em;
-		display: block;
-		content: "";
+		margin-left: -0.5em;
+		margin-top: -0.5em;
+		content: '';
 		@include animation( spin 1s ease-in-out infinite );
-		background: url(../images/icons/loader.svg) center center;
+		background: url('../images/icons/loader.svg') center center;
 		background-size: cover;
 		line-height: 1;
 		text-align: center;
 		font-size: 2em;
-		color: rgba(#000,0.75);
+		color: rgba(#000, 0.75);
 	}
 }

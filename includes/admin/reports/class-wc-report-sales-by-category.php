@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
-	 * Chart colours.
+	 * Chart colors.
 	 *
 	 * @var array
 	 */
@@ -93,9 +93,10 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 
 			$legend[] = array(
-				'title'            => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
-				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
-				'highlight_series' => $index
+				/* translators: 1: total items sold 2: category name */
+				'title'            => sprintf( __( '%1$s sales in %2$s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
+				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0],
+				'highlight_series' => $index,
 			);
 
 			$index++;
@@ -111,9 +112,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
+			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
@@ -134,23 +135,23 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => '',
-						'name'            => 'product_id'
+						'name'            => 'product_id',
 					),
 					'_line_total' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
 						'function'        => 'SUM',
-						'name'            => 'order_item_amount'
+						'name'            => 'order_item_amount',
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
 						'function' => '',
-						'name'     => 'post_date'
+						'name'     => 'post_date',
 					),
 				),
 				'group_by'     => 'ID, product_id, post_date',
 				'query_type'   => 'get_results',
-				'filter_range' => true
+				'filter_range' => true,
 			) );
 
 			$this->item_sales           = array();
@@ -190,8 +191,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		return array(
 			array(
 				'title'    => __( 'Categories', 'woocommerce' ),
-				'callback' => array( $this, 'category_widget' )
-			)
+				'callback' => array( $this, 'category_widget' ),
+			),
 		);
 	}
 
@@ -230,7 +231,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			</div>
 			<script type="text/javascript">
 				jQuery(function(){
-					// Select all/none
+					// Select all/None
 					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).attr( 'selected', 'selected' );
 						jQuery(this).closest( 'div' ).find('select').change();
@@ -257,7 +258,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -279,7 +280,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		if ( empty( $this->show_categories ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'woocommerce' ); ?></p>
+				<p class="chart-prompt"><?php _e( 'Choose a category to view stats', 'woocommerce' ); ?></p>
 			</div>
 			<?php
 		} else {
@@ -396,7 +397,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									position: "bottom",
 									tickColor: 'transparent',
 									mode: "time",
-									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+									timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
 									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],

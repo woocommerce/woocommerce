@@ -136,10 +136,11 @@ class WC_Admin_Taxonomies {
 
 					// When an image is selected, run a callback.
 					file_frame.on( 'select', function() {
-						var attachment = file_frame.state().get( 'selection' ).first().toJSON();
+						var attachment           = file_frame.state().get( 'selection' ).first().toJSON();
+						var attachment_thumbnail = attachment.sizes.thumbnail || attachment.sizes.full;
 
 						jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment.sizes.thumbnail.url );
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment_thumbnail.url );
 						jQuery( '.remove_image_button' ).show();
 					});
 
@@ -245,10 +246,11 @@ class WC_Admin_Taxonomies {
 
 						// When an image is selected, run a callback.
 						file_frame.on( 'select', function() {
-							var attachment = file_frame.state().get( 'selection' ).first().toJSON();
+							var attachment           = file_frame.state().get( 'selection' ).first().toJSON();
+							var attachment_thumbnail = attachment.sizes.thumbnail || attachment.sizes.full;
 
 							jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment.sizes.thumbnail.url );
+							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment_thumbnail.url );
 							jQuery( '.remove_image_button' ).show();
 						});
 
@@ -290,7 +292,7 @@ class WC_Admin_Taxonomies {
 	 * Description for product_cat page to aid users.
 	 */
 	public function product_cat_description() {
-		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce' ) );
+		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top-right of this page.', 'woocommerce' ) );
 	}
 
 	/**

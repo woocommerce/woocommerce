@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.1.2
+ * @version     3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,59 +21,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $items as $item_id => $item ) :
-	$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-	$item_meta    = new WC_Order_Item_Meta( $item, $_product );
-
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-
-		// Title
-		echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
-
-		// SKU
-		if ( $show_sku && $_product->get_sku() ) {
-			echo ' (#' . $_product->get_sku() . ')';
+		$product = $item->get_product();
+		echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+		if ( $show_sku && $product->get_sku() ) {
+			echo ' (#' . $product->get_sku() . ')';
 		}
-
+		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
+		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
-
-		// Variation
-		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
-
-		// Quantity
-		echo "\n" . sprintf( __( 'Quantity: %s', 'woocommerce' ), apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ) );
-
-		// Cost
-		echo "\n" . sprintf( __( 'Cost: %s', 'woocommerce' ), $order->get_formatted_line_subtotal( $item ) );
-
-		// Download URLs
-		if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) {
-			$download_files = $order->get_item_downloads( $item );
-			$i              = 0;
-
-			foreach ( $download_files as $download_id => $file ) {
-				$i++;
-
-				if ( count( $download_files ) > 1 ) {
-					$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-				} elseif ( $i == 1 ) {
-					$prefix = __( 'Download', 'woocommerce' );
-				}
-
-				echo "\n" . $prefix . '(' . esc_html( $file['name'] ) . '): ' . esc_url( $file['download_url'] );
-			}
+		echo strip_tags( wc_display_item_meta( $item, array(
+			'before'    => "\n- ",
+			'separator' => "\n- ",
+			'after'     => "",
+			'echo'      => false,
+			'autop'     => false,
+		) ) );
+		if ( $show_download_links ) {
+			echo strip_tags( wc_display_item_downloads( $item, array(
+				'before'    => "\n- ",
+				'separator' => "\n- ",
+				'after'     => "",
+				'echo'      => false,
+				'show_url'  => true,
+			) ) );
 		}
-
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
-
 	}
-
 	// Note
-	if ( $show_purchase_note && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
+	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = $product->get_purchase_note() ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
-
 	echo "\n\n";
-
 endforeach;

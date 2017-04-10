@@ -11,13 +11,17 @@
  * @category Class
  * @author   WooThemes
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'libraries/wp-async-request.php' );
-include_once( 'libraries/wp-background-process.php' );
+if ( ! class_exists( 'WP_Async_Request', false ) ) {
+	include_once( dirname( __FILE__ ) . '/libraries/wp-async-request.php' );
+}
+
+if ( ! class_exists( 'WP_Background_Process', false ) ) {
+	include_once( dirname( __FILE__ ) . '/libraries/wp-background-process.php' );
+}
 
 /**
  * WC_Background_Updater Class.
@@ -36,10 +40,13 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	public function dispatch() {
 		$dispatched = parent::dispatch();
-		$logger     = new WC_Logger();
+		$logger     = wc_get_logger();
 
 		if ( is_wp_error( $dispatched ) ) {
-			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ) );
+			$logger->error(
+				sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ),
+				array( 'source' => 'wc_db_updates' )
+			);
 		}
 	}
 
@@ -97,16 +104,16 @@ class WC_Background_Updater extends WP_Background_Process {
 			define( 'WC_UPDATING', true );
 		}
 
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 
-		include_once( 'wc-update-functions.php' );
+		include_once( dirname( __FILE__ ) . '/wc-update-functions.php' );
 
 		if ( is_callable( $callback ) ) {
-			$logger->add( 'wc_db_updates', sprintf( 'Running %s callback', $callback ) );
+			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 			call_user_func( $callback );
-			$logger->add( 'wc_db_updates', sprintf( 'Finished %s callback', $callback ) );
+			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		} else {
-			$logger->add( 'wc_db_updates', sprintf( 'Could not find %s callback', $callback ) );
+			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
 		return false;
@@ -119,8 +126,8 @@ class WC_Background_Updater extends WP_Background_Process {
 	 * performed, or, call parent::complete().
 	 */
 	protected function complete() {
-		$logger = new WC_Logger();
-		$logger->add( 'wc_db_updates', 'Data update complete' );
+		$logger = wc_get_logger();
+		$logger->info( 'Data update complete', array( 'source' => 'wc_db_updates' ) );
 		WC_Install::update_db_version();
 		parent::complete();
 	}

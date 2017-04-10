@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Product_Cat_List_Walker' ) ) :
+if ( ! class_exists( 'WC_Product_Cat_List_Walker', false ) ) :
 
 class WC_Product_Cat_List_Walker extends Walker {
 
@@ -32,7 +32,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	public $db_fields = array(
 		'parent' => 'parent',
 		'id'     => 'term_id',
-		'slug'   => 'slug'
+		'slug'   => 'slug',
 	);
 
 	/**
@@ -49,7 +49,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( 'list' != $args['style'] )
 			return;
 
-		$indent = str_repeat("\t", $depth);
+		$indent = str_repeat( "\t", $depth );
 		$output .= "$indent<ul class='children'>\n";
 	}
 
@@ -67,7 +67,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( 'list' != $args['style'] )
 			return;
 
-		$indent = str_repeat("\t", $depth);
+		$indent = str_repeat( "\t", $depth );
 		$output .= "$indent</ul>\n";
 	}
 
@@ -96,7 +96,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' current-cat-parent';
 		}
 
-		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . _x( $cat->name, 'product category name', 'woocommerce' ) . '</a>';
+		$output .= '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . _x( $cat->name, 'product category name', 'woocommerce' ) . '</a>';
 
 		if ( $args['show_count'] ) {
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';

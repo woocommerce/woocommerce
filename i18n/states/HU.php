@@ -29,5 +29,5 @@ $states['HU'] = array(
 	'TO' => __( 'Tolna', 'woocommerce' ),
 	'VA' => __( 'Vas', 'woocommerce' ),
 	'VE' => __( 'Veszprém', 'woocommerce' ),
-	'ZA' => __( 'Zala', 'woocommerce' )
+	'ZA' => __( 'Zala', 'woocommerce' ),
 );

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'class-wc-gateway-paypal-response.php' );
+include_once( dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php' );
 
 /**
  * Handle PDT Responses from PayPal.
@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			),
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
-			'user-agent'	=> 'WooCommerce/' . WC_VERSION
+			'user-agent'	=> 'WooCommerce/' . WC_VERSION,
 		);
 
 		// Post back to get a response.
@@ -88,28 +88,41 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		$transaction_result = $this->validate_transaction( $transaction );
 
-		if ( $transaction_result && 'completed' === $status ) {
-			if ( $order->get_total() != $amount ) {
-				WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')' );
-				$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
-			} else {
-				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
+		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_print_r( $transaction_result, true ) );
 
-				// Log paypal transaction fee and other meta data.
-				if ( ! empty( $transaction_result['mc_fee'] ) ) {
-					update_post_meta( $order->id, 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
+		update_post_meta( $order->get_id(), '_paypal_status', $status );
+		update_post_meta( $order->get_id(), '_transaction_id', $transaction );
+
+		if ( $transaction_result ) {
+	 		if ( 'completed' === $status ) {
+				if ( $order->get_total() != $amount ) {
+					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
+					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
+				} else {
+					$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
+
+					// Log paypal transaction fee and other meta data.
+					if ( ! empty( $transaction_result['mc_fee'] ) ) {
+						update_post_meta( $order->get_id(), 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
+					}
+					if ( ! empty( $transaction_result['payer_email'] ) ) {
+						update_post_meta( $order->get_id(), 'Payer PayPal address', $transaction_result['payer_email'] );
+					}
+					if ( ! empty( $transaction_result['first_name'] ) ) {
+						update_post_meta( $order->get_id(), 'Payer first name', $transaction_result['first_name'] );
+					}
+					if ( ! empty( $transaction_result['last_name'] ) ) {
+						update_post_meta( $order->get_id(), 'Payer last name', $transaction_result['last_name'] );
+					}
+					if ( ! empty( $transaction_result['payment_type'] ) ) {
+						update_post_meta( $order->get_id(), 'Payment type', $transaction_result['payment_type'] );
+					}
 				}
-				if ( ! empty( $transaction_result['payer_email'] ) ) {
-					update_post_meta( $order->id, 'Payer PayPal address', $transaction_result['payer_email'] );
-				}
-				if ( ! empty( $transaction_result['first_name'] ) ) {
-					update_post_meta( $order->id, 'Payer first name', $transaction_result['first_name'] );
-				}
-				if ( ! empty( $transaction_result['last_name'] ) ) {
-					update_post_meta( $order->id, 'Payer last name', $transaction_result['last_name'] );
-				}
-				if ( ! empty( $transaction_result['payment_type'] ) ) {
-					update_post_meta( $order->id, 'Payment type', $transaction_result['payment_type'] );
+			} else {
+				if ( 'authorization' === $transaction_result['pending_reason'] ) {
+					$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );
+				} else {
+					$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $transaction_result['pending_reason'] ) );
 				}
 			}
 		}

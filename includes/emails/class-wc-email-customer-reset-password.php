@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 
 /**
  * Customer Reset Password.
@@ -53,8 +53,8 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		$this->template_html    = 'emails/customer-reset-password.php';
 		$this->template_plain   = 'emails/plain/customer-reset-password.php';
 
-		$this->subject          = __( 'Password Reset for {site_title}', 'woocommerce');
-		$this->heading          = __( 'Password Reset Instructions', 'woocommerce');
+		$this->subject          = __( 'Password reset for {site_title}', 'woocommerce' );
+		$this->heading          = __( 'Password reset instructions', 'woocommerce' );
 
 		// Trigger
 		add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
@@ -101,7 +101,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'blogname'      => $this->get_blogname(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -119,7 +119,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'blogname'      => $this->get_blogname(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 }

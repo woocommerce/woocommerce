@@ -23,8 +23,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'legacy_flat_rate';
-		$this->method_title       = __( 'Flat Rate (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title       = __( 'Flat rate (legacy)', 'woocommerce' );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -37,7 +37,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
@@ -97,11 +97,11 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
-				'[cost]'
+				'[cost]',
 			),
 			array(
 				$args['qty'],
-				$args['cost']
+				$args['cost'],
 			),
 			$sum
 		) );
@@ -129,8 +129,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function fee( $atts ) {
 		$atts = shortcode_atts( array(
 			'percent' => '',
-			'min_fee' => ''
-		), $atts );
+			'min_fee' => '',
+		), $atts, 'fee' );
 
 		$calculated_fee = 0;
 
@@ -162,11 +162,11 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
 		$cost      = $this->get_option( 'cost' );
 
-		if ( $cost !== '' ) {
+		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost']
+				'cost' => $package['contents_cost'],
 			) );
 		}
 
@@ -179,24 +179,24 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 			$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
-			if ( $class_cost_string === '' ) {
+			if ( '' === $class_cost_string ) {
 				continue;
 			}
 
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 			) );
 
-			if ( $this->type === 'class' ) {
+			if ( 'class' === $this->type ) {
 				$rate['cost'] += $class_cost;
 			} else {
 				$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
 			}
 		}
 
-		if ( $this->type === 'order' && $highest_class_cost ) {
+		if ( 'order' === $this->type && $highest_class_cost ) {
 			$rate['cost'] += $highest_class_cost;
 		}
 
@@ -273,7 +273,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @deprecated 2.4.0
 	 *
-	 * Additonal rates defined like this:
+	 * Additional rates defined like this:
 	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
 	public function calculate_extra_shipping( $method, $rate ) {
@@ -331,14 +331,16 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function get_extra_cost( $cost_string, $type, $package ) {
 		$cost         = $cost_string;
 		$cost_percent = false;
+		// @codingStandardsIgnoreStart
 		$pattern      =
-			'/' .           // start regex
-			'(\d+\.?\d*)' . // capture digits, optionally capture a `.` and more digits
-			'\s*' .         // match whitespace
-			'(\+|-)' .      // capture the operand
-			'\s*'.          // match whitespace
-			'(\d+\.?\d*)'.  // capture digits, optionally capture a `.` and more digits
-			'\%/';          // match the percent sign & end regex
+			'/' .           // Start regex.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\s*' .         // Match whitespace.
+			'(\+|-)' .      // Capture the operand.
+			'\s*' .         // Match whitespace.
+			'(\d+\.?\d*)' . // Capture digits, optionally capture a `.` and more digits.
+			'\%/';          // Match the percent sign & end regex.
+		// @codingStandardsIgnoreEnd
 		if ( preg_match( $pattern, $cost_string, $this_cost_matches ) ) {
 			$cost_operator = $this_cost_matches[2];
 			$cost_percent  = $this_cost_matches[3] / 100;
@@ -356,7 +358,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			switch ( $type ) {
 				case 'class' :
 					$shipping_classes = $this->find_shipping_classes( $package );
-					foreach ( $shipping_classes as $shipping_class => $items ){
+					foreach ( $shipping_classes as $shipping_class => $items ) {
 						foreach ( $items as $item_id => $values ) {
 							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
 						}

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Page' ) ) :
+if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 /**
  * WC_Settings_Page.
@@ -41,6 +41,24 @@ abstract class WC_Settings_Page {
 		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+	}
+
+	/**
+	 * Get settings page ID.
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_id() {
+		return $this->id;
+	}
+
+	/**
+	 * Get settings page label.
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_label() {
+		return $this->label;
 	}
 
 	/**

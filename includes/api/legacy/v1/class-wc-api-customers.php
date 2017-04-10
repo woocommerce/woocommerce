@@ -64,7 +64,7 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		# GET /customers/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
@@ -98,7 +98,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$customers = array();
 
-		foreach( $query->get_results() as $user_id ) {
+		foreach ( $query->get_results() as $user_id ) {
 
 			if ( ! $this->is_readable( $user_id ) )
 				continue;
@@ -124,56 +124,47 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'customer', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
-		$customer = new WP_User( $id );
-
-		// get info about user's last order
-		$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = {$customer->ID}
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-					" );
-
+		$customer      = new WC_Customer( $id );
+		$last_order    = $customer->get_last_order();
 		$customer_data = array(
-			'id'               => $customer->ID,
-			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
-			'email'            => $customer->user_email,
-			'first_name'       => $customer->first_name,
-			'last_name'        => $customer->last_name,
-			'username'         => $customer->user_login,
-			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
-			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
-			'orders_count'     => (int) $customer->_order_count,
-			'total_spent'      => wc_format_decimal( $customer->_money_spent, 2 ),
-			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
+			'id'               => $customer->get_id(),
+			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ? $customer->get_date_created()->getTimestamp() : 0 ), // API gives UTC times.
+			'email'            => $customer->get_email(),
+			'first_name'       => $customer->get_first_name(),
+			'last_name'        => $customer->get_last_name(),
+			'username'         => $customer->get_username(),
+			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
+			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created() ? $last_order->get_date_created()->getTimestamp() : 0 ) : null, // API gives UTC times.
+			'orders_count'     => $customer->get_order_count(),
+			'total_spent'      => wc_format_decimal( $customer->get_total_spent(), 2 ),
+			'avatar_url'       => $customer->get_avatar_url(),
 			'billing_address'  => array(
-				'first_name' => $customer->billing_first_name,
-				'last_name'  => $customer->billing_last_name,
-				'company'    => $customer->billing_company,
-				'address_1'  => $customer->billing_address_1,
-				'address_2'  => $customer->billing_address_2,
-				'city'       => $customer->billing_city,
-				'state'      => $customer->billing_state,
-				'postcode'   => $customer->billing_postcode,
-				'country'    => $customer->billing_country,
-				'email'      => $customer->billing_email,
-				'phone'      => $customer->billing_phone,
+				'first_name' => $customer->get_billing_first_name(),
+				'last_name'  => $customer->get_billing_last_name(),
+				'company'    => $customer->get_billing_company(),
+				'address_1'  => $customer->get_billing_address_1(),
+				'address_2'  => $customer->get_billing_address_2(),
+				'city'       => $customer->get_billing_city(),
+				'state'      => $customer->get_billing_state(),
+				'postcode'   => $customer->get_billing_postcode(),
+				'country'    => $customer->get_billing_country(),
+				'email'      => $customer->get_billing_email(),
+				'phone'      => $customer->get_billing_phone(),
 			),
 			'shipping_address' => array(
-				'first_name' => $customer->shipping_first_name,
-				'last_name'  => $customer->shipping_last_name,
-				'company'    => $customer->shipping_company,
-				'address_1'  => $customer->shipping_address_1,
-				'address_2'  => $customer->shipping_address_2,
-				'city'       => $customer->shipping_city,
-				'state'      => $customer->shipping_state,
-				'postcode'   => $customer->shipping_postcode,
-				'country'    => $customer->shipping_country,
+				'first_name' => $customer->get_shipping_first_name(),
+				'last_name'  => $customer->get_shipping_last_name(),
+				'company'    => $customer->get_shipping_company(),
+				'address_1'  => $customer->get_shipping_address_1(),
+				'address_2'  => $customer->get_shipping_address_2(),
+				'city'       => $customer->get_shipping_city(),
+				'state'      => $customer->get_shipping_state(),
+				'postcode'   => $customer->get_shipping_postcode(),
+				'country'    => $customer->get_shipping_country(),
 			),
 		);
 
@@ -201,7 +192,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Create a customer
 	 *
-	 * @TODO implement in 2.2 with woocommerce_create_new_customer()
 	 * @param array $data
 	 * @return array
 	 */
@@ -216,7 +206,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Edit a customer
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
 	 * @return array
@@ -234,7 +223,6 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Delete a customer
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the customer ID
 	 * @return array
 	 */
@@ -261,20 +249,21 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'customer', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
-		$order_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = '%s'
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status = IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-					", $id ) );
+		$order_ids = wc_get_orders( array(
+			'customer' => $id,
+			'limit'    => -1,
+			'orderby'  => 'date',
+			'order'    => 'ASC',
+			'return'   => 'ids',
+		) );
 
-		if ( empty( $order_ids ) )
+		if ( empty( $order_ids ) ) {
 			return array( 'orders' => array() );
+		}
 
 		$orders = array();
 
@@ -359,43 +348,43 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function add_customer_data( $order_data, $order ) {
 
-		if ( 0 == $order->customer_user ) {
+		if ( 0 == $order->get_user_id() ) {
 
 			// add customer data from order
 			$order_data['customer'] = array(
 				'id'               => 0,
-				'email'            => $order->billing_email,
-				'first_name'       => $order->billing_first_name,
-				'last_name'        => $order->billing_last_name,
+				'email'            => $order->get_billing_email(),
+				'first_name'       => $order->get_billing_first_name(),
+				'last_name'        => $order->get_billing_last_name(),
 				'billing_address'  => array(
-					'first_name' => $order->billing_first_name,
-					'last_name'  => $order->billing_last_name,
-					'company'    => $order->billing_company,
-					'address_1'  => $order->billing_address_1,
-					'address_2'  => $order->billing_address_2,
-					'city'       => $order->billing_city,
-					'state'      => $order->billing_state,
-					'postcode'   => $order->billing_postcode,
-					'country'    => $order->billing_country,
-					'email'      => $order->billing_email,
-					'phone'      => $order->billing_phone,
+					'first_name' => $order->get_billing_first_name(),
+					'last_name'  => $order->get_billing_last_name(),
+					'company'    => $order->get_billing_company(),
+					'address_1'  => $order->get_billing_address_1(),
+					'address_2'  => $order->get_billing_address_2(),
+					'city'       => $order->get_billing_city(),
+					'state'      => $order->get_billing_state(),
+					'postcode'   => $order->get_billing_postcode(),
+					'country'    => $order->get_billing_country(),
+					'email'      => $order->get_billing_email(),
+					'phone'      => $order->get_billing_phone(),
 				),
 				'shipping_address' => array(
-					'first_name' => $order->shipping_first_name,
-					'last_name'  => $order->shipping_last_name,
-					'company'    => $order->shipping_company,
-					'address_1'  => $order->shipping_address_1,
-					'address_2'  => $order->shipping_address_2,
-					'city'       => $order->shipping_city,
-					'state'      => $order->shipping_state,
-					'postcode'   => $order->shipping_postcode,
-					'country'    => $order->shipping_country,
+					'first_name' => $order->get_shipping_first_name(),
+					'last_name'  => $order->get_shipping_last_name(),
+					'company'    => $order->get_shipping_company(),
+					'address_1'  => $order->get_shipping_address_1(),
+					'address_2'  => $order->get_shipping_address_2(),
+					'city'       => $order->get_shipping_city(),
+					'state'      => $order->get_shipping_state(),
+					'postcode'   => $order->get_shipping_postcode(),
+					'country'    => $order->get_shipping_country(),
 				),
 			);
 
 		} else {
 
-			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
+			$order_data['customer'] = current( $this->get_customer( $order->get_user_id() ) );
 		}
 
 		return $order_data;
@@ -414,28 +403,6 @@ class WC_API_Customers extends WC_API_Resource {
 
 		if ( $this->created_at_max )
 			$query->query_where .= sprintf( " AND user_registered <= STR_TO_DATE( '%s', '%%Y-%%m-%%d %%h:%%i:%%s' )", esc_sql( $this->created_at_max ) );
-	}
-
-	/**
-	 * Wrapper for @see get_avatar() which doesn't simply return
-	 * the URL so we need to pluck it from the HTML img tag
-	 *
-	 * @since 2.1
-	 * @param string $email the customer's email
-	 * @return string the URL to the customer's avatar
-	 */
-	private function get_avatar_url( $email ) {
-
-		$avatar_html = get_avatar( $email );
-
-		// Get the URL of the avatar from the provided HTML
-		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			return esc_url_raw( $matches[1] );
-		}
-
-		return null;
 	}
 
 	/**
@@ -500,5 +467,4 @@ class WC_API_Customers extends WC_API_Resource {
 
 		return current_user_can( 'list_users' );
 	}
-
 }

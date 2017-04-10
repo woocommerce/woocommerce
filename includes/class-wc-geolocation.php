@@ -32,7 +32,7 @@ class WC_Geolocation {
 		'ipecho'            => 'http://ipecho.net/plain',
 		'ident'             => 'http://ident.me',
 		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
-		'ip.appspot'        => 'http://ip.appspot.com'
+		'ip.appspot'        => 'http://ip.appspot.com',
 	);
 
 	/** @var array API endpoints for geolocating an IP address */
@@ -162,7 +162,7 @@ class WC_Geolocation {
 
 		return array(
 			'country' => $country_code,
-			'state'   => ''
+			'state'   => '',
 		);
 	}
 
@@ -182,10 +182,10 @@ class WC_Geolocation {
 	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
 	 */
 	public static function update_database() {
-		$logger = new WC_Logger();
+		$logger = wc_get_logger();
 
 		if ( ! is_callable( 'gzopen' ) ) {
-			$logger->add( 'geolocation', 'Server does not support gzopen' );
+			$logger->notice( 'Server does not support gzopen', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
@@ -193,7 +193,7 @@ class WC_Geolocation {
 
 		$tmp_databases = array(
 			'v4' => download_url( self::GEOLITE_DB ),
-			'v6' => download_url( self::GEOLITE_IPV6_DB )
+			'v6' => download_url( self::GEOLITE_IPV6_DB ),
 		);
 
 		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {
@@ -208,11 +208,14 @@ class WC_Geolocation {
 					gzclose( $gzhandle );
 					fclose( $handle );
 				} else {
-					$logger->add( 'geolocation', 'Unable to open database file' );
+					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
 				}
 				@unlink( $tmp_database_path );
 			} else {
-				$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message() );
+				$logger->notice(
+					'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
+					array( 'source' => 'geolocation' )
+				);
 			}
 		}
 	}
@@ -223,8 +226,8 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address ) {
-		if ( ! class_exists( 'WC_Geo_IP' ) ) {
-			include_once( 'class-wc-geo-ip.php' );
+		if ( ! class_exists( 'WC_Geo_IP', false ) ) {
+			include_once( WC_ABSPATH . 'includes/class-wc-geo-ip.php' );
 		}
 
 		$gi = new WC_Geo_IP();

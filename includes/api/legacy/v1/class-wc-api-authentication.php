@@ -90,7 +90,7 @@ class WC_API_Authentication {
 
 		} else {
 
-			throw new Exception( __( 'Consumer Key is missing', 'woocommerce' ), 404 );
+			throw new Exception( __( 'Consumer key is missing.', 'woocommerce' ), 404 );
 		}
 
 		// Get consumer secret
@@ -106,13 +106,13 @@ class WC_API_Authentication {
 
 		} else {
 
-			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
+			throw new Exception( __( 'Consumer secret is missing.', 'woocommerce' ), 404 );
 		}
 
 		$keys = $this->get_keys_by_consumer_key( $consumer_key );
 
 		if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $consumer_secret ) ) {
-			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Consumer secret is invalid.', 'woocommerce' ), 401 );
 		}
 
 		return $keys;
@@ -139,12 +139,13 @@ class WC_API_Authentication {
 
 		$params = WC()->api->server->params['GET'];
 
-		$param_names =  array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
+		$param_names = array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
 
 		// Check for required OAuth parameters
 		foreach ( $param_names as $param_name ) {
 
 			if ( empty( $params[ $param_name ] ) ) {
+				/* translators: %s: parameter name */
 				throw new Exception( sprintf( __( '%s parameter is missing', 'woocommerce' ), $param_name ), 404 );
 			}
 		}
@@ -180,7 +181,7 @@ class WC_API_Authentication {
 		", $consumer_key ), ARRAY_A );
 
 		if ( empty( $keys ) ) {
-			throw new Exception( __( 'Consumer Key is invalid', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Consumer key is invalid.', 'woocommerce' ), 401 );
 		}
 
 		return $keys;
@@ -231,7 +232,7 @@ class WC_API_Authentication {
 		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . WC()->api->server->path );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature
-		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );
 		unset( $params['oauth_signature'] );
 
 		// Remove filters and convert them from array to strings to void normalize issues
@@ -239,7 +240,7 @@ class WC_API_Authentication {
 			$filters = $params['filter'];
 			unset( $params['filter'] );
 			foreach ( $filters as $filter => $filter_value ) {
-				$params['filter[' . $filter . ']'] = $filter_value;
+				$params[ 'filter[' . $filter . ']' ] = $filter_value;
 			}
 		}
 
@@ -248,7 +249,7 @@ class WC_API_Authentication {
 
 		// Sort parameters
 		if ( ! uksort( $params, 'strcmp' ) ) {
-			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid signature - failed to sort parameters.', 'woocommerce' ), 401 );
 		}
 
 		// Form query string
@@ -261,8 +262,8 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
-			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
+		if ( 'HMAC-SHA1' !== $params['oauth_signature_method'] && 'HMAC-SHA256' !== $params['oauth_signature_method'] ) {
+			throw new Exception( __( 'Invalid signature - signature method is invalid.', 'woocommerce' ), 401 );
 		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
@@ -270,7 +271,7 @@ class WC_API_Authentication {
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $keys['consumer_secret'], true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
-			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid signature - provided signature does not match.', 'woocommerce' ), 401 );
 		}
 	}
 
@@ -328,7 +329,7 @@ class WC_API_Authentication {
 		$valid_window = 15 * 60; // 15 minute window
 
 		if ( ( $timestamp < time() - $valid_window ) || ( $timestamp > time() + $valid_window ) ) {
-			throw new Exception( __( 'Invalid timestamp', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid timestamp.', 'woocommerce' ) );
 		}
 
 		$used_nonces = maybe_unserialize( $keys['nonces'] );
@@ -338,7 +339,7 @@ class WC_API_Authentication {
 		}
 
 		if ( in_array( $nonce, $used_nonces ) ) {
-			throw new Exception( __( 'Invalid nonce - nonce has already been used', 'woocommerce' ), 401 );
+			throw new Exception( __( 'Invalid nonce - nonce has already been used.', 'woocommerce' ), 401 );
 		}
 
 		$used_nonces[ $timestamp ] = $nonce;
@@ -373,7 +374,7 @@ class WC_API_Authentication {
 			case 'HEAD':
 			case 'GET':
 				if ( 'read' !== $key_permissions && 'read_write' !== $key_permissions ) {
-					throw new Exception( __( 'The API key provided does not have read permissions', 'woocommerce' ), 401 );
+					throw new Exception( __( 'The API key provided does not have read permissions.', 'woocommerce' ), 401 );
 				}
 				break;
 
@@ -382,7 +383,7 @@ class WC_API_Authentication {
 			case 'PATCH':
 			case 'DELETE':
 				if ( 'write' !== $key_permissions && 'read_write' !== $key_permissions ) {
-					throw new Exception( __( 'The API key provided does not have write permissions', 'woocommerce' ), 401 );
+					throw new Exception( __( 'The API key provided does not have write permissions.', 'woocommerce' ), 401 );
 				}
 				break;
 		}

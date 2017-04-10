@@ -7,28 +7,28 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
-@import "fonts";
+@import 'bourbon';
+@import 'mixins';
+@import 'variables';
+@import 'fonts';
 
 /**
  * Styling begins
  */
-#adminmenu #toplevel_page_woocommerce .menu-icon-generic div.wp-menu-image:before {
+#adminmenu #toplevel_page_woocommerce .menu-icon-generic div.wp-menu-image::before {
 	font-family: 'WooCommerce' !important;
-	content: "\e03d";
+	content: '\e03d';
 }
 
-#adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image:before,
-#adminmenu #menu-posts-product .menu-icon-product div.wp-menu-image:before {
+#adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image::before,
+#adminmenu #menu-posts-product .menu-icon-product div.wp-menu-image::before {
 	font-family: 'WooCommerce' !important;
-	content: "\e006";
+	content: '\e006';
 }
 
-#adminmenu #toplevel_page_wc-reports .menu-icon-generic div.wp-menu-image:before {
+#adminmenu #toplevel_page_wc-reports .menu-icon-generic div.wp-menu-image::before {
 	font-family: 'WooCommerce' !important;
-	content: "\e023";
+	content: '\e023';
 	font-size: 1.3em !important;
 }
 
@@ -36,9 +36,9 @@ span.mce_woocommerce_shortcodes_button {
 	background-image: none !important;
 	@include ir();
 
-	&:before {
-		@include icon( "\e01d" );
-		font-size: .9em;
+	&::before {
+		@include icon( '\e01d' );
+		font-size: 0.9em;
 		line-height: 1.2;
 	}
 }
@@ -55,8 +55,8 @@ span.mce_woocommerce_shortcodes_button {
 		text-decoration: underline;
 	}
 
-	&:before {
-		content: "\f348";
+	&::before {
+		content: '\f348';
 		display: inline-block;
 		font: 400 18px/1 dashicons;
 		speak: none;

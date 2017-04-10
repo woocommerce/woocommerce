@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( $current_tab == $key ) {
 					echo 'nav-tab-active';
 				}
-				echo '">' . esc_html( $report_group[ 'title' ] ) . '</a>';
+				echo '">' . esc_html( $report_group['title'] ) . '</a>';
 			}
 
 			do_action( 'wc_reports_tabs' );
@@ -51,11 +51,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 	}
 
-	if ( isset( $reports[ $current_tab ][ 'reports' ][ $current_report ] ) ) {
+	if ( isset( $reports[ $current_tab ]['reports'][ $current_report ] ) ) {
 
-		$report = $reports[ $current_tab ][ 'reports' ][ $current_report ];
+		$report = $reports[ $current_tab ]['reports'][ $current_report ];
 
-		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true ) {
+		if ( ! isset( $report['hide_title'] ) || true != $report['hide_title'] ) {
 			echo '<h1>' . esc_html( $report['title'] ) . '</h1>';
 		} else {
 			echo '<h1 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h1>';

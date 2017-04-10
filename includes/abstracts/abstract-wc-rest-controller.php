@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Rest Controler Class
+ * Abstract Rest Controller Class
  *
  * @author   WooThemes
  * @category API
@@ -93,6 +93,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		}
 
 		if ( $total > $limit ) {
+			/* translators: %s: items limit */
 			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
 		}
 
@@ -189,6 +190,158 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Validate a text value for a text based setting.
+	 *
+	 * @since 3.0.0
+	 * @param string $value
+	 * @param array  $setting
+	 * @return string
+	 */
+	public function validate_setting_text_field( $value, $setting ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wp_kses_post( trim( stripslashes( $value ) ) );
+		return $value;
+	}
+
+	/**
+	 * Validate select based settings.
+	 *
+	 * @since 3.0.0
+	 * @param string $value
+	 * @param array  $setting
+	 * @return string|WP_Error
+	 */
+	public function validate_setting_select_field( $value, $setting ) {
+		if ( array_key_exists( $value, $setting['options'] ) ) {
+			return $value;
+		} else {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Validate multiselect based settings.
+	 *
+	 * @since 3.0.0
+	 * @param array $values
+	 * @param array  $setting
+	 * @return string|WP_Error
+	 */
+	public function validate_setting_multiselect_field( $values, $setting ) {
+		if ( empty( $values ) ) {
+			return array();
+		}
+
+		if ( ! is_array( $values ) ) {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$final_values = array();
+		foreach ( $values as $value ) {
+			if ( array_key_exists( $value, $setting['options'] ) ) {
+				$final_values[] = $value;
+			}
+		}
+
+		return $final_values;
+	}
+
+	/**
+	 * Validate image_width based settings.
+	 *
+	 * @since 3.0.0
+	 * @param array $value
+	 * @param array $setting
+	 * @return string|WP_Error
+	 */
+	public function validate_setting_image_width_field( $values, $setting ) {
+		if ( ! is_array( $values ) ) {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$current = $setting['value'];
+		if ( isset( $values['width'] ) ) {
+			$current['width'] = intval( $values['width'] );
+		}
+		if ( isset( $values['height'] ) ) {
+			$current['height'] = intval( $values['height'] );
+		}
+		if ( isset( $values['crop'] ) ) {
+			$current['crop'] = (bool) $values['crop'];
+		}
+		return $current;
+	}
+
+	/**
+	 * Validate radio based settings.
+	 *
+	 * @since 3.0.0
+	 * @param string $value
+	 * @param array  $setting
+	 * @return string|WP_Error
+	 */
+	public function validate_setting_radio_field( $value, $setting ) {
+		return $this->validate_setting_select_field( $value, $setting );
+	}
+
+	/**
+	 * Validate checkbox based settings.
+	 *
+	 * @since 3.0.0
+	 * @param string $value
+	 * @param array  $setting
+	 * @return string|WP_Error
+	 */
+	public function validate_setting_checkbox_field( $value, $setting ) {
+		if ( in_array( $value, array( 'yes', 'no' ) ) ) {
+			return $value;
+		} elseif ( empty( $value ) ) {
+			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
+			return $value;
+		} else {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Validate textarea based settings.
+	 *
+	 * @since 3.0.0
+	 * @param string $value
+	 * @param array  $setting
+	 * @return string
+	 */
+	public function validate_setting_textarea_field( $value, $setting ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wp_kses( trim( stripslashes( $value ) ),
+			array_merge(
+				array(
+					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true ),
+				),
+				wp_kses_allowed_html( 'post' )
+			)
+		);
+	}
+
+	/**
+	 * Add meta query.
+	 *
+	 * @since 3.0.0
+	 * @param array $args       Query args.
+	 * @param array $meta_query Meta query.
+	 * @return array
+	 */
+	protected function add_meta_query( $args, $meta_query ) {
+		if ( ! empty( $args['meta_query'] ) ) {
+			$args['meta_query'] = array();
+		}
+
+		$args['meta_query'][] = $meta_query;
+
+		return $args['meta_query'];
 	}
 
 	/**

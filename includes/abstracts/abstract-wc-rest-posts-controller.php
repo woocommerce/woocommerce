@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Rest Posts Controler Class
+ * Abstract Rest Posts Controller Class
  *
  * @author   WooThemes
  * @category API
@@ -126,19 +126,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
-	}
-
-	/**
-	 * Get post types.
-	 *
-	 * @return array
-	 */
-	protected function get_post_types() {
-		return array( $this->post_type );
 	}
 
 	/**
@@ -151,8 +142,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( ! empty( $post->post_type ) && 'product_variation' === $post->post_type && 'product' === $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
+		} elseif ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $post, $request );
@@ -173,6 +166,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
@@ -255,7 +249,9 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
+		if ( ! empty( $post->post_type ) && 'product_variation' === $post->post_type && 'product' === $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
+		} elseif ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
@@ -328,9 +324,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			$args['date_query'][0]['after'] = $request['after'];
 		}
 
-		if ( is_array( $request['filter'] ) ) {
-			$args = array_merge( $args, $request['filter'] );
-			unset( $args['filter'] );
+		if ( 'wc/v1' === $this->namespace ) {
+			if ( is_array( $request['filter'] ) ) {
+				$args = array_merge( $args, $request['filter'] );
+				unset( $args['filter'] );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -414,8 +412,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$force = (bool) $request['force'];
 		$post  = get_post( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || ! in_array( $post->post_type, $this->get_post_types() ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0;
@@ -431,6 +429,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
+			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -443,11 +442,13 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
+				/* translators: %s: post type */
 				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( 'trash' === $post->post_status ) {
+				/* translators: %s: post type */
 				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
 			}
 
@@ -457,6 +458,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! $result ) {
+			/* translators: %s: post type */
 			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
@@ -476,9 +478,10 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given post.
 	 */
-	protected function prepare_links( $post ) {
+	protected function prepare_links( $post, $request ) {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
@@ -672,7 +675,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type'          => 'integer',
@@ -681,7 +684,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
-				'description'       => __( 'Limit result set to all items except those of a particular parent id.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type'          => 'integer',
@@ -691,10 +694,12 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			);
 		}
 
-		$params['filter'] = array(
-			'type'        => 'object',
-			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
-		);
+		if ( 'wc/v1' === $this->namespace ) {
+			$params['filter'] = array(
+				'type'        => 'object',
+				'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
+			);
+		}
 
 		return $params;
 	}

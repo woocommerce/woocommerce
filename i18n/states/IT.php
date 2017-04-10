@@ -54,7 +54,7 @@ $states['IT'] = array(
 	'IM' => __( 'Imperia', 'woocommerce' ),
 	'IS' => __( 'Isernia', 'woocommerce' ),
 	'SP' => __( 'La Spezia', 'woocommerce' ),
-	'AQ' => __( 'L&apos;Aquila', 'woocommerce' ),
+	'AQ' => __( 'L\'Aquila', 'woocommerce' ),
 	'LT' => __( 'Latina', 'woocommerce' ),
 	'LE' => __( 'Lecce', 'woocommerce' ),
 	'LC' => __( 'Lecco', 'woocommerce' ),
@@ -119,5 +119,5 @@ $states['IT'] = array(
 	'VR' => __( 'Verona', 'woocommerce' ),
 	'VV' => __( 'Vibo Valentia', 'woocommerce' ),
 	'VI' => __( 'Vicenza', 'woocommerce' ),
-	'VT' => __( 'Viterbo', 'woocommerce' )
+	'VT' => __( 'Viterbo', 'woocommerce' ),
 );

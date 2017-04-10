@@ -60,13 +60,13 @@ class Simplify_AccessToken extends Simplify_Object {
 	 * @throws InvalidArgumentException
 	 */
 	public function refresh($authentication = null) {
+		$args = func_get_args();
 
 		$refresh_token = $this->refresh_token;
 		if (empty($refresh_token)){
 			throw new InvalidArgumentException('Cannot refresh access token; refresh token is invalid');
 		}
 
-		$args = func_get_args();
 		$authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 1);
 
 		$props = 'refresh_token='.$refresh_token.'&grant_type=refresh_token';
@@ -84,13 +84,13 @@ class Simplify_AccessToken extends Simplify_Object {
 	 * @throws InvalidArgumentException
 	 */
 	public function revoke($authentication = null) {
+		$args = func_get_args();
 
 		$access_token = $this->access_token;
 		if (empty($access_token)){
 			throw new InvalidArgumentException('Cannot revoke access token; access token is invalid');
 		}
 
-		$args = func_get_args();
 		$authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 2);
 
 		$props = 'token='.$access_token.'';

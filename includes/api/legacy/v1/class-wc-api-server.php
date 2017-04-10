@@ -326,12 +326,12 @@ class WC_API_Server {
 				$callback = $handler[0];
 				$supported = isset( $handler[1] ) ? $handler[1] : self::METHOD_GET;
 
-				if ( !( $supported & $method ) )
+				if ( ! ( $supported & $method ) )
 					continue;
 
 				$match = preg_match( '@^' . $route . '$@i', urldecode( $this->path ), $args );
 
-				if ( !$match )
+				if ( ! $match )
 					continue;
 
 				if ( ! is_callable( $callback ) )
@@ -344,8 +344,7 @@ class WC_API_Server {
 				if ( $supported & self::ACCEPT_DATA ) {
 					$data = $this->handler->parse_body( $this->get_raw_data() );
 					$args = array_merge( $args, array( 'data' => $data ) );
-				}
-				elseif ( $supported & self::ACCEPT_RAW_DATA ) {
+				} elseif ( $supported & self::ACCEPT_RAW_DATA ) {
 					$data = $this->get_raw_data();
 					$args = array_merge( $args, array( 'data' => $data ) );
 				}
@@ -397,14 +396,11 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
-
 				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
-			}
-			elseif ( $param->isDefaultValueAvailable() ) {
+			} elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional
 				$ordered_parameters[] = $param->getDefaultValue();
-			}
-			else {
+			} else {
 				// We don't have this parameter and it wasn't optional, abort!
 				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param->getName() ), array( 'status' => 400 ) );
 			}
@@ -423,26 +419,28 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array( 'store' => array(
-			'name'        => get_option( 'blogname' ),
-			'description' => get_option( 'blogdescription' ),
-			'URL'         => get_option( 'siteurl' ),
-			'wc_version'  => WC()->version,
-			'routes'      => array(),
-			'meta'        => array(
-				'timezone'			 => wc_timezone_string(),
-				'currency'       	 => get_woocommerce_currency(),
-				'currency_format'    => get_woocommerce_currency_symbol(),
-				'tax_included'   	 => wc_prices_include_tax(),
-				'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
-				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-				'links'          	 => array(
-					'help' => 'https://woothemes.github.io/woocommerce/rest-api/',
+		$available = array(
+			'store' => array(
+				'name'        => get_option( 'blogname' ),
+				'description' => get_option( 'blogdescription' ),
+				'URL'         => get_option( 'siteurl' ),
+				'wc_version'  => WC()->version,
+				'routes'      => array(),
+				'meta'        => array(
+					'timezone'			 => wc_timezone_string(),
+					'currency'       	 => get_woocommerce_currency(),
+					'currency_format'    => get_woocommerce_currency_symbol(),
+					'tax_included'   	 => wc_prices_include_tax(),
+					'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+					'links'          	 => array(
+						'help' => 'https://woocommerce.github.io/woocommerce/rest-api/',
+					),
 				),
 			),
-		) );
+		);
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -663,9 +661,17 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param int|string $timestamp unix timestamp or MySQL datetime
 	 * @param bool $convert_to_utc
+	 * @param bool $convert_to_gmt Use GMT timezone.
 	 * @return string RFC3339 datetime
 	 */
-	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+	public function format_datetime( $timestamp, $convert_to_utc = false, $convert_to_gmt = false ) {
+		if ( $convert_to_gmt ) {
+			if ( is_numeric( $timestamp ) ) {
+				$timestamp = date( 'Y-m-d H:i:s', $timestamp );
+			}
+
+			$timestamp = get_gmt_from_date( $timestamp );
+		}
 
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );
@@ -685,7 +691,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -701,16 +706,15 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ( $server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
-			}
-			elseif ( isset( $additional[ $key ] ) ) {
+			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;
 			}
 		}

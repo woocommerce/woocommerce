@@ -1,12 +1,12 @@
 <?php
 /**
-* WooCommerce Meta Box Functions
-*
-* @author      WooThemes
-* @category    Core
-* @package     WooCommerce/Admin/Functions
-* @version     2.3.0
-*/
+ * WooCommerce Meta Box Functions
+ *
+ * @author      WooThemes
+ * @category    Core
+ * @package     WooCommerce/Admin/Functions
+ * @version     2.3.0
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -27,6 +27,7 @@ function woocommerce_wp_text_input( $field ) {
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
+	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 	$data_type              = empty( $field['data_type'] ) ? '' : $field['data_type'];
 
 	switch ( $data_type ) {
@@ -56,21 +57,24 @@ function woocommerce_wp_text_input( $field ) {
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
+		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
-	if ( ! empty( $field['description'] ) ) {
-
-		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
-			echo wc_help_tip( $field['description'] );
-		} else {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
+		echo wc_help_tip( $field['description'] );
 	}
+
+	echo '<input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
+
+	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
+		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
+	}
+
 	echo '</p>';
 }
 
@@ -86,7 +90,7 @@ function woocommerce_wp_hidden_input( $field ) {
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
-	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
+	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 }
 
 /**
@@ -103,27 +107,34 @@ function woocommerce_wp_textarea_input( $field ) {
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['rows']          = isset( $field['rows'] ) ? $field['rows'] : 2;
+	$field['cols']          = isset( $field['cols'] ) ? $field['cols'] : 20;
 
 	// Custom attribute handling
 	$custom_attributes = array();
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
+		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
-	if ( ! empty( $field['description'] ) ) {
-
-		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
-			echo wc_help_tip( $field['description'] );
-		} else {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
+		echo wc_help_tip( $field['description'] );
 	}
+
+	echo '<textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="' . esc_attr( $field['rows'] ) . '" cols="' . esc_attr( $field['cols'] ) . '" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
+
+	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
+		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
+	}
+
 	echo '</p>';
 }
 
@@ -142,26 +153,29 @@ function woocommerce_wp_checkbox( $field ) {
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 
 	// Custom attribute handling
 	$custom_attributes = array();
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . '  ' . implode( ' ', $custom_attributes ) . '/> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
+		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
-	if ( ! empty( $field['description'] ) ) {
+	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
+		echo wc_help_tip( $field['description'] );
+	}
 
-		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
-			echo wc_help_tip( $field['description'] );
-		} else {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+	echo '<input type="checkbox" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . '  ' . implode( ' ', $custom_attributes ) . '/> ';
+
+	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
+		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 	}
 
 	echo '</p>';
@@ -181,18 +195,26 @@ function woocommerce_wp_select( $field ) {
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 
 	// Custom attribute handling
 	$custom_attributes = array();
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ){
+		foreach ( $field['custom_attributes'] as $attribute => $value ) {
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['name'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
+		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+
+	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
+		echo wc_help_tip( $field['description'] );
+	}
+
+	echo '<select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['name'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
 
 	foreach ( $field['options'] as $key => $value ) {
 		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
@@ -200,14 +222,10 @@ function woocommerce_wp_select( $field ) {
 
 	echo '</select> ';
 
-	if ( ! empty( $field['description'] ) ) {
-
-		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
-			echo wc_help_tip( $field['description'] );
-		} else {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
+		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 	}
+
 	echo '</p>';
 }
 
@@ -225,8 +243,15 @@ function woocommerce_wp_radio( $field ) {
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 
-	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul class="wc-radios">';
+	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend>';
+
+	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
+		echo wc_help_tip( $field['description'] );
+	}
+
+	echo '<ul class="wc-radios">';
 
 	foreach ( $field['options'] as $key => $value ) {
 
@@ -242,13 +267,8 @@ function woocommerce_wp_radio( $field ) {
 	}
 	echo '</ul>';
 
-	if ( ! empty( $field['description'] ) ) {
-
-		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
-			echo wc_help_tip( $field['description'] );
-		} else {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
+		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 	}
 
 	echo '</fieldset>';

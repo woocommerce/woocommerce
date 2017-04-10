@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $template = get_option( 'template' );
 
-switch( $template ) {
+switch ( $template ) {
 	case 'twentyeleven' :
 		echo '</div>';
 		get_sidebar( 'shop' );

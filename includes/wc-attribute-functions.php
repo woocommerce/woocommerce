@@ -19,7 +19,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	return array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) );
+	return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
+}
+
+/**
+ * See if an attribute is actually valid.
+ * @since  3.0.0
+ * @param  string $value
+ * @return bool
+ */
+function wc_get_text_attributes_filter_callback( $value ) {
+	return '' !== $value;
+}
+
+/**
+ * Implode an array of attributes using WC_DELIMITER.
+ * @since  3.0.0
+ * @param  array $attributes
+ * @return string
+ */
+function wc_implode_text_attributes( $attributes ) {
+	return implode( ' ' . WC_DELIMITER . ' ', $attributes );
 }
 
 /**
@@ -108,16 +128,19 @@ function wc_attribute_label( $name, $product = '' ) {
 	global $wpdb;
 
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
-
-		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-
-		if ( ! $label ) {
+		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
+		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
+		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
+	} elseif ( $product ) {
+		if ( $product->is_type( 'variation' ) ) {
+			$product = wc_get_product( $product->get_parent_id() );
+		}
+		// Attempt to get label from product, as entered by the user.
+		if ( ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ] ) ) {
+			$label = $attributes[ sanitize_title( $name ) ]->get_name();
+		} else {
 			$label = $name;
 		}
-	} elseif ( $product && ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ]['name'] ) ) {
-		// Attempt to get label from product, as entered by the user
-		$label = $attributes[ sanitize_title( $name ) ]['name'];
 	} else {
 		$label = $name;
 	}
@@ -170,8 +193,21 @@ function wc_get_attribute_taxonomy_names() {
 function wc_get_attribute_types() {
 	return (array) apply_filters( 'product_attributes_type_selector', array(
 		'select' => __( 'Select', 'woocommerce' ),
-		'text'   => __( 'Text', 'woocommerce' )
+		'text'   => __( 'Text', 'woocommerce' ),
 	) );
+}
+
+/**
+ * Get attribute type label.
+ *
+ * @since  3.0.0
+ * @param  string $type Attribute type slug.
+ * @return string
+ */
+function wc_get_attribute_type_label( $type ) {
+	$types = wc_get_attribute_types();
+
+	return isset( $types[ $type ] ) ? $types[ $type ] : ucfirst( $type );
 }
 
 /**
@@ -185,15 +221,103 @@ function wc_get_attribute_types() {
 function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 	// Forbidden attribute names
 	$reserved_terms = array(
-		'attachment', 'attachment_id', 'author', 'author_name', 'calendar', 'cat', 'category', 'category__and',
-		'category__in', 'category__not_in', 'category_name', 'comments_per_page', 'comments_popup', 'cpage', 'day',
-		'debug', 'error', 'exact', 'feed', 'hour', 'link_category', 'm', 'minute', 'monthnum', 'more', 'name',
-		'nav_menu', 'nopaging', 'offset', 'order', 'orderby', 'p', 'page', 'page_id', 'paged', 'pagename', 'pb', 'perm',
-		'post', 'post__in', 'post__not_in', 'post_format', 'post_mime_type', 'post_status', 'post_tag', 'post_type',
-		'posts', 'posts_per_archive_page', 'posts_per_page', 'preview', 'robots', 's', 'search', 'second', 'sentence',
-		'showposts', 'static', 'subpost', 'subpost_id', 'tag', 'tag__and', 'tag__in', 'tag__not_in', 'tag_id',
-		'tag_slug__and', 'tag_slug__in', 'taxonomy', 'tb', 'term', 'type', 'w', 'withcomments', 'withoutcomments', 'year',
+		'attachment',
+		'attachment_id',
+		'author',
+		'author_name',
+		'calendar',
+		'cat',
+		'category',
+		'category__and',
+		'category__in',
+		'category__not_in',
+		'category_name',
+		'comments_per_page',
+		'comments_popup',
+		'cpage',
+		'day',
+		'debug',
+		'error',
+		'exact',
+		'feed',
+		'hour',
+		'link_category',
+		'm',
+		'minute',
+		'monthnum',
+		'more',
+		'name',
+		'nav_menu',
+		'nopaging',
+		'offset',
+		'order',
+		'orderby',
+		'p',
+		'page',
+		'page_id',
+		'paged',
+		'pagename',
+		'pb',
+		'perm',
+		'post',
+		'post__in',
+		'post__not_in',
+		'post_format',
+		'post_mime_type',
+		'post_status',
+		'post_tag',
+		'post_type',
+		'posts',
+		'posts_per_archive_page',
+		'posts_per_page',
+		'preview',
+		'robots',
+		's',
+		'search',
+		'second',
+		'sentence',
+		'showposts',
+		'static',
+		'subpost',
+		'subpost_id',
+		'tag',
+		'tag__and',
+		'tag__in',
+		'tag__not_in',
+		'tag_id',
+		'tag_slug__and',
+		'tag_slug__in',
+		'taxonomy',
+		'tb',
+		'term',
+		'type',
+		'w',
+		'withcomments',
+		'withoutcomments',
+		'year',
 	);
 
 	return in_array( $attribute_name, $reserved_terms );
+}
+
+/**
+ * Callback for array filter to get visible only.
+ *
+ * @since  3.0.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_attributes_array_filter_visible( $attribute ) {
+	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_visible() && ( ! $attribute->is_taxonomy() || taxonomy_exists( $attribute->get_name() ) );
+}
+
+/**
+ * Callback for array filter to get variation attributes only.
+ *
+ * @since  3.0.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_attributes_array_filter_variation( $attribute ) {
+	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_variation();
 }

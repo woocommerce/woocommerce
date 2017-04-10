@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Admin_Profile' ) ) :
+if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 
 /**
  * WC_Admin_Profile Class.
@@ -38,103 +38,103 @@ class WC_Admin_Profile {
 	public function get_customer_meta_fields() {
 		$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
 			'billing' => array(
-				'title' => __( 'Customer Billing Address', 'woocommerce' ),
+				'title' => __( 'Customer billing address', 'woocommerce' ),
 				'fields' => array(
 					'billing_first_name' => array(
 						'label'       => __( 'First name', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'billing_last_name' => array(
 						'label'       => __( 'Last name', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'billing_company' => array(
 						'label'       => __( 'Company', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'billing_address_1' => array(
-						'label'       => __( 'Address 1', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Address line 1', 'woocommerce' ),
+						'description' => '',
 					),
 					'billing_address_2' => array(
-						'label'       => __( 'Address 2', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Address line 2', 'woocommerce' ),
+						'description' => '',
 					),
 					'billing_city' => array(
 						'label'       => __( 'City', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'billing_postcode' => array(
-						'label'       => __( 'Postcode', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
+						'description' => '',
 					),
 					'billing_country' => array(
 						'label'       => __( 'Country', 'woocommerce' ),
 						'description' => '',
 						'class'       => 'js_field-country',
 						'type'        => 'select',
-						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
+						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 					),
 					'billing_state' => array(
-						'label'       => __( 'State/County', 'woocommerce' ),
-						'description' => __( 'State/County or state code', 'woocommerce' ),
-						'class'       => 'js_field-state'
+						'label'       => __( 'State / County', 'woocommerce' ),
+						'description' => __( 'State / County or state code', 'woocommerce' ),
+						'class'       => 'js_field-state',
 					),
 					'billing_phone' => array(
-						'label'       => __( 'Telephone', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Phone', 'woocommerce' ),
+						'description' => '',
 					),
 					'billing_email' => array(
-						'label'       => __( 'Email', 'woocommerce' ),
-						'description' => ''
-					)
-				)
+						'label'       => __( 'Email address', 'woocommerce' ),
+						'description' => '',
+					),
+				),
 			),
 			'shipping' => array(
-				'title' => __( 'Customer Shipping Address', 'woocommerce' ),
+				'title' => __( 'Customer shipping address', 'woocommerce' ),
 				'fields' => array(
 					'shipping_first_name' => array(
 						'label'       => __( 'First name', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'shipping_last_name' => array(
 						'label'       => __( 'Last name', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'shipping_company' => array(
 						'label'       => __( 'Company', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'shipping_address_1' => array(
-						'label'       => __( 'Address 1', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Address line 1', 'woocommerce' ),
+						'description' => '',
 					),
 					'shipping_address_2' => array(
-						'label'       => __( 'Address 2', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Address line 2', 'woocommerce' ),
+						'description' => '',
 					),
 					'shipping_city' => array(
 						'label'       => __( 'City', 'woocommerce' ),
-						'description' => ''
+						'description' => '',
 					),
 					'shipping_postcode' => array(
-						'label'       => __( 'Postcode', 'woocommerce' ),
-						'description' => ''
+						'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
+						'description' => '',
 					),
 					'shipping_country' => array(
 						'label'       => __( 'Country', 'woocommerce' ),
 						'description' => '',
 						'class'       => 'js_field-country',
 						'type'        => 'select',
-						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
+						'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 					),
 					'shipping_state' => array(
-						'label'       => __( 'State/County', 'woocommerce' ),
-						'description' => __( 'State/County or state code', 'woocommerce' ),
-						'class'       => 'js_field-state'
-					)
-				)
-			)
+						'label'       => __( 'State / County', 'woocommerce' ),
+						'description' => __( 'State / County or state code', 'woocommerce' ),
+						'class'       => 'js_field-state',
+					),
+				),
+			),
 		) );
 		return $show_fields;
 	}
@@ -161,7 +161,7 @@ class WC_Admin_Profile {
 					<tr>
 						<th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
 						<td>
-							<?php if ( ! empty( $field['type'] ) && 'select' == $field['type'] ) : ?>
+							<?php if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) : ?>
 								<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
 									<?php
 										$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
@@ -169,8 +169,10 @@ class WC_Admin_Profile {
 										<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $selected, $option_key, true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 									<?php endforeach; ?>
 								</select>
+							<?php elseif ( ! empty( $field['type'] ) && 'checkbox' === $field['type'] ) : ?>
+								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
 							<?php else : ?>
-							<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
+								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
 							<br/>
 							<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
@@ -196,7 +198,9 @@ class WC_Admin_Profile {
 
 			foreach ( $fieldset['fields'] as $key => $field ) {
 
-				if ( isset( $_POST[ $key ] ) ) {
+				if ( isset( $field['type'] ) && 'checkbox' === $field['type'] ) {
+					update_user_meta( $user_id, $key, isset( $_POST[ $key ] ) );
+				} elseif ( isset( $_POST[ $key ] ) ) {
 					update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
 				}
 			}

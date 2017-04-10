@@ -48,7 +48,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -154,9 +154,9 @@ class WC_Payment_Gateways {
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} else if( $gateway->supports( 'add_payment_method' ) ) {
+				} elseif ( $gateway->supports( 'add_payment_method' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} else if ( $gateway->supports( 'tokenization' ) ) {
+				} elseif ( $gateway->supports( 'tokenization' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}

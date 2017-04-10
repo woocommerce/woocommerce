@@ -14,7 +14,7 @@ body {
 	}
 }
 .wc-setup-content {
-	box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
 	padding: 24px 24px 0;
 	background: #fff;
 	overflow: hidden;
@@ -62,7 +62,7 @@ body {
 			.description {
 				line-height: 1.5em;
 				display: block;
-				margin-top: .25em;
+				margin-top: 0.25em;
 				color: #999;
 				font-style: italic;
 			}
@@ -70,7 +70,7 @@ body {
 				width: auto;
 				box-sizing: inherit;
 				padding: inherit;
-				margin: 0 .5em 0 0;
+				margin: 0 0.5em 0 0;
 				box-shadow: none;
 			}
 		}
@@ -93,7 +93,7 @@ body {
 	}
 	table.tax-rates {
 		width: 100%;
-		font-size: .92em;
+		font-size: 0.92em;
 		th {
 			padding: 0;
 			text-align: center;
@@ -116,8 +116,8 @@ body {
 			&.sort {
 				cursor: move;
 				color: #ccc;
-				&:before {
-					content: "\f333";
+				&::before {
+					content: '\f333';
 					font-family: 'dashicons';
 				}
 			}
@@ -135,8 +135,8 @@ body {
 			overflow: hidden;
 			position: relative;
 			display: inline-block;
-			&:before {
-				content: "\f502";
+			&::before {
+				content: '\f502';
 				font-family: 'dashicons';
 				position: absolute;
 				left: 0;
@@ -153,8 +153,8 @@ body {
 			overflow: hidden;
 			position: relative;
 			display: inline-block;
-			&:before {
-				content: "\f182";
+			&::before {
+				content: '\f182';
 				font-family: 'dashicons';
 				position: absolute;
 				left: 0;
@@ -189,7 +189,7 @@ body {
 				line-height: 1.75em;
 				input {
 					vertical-align: middle;
-					margin: 1px 0 0 0;
+					margin: 1px 0 0;
 					height: 1.75em;
 					width: 1.75em;
 					line-height: 1.75em;
@@ -231,35 +231,35 @@ body {
 		ul {
 			padding: 0 2em 0 0;
 			list-style: none outside;
-			margin: 0 0 -.75em;
+			margin: 0 0 -0.75em;
 			li a {
 				display: block;
-				padding: 0 0 .75em;
+				padding: 0 0 0.75em;
 			}
 			.setup-product {
 				a {
 					background-color: #bb77ae;
-					border-color: #A36597;
-					-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-					box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-					text-shadow: 0px -1px 1px #A36597, 1px 0px 1px #A36597, 0px 1px 1px #A36597, -1px 0px 1px #A36597;
+					border-color: #a36597;
+					-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+					box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+					text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
 					font-size: 1em;
 					height: auto;
 					line-height: 1.75em;
-					margin: 0 0 .75em;
+					margin: 0 0 0.75em;
 					opacity: 1;
 					padding: 1em;
 					text-align: center;
-					
+
 					&:hover, &:focus, &:active {
-						background: #A36597;
-						border-color: #A36597;
-						-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-						box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+						background: #a36597;
+						border-color: #a36597;
+						-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+						box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 					}
 				}
 			}
-			li a:before {
+			li a::before {
 				color: #82878c;
 				font: normal 20px/1 'dashicons';
 				speak: none;
@@ -272,20 +272,20 @@ body {
 				text-decoration: none !important;
 				vertical-align: top;
 			}
-			.learn-more a:before {
-				content: "\f105";
+			.learn-more a::before {
+				content: '\f105';
 			}
-			.video-walkthrough a:before {
-				content: "\f126";
+			.video-walkthrough a::before {
+				content: '\f126';
 			}
-			.newsletter a:before {
-				content: "\f465";
+			.newsletter a::before {
+				content: '\f465';
 			}
 		}
 	}
 	.woocommerce-tracker, .updated {
 		padding: 24px 24px 0;
-		margin: 0 0 24px 0;
+		margin: 0 0 24px;
 		overflow: hidden;
 		background: #f5f5f5;
 		p {
@@ -293,7 +293,7 @@ body {
 			margin: 0 0 12px;
 		}
 		p:last-child {
-			margin: 0 0 24px 0;
+			margin: 0 0 24px;
 		}
 	}
 }
@@ -317,8 +317,8 @@ body {
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
 	}
-	li:before {
-		content: "";
+	li::before {
+		content: '';
 		border: 4px solid #ccc;
 		border-radius: 100%;
 		width: 4px;
@@ -333,14 +333,14 @@ body {
 	li.active {
 		border-color: #a16696;
 		color: #a16696;
-		&:before {
+		&::before {
 			border-color: #a16696;
 		}
 	}
 	li.done {
 		border-color: #a16696;
 		color: #a16696;
-		&:before {
+		&::before {
 			border-color: #a16696;
 			background: #a16696;
 		}
@@ -351,28 +351,28 @@ body {
 	.button {
 		float: right;
 		font-size: 1.25em;
-		padding: .5em 1em;
+		padding: 0.5em 1em;
 		line-height: 1em;
-		margin-right: .5em;
+		margin-right: 0.5em;
 		margin-bottom: 2px;
 		height: auto;
 		border-radius: 4px;
 	}
 	.button-primary {
 		background-color: #bb77ae;
-		border-color: #A36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		text-shadow: 0px -1px 1px #A36597, 1px 0px 1px #A36597, 0px 1px 1px #A36597, -1px 0px 1px #A36597;
+		border-color: #a36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
 		float: right;
 		margin: 0;
 		opacity: 1;
 
 		&:hover, &:focus, &:active {
-			background: #A36597;
-			border-color: #A36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-			box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+			background: #a36597;
+			border-color: #a36597;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
 	}
 }
@@ -424,7 +424,7 @@ ul.wc-wizard-payment-gateways {
 		}
 
 		&.checked {
-			background: #F7F1F6;
+			background: #f7f1f6;
 
 			.wc-wizard-gateway-settings {
 				display: table;
@@ -435,12 +435,12 @@ ul.wc-wizard-payment-gateways {
 			font-style: italic;
 
 			p {
-				margin: 0 0 .5em;
+				margin: 0 0 0.5em;
 			}
 		}
 
 		.wc-wizard-gateway-enable {
-			margin: 0 0 .5em;
+			margin: 0 0 0.5em;
 
 			label {
 				display: block;
@@ -452,7 +452,7 @@ ul.wc-wizard-payment-gateways {
 					vertical-align: middle;
 				}
 			}
-			label:before {
+			label::before {
 				content: '';
 				background: #fff;
 				border: 2px solid #eee;
@@ -473,8 +473,8 @@ ul.wc-wizard-payment-gateways {
 				width: 0;
 				position: absolute;
 
-				&:checked + label:before {
-					content: "\f147";
+				&:checked + label::before {
+					content: '\f147';
 					font-family: 'dashicons';
 					color: #fff;
 					border-color: #a46497;

@@ -154,14 +154,16 @@ class WC_API_Server {
 		// allow plugins to remove default authentication or add their own authentication
 		$user = apply_filters( 'woocommerce_api_check_authentication', null, $this );
 
-		// API requests run under the context of the authenticated user
 		if ( is_a( $user, 'WP_User' ) ) {
-			wp_set_current_user( $user->ID );
-		}
 
-		// WP_Errors are handled in serve_request()
-		elseif ( ! is_wp_error( $user ) ) {
+			// API requests run under the context of the authenticated user
+			wp_set_current_user( $user->ID );
+
+		} elseif ( ! is_wp_error( $user ) ) {
+
+			// WP_Errors are handled in serve_request()
 			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => 500 ) );
+
 		}
 
 		return $user;
@@ -442,32 +444,34 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array( 'store' => array(
-			'name'        => get_option( 'blogname' ),
-			'description' => get_option( 'blogdescription' ),
-			'URL'         => get_option( 'siteurl' ),
-			'wc_version'  => WC()->version,
-			'version'     => WC_API::VERSION,
-			'routes'      => array(),
-			'meta'        => array(
-				'timezone'           => wc_timezone_string(),
-				'currency'           => get_woocommerce_currency(),
-				'currency_format'    => get_woocommerce_currency_symbol(),
-				'currency_position'  => get_option( 'woocommerce_currency_pos' ),
-				'thousand_separator' => get_option( 'woocommerce_price_thousand_sep' ),
-				'decimal_separator'  => get_option( 'woocommerce_price_decimal_sep' ),
-				'price_num_decimals' => wc_get_price_decimals(),
-				'tax_included'       => wc_prices_include_tax(),
-				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || wc_site_is_https() ),
-				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-				'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
-				'links'              => array(
-					'help' => 'https://woothemes.github.io/woocommerce-rest-api-docs/',
+		$available = array(
+			'store' => array(
+				'name'        => get_option( 'blogname' ),
+				'description' => get_option( 'blogdescription' ),
+				'URL'         => get_option( 'siteurl' ),
+				'wc_version'  => WC()->version,
+				'version'     => WC_API::VERSION,
+				'routes'      => array(),
+				'meta'        => array(
+					'timezone'           => wc_timezone_string(),
+					'currency'           => get_woocommerce_currency(),
+					'currency_format'    => get_woocommerce_currency_symbol(),
+					'currency_position'  => get_option( 'woocommerce_currency_pos' ),
+					'thousand_separator' => get_option( 'woocommerce_price_thousand_sep' ),
+					'decimal_separator'  => get_option( 'woocommerce_price_decimal_sep' ),
+					'price_num_decimals' => wc_get_price_decimals(),
+					'tax_included'       => wc_prices_include_tax(),
+					'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || wc_site_is_https() ),
+					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+					'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
+					'links'              => array(
+						'help' => 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
+					),
 				),
 			),
-		) );
+		);
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -571,14 +575,14 @@ class WC_API_Server {
 			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 
-			if( $query->get( 'number' ) > 0 ) {
+			if ( $query->get( 'number' ) > 0 ) {
 				$page = ( $query->get( 'offset' ) / $query->get( 'number' ) ) + 1;
 				$total_pages = ceil( $total / $query->get( 'number' ) );
 			} else {
 				$page = 1;
 				$total_pages = 1;
 			}
-		} else if ( is_a( $query, 'stdClass' ) ) {
+		} elseif ( is_a( $query, 'stdClass' ) ) {
 			$page        = $query->page;
 			$single      = $query->is_single;
 			$total       = $query->total;
@@ -706,9 +710,17 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param int|string $timestamp unix timestamp or MySQL datetime
 	 * @param bool $convert_to_utc
+	 * @param bool $convert_to_gmt Use GMT timezone.
 	 * @return string RFC3339 datetime
 	 */
-	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+	public function format_datetime( $timestamp, $convert_to_utc = false, $convert_to_gmt = false ) {
+		if ( $convert_to_gmt ) {
+			if ( is_numeric( $timestamp ) ) {
+				$timestamp = date( 'Y-m-d H:i:s', $timestamp );
+			}
+
+			$timestamp = get_gmt_from_date( $timestamp );
+		}
 
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );
@@ -728,7 +740,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -744,13 +755,13 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ( $server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
 			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;
@@ -759,5 +770,4 @@ class WC_API_Server {
 
 		return $headers;
 	}
-
 }

@@ -21,8 +21,8 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'legacy_local_pickup';
-		$this->method_title       = __( 'Local Pickup (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title       = __( 'Local pickup (legacy)', 'woocommerce' );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 	}
 
@@ -32,12 +32,12 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
@@ -88,22 +88,22 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
-				'default' => 'no'
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Local Pickup', 'woocommerce' ),
+				'default'     => __( 'Local pickup', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'codes' => array(
-				'title'       => __( 'Allowed ZIP/Post Codes', 'woocommerce' ),
+				'title'       => __( 'Allowed ZIP/post codes', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => __( 'What ZIP/post codes are available for local pickup?', 'woocommerce' ),
 				'default'     => '',
 				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
-				'placeholder' => 'e.g. 12345, 56789'
+				'placeholder' => 'e.g. 12345, 56789',
 			),
 			'availability' => array(
 				'title'    => __( 'Method availability', 'woocommerce' ),
@@ -112,20 +112,20 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 				'class'    => 'availability wc-enhanced-select',
 				'options'  => array(
 					'all'      => __( 'All allowed countries', 'woocommerce' ),
-					'specific' => __( 'Specific Countries', 'woocommerce' )
-				)
+					'specific' => __( 'Specific countries', 'woocommerce' ),
+				),
 			),
 			'countries' => array(
-				'title'             => __( 'Specific Countries', 'woocommerce' ),
+				'title'             => __( 'Specific countries', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
-				'css'               => 'width: 450px;',
+				'css'               => 'width: 400px;',
 				'default'           => '',
 				'options'           => WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(
-					'data-placeholder'  => __( 'Select some countries', 'woocommerce' )
-				)
-			)
+					'data-placeholder'  => __( 'Select some countries', 'woocommerce' ),
+				),
+			),
 		);
 	}
 
@@ -136,8 +136,8 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function get_valid_postcodes() {
 		$codes = array();
 
-		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
+		if ( '' !== $this->codes ) {
+			foreach ( explode( ',', $this->codes ) as $code ) {
 				$codes[] = strtoupper( trim( $code ) );
 			}
 		}
@@ -196,7 +196,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 		}
 
 		if ( $is_available ) {
-			if ( $this->availability === 'specific' ) {
+			if ( 'specific' === $this->availability ) {
 				$ship_to_countries = $this->countries;
 			} else {
 				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );

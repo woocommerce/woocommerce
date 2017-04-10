@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php wc_print_notices(); ?>
 
-<p><?php printf( __( 'This will give "%s" <strong>%s</strong> access which will allow it to:' , 'woocommerce' ), esc_html( $app_name ), esc_html( $scope ) ); ?></p>
+<p><?php printf( __( 'This will give "%1$s" %2$s access which will allow it to:' , 'woocommerce' ), '<strong>' . esc_html( $app_name ) . '</strong>', '<strong>' . esc_html( $scope ) . '</strong>' ); ?></p>
 
 <ul class="wc-auth-permissions">
 	<?php foreach ( $permissions as $permission ) : ?>

@@ -37,11 +37,11 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 		$default_fields = array(
 			'routing-number' => '<p class="form-row form-row-first">
-				<label for="' . esc_attr( $this->id ) . '-routing-number">' . __( 'Routing Number', 'woocommerce' ) . ' <span class="required">*</span></label>
+				<label for="' . esc_attr( $this->id ) . '-routing-number">' . esc_html__( 'Routing number', 'woocommerce' ) . ' <span class="required">*</span></label>
 				<input id="' . esc_attr( $this->id ) . '-routing-number" class="input-text wc-echeck-form-routing-number" type="text" maxlength="9" autocomplete="off" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" name="' . esc_attr( $this->id ) . '-routing-number" />
 			</p>',
 			'account-number' => '<p class="form-row form-row-wide">
-				<label for="' . esc_attr( $this->id ) . '-account-number">' . __( 'Account Number', 'woocommerce' ) . ' <span class="required">*</span></label>
+				<label for="' . esc_attr( $this->id ) . '-account-number">' . esc_html__( 'Account number', 'woocommerce' ) . ' <span class="required">*</span></label>
 				<input id="' . esc_attr( $this->id ) . '-account-number" class="input-text wc-echeck-form-account-number" type="text" autocomplete="off" name="' . esc_attr( $this->id ) . '-account-number" maxlength="17" />
 			</p>',
 		);
@@ -60,5 +60,4 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 			<div class="clear"></div>
 		</fieldset><?php
 	}
-
 }

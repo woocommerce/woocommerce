@@ -4,14 +4,12 @@
  *
  * Functions for order specific things.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @author      WooThemes
+ * @category    Core
+ * @package     WooCommerce/Functions
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -21,25 +19,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * custom tables, functions still work.
  *
  * Args:
- * 		status array|string List of order statuses to find
- * 		type array|string Order type, e.g. shop_order or shop_order_refund
- * 		parent int post/order parent
- * 		customer int|string|array User ID or billing email to limit orders to a
- * 			particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
- * 			e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
- * 		limit int Maximum of orders to retrieve.
- * 		offset int Offset of orders to retrieve.
- * 		page int Page of orders to retrieve. Ignored when using the 'offset' arg.
- * 		exclude array Order IDs to exclude from the query.
- * 		orderby string Order by date, title, id, modified, rand etc
- * 		order string ASC or DESC
- * 		return string Type of data to return. Allowed values:
- * 			ids array of order ids
- * 			objects array of order objects (default)
- * 		paginate bool If true, the return value will be an array with values:
- * 			'orders'        => array of data (return value above),
- * 			'total'         => total number of orders matching the query
- * 			'max_num_pages' => max number of pages found
+ *      status array|string List of order statuses to find
+ *      type array|string Order type, e.g. shop_order or shop_order_refund
+ *      parent int post/order parent
+ *      customer int|string|array User ID or billing email to limit orders to a
+ *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
+ *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
+ *      limit int Maximum of orders to retrieve.
+ *      offset int Offset of orders to retrieve.
+ *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ *      date_before string Get orders before a certain date ( strtotime() compatibile string )
+ *      date_after string Get orders after a certain date ( strtotime() compatibile string )
+ *      exclude array Order IDs to exclude from the query.
+ *      orderby string Order by date, title, id, modified, rand etc
+ *      order string ASC or DESC
+ *      return string Type of data to return. Allowed values:
+ *          ids array of order ids
+ *          objects array of order objects (default)
+ *      paginate bool If true, the return value will be an array with values:
+ *          'orders'        => array of data (return value above),
+ *          'total'         => total number of orders matching the query
+ *          'max_num_pages' => max number of pages found
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -48,19 +48,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_orders( $args ) {
 	$args = wp_parse_args( $args, array(
-		'status'   => array_keys( wc_get_order_statuses() ),
-		'type'     => wc_get_order_types( 'view-orders' ),
-		'parent'   => null,
-		'customer' => null,
-		'email'    => '',
-		'limit'    => get_option( 'posts_per_page' ),
-		'offset'   => null,
-		'page'     => 1,
-		'exclude'  => array(),
-		'orderby'  => 'date',
-		'order'    => 'DESC',
-		'return'   => 'objects',
-		'paginate' => false,
+		'status'      => array_keys( wc_get_order_statuses() ),
+		'type'        => wc_get_order_types( 'view-orders' ),
+		'parent'      => null,
+		'customer'    => null,
+		'email'       => '',
+		'limit'       => get_option( 'posts_per_page' ),
+		'offset'      => null,
+		'page'        => 1,
+		'exclude'     => array(),
+		'orderby'     => 'date',
+		'order'       => 'DESC',
+		'return'      => 'objects',
+		'paginate'    => false,
+		'date_before' => '',
+		'date_after'  => '',
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
@@ -80,118 +82,36 @@ function wc_get_orders( $args ) {
 		}
 	}
 
-	/**
-	 * Generate WP_Query args. This logic will change if orders are moved to
-	 * custom tables in the future.
-	 */
-	$wp_query_args = array(
-		'post_type'      => $args['type'] ? $args['type'] : 'shop_order',
-		'post_status'    => $args['status'],
-		'posts_per_page' => $args['limit'],
-		'meta_query'     => array(),
-		'fields'         => 'ids',
-		'orderby'        => $args['orderby'],
-		'order'          => $args['order'],
-	);
-
-	if ( ! is_null( $args['parent'] ) ) {
-		$wp_query_args['post_parent'] = absint( $args['parent'] );
-	}
-
-	if ( ! is_null( $args['offset'] ) ) {
-		$wp_query_args['offset'] = absint( $args['offset'] );
-	} else {
-		$wp_query_args['paged'] = absint( $args['page'] );
-	}
-
-	if ( ! empty( $args['customer'] ) ) {
-		$values = is_array( $args['customer'] ) ? $args['customer'] : array( $args['customer'] );
-		$wp_query_args['meta_query'][] = _wc_get_orders_generate_customer_meta_query( $values );
-	}
-
-	if ( ! empty( $args['exclude'] ) ) {
-		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
-	}
-
-	if ( ! $args['paginate' ] ) {
-		$wp_query_args['no_found_rows'] = true;
-	}
-
-	// Get results.
-	$orders = new WP_Query( $wp_query_args );
-
-	if ( 'objects' === $args['return'] ) {
-		$return = array_map( 'wc_get_order', $orders->posts );
-	} else {
-		$return = $orders->posts;
-	}
-
-	if ( $args['paginate' ] ) {
-		return (object) array(
-			'orders'        => $return,
-			'total'         => $orders->found_posts,
-			'max_num_pages' => $orders->max_num_pages,
-		);
-	} else {
-		return $return;
-	}
+	return WC_Data_Store::load( 'order' )->get_orders( $args );
 }
 
 /**
- * Generate meta query for wc_get_orders. Used internally only.
- * @since  2.6.0
- * @param  array $values
- * @param  string $relation
- * @return array
+ * Main function for returning orders, uses the WC_Order_Factory class.
+ *
+ * @since  2.2
+ * @param  mixed $the_order Post object or post ID of the order.
+ * @return WC_Order|WC_Refund
  */
-function _wc_get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
-	$meta_query = array(
-		'relation' => strtoupper( $relation ),
-		'customer_emails' => array(
-			'key'     => '_billing_email',
-			'value'   => array(),
-			'compare' => 'IN',
-		),
-		'customer_ids' => array(
-			'key'     => '_customer_user',
-			'value'   => array(),
-			'compare' => 'IN',
-		)
-	);
-	foreach ( $values as $value ) {
-		if ( is_array( $value ) ) {
-			$meta_query[] = _wc_get_orders_generate_customer_meta_query( $value, 'and' );
-		} elseif ( is_email( $value ) ) {
-			$meta_query['customer_emails']['value'][] = sanitize_email( $value );
-		} else {
-			$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
-		}
+function wc_get_order( $the_order = false ) {
+	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
+		return false;
 	}
-
-	if ( empty( $meta_query['customer_emails']['value'] ) ) {
-		unset( $meta_query['customer_emails'] );
-		unset( $meta_query['relation'] );
-	}
-
-	if ( empty( $meta_query['customer_ids']['value'] ) ) {
-		unset( $meta_query['customer_ids'] );
-		unset( $meta_query['relation'] );
-	}
-
-	return $meta_query;
+	return WC()->order_factory->get_order( $the_order );
 }
 
 /**
  * Get all order statuses.
  *
  * @since 2.2
+ * @used-by WC_Order::set_status
  * @return array
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
-		'wc-pending'    => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
+		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-		'wc-on-hold'    => _x( 'On Hold', 'Order status', 'woocommerce' ),
+		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
 		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
 		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
@@ -211,18 +131,12 @@ function wc_is_order_status( $maybe_status ) {
 }
 
 /**
- * Main function for returning orders, uses the WC_Order_Factory class.
- *
- * @since  2.2
- * @param  mixed $the_order Post object or post ID of the order.
- * @return WC_Order|WC_Refund
+ * Get list of statuses which are consider 'paid'.
+ * @since  3.0.0
+ * @return array
  */
-function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
-		return false;
-	}
-	return WC()->order_factory->get_order( $the_order );
+function wc_get_is_paid_statuses() {
+	return apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) );
 }
 
 /**
@@ -236,30 +150,24 @@ function wc_get_order_status_name( $status ) {
 	$statuses = wc_get_order_statuses();
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
 	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
-
 	return $status;
 }
 
 /**
  * Finds an Order ID based on an order key.
  *
- * @access public
  * @param string $order_key An order key has generated by
  * @return int The ID of an order, or 0 if the order could not be found
  */
 function wc_get_order_id_by_order_key( $order_key ) {
-	global $wpdb;
-
-	// Faster than get_posts()
-	$order_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
-
-	return $order_id;
+	$data_store = WC_Data_Store::load( 'order' );
+	return $data_store->get_order_id_by_order_key( $order_key );
 }
 
 /**
  * Get all registered order types.
  *
- * $for optionally define what you are getting order types for so only relevent types are returned.
+ * $for optionally define what you are getting order types for so only relevant types are returned.
  *
  * e.g. for 'order-meta-boxes', 'order-count'
  *
@@ -349,14 +257,14 @@ function wc_get_order_type( $type ) {
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
- * 		orders screen.
- * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
- * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
- * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
- * 		viewing orders e.g. on the my account page.
- * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
- * 		- exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
+ *      - exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
+ *      orders screen.
+ *      - add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
+ *      - exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
+ *      - exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
+ *      viewing orders e.g. on the my account page.
+ *      - exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
+ *      - exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
  *
  * @since  2.2
  * @see    register_post_type for $args used in that function
@@ -389,7 +297,7 @@ function wc_register_order_type( $type, $args = array() ) {
 		'exclude_from_order_webhooks'      => false,
 		'exclude_from_order_reports'       => false,
 		'exclude_from_order_sales_reports' => false,
-		'class_name'                       => 'WC_Order'
+		'class_name'                       => 'WC_Order',
 	);
 
 	$args                    = array_intersect_key( $args, $order_type_args );
@@ -398,308 +306,6 @@ function wc_register_order_type( $type, $args = array() ) {
 
 	return true;
 }
-
-/**
- * Grant downloadable product access to the file identified by $download_id.
- *
- * @access public
- * @param string $download_id file identifier
- * @param int $product_id product identifier
- * @param WC_Order $order the order
- * @param  int $qty purchased
- * @return int|bool insert id or false on failure
- */
-function wc_downloadable_file_permission( $download_id, $product_id, $order, $qty = 1 ) {
-	global $wpdb;
-
-	$user_email = sanitize_email( $order->billing_email );
-	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
-	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
-
-	$limit      = empty( $limit ) ? '' : absint( $limit ) * $qty;
-
-	// Default value is NULL in the table schema
-	$expiry     = empty( $expiry ) ? null : absint( $expiry );
-
-	if ( $expiry ) {
-		$order_completed_date = date_i18n( "Y-m-d", strtotime( $order->completed_date ) );
-		$expiry = date_i18n( "Y-m-d", strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
-	}
-
-	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
-		'download_id'			=> $download_id,
-		'product_id' 			=> $product_id,
-		'user_id' 				=> absint( $order->user_id ),
-		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->id,
-		'order_key' 			=> $order->order_key,
-		'downloads_remaining' 	=> $limit,
-		'access_granted'		=> current_time( 'mysql' ),
-		'download_count'		=> 0
-	));
-
-	$format = apply_filters( 'woocommerce_downloadable_file_permission_format', array(
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%d'
-	), $data);
-
-	if ( ! is_null( $expiry ) ) {
-			$data['access_expires'] = $expiry;
-			$format[] = '%s';
-	}
-
-	// Downloadable product - give access to the customer
-	$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-		$data,
-		$format
-	);
-
-	do_action( 'woocommerce_grant_product_download_access', $data );
-
-	return $result ? $wpdb->insert_id : false;
-}
-
-/**
- * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER.
- *
- * @access public
- * @param int $order_id
- */
-function wc_downloadable_product_permissions( $order_id ) {
-	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
-		return; // Only do this once
-	}
-
-	$order = wc_get_order( $order_id );
-
-	if ( $order && $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
-		return;
-	}
-
-	if ( sizeof( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
-			$_product = $order->get_product_from_item( $item );
-
-			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
-				$downloads = $_product->get_files();
-
-				foreach ( array_keys( $downloads ) as $download_id ) {
-					wc_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order, $item['qty'] );
-				}
-			}
-		}
-	}
-
-	update_post_meta( $order_id, '_download_permissions_granted', 1 );
-
-	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
-}
-add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
-add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
-
-
-/**
- * Add a item to an order (for example a line item).
- *
- * @access public
- * @param int $order_id
- * @return mixed
- */
-function wc_add_order_item( $order_id, $item ) {
-	global $wpdb;
-
-	$order_id = absint( $order_id );
-
-	if ( ! $order_id )
-		return false;
-
-	$defaults = array(
-		'order_item_name' 		=> '',
-		'order_item_type' 		=> 'line_item',
-	);
-
-	$item = wp_parse_args( $item, $defaults );
-
-	$wpdb->insert(
-		$wpdb->prefix . "woocommerce_order_items",
-		array(
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id
-		),
-		array(
-			'%s', '%s', '%d'
-		)
-	);
-
-	$item_id = absint( $wpdb->insert_id );
-
-	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
-
-	return $item_id;
-}
-
-/**
- * Update an item for an order.
- *
- * @since 2.2
- * @param int $item_id
- * @param array $args either `order_item_type` or `order_item_name`
- * @return bool true if successfully updated, false otherwise
- */
-function wc_update_order_item( $item_id, $args ) {
-	global $wpdb;
-
-	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
-
-	if ( false === $update ) {
-		return false;
-	}
-
-	do_action( 'woocommerce_update_order_item', $item_id, $args );
-
-	return true;
-}
-
-/**
- * Delete an item from the order it belongs to based on item id.
- *
- * @access public
- * @param int $item_id
- * @return bool
- */
-function wc_delete_order_item( $item_id ) {
-	global $wpdb;
-
-	$item_id = absint( $item_id );
-
-	if ( ! $item_id )
-		return false;
-
-	do_action( 'woocommerce_before_delete_order_item', $item_id );
-
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
-
-	do_action( 'woocommerce_delete_order_item', $item_id );
-
-	return true;
-}
-
-/**
- * WooCommerce Order Item Meta API - Update term meta.
- *
- * @access public
- * @param mixed $item_id
- * @param mixed $meta_key
- * @param mixed $meta_value
- * @param string $prev_value (default: '')
- * @return bool
- */
-function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
-	if ( update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
-		return true;
-	}
-	return false;
-}
-
-/**
- * WooCommerce Order Item Meta API - Add term meta.
- *
- * @access public
- * @param mixed $item_id
- * @param mixed $meta_key
- * @param mixed $meta_value
- * @param bool $unique (default: false)
- * @return int New row ID or 0
- */
-function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
-	if ( $meta_id = add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
-		return $meta_id;
-	}
-	return 0;
-}
-
-/**
- * WooCommerce Order Item Meta API - Delete term meta.
- *
- * @access public
- * @param mixed $item_id
- * @param mixed $meta_key
- * @param string $meta_value (default: '')
- * @param bool $delete_all (default: false)
- * @return bool
- */
-function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
-	if ( delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
-		wp_cache_delete( $cache_key, 'orders' );
-		return true;
-	}
-	return false;
-}
-
-/**
- * WooCommerce Order Item Meta API - Get term meta.
- *
- * @access public
- * @param mixed $item_id
- * @param mixed $key
- * @param bool $single (default: true)
- * @return mixed
- */
-function wc_get_order_item_meta( $item_id, $key, $single = true ) {
-	return get_metadata( 'order_item', $item_id, $key, $single );
-}
-
-/**
- * Cancel all unpaid orders after held duration to prevent stock lock for those products.
- *
- * @access public
- */
-function wc_cancel_unpaid_orders() {
-	global $wpdb;
-
-	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
-
-	if ( $held_duration < 1 || get_option( 'woocommerce_manage_stock' ) != 'yes' )
-		return;
-
-	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
-
-	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
-		SELECT posts.ID
-		FROM {$wpdb->posts} AS posts
-		WHERE 	posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-		AND 	posts.post_status = 'wc-pending'
-		AND 	posts.post_modified < %s
-	", $date ) );
-
-	if ( $unpaid_orders ) {
-		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = wc_get_order( $unpaid_order );
-
-			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === get_post_meta( $unpaid_order, '_created_via', true ), $order ) ) {
-				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
-			}
-		}
-	}
-
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-}
-add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 
 /**
  * Return the count of processing orders.
@@ -714,15 +320,12 @@ function wc_processing_order_count() {
 /**
  * Return the orders count of a specific order status.
  *
- * @access public
  * @param string $status
  * @return int
  */
 function wc_orders_count( $status ) {
-	global $wpdb;
-
-	$count = 0;
-	$status = 'wc-' . $status;
+	$count          = 0;
+	$status         = 'wc-' . $status;
 	$order_statuses = array_keys( wc_get_order_statuses() );
 
 	if ( ! in_array( $status, $order_statuses ) ) {
@@ -737,8 +340,10 @@ function wc_orders_count( $status ) {
 	}
 
 	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
-		$query = "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
-		$count += $wpdb->get_var( $wpdb->prepare( $query, $type, $status ) );
+		$data_store = WC_Data_Store::load( 'shop_order' === $type ? 'order' : $type );
+		if ( $data_store ) {
+			$count += $data_store->get_order_count( $status );
+		}
 	}
 
 	wp_cache_set( $cache_key, $count, 'counts' );
@@ -747,16 +352,88 @@ function wc_orders_count( $status ) {
 }
 
 /**
+ * Grant downloadable product access to the file identified by $download_id.
+ *
+ * @param  string $download_id file identifier
+ * @param  int|WC_Product $product
+ * @param  WC_Order $order the order
+ * @param  int $qty purchased
+ * @return int|bool insert id or false on failure
+ */
+function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1 ) {
+	if ( is_numeric( $product ) ) {
+		$product = wc_get_product( $product );
+	}
+	$download = new WC_Customer_Download();
+	$download->set_download_id( $download_id );
+	$download->set_product_id( $product->get_id() );
+	$download->set_user_id( $order->get_customer_id() );
+	$download->set_order_id( $order->get_id() );
+	$download->set_user_email( $order->get_billing_email() );
+	$download->set_order_key( $order->get_order_key() );
+	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
+	$download->set_access_granted( current_time( 'timestamp', true ) );
+	$download->set_download_count( 0 );
+
+	$expiry = $product->get_download_expiry();
+
+	if ( $expiry > 0 ) {
+		$from_date = $order->get_date_completed() ? $order->get_date_completed()->format( 'Y-m-d' ) : current_time( 'mysql', true );
+		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
+	}
+
+	return $download->save();
+}
+
+/**
+ * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER.
+ *
+ * @param int $order_id
+ */
+function wc_downloadable_product_permissions( $order_id, $force = false ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
+		return;
+	}
+
+	if ( $order->has_status( 'processing' ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
+		return;
+	}
+
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			$product = $item->get_product();
+
+			if ( $product && $product->exists() && $product->is_downloadable() ) {
+				$downloads = $product->get_downloads();
+
+				foreach ( array_keys( $downloads ) as $download_id ) {
+					wc_downloadable_file_permission( $download_id, $product, $order, $item->get_quantity() );
+				}
+			}
+		}
+	}
+
+	$order->get_data_store()->set_download_permissions_granted( $order, true );
+	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
+}
+add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
+add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
+
+/**
  * Clear all transients cache for order data.
  *
- * @param int $post_id (default: 0)
+ * @param int|WC_Order $order
  */
-function wc_delete_shop_order_transients( $post_id = 0 ) {
-	$post_id             = absint( $post_id );
-	$transients_to_clear = array();
-
-	// Clear report transients
-	$reports = WC_Admin_Reports::get_reports();
+function wc_delete_shop_order_transients( $order = 0 ) {
+	if ( is_numeric( $order ) ) {
+		$order = wc_get_order( $order );
+	}
+	$reports             = WC_Admin_Reports::get_reports();
+	$transients_to_clear = array(
+		'wc_admin_report'
+	);
 
 	foreach ( $reports as $report_group ) {
 		foreach ( $report_group['reports'] as $report_key => $report ) {
@@ -764,18 +441,17 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		}
 	}
 
-	// clear API report transient
-	$transients_to_clear[] = 'wc_admin_report';
-
-	// Clear transients where we have names
-	foreach( $transients_to_clear as $transient ) {
+	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
 	// Clear money spent for user associated with order
-	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
-		delete_user_meta( $user_id, '_money_spent' );
-		delete_user_meta( $user_id, '_order_count' );
+	if ( is_a( $order, 'WC_Order' ) ) {
+		$order_id = $order->get_id();
+		delete_user_meta( $order->get_customer_id(), '_money_spent' );
+		delete_user_meta( $order->get_customer_id(), '_order_count' );
+	} else {
+		$order_id = 0;
 	}
 
 	// Increments the transient version to invalidate cache
@@ -784,7 +460,7 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	// Do the same for regular cache
 	WC_Cache_Helper::incr_cache_prefix( 'orders' );
 
-	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
+	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
 
 /**
@@ -806,126 +482,195 @@ function wc_ship_to_billing_address_only() {
  */
 function wc_create_refund( $args = array() ) {
 	$default_args = array(
-		'amount'     => '',
-		'reason'     => null,
-		'order_id'   => 0,
-		'refund_id'  => 0,
-		'line_items' => array(),
-		'date'       => current_time( 'mysql', 0 )
+		'amount'         => 0,
+		'reason'         => null,
+		'order_id'       => 0,
+		'refund_id'      => 0,
+		'line_items'     => array(),
+		'refund_payment' => false,
+		'restock_items'  => false,
 	);
 
-	$args        = wp_parse_args( $args, $default_args );
-	$refund_data = array();
+	try {
+		$args = wp_parse_args( $args, $default_args );
 
-	// prevent negative refunds
-	if ( 0 > $args['amount'] ) {
-		$args['amount'] = 0;
-	}
+		if ( ! $order = wc_get_order( $args['order_id'] ) ) {
+			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
+		}
 
-	if ( $args['refund_id'] > 0 ) {
-		$updating          = true;
-		$refund_data['ID'] = $args['refund_id'];
-	} else {
-		$updating                     = false;
-		$refund_data['post_type']     = 'shop_order_refund';
-		$refund_data['post_status']   = 'wc-completed';
-		$refund_data['ping_status']   = 'closed';
-		$refund_data['post_author']   = get_current_user_id() ? get_current_user_id() : 1;
-		$refund_data['post_password'] = uniqid( 'refund_' );
-		$refund_data['post_parent']   = absint( $args['order_id'] );
-		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		$refund_data['post_date']     = $args['date'];
-	}
+		$remaining_refund_amount = $order->get_remaining_refund_amount();
+		$remaining_refund_items  = $order->get_remaining_refund_items();
+		$refund_item_count       = 0;
+		$refund                  = new WC_Order_Refund( $args['refund_id'] );
 
-	if ( ! is_null( $args['reason'] ) ) {
-		$refund_data['post_excerpt'] = $args['reason'];
-	}
+		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
+			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
+		}
 
-	if ( $updating ) {
-		$refund_id = wp_update_post( $refund_data );
-	} else {
-		$refund_id = wp_insert_post( apply_filters( 'woocommerce_new_refund_data', $refund_data ), true );
-	}
+		$refund->set_currency( $order->get_currency() );
+		$refund->set_amount( $args['amount'] );
+		$refund->set_parent_id( absint( $args['order_id'] ) );
+		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
 
-	if ( is_wp_error( $refund_id ) ) {
-		return $refund_id;
-	}
-
-	if ( ! $updating ) {
-		// Default refund meta data
-		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-
-		// Get refund object
-		$refund = wc_get_order( $refund_id );
-		$order  = wc_get_order( $args['order_id'] );
-
-		// Refund currency is the same used for the parent order
-		update_post_meta( $refund_id, '_order_currency', $order->get_order_currency() );
+		if ( ! is_null( $args['reason'] ) ) {
+			$refund->set_reason( $args['reason'] );
+		}
 
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
-			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
+			$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
-			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
-				if ( isset( $order_items[ $refund_item_id ] ) ) {
-					if ( empty( $refund_item['qty'] ) && empty( $refund_item['refund_total'] ) && empty( $refund_item['refund_tax'] ) ) {
-						continue;
-					}
-
-					// Prevents errors when the order has no taxes
-					if ( ! isset( $refund_item['refund_tax'] ) ) {
-						$refund_item['refund_tax'] = array();
-					}
-
-					switch ( $order_items[ $refund_item_id ]['type'] ) {
-						case 'line_item' :
-							$line_item_args = array(
-								'totals' => array(
-									'subtotal'     => wc_format_refund_total( $refund_item['refund_total'] ),
-									'total'        => wc_format_refund_total( $refund_item['refund_total'] ),
-									'subtotal_tax' => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
-									'tax'          => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
-									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
-								)
-							);
-							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] * -1 : 0, $line_item_args );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-						case 'shipping' :
-							$shipping    = new WC_Shipping_Rate( $order_items[ $refund_item_id ]['method_id'], $order_items[ $refund_item_id ]['name'], wc_format_refund_total( $refund_item['refund_total'] ), array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), $order_items[ $refund_item_id ]['method_id'] );
-							$new_item_id = $refund->add_shipping( $shipping );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-						case 'fee' :
-							$fee            = new stdClass();
-							$fee->name      = $order_items[ $refund_item_id ]['name'];
-							$fee->tax_class = $order_items[ $refund_item_id ]['tax_class'];
-							$fee->taxable   = $fee->tax_class !== '0';
-							$fee->amount    = wc_format_refund_total( $refund_item['refund_total'] );
-							$fee->tax       = wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) );
-							$fee->tax_data  = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-
-							$new_item_id = $refund->add_fee( $fee );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-					}
+			foreach ( $items as $item_id => $item ) {
+				if ( ! isset( $args['line_items'][ $item_id ] ) ) {
+					continue;
 				}
+
+				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
+				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
+				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
+
+				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					continue;
+				}
+
+				$class         = get_class( $item );
+				$refunded_item = new $class( $item );
+				$refunded_item->set_id( 0 );
+				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
+				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
+				$refunded_item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $refund_tax ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_tax ) ) );
+
+				if ( is_callable( array( $refunded_item, 'set_subtotal' ) ) ) {
+					$refunded_item->set_subtotal( wc_format_refund_total( $refund_total ) );
+				}
+
+				if ( is_callable( array( $refunded_item, 'set_quantity' ) ) ) {
+					$refunded_item->set_quantity( $qty * -1 );
+				}
+
+				$refund->add_item( $refunded_item );
+				$refund_item_count += $qty;
 			}
-			$refund->update_taxes();
 		}
 
+		$refund->update_taxes();
 		$refund->calculate_totals( false );
+		$refund->set_total( $args['amount'] * -1 );
 
-		// Set total to total refunded which may vary from order items
-		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
+		/**
+		 * Action hook to adjust refund before save.
+		 * @since 3.0.0
+		 */
+		do_action( 'woocommerce_create_refund', $refund, $args );
 
-		do_action( 'woocommerce_refund_created', $refund_id, $args );
+		if ( $refund->save() ) {
+			if ( $args['refund_payment'] ) {
+				$result = wc_refund_payment( $order, $refund->get_amount(), $refund->get_reason() );
+
+				if ( is_wp_error( $result ) ) {
+					$refund->delete();
+					return $result;
+				}
+			}
+
+			if ( $args['restock_items'] ) {
+				wc_restock_refunded_items( $order, $args['line_items'] );
+			}
+
+			// Trigger notification emails
+			if ( ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ) ) {
+				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
+			} else {
+				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
+
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+
+				if ( $parent_status ) {
+					$order->update_status( $parent_status );
+				}
+			}
+		}
+
+		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
+		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
+
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
 	}
 
-	// Clear transients
-	wc_delete_shop_order_transients( $args['order_id'] );
+	return $refund;
+}
 
-	return new WC_Order_Refund( $refund_id );
+/**
+ * Try to refund the payment for an order via the gateway.
+ *
+ * @since 3.0.0
+ * @param WC_Order $order
+ * @param string $amount
+ * @param string $reason
+ * @return bool|WP_Error
+ */
+function wc_refund_payment( $order, $amount, $reason = '' ) {
+	try {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
+		}
+
+		$gateway_controller = WC_Payment_Gateways::instance();
+		$all_gateways       = $gateway_controller->payment_gateways();
+		$payment_method     = $order->get_payment_method();
+		$gateway            = isset( $all_gateways[ $payment_method ] ) ? $all_gateways[ $payment_method ] : false;
+
+		if ( ! $gateway ) {
+			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );
+		}
+
+		if ( ! $gateway->supports( 'refunds' ) ) {
+			throw new Exception( __( 'The payment gateway for this order does not support automatic refunds.', 'woocommerce' ) );
+		}
+
+		$result = $gateway->process_refund( $order->get_id(), $amount, $reason );
+
+		if ( ! $result ) {
+			throw new Exception( __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ) );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			throw new Exception( $result->get_error_message() );
+		}
+
+		return true;
+
+	} catch ( Exception $e ) {
+		return new WP_Error( 'error', $e->getMessage() );
+	}
+}
+
+/**
+ * Restock items during refund.
+ *
+ * @since  3.0.0
+ * @param  WC_Order $order
+ * @param  array $refunded_line_items
+ */
+function wc_restock_refunded_items( $order, $refunded_line_items ) {
+	$line_items = $order->get_items();
+
+	foreach ( $line_items as $item_id => $item ) {
+		if ( ! isset( $refunded_line_items[ $item_id ], $refunded_line_items[ $item_id ]['qty'] ) ) {
+			continue;
+		}
+		$product = $item->get_product();
+
+		if ( $product && $product->managing_stock() ) {
+			$old_stock = $product->get_stock_quantity();
+			$new_stock = wc_update_product_stock( $product, $refunded_line_items[ $item_id ]['qty'], 'increase' );
+
+			$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+
+			do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
+		}
+	}
 }
 
 /**
@@ -937,10 +682,7 @@ function wc_create_refund( $args = array() ) {
  */
 function wc_get_tax_class_by_tax_id( $tax_id ) {
 	global $wpdb;
-
-	$tax_class = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_id ) );
-
-	return wc_clean( $tax_class );
+	return $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_id ) );
 }
 
 /**
@@ -962,7 +704,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**
@@ -984,84 +726,135 @@ function wc_order_fully_refunded( $order_id ) {
 	// Create the refund object
 	wc_create_refund( array(
 		'amount'     => $max_refund,
-		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
+		'reason'     => __( 'Order fully refunded', 'woocommerce' ),
 		'order_id'   => $order_id,
-		'line_items' => array()
+		'line_items' => array(),
 	) );
-
-	wc_delete_shop_order_transients( $order_id );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
 /**
- * Search in orders.
+ * Search orders.
  *
  * @since  2.6.0
  * @param  string $term Term to search.
  * @return array List of orders ID.
  */
 function wc_order_search( $term ) {
-	global $wpdb;
+	$data_store = WC_Data_Store::load( 'order' );
+	return $data_store->search_orders( str_replace( 'Order #', '', wc_clean( $term ) ) );
+}
 
-	$term     = str_replace( 'Order #', '', wc_clean( $term ) );
-	$post_ids = array();
+/**
+ * Update total sales amount for each product within a paid order.
+ *
+ * @since 3.0.0
+ * @param int $order_id
+ */
+function wc_update_total_sales_counts( $order_id ) {
+	$order = wc_get_order( $order_id );
 
-	// Search fields.
-	$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
-		'_order_key',
-		'_billing_company',
-		'_billing_address_1',
-		'_billing_address_2',
-		'_billing_city',
-		'_billing_postcode',
-		'_billing_country',
-		'_billing_state',
-		'_billing_email',
-		'_billing_phone',
-		'_shipping_address_1',
-		'_shipping_address_2',
-		'_shipping_city',
-		'_shipping_postcode',
-		'_shipping_country',
-		'_shipping_state'
-	) ) );
-
-	// Search orders.
-	if ( is_numeric( $term ) ) {
-		$post_ids = array_unique( array_merge(
-			$wpdb->get_col(
-				$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%';", wc_clean( $term ) )
-			),
-			array( absint( $term ) )
-		) );
-	} elseif ( ! empty( $search_fields ) ) {
-		$post_ids = array_unique( array_merge(
-			$wpdb->get_col(
-				$wpdb->prepare( "
-					SELECT DISTINCT p1.post_id
-					FROM {$wpdb->postmeta} p1
-					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
-					WHERE
-						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR
-						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR
-						( p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%' )
-					",
-					$term, $term, $term
-				)
-			),
-			$wpdb->get_col(
-				$wpdb->prepare( "
-					SELECT order_id
-					FROM {$wpdb->prefix}woocommerce_order_items as order_items
-					WHERE order_item_name LIKE '%%%s%%'
-					",
-					$term
-				)
-			)
-		) );
+	if ( ! $order || $order->get_data_store()->get_recorded_sales( $order ) ) {
+		return;
 	}
 
-	return $post_ids;
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( $product_id = $item->get_product_id() ) {
+				$data_store = WC_Data_Store::load( 'product' );
+				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+			}
+		}
+	}
+
+	$order->get_data_store()->set_recorded_sales( $order, true );
+
+	/**
+	 * Called when sales for an order are recorded
+	 *
+	 * @param int $order_id order id
+	 */
+	do_action( 'woocommerce_recorded_sales', $order_id );
 }
+add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+
+/**
+ * Update used coupon amount for each coupon within an order.
+ *
+ * @since 3.0.0
+ * @param int $order_id
+ */
+function wc_update_coupon_usage_counts( $order_id ) {
+	if ( ! $order = wc_get_order( $order_id ) ) {
+		return;
+	}
+
+	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+
+	if ( $order->has_status( 'cancelled' ) && $has_recorded ) {
+		$action = 'reduce';
+		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
+		$action = 'increase';
+		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+	} else {
+		return;
+	}
+
+	if ( sizeof( $order->get_used_coupons() ) > 0 ) {
+		foreach ( $order->get_used_coupons() as $code ) {
+			if ( ! $code ) {
+				continue;
+			}
+
+			$coupon = new WC_Coupon( $code );
+
+			if ( ! $used_by = $order->get_user_id() ) {
+				$used_by = $order->get_billing_email();
+			}
+
+			switch ( $action ) {
+				case 'reduce' :
+					$coupon->decrease_usage_count( $used_by );
+				break;
+				case 'increase' :
+					$coupon->increase_usage_count( $used_by );
+				break;
+			}
+		}
+	}
+}
+add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
+
+/**
+ * Cancel all unpaid orders after held duration to prevent stock lock for those products.
+ */
+function wc_cancel_unpaid_orders() {
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+
+	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
+	}
+
+	$data_store    = WC_Data_Store::load( 'order' );
+	$unpaid_orders = $data_store->get_unpaid_orders( strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+
+	if ( $unpaid_orders ) {
+		foreach ( $unpaid_orders as $unpaid_order ) {
+			$order = wc_get_order( $unpaid_order );
+
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
+				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+			}
+		}
+	}
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+}
+add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );

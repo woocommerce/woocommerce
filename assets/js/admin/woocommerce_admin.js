@@ -258,7 +258,7 @@ jQuery( function ( $ ) {
 
 	// Load videos when help button is clicked.
 	$( '#contextual-help-link' ).on( 'click', function() {
-		var frame = $( '#tab-panel-woocommerce_101_tab iframe' );
+		var frame = $( '#tab-panel-woocommerce_guided_tour_tab iframe' );
 
 		frame.attr( 'src', frame.data( 'src' ) );
 	});

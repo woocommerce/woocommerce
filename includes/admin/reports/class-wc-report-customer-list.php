@@ -26,7 +26,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		parent::__construct( array(
 			'singular'  => __( 'Customer', 'woocommerce' ),
 			'plural'    => __( 'Customers', 'woocommerce' ),
-			'ajax'      => false
+			'ajax'      => false,
 		) );
 	}
 
@@ -127,13 +127,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 				$orders = wc_get_orders( array(
 					'limit'    => 1,
-					'status'   => array( 'wc-completed', 'wc-processing' ),
-					'customer' => $user->ID
+					'status'   => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+					'customer' => $user->ID,
 				) );
 
 				if ( ! empty( $orders ) ) {
 					$order = $orders[0];
-					return '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
+					return '<a href="' . admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . wc_format_datetime( $order->get_date_created() );
 				} else {
 					return '-';
 				}
@@ -151,24 +151,24 @@ class WC_Report_Customer_List extends WP_List_Table {
 						$actions['refresh'] = array(
 							'url'       => wp_nonce_url( add_query_arg( 'refresh', $user->ID ), 'refresh' ),
 							'name'      => __( 'Refresh stats', 'woocommerce' ),
-							'action'    => "refresh"
+							'action'    => "refresh",
 						);
 
 						$actions['edit'] = array(
 							'url'       => admin_url( 'user-edit.php?user_id=' . $user->ID ),
 							'name'      => __( 'Edit', 'woocommerce' ),
-							'action'    => "edit"
+							'action'    => "edit",
 						);
 
 						$actions['view'] = array(
 							'url'       => admin_url( 'edit.php?post_type=shop_order&_customer_user=' . $user->ID ),
 							'name'      => __( 'View orders', 'woocommerce' ),
-							'action'    => "view"
+							'action'    => "view",
 						);
 
 						$orders = wc_get_orders( array(
 							'limit'          => 1,
-							'status'         => array( 'wc-completed', 'wc-processing' ),
+							'status'         => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 							'customer'       => array( array( 0, $user->user_email ) ),
 						) );
 
@@ -176,7 +176,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 							$actions['link'] = array(
 								'url'       => wp_nonce_url( add_query_arg( 'link_orders', $user->ID ), 'link_orders' ),
 								'name'      => __( 'Link previous orders', 'woocommerce' ),
-								'action'    => "link"
+								'action'    => "link",
 							);
 						}
 
@@ -210,9 +210,9 @@ class WC_Report_Customer_List extends WP_List_Table {
 			'email'           => __( 'Email', 'woocommerce' ),
 			'location'        => __( 'Location', 'woocommerce' ),
 			'orders'          => __( 'Orders', 'woocommerce' ),
-			'spent'           => __( 'Money Spent', 'woocommerce' ),
+			'spent'           => __( 'Money spent', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
-			'user_actions'    => __( 'Actions', 'woocommerce' )
+			'user_actions'    => __( 'Actions', 'woocommerce' ),
 		);
 
 		return $columns;
@@ -263,21 +263,21 @@ class WC_Report_Customer_List extends WP_List_Table {
 		$admin_users = new WP_User_Query(
 			array(
 				'role'   => 'administrator1',
-				'fields' => 'ID'
+				'fields' => 'ID',
 			)
 		);
 
 		$manager_users = new WP_User_Query(
 			array(
 				'role'   => 'shop_manager',
-				'fields' => 'ID'
+				'fields' => 'ID',
 			)
 		);
 
 		$query = new WP_User_Query( array(
 			'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
 			'number'  => $per_page,
-			'offset'  => ( $current_page - 1 ) * $per_page
+			'offset'  => ( $current_page - 1 ) * $per_page,
 		) );
 
 		$this->items = $query->get_results();
@@ -290,7 +290,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $query->total_users,
 			'per_page'    => $per_page,
-			'total_pages' => ceil( $query->total_users / $per_page )
+			'total_pages' => ceil( $query->total_users / $per_page ),
 		) );
 	}
 }

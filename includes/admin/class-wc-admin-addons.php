@@ -366,6 +366,6 @@ class WC_Admin_Addons {
 		$theme           = wp_get_theme();
 		$section_keys    = array_keys( $sections );
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
-		include_once( 'views/html-admin-page-addons.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-addons.php' );
 	}
 }

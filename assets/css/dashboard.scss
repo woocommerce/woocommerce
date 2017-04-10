@@ -6,10 +6,10 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
-@import "fonts";
+@import 'bourbon';
+@import 'mixins';
+@import 'variables';
+@import 'fonts';
 
 /**
  * Styling begins
@@ -26,7 +26,6 @@ ul.woocommerce_stats {
 		font-size: 0.8em;
 		border-left: 1px solid #fff;
 		border-right: 1px solid #ececec;
-		text-align: center;
 		box-sizing: border-box;
 	}
 
@@ -39,7 +38,7 @@ ul.woocommerce_stats {
 	}
 
 	strong {
-		font-family: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+		font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif;
 		font-size: 4em;
 		line-height: 1.2em;
 		font-weight: normal;
@@ -71,7 +70,7 @@ ul.woocommerce_stats {
 				display: block;
 				color: #aaa;
 				padding: 9px 12px;
-				-webkit-transition: all ease .5s;
+				-webkit-transition: all ease 0.5s;
 				position: relative;
 				font-size: 12px;
 
@@ -84,7 +83,7 @@ ul.woocommerce_stats {
 					right: 0;
 					top: 50%;
 					margin-right: 12px;
-					margin-top: -1.25em
+					margin-top: -1.25em;
 				}
 
 				strong {
@@ -98,13 +97,13 @@ ul.woocommerce_stats {
 				&:hover {
 					color: #2ea2cc;
 
-					&:before,
+					&::before,
 					strong {
 						color: #2ea2cc !important;
 					}
 				}
 
-				&:before {
+				&::before {
 					@include icon();
 					font-size: 2em;
 					position: relative;
@@ -125,32 +124,32 @@ ul.woocommerce_stats {
 		li.sales-this-month {
 			width: 100%;
 
-			a:before {
-				font-family: "Dashicons";
-				content: "\f185";
+			a::before {
+				font-family: 'Dashicons';
+				content: '\f185';
 			}
 		}
 
 		li.best-seller-this-month {
 			width: 100%;
 
-			a:before {
-				content: "\e006";
+			a::before {
+				content: '\e006';
 			}
 		}
 
 		li.processing-orders {
 			border-right: 1px solid #ececec;
 
-			a:before {
-				content: "\e011";
+			a::before {
+				content: '\e011';
 				color: $green;
 			}
 		}
 
 		li.on-hold-orders {
-			a:before {
-				content: "\e033";
+			a::before {
+				content: '\e033';
 				color: #999;
 			}
 		}
@@ -158,15 +157,15 @@ ul.woocommerce_stats {
 		li.low-in-stock {
 			border-right: 1px solid #ececec;
 
-			a:before {
-				content: "\e016";
+			a::before {
+				content: '\e016';
 				color: $orange;
 			}
 		}
 
 		li.out-of-stock {
-			a:before {
-				content: "\e013";
+			a::before {
+				content: '\e013';
 				color: $red;
 			}
 		}
@@ -181,7 +180,7 @@ ul.woocommerce_stats {
 
 	h4.meta {
 		line-height: 1.4;
-		margin: -.2em 0 0 0;
+		margin: -0.2em 0 0 0;
 		font-weight: normal;
 		color: #999;
 	}
@@ -202,12 +201,12 @@ ul.woocommerce_stats {
 		position: relative;
 		height: 1.5em;
 		line-height: 1.5;
-		margin-left: .5em;
+		margin-left: 0.5em;
 		width: 5.4em;
 		font-family: 'WooCommerce' !important;
 
-		&:before {
-			content: "\e021\e021\e021\e021\e021";
+		&::before {
+			content: '\e021\e021\e021\e021\e021';
 			color: darken( #ccc, 10% );
 			float: left;
 			top: 0;
@@ -226,8 +225,8 @@ ul.woocommerce_stats {
 			padding-top: 1.5em;
 		}
 
-		span:before {
-			content: "\e020\e020\e020\e020\e020";
+		span::before {
+			content: '\e020\e020\e020\e020\e020';
 			top: 0;
 			position: absolute;
 			left: 0;
@@ -238,7 +237,7 @@ ul.woocommerce_stats {
 	}
 }
 
-#dash-right-now li.product-count a:before {
+#dash-right-now li.product-count a::before {
 	font-family: 'WooCommerce';
-	content: "\e01d";
+	content: '\e01d';
 }

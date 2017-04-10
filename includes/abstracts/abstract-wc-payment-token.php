@@ -1,8 +1,9 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
+
+include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php' );
 
 /**
  * WooCommerce Payment Token.
@@ -11,32 +12,33 @@ if ( ! defined( 'ABSPATH' ) ) {
  * examples: Credit Card, eCheck.
  *
  * @class 		WC_Payment_Token
+ * @version     3.0.0
  * @since		2.6.0
  * @package		WooCommerce/Abstracts
  * @category	Abstract Class
  * @author		WooThemes
  */
- abstract class WC_Payment_Token extends WC_Data {
+ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 
 	/**
 	 * Token Data (stored in the payment_tokens table).
 	 * @var array
 	 */
-	protected $_data = array(
-		 'id'         => 0,
+	protected $data = array(
 		 'gateway_id' => '',
 		 'token'      => '',
-		 'is_default' => 0,
+		 'is_default' => false,
 		 'user_id'    => 0,
+		 'type'       => '',
 	);
 
 	/**
-	 * Meta type. Payment tokens are a new object type.
-	 * @var string
+	 * Token Type (CC, eCheck, or a custom type added by an extension).
+	 * Set by child classes.
 	 */
-	protected $_meta_type = 'payment_token';
+	protected $type = '';
 
-	 /**
+	/**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:
@@ -49,107 +51,133 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param mixed $token
 	 */
 	public function __construct( $token = '' ) {
+		parent::__construct( $token );
+
 		if ( is_numeric( $token ) ) {
-			$this->read( $token );
-		} else if ( is_object( $token ) ) {
+			$this->set_id( $token );
+		} elseif ( is_object( $token ) ) {
 			$token_id = $token->get_id();
 			if ( ! empty( $token_id ) ) {
-				$this->read( $token->get_id() );
+				$this->set_id( $token->get_id() );
 			}
+		} else {
+			$this->set_object_read( true );
 		}
-		// Set token type (cc, echeck)
-		if ( ! empty( $this->type ) ) {
-			$this->_data['type'] = $this->type;
+
+		$this->data_store = WC_Data_Store::load( 'payment-token' );
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
 		}
 	}
 
-	/**
-	 * Returns the payment token ID.
-	 * @since 2.6.0
-	 * @return integer Token ID
+	/*
+	 |--------------------------------------------------------------------------
+	 | Getters
+	 |--------------------------------------------------------------------------
 	 */
-	public function get_id() {
-		return absint( $this->_data['id'] );
-	}
 
 	/**
 	 * Returns the raw payment token.
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Raw token
 	 */
-	public function get_token() {
-		return $this->_data['token'];
-	}
-
-	/**
-	 * Set the raw payment token.
-	 * @since 2.6.0
-	 * @param string $token
-	 */
-	public function set_token( $token ) {
-		$this->_data['token'] = $token;
+	public function get_token( $context = 'view' ) {
+		return $this->get_prop( 'token', $context );
 	}
 
 	/**
 	 * Returns the type of this payment token (CC, eCheck, or something else).
-	 * @since 2.6.0
+	 * Overwritten by child classes.
+	 *
+	 * @since  2.6.0
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
-	public function get_type() {
-		return isset( $this->_data['type'] ) ? $this->_data['type'] : '';
+	public function get_type( $deprecated = '' ) {
+		return $this->type;
 	}
 
 	/**
 	 * Get type to display to user.
+	 * Get's overwritten by child classes.
+	 *
+	 * @since  2.6.0
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string
 	 */
-	public function get_display_name() {
+	public function get_display_name( $deprecated = '' ) {
 		return $this->get_type();
 	}
 
 	/**
 	 * Returns the user ID associated with the token or false if this token is not associated.
+	 *
 	 * @since 2.6.0
+	 * @param  string $context
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
-	public function get_user_id() {
-		return ( isset( $this->_data['user_id'] ) && $this->_data['user_id'] > 0 ) ? absint( $this->_data['user_id'] ) : 0;
-	}
-
-	/**
-	 * Set the user ID for the user associated with this order.
-	 * @since 2.6.0
-	 * @param int $user_id
-	 */
-	public function set_user_id( $user_id ) {
-		$this->_data['user_id'] = absint( $user_id );
+	public function get_user_id( $context = 'view' ) {
+		return $this->get_prop( 'user_id', $context );
 	}
 
 	/**
 	 * Returns the ID of the gateway associated with this payment token.
+	 *
 	 * @since 2.6.0
+	 * @param  string $context
 	 * @return string Gateway ID
 	 */
-	public function get_gateway_id() {
-		return $this->_data['gateway_id'];
+	public function get_gateway_id( $context = 'view' ) {
+		return $this->get_prop( 'gateway_id', $context );
+	}
+
+	/**
+	 * Returns the ID of the gateway associated with this payment token.
+	 *
+	 * @since 2.6.0
+	 * @param  string $context
+	 * @return string Gateway ID
+	 */
+	public function get_is_default( $context = 'view' ) {
+		return $this->get_prop( 'is_default', $context );
+	}
+
+	/*
+	 |--------------------------------------------------------------------------
+	 | Setters
+	 |--------------------------------------------------------------------------
+	 */
+
+	/**
+	 * Set the raw payment token.
+	 *
+	 * @since 2.6.0
+	 * @param string $token
+	 */
+	public function set_token( $token ) {
+		$this->set_prop( 'token', $token );
+	}
+
+	/**
+	 * Set the user ID for the user associated with this order.
+	 *
+	 * @since 2.6.0
+	 * @param int $user_id
+	 */
+	public function set_user_id( $user_id ) {
+		$this->set_prop( 'user_id', absint( $user_id ) );
 	}
 
 	/**
 	 * Set the gateway ID.
+	 *
 	 * @since 2.6.0
 	 * @param string $gateway_id
 	 */
 	public function set_gateway_id( $gateway_id ) {
-		$this->_data['gateway_id'] = $gateway_id;
-	}
-
-	/**
-	 * Returns if the token is marked as default.
-	 * @since 2.6.0
-	 * @return boolean True if the token is default
-	 */
-	public function is_default() {
-		return ! empty( $this->_data['is_default'] );
+		$this->set_prop( 'gateway_id', $gateway_id );
 	}
 
 	/**
@@ -158,7 +186,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param boolean $is_default True or false
 	 */
 	public function set_default( $is_default ) {
-		$this->_data['is_default'] = (bool) $is_default;
+		$this->set_prop( 'is_default', (bool) $is_default );
+	}
+
+	/*
+	 |--------------------------------------------------------------------------
+	 | Other Methods
+	 |--------------------------------------------------------------------------
+	 */
+
+	/**
+	 * Returns if the token is marked as default.
+	 *
+	 * @since 2.6.0
+	 * @return boolean True if the token is default
+	 */
+	public function is_default() {
+		return (bool) $this->get_prop( 'is_default', 'view' );
 	}
 
 	/**
@@ -167,132 +211,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		if ( empty( $this->_data['token'] ) ) {
+		$token = $this->get_prop( 'token', 'edit' );
+		if ( empty( $token ) ) {
 			return false;
 		}
-
-		if ( empty( $this->_data['type'] ) ) {
-			return false;
-		}
-
 		return true;
-	}
-
-	/**
-	 * Get a token from the database.
-	 * @since 2.6.0
-	 * @param  int $token_id Token ID
-	 */
-	public function read( $token_id ) {
-		global $wpdb;
-		if ( $token = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d LIMIT 1;", $token_id ) ) ) {
-			$token_id = $token->token_id;
-			$token = (array) $token;
-			unset( $token['token_id'] );
-			$this->_data = $token;
-			$this->_data['id'] = $token_id;
-			$this->read_meta_data();
-		}
-	}
-
-	/**
-	 * Update a payment token.
-	 * @since 2.6.0
-	 * @return boolean on success, false if validation failed and a payment token could not be updated
-	 */
-	public function update() {
-		if ( false === $this->validate() ) {
-			return false;
-		}
-
-		global $wpdb;
-
-		$payment_token_data = array(
-			'gateway_id' => $this->get_gateway_id(),
-			'token'      => $this->get_token(),
-			'user_id'    => $this->get_user_id(),
-			'type'       => $this->get_type(),
-		);
-
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_payment_tokens',
-			$payment_token_data,
-			array( 'token_id' => $this->get_id() )
-		);
-
-		$this->save_meta_data();
-
-		// Make sure all other tokens are not set to default
-		if ( $this->is_default() && $this->get_user_id() > 0 ) {
-			WC_Payment_Tokens::set_users_default( $this->get_user_id(), $this->get_id() );
-		}
-
-		do_action( 'woocommerce_payment_token_updated', $this->get_id() );
-		return true;
-	}
-
-	/**
-	 * Create a new payment token in the database.
-	 * @since 2.6.0
-	 * @return boolean on success, false if validation failed and a payment token could not be created
-	 */
-	public function create() {
-		if ( false === $this->validate() ) {
-			return false;
-		}
-
-		global $wpdb;
-		// Are there any other tokens? If not, set this token as default
-		if ( ! $this->is_default() && $this->get_user_id() > 0 ) {
-			$default_token = WC_Payment_Tokens::get_customer_default_token( $this->get_user_id() );
-			if ( is_null( $default_token ) ) {
-				$this->set_default( true );
-			}
-		}
-
-		$payment_token_data = array(
-			'gateway_id' => $this->get_gateway_id(),
-			'token'      => $this->get_token(),
-			'user_id'    => $this->get_user_id(),
-			'type'       => $this->get_type(),
-		);
-
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $payment_token_data );
-		$this->_data['id'] = $token_id = $wpdb->insert_id;
-		$this->save_meta_data();
-
-		// Make sure all other tokens are not set to default
-		if ( $this->is_default() && $this->get_user_id() > 0 ) {
-			WC_Payment_Tokens::set_users_default( $this->get_user_id(), $token_id );
-		}
-
-		do_action( 'woocommerce_payment_token_created', $token_id );
-		return true;
-	}
-
-	/**
-	 * Saves a payment token to the database - does not require you to know if this is a new token or an update token.
-	 * @since 2.6.0
-	 * @return boolean on success, false if validation failed and a payment token could not be saved
-	 */
-	public function save() {
-		if ( $this->get_id() > 0 ) {
-			return $this->update();
-		} else {
-			return $this->create();
-		}
-	}
-
-	/**
-	 * Remove a payment token from the database.
-	 * @since 2.6.0
-	 */
-	public function delete() {
-		global $wpdb;
-		$this->read( $this->get_id() ); // Make sure we have a token to return after deletion
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $this->get_id() ), array( '%d' ) );
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $this->get_id() ), array( '%d' ) );
-		do_action( 'woocommerce_payment_token_deleted', $this->get_id(), $this );
 	}
 
 }

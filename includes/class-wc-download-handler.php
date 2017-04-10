@@ -21,7 +21,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+		if ( isset( $_GET['download_file'], $_GET['order'], $_GET['email'] ) ) {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -33,103 +33,96 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
-		$product_id    = absint( $_GET['download_file'] );
-		$_product      = wc_get_product( $product_id );
-		$download_data = self::get_download_data( array(
-			'product_id'  => $product_id,
-			'order_key'   => wc_clean( $_GET['order'] ),
-			'email'       => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
-			'download_id' => wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' )
-		) );
+		$product_id   = absint( $_GET['download_file'] );
+		$product      = wc_get_product( $product_id );
+		$data_store   = WC_Data_Store::load( 'customer-download' );
 
-		if ( $_product && $download_data ) {
-			self::check_current_user_can_download( $download_data );
-
-			do_action( 'woocommerce_download_product', $download_data->user_email, $download_data->order_key, $download_data->product_id, $download_data->user_id, $download_data->download_id, $download_data->order_id );
-
-			self::count_download( $download_data );
-			self::download( $_product->get_file_download_path( $download_data->download_id ), $download_data->product_id );
-		} else {
+		if ( ! $product || ! isset( $_GET['key'], $_GET['order'] ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
-	}
 
-	/**
-	 * Get a download from the database.
-	 *
-	 * @param  array  $args Contains email, order key, product id and download id
-	 * @return object
-	 * @access private
-	 */
-	private static function get_download_data( $args = array() ) {
-		global $wpdb;
+		$download_ids = $data_store->get_downloads( array(
+			'user_email'  => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
+			'order_key'   => wc_clean( $_GET['order'] ),
+			'product_id'  => $product_id,
+			'download_id' => wc_clean( preg_replace( '/\s+/', ' ', $_GET['key'] ) ),
+			'orderby'     => 'downloads_remaining',
+			'order'       => 'DESC',
+			'limit'       => 1,
+			'return'      => 'ids',
+		) );
 
-		$query = "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions ";
-		$query .= "WHERE user_email = %s ";
-		$query .= "AND order_key = %s ";
-		$query .= "AND product_id = %s ";
-
-		if ( $args['download_id'] ) {
-			$query .= "AND download_id = %s ";
+		if ( empty( $download_ids ) ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$query .= "ORDER BY downloads_remaining DESC";
+		$download = new WC_Customer_Download( current( $download_ids ) );
 
-		return $wpdb->get_row( $wpdb->prepare( $query, array( $args['email'], $args['order_key'], $args['product_id'], $args['download_id'] ) ) );
-	}
+		self::check_order_is_valid( $download );
+		self::check_downloads_remaining( $download );
+		self::check_download_expiry( $download );
+		self::check_download_login_required( $download );
 
-	/**
-	 * Perform checks to see if the current user can download the file.
-	 * @param  object $download_data
-	 * @access private
-	 */
-	private static function check_current_user_can_download( $download_data ) {
-		self::check_order_is_valid( $download_data );
-		self::check_downloads_remaining( $download_data );
-		self::check_download_expiry( $download_data );
-		self::check_download_login_required( $download_data );
+		do_action(
+			'woocommerce_download_product',
+			$download->get_user_email(),
+			$download->get_order_key(),
+			$download->get_product_id(),
+			$download->get_user_id(),
+			$download->get_download_id(),
+			$download->get_order_id()
+		);
+		$count     = $download->get_download_count();
+		$remaining = $download->get_downloads_remaining();
+		$download->set_download_count( $count + 1 );
+		if ( '' !== $remaining ) {
+			$download->set_downloads_remaining( $remaining - 1 );
+		}
+		$download->save();
+
+		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
 	}
 
 	/**
 	 * Check if an order is valid for downloading from.
-	 * @param  array $download_data
+	 * @param  WC_Customer_Download $download
 	 * @access private
 	 */
-	private static function check_order_is_valid( $download_data ) {
-		if ( $download_data->order_id && ( $order = wc_get_order( $download_data->order_id ) ) && ! $order->is_download_permitted() ) {
+	private static function check_order_is_valid( $download ) {
+		if ( $download->get_order_id() && ( $order = wc_get_order( $download->get_order_id() ) ) && ! $order->is_download_permitted() ) {
 			self::download_error( __( 'Invalid order.', 'woocommerce' ), '', 403 );
 		}
 	}
 
 	/**
 	 * Check if there are downloads remaining.
-	 * @param  array $download_data
+	 * @param  WC_Customer_Download $download
 	 * @access private
 	 */
-	private static function check_downloads_remaining( $download_data ) {
-		if ( '0' == $download_data->downloads_remaining  ) {
+	private static function check_downloads_remaining( $download ) {
+		if ( '' !== $download->get_downloads_remaining() && 0 >= $download->get_downloads_remaining() ) {
 			self::download_error( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ), '', 403 );
 		}
 	}
 
 	/**
 	 * Check if the download has expired.
-	 * @param  array $download_data
+	 * @param  WC_Customer_Download $download
 	 * @access private
 	 */
-	private static function check_download_expiry( $download_data ) {
-		if ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < strtotime( 'midnight', current_time( 'timestamp' ) ) ) {
+	private static function check_download_expiry( $download ) {
+		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', current_time( 'timestamp', true ) ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
 
 	/**
 	 * Check if a download requires the user to login first.
-	 * @param  array $download_data
+	 * @param  WC_Customer_Download $download
 	 * @access private
 	 */
-	private static function check_download_login_required( $download_data ) {
-		if ( $download_data->user_id && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
+	private static function check_download_login_required( $download ) {
+		if ( $download->get_user_id() && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
 			if ( ! is_user_logged_in() ) {
 				if ( wc_get_page_id( 'myaccount' ) ) {
 					wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), wc_get_page_permalink( 'myaccount' ) ) );
@@ -137,32 +130,16 @@ class WC_Download_Handler {
 				} else {
 					self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( wc_get_page_permalink( 'myaccount' ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
 				}
-			} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
+			} elseif ( ! current_user_can( 'download_file', $download ) ) {
 				self::download_error( __( 'This is not your download link.', 'woocommerce' ), '', 403 );
 			}
 		}
 	}
 
 	/**
-	 * Log the download + increase counts.
-	 * @param object $download_data
+	 * @deprecated
 	 */
-	public static function count_download( $download_data ) {
-		global $wpdb;
-
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-			array(
-				'download_count'      => $download_data->download_count + 1,
-				'downloads_remaining' => $download_data->downloads_remaining > 0 ? $download_data->downloads_remaining - 1 : $download_data->downloads_remaining,
-			),
-			array(
-				'permission_id' => absint( $download_data->permission_id ),
-			),
-			array( '%d', '%s' ),
-			array( '%d' )
-		);
-	}
+	public static function count_download( $download_data ) {}
 
 	/**
 	 * Download a file - hook into init function.
@@ -216,7 +193,7 @@ class WC_Download_Handler {
 			network_site_url( '/', 'https' ) => ABSPATH,
 			network_site_url( '/', 'http' )  => ABSPATH,
 			site_url( '/', 'https' )         => ABSPATH,
-			site_url( '/', 'http' )          => ABSPATH
+			site_url( '/', 'http' )          => ABSPATH,
 		);
 
 		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
@@ -228,6 +205,10 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
+		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+			$remote_file = false;
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
+
 		// Check if we have an absolute path
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
 			$remote_file = false;
@@ -236,7 +217,7 @@ class WC_Download_Handler {
 
 		return array(
 			'remote_file' => $remote_file,
-			'file_path'   => $file_path
+			'file_path'   => $file_path,
 		);
 	}
 
@@ -417,7 +398,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

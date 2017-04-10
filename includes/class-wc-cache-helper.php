@@ -55,12 +55,12 @@ class WC_Cache_Helper {
 	 * @return string
 	 */
 	public static function geolocation_ajax_get_location_hash() {
-		$customer             = new WC_Customer();
+		$customer             = new WC_Customer( 0, true );
 		$location             = array();
-		$location['country']  = $customer->get_country();
-		$location['state']    = $customer->get_state();
-		$location['postcode'] = $customer->get_postcode();
-		$location['city']     = $customer->get_city();
+		$location['country']  = $customer->get_billing_country();
+		$location['state']    = $customer->get_billing_state();
+		$location['postcode'] = $customer->get_billing_postcode();
+		$location['city']     = $customer->get_billing_city();
 		return substr( md5( implode( '', $location ) ), 0, 12 );
 	}
 
@@ -107,7 +107,7 @@ class WC_Cache_Helper {
 	 * to append a unique string (based on time()) to each transient. When transients.
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
-	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777.
+	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
 	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate
@@ -166,6 +166,11 @@ class WC_Cache_Helper {
 	 * Prevent caching on dynamic pages.
 	 */
 	public static function prevent_caching() {
+
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
@@ -208,14 +213,14 @@ class WC_Cache_Helper {
 			return;
 		}
 
-		$config   = w3_instance('W3_Config');
+		$config   = w3_instance( 'W3_Config' );
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
 		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 
 		if ( $enabled && ! in_array( '_wc_session_', $settings ) ) {
 			?>
 			<div class="error">
-				<p><?php printf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add <code>_wc_session_</code> to the "Ignored Query Strings" option in W3 Total Cache settings <a href="%s">here</a>.', 'woocommerce' ), admin_url( 'admin.php?page=w3tc_dbcache' ) ); ?></p>
+				<p><?php printf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add %1$s to the "Ignored Query Strings" option in <a href="%2$s">W3 Total Cache settings</a>.', 'woocommerce' ), '<code>_wc_session_</code>', admin_url( 'admin.php?page=w3tc_dbcache' ) ); ?></p>
 			</div>
 			<?php
 		}

@@ -23,13 +23,13 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_rating_filter';
 		$this->widget_description = __( 'Filter products by rating when viewing product archives and categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_rating_filter';
-		$this->widget_name        = __( 'WooCommerce Average Rating Filter', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce average rating filter', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Average Rating', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'std'   => __( 'Average rating', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 		parent::__construct();
 	}
@@ -41,10 +41,10 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	protected function get_page_base_url() {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id('shop') ) ) {
+		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
 			$link = get_post_type_archive_link( 'product' );
 		} else {
-			$link = get_term_link( get_query_var('term'), get_query_var('taxonomy') );
+			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
 		}
 
 		// Min/Max
@@ -91,7 +91,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	}
 
 	/**
-	 * Count products after other filters have occured by adjusting the main query.
+	 * Count products after other filters have occurred by adjusting the main query.
 	 * @param  int $rating
 	 * @return int
 	 */
@@ -101,32 +101,37 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		$tax_query  = WC_Query::get_main_tax_query();
 		$meta_query = WC_Query::get_main_meta_query();
 
-		// Unset current rating filter
-		foreach ( $meta_query as $key => $query ) {
+		// Unset current rating filter.
+		foreach ( $tax_query as $key => $query ) {
 			if ( ! empty( $query['rating_filter'] ) ) {
-				unset( $meta_query[ $key ] );
+				unset( $tax_query[ $key ] );
+				break;
 			}
 		}
 
-		// Set new rating filter
-		$meta_query[] = array(
-			'key'           => '_wc_average_rating',
-			'value'         => $rating,
-			'compare'       => '>=',
-			'type'          => 'DECIMAL',
-			'rating_filter' => true
+		// Set new rating filter.
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
+		$tax_query[]             = array(
+			'taxonomy'      => 'product_visibility',
+			'field'         => 'term_taxonomy_id',
+			'terms'         => $product_visibility_terms[ 'rated-' . $rating ],
+			'operator'      => 'IN',
+			'rating_filter' => true,
 		);
 
-		$meta_query = new WP_Meta_Query( $meta_query );
-		$tax_query  = new WP_Tax_Query( $tax_query );
-
+		$meta_query     = new WP_Meta_Query( $meta_query );
+		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT COUNT( {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
+		$sql  = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
 		$sql .= $tax_query_sql['join'] . $meta_query_sql['join'];
 		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
+
+		if ( $search = WC_Query::get_main_search_query_sql() ) {
+			$sql .= ' AND ' . $search;
+		}
 
 		return absint( $wpdb->get_var( $sql ) );
 	}
@@ -152,30 +157,35 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		ob_start();
 
-		$found      = false;
-		$min_rating = isset( $_GET['min_rating'] ) ? absint( $_GET['min_rating'] ) : '';
+		$found         = false;
+		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) ) : array();
 
 		$this->widget_start( $args, $instance );
 
 		echo '<ul>';
 
-		for ( $rating = 4; $rating >= 1; $rating-- ) {
+		for ( $rating = 5; $rating >= 1; $rating-- ) {
 			$count = $this->get_filtered_product_count( $rating );
-
-			if ( ! $count ) {
+			if ( empty( $count ) ) {
 				continue;
 			}
-
 			$found = true;
 			$link  = $this->get_page_base_url();
-			$link  = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
 
-			echo '<li class="wc-layered-nav-rating ' . ( ! empty( $_GET['min_rating'] ) && $rating === absint( $_GET['min_rating'] ) ? 'chosen' : '' ) . '">';
+			if ( in_array( $rating, $rating_filter ) ) {
+				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );
+			} else {
+				$link_ratings = implode( ',', array_merge( $rating_filter, array( $rating ) ) );
+			}
+
+			$link  = $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' );
+
+			echo '<li class="wc-layered-nav-rating ' . ( in_array( $rating, $rating_filter ) ? 'chosen' : '' ) . '">';
 
 			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
 
-			echo '<span class="star-rating" title="' . esc_attr( sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) ). '">
-					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce'), $rating ) . '</span>
+			echo '<span class="star-rating">
+					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '</span>
 				</span> (' . esc_html( $count ) . ')';
 
 			echo '</a>';

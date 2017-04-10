@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WooCommerce Coupons Functions
  *
@@ -7,12 +11,8 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version     3.0.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
 
 /**
  * Get coupon types.
@@ -21,10 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_coupon_types() {
 	return (array) apply_filters( 'woocommerce_coupon_discount_types', array(
-		'fixed_cart'      => __( 'Cart Discount', 'woocommerce' ),
-		'percent'         => __( 'Cart % Discount', 'woocommerce' ),
-		'fixed_product'   => __( 'Product Discount', 'woocommerce' ),
-		'percent_product' => __( 'Product % Discount', 'woocommerce' )
+		'percent'         => __( 'Percentage discount', 'woocommerce' ),
+		'fixed_cart'      => __( 'Fixed cart discount', 'woocommerce' ),
+		'fixed_product'   => __( 'Fixed product discount', 'woocommerce' ),
 	) );
 }
 
@@ -46,7 +45,7 @@ function wc_get_coupon_type( $type = '' ) {
  * @return array
  */
 function wc_get_product_coupon_types() {
-	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent_product' ) );
+	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent' ) );
 }
 
 /**
@@ -56,7 +55,7 @@ function wc_get_product_coupon_types() {
  * @return array
  */
 function wc_get_cart_coupon_types() {
-	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart', 'percent' ) );
+	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart' ) );
 }
 
 /**
@@ -69,4 +68,40 @@ function wc_get_cart_coupon_types() {
  */
 function wc_coupons_enabled() {
 	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
+}
+
+/**
+ * Get coupon code by ID.
+ *
+ * @since 3.0.0
+ * @param int $id Coupon ID.
+ * @return string
+ */
+function wc_get_coupon_code_by_id( $id ) {
+	$data_store = WC_Data_Store::load( 'coupon' );
+	return (string) $data_store->get_code_by_id( $id );
+}
+
+/**
+ * Get coupon code by ID.
+ *
+ * @since 3.0.0
+ * @param string $code
+ * @param int $exclude Used to exclude an ID from the check if you're checking existence.
+ * @return int
+ */
+function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
+	$data_store = WC_Data_Store::load( 'coupon' );
+	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+
+	if ( false === $ids ) {
+		$ids = $data_store->get_ids_by_code( $code );
+		if ( $ids ) {
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
+		}
+	}
+
+	$ids = array_diff( array_filter( array_map( 'absint', (array) $ids ) ), array( $exclude ) );
+
+	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude );
 }

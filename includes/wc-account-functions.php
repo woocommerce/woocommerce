@@ -22,11 +22,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
-	$wc_password_reset_url  = wc_get_page_permalink( 'myaccount' );
+	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], network_admin_url() ) ) {
+		return $default_url;
+	}
+
+	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
+	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	if ( false !== $wc_password_reset_url && ! empty( $lost_password_endpoint ) ) {
-		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_password_reset_url );
+	if ( $wc_account_page_exists && ! empty( $lost_password_endpoint ) ) {
+		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
 		return $default_url;
 	}
@@ -56,7 +62,7 @@ function wc_customer_edit_account_url() {
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
 		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
-		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) )
+		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
 	) );
 
 	if ( $flip ) {
@@ -91,8 +97,8 @@ function wc_get_account_menu_items() {
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
 		'edit-address'    => __( 'Addresses', 'woocommerce' ),
-		'payment-methods' => __( 'Payment Methods', 'woocommerce' ),
-		'edit-account'    => __( 'Account Details', 'woocommerce' ),
+		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
+		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	);
 
@@ -192,12 +198,19 @@ function wc_get_account_orders_columns() {
  * @return array
  */
 function wc_get_account_downloads_columns() {
-	return apply_filters( 'woocommerce_account_downloads_columns', array(
-		'download-file'      => __( 'File', 'woocommerce' ),
-		'download-remaining' => __( 'Remaining', 'woocommerce' ),
+	$columns = apply_filters( 'woocommerce_account_downloads_columns', array(
+		'download-product'   => __( 'Product', 'woocommerce' ),
+		'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
+		'download-file'      => __( 'File', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
+
+	if ( ! has_filter( 'woocommerce_account_download_actions' ) ) {
+		unset( $columns['download-actions'] );
+	}
+
+	return $columns;
 }
 
 /**
@@ -222,7 +235,7 @@ function wc_get_account_payment_methods_columns() {
  */
 function wc_get_account_payment_methods_types() {
 	return apply_filters( 'woocommerce_payment_methods_types', array(
-		'cc'     => __( 'Credit Card', 'woocommerce' ),
+		'cc'     => __( 'Credit card', 'woocommerce' ),
 		'echeck' => __( 'eCheck', 'woocommerce' ),
 	) );
 }
@@ -260,9 +273,9 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
-			$list[ $type ][$key]['actions']['default'] = array(
+			$list[ $type ][ $key ]['actions']['default'] = array(
 				'url' => $set_default_url,
-				'name' => esc_html__( 'Make Default', 'woocommerce' ),
+				'name' => esc_html__( 'Make default', 'woocommerce' ),
 			);
 		}
 
@@ -288,7 +301,7 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 
 	$card_type               = $payment_token->get_card_type();
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit Card', 'woocommerce' ) );
+	$item['method']['brand'] = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
 	$item['expires']         = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
 	return $item;
@@ -310,7 +323,7 @@ function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_
 	}
 
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] =  esc_html__( 'eCheck', 'woocommerce' );
+	$item['method']['brand'] = esc_html__( 'eCheck', 'woocommerce' );
 
 	return $item;
 }

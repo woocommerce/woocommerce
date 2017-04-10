@@ -3,7 +3,7 @@ jQuery( function( $ ) {
 
 	// wc_address_i18n_params is required to continue, ensure the object exists
 	if ( typeof wc_address_i18n_params === 'undefined' ) {
-    	return false;
+		return false;
 	}
 
 	var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ),
@@ -42,20 +42,6 @@ jQuery( function( $ ) {
 				$statefield.attr( 'data-o_class', $statefield.attr( 'class' ) );
 			}
 
-			// Re-order postcode/city
-			if ( thislocale.postcode_before_city ) {
-				$postcodefield.add( $cityfield ).add( $statefield ).removeClass( 'form-row-first form-row-last' ).addClass( 'form-row-first' );
-				$cityfield.removeClass( 'form-row-wide form-row-first' ).addClass( 'form-row-last' );
-				$postcodefield.insertBefore( $cityfield );
-			} else {
-				// Default
-				$postcodefield.attr( 'class', $postcodefield.attr( 'data-o_class' ) );
-				$cityfield.attr( 'class', $cityfield.attr( 'data-o_class' ) );
-				$statefield.attr( 'class', $statefield.attr( 'data-o_class' ) );
-				$postcodefield.insertAfter( $statefield );
-			}
-
-			// Handle locale fields
 			var locale_fields = $.parseJSON( wc_address_i18n_params.locale_fields );
 
 			$.each( locale_fields, function( key, value ) {
@@ -88,6 +74,12 @@ jQuery( function( $ ) {
 						}
 					}
 
+					if ( thislocale[ key ].sort ) {
+						field.data( 'priority', thislocale[ key ].sort );
+					} else if ( locale['default'][ key ].sort ) {
+						field.data( 'priority', locale['default'][ key ].sort );
+					}
+
 				} else if ( locale['default'][ key ] ) {
 
 					if ( 'state' !== key ) {
@@ -113,9 +105,45 @@ jQuery( function( $ ) {
 							field_is_required( field, true );
 						}
 					}
+
+					if ( locale['default'][ key ].sort ) {
+						field.data( 'priority', locale['default'][ key ].sort );
+					}
 				}
 
 			});
-		});
 
+			var fieldsets = $('.woocommerce-billing-fields__field-wrapper, .woocommerce-shipping-fields__field-wrapper, .woocommerce-address-fields__field-wrapper, .woocommerce-additional-fields__field-wrapper .woocommerce-account-fields');
+
+			fieldsets.each( function( index, fieldset ) {
+				var rows    = $( fieldset ).find( '.form-row' );
+				var wrapper = rows.first().parent();
+
+				// Before sorting, ensure all fields have a priority for bW compatibility.
+				var last_priority = 0;
+
+				rows.each( function() {
+					if ( ! $( this ).data( 'priority' ) ) {
+						 $( this ).data( 'priority', last_priority + 1 );
+					}
+					last_priority = $( this ).data( 'priority' );
+				} );
+
+				// Sort the fields.
+				rows.sort( function( a, b ) {
+					var asort = $( a ).data( 'priority' ),
+						bsort = $( b ).data( 'priority' );
+
+					if ( asort > bsort ) {
+						return 1;
+					}
+					if ( asort < bsort ) {
+						return -1;
+					}
+					return 0;
+				});
+
+				rows.detach().appendTo( wrapper );
+			} );
+		});
 });

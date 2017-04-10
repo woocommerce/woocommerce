@@ -45,18 +45,18 @@ add_filter( 'the_title', 'wc_page_endpoint_title' );
  */
 function wc_get_page_id( $page ) {
 
-	if ( $page == 'pay' || $page == 'thanks' ) {
-		_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
+	if ( 'pay' == $page || 'thanks' == $page ) {
+		wc_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 		$page = 'checkout';
 	}
-	if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
-		_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
+	if ( 'change_password' === $page || 'edit_address' === $page || 'lost_password' === $page ) {
+		wc_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
 
 		$page = 'myaccount';
 	}
 
-	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
+	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
 	return $page ? absint( $page ) : -1;
 }
@@ -91,7 +91,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 
 	// Map endpoint to options
 	$endpoint = ! empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
-	$value    = ( 'edit-address' == $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
+	$value    = ( get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ) === $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
 		if ( strstr( $permalink, '?' ) ) {
@@ -146,7 +146,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page 		= (int) wc_get_page_id('shop');
+	$shop_page 		= (int) wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) {
@@ -155,14 +155,14 @@ function wc_nav_menu_item_classes( $menu_items ) {
 
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[$key]->current = false;
+			$menu_items[ $key ]->current = false;
 
 			if ( in_array( 'current_page_parent', $classes ) ) {
-				unset( $classes[ array_search('current_page_parent', $classes) ] );
+				unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
 			}
 
 			if ( in_array( 'current-menu-item', $classes ) ) {
-				unset( $classes[ array_search('current-menu-item', $classes) ] );
+				unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
 			}
 
 		// Set active state if this is the shop page link
@@ -188,7 +188,7 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 /**
  * Fix active class in wp_list_pages for shop page.
  *
- * https://github.com/woothemes/woocommerce/issues/177.
+ * https://github.com/woocommerce/woocommerce/issues/177.
  *
  * @author Jessor, Peter Sterling
  * @param string $pages

@@ -41,6 +41,11 @@ class WC_Shortcode_My_Account {
 				wc_add_notice( $message );
 			}
 
+			// After password reset, add confirmation message.
+			if ( ! empty( $_GET['password-reset'] ) ) {
+				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+			}
+
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 				self::lost_password();
 			} else {
@@ -77,7 +82,7 @@ class WC_Shortcode_My_Account {
 					}
 	 			}
 
-				_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
+				wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
 			}
 
 			// Send output buffer
@@ -92,8 +97,8 @@ class WC_Shortcode_My_Account {
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-			'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
-		), $atts ) );
+			'order_count' => 15, // @deprecated 2.6.0. Keep for backward compatibility.
+		), $atts, 'woocommerce_my_account' ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
 			'current_user' => get_user_by( 'id', get_current_user_id() ),
@@ -110,7 +115,7 @@ class WC_Shortcode_My_Account {
 		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
+			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My account', 'woocommerce' ) . '</a>' . '</div>';
 			return;
 		}
 
@@ -121,7 +126,7 @@ class WC_Shortcode_My_Account {
 		wc_get_template( 'myaccount/view-order.php', array(
 			'status'    => $status, // @deprecated 2.2
 			'order'     => wc_get_order( $order_id ),
-			'order_id'  => $order_id
+			'order_id'  => $order_id,
 		) );
 	}
 
@@ -153,7 +158,7 @@ class WC_Shortcode_My_Account {
 			$value = get_user_meta( get_current_user_id(), $key, true );
 
 			if ( ! $value ) {
-				switch( $key ) {
+				switch ( $key ) {
 					case 'billing_email' :
 					case 'shipping_email' :
 						$value = $current_user->user_email;
@@ -174,7 +179,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
-			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
+			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
 		) );
 	}
 
@@ -187,12 +192,6 @@ class WC_Shortcode_My_Account {
 		 */
 		if ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
-
-		/**
-		 * After reset, show confirmation message.
-		 */
-		} elseif ( ! empty( $_GET['reset'] ) ) {
-			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 
 		/**
 		 * Process reset key / login from email confirmation link
@@ -235,7 +234,7 @@ class WC_Shortcode_My_Account {
 
 		if ( empty( $login ) ) {
 
-			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Enter a username or email address.', 'woocommerce' ), 'error' );
 			return false;
 
 		} else {
@@ -248,15 +247,22 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'email', $login );
 		}
 
-		do_action( 'lostpassword_post' );
+		$errors = new WP_Error();
+
+		do_action( 'lostpassword_post', $errors );
+
+		if ( $errors->get_error_code() ) {
+			wc_add_notice( $allow->get_error_message(), 'error' );
+			return false;
+		}
 
 		if ( ! $user_data ) {
-			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
 			return false;
 		}
 
 		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
 			return false;
 		}
 
@@ -360,7 +366,5 @@ class WC_Shortcode_My_Account {
 			do_action( 'after_woocommerce_add_payment_method' );
 
 		}
-
 	}
-
 }

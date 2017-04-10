@@ -15,28 +15,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
+ * Parses and formats a date for ISO8601/RFC3339.
  *
- * Requered WP 4.4 or later.
+ * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
- * @since 2.6.0
- * @param string       $date
+ * @since  2.6.0
+ * @param  string|null|WC_DateTime $date
+ * @param  bool Send false to get local/offset time.
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_prepare_date_response( $date ) {
-	// Check if mysql_to_rfc3339 exists first!
-	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
+function wc_rest_prepare_date_response( $date, $utc = true ) {
+	if ( is_numeric( $date ) ) {
+		$date = new WC_DateTime( "@$date", new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	} elseif ( is_string( $date ) ) {
+		$date = new WC_DateTime( $date, new DateTimeZone( 'UTC' ) );
+		$date->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	}
+
+	if ( ! is_a( $date, 'WC_DateTime' ) ) {
 		return null;
 	}
 
-	// Return null if $date is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date || empty( $date ) ) {
-		return null;
-	}
-
-	// Return the formatted datetime.
-	return mysql_to_rfc3339( $date );
+	// Get timestamp before changing timezone to UTC.
+	return gmdate( 'Y-m-d\TH:i:s', $utc ? $date->getTimestamp() : $date->getOffsetTimestamp() );
 }
 
 /**
@@ -76,7 +79,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	// Get the file.
 	$response = wp_safe_remote_get( $image_url, array(
-		'timeout' => 10
+		'timeout' => 10,
 	) );
 
 	if ( is_wp_error( $response ) ) {
@@ -306,9 +309,12 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
  */
 function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 	$objects = array(
-		'reports'    => 'view_woocommerce_reports',
-		'settings'   => 'manage_woocommerce',
-		'attributes' => 'manage_product_terms',
+		'reports'          => 'view_woocommerce_reports',
+		'settings'         => 'manage_woocommerce',
+		'system_status'    => 'manage_woocommerce',
+		'attributes'       => 'manage_product_terms',
+		'shipping_methods' => 'manage_woocommerce',
+		'payment_gateways' => 'manage_woocommerce',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );

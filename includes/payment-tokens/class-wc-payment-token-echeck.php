@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Representation of a payment token for eChecks.
  *
  * @class 		WC_Payment_Token_eCheck
+ * @version     3.0.0
  * @since		2.6.0
  * @category 	PaymentTokens
  * @package 	WooCommerce/PaymentTokens
@@ -17,8 +18,37 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
-	/** @protected string Token Type String */
+	/** @protected string Token Type String. */
 	protected $type = 'eCheck';
+
+	/**
+	 * Stores eCheck payment token data.
+	 *
+	 * @var array
+	 */
+	protected $extra_data = array(
+		'last4' => '',
+	);
+
+	/**
+	 * Get type to display to user.
+	 *
+	 * @since  2.6.0
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
+	 * @return string
+	 */
+	public function get_display_name( $deprecated = '' ) {
+		return __( 'eCheck', 'woocommerce' );
+	}
+
+	/**
+	 * Hook prefix
+	 *
+	 * @since 3.0.0
+	 */
+	protected function get_hook_prefix() {
+		return 'woocommerce_payment_token_echeck_get_';
+	}
 
 	/**
 	 * Validate eCheck payment tokens.
@@ -34,27 +64,21 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( ! $this->get_last4() ) {
+		if ( ! $this->get_last4( 'edit' ) ) {
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * Get type to display to user.
-	 * @return string
-	 */
-	public function get_display_name() {
-		return __( 'eCheck', 'woocommerce' );
-	}
-
-	/**
 	 * Returns the last four digits.
-	 * @since 2.6.0
+	 *
+	 * @since  2.6.0
+	 * @param  string $context
 	 * @return string Last 4 digits
 	 */
-	public function get_last4() {
-		return $this->get_meta( 'last4' );
+	public function get_last4( $context = 'view' ) {
+		return $this->get_prop( 'last4', $context );
 	}
 
 	/**
@@ -63,7 +87,6 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @param string $last4
 	 */
 	public function set_last4( $last4 ) {
-		$this->add_meta_data( 'last4', $last4, true );
+		$this->set_prop( 'last4', $last4 );
 	}
-
 }

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 
 /**
  * Customer New Account.
@@ -60,8 +60,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->template_html  = 'emails/customer-new-account.php';
 		$this->template_plain = 'emails/plain/customer-new-account.php';
 
-		$this->subject        = __( 'Your account on {site_title}', 'woocommerce');
-		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce');
+		$this->subject        = __( 'Your account on {site_title}', 'woocommerce' );
+		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce' );
 
 		// Call parent constructor
 		parent::__construct();
@@ -108,7 +108,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
 			'plain_text'         => false,
-			'email'				 => $this
+			'email'				 => $this,
 		) );
 	}
 
@@ -127,7 +127,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
 			'plain_text'         => true,
-			'email'			     => $this
+			'email'			     => $this,
 		) );
 	}
 }

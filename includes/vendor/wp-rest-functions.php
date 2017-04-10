@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 2.0-beta13.1
+ * @version 2.0-beta15
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -142,7 +142,7 @@ if ( ! function_exists( 'register_api_field' ) ) {
 	 * Backwards compat shim
 	 */
 	function register_api_field( $object_type, $attributes, $args = array() ) {
-		_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
+		wc_deprecated_function( 'register_api_field', 'WPAPI-2.0', 'register_rest_field' );
 		register_rest_field( $object_type, $attributes, $args );
 	}
 }
@@ -166,16 +166,24 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 
 		if ( ! empty( $args['enum'] ) ) {
 			if ( ! in_array( $value, $args['enum'] ) ) {
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not one of %s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
+				/* translators: 1: parameter 2: arguments */
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
 			}
 		}
 
 		if ( 'integer' === $args['type'] && ! is_numeric( $value ) ) {
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'integer' ) );
+			/* translators: 1: parameter 2: integer type */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'integer' ) );
+		}
+
+		if ( 'boolean' === $args['type'] && ! rest_is_boolean( $value ) ) {
+			/* translators: 1: parameter 2: boolean type */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $value, 'boolean' ) );
 		}
 
 		if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'string' ) );
+			/* translators: 1: parameter 2: string type */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 		}
 
 		if ( isset( $args['format'] ) ) {
@@ -191,38 +199,44 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 						return new WP_Error( 'rest_invalid_email', __( 'The email address you provided is invalid.', 'woocommerce' ) );
 					}
 					break;
+				case 'ipv4' :
+					if ( ! rest_is_ip_address( $value ) ) {
+						/* translators: %s: IP address */
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not a valid IP address.', 'woocommerce' ), $value ) );
+					}
+					break;
 			}
 		}
 
 		if ( in_array( $args['type'], array( 'numeric', 'integer' ) ) && ( isset( $args['minimum'] ) || isset( $args['maximum'] ) ) ) {
 			if ( isset( $args['minimum'] ) && ! isset( $args['maximum'] ) ) {
 				if ( ! empty( $args['exclusiveMinimum'] ) && $value <= $args['minimum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be greater than %d (exclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
-				} else if ( empty( $args['exclusiveMinimum'] ) && $value < $args['minimum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be greater than %d (inclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d (exclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
+				} elseif ( empty( $args['exclusiveMinimum'] ) && $value < $args['minimum'] ) {
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$d (inclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
 				}
-			} else if ( isset( $args['maximum'] ) && ! isset( $args['minimum'] ) ) {
+			} elseif ( isset( $args['maximum'] ) && ! isset( $args['minimum'] ) ) {
 				if ( ! empty( $args['exclusiveMaximum'] ) && $value >= $args['maximum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be less than %d (exclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
-				} else if ( empty( $args['exclusiveMaximum'] ) && $value > $args['maximum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be less than %d (inclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d (exclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
+				} elseif ( empty( $args['exclusiveMaximum'] ) && $value > $args['maximum'] ) {
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$d (inclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
 				}
-			} else if ( isset( $args['maximum'] ) && isset( $args['minimum'] ) ) {
+			} elseif ( isset( $args['maximum'] ) && isset( $args['minimum'] ) ) {
 				if ( ! empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value >= $args['maximum'] || $value <= $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (exclusive) and %d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (exclusive) and %3$d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
-				} else if ( empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
+				} elseif ( empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value >= $args['maximum'] || $value < $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (inclusive) and %d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (inclusive) and %3$d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
-				} else if ( ! empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
+				} elseif ( ! empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value > $args['maximum'] || $value <= $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (exclusive) and %d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (exclusive) and %3$d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
-				} else if ( empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
+				} elseif ( empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value > $args['maximum'] || $value < $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (inclusive) and %d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$d (inclusive) and %3$d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
 				}
 			}
@@ -253,6 +267,10 @@ if ( ! function_exists( 'rest_sanitize_request_arg' ) ) {
 			return (int) $value;
 		}
 
+		if ( 'boolean' === $args['type'] ) {
+			return rest_sanitize_boolean( $value );
+		}
+
 		if ( isset( $args['format'] ) ) {
 			switch ( $args['format'] ) {
 				case 'date-time' :
@@ -266,10 +284,113 @@ if ( ! function_exists( 'rest_sanitize_request_arg' ) ) {
 
 				case 'uri' :
 					return esc_url_raw( $value );
+
+				case 'ipv4' :
+					return sanitize_text_field( $value );
 			}
 		}
 
 		return $value;
 	}
+}
 
+
+if ( ! function_exists( 'rest_parse_request_arg' ) ) {
+	/**
+	 * Parse a request argument based on details registered to the route.
+	 *
+	 * Runs a validation check and sanitizes the value, primarily to be used via
+	 * the `sanitize_callback` arguments in the endpoint args registration.
+	 *
+	 * @param  mixed            $value
+	 * @param  WP_REST_Request  $request
+	 * @param  string           $param
+	 * @return mixed
+	 */
+	function rest_parse_request_arg( $value, $request, $param ) {
+
+		$is_valid = rest_validate_request_arg( $value, $request, $param );
+
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+
+		$value = rest_sanitize_request_arg( $value, $request, $param );
+
+		return $value;
+	}
+}
+
+if ( ! function_exists( 'rest_is_ip_address' ) ) {
+	/**
+	 * Determines if a IPv4 address is valid.
+	 *
+	 * Does not handle IPv6 addresses.
+	 *
+	 * @param  string $ipv4 IP 32-bit address.
+	 * @return string|false The valid IPv4 address, otherwise false.
+	 */
+	function rest_is_ip_address( $ipv4 ) {
+		$pattern = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
+
+		if ( ! preg_match( $pattern, $ipv4 ) ) {
+			return false;
+		}
+
+		return $ipv4;
+	}
+}
+
+/**
+ * Changes a boolean-like value into the proper boolean value.
+ *
+ * @param bool|string|int $value The value being evaluated.
+ * @return boolean Returns the proper associated boolean value.
+ */
+if ( ! function_exists( 'rest_sanitize_boolean' ) ) {
+	function rest_sanitize_boolean( $value ) {
+		// String values are translated to `true`; make sure 'false' is false.
+		if ( is_string( $value )  ) {
+			$value = strtolower( $value );
+			if ( in_array( $value, array( 'false', '0' ), true ) ) {
+				$value = false;
+			}
+		}
+
+		// Everything else will map nicely to boolean.
+		return (boolean) $value;
+	}
+}
+
+/**
+ * Determines if a given value is boolean-like.
+ *
+ * @param bool|string $maybe_bool The value being evaluated.
+ * @return boolean True if a boolean, otherwise false.
+ */
+if ( ! function_exists( 'rest_is_boolean' ) ) {
+	function rest_is_boolean( $maybe_bool ) {
+		if ( is_bool( $maybe_bool ) ) {
+			return true;
+		}
+
+		if ( is_string( $maybe_bool ) ) {
+			$maybe_bool = strtolower( $maybe_bool );
+
+			$valid_boolean_values = array(
+				'false',
+				'true',
+				'0',
+				'1',
+			);
+
+			return in_array( $maybe_bool, $valid_boolean_values, true );
+		}
+
+		if ( is_int( $maybe_bool ) ) {
+			return in_array( $maybe_bool, array( 0, 1 ), true );
+		}
+
+		return false;
+	}
 }

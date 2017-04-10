@@ -1,157 +1,1305 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Legacy product contains all deprecated methods for this class and can be
+ * removed in the future.
+ */
+include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php' );
+
 /**
  * Abstract Product Class
  *
  * The WooCommerce product class handles individual product data.
  *
- * @class       WC_Product
- * @var         WP_Post
- * @version     2.1.0
- * @package     WooCommerce/Abstracts
- * @category    Abstract Class
- * @author      WooThemes
- *
- * @property    string $width Product width
- * @property    string $length Product length
- * @property    string $height Product height
- * @property    string $weight Product weight
- * @property    string $price Product price
- * @property    string $regular_price Product regular price
- * @property    string $sale_price Product sale price
- * @property    string $product_image_gallery String of image IDs in the gallery
- * @property    string $sku Product SKU
- * @property    string $stock Stock amount
- * @property    string $downloadable Shows/define if the product is downloadable
- * @property    string $virtual Shows/define if the product is virtual
- * @property    string $sold_individually Allow one item to be bought in a single order
- * @property    string $tax_status Tax status
- * @property    string $tax_class Tax class
- * @property    string $manage_stock Shows/define if can manage the product stock
- * @property    string $stock_status Stock status
- * @property    string $backorders Whether or not backorders are allowed
- * @property    string $featured Featured product
- * @property    string $visibility Product visibility
- * @property    string $variation_id Variation ID when dealing with variations
+ * @version  3.0.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
  */
-class WC_Product {
+class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
-	 * The product (post) ID.
-	 *
-	 * @var int
-	 */
-	public $id = 0;
-
-	/**
-	 * $post Stores post data.
-	 *
-	 * @var $post WP_Post
-	 */
-	public $post = null;
-
-	/**
-	 * The product's type (simple, variable etc).
-	 *
+	 * This is the name of this object type.
 	 * @var string
 	 */
-	public $product_type = null;
+	protected $object_type = 'product';
 
 	/**
-	 * Product shipping class.
-	 *
+	 * Post type.
 	 * @var string
 	 */
-	protected $shipping_class    = '';
+	protected $post_type = 'product';
 
 	/**
-	 * ID of the shipping class this product has.
-	 *
-	 * @var int
+	 * Cache group.
+	 * @var string
 	 */
-	protected $shipping_class_id = 0;
+	protected $cache_group = 'products';
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
+	/**
+	 * Stores product data.
+	 *
+	 * @var array
+	 */
+	protected $data = array(
+		'name'               => '',
+		'slug'               => '',
+		'date_created'       => null,
+		'date_modified'      => null,
+		'status'             => false,
+		'featured'           => false,
+		'catalog_visibility' => 'visible',
+		'description'        => '',
+		'short_description'  => '',
+		'sku'                => '',
+		'price'              => '',
+		'regular_price'      => '',
+		'sale_price'         => '',
+		'date_on_sale_from'  => null,
+		'date_on_sale_to'    => null,
+		'total_sales'        => '0',
+		'tax_status'         => 'taxable',
+		'tax_class'          => '',
+		'manage_stock'       => false,
+		'stock_quantity'     => null,
+		'stock_status'       => 'instock',
+		'backorders'         => 'no',
+		'sold_individually'  => false,
+		'weight'             => '',
+		'length'             => '',
+		'width'              => '',
+		'height'             => '',
+		'upsell_ids'         => array(),
+		'cross_sell_ids'     => array(),
+		'parent_id'          => 0,
+		'reviews_allowed'    => true,
+		'purchase_note'      => '',
+		'attributes'         => array(),
+		'default_attributes' => array(),
+		'menu_order'         => 0,
+		'virtual'            => false,
+		'downloadable'       => false,
+		'category_ids'       => array(),
+		'tag_ids'            => array(),
+		'shipping_class_id'  => 0,
+		'downloads'          => array(),
+		'image_id'           => '',
+		'gallery_image_ids'  => array(),
+		'download_limit'     => -1,
+		'download_expiry'    => -1,
+		'rating_counts'      => array(),
+		'average_rating'     => 0,
+		'review_count'       => 0,
+	);
 
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
+	 *
 	 * @var array
 	 */
 	protected $supports = array();
 
 	/**
-	 * Constructor gets the post object and sets the ID for the loaded product.
+	 * Get the product if ID is passed, otherwise the product is new and empty.
+	 * This class should NOT be instantiated, but the wc_get_product() function
+	 * should be used. It is possible, but the wc_get_product() is preferred.
 	 *
-	 * @param int|WC_Product|object $product Product ID, post object, or product object
+	 * @param int|WC_Product|object $product Product to init.
 	 */
-	public function __construct( $product ) {
-		if ( is_numeric( $product ) ) {
-			$this->id   = absint( $product );
-			$this->post = get_post( $this->id );
-		} elseif ( $product instanceof WC_Product ) {
-			$this->id   = absint( $product->id );
-			$this->post = $product->post;
-		} elseif ( isset( $product->ID ) ) {
-			$this->id   = absint( $product->ID );
-			$this->post = $product;
+	public function __construct( $product = 0 ) {
+		parent::__construct( $product );
+		if ( is_numeric( $product ) && $product > 0 ) {
+			$this->set_id( $product );
+		} elseif ( $product instanceof self ) {
+			$this->set_id( absint( $product->get_id() ) );
+		} elseif ( ! empty( $product->ID ) ) {
+			$this->set_id( absint( $product->ID ) );
+		} else {
+			$this->set_object_read( true );
+		}
+
+		$this->data_store = WC_Data_Store::load( 'product-' . $this->get_type() );
+		if ( $this->get_id() > 0 ) {
+			$this->data_store->read( $this );
 		}
 	}
 
 	/**
-	 * __isset function.
+	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 *
-	 * @param mixed $key
+	 * The product_type property is deprecated but is used here for BW compat with child classes which may be defining product_type and not have a get_type method.
+	 *
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_type() {
+		return isset( $this->product_type ) ? $this->product_type : 'simple';
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting data from the product object.
+	*/
+
+	/**
+	 * Get product name.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		return $this->get_prop( 'name', $context );
+	}
+
+	/**
+	 * Get product slug.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_slug( $context = 'view' ) {
+		return $this->get_prop( 'slug', $context );
+	}
+
+	/**
+	 * Get product created date.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
+	}
+
+	/**
+	 * Get product modified date.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
+	}
+
+	/**
+	 * Get product status.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_status( $context = 'view' ) {
+		return $this->get_prop( 'status', $context );
+	}
+
+	/**
+	 * If the product is featured.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return boolean
+	 */
+	public function get_featured( $context = 'view' ) {
+		return $this->get_prop( 'featured', $context );
+	}
+
+	/**
+	 * Get catalog visibility.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_catalog_visibility( $context = 'view' ) {
+		return $this->get_prop( 'catalog_visibility', $context );
+	}
+
+	/**
+	 * Get product description.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_description( $context = 'view' ) {
+		return $this->get_prop( 'description', $context );
+	}
+
+	/**
+	 * Get product short description.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_short_description( $context = 'view' ) {
+		return $this->get_prop( 'short_description', $context );
+	}
+
+	/**
+	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_sku( $context = 'view' ) {
+		return $this->get_prop( 'sku', $context );
+	}
+
+	/**
+	 * Returns the product's active price.
+	 *
+	 * @param  string $context
+	 * @return string price
+	 */
+	public function get_price( $context = 'view' ) {
+		return $this->get_prop( 'price', $context );
+	}
+
+	/**
+	 * Returns the product's regular price.
+	 *
+	 * @param  string $context
+	 * @return string price
+	 */
+	public function get_regular_price( $context = 'view' ) {
+		return $this->get_prop( 'regular_price', $context );
+	}
+
+	/**
+	 * Returns the product's sale price.
+	 *
+	 * @param  string $context
+	 * @return string price
+	 */
+	public function get_sale_price( $context = 'view' ) {
+		return $this->get_prop( 'sale_price', $context );
+	}
+
+	/**
+	 * Get date on sale from.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_on_sale_from( $context = 'view' ) {
+		return $this->get_prop( 'date_on_sale_from', $context );
+	}
+
+	/**
+	 * Get date on sale to.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_on_sale_to( $context = 'view' ) {
+		return $this->get_prop( 'date_on_sale_to', $context );
+	}
+
+	/**
+	 * Get number total of sales.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_total_sales( $context = 'view' ) {
+		return $this->get_prop( 'total_sales', $context );
+	}
+
+	/**
+	 * Returns the tax status.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_status( $context = 'view' ) {
+		return $this->get_prop( 'tax_status', $context );
+	}
+
+	/**
+	 * Returns the tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class( $context = 'view' ) {
+		return $this->get_prop( 'tax_class', $context );
+	}
+
+	/**
+	 * Return if product manage stock.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return boolean
+	 */
+	public function get_manage_stock( $context = 'view' ) {
+		return $this->get_prop( 'manage_stock', $context );
+	}
+
+	/**
+	 * Returns number of items available for sale.
+	 *
+	 * @param  string $context
+	 * @return int|null
+	 */
+	public function get_stock_quantity( $context = 'view' ) {
+		return $this->get_prop( 'stock_quantity', $context );
+	}
+
+	/**
+	 * Return the stock status.
+	 *
+	 * @param  string $context
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_stock_status( $context = 'view' ) {
+		return $this->get_prop( 'stock_status', $context );
+	}
+
+	/**
+	 * Get backorders.
+	 *
+	 * @param  string $context
+	 * @since 3.0.0
+	 * @return string yes no or notify
+	 */
+	public function get_backorders( $context = 'view' ) {
+		return $this->get_prop( 'backorders', $context );
+	}
+
+	/**
+	 * Return if should be sold individually.
+	 *
+	 * @param  string $context
+	 * @since 3.0.0
+	 * @return boolean
+	 */
+	public function get_sold_individually( $context = 'view' ) {
+		return $this->get_prop( 'sold_individually', $context );
+	}
+
+	/**
+	 * Returns the product's weight.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_weight( $context = 'view' ) {
+		return $this->get_prop( 'weight', $context );
+	}
+
+	/**
+	 * Returns the product length.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_length( $context = 'view' ) {
+		return $this->get_prop( 'length', $context );
+	}
+
+	/**
+	 * Returns the product width.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_width( $context = 'view' ) {
+		return $this->get_prop( 'width', $context );
+	}
+
+	/**
+	 * Returns the product height.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_height( $context = 'view' ) {
+		return $this->get_prop( 'height', $context );
+	}
+
+	/**
+	 * Returns formatted dimensions.
+	 *
+	 * @param  $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @return string|array
+	 */
+	public function get_dimensions( $formatted = true ) {
+		if ( $formatted ) {
+			wc_deprecated_argument( 'WC_Product::get_dimensions', '3.0', 'By default, get_dimensions has an argument set to true so that HTML is returned. This is to support the legacy version of the method. To get HTML dimensions, instead use wc_format_dimensions() function. Pass false to this method to return an array of dimensions. This will be the new default behavior in future versions.' );
+			return apply_filters( 'woocommerce_product_dimensions', wc_format_dimensions( $this->get_dimensions( false ) ), $this );
+		}
+		return array(
+			'length' => $this->get_length(),
+			'width'  => $this->get_width(),
+			'height' => $this->get_height(),
+		);
+	}
+
+	/**
+	 * Get upsel IDs.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_upsell_ids( $context = 'view' ) {
+		return $this->get_prop( 'upsell_ids', $context );
+	}
+
+	/**
+	 * Get cross sell IDs.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_cross_sell_ids( $context = 'view' ) {
+		return $this->get_prop( 'cross_sell_ids', $context );
+	}
+
+	/**
+	 * Get parent ID.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_parent_id( $context = 'view' ) {
+		return $this->get_prop( 'parent_id', $context );
+	}
+
+	/**
+	 * Return if reviews is allowed.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
 	 * @return bool
 	 */
-	public function __isset( $key ) {
-		return metadata_exists( 'post', $this->id, '_' . $key );
+	public function get_reviews_allowed( $context = 'view' ) {
+		return $this->get_prop( 'reviews_allowed', $context );
 	}
 
 	/**
-	 * __get function.
+	 * Get purchase note.
 	 *
-	 * @param string $key
-	 * @return mixed
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
 	 */
-	public function __get( $key ) {
-		$value = get_post_meta( $this->id, '_' . $key, true );
-
-		// Get values or default if not set
-		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) ) {
-			$value = $value ? $value : 'no';
-
-		} elseif ( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) ) {
-			$value = $value ? $value : array();
-
-		} elseif ( 'visibility' === $key ) {
-			$value = $value ? $value : 'hidden';
-
-		} elseif ( 'stock' === $key ) {
-			$value = $value ? $value : 0;
-
-		} elseif ( 'stock_status' === $key ) {
-			$value = $value ? $value : 'instock';
-
-		} elseif ( 'tax_status' === $key ) {
-			$value = $value ? $value : 'taxable';
-
-		}
-
-		if ( false !== $value ) {
-			$this->$key = $value;
-		}
-
-		return $value;
+	public function get_purchase_note( $context = 'view' ) {
+		return $this->get_prop( 'purchase_note', $context );
 	}
 
 	/**
-	 * Get the product's post data.
+	 * Returns product attributes.
 	 *
-	 * @return object
+	 * @param  string $context
+	 * @return array
 	 */
-	public function get_post_data() {
-		return $this->post;
+	public function get_attributes( $context = 'view' ) {
+		return $this->get_prop( 'attributes', $context );
 	}
+
+	/**
+	 * Get default attributes.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_default_attributes( $context = 'view' ) {
+		return $this->get_prop( 'default_attributes', $context );
+	}
+
+	/**
+	 * Get menu order.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_menu_order( $context = 'view' ) {
+		return $this->get_prop( 'menu_order', $context );
+	}
+
+	/**
+	 * Get category ids.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_category_ids( $context = 'view' ) {
+		return $this->get_prop( 'category_ids', $context );
+	}
+
+	/**
+	 * Get tag ids.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_tag_ids( $context = 'view' ) {
+		return $this->get_prop( 'tag_ids', $context );
+	}
+
+	/**
+	 * Get virtual.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_virtual( $context = 'view' ) {
+		return $this->get_prop( 'virtual', $context );
+	}
+
+	/**
+	 * Returns the gallery attachment ids.
+	 *
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_gallery_image_ids( $context = 'view' ) {
+		return $this->get_prop( 'gallery_image_ids', $context );
+	}
+
+	/**
+	 * Get shipping class ID.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_shipping_class_id( $context = 'view' ) {
+		return $this->get_prop( 'shipping_class_id', $context );
+	}
+
+	/**
+	 * Get downloads.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_downloads( $context = 'view' ) {
+		return $this->get_prop( 'downloads', $context );
+	}
+
+	/**
+	 * Get download expiry.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_download_expiry( $context = 'view' ) {
+		return $this->get_prop( 'download_expiry', $context );
+	}
+
+	/**
+	 * Get downloadable.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_downloadable( $context = 'view' ) {
+		return $this->get_prop( 'downloadable', $context );
+	}
+
+	/**
+	 * Get download limit.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_download_limit( $context = 'view' ) {
+		return $this->get_prop( 'download_limit', $context );
+	}
+
+	/**
+	 * Get main image ID.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_image_id( $context = 'view' ) {
+		return $this->get_prop( 'image_id', $context );
+	}
+
+	/**
+	 * Get rating count.
+	 * @param  string $context
+	 * @return array of counts
+	 */
+	public function get_rating_counts( $context = 'view' ) {
+		return $this->get_prop( 'rating_counts', $context );
+	}
+
+	/**
+	 * Get average rating.
+	 * @param  string $context
+	 * @return float
+	 */
+	public function get_average_rating( $context = 'view' ) {
+		return $this->get_prop( 'average_rating', $context );
+	}
+
+	/**
+	 * Get review count.
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_review_count( $context = 'view' ) {
+		return $this->get_prop( 'review_count', $context );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	|
+	| Functions for setting product data. These should not update anything in the
+	| database itself and should only change what is stored in the class
+	| object.
+	*/
+
+	/**
+	 * Set product name.
+	 *
+	 * @since 3.0.0
+	 * @param string $name Product name.
+	 */
+	public function set_name( $name ) {
+		$this->set_prop( 'name', $name );
+	}
+
+	/**
+	 * Set product slug.
+	 *
+	 * @since 3.0.0
+	 * @param string $slug Product slug.
+	 */
+	public function set_slug( $slug ) {
+		$this->set_prop( 'slug', $slug );
+	}
+
+	/**
+	 * Set product created date.
+	 *
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 */
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
+	}
+
+	/**
+	 * Set product modified date.
+	 *
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 */
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
+	}
+
+	/**
+	 * Set product status.
+	 *
+	 * @since 3.0.0
+	 * @param string $status Product status.
+	 */
+	public function set_status( $status ) {
+		$this->set_prop( 'status', $status );
+	}
+
+	/**
+	 * Set if the product is featured.
+	 *
+	 * @since 3.0.0
+	 * @param bool|string
+	 */
+	public function set_featured( $featured ) {
+		$this->set_prop( 'featured', wc_string_to_bool( $featured ) );
+	}
+
+	/**
+	 * Set catalog visibility.
+	 *
+	 * @since 3.0.0
+	 * @throws WC_Data_Exception
+	 * @param string $visibility Options: 'hidden', 'visible', 'search' and 'catalog'.
+	 */
+	public function set_catalog_visibility( $visibility ) {
+		$options = array_keys( wc_get_product_visibility_options() );
+		if ( ! in_array( $visibility, $options, true ) ) {
+			$this->error( 'product_invalid_catalog_visibility', __( 'Invalid catalog visibility option.', 'woocommerce' ) );
+		}
+		$this->set_prop( 'catalog_visibility', $visibility );
+	}
+
+	/**
+	 * Set product description.
+	 *
+	 * @since 3.0.0
+	 * @param string $description Product description.
+	 */
+	public function set_description( $description ) {
+		$this->set_prop( 'description', $description );
+	}
+
+	/**
+	 * Set product short description.
+	 *
+	 * @since 3.0.0
+	 * @param string $short_description Product short description.
+	 */
+	public function set_short_description( $short_description ) {
+		$this->set_prop( 'short_description', $short_description );
+	}
+
+	/**
+	 * Set SKU.
+	 *
+	 * @since 3.0.0
+	 * @throws WC_Data_Exception
+	 * @param string $sku Product SKU.
+	 */
+	public function set_sku( $sku ) {
+		$sku = (string) $sku;
+		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
+			$sku_found = wc_get_product_id_by_sku( $sku );
+
+			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
+		}
+		$this->set_prop( 'sku', $sku );
+	}
+
+	/**
+	 * Set the product's active price.
+	 *
+	 * @param string $price Price.
+	 */
+	public function set_price( $price ) {
+		$this->set_prop( 'price', wc_format_decimal( $price ) );
+	}
+
+	/**
+	 * Set the product's regular price.
+	 *
+	 * @since 3.0.0
+	 * @param string $price Regular price.
+	 */
+	public function set_regular_price( $price ) {
+		$this->set_prop( 'regular_price', wc_format_decimal( $price ) );
+	}
+
+	/**
+	 * Set the product's sale price.
+	 *
+	 * @since 3.0.0
+	 * @param string $price sale price.
+	 */
+	public function set_sale_price( $price ) {
+		$this->set_prop( 'sale_price', wc_format_decimal( $price ) );
+	}
+
+	/**
+	 * Set date on sale from.
+	 *
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 */
+	public function set_date_on_sale_from( $date = null ) {
+		$this->set_date_prop( 'date_on_sale_from', $date );
+	}
+
+	/**
+	 * Set date on sale to.
+	 *
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 */
+	public function set_date_on_sale_to( $date = null ) {
+		$this->set_date_prop( 'date_on_sale_to', $date );
+	}
+
+	/**
+	 * Set number total of sales.
+	 *
+	 * @since 3.0.0
+	 * @param int $total Total of sales.
+	 */
+	public function set_total_sales( $total ) {
+		$this->set_prop( 'total_sales', absint( $total ) );
+	}
+
+	/**
+	 * Set the tax status.
+	 *
+	 * @since 3.0.0
+	 * @throws WC_Data_Exception
+	 * @param string $status Tax status.
+	 */
+	public function set_tax_status( $status ) {
+		$options = array(
+			'taxable',
+			'shipping',
+			'none',
+		);
+
+		// Set default if empty.
+		if ( empty( $status ) ) {
+			$status = 'taxable';
+		}
+
+		if ( ! in_array( $status, $options, true ) ) {
+			$this->error( 'product_invalid_tax_status', __( 'Invalid product tax status.', 'woocommerce' ) );
+		}
+
+		$this->set_prop( 'tax_status', $status );
+	}
+
+	/**
+	 * Set the tax class.
+	 *
+	 * @since 3.0.0
+	 * @param string $class Tax class.
+	 */
+	public function set_tax_class( $class ) {
+		$class       = sanitize_title( $class );
+		$class       = 'standard' === $class ? '' : $class;
+		$this->set_prop( 'tax_class', $class );
+	}
+
+	/**
+	 * Set if product manage stock.
+	 *
+	 * @since 3.0.0
+	 * @param bool
+	 */
+	public function set_manage_stock( $manage_stock ) {
+		$this->set_prop( 'manage_stock', wc_string_to_bool( $manage_stock ) );
+	}
+
+	/**
+	 * Set number of items available for sale.
+	 *
+	 * @since 3.0.0
+	 * @param float|null $quantity Stock quantity.
+	 */
+	public function set_stock_quantity( $quantity ) {
+		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
+	}
+
+	/**
+	 * Set stock status.
+	 *
+	 * @param string $status New status.
+	 */
+	public function set_stock_status( $status = '' ) {
+		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
+	}
+
+	/**
+	 * Set backorders.
+	 *
+	 * @since 3.0.0
+	 * @param string $backorders Options: 'yes', 'no' or 'notify'.
+	 */
+	public function set_backorders( $backorders ) {
+		$this->set_prop( 'backorders', $backorders );
+	}
+
+	/**
+	 * Set if should be sold individually.
+	 *
+	 * @since 3.0.0
+	 * @param bool
+	 */
+	public function set_sold_individually( $sold_individually ) {
+		$this->set_prop( 'sold_individually', wc_string_to_bool( $sold_individually ) );
+	}
+
+	/**
+	 * Set the product's weight.
+	 *
+	 * @since 3.0.0
+	 * @param float|string $weight Total weight.
+	 */
+	public function set_weight( $weight ) {
+		$this->set_prop( 'weight', '' === $weight ? '' : wc_format_decimal( $weight ) );
+	}
+
+	/**
+	 * Set the product length.
+	 *
+	 * @since 3.0.0
+	 * @param float|string $length Total length.
+	 */
+	public function set_length( $length ) {
+		$this->set_prop( 'length', '' === $length ? '' : wc_format_decimal( $length ) );
+	}
+
+	/**
+	 * Set the product width.
+	 *
+	 * @since 3.0.0
+	 * @param float|string $width Total width.
+	 */
+	public function set_width( $width ) {
+		$this->set_prop( 'width', '' === $width ? '' : wc_format_decimal( $width ) );
+	}
+
+	/**
+	 * Set the product height.
+	 *
+	 * @since 3.0.0
+	 * @param float|string $height Total height.
+	 */
+	public function set_height( $height ) {
+		$this->set_prop( 'height', '' === $height ? '' : wc_format_decimal( $height ) );
+	}
+
+	/**
+	 * Set upsell IDs.
+	 *
+	 * @since 3.0.0
+	 * @param array $upsell_ids IDs from the up-sell products.
+	 */
+	public function set_upsell_ids( $upsell_ids ) {
+		$this->set_prop( 'upsell_ids', array_filter( (array) $upsell_ids ) );
+	}
+
+	/**
+	 * Set crosssell IDs.
+	 *
+	 * @since 3.0.0
+	 * @param array $cross_sell_ids IDs from the cross-sell products.
+	 */
+	public function set_cross_sell_ids( $cross_sell_ids ) {
+		$this->set_prop( 'cross_sell_ids', array_filter( (array) $cross_sell_ids ) );
+	}
+
+	/**
+	 * Set parent ID.
+	 *
+	 * @since 3.0.0
+	 * @param int $parent_id Product parent ID.
+	 */
+	public function set_parent_id( $parent_id ) {
+		$this->set_prop( 'parent_id', absint( $parent_id ) );
+	}
+
+	/**
+	 * Set if reviews is allowed.
+	 *
+	 * @since 3.0.0
+	 * @param bool $reviews_allowed Reviews allowed or not.
+	 */
+	public function set_reviews_allowed( $reviews_allowed ) {
+		$this->set_prop( 'reviews_allowed', wc_string_to_bool( $reviews_allowed ) );
+	}
+
+	/**
+	 * Set purchase note.
+	 *
+	 * @since 3.0.0
+	 * @param string $purchase_note Purchase note.
+	 */
+	public function set_purchase_note( $purchase_note ) {
+		$this->set_prop( 'purchase_note', $purchase_note );
+	}
+
+	/**
+	 * Set product attributes.
+	 *
+	 * Attributes are made up of:
+	 * 		id - 0 for product level attributes. ID for global attributes.
+	 * 		name - Attribute name.
+	 * 		options - attribute value or array of term ids/names.
+	 * 		position - integer sort order.
+	 * 		visible - If visible on frontend.
+	 * 		variation - If used for variations.
+	 * 	Indexed by unqiue key to allow clearing old ones after a set.
+	 *
+	 * @since 3.0.0
+	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
+	 */
+	public function set_attributes( $raw_attributes ) {
+		$attributes = array_fill_keys( array_keys( $this->get_attributes( 'edit' ) ), null );
+		foreach ( $raw_attributes as $attribute ) {
+			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
+			}
+		}
+
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
+		$this->set_prop( 'attributes', $attributes );
+	}
+
+	/**
+	 * Set default attributes.
+	 *
+	 * @since 3.0.0
+	 * @param array $default_attributes List of default attributes.
+	 */
+	public function set_default_attributes( $default_attributes ) {
+		$this->set_prop( 'default_attributes', array_filter( (array) $default_attributes ) );
+	}
+
+	/**
+	 * Set menu order.
+	 *
+	 * @since 3.0.0
+	 * @param int $menu_order Menu order.
+	 */
+	public function set_menu_order( $menu_order ) {
+		$this->set_prop( 'menu_order', intval( $menu_order ) );
+	}
+
+	/**
+	 * Set the product categories.
+	 *
+	 * @since 3.0.0
+	 * @param array $term_ids List of terms IDs.
+	 */
+	public function set_category_ids( $term_ids ) {
+		$this->set_prop( 'category_ids', array_unique( array_map( 'intval', $term_ids ) ) );
+	}
+
+	/**
+	 * Set the product tags.
+	 *
+	 * @since 3.0.0
+	 * @param array $term_ids List of terms IDs.
+	 */
+	public function set_tag_ids( $term_ids ) {
+		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids ) ) );
+	}
+
+	/**
+	 * Set if the product is virtual.
+	 *
+	 * @since 3.0.0
+	 * @param bool|string
+	 */
+	public function set_virtual( $virtual ) {
+		$this->set_prop( 'virtual', wc_string_to_bool( $virtual ) );
+	}
+
+	/**
+	 * Set shipping class ID.
+	 *
+	 * @since 3.0.0
+	 * @param int
+	 */
+	public function set_shipping_class_id( $id ) {
+		$this->set_prop( 'shipping_class_id', absint( $id ) );
+	}
+
+	/**
+	 * Set if the product is downloadable.
+	 *
+	 * @since 3.0.0
+	 * @param bool|string
+	 */
+	public function set_downloadable( $downloadable ) {
+		$this->set_prop( 'downloadable', wc_string_to_bool( $downloadable ) );
+	}
+
+	/**
+	 * Set downloads.
+	 *
+	 * @since 3.0.0
+	 * @param $downloads_array array of WC_Product_Download objects or arrays.
+	 */
+	public function set_downloads( $downloads_array ) {
+		$downloads = array();
+		$errors    = array();
+
+		foreach ( $downloads_array as $download ) {
+			if ( is_a( $download, 'WC_Product_Download' ) ) {
+				$download_object = $download;
+			} else {
+				$download_object           = new WC_Product_Download();
+				$download['previous_hash'] = isset( $download['previous_hash'] ) ? $download['previous_hash'] : '';
+				$file_hash                 = apply_filters( 'woocommerce_downloadable_file_hash', md5( $download['file'] ), $this->get_id(), $download['name'], $download['file'], $download['previous_hash'] );
+
+				$download_object->set_id( $file_hash );
+				$download_object->set_name( $download['name'] );
+				$download_object->set_file( $download['file'] );
+				$download_object->set_previous_hash( $download['previous_hash'] );
+			}
+
+			// Validate the file extension
+			if ( ! $download_object->is_allowed_filetype() ) {
+				$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				continue;
+			}
+
+			// Validate the file exists.
+			if ( ! $download_object->file_exists() ) {
+				$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				continue;
+			}
+
+			$downloads[ $download_object->get_id() ] = $download_object;
+		}
+
+		if ( $errors ) {
+			$this->error( 'product_invalid_download', $errors[0] );
+		}
+
+		$this->set_prop( 'downloads', $downloads );
+	}
+
+	/**
+	 * Set download limit.
+	 *
+	 * @since 3.0.0
+	 * @param int $download_limit
+	 */
+	public function set_download_limit( $download_limit ) {
+		$this->set_prop( 'download_limit', -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit ) );
+	}
+
+	/**
+	 * Set download expiry.
+	 *
+	 * @since 3.0.0
+	 * @param int $download_expiry
+	 */
+	public function set_download_expiry( $download_expiry ) {
+		$this->set_prop( 'download_expiry', -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry ) );
+	}
+
+	/**
+	 * Set gallery attachment ids.
+	 *
+	 * @since 3.0.0
+	 * @param array $image_ids
+	 */
+	public function set_gallery_image_ids( $image_ids ) {
+		$image_ids = wp_parse_id_list( $image_ids );
+
+		if ( $this->get_object_read() ) {
+			$image_ids = array_filter( $image_ids, 'wp_attachment_is_image' );
+		}
+
+		$this->set_prop( 'gallery_image_ids', $image_ids );
+	}
+
+	/**
+	 * Set main image ID.
+	 *
+	 * @since 3.0.0
+	 * @param int $image_id
+	 */
+	public function set_image_id( $image_id = '' ) {
+		$this->set_prop( 'image_id', $image_id );
+	}
+
+	/**
+	 * Set rating counts. Read only.
+	 * @param array $counts
+	 */
+	public function set_rating_counts( $counts ) {
+		$this->set_prop( 'rating_counts', array_filter( array_map( 'absint', (array) $counts ) ) );
+	}
+
+	/**
+	 * Set average rating. Read only.
+	 * @param float $average
+	 */
+	public function set_average_rating( $average ) {
+		$this->set_prop( 'average_rating', wc_format_decimal( $average ) );
+	}
+
+	/**
+	 * Set review count. Read only.
+	 * @param int $count
+	 */
+	public function set_review_count( $count ) {
+		$this->set_prop( 'review_count', absint( $count ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Other Methods
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Ensure properties are set correctly before save.
+	 * @since 3.0.0
+	 */
+	public function validate_props() {
+		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		if ( ! $this->get_manage_stock() ) {
+			$this->set_stock_quantity( '' );
+			$this->set_backorders( 'no' );
+
+		// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) && 'no' === $this->get_backorders() ) {
+			$this->set_stock_status( 'outofstock' );
+
+		// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			$this->set_stock_status( 'instock' );
+		}
+	}
+
+	/**
+	 * Save data (either create or update depending on if we are working on an existing product).
+	 *
+	 * @since 3.0.0
+	 */
+	public function save() {
+		$this->validate_props();
+
+		if ( $this->data_store ) {
+			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
+			if ( $this->get_parent_id() ) {
+				wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
+			}
+			return $this->get_id();
+		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Conditionals
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Check if a product supports a given feature.
@@ -167,186 +1315,12 @@ class WC_Product {
 	}
 
 	/**
-	 * Return the product ID
+	 * Returns whether or not the product post exists.
 	 *
-	 * @since 2.5.0
-	 * @return int product (post) ID
+	 * @return bool
 	 */
-	public function get_id() {
-
-		return $this->id;
-	}
-
-	/**
-	 * Returns the gallery attachment ids.
-	 *
-	 * @return array
-	 */
-	public function get_gallery_attachment_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
-	}
-
-	/**
-	 * Wrapper for get_permalink.
-	 *
-	 * @return string
-	 */
-	public function get_permalink() {
-		return get_permalink( $this->id );
-	}
-
-	/**
-	 * Get SKU (Stock-keeping unit) - product unique ID.
-	 *
-	 * @return string
-	 */
-	public function get_sku() {
-		return apply_filters( 'woocommerce_get_sku', $this->sku, $this );
-	}
-
-	/**
-	 * Returns number of items available for sale.
-	 *
-	 * @return int
-	 */
-	public function get_stock_quantity() {
-		return apply_filters( 'woocommerce_get_stock_quantity', $this->managing_stock() ? wc_stock_amount( $this->stock ) : null, $this );
-	}
-
-	/**
-	 * Get total stock - This is the stock of parent and children combined.
-	 *
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			if ( sizeof( $this->get_children() ) > 0 ) {
-				$this->total_stock = max( 0, $this->get_stock_quantity() );
-
-				foreach ( $this->get_children() as $child_id ) {
-					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-					}
-				}
-			} else {
-				$this->total_stock = $this->get_stock_quantity();
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
-	}
-
-	/**
-	 * Check if the stock status needs changing.
-	 */
-	public function check_stock_status() {
-		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'outofstock' ) {
-				$this->set_stock_status( 'outofstock' );
-			}
-		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'instock' ) {
-				$this->set_stock_status( 'instock' );
-			}
-		}
-	}
-
-	/**
-	 * Set stock level of the product.
-	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
-	 * We cannot rely on the original loaded value in case another order was made since then.
-	 *
-	 * @param int $amount (default: null)
-	 * @param string $mode can be set, add, or subtract
-	 * @return int new stock level
-	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
-		global $wpdb;
-
-		if ( ! is_null( $amount ) && $this->managing_stock() ) {
-
-			// Ensure key exists
-			add_post_meta( $this->id, '_stock', 0, true );
-
-			// Update stock in DB directly
-			switch ( $mode ) {
-				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
-				break;
-				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
-				break;
-				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
-				break;
-			}
-
-			// Clear caches
-			wp_cache_delete( $this->id, 'post_meta' );
-			delete_transient( 'wc_low_stock_count' );
-			delete_transient( 'wc_outofstock_count' );
-			unset( $this->stock );
-
-			// Stock status
-			$this->check_stock_status();
-
-			// Trigger action
-			do_action( 'woocommerce_product_set_stock', $this );
-		}
-
-		return $this->get_stock_quantity();
-	}
-
-	/**
-	 * Reduce stock level of the product.
-	 *
-	 * @param int $amount Amount to reduce by. Default: 1
-	 * @return int new stock level
-	 */
-	public function reduce_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'subtract' );
-	}
-
-	/**
-	 * Increase stock level of the product.
-	 *
-	 * @param int $amount Amount to increase by. Default 1.
-	 * @return int new stock level
-	 */
-	public function increase_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'add' );
-	}
-
-	/**
-	 * Set stock status of the product.
-	 *
-	 * @param string $status
-	 */
-	public function set_stock_status( $status ) {
-
-		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
-
-		// Sanity check
-		if ( $this->managing_stock() ) {
-			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$status = 'outofstock';
-			}
-		}
-
-		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
-			$this->stock_status = $status;
-			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
-		}
-	}
-
-	/**
-	 * Return the product type.
-	 *
-	 * @return string
-	 */
-	public function get_type() {
-		return is_null( $this->product_type ) ? '' : $this->product_type;
+	public function exists() {
+		return false !== $this->get_status();
 	}
 
 	/**
@@ -358,7 +1332,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_type( $type ) {
-		return ( $this->product_type == $type || ( is_array( $type ) && in_array( $this->product_type, $type ) ) ) ? true : false;
+		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type ) ) );
 	}
 
 	/**
@@ -367,7 +1341,232 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_downloadable() {
-		return $this->downloadable == 'yes' ? true : false;
+		return apply_filters( 'woocommerce_is_downloadable', true === $this->get_downloadable(), $this );
+	}
+
+	/**
+	 * Checks if a product is virtual (has no shipping).
+	 *
+	 * @return bool
+	 */
+	public function is_virtual() {
+		return apply_filters( 'woocommerce_is_virtual', true === $this->get_virtual(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is featured.
+	 *
+	 * @return bool
+	 */
+	public function is_featured() {
+		return true === $this->get_featured();
+	}
+
+	/**
+	 * Check if a product is sold individually (no quantities).
+	 *
+	 * @return bool
+	 */
+	public function is_sold_individually() {
+		return apply_filters( 'woocommerce_is_sold_individually', true === $this->get_sold_individually(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is visible in the catalog.
+	 *
+	 * @return bool
+	 */
+	public function is_visible() {
+		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
+
+		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+			$visible = false;
+		}
+
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
+			$visible = false;
+		}
+
+		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
+	}
+
+	/**
+	 * Returns false if the product cannot be bought.
+	 *
+	 * @return bool
+	 */
+	public function is_purchasable() {
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( 'publish' === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is on sale.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return bool
+	 */
+	public function is_on_sale( $context = 'view' ) {
+		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
+			$on_sale = true;
+
+			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > time() ) {
+				$on_sale = false;
+			}
+
+			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < time() ) {
+				$on_sale = false;
+			}
+		} else {
+			$on_sale = false;
+		}
+		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
+	}
+
+	/**
+	 * Returns whether or not the product has dimensions set.
+	 *
+	 * @return bool
+	 */
+	public function has_dimensions() {
+		return ( $this->get_length() || $this->get_height() || $this->get_width() ) && ! $this->get_virtual();
+	}
+
+	/**
+	 * Returns whether or not the product has weight set.
+	 *
+	 * @return bool
+	 */
+	public function has_weight() {
+		return $this->get_weight() && ! $this->get_virtual();
+	}
+
+	/**
+	 * Returns whether or not the product is in stock.
+	 *
+	 * @return bool
+	 */
+	public function is_in_stock() {
+		return apply_filters( 'woocommerce_product_is_in_stock', 'instock' === $this->get_stock_status(), $this );
+	}
+
+	/**
+	 * Checks if a product needs shipping.
+	 *
+	 * @return bool
+	 */
+	public function needs_shipping() {
+		return apply_filters( 'woocommerce_product_needs_shipping', ! $this->is_virtual(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product is taxable.
+	 *
+	 * @return bool
+	 */
+	public function is_taxable() {
+		return apply_filters( 'woocommerce_product_is_taxable', $this->get_tax_status() === 'taxable' && wc_tax_enabled(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product shipping is taxable.
+	 *
+	 * @return bool
+	 */
+	public function is_shipping_taxable() {
+		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping';
+	}
+
+	/**
+	 * Returns whether or not the product is stock managed.
+	 *
+	 * @return bool
+	 */
+	public function managing_stock() {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			return $this->get_manage_stock();
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not the product can be backordered.
+	 *
+	 * @return bool
+	 */
+	public function backorders_allowed() {
+		return apply_filters( 'woocommerce_product_backorders_allowed', ( 'yes' === $this->get_backorders() || 'notify' === $this->get_backorders() ), $this->get_id(), $this );
+	}
+
+	/**
+	 * Returns whether or not the product needs to notify the customer on backorder.
+	 *
+	 * @return bool
+	 */
+	public function backorders_require_notification() {
+		return apply_filters( 'woocommerce_product_backorders_require_notification', ( $this->managing_stock() && 'notify' === $this->get_backorders() ), $this );
+	}
+
+	/**
+	 * Check if a product is on backorder.
+	 *
+	 * @param int $qty_in_cart (default: 0)
+	 * @return bool
+	 */
+	public function is_on_backorder( $qty_in_cart = 0 ) {
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
+	}
+
+	/**
+	 * Returns whether or not the product has enough stock for the order.
+	 *
+	 * @param mixed $quantity
+	 * @return bool
+	 */
+	public function has_enough_stock( $quantity ) {
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
+	}
+
+	/**
+	 * Returns whether or not the product has any visible attributes.
+	 *
+	 * @return boolean
+	 */
+	public function has_attributes() {
+		foreach ( $this->get_attributes() as $attribute ) {
+			if ( $attribute->get_visible() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not the product has any child product.
+	 *
+	 * @return bool
+	 */
+	public function has_child() {
+		return 0 < count( $this->get_children() );
+	}
+
+	/**
+	 * Does a child have dimensions?
+	 *
+	 * @since 3.0.0
+	 * @return bool
+	 */
+	public function child_has_dimensions() {
+		return false;
+	}
+
+	/**
+	 * Does a child have a weight?
+	 *
+	 * @since 3.0.0
+	 * @return boolean
+	 */
+	public function child_has_weight() {
+		return false;
 	}
 
 	/**
@@ -379,191 +1578,111 @@ class WC_Product {
 	 * @return bool Whether downloadable product has a file attached.
 	 */
 	public function has_file( $download_id = '' ) {
-		return ( $this->is_downloadable() && $this->get_file( $download_id ) ) ? true : false;
+		return $this->is_downloadable() && $this->get_file( $download_id );
 	}
 
 	/**
-	 * Gets an array of downloadable files for this product.
+	 * Returns whether or not the product has additonal options that need
+	 * selecting before adding to cart.
 	 *
-	 * @since 2.1.0
-	 *
-	 * @return array
+	 * @since  3.0.0
+	 * @return boolean
 	 */
-	public function get_files() {
-
-		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
-
-		if ( ! empty( $downloadable_files ) ) {
-
-			foreach ( $downloadable_files as $key => $file ) {
-
-				if ( ! is_array( $file ) ) {
-					$downloadable_files[ $key ] = array(
-						'file' => $file,
-						'name' => ''
-					);
-				}
-
-				// Set default name
-				if ( empty( $file['name'] ) ) {
-					$downloadable_files[ $key ]['name'] = wc_get_filename_from_url( $file['file'] );
-				}
-
-				// Filter URL
-				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this, $key );
-			}
-		}
-
-		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this );
+	public function has_options() {
+		return false;
 	}
 
-	/**
-	 * Get a file by $download_id.
-	 *
-	 * @param string $download_id file identifier
-	 * @return array|false if not found
-	 */
-	public function get_file( $download_id = '' ) {
-
-		$files = $this->get_files();
-
-		if ( '' === $download_id ) {
-			$file = sizeof( $files ) ? current( $files ) : false;
-		} elseif ( isset( $files[ $download_id ] ) ) {
-			$file = $files[ $download_id ];
-		} else {
-			$file = false;
-		}
-
-		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_product_file', $file, $this, $download_id );
-	}
+	/*
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
-	 * Get file download path identified by $download_id.
+	 * Get the product's title. For products this is the product name.
 	 *
-	 * @param string $download_id file identifier
 	 * @return string
 	 */
-	public function get_file_download_path( $download_id ) {
-		$files = $this->get_files();
-
-		if ( isset( $files[ $download_id ] ) ) {
-			$file_path = $files[ $download_id ]['file'];
-		} else {
-			$file_path = '';
-		}
-
-		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
+	public function get_title() {
+		return apply_filters( 'woocommerce_product_title', $this->get_name(), $this );
 	}
 
 	/**
-	 * Checks if a product is virtual (has no shipping).
-	 *
-	 * @return bool
+	 * Product permalink.
+	 * @return string
 	 */
-	public function is_virtual() {
-		return apply_filters( 'woocommerce_is_virtual', $this->virtual == 'yes' ? true : false, $this );
+	public function get_permalink() {
+		return get_permalink( $this->get_id() );
 	}
 
 	/**
-	 * Checks if a product needs shipping.
+	 * Returns the children IDs if applicable. Overridden by child classes.
 	 *
-	 * @return bool
-	 */
-	public function needs_shipping() {
-		return apply_filters( 'woocommerce_product_needs_shipping', $this->is_virtual() ? false : true, $this );
-	}
-
-	/**
-	 * Check if a product is sold individually (no quantities).
-	 *
-	 * @return bool
-	 */
-	public function is_sold_individually() {
-
-		$return = false;
-
-		if ( 'yes' == $this->sold_individually ) {
-			$return = true;
-		}
-
-		return apply_filters( 'woocommerce_is_sold_individually', $return, $this );
-	}
-
-	/**
-	 * Returns the child product.
-	 *
-	 * @param mixed $child_id
-	 * @return WC_Product|WC_Product|WC_Product_variation
-	 */
-	public function get_child( $child_id ) {
-		return wc_get_product( $child_id );
-	}
-
-	/**
-	 * Returns the children.
-	 *
-	 * @return array
+	 * @return array of IDs
 	 */
 	public function get_children() {
 		return array();
 	}
 
 	/**
-	 * Returns whether or not the product has any child product.
-	 *
-	 * @return bool
-	 */
-	public function has_child() {
-		return false;
-	}
-
-	/**
-	 * Returns whether or not the product post exists.
-	 *
-	 * @return bool
-	 */
-	public function exists() {
-		return empty( $this->post ) ? false : true;
-	}
-
-	/**
-	 * Returns whether or not the product is taxable.
-	 *
-	 * @return bool
-	 */
-	public function is_taxable() {
-		$taxable = $this->get_tax_status() === 'taxable' && wc_tax_enabled() ? true : false;
-		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
-	}
-
-	/**
-	 * Returns whether or not the product shipping is taxable.
-	 *
-	 * @return bool
-	 */
-	public function is_shipping_taxable() {
-		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' ? true : false;
-	}
-
-	/**
-	 * Get the title of the post.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->post ? $this->post->post_title : '', $this );
-	}
-
-	/**
-	 * Get the parent of the post.
-	 *
+	 * If the stock level comes from another product ID, this should be modified.
+	 * @since  3.0.0
 	 * @return int
 	 */
-	public function get_parent() {
-		return apply_filters( 'woocommerce_product_parent', absint( $this->post->post_parent ), $this );
+	public function get_stock_managed_by_id() {
+		return $this->get_id();
+	}
+
+	/**
+	 * Returns the price in html format.
+	 * @return string
+	 */
+	public function get_price_html( $deprecated = '' ) {
+		if ( '' === $this->get_price() ) {
+			return apply_filters( 'woocommerce_empty_price_html', '', $this );
+		}
+
+		if ( $this->is_on_sale() ) {
+			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
+		} else {
+			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
+		}
+
+		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @return string Formatted product name
+	 */
+	public function get_formatted_name() {
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->get_id();
+		}
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() );
+	}
+
+	/**
+	 * Get min quantity which can be purchased at once.
+	 *
+	 * @since  3.0.0
+	 * @return int
+	 */
+	public function get_min_purchase_quantity() {
+		return 1;
+	}
+
+	/**
+	 * Get max quantity which can be purchased at once.
+	 *
+	 * @since  3.0.0
+	 * @return int Quantity or -1 if unlimited.
+	 */
+	public function get_max_purchase_quantity() {
+		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->get_manage_stock() ? -1 : $this->get_stock_quantity() );
 	}
 
 	/**
@@ -572,7 +1691,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->id ), $this );
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $this->get_permalink(), $this );
 	}
 
 	/**
@@ -594,84 +1713,137 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns whether or not the product is stock managed.
+	 * Returns the main product image.
 	 *
-	 * @return bool
+	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array $attr
+	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
+	 * @return string
 	 */
-	public function managing_stock() {
-		return ( ! isset( $this->manage_stock ) || $this->manage_stock == 'no' || get_option( 'woocommerce_manage_stock' ) !== 'yes' ) ? false : true;
+	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
+		if ( has_post_thumbnail( $this->get_id() ) ) {
+			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
+			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
+		} elseif ( $placeholder ) {
+			$image = wc_placeholder_img( $size );
+		} else {
+			$image = '';
+		}
+		return str_replace( array( 'https://', 'http://' ), '//', $image );
 	}
 
 	/**
-	 * Returns whether or not the product is in stock.
+	 * Returns the product shipping class SLUG.
 	 *
-	 * @return bool
+	 * @return string
 	 */
-	public function is_in_stock() {
-		$status = $this->stock_status === 'instock';
+	public function get_shipping_class() {
+		if ( $class_id = $this->get_shipping_class_id() ) {
+			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
 
-		/**
-		 * Sanity check to ensure stock qty is not lower than 0 but still listed
-		 * instock.
-		 *
-		 * Check is not required for products on backorder since they can be
-		 * instock regardless of actual stock quantity.
-		 */
-		if ( $this->managing_stock() && ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$status = false;
+			if ( $term && ! is_wp_error( $term ) ) {
+				return $term->slug;
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Returns a single product attribute as a string.
+	 * @param  string $attribute to get.
+	 * @return string
+	 */
+	public function get_attribute( $attribute ) {
+		$attributes = $this->get_attributes();
+		$attribute  = sanitize_title( $attribute );
+
+		if ( isset( $attributes[ $attribute ] ) ) {
+			$attribute_object = $attributes[ $attribute ];
+		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
+			$attribute_object = $attributes[ 'pa_' . $attribute ];
+		} else {
+			return '';
+		}
+		return $attribute_object->is_taxonomy() ? implode( ', ', wc_get_product_terms( $this->get_id(), $attribute_object->get_name(), array( 'fields' => 'names' ) ) ) : wc_implode_text_attributes( $attribute_object->get_options() );
+	}
+
+	/**
+	 * Get the total amount (COUNT) of ratings, or just the count for one rating e.g. number of 5 star ratings.
+	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
+	 * @return int
+	 */
+	public function get_rating_count( $value = null ) {
+		$counts = $this->get_rating_counts();
+
+		if ( is_null( $value ) ) {
+			return array_sum( $counts );
+		} elseif ( isset( $counts[ $value ] ) ) {
+			return absint( $counts[ $value ] );
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Get a file by $download_id.
+	 *
+	 * @param string $download_id file identifier
+	 * @return array|false if not found
+	 */
+	public function get_file( $download_id = '' ) {
+		$files = $this->get_downloads();
+
+		if ( '' === $download_id ) {
+			$file = sizeof( $files ) ? current( $files ) : false;
+		} elseif ( isset( $files[ $download_id ] ) ) {
+			$file = $files[ $download_id ];
+		} else {
+			$file = false;
 		}
 
-		return apply_filters( 'woocommerce_product_is_in_stock', $status );
+		return apply_filters( 'woocommerce_product_file', $file, $this, $download_id );
 	}
 
 	/**
-	 * Returns whether or not the product can be backordered.
+	 * Get file download path identified by $download_id.
 	 *
-	 * @return bool
+	 * @param string $download_id file identifier
+	 * @return string
 	 */
-	public function backorders_allowed() {
-		return apply_filters( 'woocommerce_product_backorders_allowed', $this->backorders === 'yes' || $this->backorders === 'notify' ? true : false, $this->id, $this );
+	public function get_file_download_path( $download_id ) {
+		$files     = $this->get_downloads();
+		$file_path = isset( $files[ $download_id ] ) ? $files[ $download_id ]->get_file() : '';
+
+		// allow overriding based on the particular file being requested
+		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 
 	/**
-	 * Returns whether or not the product needs to notify the customer on backorder.
+	 * Get the suffix to display after prices > 0.
 	 *
-	 * @return bool
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
 	 */
-	public function backorders_require_notification() {
-		return apply_filters( 'woocommerce_product_backorders_require_notification', $this->managing_stock() && $this->backorders === 'notify' ? true : false, $this );
-	}
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+		$html = '';
 
-	/**
-	 * Check if a product is on backorder.
-	 *
-	 * @param int $qty_in_cart (default: 0)
-	 * @return bool
-	 */
-	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
-	}
-
-	/**
-	 * Returns whether or not the product has enough stock for the order.
-	 *
-	 * @param mixed $quantity
-	 * @return bool
-	 */
-	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
+			if ( '' === $price ) {
+				$price = $this->get_price();
+			}
+			$replacements = array(
+				'{price_including_tax}' => wc_price( wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
+				'{price_excluding_tax}' => wc_price( wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
+			);
+			$html = str_replace( array_keys( $replacements ), array_values( $replacements ), ' <small class="woocommerce-price-suffix">' . wp_kses_post( $suffix ) . '</small>' );
+		}
+		return apply_filters( 'woocommerce_get_price_suffix', $html, $this, $price, $qty );
 	}
 
 	/**
 	 * Returns the availability of the product.
-	 *
-	 * If stock management is enabled at global and product level, a stock message
-	 * will be shown. e.g. In stock, In stock x10, Out of stock.
-	 *
-	 * If stock management is disabled at global or product level, out of stock
-	 * will be shown when needed, but in stock will be hidden from view.
-	 *
-	 * This can all be changed through use of the woocommerce_get_availability filter.
 	 *
 	 * @return string
 	 */
@@ -691,31 +1863,9 @@ class WC_Product {
 		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
-			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
+			$availability = __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
-			switch ( get_option( 'woocommerce_stock_format' ) ) {
-				case 'no_amount' :
-					$availability = __( 'In stock', 'woocommerce' );
-				break;
-				case 'low_amount' :
-					if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
-
-						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-						}
-					} else {
-						$availability = __( 'In stock', 'woocommerce' );
-					}
-				break;
-				default :
-					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
-
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-					}
-				break;
-			}
+			$availability = wc_format_stock_for_display( $this );
 		} else {
 			$availability = '';
 		}
@@ -730,934 +1880,11 @@ class WC_Product {
 	protected function get_availability_class() {
 		if ( ! $this->is_in_stock() ) {
 			$class = 'out-of-stock';
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) && $this->backorders_require_notification() ) {
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
 			$class = 'available-on-backorder';
 		} else {
 			$class = 'in-stock';
 		}
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
-	}
-
-	/**
-	 * Returns whether or not the product is featured.
-	 *
-	 * @return bool
-	 */
-	public function is_featured() {
-		return $this->featured === 'yes' ? true : false;
-	}
-
-	/**
-	 * Returns whether or not the product is visible in the catalog.
-	 *
-	 * @return bool
-	 */
-	public function is_visible() {
-		if ( ! $this->post ) {
-			$visible = false;
-
-		// Published/private
-		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
-			$visible = false;
-
-		// Out of stock visibility
-		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
-			$visible = false;
-
-		// visibility setting
-		} elseif ( 'hidden' === $this->visibility ) {
-			$visible = false;
-		} elseif ( 'visible' === $this->visibility ) {
-			$visible = true;
-
-		// Visibility in loop
-		} elseif ( is_search() ) {
-			$visible = 'search' === $this->visibility;
-		} else {
-			$visible = 'catalog' === $this->visibility;
-		}
-
-		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
-	}
-
-	/**
-	 * Returns whether or not the product is on sale.
-	 *
-	 * @return bool
-	 */
-	public function is_on_sale() {
-		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
-	}
-
-	/**
-	 * Returns false if the product cannot be bought.
-	 *
-	 * @return bool
-	 */
-	public function is_purchasable() {
-
-		$purchasable = true;
-
-		// Products must exist of course
-		if ( ! $this->exists() ) {
-			$purchasable = false;
-
-		// Other products types need a price to be set
-		} elseif ( $this->get_price() === '' ) {
-			$purchasable = false;
-
-		// Check the product is published
-		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
-			$purchasable = false;
-		}
-
-		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
-	}
-
-	/**
-	 * Set a products price dynamically.
-	 *
-	 * @param float $price Price to set.
-	 */
-	public function set_price( $price ) {
-		$this->price = $price;
-	}
-
-	/**
-	 * Adjust a products price dynamically.
-	 *
-	 * @param mixed $price
-	 */
-	public function adjust_price( $price ) {
-		$this->price = $this->price + $price;
-	}
-
-	/**
-	 * Returns the product's sale price.
-	 *
-	 * @return string price
-	 */
-	public function get_sale_price() {
-		return apply_filters( 'woocommerce_get_sale_price', $this->sale_price, $this );
-	}
-
-	/**
-	 * Returns the product's regular price.
-	 *
-	 * @return string price
-	 */
-	public function get_regular_price() {
-		return apply_filters( 'woocommerce_get_regular_price', $this->regular_price, $this );
-	}
-
-	/**
-	 * Returns the product's active price.
-	 *
-	 * @return string price
-	 */
-	public function get_price() {
-		return apply_filters( 'woocommerce_get_price', $this->price, $this );
-	}
-
-	/**
-	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_including_tax( $qty = 1, $price = '' ) {
-
-		if ( $price === '' ) {
-			$price = $this->get_price();
-		}
-		$price = (float) $price;
-
-		if ( $this->is_taxable() ) {
-
-			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
-
-				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
-				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
-				$tax_amount = WC_Tax::get_tax_total( $taxes );
-				$price      = round( $price * $qty + $tax_amount, wc_get_price_decimals() );
-
-			} else {
-
-				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
-				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
-
-				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$base_tax_amount    = array_sum( $base_taxes );
-					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
-
-				/**
-				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-				 */
-				} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-
-					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
-					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
-					$price              = round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
-
-				} else {
-
-					$price = $price * $qty;
-
-				}
-
-			}
-
-		} else {
-			$price = $price * $qty;
-		}
-
-		return apply_filters( 'woocommerce_get_price_including_tax', $price, $qty, $this );
-	}
-
-	/**
-	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
-	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
-	 * @return string
-	 */
-	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
-
-		if ( $price === '' ) {
-			$price = $this->get_price();
-		}
-		$price = (float) $price;
-
-		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
-			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
-			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
-			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
-		} else {
-			$price = $price * $qty;
-		}
-
-		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
-	}
-
-	/**
-	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
-	 *
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_display_price( $price = '', $qty = 1 ) {
-
-		if ( $price === '' ) {
-			$price = $this->get_price();
-		}
-
-		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-		$display_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
-
-		return $display_price;
-	}
-
-	/**
-	 * Get the suffix to display after prices > 0.
-	 *
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
-	 * @return string
-	 */
-	public function get_price_suffix( $price = '', $qty = 1 ) {
-
-		if ( $price === '' ) {
-			$price = $this->get_price();
-		}
-
-		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
-		$woocommerce_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
-
-		if ( $price_display_suffix && 'yes' === $woocommerce_calc_taxes ) {
-
-			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
-
-			$find = array(
-				'{price_including_tax}',
-				'{price_excluding_tax}'
-			);
-
-			$replace = array(
-				wc_price( $this->get_price_including_tax( $qty, $price ) ),
-				wc_price( $this->get_price_excluding_tax( $qty, $price ) )
-			);
-
-			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
-		} else {
-			$price_display_suffix = '';
-		}
-
-		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
-	}
-
-	/**
-	 * Returns the price in html format.
-	 *
-	 * @param string $price (default: '')
-	 * @return string
-	 */
-	public function get_price_html( $price = '' ) {
-
-		$display_price         = $this->get_display_price();
-		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
-
-		if ( $this->get_price() > 0 ) {
-
-			if ( $this->is_on_sale() && $this->get_regular_price() ) {
-
-				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $this->get_price_suffix();
-
-				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
-
-			} else {
-
-				$price .= wc_price( $display_price ) . $this->get_price_suffix();
-
-				$price = apply_filters( 'woocommerce_price_html', $price, $this );
-
-			}
-
-		} elseif ( $this->get_price() === '' ) {
-
-			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
-
-		} elseif ( $this->get_price() == 0 ) {
-
-			if ( $this->is_on_sale() && $this->get_regular_price() ) {
-
-				$price .= $this->get_price_html_from_to( $display_regular_price, __( 'Free!', 'woocommerce' ) );
-
-				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
-
-			} else {
-
-				$price = '<span class="amount">' . __( 'Free!', 'woocommerce' ) . '</span>';
-
-				$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
-
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_price_html', $price, $this );
-	}
-
-	/**
-	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
-	 * @return string
-	 */
-	public function get_price_html_from_text() {
-		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
-	}
-
-	/**
-	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
-	 * @param  string $from String or float to wrap with 'from' text
-	 * @param  mixed $to String or float to wrap with 'to' text
-	 * @return string
-	 */
-	public function get_price_html_from_to( $from, $to ) {
-		$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $from, $to, $this );
-	}
-
-	/**
-	 * Returns the tax class.
-	 *
-	 * @return string
-	 */
-	public function get_tax_class() {
-		return apply_filters( 'woocommerce_product_tax_class', $this->tax_class, $this );
-	}
-
-	/**
-	 * Returns the tax status.
-	 *
-	 * @return string
-	 */
-	public function get_tax_status() {
-		return $this->tax_status;
-	}
-
-	/**
-	 * Get the average rating of product. This is calculated once and stored in postmeta.
-	 * @return string
-	 */
-	public function get_average_rating() {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->id, '_wc_average_rating' ) ) {
-			$this->sync_average_rating( $this->id );
-		}
-
-		return (string) floatval( get_post_meta( $this->id, '_wc_average_rating', true ) );
-	}
-
-	/**
-	 * Get the total amount (COUNT) of ratings.
-	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
-	 * @return int
-	 */
-	public function get_rating_count( $value = null ) {
-		// No meta data? Do the calculation
-		if ( ! metadata_exists( 'post', $this->id, '_wc_rating_count' ) ) {
-			$this->sync_rating_count( $this->id );
-		}
-
-		$counts = array_filter( (array) get_post_meta( $this->id, '_wc_rating_count', true ) );
-
-		if ( is_null( $value ) ) {
-			return array_sum( $counts );
-		} else {
-			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
-		}
-	}
-
-	/**
-	 * Sync product rating. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_average_rating( $post_id ) {
-		if ( ! metadata_exists( 'post', $post_id, '_wc_rating_count' ) ) {
-			self::sync_rating_count( $post_id );
-		}
-
-		$count = array_sum( (array) get_post_meta( $post_id, '_wc_rating_count', true ) );
-
-		if ( $count ) {
-			global $wpdb;
-
-			$ratings = $wpdb->get_var( $wpdb->prepare("
-				SELECT SUM(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-				AND meta_value > 0
-			", $post_id ) );
-			$average = number_format( $ratings / $count, 2, '.', '' );
-		} else {
-			$average = 0;
-		}
-		update_post_meta( $post_id, '_wc_average_rating', $average );
-	}
-
-	/**
-	 * Sync product rating count. Can be called statically.
-	 * @param  int $post_id
-	 */
-	public static function sync_rating_count( $post_id ) {
-		global $wpdb;
-
-		$counts     = array();
-		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-			GROUP BY meta_value
-		", $post_id ) );
-
-		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = $count->meta_value_count;
-		}
-
-		update_post_meta( $post_id, '_wc_rating_count', $counts );
-	}
-
-	/**
-	 * Returns the product rating in html format.
-	 *
-	 * @param string $rating (default: '')
-	 *
-	 * @return string
-	 */
-	public function get_rating_html( $rating = null ) {
-		$rating_html = '';
-
-		if ( ! is_numeric( $rating ) ) {
-			$rating = $this->get_average_rating();
-		}
-
-		if ( $rating > 0 ) {
-
-			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
-
-			$rating_html .= '</div>';
-		}
-
-		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
-	}
-
-	/**
-	 * Get the total amount (COUNT) of reviews.
-	 *
-	 * @since 2.3.2
-	 * @return int The total numver of product reviews
-	 */
-	public function get_review_count() {
-		global $wpdb;
-
-		// No meta date? Do the calculation
-		if ( ! metadata_exists( 'post', $this->id, '_wc_review_count' ) ) {
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(*) FROM $wpdb->comments
-				WHERE comment_parent = 0
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->id ) );
-
-			update_post_meta( $this->id, '_wc_review_count', $count );
-		} else {
-			$count = get_post_meta( $this->id, '_wc_review_count', true );
-		}
-
-		return apply_filters( 'woocommerce_product_review_count', $count, $this );
-	}
-
-	/**
-	 * Returns the upsell product ids.
-	 *
-	 * @return array
-	 */
-	public function get_upsells() {
-		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ), $this );
-	}
-
-	/**
-	 * Returns the cross sell product ids.
-	 *
-	 * @return array
-	 */
-	public function get_cross_sells() {
-		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
-	}
-
-	/**
-	 * Returns the product categories.
-	 *
-	 * @param string $sep (default: ', ')
-	 * @param string $before (default: '')
-	 * @param string $after (default: '')
-	 * @return string
-	 */
-	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->id, 'product_cat', $before, $sep, $after );
-	}
-
-	/**
-	 * Returns the product tags.
-	 *
-	 * @param string $sep (default: ', ')
-	 * @param string $before (default: '')
-	 * @param string $after (default: '')
-	 * @return array
-	 */
-	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list( $this->id, 'product_tag', $before, $sep, $after );
-	}
-
-	/**
-	 * Returns the product shipping class.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_class() {
-
-		if ( ! $this->shipping_class ) {
-
-			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->shipping_class = current( $classes )->slug;
-			} else {
-				$this->shipping_class = '';
-			}
-
-		}
-
-		return $this->shipping_class;
-	}
-
-	/**
-	 * Returns the product shipping class ID.
-	 *
-	 * @return int
-	 */
-	public function get_shipping_class_id() {
-
-		if ( ! $this->shipping_class_id ) {
-
-			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-
-			if ( $classes && ! is_wp_error( $classes ) ) {
-				$this->shipping_class_id = current( $classes )->term_id;
-			} else {
-				$this->shipping_class_id = 0;
-			}
-		}
-
-		return absint( $this->shipping_class_id );
-	}
-
-	/**
-	 * Get and return related products.
-	 *
-	 * Notes:
-	 * 	- Results are cached in a transient for faster queries.
-	 *  - To make results appear random, we query and extra 10 products and shuffle them.
-	 *  - To ensure we always have enough results, it will check $limit before returning the cached result, if not recalc.
-	 *  - This used to rely on transient version to invalidate cache, but to avoid multiple transients we now just expire daily.
-	 *  	This means if a related product is edited and no longer related, it won't be removed for 24 hours. Acceptable trade-off for performance.
-	 *  - Saving a product will flush caches for that product.
-	 *
-	 * @param int $limit (default: 5) Should be an integer greater than 0.
-	 * @return array Array of post IDs
-	 */
-	public function get_related( $limit = 5 ) {
-		global $wpdb;
-
-		$transient_name = 'wc_related_' . $this->id;
-		$related_posts  = get_transient( $transient_name );
-		$limit          = $limit > 0 ? $limit : 5;
-
-		// We want to query related posts if they are not cached, or we don't have enough
-		if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
-			// Related products are found from category and tag
-			$tags_array = $this->get_related_terms( 'product_tag' );
-			$cats_array = $this->get_related_terms( 'product_cat' );
-
-			// Don't bother if none are set
-			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
-				$related_posts = array();
-			} else {
-				// Sanitize
-				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
-
-				// Generate query - but query an extra 10 results to give the appearance of random results
-				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 );
-
-				// Get the posts
-				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
-			}
-
-			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
-		}
-
-		// Randomise the results
-		shuffle( $related_posts );
-
-		// Limit the returned results
-		return array_slice( $related_posts, 0, $limit );
-	}
-
-	/**
-	 * Returns a single product attribute.
-	 *
-	 * @param mixed $attr
-	 * @return string
-	 */
-	public function get_attribute( $attr ) {
-
-		$attributes = $this->get_attributes();
-
-		$attr = sanitize_title( $attr );
-
-		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
-
-			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
-
-			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
-
-				return implode( ', ', wc_get_product_terms( $this->id, $attribute['name'], array( 'fields' => 'names' ) ) );
-
-			} else {
-
-				return $attribute['value'];
-			}
-
-		}
-
-		return '';
-	}
-
-	/**
-	 * Returns product attributes.
-	 *
-	 * @return array
-	 */
-	public function get_attributes() {
-		$attributes = array_filter( (array) maybe_unserialize( $this->product_attributes ) );
-		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
-
-		// Check for any attributes which have been removed globally
-		foreach ( $attributes as $key => $attribute ) {
-			if ( $attribute['is_taxonomy'] ) {
-				if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
-					unset( $attributes[ $key ] );
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_product_attributes', $attributes );
-	}
-
-	/**
-	 * Returns whether or not the product has any attributes set.
-	 *
-	 * @return boolean
-	 */
-	public function has_attributes() {
-
-		if ( sizeof( $this->get_attributes() ) > 0 ) {
-
-			foreach ( $this->get_attributes() as $attribute ) {
-
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns whether or not we are showing dimensions on the product page.
-	 *
-	 * @return bool
-	 */
-	public function enable_dimensions_display() {
-		return apply_filters( 'wc_product_enable_dimensions_display', true );
-	}
-
-	/**
-	 * Returns whether or not the product has dimensions set.
-	 *
-	 * @return bool
-	 */
-	public function has_dimensions() {
-		return $this->get_dimensions() ? true : false;
-	}
-
-	/**
-	 * Returns the product length.
-	 * @return string
-	 */
-	public function get_length() {
-		return apply_filters( 'woocommerce_product_length', '' === $this->length ? '' : wc_format_decimal( $this->length ), $this );
-	}
-
-	/**
-	 * Returns the product width.
-	 * @return string
-	 */
-	public function get_width() {
-		return apply_filters( 'woocommerce_product_width', '' === $this->width ? '' : wc_format_decimal( $this->width ), $this );
-	}
-
-	/**
-	 * Returns the product height.
-	 * @return string
-	 */
-	public function get_height() {
-		return apply_filters( 'woocommerce_product_height', '' === $this->height ? '' : wc_format_decimal( $this->height ), $this );
-	}
-
-	/**
-	 * Returns the product's weight.
-	 * @todo   refactor filters in this class to naming woocommerce_product_METHOD
-	 * @return string
-	 */
-	public function get_weight() {
-		return apply_filters( 'woocommerce_product_weight', apply_filters( 'woocommerce_product_get_weight', '' === $this->weight ? '' : wc_format_decimal( $this->weight ) ), $this );
-	}
-
-	/**
-	 * Returns whether or not the product has weight set.
-	 *
-	 * @return bool
-	 */
-	public function has_weight() {
-		return $this->get_weight() ? true : false;
-	}
-
-	/**
-	 * Returns formatted dimensions.
-	 * @return string
-	 */
-	public function get_dimensions() {
-		$dimensions = implode( ' x ', array_filter( array(
-			wc_format_localized_decimal( $this->get_length() ),
-			wc_format_localized_decimal( $this->get_width() ),
-			wc_format_localized_decimal( $this->get_height() ),
-		) ) );
-
-		if ( ! empty( $dimensions ) ) {
-			$dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
-		}
-
-		return  apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
-	}
-
-	/**
-	 * Lists a table of attributes for the product page.
-	 */
-	public function list_attributes() {
-		wc_get_template( 'single-product/product-attributes.php', array(
-			'product'    => $this
-		) );
-	}
-
-	/**
-	 * Gets the main product image ID.
-	 *
-	 * @return int
-	 */
-	public function get_image_id() {
-
-		if ( has_post_thumbnail( $this->id ) ) {
-			$image_id = get_post_thumbnail_id( $this->id );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image_id = get_post_thumbnail_id( $parent_id );
-		} else {
-			$image_id = 0;
-		}
-
-		return $image_id;
-	}
-
-	/**
-	 * Returns the main product image.
-	 *
-	 * @param string $size (default: 'shop_thumbnail')
-	 * @param array $attr
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
-	 * @return string
-	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
-		if ( has_post_thumbnail( $this->id ) ) {
-			$image = get_the_post_thumbnail( $this->id, $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
-		} elseif ( $placeholder ) {
-			$image = wc_placeholder_img( $size );
-		} else {
-			$image = '';
-		}
-
-		return $image;
-	}
-
-	/**
-	 * Get product name with SKU or ID. Used within admin.
-	 *
-	 * @return string Formatted product name
-	 */
-	public function get_formatted_name() {
-		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
-		} else {
-			$identifier = '#' . $this->id;
-		}
-
-		return sprintf( '%s &ndash; %s', $identifier, $this->get_title() );
-	}
-
-	/**
-	 * Retrieves related product terms.
-	 *
-	 * @param string $term
-	 * @return array
-	 */
-	protected function get_related_terms( $term ) {
-		$terms_array = array(0);
-
-		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
-		foreach ( $terms as $term ) {
-			$terms_array[] = $term->term_id;
-		}
-
-		return array_map( 'absint', $terms_array );
-	}
-
-	/**
-	 * Builds the related posts query.
-	 *
-	 * @param array $cats_array
-	 * @param array $tags_array
-	 * @param array $exclude_ids
-	 * @param int   $limit
-	 * @return string
-	 */
-	protected function build_related_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
-		global $wpdb;
-
-		$limit = absint( $limit );
-
-		$query           = array();
-		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
-		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
-			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
-		}
-
-		$query['where']  = " WHERE 1=1";
-		$query['where'] .= " AND p.post_status = 'publish'";
-		$query['where'] .= " AND p.post_type = 'product'";
-		$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
-		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
-
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
-			$query['where'] .= " AND pm2.meta_value = 'instock'";
-		}
-
-		$relate_by_category = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id );
-		$relate_by_tag      = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id );
-
-		if ( $relate_by_category || $relate_by_tag ) {
-			$query['where'] .= ' AND (';
-
-			if ( $relate_by_category ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
-				if ( $relate_by_tag ) {
-					$query['where'] .= ' OR ';
-				}
-			}
-
-			if ( $relate_by_tag ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
-			}
-
-			$query['where'] .= ')';
-		}
-
-		$query['limits'] = " LIMIT {$limit} ";
-		$query           = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
-
-		return $query;
 	}
 }

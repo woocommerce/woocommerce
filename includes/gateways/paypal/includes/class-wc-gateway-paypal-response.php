@@ -30,7 +30,7 @@ abstract class WC_Gateway_Paypal_Response {
 
 		// Nothing was found.
 		} else {
-			WC_Gateway_Paypal::log( 'Error: Order ID and key were not found in "custom".' );
+			WC_Gateway_Paypal::log( 'Order ID and key were not found in "custom".', 'error' );
 			return false;
 		}
 
@@ -40,8 +40,8 @@ abstract class WC_Gateway_Paypal_Response {
 			$order    = wc_get_order( $order_id );
 		}
 
-		if ( ! $order || $order->order_key !== $order_key ) {
-			WC_Gateway_Paypal::log( 'Error: Order Keys do not match.' );
+		if ( ! $order || $order->get_order_key() !== $order_key ) {
+			WC_Gateway_Paypal::log( 'Order Keys do not match.', 'error' );
 			return false;
 		}
 
@@ -66,7 +66,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( 'on-hold', $reason );
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 		WC()->cart->empty_cart();
 	}
 }

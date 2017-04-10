@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Report_Stock' ) ) {
-	require_once( 'class-wc-report-stock.php' );
+	require_once( dirname( __FILE__ ) . '/class-wc-report-stock.php' );
 }
 
 /**

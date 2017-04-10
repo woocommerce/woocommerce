@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Emails
  * @version 2.3.0
@@ -18,7 +18,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Load colours
+// Load colors
 $bg              = get_option( 'woocommerce_email_background_color' );
 $body            = get_option( 'woocommerce_email_body_background_color' );
 $base            = get_option( 'woocommerce_email_base_color' );
@@ -93,6 +93,22 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #body_content table td th {
 	padding: 12px;
+}
+
+#body_content td ul.wc-item-meta {
+	font-size: small;
+	margin: 1em 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+#body_content td ul.wc-item-meta li {
+	margin: 0.5em 0 0;
+	padding: 0;
+}
+
+#body_content td ul.wc-item-meta li p {
+	margin: 0;
 }
 
 #body_content p {

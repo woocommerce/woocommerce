@@ -178,7 +178,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_page_permalink( 'checkout' ) );
 		}
 
-		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
+		if ( is_ssl() || get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' ) {
 			$return_url = str_replace( 'http:', 'https:', $return_url );
 		}
 
@@ -365,7 +365,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  array $fields
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
-		_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
+		wc_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
 		$cc_form = new WC_Payment_Gateway_CC;
 		$cc_form->id       = $this->id;
 		$cc_form->supports = $this->supports;
@@ -379,7 +379,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function tokenization_script() {
 		wp_enqueue_script(
 			'woocommerce-tokenization-form',
-			plugins_url(  '/assets/js/frontend/tokenization-form' . ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
+			plugins_url( '/assets/js/frontend/tokenization-form' . ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC()->version
 		);
@@ -447,13 +447,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function save_payment_method_checkbox() {
-		echo sprintf(
+		printf(
 			'<p class="form-row woocommerce-SavedPaymentMethods-saveNew">
 				<input id="wc-%1$s-new-payment-method" name="wc-%1$s-new-payment-method" type="checkbox" value="true" style="width:auto;" />
 				<label for="wc-%1$s-new-payment-method" style="display:inline;">%2$s</label>
 			</p>',
 			esc_attr( $this->id ),
-			esc_html__( 'Save to Account', 'woocommerce' )
+			esc_html__( 'Save to account', 'woocommerce' )
 		);
 	}
 }
