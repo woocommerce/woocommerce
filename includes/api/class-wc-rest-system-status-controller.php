@@ -487,6 +487,15 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 								'type'    => 'string',
 							),
 						),
+						'product_visibility_terms' => array(
+							'description' => __( 'Terms in the product visibility taxonomy.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'items'       => array(
+								'type'    => 'string',
+							),
+						),
 					),
 				),
 				'security' => array(
@@ -823,18 +832,26 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$term_response[ $term->slug ] = strtolower( $term->name );
 		}
 
+		// Get a list of terms used for product visibility.
+		$product_visibility_terms = array();
+		$terms                    = get_terms( 'product_visibility', array( 'hide_empty' => 0 ) );
+		foreach ( $terms as $term ) {
+			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
+		}
+
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'         => 'yes' === get_option( 'woocommerce_api_enabled' ),
-			'force_ssl'           => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
-			'currency'            => get_woocommerce_currency(),
-			'currency_symbol'     => get_woocommerce_currency_symbol(),
-			'currency_position'   => get_option( 'woocommerce_currency_pos' ),
-			'thousand_separator'  => wc_get_price_thousand_separator(),
-			'decimal_separator'   => wc_get_price_decimal_separator(),
-			'number_of_decimals'  => wc_get_price_decimals(),
-			'geolocation_enabled' => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
-			'taxonomies'          => $term_response,
+			'api_enabled'              => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'force_ssl'                => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
+			'currency'                 => get_woocommerce_currency(),
+			'currency_symbol'          => get_woocommerce_currency_symbol(),
+			'currency_position'        => get_option( 'woocommerce_currency_pos' ),
+			'thousand_separator'       => wc_get_price_thousand_separator(),
+			'decimal_separator'        => wc_get_price_decimal_separator(),
+			'number_of_decimals'       => wc_get_price_decimals(),
+			'geolocation_enabled'      => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
+			'taxonomies'               => $term_response,
+			'product_visibility_terms' => $product_visibility_terms,
 		);
 	}
 
