@@ -177,6 +177,7 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->get_button_text(), $this );
+		$button_text =  $this->get_button_text();
+		return apply_filters( 'woocommerce_product_add_to_cart_text', ! empty( $button_text ) ? $button_text : 'Buy product', $this );
 	}
 }
