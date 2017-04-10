@@ -240,7 +240,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'name'         => $item->get_name(),
 				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 				'sku'          => is_object( $product ) ? $product->get_sku() : null,
-				'meta'         => $item_meta,
+				'meta'         => array_values( $item_meta ),
 			);
 
 			if ( in_array( 'products', $expand ) ) {
@@ -1582,7 +1582,7 @@ class WC_API_Orders extends WC_API_Resource {
 					'name'             => $item->get_name(),
 					'product_id'       => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 					'sku'              => is_object( $product ) ? $product->get_sku() : null,
-					'meta'             => $item_meta,
+					'meta'             => array_values( $item_meta ),
 					'refunded_item_id' => (int) $item->get_meta( 'refunded_item_id' ),
 				);
 			}
