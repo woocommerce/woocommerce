@@ -132,6 +132,22 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * When the object is cloned, make sure meta is duplicated correctly.
+	 *
+	 * @since 3.0.2
+	 */
+	public function __clone() {
+		$this->maybe_read_meta_data();
+		if ( ! empty( $this->meta_data ) ) {
+			foreach ( $this->meta_data as $array_key => $meta ) {
+				if ( ! empty( $meta->id ) ) {
+					unset( $this->meta_data[ $array_key ]->id );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Get the data store.
 	 *
 	 * @since  3.0.0
