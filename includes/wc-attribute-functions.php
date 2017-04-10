@@ -321,3 +321,27 @@ function wc_attributes_array_filter_visible( $attribute ) {
 function wc_attributes_array_filter_variation( $attribute ) {
 	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_variation();
 }
+
+/**
+ * Check if an attribute is included in the attributes area of a product name.
+ *
+ * @since  3.0.2
+ * @param  string $attribute Attribute value to check for
+ * @param  string $name      Product name to check in
+ * @return bool
+ */
+function wc_is_attribute_in_product_name( $attribute, $name ) {
+	$attribute = strtolower( $attribute );
+	$name = strtolower( $name );
+	$product_name_sections = explode( '&ndash;', $name );
+
+	// Only one main area exists, so no attribute area exists.
+	if ( count( $product_name_sections ) < 2 ) {
+		return false;
+	}
+
+	$product_attributes_section = end( $product_name_sections );
+	$product_attributes = array_map( 'trim', explode( ',', $product_attributes_section ) );
+
+	return in_array( $attribute, $product_attributes );
+}
