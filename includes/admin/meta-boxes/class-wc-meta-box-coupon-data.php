@@ -328,7 +328,7 @@ class WC_Meta_Box_Coupon_Data {
 
 		$coupon = new WC_Coupon( $post_id );
 		$coupon->set_props( array(
-            'enabled'                     => isset( $_POST['enabled'] ) ? 'yes' : 'no',
+            'enabled'                     => isset( $_POST['enabled'] ),
 			'code'                        => $post->post_title,
 			'discount_type'               => wc_clean( $_POST['discount_type'] ),
 			'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),

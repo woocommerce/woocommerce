@@ -436,8 +436,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  string $enabled
 	 * @throws WC_Data_Exception
 	 */
-	public function set_enabled( $enabled ) {
-		$this->set_prop( 'enabled', (bool) $enabled );
+	public function set_enabled( $is_enabled ) {
+		$this->set_prop( 'enabled', (bool) $is_enabled );
 	}
 
 	/**

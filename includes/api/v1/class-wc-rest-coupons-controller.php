@@ -174,7 +174,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$data = array(
-            'enabled'                     => ( 'yes' === $_data['enabled'] ),
+            'enabled'                     => $_data['enabled'],
 			'id'                          => $_data['id'],
 			'code'                        => $_data['code'],
 			'date_created'                => $_data['date_created'],

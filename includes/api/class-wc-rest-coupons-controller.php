@@ -159,7 +159,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 		}
 
 		return array(
-            'enabled'                     => ( 'yes' === $data['enabled'] ),
+            'enabled'                     => $data['enabled'],
 			'id'                          => $object->get_id(),
 			'code'                        => $data['code'],
 			'amount'                      => $data['amount'],
