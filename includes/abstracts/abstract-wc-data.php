@@ -133,6 +133,8 @@ abstract class WC_Data {
 
 	/**
 	 * When the object is cloned, make sure meta is duplicated correctly.
+	 *
+	 * @since 3.0.2
 	 */
 	public function __clone() {
 		$this->maybe_read_meta_data();
