@@ -479,6 +479,17 @@ $pages          = $system_status->get_pages();
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 			?></td>
 		</tr>
+		<tr>
+			<td data-export-label="Taxonomies: Product Visibility"><?php _e( 'Taxonomies: Product visibility', 'woocommerce' ); ?></th>
+			<td class="help"><?php echo wc_help_tip( __( 'A list of taxonomy terms used for product visibility.', 'woocommerce' ) ); ?></td>
+			<td><?php
+				$display_terms = array();
+				foreach ( $settings['product_visibility_terms'] as $slug => $name ) {
+					$display_terms[] = strtolower( $name ) . ' (' . $slug . ')';
+				}
+				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+			?></td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
