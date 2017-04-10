@@ -417,17 +417,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$one_attribute_variation = new WC_Product_Variation;
 		$one_attribute_variation->set_parent_id( $product->get_id() );
-		$one_attribute_variation->set_attributes( array( 'Color' => 'green' ) );
+		$one_attribute_variation->set_attributes( array( 'color' => 'green' ) );
 		$one_attribute_variation->save();
 
 		$two_attribute_variation = new WC_Product_Variation;
 		$two_attribute_variation->set_parent_id( $product->get_id() );
-		$two_attribute_variation->set_attributes( array( 'Color' => 'green', 'Size' => 'large' ) );
+		$two_attribute_variation->set_attributes( array( 'color' => 'green', 'size' => 'large' ) );
 		$two_attribute_variation->save();
 
 		$multiword_attribute_variation = new WC_Product_Variation;
 		$multiword_attribute_variation->set_parent_id( $product->get_id() );
-		$multiword_attribute_variation->set_attributes( array( 'Color' => 'green', 'Mounting Plate' => 'galaxy-s6', 'Support' => 'one-year' ) );
+		$multiword_attribute_variation->set_attributes( array( 'color' => 'green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
 		$multiword_attribute_variation->save();
 
 		// Check the one attribute variation title.
@@ -436,11 +436,27 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		// Check the two attribute variation title.
 		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Color: Green, Size: Large", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product &ndash; Green, Large", $loaded_variation->get_name() );
 
-		// Check the variation with multiple attributes but only one 1-word attribute.
+		// Check the variation with a multiword attribute name.
 		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Green, Galaxy S6, One Year", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
+	}
+
+	function test_generate_product_title_disable() {
+		add_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
+
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'green' ) );
+		$variation->save();
+
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
 
 	function test_generate_product_title_no_attributes() {
