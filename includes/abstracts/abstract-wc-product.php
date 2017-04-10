@@ -1155,13 +1155,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 			// Validate the file extension
 			if ( ! $download_object->is_allowed_filetype() ) {
-				$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				if ( $this->get_object_read() ) {
+					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				}
 				continue;
 			}
 
 			// Validate the file exists.
 			if ( ! $download_object->file_exists() ) {
-				$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				if ( $this->get_object_read() ) {
+					$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				}
 				continue;
 			}
 
@@ -1289,7 +1293,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$this->data_store->create( $this );
 			}
 			if ( $this->get_parent_id() ) {
-				wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
+				wc_deferred_product_sync( $this->get_parent_id() );
 			}
 			return $this->get_id();
 		}
@@ -1845,7 +1849,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the availability of the product.
 	 *
-	 * @return string
+	 * @return string[]
 	 */
 	public function get_availability() {
 		return apply_filters( 'woocommerce_get_availability', array(

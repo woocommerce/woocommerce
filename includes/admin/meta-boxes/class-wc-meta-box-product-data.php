@@ -290,8 +290,8 @@ class WC_Meta_Box_Product_Data {
 	 */
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type );
+		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
 		$errors       = $product->set_props( array(
@@ -384,7 +384,7 @@ class WC_Meta_Box_Product_Data {
 					'downloadable'      => isset( $_POST['variable_is_downloadable'][ $i ] ),
 					'date_on_sale_from' => wc_clean( $_POST['variable_sale_price_dates_from'][ $i ] ),
 					'date_on_sale_to'   => wc_clean( $_POST['variable_sale_price_dates_to'][ $i ] ),
-					'description'       => wp_kses_post( wc_sanitize_textarea( $_POST['variable_description'][ $i ] ) ),
+					'description'       => wp_kses_post( $_POST['variable_description'][ $i ] ),
 					'download_limit'    => wc_clean( $_POST['variable_download_limit'][ $i ] ),
 					'download_expiry'   => wc_clean( $_POST['variable_download_expiry'][ $i ] ),
 					'downloads'         => self::prepare_downloads(

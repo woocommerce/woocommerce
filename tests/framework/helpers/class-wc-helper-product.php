@@ -326,4 +326,12 @@ class WC_Helper_Product {
 
 		return wp_insert_comment( $data );
 	}
+
+	/**
+	 * A helper function for hooking into save_post during the test_product_meta_save_post test.
+	 * @since 3.0.1
+	 */
+	public static function save_post_test_update_meta_data_direct( $id ) {
+		update_post_meta( $id, '_test2', 'world' );
+	}
 }

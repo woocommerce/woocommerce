@@ -162,6 +162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
@@ -189,6 +190,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$post_data['post_modified_gmt'] = current_time( 'mysql', 1 );
 			}
 			wp_update_post( $post_data );
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
@@ -198,7 +200,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_version_and_type( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->clear_caches( $product );
@@ -352,9 +353,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_attributes( &$product ) {
 		$meta_values = get_post_meta( $product->get_id(), '_product_attributes', true );
 
-		if ( $meta_values ) {
+		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
+				$meta_value = array_merge( array(
+					'name'         => '',
+					'value'        => '',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				), (array) $meta_value );
+
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
@@ -363,6 +373,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
 				$attribute->set_name( $meta_value['name'] );

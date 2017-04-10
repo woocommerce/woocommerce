@@ -75,11 +75,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
 		global $wpdb;
+
+		$table_prefix = $wpdb->prefix ? $wpdb->prefix : 'wp_';
+
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys )
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
 			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
-			&& ! strstr( $meta->meta_key, $wpdb->prefix )
+			&& ! strstr( $meta->meta_key, $table_prefix )
 			&& 0 !== stripos( $meta->meta_key, 'wp_' );
 	 }
 
@@ -132,7 +135,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$customer_id = $customer->get_id();
-		$customer->set_props( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ) );
+		// Load meta but exclude deprecated props.
+		$user_meta = array_diff_key( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ), array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default' ) ) );
+		$customer->set_props( $user_meta );
 		$customer->set_props( array(
 			'is_paying_customer' => get_user_meta( $customer_id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,

@@ -138,11 +138,15 @@ class WC_Product_Variable extends WC_Product {
 			return apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		}
 
-		$min_price = current( $prices['price'] );
-		$max_price = end( $prices['price'] );
+		$min_price     = current( $prices['price'] );
+		$max_price     = end( $prices['price'] );
+		$min_reg_price = current( $prices['regular_price'] );
+		$max_reg_price = end( $prices['regular_price'] );
 
 		if ( $min_price !== $max_price ) {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
+		} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
 		} else {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
 		}
@@ -240,7 +244,7 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
-			if ( ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
 
@@ -290,7 +294,7 @@ class WC_Product_Variable extends WC_Product {
 			'is_downloadable'       => $variation->is_downloadable(),
 			'is_virtual'            => $variation->is_virtual(),
 			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description' => $variation->get_description(),
+			'variation_description' => wc_format_content( $variation->get_description() ),
 		) ), $this, $variation );
 	}
 
@@ -345,6 +349,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
+			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -412,14 +417,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_is_in_stock() {
-		$transient_name = 'wc_child_is_in_stock_' . $this->get_id();
-		$in_stock       = get_transient( $transient_name );
-
-		if ( false === $in_stock ) {
-			$in_stock = $this->data_store->child_is_in_stock( $this );
-			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
-		}
-		return (bool) $in_stock;
+		return $this->data_store->child_is_in_stock( $this );
 	}
 
 	/**

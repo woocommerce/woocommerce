@@ -46,168 +46,172 @@ jQuery( function( $ ) {
 		};
 	}
 
-	$( document.body )
+	try {
+		$( document.body )
 
-		.on( 'wc-enhanced-select-init', function() {
+			.on( 'wc-enhanced-select-init', function() {
 
-			// Regular select boxes
-			$( ':input.wc-enhanced-select, :input.chosen_select' ).filter( ':not(.enhanced)' ).each( function() {
-				var select2_args = $.extend({
-					minimumResultsForSearch: 10,
-					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
-					placeholder: $( this ).data( 'placeholder' )
-				}, getEnhancedSelectFormatString() );
+				// Regular select boxes
+				$( ':input.wc-enhanced-select, :input.chosen_select' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = $.extend({
+						minimumResultsForSearch: 10,
+						allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder: $( this ).data( 'placeholder' )
+					}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args ).addClass( 'enhanced' );
-			});
+					$( this ).select2( select2_args ).addClass( 'enhanced' );
+				});
 
-			$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).filter( ':not(.enhanced)' ).each( function() {
-				var select2_args = $.extend({
-					minimumResultsForSearch: 10,
-					allowClear:  true,
-					placeholder: $( this ).data( 'placeholder' )
-				}, getEnhancedSelectFormatString() );
+				$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = $.extend({
+						minimumResultsForSearch: 10,
+						allowClear:  true,
+						placeholder: $( this ).data( 'placeholder' )
+					}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args ).addClass( 'enhanced' );
-			});
+					$( this ).select2( select2_args ).addClass( 'enhanced' );
+				});
 
-			// Ajax product search box
-			$( ':input.wc-product-search' ).filter( ':not(.enhanced)' ).each( function() {
-				var select2_args = {
-					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
-					placeholder: $( this ).data( 'placeholder' ),
-					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
-					escapeMarkup: function( m ) {
-						return m;
-					},
-					ajax: {
-						url:         wc_enhanced_select_params.ajax_url,
-						dataType:    'json',
-						quietMillis: 250,
-						data: function( params ) {
-							return {
-								term:     params.term,
-								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
-								security: wc_enhanced_select_params.search_products_nonce,
-								exclude:  $( this ).data( 'exclude' ),
-								include:  $( this ).data( 'include' ),
-								limit:    $( this ).data( 'limit' )
-							};
+				// Ajax product search box
+				$( ':input.wc-product-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = {
+						allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder: $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
+						escapeMarkup: function( m ) {
+							return m;
 						},
-						processResults: function( data ) {
-							var terms = [];
-							if ( data ) {
-								$.each( data, function( id, text ) {
-									terms.push( { id: id, text: text } );
-								});
-							}
-							return {
-								results: terms
-							};
-						},
-						cache: true
-					}
-				};
-
-				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
-
-				$( this ).select2( select2_args ).addClass( 'enhanced' );
-
-				if ( $( this ).data( 'sortable' ) ) {
-					var $select = $(this);
-					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
-
-					$list.sortable({
-						placeholder : 'ui-state-highlight select2-selection__choice',
-						forcePlaceholderSize: true,
-						items       : 'li:not(.select2-search__field)',
-						tolerance   : 'pointer',
-						stop: function() {
-							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
-								var id     = $( this ).data( 'data' ).id;
-								var option = $select.find( 'option[value="' + id + '"]' )[0];
-								$select.prepend( option );
-							} );
-						}
-					});
-				}
-			});
-
-			// Ajax customer search boxes
-			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
-				var select2_args = {
-					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
-					placeholder: $( this ).data( 'placeholder' ),
-					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
-					escapeMarkup: function( m ) {
-						return m;
-					},
-					ajax: {
-						url:         wc_enhanced_select_params.ajax_url,
-						dataType:    'json',
-						quietMillis: 250,
-						data: function( params ) {
-							return {
-								term:     params.term,
-								action:   'woocommerce_json_search_customers',
-								security: wc_enhanced_select_params.search_customers_nonce,
-								exclude:  $( this ).data( 'exclude' )
-							};
-						},
-						processResults: function( data ) {
-							var terms = [];
-							if ( data ) {
-								$.each( data, function( id, text ) {
-									terms.push({
-										id: id,
-										text: text
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
+									security: wc_enhanced_select_params.search_products_nonce,
+									exclude:  $( this ).data( 'exclude' ),
+									include:  $( this ).data( 'include' ),
+									limit:    $( this ).data( 'limit' )
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, text ) {
+										terms.push( { id: id, text: text } );
 									});
-								});
-							}
-							return {
-								results: terms
-							};
-						},
-						cache: true
-					}
-				};
-
-				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
-
-				$( this ).select2( select2_args ).addClass( 'enhanced' );
-
-				if ( $( this ).data( 'sortable' ) ) {
-					var $select = $(this);
-					var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
-
-					$list.sortable({
-						placeholder : 'ui-state-highlight select2-selection__choice',
-						forcePlaceholderSize: true,
-						items       : 'li:not(.select2-search__field)',
-						tolerance   : 'pointer',
-						stop: function() {
-							$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
-								var id     = $( this ).data( 'data' ).id;
-								var option = $select.find( 'option[value="' + id + '"]' )[0];
-								$select.prepend( option );
-							} );
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
 						}
-					});
-				}
-			});
-		})
+					};
 
-		// WooCommerce Backbone Modal
-		.on( 'wc_backbone_modal_before_remove', function() {
-			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
-		})
+					select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
-		.trigger( 'wc-enhanced-select-init' );
+					$( this ).select2( select2_args ).addClass( 'enhanced' );
 
-	$( 'html' ).on( 'click', function( event ) {
-		if ( this === event.target ) {
-			$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
-		}
-	} );
+					if ( $( this ).data( 'sortable' ) ) {
+						var $select = $(this);
+						var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
 
+						$list.sortable({
+							placeholder : 'ui-state-highlight select2-selection__choice',
+							forcePlaceholderSize: true,
+							items       : 'li:not(.select2-search__field)',
+							tolerance   : 'pointer',
+							stop: function() {
+								$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+									var id     = $( this ).data( 'data' ).id;
+									var option = $select.find( 'option[value="' + id + '"]' )[0];
+									$select.prepend( option );
+								} );
+							}
+						});
+					}
+				});
+
+				// Ajax customer search boxes
+				$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = {
+						allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder: $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '1',
+						escapeMarkup: function( m ) {
+							return m;
+						},
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   'woocommerce_json_search_customers',
+									security: wc_enhanced_select_params.search_customers_nonce,
+									exclude:  $( this ).data( 'exclude' )
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, text ) {
+										terms.push({
+											id: id,
+											text: text
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					};
+
+					select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
+
+					$( this ).select2( select2_args ).addClass( 'enhanced' );
+
+					if ( $( this ).data( 'sortable' ) ) {
+						var $select = $(this);
+						var $list   = $( this ).next( '.select2-container' ).find( 'ul.select2-selection__rendered' );
+
+						$list.sortable({
+							placeholder : 'ui-state-highlight select2-selection__choice',
+							forcePlaceholderSize: true,
+							items       : 'li:not(.select2-search__field)',
+							tolerance   : 'pointer',
+							stop: function() {
+								$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
+									var id     = $( this ).data( 'data' ).id;
+									var option = $select.find( 'option[value="' + id + '"]' )[0];
+									$select.prepend( option );
+								} );
+							}
+						});
+					}
+				});
+			})
+
+			// WooCommerce Backbone Modal
+			.on( 'wc_backbone_modal_before_remove', function() {
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
+			})
+
+			.trigger( 'wc-enhanced-select-init' );
+
+		$( 'html' ).on( 'click', function( event ) {
+			if ( this === event.target ) {
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
+			}
+		} );
+	} catch( err ) {
+		// If select2 failed (conflict?) log the error but don't stop other scripts breaking.
+		window.console.log( err );
+	}
 });

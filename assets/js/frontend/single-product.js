@@ -79,6 +79,7 @@ jQuery( function( $ ) {
 
 		// No images? Abort.
 		if ( 0 === this.$images.length ) {
+			this.$target.css( 'opacity', 1 );
 			return;
 		}
 

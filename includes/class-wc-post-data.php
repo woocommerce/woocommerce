@@ -29,7 +29,7 @@ class WC_Post_Data {
 	 */
 	public static function init() {
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
-		add_action( 'woocommerce_deferred_product_sync', array( __CLASS__, 'deferred_product_sync' ), 10, 1 );
+		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -64,6 +64,18 @@ class WC_Post_Data {
 			return $variation->get_permalink();
 		}
 		return $permalink;
+	}
+
+	/**
+	 * Sync products queued to sync.
+	 */
+	public static function do_deferred_product_sync() {
+		global $wc_deferred_product_sync;
+
+		if ( ! empty( $wc_deferred_product_sync ) ) {
+			$wc_deferred_product_sync = wp_parse_id_list( $wc_deferred_product_sync );
+			array_walk( $wc_deferred_product_sync, array( __CLASS__, 'deferred_product_sync' ) );
+		}
 	}
 
 	/**
@@ -126,10 +138,10 @@ class WC_Post_Data {
 	 * @param string $to
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		if ( 'variable' === $from ) {
+		if ( 'variable' === $from && 'variable' !== $to ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
-			$data_store->delete_variations( $product );
+			$data_store->delete_variations( $product->get_id() );
 		}
 	}
 

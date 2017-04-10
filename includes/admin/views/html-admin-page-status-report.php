@@ -273,6 +273,27 @@ $pages          = $system_status->get_pages();
 				} ?>
 			</td>
 		</tr>
+		<?php
+		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
+		foreach ( $rows as $row ) {
+			if ( ! empty( $row['success'] ) ) {
+				$css_class = 'yes';
+				$icon = '<span class="dashicons dashicons-yes"></span>';
+			} else {
+				$css_class = 'error';
+				$icon = '<span class="dashicons dashicons-no-alt"></span>';
+			}
+			?>
+			<tr>
+				<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
+				<td class="help"><?php echo isset( $row['help'] ) ? $row['help'] : ''; ?></td>
+				<td>
+					<mark class="<?php echo esc_attr( $css_class ); ?>">
+						<?php echo $icon; ?>  <?php echo ! empty( $row['note'] ) ? wp_kses_data( $row['note'] ) : ''; ?>
+					</mark>
+				</td>
+			</tr><?php
+		} ?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">

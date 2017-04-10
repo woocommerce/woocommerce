@@ -132,7 +132,9 @@ class WC_Structured_Data {
 		if ( $plain_text ) {
 			return;
 		}
+		echo '<div style="display: none; font-size: 0; max-height: 0; line-height: 0; padding: 0; mso-hide: all;">';
 		$this->output_structured_data();
+		echo '</div>';
 	}
 
 	/**
@@ -178,6 +180,10 @@ class WC_Structured_Data {
 	public function generate_product_data( $product = null ) {
 		if ( ! is_object( $product ) ) {
 			global $product;
+		}
+
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return;
 		}
 
 		$shop_name       = get_bloginfo( 'name' );

@@ -23,8 +23,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct( array(
-			'singular' => __( 'webhook', 'woocommerce' ),
-			'plural'   => __( 'webhooks', 'woocommerce' ),
+			'singular' => 'webhook',
+			'plural'   => 'webhooks',
 			'ajax'     => false,
 		) );
 	}
