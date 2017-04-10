@@ -703,6 +703,12 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
 
+		// Thumbnail version.
+		$src                 = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$props['thumb_src']   = $src[0];
+		$props['thumb_src_w'] = $src[1];
+		$props['thumb_src_h'] = $src[2];
+
 		// Image source.
 		$src             = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
 		$props['src']    = $src[0];
