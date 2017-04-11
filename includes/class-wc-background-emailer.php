@@ -124,6 +124,10 @@ class WC_Background_Emailer extends WP_Background_Process {
 		do {
 			$batch = $this->get_batch();
 
+			if ( empty( $batch->data ) ) {
+				break;
+			}
+
 			foreach ( $batch->data as $key => $value ) {
 				$task = $this->task( $value );
 
