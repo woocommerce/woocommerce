@@ -537,7 +537,7 @@ class WC_Admin_Post_Types {
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( __( 'Y-m-d', 'woocommerce' ) ) ) );
+				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'Y-m-d', 'woocommerce' ) ) ) ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
