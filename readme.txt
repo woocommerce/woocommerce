@@ -171,4 +171,4 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Upgrade Notice ==
 
 = 3.0.0 =
-3.0 is a major update. It is important that you make backups and ensure themes and extensions are 3.0 compatible before upgrading.
+3.0 is a major update. It is important that you [make backups](https://docs.woocommerce.com/document/backup-wordpress-content) and ensure themes and extensions are 3.0 compatible [before upgrading.](https://docs.woocommerce.com/document/how-to-update-your-site)
