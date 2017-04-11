@@ -559,7 +559,7 @@ class WC_Cart {
 				}
 
 				// Check the nicename against the title.
-				if ( '' === $value || stristr( $cart_item['data']->get_name(), $value ) ) {
+				if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
 					continue;
 				}
 
