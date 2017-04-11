@@ -107,6 +107,8 @@ jQuery( function( $ ) {
 			$.each( fragments, function( key, value ) {
 				$( key ).replaceWith( value );
 			});
+
+			$( document.body ).trigger( 'wc_fragments_loaded' );
 		}
 
 		// Unblock.
