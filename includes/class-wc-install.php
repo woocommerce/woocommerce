@@ -861,13 +861,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Check the latest stable version and ignore trunk.
 			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
 
-				$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
+				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
 
 				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
+					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
 				}
-
-				$upgrade_notice .= '</div> ';
 			}
 		}
 
