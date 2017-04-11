@@ -323,7 +323,7 @@ function wc_attributes_array_filter_variation( $attribute ) {
 }
 
 /**
- * Check if an attribute is included in the attributes area of a product name.
+ * Check if an attribute is included in the attributes area of a variation name.
  *
  * @since  3.0.2
  * @param  string $attribute Attribute value to check for
@@ -331,17 +331,5 @@ function wc_attributes_array_filter_variation( $attribute ) {
  * @return bool
  */
 function wc_is_attribute_in_product_name( $attribute, $name ) {
-	$attribute = strtolower( $attribute );
-	$name = strtolower( $name );
-	$product_name_sections = explode( '&ndash;', $name );
-
-	// Only one main area exists, so no attribute area exists.
-	if ( count( $product_name_sections ) < 2 ) {
-		return false;
-	}
-
-	$product_attributes_section = end( $product_name_sections );
-	$product_attributes = array_map( 'trim', explode( ',', $product_attributes_section ) );
-
-	return in_array( $attribute, $product_attributes );
+	return stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
 }
