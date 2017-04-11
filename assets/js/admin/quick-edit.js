@@ -1,4 +1,4 @@
-/*global ajaxurl, inlineEditPost, inlineEditL10n, woocommerce_admin */
+/*global inlineEditPost, woocommerce_admin */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
