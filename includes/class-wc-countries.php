@@ -866,6 +866,11 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'KW' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'NL' => array(
 					'postcode' => array(
 						'priority' => 65,
