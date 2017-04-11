@@ -1269,6 +1269,10 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	function woocommerce_related_products( $args = array() ) {
 		global $product, $woocommerce_loop;
 
+		if ( ! $product ) {
+			return;
+		}
+
 		$defaults = array(
 			'posts_per_page' => 2,
 			'columns'        => 2,
@@ -1277,10 +1281,6 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
-
-		if ( ! $product ) {
-			return;
-		}
 
 		// Get visble related products then sort them at random.
 		$args['related_products'] = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
@@ -1308,6 +1308,10 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 */
 	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
 		global $product, $woocommerce_loop;
+
+		if ( ! $product ) {
+			return;
+		}
 
 		// Handle the legacy filter which controlled posts per page etc.
 		$args = apply_filters( 'woocommerce_upsell_display_args', array(
