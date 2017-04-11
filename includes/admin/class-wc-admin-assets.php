@@ -84,7 +84,7 @@ class WC_Admin_Assets {
 	 * Enqueue scripts.
 	 */
 	public function admin_scripts() {
-		global $wp_query, $post;
+		global $wp_query, $post, $wp_version;
 
 		$screen       = get_current_screen();
 		$screen_id    = $screen ? $screen->id : '';
@@ -167,7 +167,13 @@ class WC_Admin_Assets {
 
 		// Products
 		if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), WC_VERSION );
+			$deps = array( 'jquery', 'woocommerce_admin' );
+
+			if ( version_compare( $wp_version, '4.7', '<' ) ) {
+				$deps[] = 'suggest';
+			}
+
+			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', $deps, WC_VERSION );
 			wp_enqueue_script( 'woocommerce_quick-edit' );
 		}
 
