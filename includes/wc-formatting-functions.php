@@ -847,7 +847,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * @return string
  */
 function wc_format_content( $raw_string ) {
-	return apply_filters( 'woocommerce_format_content', wpautop( do_shortcode( wp_kses_post( $raw_string ) ) ), $raw_string );
+	return apply_filters( 'woocommerce_format_content', apply_filters( 'woocommerce_short_description', $raw_string ), $raw_string );
 }
 
 /**
@@ -868,8 +868,6 @@ function wc_format_product_short_description( $content ) {
 
 	return $content;
 }
-
-add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
  * Formats curency symbols when saved in settings.
