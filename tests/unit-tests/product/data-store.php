@@ -432,11 +432,11 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		// Check the one attribute variation title.
 		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Green", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green", $loaded_variation->get_name() );
 
 		// Check the two attribute variation title.
 		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Green, Large", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green, Large", $loaded_variation->get_name() );
 
 		// Check the variation with a multiword attribute name.
 		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );

@@ -193,7 +193,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		// Don't include attributes if an attribute name has 2+ words.
 		if ( $should_include_attributes ) {
-			foreach( $attributes as $name => $value ) {
+			foreach ( $attributes as $name => $value ) {
 				if ( false !== strpos( $name, '-' ) ) {
 					$should_include_attributes = false;
 					break;
@@ -202,17 +202,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
+		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
+		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
-		$title_base_text         = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_attributes_text   = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
-		$separator               = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
-
-		return apply_filters( 'woocommerce_product_variation_title',
-			$title_base_text . $separator . $title_attributes_text,
-			$product,
-			$title_base_text,
-			$title_attributes_text
-		);
+		return apply_filters( 'woocommerce_product_variation_title', rtrim( $title_base . $separator . $title_suffix, $separator ), $product, $title_base, $title_suffix );
 	}
 
 	/**
