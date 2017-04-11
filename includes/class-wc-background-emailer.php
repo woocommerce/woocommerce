@@ -63,7 +63,13 @@ class WC_Background_Emailer extends WP_Background_Process {
 	 */
 	protected function task( $callback ) {
 		if ( isset( $callback['filter'], $callback['args'] ) ) {
-			WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
+			try {
+				WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
+			} catch ( Exception $e ) {
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					trigger_error( 'Transactional email triggered fatal error for callback ' . $callback['filter'], E_USER_WARNING );
+				}
+			}
 		}
 		return false;
 	}
@@ -74,6 +80,79 @@ class WC_Background_Emailer extends WP_Background_Process {
 	public function dispatch_queue() {
 		if ( ! empty( $this->data ) ) {
 			$this->save()->dispatch();
+		}
+	}
+
+	/**
+	 * Get post args
+	 *
+	 * @return array
+	 */
+	protected function get_post_args() {
+		if ( property_exists( $this, 'post_args' ) ) {
+			return $this->post_args;
+		}
+
+		// Pass cookies through with the request so nonces function.
+		$cookies = array();
+
+		foreach ( $_COOKIE as $name => $value ) {
+			if ( 'PHPSESSID' === $name ) {
+				continue;
+			}
+			$cookies[] = new WP_Http_Cookie( array( 'name' => $name, 'value' => $value ) );
+		}
+
+		return array(
+			'timeout'   => 0.01,
+			'blocking'  => false,
+			'body'      => $this->data,
+			'cookies'   => $cookies,
+			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+		);
+	}
+
+	/**
+	 * Handle
+	 *
+	 * Pass each queue item to the task handler, while remaining
+	 * within server memory and time limit constraints.
+	 */
+	protected function handle() {
+		$this->lock_process();
+
+		do {
+			$batch = $this->get_batch();
+
+			foreach ( $batch->data as $key => $value ) {
+				$task = $this->task( $value );
+
+				if ( false !== $task ) {
+					$batch->data[ $key ] = $task;
+				} else {
+					unset( $batch->data[ $key ] );
+				}
+
+				// Update batch before sending more to prevent duplicate email possibility.
+				$this->update( $batch->key, $batch->data );
+
+				if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+					// Batch limits reached.
+					break;
+				}
+			}
+			if ( empty( $batch->data ) ) {
+				$this->delete( $batch->key );
+			}
+		} while ( ! $this->time_exceeded() && ! $this->memory_exceeded() && ! $this->is_queue_empty() );
+
+		$this->unlock_process();
+
+		// Start next batch or complete process.
+		if ( ! $this->is_queue_empty() ) {
+			$this->dispatch();
+		} else {
+			$this->complete();
 		}
 	}
 }
