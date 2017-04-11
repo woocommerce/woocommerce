@@ -1844,7 +1844,7 @@ class WC_AJAX {
 			}
 
 			if ( 'false' !== $data['date_to'] ) {
-				$variation->set_date_on_sale_from( wc_clean( $data['date_to'] ) );
+				$variation->set_date_on_sale_to( wc_clean( $data['date_to'] ) );
 			}
 
 			$variation->save();
