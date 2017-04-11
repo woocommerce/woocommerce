@@ -104,10 +104,6 @@ jQuery(function( $ ) {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
 		$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
 		$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
-
-		// Autosuggest product tags on bulk edit
-		var tax = 'product_tag';
-		$( 'tr.inline-editor textarea[name="tax_input[' + tax + ']"]' ).suggest( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: inlineEditL10n.comma } );
 	});
 
 	$( '#wpbody' ).on( 'change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function() {
