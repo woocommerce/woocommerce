@@ -191,7 +191,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( $order->get_order_key() != $order_key ) {
+			if ( ! $order || $order->get_order_key() !== $order_key ) {
 				$order = false;
 			}
 		}
