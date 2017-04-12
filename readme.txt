@@ -161,6 +161,38 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.0.2 - 2017-04-12 =
+* Fix - Added missing `woocommerce_cross_sells_columns` filter.
+* Fix - Ensure meta values has valid keys before read attributes.
+* Fix - Prevented warnings when product has invalid attributes.
+* Fix - Updated `emails/email-addresses.php`, `emails/email-order-details.php`, `content-single-product.php`, `checkout/form-shipping.php`, `myaccount/form-add-payment-method.php`, `myaccount/form-edit-address.php`, `myaccount/form-lost-password.php`, `myaccount/form-reset-password.php`, `myaccount/orders.php` and `myaccount/view-order.php` template version to 3.0.0.
+* Fix - Avoid invalid objects to be read, fixing warnings and fatal errors when products products does not exists.
+* Fix - Fixed default behavior of variation tax class setting to "parent" when not set.
+* Fix - Fixed duplicated products, avoiding copy slugs, including "(Copy)" to the product name, coping all meta data, and fixed duplication of grouped products.
+* Fix - Fixed PHP 7.1 notices when sorting products by name (numeric).
+* Fix - Fixed calls to wc_reduce_stock_levels in PayPal and Simplify gateways.
+* Fix - Exclude "location" meta when reading customer meta data.
+* Fix - Removed duplicated items from cross sell products.
+* Fix - Updated default "add to cart" text of external products to "Buy product".
+* Fix - Fixed backwards compatibility of guest checkout rules.
+* Fix - Use correct thumbnail for variation images in gallery.
+* Fix - Fixed shortcodes on shop page.
+* Fix - Fixed incorrect sale dates when bulk editing variations.
+* Fix - Trigger wc_fragments_loaded after add to cart fragment refresh.
+* Fix - Fixed caption on thumbnails and main image.
+* Fix - Download permissions; Convert dates to timestamp on read so UTC is preserved.
+* Fix - Fixed warnings in "Lost password" page.
+* Fix - Fixed pagination on [products] shortcode.
+* Fix - Removed required state for GP, GF, KW, LB, MQ, RE and YT.
+* Fix - Remove error causing legacy suggest code.
+* Tweak - Improved variation and attribute name generation.
+* Tweak - Works around some cookie hosting issues, and updates the queue more frequently in case of error during email send.
+* Feature - Introduced `woocommerce_admin_order_date_format` filter to replace old `post_date_column_time`.
+* Feature - Introduced `woocommerce_update_customer_args` filter.
+* Feature - Add product visibility terms to system status report to help debug.
+* REST API - Fixed saving of variations in legacy REST API v3.
+* REST API - Fixed backwards compatibility of line_items meta in legacy REST API.
+
 = 3.0.1 - 2017-04-06 =
 * Fix - Show catalog hidden products within grouped products.
 * Fix - Fade in the gallery in if no images are set or it's custom.
