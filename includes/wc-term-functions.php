@@ -507,7 +507,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	$clauses['fields'] = 'DISTINCT t.term_id, tm.meta_value, ' . $clauses['fields'];
+	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'] . ', tm.meta_value';
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
