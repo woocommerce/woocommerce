@@ -384,11 +384,15 @@ class WC_Query {
 	 */
 	public function product_query( $q ) {
 		// Ordering query vars
-		$ordering  = $this->get_catalog_ordering_args();
-		$q->set( 'orderby', $ordering['orderby'] );
-		$q->set( 'order', $ordering['order'] );
-		if ( isset( $ordering['meta_key'] ) ) {
-			$q->set( 'meta_key', $ordering['meta_key'] );
+		if ( ! $q->is_search() ) {
+			$ordering  = $this->get_catalog_ordering_args();
+			$q->set( 'orderby', $ordering['orderby'] );
+			$q->set( 'order', $ordering['order'] );
+			if ( isset( $ordering['meta_key'] ) ) {
+				$q->set( 'meta_key', $ordering['meta_key'] );
+			}
+		} else {
+			$q->set( 'orderby', 'relevance' );
 		}
 
 		// Query vars that affect posts shown
