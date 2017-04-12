@@ -24,22 +24,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * Parent data.
-	 * @var array
+	 * @var object
 	 */
-	protected $parent_data = array(
-		'title'             => '',
-		'sku'               => '',
-		'manage_stock'      => '',
-		'backorders'        => '',
-		'stock_quantity'    => '',
-		'weight'            => '',
-		'length'            => '',
-		'width'             => '',
-		'height'            => '',
-		'tax_class'         => '',
-		'shipping_class_id' => '',
-		'image_id'          => '',
-	);
+	protected $parent_data;
 
 	/**
 	 * Prefix for action and filter hooks on data.
@@ -74,7 +61,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
+		return apply_filters( 'woocommerce_product_title', $this->parent_data->get_title(), $this );
 	}
 
 	/**
@@ -135,7 +122,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['sku'];
+			$value = $this->parent_data->get_sku( $context );
 		}
 		return $value;
 	}
@@ -151,7 +138,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['weight'];
+			$value = $this->parent_data->get_weight( $context );
 		}
 		return $value;
 	}
@@ -167,7 +154,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['length'];
+			$value = $this->parent_data->get_length( $context );
 		}
 		return $value;
 	}
@@ -183,7 +170,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['width'];
+			$value = $this->parent_data->get_width( $context );
 		}
 		return $value;
 	}
@@ -199,7 +186,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['height'];
+			$value = $this->parent_data->get_height( $context );
 		}
 		return $value;
 	}
@@ -215,7 +202,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $value ) {
-			$value = $this->parent_data['tax_class'];
+			$value = $this->parent_data->get_tax_class( $context );
 		}
 		return $value;
 	}
@@ -231,7 +218,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$value = $this->get_prop( 'manage_stock', $context );
 
 		// Inherit value from parent.
-		if ( 'view' === $context && false === $value && true === wc_string_to_bool( $this->parent_data['manage_stock'] ) ) {
+		if ( 'view' === $context && false === $value && true === wc_string_to_bool( $this->parent_data->get_manage_stock( $context ) ) ) {
 			$value = 'parent';
 		}
 		return $value;
@@ -248,7 +235,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['stock_quantity'];
+			$value = $this->parent_data->get_stock_quantity( $context );
 		}
 		return $value;
 	}
@@ -265,7 +252,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['backorders'];
+			$value = $this->parent_data->get_backorders( $context );
 		}
 		return $value;
 	}
@@ -281,7 +268,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$image_id = $this->parent_data['image_id'];
+			$image_id = $this->parent_data->get_image_id( $context );
 		}
 
 		return $image_id;
@@ -298,7 +285,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
 
 		if ( 'view' === $context && ! $shipping_class_id ) {
-			$shipping_class_id = $this->parent_data['shipping_class_id'];
+			$shipping_class_id = $this->parent_data->get_shipping_class_id( $context );
 		}
 
 		return $shipping_class_id;
