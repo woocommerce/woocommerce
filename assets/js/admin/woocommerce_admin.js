@@ -242,7 +242,6 @@ jQuery( function ( $ ) {
 		return false;
 	});
 
-
 	// Select availability
 	$( 'select.availability' ).change( function() {
 		if ( $( this ).val() === 'all' ) {
