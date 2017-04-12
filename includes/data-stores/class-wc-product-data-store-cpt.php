@@ -399,6 +399,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $meta_values ) {
 			$downloads = array();
 			foreach ( $meta_values as $key => $value ) {
+				if ( ! isset( $value['name'], $value['file'] ) ) {
+					continue;
+				}
 				$download    = new WC_Product_Download();
 				$download->set_id( $key );
 				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
