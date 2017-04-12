@@ -155,6 +155,7 @@ class WC_Admin_Assets {
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+				'get_order_items_nonce'             =>  wp_create_nonce( 'get-order-items' ),
 			);
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
