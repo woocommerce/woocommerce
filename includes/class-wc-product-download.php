@@ -80,7 +80,7 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return boolean
 	 */
 	public function is_allowed_filetype() {
-		if ( 'shortcode' === $this->get_type_of_file_path() ) {
+		if ( 'relative' !== $this->get_type_of_file_path() ) {
 			return true;
 		}
 		return ! $this->get_file_extension() || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
