@@ -184,6 +184,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Removed legacy suggest.js code which was causing JS error on bulk edit.
 * Fix - Fixed warnings on the "Lost password" page and when loading a product with invalid attributes.
 * Fix - Made background emailer update the queue after a successful send so duplicate mails are less likely.
+* Fix - Typo in flexslider_enabled option in new gallery script.
+* Fix - woocommerce_notify_low_stock and woocommerce_notify_no_stock options had no effect.
+* Tweak - For downloadable files, only validate file type when dealing with relative paths.
 * Tweak - Improved automatic variation name generation.
 * Dev - Added product visibility terms to system status report to help debug.
 * Dev - Introduced `woocommerce_admin_order_date_format` filter to replace missing `post_date_column_time`.
