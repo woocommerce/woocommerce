@@ -298,22 +298,23 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 
 			do {
 				$batch = $this->get_batch();
+				if( ! empty( $batch->data ) && is_array( $batch->data ) )
+				{
+					foreach ( $batch->data as $key => $value ) {
+						$task = $this->task( $value );
 
-				foreach ( $batch->data as $key => $value ) {
-					$task = $this->task( $value );
+						if ( false !== $task ) {
+							$batch->data[ $key ] = $task;
+						} else {
+							unset( $batch->data[ $key ] );
+						}
 
-					if ( false !== $task ) {
-						$batch->data[ $key ] = $task;
-					} else {
-						unset( $batch->data[ $key ] );
-					}
-
-					if ( $this->time_exceeded() || $this->memory_exceeded() ) {
-						// Batch limits reached.
-						break;
+						if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+							// Batch limits reached.
+							break;
+						}
 					}
 				}
-
 				// Update or delete current batch.
 				if ( ! empty( $batch->data ) ) {
 					$this->update( $batch->key, $batch->data );
