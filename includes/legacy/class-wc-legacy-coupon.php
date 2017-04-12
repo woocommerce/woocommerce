@@ -58,7 +58,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		wc_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '3.0' );
+		wc_doing_it_wrong( $key, 'Coupon properties should not be accessed directly. Called by: ' . wp_debug_backtrace_summary( __CLASS__ ), '3.0' );
 
 		switch ( $key ) {
 			case 'id' :
