@@ -451,6 +451,10 @@ class WC_Emails {
 	 * @param WC_Product $product
 	 */
 	public function low_stock( $product ) {
+		if ( 'no' === get_option( 'woocommerce_notify_low_stock', 'yes' ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		/* translators: 1: product name 2: items in stock */
 		$message = sprintf(
@@ -474,6 +478,10 @@ class WC_Emails {
 	 * @param WC_Product $product
 	 */
 	public function no_stock( $product ) {
+		if ( 'no' === get_option( 'woocommerce_notify_no_stock', 'yes' ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
