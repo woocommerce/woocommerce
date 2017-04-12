@@ -101,12 +101,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 			'post_name'      => $product->get_slug( 'edit' ),
+			'meta_input'     => $this->get_meta_to_insert($product),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
-			$this->update_post_meta( $product, true );
+			//$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
@@ -398,6 +399,84 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_downloads( $downloads );
 		}
 	}
+
+	/**
+	 * Helper method to get product metas to be used as the array for meta_input when using wp_insert_post
+	 */
+	protected function get_meta_to_insert(&$product){
+        $meta_key_to_props = array(
+            '_sku'                   => 'sku',
+            '_regular_price'         => 'regular_price',
+            '_sale_price'            => 'sale_price',
+            '_sale_price_dates_from' => 'date_on_sale_from',
+            '_sale_price_dates_to'   => 'date_on_sale_to',
+            'total_sales'            => 'total_sales',
+            '_tax_status'            => 'tax_status',
+            '_tax_class'             => 'tax_class',
+            '_manage_stock'          => 'manage_stock',
+            '_backorders'            => 'backorders',
+            '_sold_individually'     => 'sold_individually',
+            '_weight'                => 'weight',
+            '_length'                => 'length',
+            '_width'                 => 'width',
+            '_height'                => 'height',
+            '_upsell_ids'            => 'upsell_ids',
+            '_crosssell_ids'         => 'cross_sell_ids',
+            '_purchase_note'         => 'purchase_note',
+            '_default_attributes'    => 'default_attributes',
+            '_virtual'               => 'virtual',
+            '_downloadable'          => 'downloadable',
+            '_product_image_gallery' => 'gallery_image_ids',
+            '_download_limit'        => 'download_limit',
+            '_download_expiry'       => 'download_expiry',
+            '_thumbnail_id'          => 'image_id',
+            '_stock'                 => 'stock_quantity',
+            '_stock_status'          => 'stock_status',
+            '_wc_average_rating'     => 'average_rating',
+            '_wc_rating_count'       => 'rating_counts',
+            '_wc_review_count'       => 'review_count',
+        );
+
+        // Make sure to take extra data (like product url or text for external products) into account.
+        $extra_data_keys = $product->get_extra_data_keys();
+
+        foreach ( $extra_data_keys as $key ) {
+            $meta_key_to_props[ '_' . $key ] = $key;
+        }
+
+        foreach ($meta_key_to_props as $meta_key => $prop) {
+            $value = $product->{"get_$prop"}('edit');
+            switch ($prop) {
+                case 'virtual' :
+                case 'downloadable' :
+                case 'manage_stock' :
+                case 'sold_individually' :
+                    $meta_key_to_props[$meta_key] = wc_bool_to_string($value);
+                    break;
+                case 'gallery_image_ids' :
+                    $meta_key_to_props[$meta_key] = implode(',', $value);
+                    break;
+                case 'image_id' :
+                    if (!empty($value)) {
+                        set_post_thumbnail($product->get_id(), $value);
+                    } else {
+                        delete_post_meta($product->get_id(), '_thumbnail_id');
+                    }
+                    break;
+                case 'date_on_sale_from' :
+                case 'date_on_sale_to' :
+                    $meta_key_to_props[$meta_key] = $value ? $value->getTimestamp() : '';
+                    break;
+                default :
+                    $meta_key_to_props[$meta_key] = $value;
+                    break;
+            }
+
+        }
+
+        return $meta_key_to_props;
+
+    }
 
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
