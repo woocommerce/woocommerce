@@ -93,7 +93,7 @@ jQuery( function( $ ) {
 
 		// ...also taking args into account.
 		if ( args ) {
-			this.flexslider_enabled = false === args.photoswipe_enabled ? false : this.flexslider_enabled;
+			this.flexslider_enabled = false === args.flexslider_enabled ? false : this.flexslider_enabled;
 			this.zoom_enabled       = false === args.zoom_enabled ? false : this.zoom_enabled;
 			this.photoswipe_enabled = false === args.photoswipe_enabled ? false : this.photoswipe_enabled;
 		}
