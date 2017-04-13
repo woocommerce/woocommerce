@@ -908,7 +908,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			$return_price = round( $line_price + $tax_amount, wc_get_price_decimals() );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
-			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
+			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 
 			/**
 			 * If the customer is excempt from VAT, remove the taxes here.
@@ -957,7 +957,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	}
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
+		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 		$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 	} else {
