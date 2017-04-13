@@ -259,26 +259,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
-		$parent_object = get_post( $product->get_parent_id() );
-		$product->set_parent_data( array(
-			'title'             => $parent_object->post_title,
-			'sku'               => get_post_meta( $product->get_parent_id(), '_sku', true ),
-			'manage_stock'      => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
-			'backorders'        => get_post_meta( $product->get_parent_id(), '_backorders', true ),
-			'stock_quantity'    => get_post_meta( $product->get_parent_id(), '_stock', true ),
-			'weight'            => get_post_meta( $product->get_parent_id(), '_weight', true ),
-			'length'            => get_post_meta( $product->get_parent_id(), '_length', true ),
-			'width'             => get_post_meta( $product->get_parent_id(), '_width', true ),
-			'height'            => get_post_meta( $product->get_parent_id(), '_height', true ),
-			'tax_class'         => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
-			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
-			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
-		) );
-
+		$parent = wc_get_product( $product->get_parent_id() );
+		$product->set_parent_data( $parent );
 		// Pull data from the parent when there is no user-facing way to set props.
-		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
-		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
-		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
+		$product->set_sold_individually( $parent->get_sold_individually() );
+		$product->set_tax_status( $parent->get_tax_status() );
+		$product->set_cross_sell_ids( $parent->get_cross_sell_ids() );
 	}
 
 	/**
