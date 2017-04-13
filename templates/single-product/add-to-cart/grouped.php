@@ -66,7 +66,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						</td>
 						<td class="label">
 							<label for="product-<?php echo $grouped_product->get_id(); ?>">
-								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $grouped_product->get_id() ) ) . '">' . get_the_title() . '</a>' : get_the_title(); ?>
+								<?php echo $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $grouped_product->get_id() ) ) . '">' . get_the_title() . '</a>' : get_the_title(); ?>
 							</label>
 						</td>
 						<?php do_action( 'woocommerce_grouped_product_list_before_price', $grouped_product ); ?>
