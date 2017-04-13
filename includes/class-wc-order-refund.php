@@ -75,6 +75,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 		return $this->get_prop( 'amount', $context );
 	}
 
+    /**
+     * Get refunded order date.
+     *
+     * @param  string $context
+     * @return date
+     */
+    public function get_refund_date( $context = 'view' ) {
+        return $this->get_prop( 'date_created', $context );
+    }
+
 	/**
 	 * Get refund reason.
 	 *
