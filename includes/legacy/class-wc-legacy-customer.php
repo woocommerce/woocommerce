@@ -48,7 +48,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @return string
 	 */
 	public function __get( $key ) {
-		wc_doing_it_wrong( $key, 'Customer properties should not be accessed directly. Called by: ' . wp_debug_backtrace_summary( __CLASS__ ), '3.0' );
+		wc_doing_it_wrong( $key, 'Customer properties should not be accessed directly.', '3.0' );
 		$key = $this->filter_legacy_key( $key );
 		if ( in_array( $key, array( 'country', 'state', 'postcode', 'city', 'address_1', 'address', 'address_2' ) ) ) {
 			$key = 'billing_' . $key;

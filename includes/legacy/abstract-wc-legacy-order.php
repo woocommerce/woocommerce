@@ -404,7 +404,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		wc_doing_it_wrong( $key, 'Order properties should not be accessed directly. Called by: ' . wp_debug_backtrace_summary( __CLASS__ ), '3.0' );
+		wc_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '3.0' );
 
 		if ( 'completed_date' === $key ) {
 			return $this->get_date_completed() ? gmdate( 'Y-m-d H:i:s', $this->get_date_completed()->getOffsetTimestamp() ) : '';

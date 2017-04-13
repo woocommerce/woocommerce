@@ -145,7 +145,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		wc_doing_it_wrong( $key, 'Refund properties should not be accessed directly. Called by: ' . wp_debug_backtrace_summary( __CLASS__ ), '3.0' );
+		wc_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '3.0' );
 		/**
 		 * Maps legacy vars to new getters.
 		 */
