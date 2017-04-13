@@ -139,9 +139,15 @@ class WC_Emails {
 	 * @param array $args Email args (default: []).
 	 */
 	public static function send_transactional_email( $args = array() ) {
-		$args = func_get_args();
-		self::instance(); // Init self so emails exist.
-		do_action_ref_array( current_filter() . '_notification', $args );
+		try {
+			$args = func_get_args();
+			self::instance(); // Init self so emails exist.
+			do_action_ref_array( current_filter() . '_notification', $args );
+		} catch ( Exception $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				trigger_error( 'Transactional email triggered fatal error for callback ' . current_filter(), E_USER_WARNING );
+			}
+		}
 	}
 
 	/**
