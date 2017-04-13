@@ -207,15 +207,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the tax class.
 	 *
-	 * @param  string $context
+	 * Does not use get_prop so it can handle 'parent' Inheritance correctly.
+	 *
+	 * @param  string $context view, edit, or unfiltered
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
-		$value = $this->get_prop( 'tax_class', $context );
+		$value = null;
 
-		// Inherit value from parent.
-		if ( 'view' === $context && 'parent' === $value ) {
-			$value = $this->parent_data['tax_class'];
+		if ( array_key_exists( 'tax_class', $this->data ) ) {
+			$value = array_key_exists( 'tax_class', $this->changes ) ? $this->changes['tax_class'] : $this->data['tax_class'];
+
+			if ( 'edit' !== $context && 'parent' === $value ) {
+				$value = $this->parent_data['tax_class'];
+			}
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . 'tax_class', $value, $this );
+			}
 		}
 		return $value;
 	}
