@@ -135,7 +135,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['sku'];
+			$value = apply_filters( $this->get_hook_prefix() . 'sku', $this->parent_data['sku'], $this );
 		}
 		return $value;
 	}
@@ -151,7 +151,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['weight'];
+			$value = apply_filters( $this->get_hook_prefix() . 'weight', $this->parent_data['weight'], $this );
 		}
 		return $value;
 	}
@@ -167,7 +167,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['length'];
+			$value = apply_filters( $this->get_hook_prefix() . 'length', $this->parent_data['length'], $this );
 		}
 		return $value;
 	}
@@ -183,7 +183,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['width'];
+			$value = apply_filters( $this->get_hook_prefix() . 'width', $this->parent_data['width'], $this );
 		}
 		return $value;
 	}
@@ -199,7 +199,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['height'];
+			$value = apply_filters( $this->get_hook_prefix() . 'height', $this->parent_data['height'], $this );
 		}
 		return $value;
 	}
@@ -207,15 +207,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the tax class.
 	 *
-	 * @param  string $context
+	 * Does not use get_prop so it can handle 'parent' Inheritance correctly.
+	 *
+	 * @param  string $context view, edit, or unfiltered
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
-		$value = $this->get_prop( 'tax_class', $context );
+		$value = null;
 
-		// Inherit value from parent.
-		if ( 'view' === $context && 'parent' === $value ) {
-			$value = $this->parent_data['tax_class'];
+		if ( array_key_exists( 'tax_class', $this->data ) ) {
+			$value = array_key_exists( 'tax_class', $this->changes ) ? $this->changes['tax_class'] : $this->data['tax_class'];
+
+			if ( 'edit' !== $context && 'parent' === $value ) {
+				$value = $this->parent_data['tax_class'];
+			}
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . 'tax_class', $value, $this );
+			}
 		}
 		return $value;
 	}
@@ -248,7 +257,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['stock_quantity'];
+			$value = apply_filters( $this->get_hook_prefix() . 'stock_quantity', $this->parent_data['stock_quantity'], $this );
 		}
 		return $value;
 	}
@@ -265,7 +274,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['backorders'];
+			$value = apply_filters( $this->get_hook_prefix() . 'backorders', $this->parent_data['backorders'], $this );
 		}
 		return $value;
 	}
@@ -281,7 +290,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$image_id = $this->parent_data['image_id'];
+			$value = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
 		return $image_id;
@@ -298,7 +307,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
 
 		if ( 'view' === $context && ! $shipping_class_id ) {
-			$shipping_class_id = $this->parent_data['shipping_class_id'];
+			$value = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
 		}
 
 		return $shipping_class_id;
