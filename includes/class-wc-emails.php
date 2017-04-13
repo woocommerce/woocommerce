@@ -88,7 +88,7 @@ class WC_Emails {
 			'woocommerce_created_customer',
 		) );
 
-		if ( apply_filters( 'woocommerce_defer_transactional_emails', true ) ) {
+		if ( apply_filters( 'woocommerce_defer_transactional_emails', false ) ) {
 			self::$background_emailer = new WC_Background_Emailer();
 
 			foreach ( $email_actions as $action ) {
