@@ -161,6 +161,19 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.0.3 - 2017004-13 =
+* Fix - Fixed System status success messages grammar.
+* Fix - Escaped attributes in `cart.php` template.
+* Fix - Fixed tax class handling in the cart.
+* Fix - Improved how compare versions in update notice.
+* Fix - Correct refund date in order screen on admin.
+* Fix - Fixed groupped product link visibility.
+* Fix - Fixed incorrect grouped product sale badge.
+* Fix - Restored `itemReviewed` structured data for product reviews.
+* Fix -  Made the get_attribute method work on variation objects
+* Tweak - Set default email sending method to not defer.
+* Dev - Added backtrace to deprecated messages.
+
 = 3.0.2 - 2017-04-12 =
 * Fix - Removed required states for GP, GF, KW, LB, MQ, RE and YT countries.
 * Fix - Made cache in the [products] shortcode respect filters from plugins.
