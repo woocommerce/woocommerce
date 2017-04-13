@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.2
+Stable tag: 3.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,18 +161,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.3 - 2017004-13 =
-* Fix - Fixed System status success messages grammar.
-* Fix - Escaped attributes in `cart.php` template.
-* Fix - Fixed tax class handling in the cart.
-* Fix - Improved how compare versions in update notice.
-* Fix - Correct refund date in order screen on admin.
-* Fix - Fixed groupped product link visibility.
-* Fix - Fixed incorrect grouped product sale badge.
-* Fix - Restored `itemReviewed` structured data for product reviews.
-* Fix -  Made the get_attribute method work on variation objects
-* Tweak - Set default email sending method to not defer.
-* Dev - Added backtrace to deprecated messages.
+= 3.0.3 - 2017-04-13 =
+* Fix - Fixed an issue with variation tax-classes when set to 'parent'. This made taxes apply on top of the tax inclusive price in certain setups.
+* Fix - Escaped attribute translations in the `cart.php` template and bumped the template version to match.
+* Fix - Corrected the display of refund dates on the order screen.
+* Fix - Fixed the grouped product visibility check in the grouped.php template and bumped the template version to match.
+* Fix - Fixed the sale badge display for grouped products.
+* Fix - Added the `itemReviewed` structured data for product reviews to make it validate.
+* Fix - Made the `get_attribute` method work on variation objects.
+* Tweak - Turned off the deferred email sending by default which was added in 3.0. Whilst it does improve performance, there were compatibility problems on some servers. It can be enabled with a filter if desired.
+* Dev - Added backtrace information to the deprecation messages to help find problem plugins.
 
 = 3.0.2 - 2017-04-12 =
 * Fix - Removed required states for GP, GF, KW, LB, MQ, RE and YT countries.
@@ -321,5 +319,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.2 =
+= 3.0.3 =
 3.0 is a major update. [Make a full site backup](https://docs.woocommerce.com/document/backup-wordpress-content), update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
