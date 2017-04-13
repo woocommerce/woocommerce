@@ -92,6 +92,30 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Returns a single product attribute as a string.
+	 * @param  string $attribute to get.
+	 * @return string
+	 */
+	public function get_attribute( $attribute ) {
+		$attributes = $this->get_attributes();
+		$attribute  = sanitize_title( $attribute );
+
+		if ( isset( $attributes[ $attribute ] ) ) {
+			$value = $attributes[ $attribute ];
+			$term  = taxonomy_exists( $attribute ) ? get_term_by( 'slug', $value, $attribute ) : false;
+			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
+		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
+			$value = $attributes[ 'pa_' . $attribute ];
+			$term  = taxonomy_exists( 'pa_' . $attribute ) ? get_term_by( 'slug', $value, 'pa_' . $attribute ) : false;
+			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
+		} else {
+			return '';
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
 	 * @param  $item_object item array If a cart or order item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
