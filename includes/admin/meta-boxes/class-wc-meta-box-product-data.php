@@ -75,76 +75,43 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
-		$tabs = apply_filters( 'woocommerce_product_data_tabs', array(
+		return apply_filters( 'woocommerce_product_data_tabs', array(
 			'general' => array(
-				'label'    => __( 'General', 'woocommerce' ),
-				'target'   => 'general_product_data',
-				'class'    => array( 'hide_if_grouped' ),
-				'priority' => 10,
+				'label'  => __( 'General', 'woocommerce' ),
+				'target' => 'general_product_data',
+				'class'  => array( 'hide_if_grouped' ),
 			),
 			'inventory' => array(
-				'label'    => __( 'Inventory', 'woocommerce' ),
-				'target'   => 'inventory_product_data',
-				'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
-				'priority' => 20,
+				'label'  => __( 'Inventory', 'woocommerce' ),
+				'target' => 'inventory_product_data',
+				'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
 			),
 			'shipping' => array(
-				'label'    => __( 'Shipping', 'woocommerce' ),
-				'target'   => 'shipping_product_data',
-				'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
-				'priority' => 30,
+				'label'  => __( 'Shipping', 'woocommerce' ),
+				'target' => 'shipping_product_data',
+				'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
 			),
 			'linked_product' => array(
-				'label'    => __( 'Linked Products', 'woocommerce' ),
-				'target'   => 'linked_product_data',
-				'class'    => array(),
-				'priority' => 40,
+				'label'  => __( 'Linked Products', 'woocommerce' ),
+				'target' => 'linked_product_data',
+				'class'  => array(),
 			),
 			'attribute' => array(
-				'label'    => __( 'Attributes', 'woocommerce' ),
-				'target'   => 'product_attributes',
-				'class'    => array(),
-				'priority' => 50,
+				'label'  => __( 'Attributes', 'woocommerce' ),
+				'target' => 'product_attributes',
+				'class'  => array(),
 			),
 			'variations' => array(
-				'label'    => __( 'Variations', 'woocommerce' ),
-				'target'   => 'variable_product_options',
-				'class'    => array( 'variations_tab', 'show_if_variable' ),
-				'priority' => 60,
+				'label'  => __( 'Variations', 'woocommerce' ),
+				'target' => 'variable_product_options',
+				'class'  => array( 'variations_tab', 'show_if_variable' ),
 			),
 			'advanced' => array(
-				'label'    => __( 'Advanced', 'woocommerce' ),
-				'target'   => 'advanced_product_data',
-				'class'    => array(),
-				'priority' => 70,
+				'label'  => __( 'Advanced', 'woocommerce' ),
+				'target' => 'advanced_product_data',
+				'class'  => array(),
 			),
 		) );
-
-		// Sort tabs based on priority.
-		uasort( $tabs, array( __CLASS__, 'product_data_tabs_sort' ) );
-
-		return $tabs;
-	}
-
-	/**
-	 * Callback to sort product data tabs on priority.
-	 *
-	 * @since 3.1.0
-	 * @param int $a First item.
-	 * @param int $b Second item.
-	 *
-	 * @return bool
-	 */
-	private static function product_data_tabs_sort( $a, $b ) {
-		if ( ! isset( $a['priority'], $b['priority'] ) ) {
-			return -1;
-		}
-
-		if ( $a['priority'] == $b['priority'] ) {
-			return 0;
-		}
-
-		return $a['priority'] < $b['priority'] ? -1 : 1;
 	}
 
 	/**
