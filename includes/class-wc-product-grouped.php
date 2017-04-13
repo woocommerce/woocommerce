@@ -52,7 +52,7 @@ class WC_Product_Grouped extends WC_Product {
 	public function is_on_sale( $context = 'view' ) {
 		global $wpdb;
 
-		//$on_sale = $this->get_children() && 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
+		
 		$on_sale=0;
 		if($this->get_children() && $wpdb->get_var( "SELECT count(*) FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" ) > 0 )
 		$on_sale=1;
