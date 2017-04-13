@@ -219,6 +219,10 @@ jQuery( function ( $ ) {
 			return false;
 		}
 		
+		if ( $this_td.hasClass( 'loading' ) ) {
+			return false;
+		}
+		
 		var id       = $this.closest( 'tr' ).attr( 'id' ),
 			matches  = id.match( /post-(\d+)/ ),
 			order_id = matches[1] || false;
