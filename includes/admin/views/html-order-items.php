@@ -1,9 +1,13 @@
 <table class="order_items" cellspacing="0">
-	<?php foreach ( $items as $item ):
-		$product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
-		$item_meta      = new WC_Order_Item_Meta( $item, $product );
-		$item_meta_html = $item_meta->display( true, true );
-	?>
+	<?php foreach ( $items as $item ): ?>
+		<?php $product        = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );?>
+		<?php $item_meta_html = wc_display_item_meta( $item, array(
+			'before'    => '',
+			'after'     => '',
+			'separator' => ", \n",
+			'echo'      => false,
+			'autop'     => true,
+		) );?>
 		<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
 			<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>
 			<td class="name">
@@ -18,5 +22,5 @@
 				<?php endif;?>
 			</td>
 		</tr>
-	<?php endforeach; ?>
+	<?php endforeach;?>
 </table>
