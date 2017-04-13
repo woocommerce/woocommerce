@@ -6,7 +6,6 @@
 			'after'     => '',
 			'separator' => ", \n",
 			'echo'      => false,
-			'autop'     => true,
 		) );?>
 		<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item, $the_order ); ?>">
 			<td class="qty"><?php echo esc_html( $item->get_quantity() ); ?></td>

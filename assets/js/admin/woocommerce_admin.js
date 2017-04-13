@@ -236,7 +236,17 @@ jQuery( function ( $ ) {
 				'nonce':    woocommerce_admin.get_order_items_nonce,
 			}, function( response ) {
 				if ( response.success ) {
-					$this_td.append( response.data.html );
+					var html        = $( response.data.html ),
+						tiptip_args = {
+							'attribute': 'data-tip',
+							'fadeIn': 50,
+							'fadeOut': 50,
+							'delay': 200
+						};
+
+					html.find( '.woocommerce-help-tip' ).tipTip( tiptip_args );
+
+					$this_td.append( html );
 				}
 			} ).always( function() {
 				$this_td.removeClass( 'loading' );
