@@ -855,11 +855,21 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$upgrade_notice = '';
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
-			$version = trim( $matches[1] );
 			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
+			// Convert the full version strings to minor versions.
+			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
+			$current_version_parts = explode( '.', WC_VERSION );
+
+			if ( 3 !== sizeof( $notice_version_parts ) ) {
+				return;
+			}
+
+			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
+			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
+
 			// Check the latest stable version and ignore trunk.
-			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
+			if ( version_compare( $current_version, $notice_version, '<' ) ) {
 
 				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
 
