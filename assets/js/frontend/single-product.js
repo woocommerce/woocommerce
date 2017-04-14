@@ -256,14 +256,9 @@ jQuery( function( $ ) {
 			clicked = this.$target.find( '.flex-active-slide' );
 		}
 
-		var options = {
-			index:                 $( clicked ).index(),
-			shareEl:               false,
-			closeOnScroll:         false,
-			history:               false,
-			hideAnimationDuration: 0,
-			showAnimationDuration: 0
-		};
+		var options = $.extend( {
+			index: $( clicked ).index(),
+		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
