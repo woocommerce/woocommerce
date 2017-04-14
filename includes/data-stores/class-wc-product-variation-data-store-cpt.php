@@ -65,6 +65,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'reviews_allowed' => 'open' === $post_object->comment_status,
 		) );
 
+		$this->read_downloads( $product );
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
@@ -238,7 +239,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
 			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
-			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 			'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
