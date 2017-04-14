@@ -670,8 +670,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param  string $context
 	 * @return int
 	 */
-	public function get_review_count( $context = 'view' ) {
-		return $this->get_prop( 'review_count', $context );
+	public function get_review_count( $context = 'view' ) { 
+		$get_review_by_ID =  get_comments('post_id='.$this->id);
+		   if( !empty( $get_review_by_ID )) {
+			return $this->get_prop( 'review_count', $context );
+		   }
 	}
 
 	/*

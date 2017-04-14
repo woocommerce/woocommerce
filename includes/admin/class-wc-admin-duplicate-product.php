@@ -122,6 +122,13 @@ class WC_Admin_Duplicate_Product {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		$duplicate->set_status( 'draft' );
+		
+		$duplicate->set_date_created( null );
+		$duplicate->set_slug( '' );
+        $duplicate->set_rating_counts( 0 );
+ 		$duplicate->set_average_rating( 0 );
+ 		$duplicate->set_review_count( 0 );
+		
 
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
