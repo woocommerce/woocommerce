@@ -161,6 +161,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.0.4 - 2017-04-xx =
+* Fix - Fixed an issue where variations were not correctly inheriting the parent image or shipping class id.
+
 = 3.0.3 - 2017-04-13 =
 * Fix - Fixed an issue with variation tax-classes when set to 'parent'. This made taxes apply on top of the tax inclusive price in certain setups.
 * Fix - Escaped attribute translations in the `cart.php` template and bumped the template version to match.
