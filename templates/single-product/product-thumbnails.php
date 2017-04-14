@@ -25,7 +25,13 @@ global $post, $product;
 $attachment_ids = $product->get_gallery_image_ids();
 
 if ( $attachment_ids && has_post_thumbnail() ) {
+
 	foreach ( $attachment_ids as $attachment_id ) {
+
+		if ( get_post_thumbnail_id() == $attachment_id ) {
+			continue;
+		}
+
 		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
 		$image_title     = get_post_field( 'post_excerpt', $attachment_id );
@@ -43,5 +49,7 @@ if ( $attachment_ids && has_post_thumbnail() ) {
  		$html .= '</a></div>';
 
 		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id );
+
 	}
+
 }
