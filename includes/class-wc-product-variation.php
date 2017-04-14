@@ -314,7 +314,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$value = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
+			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
 		return $image_id;
@@ -331,7 +331,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
 
 		if ( 'view' === $context && ! $shipping_class_id ) {
-			$value = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
+			$shipping_class_id = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
 		}
 
 		return $shipping_class_id;
