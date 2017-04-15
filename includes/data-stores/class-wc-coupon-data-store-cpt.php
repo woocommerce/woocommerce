@@ -61,9 +61,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_type'     => 'shop_coupon',
 			'post_status'   => 'publish',
 			'post_author'   => get_current_user_id(),
-			'post_title'    => $coupon->get_code(),
+			'post_title'    => $coupon->get_code( 'edit' ),
 			'post_content'  => '',
-			'post_excerpt'  => $coupon->get_description(),
+			'post_excerpt'  => $coupon->get_description( 'edit' ),
 			'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
 			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
@@ -130,10 +130,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->save_meta_data();
 		$changes = $coupon->get_changes();
 
-		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified' ), array_keys( $coupon ) ) ) {
+		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			$post_data = array(
-				'post_title'        => $coupon->get_code(),
-				'post_excerpt'      => $coupon->get_description(),
+				'post_title'        => $coupon->get_code( 'edit' ),
+				'post_excerpt'      => $coupon->get_description( 'edit' ),
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
