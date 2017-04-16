@@ -650,6 +650,9 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
+                    'state' => array(
+						'required' => false,
+					),
 				),
 				'AF' => array(
 					'state' => array(
