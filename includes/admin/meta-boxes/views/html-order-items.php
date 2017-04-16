@@ -353,3 +353,5 @@ if ( wc_tax_enabled() ) {
 	</div>
 	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>
+
+<?php do_action( 'woocommerce_order_items_extra_modals', $order ) ?>
