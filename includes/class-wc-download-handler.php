@@ -165,6 +165,8 @@ class WC_Download_Handler {
 
 		// Trigger download via one of the methods
 		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename );
+
+		exit;
 	}
 
 	/**
@@ -265,8 +267,6 @@ class WC_Download_Handler {
 				self::download_error( __( 'File not found', 'woocommerce' ) );
 			}
 		}
-
-		exit;
 	}
 
 	/**
