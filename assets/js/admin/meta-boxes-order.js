@@ -568,6 +568,7 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 						wc_meta_boxes_order_items.stupidtable.init();
+						$( '#woocommerce-order-items' ).trigger( 'calculate_tax_ajax_finished' );
 					}
 				});
 			}
@@ -612,6 +613,7 @@ jQuery( function ( $ ) {
 					.val( accounting.formatNumber( line_totals + tax + shipping, woocommerce_admin_meta_boxes.currency_format_num_decimals, '', woocommerce_admin.mon_decimal_point ) )
 					.change();
 
+				$( this ).trigger( 'totals_calculated' );
 				$( 'button.save-action' ).click();
 			}
 
@@ -638,6 +640,7 @@ jQuery( function ( $ ) {
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.stupidtable.init();
+					$( '#woocommerce-order-items' ).trigger( 'save_line_items_ajax_finished' );
 				}
 			});
 
