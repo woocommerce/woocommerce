@@ -12,6 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Checks and returns a valid post id
+ * @param int $thepostid
+ * @param Object $post
+ */
+function _woocomerce_get_post_id_input($thepostid = null ,$post = null){
+    $return_id = 0;
+    if( $post === null && $thepostid === null ) {
+        $return_id = 0;
+    } else if( isset( $post->id ) ){
+        $return_id = $post->id;
+    } else if( isset( $thepostid ) ){
+        $return_id = $thepostid;
+    }
+    return $return_id;
+}
+
+/**
  * Output a text input box.
  *
  * @param array $field
@@ -19,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid              = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
@@ -86,7 +103,7 @@ function woocommerce_wp_text_input( $field ) {
 function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
 
-	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid  = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
@@ -101,7 +118,7 @@ function woocommerce_wp_hidden_input( $field ) {
 function woocommerce_wp_textarea_input( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid              = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
@@ -146,7 +163,7 @@ function woocommerce_wp_textarea_input( $field ) {
 function woocommerce_wp_checkbox( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid              = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
@@ -189,7 +206,7 @@ function woocommerce_wp_checkbox( $field ) {
 function woocommerce_wp_select( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid              = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
@@ -237,7 +254,7 @@ function woocommerce_wp_select( $field ) {
 function woocommerce_wp_radio( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$thepostid              = _woocomerce_get_post_id_input($thepostid,$post);
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
