@@ -219,7 +219,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			);
 		}
 
-		return $formatted_meta;
+		return apply_filters( 'woocommerce_order_item_get_formatted_meta_data', $formatted_meta, $this );
 	}
 
 	/*
