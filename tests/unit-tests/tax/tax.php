@@ -426,15 +426,14 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Get tax totals.
+	 * Test the get_tax_total method which rounds each row to get a grand total.
 	 */
 	public function test_get_tax_total() {
 		$to_total = array(
 			'1' => '1.665',
 			'2' => '2',
 		);
-
-		$this->assertEquals( WC_Tax::get_tax_total( $to_total ), '3.665' );
+		$this->assertEquals( '3.67', WC_Tax::get_tax_total( $to_total ) );
 	}
 
 	/**
