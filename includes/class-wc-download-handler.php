@@ -400,6 +400,9 @@ class WC_Download_Handler {
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
+		
+		do_action('woocommerce_download_error', $message, $title);		
+		
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}
 }
