@@ -1268,11 +1268,11 @@ class WC_Cart {
 					$discounted_price  = $this->get_discounted_price( $values, $adjusted_price, true );
 
 					// Convert back to line price
-					$discounted_line_price = $discounted_price * $values['quantity'];
+					$discounted_line_price = round( $discounted_price * $values['quantity'], wc_get_rounding_precision() );
 
 					// Now use rounded line price to get taxes.
 					$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
-					$line_tax          = array_sum( $discounted_taxes );
+					$line_tax          = wc_round_tax_total( array_sum( $discounted_taxes ) );
 					$line_total        = $discounted_line_price - $line_tax;
 
 				/**
@@ -1291,17 +1291,17 @@ class WC_Cart {
 					$discounted_price = $this->get_discounted_price( $values, $base_price, true );
 
 					// Convert back to line price
-					$discounted_line_price = $discounted_price * $values['quantity'];
+					$discounted_line_price = round( $discounted_price * $values['quantity'], wc_get_rounding_precision() );
 
 					// Now use rounded line price to get taxes.
 					$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
-					$line_tax          = array_sum( $discounted_taxes );
+					$line_tax          = wc_round_tax_total( array_sum( $discounted_taxes ) );
 					$line_total        = $discounted_line_price - $line_tax;
 				}
 
 				// Tax rows - merge the totals we just got
 				foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
-					$this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+					$this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? wc_round_tax_total( $discounted_taxes[ $key ] ) : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 				}
 
 			/**
@@ -1322,38 +1322,23 @@ class WC_Cart {
 				$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
 				$discounted_taxes      = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
 				$discounted_tax_amount = array_sum( $discounted_taxes );
-				$line_tax              = $discounted_tax_amount;
-				$line_total            = $discounted_price * $values['quantity'];
+				$line_tax              = wc_round_tax_total( $discounted_tax_amount );
+				$line_total            = round( $discounted_price * $values['quantity'], wc_get_rounding_precision() );
 
 				// Tax rows - merge the totals we just got
 				foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
-					$this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+					$this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? wc_round_tax_total( $discounted_taxes[ $key ] ) : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 				}
 			}
 
 			// Cart contents total is based on discounted prices and is used for the final total calculation
 			$this->cart_contents_total += $line_total;
 
-			/**
-			 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
-			 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
-			 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
-			 *
-			 * Tax exclusive prices are not affected.
-			 */
-			if ( ! $product->is_taxable() || $this->prices_include_tax ) {
-				$this->cart_contents[ $cart_item_key ]['line_total']        = round( $line_total + $line_tax - wc_round_tax_total( $line_tax ), $this->dp );
-				$this->cart_contents[ $cart_item_key ]['line_subtotal']     = round( $line_subtotal + $line_subtotal_tax - wc_round_tax_total( $line_subtotal_tax ), $this->dp );
-				$this->cart_contents[ $cart_item_key ]['line_tax']          = wc_round_tax_total( $line_tax );
-				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = wc_round_tax_total( $line_subtotal_tax );
-				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array_map( 'wc_round_tax_total', $discounted_taxes ), 'subtotal' => array_map( 'wc_round_tax_total', $taxes ) );
-			} else {
-				$this->cart_contents[ $cart_item_key ]['line_total']        = $line_total;
-				$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $line_subtotal;
-				$this->cart_contents[ $cart_item_key ]['line_tax']          = $line_tax;
-				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
-				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
-			}
+			$this->cart_contents[ $cart_item_key ]['line_total']        = $line_total;
+			$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $line_subtotal;
+			$this->cart_contents[ $cart_item_key ]['line_tax']          = $line_tax;
+			$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
+			$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
 		}
 
 		// Only calculate the grand total + shipping if on the cart/checkout
@@ -1902,7 +1887,7 @@ class WC_Cart {
 				if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
 					$discount_amount = $coupon->get_discount_amount( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price, $values, true );
 					$discount_amount = min( $price, $discount_amount );
-					$price           = max( $price - $discount_amount, 0 );
+					$price           = max( round( $price - $discount_amount, wc_get_rounding_precision() ), 0 );
 
 					// Store the totals for DISPLAY in the cart.
 					if ( $add_totals ) {
