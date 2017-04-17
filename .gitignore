@@ -7,6 +7,9 @@ project.properties
 .settings*
 .idea
 
+# Browser-sync
+bs-config.js
+
 # Grunt
 /node_modules/
 
