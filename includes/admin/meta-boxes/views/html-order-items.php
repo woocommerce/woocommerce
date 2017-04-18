@@ -161,19 +161,9 @@ if ( wc_tax_enabled() ) {
 
 		<tr>
 			<td class="label"><?php _e( 'Order total', 'woocommerce' ); ?>:</td>
-			<td>
-				<?php if ( $order->is_editable() ) : ?>
-					<div class="wc-order-edit-line-item-actions">
-						<a class="edit-order-item" href="#"></a>
-					</div>
-				<?php endif; ?>
-			</td>
+			<td width="1%"></td>
 			<td class="total">
-				<div class="view"><?php echo $order->get_formatted_order_total(); ?></div>
-				<div class="edit" style="display: none;">
-					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $order->get_total( 'edit' ) ) ); ?>" />
-					<div class="clear"></div>
-				</div>
+				<?php echo $order->get_formatted_order_total(); ?>
 			</td>
 		</tr>
 
@@ -210,8 +200,7 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_order_item_add_action_buttons', $order );
 		?>
 		<?php if ( $order->is_editable() ) : ?>
-			<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate taxes', 'woocommerce' ); ?></button>
-			<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate total', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary calculate-action"><?php _e( 'Recalculate', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 	</p>
 </div>
