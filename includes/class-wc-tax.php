@@ -81,7 +81,7 @@ class WC_Tax {
 		}
 
 		// Round to precision
-		if ( ! self::$round_at_subtotal && ! $suppress_rounding ) {
+		if ( ! $suppress_rounding ) {
 			$taxes = array_map( 'round', $taxes ); // Round to precision
 		}
 
@@ -694,7 +694,7 @@ class WC_Tax {
 	 * @return  float
 	 */
 	public static function get_tax_total( $taxes ) {
-		return array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
 	}
 
 	/**
