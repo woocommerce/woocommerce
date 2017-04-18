@@ -354,7 +354,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, __( 'yes' ) === $this->enabled, $this->object );
 	}
 
 	/**
