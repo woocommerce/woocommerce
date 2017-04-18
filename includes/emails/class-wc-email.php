@@ -207,7 +207,7 @@ class WC_Email extends WC_Settings_API {
 		$this->heading     = $this->get_option( 'heading', $this->heading );
 		$this->subject     = $this->get_option( 'subject', $this->subject );
 		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' );
+		$this->enabled     = $this->get_option( 'enabled' ) ? 'yes' : '';
 
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
