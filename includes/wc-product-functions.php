@@ -341,8 +341,14 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 		$variation_attributes = $variation->get_attributes();
 		$product              = $variation;
 	} else {
-		$variation_attributes = $variation;
 		$product              = false;
+		// Remove attribute_ prefix from names.
+		$variation_attributes = array();
+		if ( is_array( $variation ) ) {
+			foreach ( $variation as $key => $value ) {
+				$variation_attributes[ str_replace( 'attribute_', '', $key ) ] = $value;
+			}
+		}
 	}
 
 	$list_type = $include_names ? 'dl' : 'ul';
