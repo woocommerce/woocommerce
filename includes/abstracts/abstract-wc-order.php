@@ -1351,7 +1351,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			// Remove non-compound taxes.
 			foreach ( $this->get_taxes() as $tax ) {
-				if ( $this->is_compound() ) {
+				if ( $tax->is_compound() ) {
 					continue;
 				}
 				$subtotal = $subtotal + $tax->get_tax_total() + $tax->get_shipping_tax_total();
