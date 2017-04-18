@@ -186,7 +186,7 @@ class WC_Frontend_Scripts {
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'    => array(),
-				'version' => '2.1.3',
+				'version' => '2.1.4',
 			),
 			'jquery-blockui' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
