@@ -135,7 +135,7 @@ class WC_Checkout {
 			case 'checkout_fields' :
 				return $this->get_checkout_fields();
 			case 'posted' :
-				wc_doing_it_wrong( 'WC_Checkout->posted', 'Use $_POST directly, or the WC_Checkout->get_posted_data() method.', '3.0.0' );
+				wc_doing_it_wrong( 'WC_Checkout->posted', 'Use $_POST directly.', '3.0.0' );
 				return $this->legacy_posted_data;
 			case 'shipping_method' :
 				return $this->legacy_posted_data['shipping_method'];
