@@ -8,6 +8,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $wpdb;
+
+if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
+}
+
 $system_status  = new WC_REST_System_Status_Controller;
 $environment    = $system_status->get_environment_info();
 $database       = $system_status->get_database_info();
