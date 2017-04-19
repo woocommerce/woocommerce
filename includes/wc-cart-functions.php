@@ -356,7 +356,10 @@ function wc_cart_totals_shipping_method_label( $method ) {
  * @param  int $precision
  * @return float
  */
-function wc_cart_round_discount( $value, $precision ) {
+function wc_cart_round_discount( $value, $precision = 0 ) {
+	if ( ! $precision ) {
+		$precision = wc_get_price_decimals();
+	}
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {

@@ -1161,7 +1161,7 @@ class WC_Cart {
 				if ( ! isset( $this->taxes[ $key ] ) ) {
 					$this->taxes[ $key ] = 0;
 				}
-				$this->taxes[ $key ] += $line_costs->total_taxes[ $key ];
+				$this->taxes[ $key ] += wc_round_tax_total( $line_costs->total_taxes[ $key ] );
 			}
 
 			$this->cart_contents[ $cart_item_key ]['line_total']        = $line_costs->total;
@@ -1255,33 +1255,32 @@ class WC_Cart {
 			}
 
 			// Adjusted price (this is the price including the new tax rate).
-			$adjusted_price             = round( ( $line_costs->subtotal + $line_costs->subtotal_tax ) / $values['quantity'], wc_get_rounding_precision() );
+			$adjusted_price             = round( ( $line_costs->subtotal + $line_costs->subtotal_tax ) / $quantity, wc_get_rounding_precision() );
 
-			// Apply discounts and get the discounted price FOR A SINGLE ITEM.
-			$discounted_price           = $this->get_discounted_price( $values, $adjusted_price, true );
-
-			// Round discounted line price to the DP setting rather than precision - this is the price being charged.
-			$discounted_line            = round( $discounted_price * $quantity, wc_get_rounding_precision() );
+			// Discounted price is unit cost unrounded. Round to store DP setting when calculating the line cost.
+			$discounted_price           = $this->get_discounted_price( $cart_item, $adjusted_price, true );
+			$discounted_line            = round( $discounted_price * $quantity, wc_get_price_decimals() );
 
 			// Convert back to line price and get total taxes.
 			$line_costs->total_taxes    = WC_Tax::calc_tax( $discounted_line, $item_tax_rates, true );
-			$line_costs->total_tax      = round( array_sum( $line_costs->total_taxes ), wc_get_rounding_precision() );
-			$line_costs->total          = round( $discounted_line - $line_costs->total_tax, wc_get_rounding_precision() );
+			$line_costs->total_tax      = wc_round_tax_total( array_sum( $line_costs->total_taxes ) );
+			$line_costs->total          = $discounted_line - $line_costs->total_tax;
 		} else {
 			$line_costs->subtotal_taxes = WC_Tax::calc_tax( $line_costs->subtotal, $base_tax_rates, true );
-			$line_costs->subtotal_tax   = round( array_sum( $line_costs->subtotal_taxes ), wc_get_rounding_precision() );
-			$line_costs->subtotal       = round( $line_costs->subtotal - $line_costs->subtotal_tax, wc_get_rounding_precision() );
+			$line_costs->subtotal_tax   = wc_round_tax_total( array_sum( $line_costs->subtotal_taxes ) );
+			$line_costs->subtotal       = $line_costs->subtotal - $line_costs->subtotal_tax;
 
 			if ( $subtotal_only ) {
 				return $line_costs;
 			}
 
+			// Discounted price is unit cost unrounded. Round to store DP setting when calculating the line cost.
 			$discounted_price           = $this->get_discounted_price( $cart_item, $product->get_price(), true );
-			$discounted_line            = round( $discounted_price * $quantity, wc_get_rounding_precision() );
+			$discounted_line            = round( $discounted_price * $quantity, wc_get_price_decimals() );
 
 			$line_costs->total_taxes    = WC_Tax::calc_tax( $discounted_line, $item_tax_rates, true );
-			$line_costs->total_tax      = round( array_sum( $line_costs->total_taxes ), wc_get_rounding_precision() );
-			$line_costs->total          = round( $discounted_line - $line_costs->total_tax, wc_get_rounding_precision() );
+			$line_costs->total_tax      = wc_round_tax_total( array_sum( $line_costs->total_taxes ) );
+			$line_costs->total          = $discounted_line - $line_costs->total_tax;
 		}
 
 		return $line_costs;
@@ -1805,7 +1804,12 @@ class WC_Cart {
 	}
 
 	/**
-	 * Function to apply discounts to a product and get the discounted price (before tax is applied).
+	 * Function to apply discounts to a product and get the discounted price
+	 * (before tax is applied).
+	 *
+	 * Discounts are done per LINE. Rounding is performed to the store DP setting.
+	 * This can lead to discrepencies at cart level, but discounts are applied per
+	 * line item - adding up values based on that makes mathmatical sense.
 	 *
 	 * @param mixed $values
 	 * @param mixed $price
@@ -1826,22 +1830,22 @@ class WC_Cart {
 				if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
 					$discount_amount = $coupon->get_discount_amount( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price, $values, true );
 					$discount_amount = min( $price, $discount_amount );
-					$price           = max( round( $price - $discount_amount, wc_get_rounding_precision() ), 0 );
+					$price           = max( $price - $discount_amount, 0 );
 
 					// Store the totals for DISPLAY in the cart.
 					if ( $add_totals ) {
-						$total_discount     = $discount_amount * $values['quantity'];
+						$total_discount     = wc_cart_round_discount( $discount_amount * $values['quantity'] );
 						$total_discount_tax = 0;
 
 						if ( wc_tax_enabled() && $product->is_taxable() ) {
-							$tax_rates          = WC_Tax::get_rates( $product->get_tax_class() );
-							$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
-							$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
-							$total_discount     = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
-							$this->discount_cart_tax += $total_discount_tax;
+							$tax_rates               = WC_Tax::get_rates( $product->get_tax_class() );
+							$taxes                   = WC_Tax::calc_tax( $total_discount, $tax_rates, $this->prices_include_tax );
+							$total_discount_tax      = wc_round_tax_total( array_sum( $taxes ) );
+							$total_discount          = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
+							$this->discount_cart_tax = $this->discount_cart_tax + $total_discount_tax;
 						}
 
-						$this->discount_cart     += $total_discount;
+						$this->discount_cart = $this->discount_cart + $total_discount;
 						$this->increase_coupon_discount_amount( $code, $total_discount, $total_discount_tax );
 						$this->increase_coupon_applied_count( $code, $values['quantity'] );
 					}

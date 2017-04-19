@@ -694,7 +694,7 @@ class WC_Tax {
 	 * @return  float
 	 */
 	public static function get_tax_total( $taxes ) {
-		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
+		return array_sum( array_map( 'wc_round_tax_total', $taxes ) );
 	}
 
 	/**
