@@ -822,7 +822,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			FROM $wpdb->posts AS posts
 			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
 			WHERE posts.post_type IN ( 'product', 'product_variation' )
-			AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
+			AND posts.post_status != 'trash'
+			AND postmeta.meta_key = '_sku'
+			AND postmeta.meta_value = '%s'
 			LIMIT 1
 		 ", $sku ) );
 	}
