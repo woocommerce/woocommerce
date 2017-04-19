@@ -615,6 +615,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Order status.
 			if ( ! empty( $data['status'] ) ) {
+				// Refresh the order instance.
+				$order = wc_get_order( $order->get_id() );
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
