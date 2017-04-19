@@ -420,7 +420,6 @@ class WC_Post_Data {
 		if ( $variation_id ) {
 			$product_id = $variation_id;
 		}
-		$product    = wc_get_product( $product_id );
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
 		if ( $downloads ) {
