@@ -1925,7 +1925,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$field           = '';
 		$label_id        = $args['id'];
 		$sort            = $args['priority'] ? $args['priority'] : '';
-		$field_container = '<p class="form-row %1$s" id="%2$s" data-sort="' . esc_attr( $sort ) . '">%3$s</p>';
+		$field_container = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
 
 		switch ( $args['type'] ) {
 			case 'country' :
