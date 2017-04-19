@@ -562,6 +562,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );

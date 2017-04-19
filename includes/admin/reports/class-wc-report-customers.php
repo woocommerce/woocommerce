@@ -178,6 +178,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		$admin_users = new WP_User_Query(
