@@ -77,3 +77,5 @@ $col    = 1;
 <?php endforeach; ?>
 
 <?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) echo '</div>'; ?>
+
+<?php do_action( 'woocommerce_after_my_address' ); ?>
