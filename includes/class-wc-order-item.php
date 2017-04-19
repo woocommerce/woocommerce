@@ -303,7 +303,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$return = array();
 
 			foreach ( $this->meta_data as $meta ) {
-				$return[ $meta->id ] = $meta;
+				$return[ $meta->key ] = $meta;
 			}
 
 			return $return;
