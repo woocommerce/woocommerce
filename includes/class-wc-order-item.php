@@ -27,12 +27,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	);
 
 	/**
-	 * May store an order to prevent retriving it multiple times.
-	 * @var object
-	 */
-	protected $order;
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -122,10 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order() {
-		if ( ! $this->order ) {
-		 	$this->order = wc_get_order( $this->get_order_id() );
-		}
-		return $this->order;
+		return wc_get_order( $this->get_order_id() );
 	}
 
 	/*
