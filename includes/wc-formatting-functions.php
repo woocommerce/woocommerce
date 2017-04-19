@@ -165,6 +165,7 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
  * @return float
  */
 function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
+	$weight  = (float) $weight;
 	$to_unit = strtolower( $to_unit );
 
 	if ( empty( $from_unit ) ) {
