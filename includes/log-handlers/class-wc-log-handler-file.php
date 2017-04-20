@@ -163,7 +163,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool True if $handle is open.
 	 */
 	protected function is_open( $handle ) {
-		return is_resource( $this->handles[ $handle ] ) && array_key_exists( $handle, $this->handles );
+		return array_key_exists( $handle, $this->handles ) && is_resource( $this->handles[ $handle ] );
 	}
 
 	/**
