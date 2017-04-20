@@ -164,7 +164,46 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 = 3.0.4 - 2017-04-xx =
 * Fix - Fixed an issue where variations were not correctly inheriting the parent image or shipping class id.
 * Fix - Fixed an issue where duplicated products would have their ratings/review counts duplicated also.
-* Fix - Added a missing hook to the docblock in templates/archive-product.php.
+* Fix - Added a missing hook to the docblock in `templates/archive-product.php`.
+* Fix - PHP 7.1 warnings when manually adding order items.
+* Fix - Fixed aan issue where downlodable variations are unable to process downloads.
+* Fix - Bump `single-product/add-to-cart/variable.php` template version to 3.0.0.
+* Fix - Prevent infinite loops while saving coupons, products and orders in admin.
+* Fix - Fixed nt required state for UA.
+* Fix - Fixed shipping address map URL.
+* Fix - Fixed navigation in images with long captions.
+* Fix - Fixed warnings when product attribute does not exists.
+* Fix - Use div for comment-form-rating to prevent bad nested markup due to star ratings.
+* Fix - Fixed css issues on checkout when using Twenty Seventeen.
+* Fix - Fixed support for WordPress 4.7 user locale setting.
+* Fix - Fixed default options for product types in product meta box.
+* Fix - Adds a fallback to `queue_transactional_email` if background sending is disabled.
+* Fix - Fixed an issue while checking if order taxes are compound.
+* Fix - Fixed formattted display of variations attributes.
+* Fix - Fixed missing refud lines in reports.
+* Fix - Fixed check for duplicated SKU excluding products in Trash.
+* Fix - Fixed upgrade routine for grouped products that needs to unset the parent product.
+* Fix - Give zoomed images a bg color so it supports transparent PNG.
+* Fix - Throw warning when REST API is not avaiable on status report.
+* Fix - Fixed address fields sorting on checkout.
+* Fix - Ensure order is not cached before download permissions are generated.
+* Fix - Hide text when product is on backworder without notifications.
+* Fix - Fixed incorrect stock numbers in low stock emails.
+* Tweak - Removed the non-functional order total input and combine the recalculation buttons into one working button.
+* Tweak - Updated Guided Tour videos.
+* Tweak - Updated js-cookie to 2.1.4.
+* Tweak - Updated schame URLs to use HTTPS.
+* REST API - Fixed an issue that prevented to delete an term if found any error on creation.
+* REST API - Fixed reports endpoint when querying by date.
+* REST API - Fixed ignored order parameters when changing order status.
+* Dev - Added has_shipping_address helper method.
+* Dev - Introduced `woocommerce_order_item_get_formatted_meta_data` filter
+* Dev - Make wc_add_order_item pass correct values to woocommerce_new_order_item.
+* Dev - Fixes legacy_posted_data access and adds notices if accessed.
+* Dev - Fixed undefined property notice in `WC_Order_Item::offsetGet`.
+* Dev - Fixed PHP 7.1 warnings when using non-float values to `wc_get_weight()`.
+* Dev - Fixed included products when searching by downlodable products by ajax.
+* Dev - Fixed wrong variable name in `wc_add_order_item()`.
 
 = 3.0.3 - 2017-04-13 =
 * Fix - Fixed an issue with variation tax-classes when set to 'parent'. This made taxes apply on top of the tax inclusive price in certain setups.
