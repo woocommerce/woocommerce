@@ -365,7 +365,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 3.0.2
 	 */
 	public function test_wc_is_attribute_in_product_name() {
-		$this->assertTrue( wc_is_attribute_in_product_name( 'L', 'Product &ndash; L') );
+		$this->assertTrue( wc_is_attribute_in_product_name( 'L', 'Product &ndash; L' ) );
 		$this->assertTrue( wc_is_attribute_in_product_name( 'Two Words', 'Product &ndash; L, Two Words' ) );
 		$this->assertTrue( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; The Cool One &ndash; Blue, Large' ) );
 		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product' ) );
