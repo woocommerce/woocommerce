@@ -447,8 +447,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get user. Used by orders, not other order types like refunds.
 	 *
-	 * @param  string $context
-	 * @return int
+	 * @return WP_User|false
 	 */
 	public function get_user() {
 		return false;
