@@ -577,8 +577,9 @@ class WC_Countries {
 				'priority'     => 40,
 			),
 			'address_1' => array(
-				'label'        => __( 'Address', 'woocommerce' ),
-				'placeholder'  => esc_attr__( 'Street address', 'woocommerce' ),
+				'label'        => __( 'Street address', 'woocommerce' ),
+				/* translators: use local order of street name and house number. */
+				'placeholder'  => esc_attr__( 'House number and street name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
