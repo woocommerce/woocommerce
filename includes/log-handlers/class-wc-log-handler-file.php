@@ -163,7 +163,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool True if $handle is open.
 	 */
 	protected function is_open( $handle ) {
-		return array_key_exists( $handle, $this->handles );
+		return is_resource( $this->handles[ $handle ] ) && array_key_exists( $handle, $this->handles );
 	}
 
 	/**
@@ -175,7 +175,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
+		if ( $this->is_open( $handle ) ) {
 			$result = fclose( $this->handles[ $handle ] );
 			unset( $this->handles[ $handle ] );
 		}
@@ -266,7 +266,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function should_rotate( $handle ) {
 		$file = self::get_log_file_path( $handle );
 		if ( $file ) {
-			if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
+			if ( $this->is_open( $handle ) ) {
 				$file_stat = fstat( $this->handles[ $handle ] );
 				return $file_stat['size'] > $this->log_size_limit;
 			} elseif ( file_exists( $file ) ) {
