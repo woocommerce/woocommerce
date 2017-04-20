@@ -767,11 +767,8 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_shipping_address_map_url() {
 		$address = $this->get_address( 'shipping' );
 
-		foreach ( array( 'first_name', 'last_name', 'company' ) as $key ) {
-			if ( isset( $address[ $key ] ) ) {
-				unset( $address[ $key ] );
-			}
-		}
+		// Remove name and company before generate the Google Maps URL.
+		unset( $address['first_name'], $address['last_name'], $address['company'] );
 
 		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $address, $this );
 
