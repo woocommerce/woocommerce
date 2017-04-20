@@ -434,6 +434,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_keys( wc_get_order_statuses() );
 	}
 
+	/**
+	 * Get user ID. Used by orders, not other order types like refunds.
+	 *
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_user_id( $context = 'view' ) {
+		return 0;
+	}
+
+	/**
+	 * Get user. Used by orders, not other order types like refunds.
+	 *
+	 * @return WP_User|false
+	 */
+	public function get_user() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
