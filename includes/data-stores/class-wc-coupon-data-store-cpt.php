@@ -61,9 +61,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_type'     => 'shop_coupon',
 			'post_status'   => 'publish',
 			'post_author'   => get_current_user_id(),
-			'post_title'    => $coupon->get_code(),
+			'post_title'    => $coupon->get_code( 'edit' ),
 			'post_content'  => '',
-			'post_excerpt'  => $coupon->get_description(),
+			'post_excerpt'  => $coupon->get_description( 'edit' ),
 			'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
 			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
@@ -128,14 +128,34 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
-		$post_data = array(
-			'ID'           => $coupon->get_id(),
-			'post_title'   => $coupon->get_code(),
-			'post_excerpt' => $coupon->get_description(),
-		);
-		wp_update_post( $post_data );
-		$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+		$changes = $coupon->get_changes();
 
+		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+			$post_data = array(
+				'post_title'        => $coupon->get_code( 'edit' ),
+				'post_excerpt'      => $coupon->get_description( 'edit' ),
+				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getTimestamp() )       : current_time( 'mysql', 1 ),
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $coupon->get_id() ) );
+				clean_post_cache( $coupon->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) );
+			}
+			$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+		}
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
