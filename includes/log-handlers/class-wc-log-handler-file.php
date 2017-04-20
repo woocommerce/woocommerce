@@ -148,7 +148,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				}
 			}
 
-			if ( $this->handles[ $handle ] = @fopen( $file, $mode ) ) {
+			if ( $resource = @fopen( $file, $mode ) ) {
+				$this->handles[ $handle ] = $resource;
 				return true;
 			}
 		}
