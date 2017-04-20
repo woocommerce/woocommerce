@@ -153,39 +153,91 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0
 	 */
+	public function test_wc_get_orders_customer_params() {
+		$order1  = WC_Helper_Order::create_order( 0 );
+		$order2  = WC_Helper_Order::create_order( 0 );
+		$order3  = WC_Helper_Order::create_order( 1 );
+		$order4  = WC_Helper_Order::create_order( 1 );
+		$order_1 = $order1->get_id();
+		$order_2 = $order2->get_id();
+		$order_3 = $order3->get_id();
+		$order_4 = $order4->get_id();
+
+		$orders   = wc_get_orders( array( 'customer' => 0, 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2 );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
+
+		$orders   = wc_get_orders( array( 'customer' => 1, 'return' => 'ids' ) );
+		$expected = array( $order_3, $order_4 );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
+
+		$orders   = wc_get_orders( array( 'customer' => '', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3, $order_4 );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
+
+		$order1->delete();
+		$order2->delete();
+		$order3->delete();
+		$order4->delete();
+	}
+
+	/**
+	 * Test the before and after date parameters for wc_get_orders.
+	 *
+	 * @since 3.0
+	 */
 	public function test_wc_get_orders_date_params() {
-		$order = WC_Helper_Order::create_order();
-		$order->set_date_created( '2015-01-01 05:20:30' );
-		$order->save();
-		$order_1 = $order->get_id();
-		$order   = WC_Helper_Order::create_order();
-		$order->set_date_created( '2017-01-01' );
-		$order->save();
-		$order_2 = $order->get_id();
-		$order   = WC_Helper_Order::create_order();
-		$order->set_date_created( '2017-01-01' );
-		$order->save();
-		$order_3 = $order->get_id();
+		$order1 = WC_Helper_Order::create_order();
+		$order1->set_date_created( '2015-01-01 05:20:30' );
+		$order1->save();
+		$order_1 = $order1->get_id();
+		$order2   = WC_Helper_Order::create_order();
+		$order2->set_date_created( '2017-01-01' );
+		$order2->save();
+		$order_2 = $order2->get_id();
+		$order3   = WC_Helper_Order::create_order();
+		$order3->set_date_created( '2017-01-01' );
+		$order3->save();
+		$order_3 = $order3->get_id();
 
 		$orders   = wc_get_orders( array( 'date_before' => '2017-01-15', 'return' => 'ids' ) );
 		$expected = array( $order_1, $order_2, $order_3 );
-		$this->assertEquals( sort( $expected ), sort( $orders ) );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
 
 		$orders   = wc_get_orders( array( 'date_before' => '2017-01-01', 'return' => 'ids' ) );
 		$expected = array( $order_1 );
-		$this->assertEquals( sort( $expected ), sort( $orders ) );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
 
 		$orders   = wc_get_orders( array( 'date_before' => '2016-12-31', 'return' => 'ids' ) );
 		$expected = array( $order_1 );
-		$this->assertEquals( sort( $expected ), sort( $orders ) );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
 
 		$orders   = wc_get_orders( array( 'date_after' => '2015-01-01 00:00:00', 'return' => 'ids' ) );
 		$expected = array( $order_1, $order_2, $order_3 );
-		$this->assertEquals( sort( $expected ), sort( $orders ) );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
 
 		$orders   = wc_get_orders( array( 'date_after' => '2016-01-01', 'return' => 'ids' ) );
 		$expected = array( $order_2, $order_3 );
-		$this->assertEquals( sort( $expected ), sort( $orders ) );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
 
+		$order1->delete();
+		$order2->delete();
+		$order3->delete();
 	}
 }
