@@ -266,7 +266,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function should_rotate( $handle ) {
 		$file = self::get_log_file_path( $handle );
 		if ( $file ) {
-			if ( $this->is_open( $handle ) ) {
+			if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
 				$file_stat = fstat( $this->handles[ $handle ] );
 				return $file_stat['size'] > $this->log_size_limit;
 			} elseif ( file_exists( $file ) ) {
