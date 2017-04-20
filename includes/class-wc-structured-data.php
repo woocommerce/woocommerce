@@ -287,6 +287,10 @@ class WC_Structured_Data {
 	public function generate_breadcrumblist_data( $breadcrumbs ) {
 		$crumbs = $breadcrumbs->get_breadcrumb();
 
+		if ( empty( $crumbs ) || ! is_array( $crumbs ) ) {
+			return;
+		}
+
 		$markup                    = array();
 		$markup['@type']           = 'BreadcrumbList';
 		$markup['itemListElement'] = array();
