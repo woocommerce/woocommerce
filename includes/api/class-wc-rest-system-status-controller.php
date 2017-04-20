@@ -574,7 +574,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		// Test POST requests
 		$post_response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
-			'timeout'     => 60,
+			'timeout'     => 10,
 			'user-agent'  => 'WooCommerce/' . WC()->version,
 			'httpversion' => '1.1',
 			'body'        => array(
