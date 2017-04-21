@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( $order->has_status( 'failed' ) ) : ?>
 
+			<?php do_action('woocommerce_before_thankyou_failed'); ?>
+
 			<p class="woocommerce-notice woocommerce-notice--error woocommerce-thankyou-order-failed"><?php _e( 'Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction. Please attempt your purchase again.', 'woocommerce' ); ?></p>
 
 			<p class="woocommerce-notice woocommerce-notice--error woocommerce-thankyou-order-failed-actions">
@@ -37,6 +39,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</p>
 
 		<?php else : ?>
+
+			<?php do_action('woocommerce_before_thankyou_success'); ?>
 
 			<p class="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-received"><?php echo apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), $order ); ?></p>
 
