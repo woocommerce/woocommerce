@@ -1579,6 +1579,10 @@ class WC_AJAX {
 
 		if ( $variations ) {
 			foreach ( $variations as $variation_object ) {
+				// Skip, if variable_object is null.
+				if ( !  $variation_object ) {
+					continue;
+				}
 				$variation_id   = $variation_object->get_id();
 				$variation      = get_post( $variation_id );
 				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
