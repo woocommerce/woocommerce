@@ -4381,6 +4381,7 @@ img.tips {
 
 #tiptip_holder {
 	display: none;
+	z-index: 8675309;
 	position: absolute;
 	top: 0;
 	/*rtl:ignore*/
