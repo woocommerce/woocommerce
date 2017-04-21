@@ -526,24 +526,28 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$enable_shipping = isset( $_POST['woocommerce_calc_shipping'] );
-		$enable_taxes    = isset( $_POST['woocommerce_calc_taxes'] );
+		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
+		$enable_taxes     = isset( $_POST['woocommerce_calc_taxes'] );
+		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 
 			/*
-			 * Create a shipping zone containing the country the store is located in.
+			 * If this is the initial shipping setup, create a shipping
+			 * zone containing the country the store is located in.
 			 */
-			$default_country = get_option( 'woocommerce_default_country' );
-			$location        = wc_format_country_state_string( $default_country );
+			if ( false === $current_shipping ) {
+				$default_country = get_option( 'woocommerce_default_country' );
+				$location        = wc_format_country_state_string( $default_country );
 
-			$zone = new WC_Shipping_Zone( null );
-			$zone->set_zone_order( 0 );
-			$zone->add_location( $location['country'], 'country' );
-			$zone->set_zone_name( $zone->get_formatted_location() );
-			$zone->save();
+				$zone = new WC_Shipping_Zone( null );
+				$zone->set_zone_order( 0 );
+				$zone->add_location( $location['country'], 'country' );
+				$zone->set_zone_name( $zone->get_formatted_location() );
+				$zone->save();
+			}
 		} else {
 			update_option( 'woocommerce_ship_to_countries', 'disabled' );
 		}
