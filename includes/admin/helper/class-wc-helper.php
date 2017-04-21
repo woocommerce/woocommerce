@@ -30,8 +30,8 @@ class WC_Helper {
 			__( 'Helper', 'woocommerce' ),
 			'manage_woocommerce',
 			'wc-helper',
-			array( __CLASS__, 'admin_menu_render_helper'
-		) );
+			array( __CLASS__, 'admin_menu_render_helper' )
+		);
 	}
 
 	/**
@@ -108,13 +108,13 @@ class WC_Helper {
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version'] = $local['Version'];
 
-				if ( $local['_type'] == 'plugin' ) {
+				if ( 'plugin' == $local['_type'] ) {
 					if ( is_plugin_active( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					}
-				} elseif ( $local['_type'] == 'theme' ) {
+				} elseif ( 'theme' == $local['_type'] ) {
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
 						$subscription['local']['active'] = true;
 					}
@@ -145,7 +145,7 @@ class WC_Helper {
 	 */
 	public static function admin_enqueue_scripts() {
 		$screen = get_current_screen();
-		if ( $screen->id == 'woocommerce_page_wc-helper' ) {
+		if ( 'woocommerce_page_wc-helper' == $screen->id ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
 		}
 	}
@@ -253,7 +253,7 @@ class WC_Helper {
 	 * Various early-phase actions with possible redirects.
 	 */
 	public static function current_screen( $screen ) {
-		if ( $screen->id != 'woocommerce_page_wc-helper' ) {
+		if ( 'woocommerce_page_wc-helper' != $screen->id ) {
 			return;
 		}
 
@@ -310,7 +310,7 @@ class WC_Helper {
 
 		$code = wp_remote_retrieve_response_code( $request );
 
-		if ( $code != 200 ) {
+		if ( 200 !== $code ) {
 			self::log( sprintf( 'Call to oauth/request_token returned a non-200 response code (%d)', $code ) );
 			wp_die( 'Something went wrong' );
 		}
@@ -362,7 +362,7 @@ class WC_Helper {
 
 		$code = wp_remote_retrieve_response_code( $request );
 
-		if ( $code !== 200 ) {
+		if ( 200 !== $code ) {
 			self::log( sprintf( 'Call to oauth/access_token returned a non-200 response code (%d)', $code ) );
 			wp_die( 'Something went wrong' );
 		}
@@ -410,7 +410,6 @@ class WC_Helper {
 			'page' => 'wc-helper',
 			'wc-helper-status' => 'helper-disconnected',
 		), admin_url( 'admin.php' ) );
-
 
 		$result = WC_Helper_API::post( 'oauth/invalidate_token', array(
 			'authenticated' => true,
@@ -469,13 +468,13 @@ class WC_Helper {
 
 		$activated = wp_remote_retrieve_response_code( $request ) == 200;
 		$body = json_decode( wp_remote_retrieve_body( $request ), true );
-		if ( ! $activated && ! empty( $body['code'] ) && $body['code'] == 'already_connected' ) {
+		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' == $body['code'] ) {
 			$activated = true;
 		}
 
 		// Attempt to activate this plugin.
 		$local = self::_get_local_from_product_id( $product_id );
-		if ( $local && $local['_type'] == 'plugin' && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
+		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
 			activate_plugin( $local['_filename'] );
 		}
 
@@ -510,7 +509,7 @@ class WC_Helper {
 		) );
 
 		$code = wp_remote_retrieve_response_code( $request );
-		$deactivated = $code == 200;
+		$deactivated = 200 == $code;
 		if ( ! $deactivated ) {
 			self::log( sprintf( 'Deactivate API call returned a non-200 response code (%d)', $code ) );
 		}
@@ -625,7 +624,7 @@ class WC_Helper {
 		// Back-compat for woothemes_queue_update().
 		$_compat = array();
 		if ( ! empty( $GLOBALS['woothemes_queued_updates'] ) ) {
-			foreach( $GLOBALS['woothemes_queued_updates'] as $_compat_plugin ) {
+			foreach ( $GLOBALS['woothemes_queued_updates'] as $_compat_plugin ) {
 				$_compat[ $_compat_plugin->file ] = array(
 					'product_id' => $_compat_plugin->product_id,
 					'file_id' => $_compat_plugin->file_id,

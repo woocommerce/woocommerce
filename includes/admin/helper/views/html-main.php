@@ -44,7 +44,10 @@
 						'autorenews' => $subscription['autorenew'],
 					);
 
-					$classes = array_filter( $classes, function( $i ) { return (bool) $i; } );
+					$classes = array_filter( $classes, function( $i ) {
+						return (bool) $i;
+					} );
+
 					$classes = array_keys( $classes );
 				?>
 				<tr>

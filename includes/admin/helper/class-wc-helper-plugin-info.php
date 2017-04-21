@@ -18,7 +18,7 @@ class WC_Helper_Plugin_Info {
 	 * @return object An updated $response.
 	 */
 	public static function plugins_api( $response, $action, $args ) {
-		if ( $action !== 'plugin_information' ) {
+		if ( 'plugin_information' !== $action ) {
 			return $response;
 		}
 
@@ -29,7 +29,7 @@ class WC_Helper_Plugin_Info {
 		$found_plugin = null;
 
 		// Look through local Woo plugins by slugs.
-		foreach( WC_Helper::get_local_woo_plugins() as $plugin ) {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$slug = dirname( $plugin['_filename'] );
 			if ( dirname( $plugin['_filename'] ) == $args->slug ) {
 				$plugin['_slug'] = $args->slug;
