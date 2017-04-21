@@ -1579,7 +1579,7 @@ class WC_AJAX {
 
 		if ( $variations ) {
 			foreach ( $variations as $variation_object ) {
-				// Skip, if variable_object is null.
+				// Skip, if variation object is null.
 				if ( !  $variation_object ) {
 					continue;
 				}
