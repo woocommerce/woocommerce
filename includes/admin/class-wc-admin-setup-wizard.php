@@ -536,7 +536,8 @@ class WC_Admin_Setup_Wizard {
 
 			/*
 			 * If this is the initial shipping setup, create a shipping
-			 * zone containing the country the store is located in.
+			 * zone containing the country the store is located in, with
+			 * a "free shipping" method preconfigured.
 			 */
 			if ( false === $current_shipping ) {
 				$default_country = get_option( 'woocommerce_default_country' );
@@ -546,6 +547,7 @@ class WC_Admin_Setup_Wizard {
 				$zone->set_zone_order( 0 );
 				$zone->add_location( $location['country'], 'country' );
 				$zone->set_zone_name( $zone->get_formatted_location() );
+				$zone->add_shipping_method( 'free_shipping' );
 				$zone->save();
 			}
 		} else {
