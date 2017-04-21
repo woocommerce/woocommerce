@@ -1,0 +1,160 @@
+/*------------------------------------------------------------------------------
+  General table styling
+------------------------------------------------------------------------------*/
+
+.wc-helper {
+	.striped > tbody > :nth-child(odd),
+	ul.striped > :nth-child(odd),
+	.alternate {
+		background-color: #ffffff;
+	}
+
+	table.widefat, .wp-editor-container, .stuffbox, p.popular-tags, .widgets-holder-wrap, .popular-tags, .feature-filter, .imgedit-group, .comment-ays {
+		padding-top: 5px;
+	}
+
+	.widefat thead tr th, .widefat thead tr td, .widefat tfoot tr th, .widefat tfoot tr td {
+		color: #32373c;
+		padding-top: 10px;
+		padding-bottom: 15px;
+	}
+
+	.widefat td {
+		border-bottom: 1px solid #e5e5e5;
+		padding-top: 15px;
+		padding-bottom: 15px;
+	}
+
+	.product-name {
+		color: #0073AA;
+	}
+}
+
+/*------------------------------------------------------------------------------
+  Expired notification bar
+------------------------------------------------------------------------------*/
+
+.wc-helper {
+	td.color-bar {
+		border-left: solid 4px transparent;
+	}
+
+	td.color-bar.expired {
+		border-left-color: #B81C23;
+	}
+
+	td.color-bar.expiring {
+		border-left-color: orange;
+	}
+
+	td.color-bar.update-available {
+		border-left-color: #8FAE1B;
+	}
+
+	td.color-bar.expiring.update-available {
+		border-left-color: #8FAE1B;
+	}
+}
+
+/*------------------------------------------------------------------------------
+  Connected account table
+------------------------------------------------------------------------------*/
+
+.wc-helper {
+	.connect-wrapper {
+		background-color: #fff;
+		margin-bottom: 25px;
+		padding: 20px;
+		border: 1px solid #e5e5e5;
+	}
+
+	.connected {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.connected img {
+		border: 1px solid #e5e5e5;
+		vertical-align: top;
+	}
+
+	.connected p {
+		display: inline-block;
+		margin: 10px 0 0 20px;
+	}
+
+	.buttons {
+		display: block;
+		margin-top: 10px;
+	}
+}
+
+/*------------------------------------------------------------------------------
+  Initial connection screen
+------------------------------------------------------------------------------*/
+
+.wc-helper {
+	.start-container {
+		background-color: #ffffff;
+		padding: 45px 20px 20px 30px;
+		position: relative;
+		overflow: hidden;
+		border-left: 4px solid #cc99c2;
+	}
+
+	.start-container::before {
+		content: "\e01C";
+		font-family: WooCommerce;
+		text-align: center;
+		line-height: 1;
+		color: #eee2ec;
+		display: block;
+		width: 1em;
+		font-size: 192px;
+		top: 65%;
+		right: -3%;
+		position: absolute;
+	}
+
+	.start-container h2 {
+		font-size: 24px;
+		line-height: 29px;
+		position: relative;
+	}
+
+	.start-container p {
+		font-size: 16px;
+		margin-bottom: 30px;
+		position: relative;
+	}
+
+	.wp-core-ui .button-primary {
+		background: #bb77ae;
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		color: #fff;
+		text-shadow: 0 -1px 1px #A36597, 1px 0 1px #A36597, 0 1px 1px #A36597, -1px 0 1px #A36597;
+	}
+
+	.wp-core-ui a.button-primary:hover {
+		background: #A36597;
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+	}
+
+	.wp-core-ui a.button-primary:focus {
+		background: #A36597;
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+	}
+
+	.wp-core-ui a.button-primary:active {
+		background: #A36597;
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+	}
+}
