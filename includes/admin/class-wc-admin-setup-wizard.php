@@ -532,6 +532,18 @@ class WC_Admin_Setup_Wizard {
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+
+			/*
+			 * Create a shipping zone containing the country the store is located in.
+			 */
+			$default_country = get_option( 'woocommerce_default_country' );
+			$location        = wc_format_country_state_string( $default_country );
+
+			$zone = new WC_Shipping_Zone( null );
+			$zone->set_zone_order( 0 );
+			$zone->add_location( $location['country'], 'country' );
+			$zone->set_zone_name( $zone->get_formatted_location() );
+			$zone->save();
 		} else {
 			update_option( 'woocommerce_ship_to_countries', 'disabled' );
 		}
