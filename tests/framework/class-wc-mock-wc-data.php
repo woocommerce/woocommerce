@@ -224,3 +224,11 @@ class WC_Mock_WC_Data extends WC_Data {
 		return $this->get_id();
 	}
 }
+
+/**
+ * A child class of WC_Mock_WC_Data but it has the meta data
+ * cache enabled.
+ */
+class WC_Mock_WC_Data_With_Cache extends WC_Mock_WC_Data {
+	protected $cache_group = __CLASS__;
+}
