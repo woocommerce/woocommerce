@@ -306,6 +306,12 @@ class WC_Meta_Box_Order_Data {
 
 							// Display form
 							echo '<div class="edit_address">';
+							
+							$wooocommerce_default_customer_locations = wc_get_customer_default_location();
+							if( !empty( $wooocommerce_default_customer_locations ) && isset( $wooocommerce_default_customer_locations ) ) { 
+							    $woocommerce_default_country = !empty( $wooocommerce_default_customer_locations['country'] ) ? $wooocommerce_default_customer_locations['country'] : '';
+							    $woocommerce_default_state = !empty( $wooocommerce_default_customer_locations['state'] ) ? $wooocommerce_default_customer_locations['state'] : '';
+							}
 
 							foreach ( self::$billing_fields as $key => $field ) {
 								if ( ! isset( $field['type'] ) ) {
@@ -314,6 +320,12 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['id'] ) ) {
 									$field['id'] = '_billing_' . $key;
 								}
+								if( $key === "country" ) { 
+									$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_country;
+								} else if( $key === "state" ) { 
+									$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_state;
+								}
+								
 								switch ( $field['type'] ) {
 									case 'select' :
 										woocommerce_wp_select( $field );
@@ -411,6 +423,11 @@ class WC_Meta_Box_Order_Data {
 									}
 									if ( ! isset( $field['id'] ) ) {
 										$field['id'] = '_shipping_' . $key;
+									}
+									if( $key === "country" ) { 
+										$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_country;
+									} else if( $key === "state" ) { 
+										$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_state;
 									}
 
 									switch ( $field['type'] ) {
