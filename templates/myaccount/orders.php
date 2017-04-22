@@ -17,11 +17,9 @@
  * @package WooCommerce/Templates
  * @version 3.0.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 <?php if ( $has_orders ) : ?>
@@ -79,15 +77,12 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 											'name' => __( 'Cancel', 'woocommerce' ),
 										),
 									);
-
 									if ( ! $order->needs_payment() ) {
 										unset( $actions['pay'] );
 									}
-
 									if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
 										unset( $actions['cancel'] );
 									}
-
 									if ( $actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order ) ) {
 										foreach ( $actions as $key => $action ) {
 											echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';

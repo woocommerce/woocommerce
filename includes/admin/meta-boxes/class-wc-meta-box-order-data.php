@@ -306,6 +306,13 @@ class WC_Meta_Box_Order_Data {
 
 							// Display form
 							echo '<div class="edit_address">';
+							
+							$woocommerce_default_store_locator = get_option('woocommerce_default_country');
+                            if( !empty( $woocommerce_default_store_locator ) && $woocommerce_default_store_locator != '' ) { 
+                                $woocommerce_default_store_locator = explode(':', $woocommerce_default_store_locator);
+                                $woocommerce_default_country = !empty( $woocommerce_default_store_locator[0] ) ? $woocommerce_default_store_locator[0] : '';
+                                $woocommerce_default_state = !empty( $woocommerce_default_store_locator[1] ) ? $woocommerce_default_store_locator[1] : '';
+                            }
 
 							foreach ( self::$billing_fields as $key => $field ) {
 								if ( ! isset( $field['type'] ) ) {
@@ -313,6 +320,11 @@ class WC_Meta_Box_Order_Data {
 								}
 								if ( ! isset( $field['id'] ) ) {
 									$field['id'] = '_billing_' . $key;
+								}
+								if( $key === "country" ) { 
+									$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_country;
+								} else if( $key === "state" ){ 
+									$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_state;
 								}
 								switch ( $field['type'] ) {
 									case 'select' :
@@ -411,6 +423,11 @@ class WC_Meta_Box_Order_Data {
 									}
 									if ( ! isset( $field['id'] ) ) {
 										$field['id'] = '_shipping_' . $key;
+									}
+									if( $key === "country" ) { 
+										$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_country;
+									} else if( $key === "state" ){ 
+										$field['value'] = !empty( get_post_meta( $post->ID, $field['id'], true ) ) ? get_post_meta( $post->ID, $field['id'], true ) : $woocommerce_default_state;
 									}
 
 									switch ( $field['type'] ) {
