@@ -37,6 +37,8 @@ $oldcol = 1;
 $col    = 1;
 ?>
 
+<?php do_action( 'woocommerce_before_account_addresses' ); ?>
+
 <p>
 	<?php echo apply_filters( 'woocommerce_my_account_my_address_description', __( 'The following addresses will be used on the checkout page by default.', 'woocommerce' ) ); ?>
 </p>
