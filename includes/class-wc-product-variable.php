@@ -148,7 +148,13 @@ class WC_Product_Variable extends WC_Product {
 		} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
 			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
 		} else {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
+			$suffix = '';
+			if ( get_option( 'woocommerce_price_display_suffix' ) && wc_tax_enabled() ) {
+				$variation_id = key( $prices['price'] );
+				$variation    = wc_get_product( $variation_id );
+				$suffix       = $variation->get_price_suffix();
+			}
+			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $suffix, $this );
 		}
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
