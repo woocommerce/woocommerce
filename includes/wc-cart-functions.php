@@ -41,6 +41,20 @@ function wc_empty_cart() {
 }
 
 /**
+ * Show notice if cart is empty.
+ *
+ * @since 3.1.0
+ */
+function wc_empty_cart_message() {
+    ?>
+        <p class="cart-empty">
+            <?php echo apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ); ?>
+        </p>
+    <?php
+}
+add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
+
+/**
  * Load the persistent cart.
  *
  * @param string $user_login
