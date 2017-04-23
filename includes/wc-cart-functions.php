@@ -330,7 +330,7 @@ function wc_cart_totals_fee_html( $fee ) {
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
-	$label = $method->get_label();
+	$label = __( $method->get_label(), 'woocommerce' );
 
 	if ( $method->cost > 0 ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
