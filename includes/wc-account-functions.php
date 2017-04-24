@@ -184,7 +184,7 @@ function wc_get_account_orders_columns() {
 		'order-date'    => __( 'Date', 'woocommerce' ),
 		'order-status'  => __( 'Status', 'woocommerce' ),
 		'order-total'   => __( 'Total', 'woocommerce' ),
-		'order-actions' => '&nbsp;',
+		'order-actions' => __( 'Actions', 'woocommerce' ),
 	) );
 
 	// Deprecated filter since 2.6.0.
