@@ -65,6 +65,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'reviews_allowed' => 'open' === $post_object->comment_status,
 		) );
 
+		$this->read_downloads( $product );
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
@@ -142,8 +143,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		// Only update the post when the post data changes.
 		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $product->get_id(),
+			$post_data = array(
 				'post_title'        => $title,
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
@@ -153,7 +153,22 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-			) );
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
+				clean_post_cache( $product->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
@@ -179,40 +194,34 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 	/**
 	 * Generates a title with attribute information for a variation.
-	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
-	 * All other products will get a title of the form "Name - Value, Value"
+	 * Products will get a title of the form "Name - Value, Value" or just "Name".
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$include_attribute_names = false;
 		$attributes = (array) $product->get_attributes();
 
-		// Determine whether to include attribute names through counting the number of one-word attribute values.
-		$one_word_attributes = 0;
-		foreach ( $attributes as $name => $value ) {
-			if ( false === strpos( $value, '-' ) ) {
-				++$one_word_attributes;
-			}
-			if ( $one_word_attributes > 1 ) {
-				$include_attribute_names = true;
-				break;
+		// Don't include attributes if the product has 3+ attributes.
+		$should_include_attributes = count( $attributes ) < 3;
+
+		// Don't include attributes if an attribute name has 2+ words.
+		if ( $should_include_attributes ) {
+			foreach ( $attributes as $name => $value ) {
+				if ( false !== strpos( $name, '-' ) ) {
+					$should_include_attributes = false;
+					break;
+				}
 			}
 		}
 
-		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
-		$title_base_text         = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_attributes_text   = wc_get_formatted_variation( $product, true, $include_attribute_names );
-		$separator               = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
+		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
+		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
+		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
-		return apply_filters( 'woocommerce_product_variation_title',
-			$title_base_text . $separator . $title_attributes_text,
-			$product,
-			$title_base_text,
-			$title_attributes_text
-		);
+		return apply_filters( 'woocommerce_product_variation_title', rtrim( $title_base . $separator . $title_suffix, $separator ), $product, $title_base, $title_suffix );
 	}
 
 	/**
@@ -244,7 +253,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
 			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
-			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 			'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),

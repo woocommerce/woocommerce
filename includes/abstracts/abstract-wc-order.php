@@ -434,6 +434,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_keys( wc_get_order_statuses() );
 	}
 
+	/**
+	 * Get user ID. Used by orders, not other order types like refunds.
+	 *
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_user_id( $context = 'view' ) {
+		return 0;
+	}
+
+	/**
+	 * Get user. Used by orders, not other order types like refunds.
+	 *
+	 * @return WP_User|false
+	 */
+	public function get_user() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -1078,14 +1097,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax : $tax;
+				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
 			}
 		}
 
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax : $tax;
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
 			}
 		}
 
@@ -1351,7 +1370,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			// Remove non-compound taxes.
 			foreach ( $this->get_taxes() as $tax ) {
-				if ( $this->is_compound() ) {
+				if ( $tax->is_compound() ) {
 					continue;
 				}
 				$subtotal = $subtotal + $tax->get_tax_total() + $tax->get_shipping_tax_total();

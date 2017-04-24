@@ -148,7 +148,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				}
 			}
 
-			if ( $this->handles[ $handle ] = @fopen( $file, $mode ) ) {
+			if ( $resource = @fopen( $file, $mode ) ) {
+				$this->handles[ $handle ] = $resource;
 				return true;
 			}
 		}
@@ -163,7 +164,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool True if $handle is open.
 	 */
 	protected function is_open( $handle ) {
-		return array_key_exists( $handle, $this->handles );
+		return array_key_exists( $handle, $this->handles ) && is_resource( $this->handles[ $handle ] );
 	}
 
 	/**
@@ -175,7 +176,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
+		if ( $this->is_open( $handle ) ) {
 			$result = fclose( $this->handles[ $handle ] );
 			unset( $this->handles[ $handle ] );
 		}

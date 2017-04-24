@@ -358,4 +358,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		wc_product_force_unique_sku( $product_4_id );
 		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
 	}
+
+	/**
+	 * Test wc_is_attribute_in_product_name
+	 *
+	 * @since 3.0.2
+	 */
+	public function test_wc_is_attribute_in_product_name() {
+		$this->assertTrue( wc_is_attribute_in_product_name( 'L', 'Product &ndash; L' ) );
+		$this->assertTrue( wc_is_attribute_in_product_name( 'Two Words', 'Product &ndash; L, Two Words' ) );
+		$this->assertTrue( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; The Cool One &ndash; Blue, Large' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product L Thing' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; Large, Blueish' ) );
+	}
 }

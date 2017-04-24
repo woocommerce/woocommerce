@@ -316,7 +316,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */

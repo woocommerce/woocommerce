@@ -41,7 +41,7 @@ class WC_Admin_Customize {
 			'title'      => __( 'WooCommerce endpoints', 'woocommerce' ),
 			'type_label' => __( 'WooCommerce endpoint', 'woocommerce' ),
 			'type'       => 'woocommerce_nav',
-			'object'     => 'woocommerce_endpoint'
+			'object'     => 'woocommerce_endpoint',
 		);
 
 		return $item_types;

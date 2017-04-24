@@ -176,6 +176,10 @@ p.demo_store,
 				transition: all cubic-bezier(0.795, -0.035, 0.000, 1.000) .5s;
 			}
 
+			.woocommerce-product-gallery__wrapper .zoomImg {
+				background-color: #fff;
+			}
+
 			.woocommerce-product-gallery__image:nth-child(n+2) {
 				width: 25%;
 				display: inline-block;

@@ -43,26 +43,29 @@ span.mce_woocommerce_shortcodes_button {
 	}
 }
 
-.wc_plugin_upgrade_notice {
-	font-weight: normal;
-	color: #fff;
-	background: #d54d21;
-	padding: 1em;
-	margin: 9px 0;
+#woocommerce-update {
+	p.wc_plugin_upgrade_notice {
+		font-weight: normal;
+		color: #fff !important;
+		background: #d54d21 !important;
+		padding: 1em !important;
+		margin: 9px 0 !important;
 
-	a {
-		color: #fff;
-		text-decoration: underline;
-	}
+		a {
+			color: #fff;
+			text-decoration: underline;
+		}
 
-	&::before {
-		content: '\f348';
-		display: inline-block;
-		font: 400 18px/1 dashicons;
-		speak: none;
-		margin: 0 8px 0 -2px;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		vertical-align: top;
+		&::before {
+			color: #fff !important;
+			content: '\f348';
+			display: inline-block;
+			font: 400 18px/1 dashicons;
+			speak: none;
+			margin: 0 8px 0 -2px;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			vertical-align: top;
+		}
 	}
 }

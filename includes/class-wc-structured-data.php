@@ -92,7 +92,7 @@ class WC_Structured_Data {
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
 			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'http://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
@@ -203,7 +203,7 @@ class WC_Structured_Data {
 		$markup_offer = array(
 			'@type'         => 'Offer',
 			'priceCurrency' => $currency,
-			'availability'  => 'http://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+			'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 			'sku'           => $product->get_sku(),
 			'image'         => wp_get_attachment_url( $product->get_image_id() ),
 			'description'   => $product->get_description(),
@@ -254,7 +254,10 @@ class WC_Structured_Data {
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
 		$markup['description']   = get_comment_text( $comment->comment_ID );
-
+		$markup['itemReviewed']  = array(
+			'@type' => 'Product',
+			'name'  => get_the_title( $comment->post_ID ),
+		);
 		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
 			$markup['reviewRating']  = array(
 				'@type'       => 'rating',
@@ -283,6 +286,10 @@ class WC_Structured_Data {
 	 */
 	public function generate_breadcrumblist_data( $breadcrumbs ) {
 		$crumbs = $breadcrumbs->get_breadcrumb();
+
+		if ( empty( $crumbs ) || ! is_array( $crumbs ) ) {
+			return;
+		}
 
 		$markup                    = array();
 		$markup['@type']           = 'BreadcrumbList';
@@ -342,13 +349,13 @@ class WC_Structured_Data {
 		$shop_url       = home_url();
 		$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
 		$order_statuses = array(
-			'pending'    => 'http://schema.org/OrderPaymentDue',
-			'processing' => 'http://schema.org/OrderProcessing',
-			'on-hold'    => 'http://schema.org/OrderProblem',
-			'completed'  => 'http://schema.org/OrderDelivered',
-			'cancelled'  => 'http://schema.org/OrderCancelled',
-			'refunded'   => 'http://schema.org/OrderReturned',
-			'failed'     => 'http://schema.org/OrderProblem',
+			'pending'    => 'https://schema.org/OrderPaymentDue',
+			'processing' => 'https://schema.org/OrderProcessing',
+			'on-hold'    => 'https://schema.org/OrderProblem',
+			'completed'  => 'https://schema.org/OrderDelivered',
+			'cancelled'  => 'https://schema.org/OrderCancelled',
+			'refunded'   => 'https://schema.org/OrderReturned',
+			'failed'     => 'https://schema.org/OrderProblem',
 		);
 
 		$markup_offers = array();

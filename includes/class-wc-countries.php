@@ -650,7 +650,10 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
-				),
+                    'state' => array(
+                        'required' => false,
+					),
+                ),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -797,6 +800,16 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'GP' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'GF' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'HK' => array(
 					'postcode' => array(
 						'required' => false,
@@ -866,6 +879,21 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'KW' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'LB' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'MQ' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'NL' => array(
 					'postcode' => array(
 						'priority' => 65,
@@ -909,6 +937,11 @@ class WC_Countries {
 					),
 				),
 				'PT' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'RE' => array(
 					'state' => array(
 						'required' => false,
 					),
@@ -1012,6 +1045,11 @@ class WC_Countries {
 					'postcode' => array(
 						'required' => false,
 						'hidden'   => true,
+					),
+				),
+				'YT' => array(
+					'state' => array(
+						'required' => false,
 					),
 				),
 				'ZA' => array(

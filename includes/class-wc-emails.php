@@ -88,7 +88,7 @@ class WC_Emails {
 			'woocommerce_created_customer',
 		) );
 
-		if ( apply_filters( 'woocommerce_defer_transactional_emails', true ) ) {
+		if ( apply_filters( 'woocommerce_defer_transactional_emails', false ) ) {
 			self::$background_emailer = new WC_Background_Emailer();
 
 			foreach ( $email_actions as $action ) {
@@ -102,13 +102,18 @@ class WC_Emails {
 	}
 
 	/**
-	 * Queue transactional email so it's not sent in current request.
+	 * Queues transactional email so it's not sent in current request if enabled,
+	 * otherwise falls back to send now.
 	 */
 	public static function queue_transactional_email() {
-		self::$background_emailer->push_to_queue( array(
-			'filter' => current_filter(),
-			'args'   => func_get_args(),
-		) );
+		if ( is_a( self::$background_emailer, 'WC_Background_Emailer' ) ) {
+			self::$background_emailer->push_to_queue( array(
+				'filter' => current_filter(),
+				'args'   => func_get_args(),
+			) );
+		} else {
+			call_user_func_array( array( __CLASS__, 'send_transactional_email' ), func_get_args() );
+		}
 	}
 
 	/**
@@ -139,9 +144,15 @@ class WC_Emails {
 	 * @param array $args Email args (default: []).
 	 */
 	public static function send_transactional_email( $args = array() ) {
-		$args = func_get_args();
-		self::instance(); // Init self so emails exist.
-		do_action_ref_array( current_filter() . '_notification', $args );
+		try {
+			$args = func_get_args();
+			self::instance(); // Init self so emails exist.
+			do_action_ref_array( current_filter() . '_notification', $args );
+		} catch ( Exception $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				trigger_error( 'Transactional email triggered fatal error for callback ' . current_filter(), E_USER_WARNING );
+			}
+		}
 	}
 
 	/**
@@ -451,6 +462,10 @@ class WC_Emails {
 	 * @param WC_Product $product
 	 */
 	public function low_stock( $product ) {
+		if ( 'no' === get_option( 'woocommerce_notify_low_stock', 'yes' ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		/* translators: 1: product name 2: items in stock */
 		$message = sprintf(
@@ -474,6 +489,10 @@ class WC_Emails {
 	 * @param WC_Product $product
 	 */
 	public function no_stock( $product ) {
+		if ( 'no' === get_option( 'woocommerce_notify_no_stock', 'yes' ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );

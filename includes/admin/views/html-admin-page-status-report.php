@@ -8,6 +8,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $wpdb;
+
+if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
+}
+
 $system_status  = new WC_REST_System_Status_Controller;
 $environment    = $system_status->get_environment_info();
 $database       = $system_status->get_database_info();
@@ -474,6 +479,17 @@ $pages          = $system_status->get_pages();
 			<td><?php
 				$display_terms = array();
 				foreach ( $settings['taxonomies'] as $slug => $name ) {
+					$display_terms[] = strtolower( $name ) . ' (' . $slug . ')';
+				}
+				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+			?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Taxonomies: Product Visibility"><?php _e( 'Taxonomies: Product visibility', 'woocommerce' ); ?></th>
+			<td class="help"><?php echo wc_help_tip( __( 'A list of taxonomy terms used for product visibility.', 'woocommerce' ) ); ?></td>
+			<td><?php
+				$display_terms = array();
+				foreach ( $settings['product_visibility_terms'] as $slug => $name ) {
 					$display_terms[] = strtolower( $name ) . ' (' . $slug . ')';
 				}
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );

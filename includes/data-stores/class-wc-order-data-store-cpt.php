@@ -383,7 +383,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['paged'] = absint( $args['page'] );
 		}
 
-		if ( ! empty( $args['customer'] ) ) {
+		if ( isset( $args['customer'] ) && '' !== $args['customer'] ) {
 			$values = is_array( $args['customer'] ) ? $args['customer'] : array( $args['customer'] );
 			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
 		}

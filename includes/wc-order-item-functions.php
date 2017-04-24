@@ -15,23 +15,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Add a item to an order (for example a line item).
  *
- * @access public
  * @param int $order_id
- * @return mixed
+ * @param array $item_array
+ * @return int|bool Item ID or false
  */
-function wc_add_order_item( $order_id, $item ) {
-	if ( ! $order_id = absint( $order_id ) )
+function wc_add_order_item( $order_id, $item_array ) {
+	if ( ! $order_id = absint( $order_id ) ) {
 		return false;
+	}
 
 	$defaults = array(
-		'order_item_name'       => '',
-		'order_item_type'       => 'line_item',
+		'order_item_name' => '',
+		'order_item_type' => 'line_item',
 	);
 
-	$item = wp_parse_args( $item, $defaults );
-
+	$item_array = wp_parse_args( $item_array, $defaults );
 	$data_store = WC_Data_Store::load( 'order-item' );
-	$item_id    = $data_store->add_order_item( $order_id, $item );
+	$item_id    = $data_store->add_order_item( $order_id, $item_array );
+	$item       = WC_Order_Factory::get_order_item( $item_id );
 
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 

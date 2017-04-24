@@ -51,6 +51,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
+		$this->set_prop( 'name', wc_clean( $value ) );
 		$this->set_prop( 'method_title', wc_clean( $value ) );
 	}
 
