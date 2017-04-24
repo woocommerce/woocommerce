@@ -35,6 +35,8 @@ class WC_Order_Item_Meta {
 	 * @param \WC_Product $product defaults to null
 	 */
 	public function __construct( $item = array(), $product = null ) {
+		wc_deprecated_function( 'WC_Order_Item_Meta::__construct', '3.1', 'WC_Order_Item_Product' );
+
 		// Backwards (pre 2.4) compat
 		if ( ! isset( $item['item_meta'] ) ) {
 			$this->legacy = true;
