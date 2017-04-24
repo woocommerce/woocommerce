@@ -335,7 +335,7 @@ class WC_Webhook {
 	 * @param mixed $resource_id first hook argument, typically the resource ID
 	 * @return mixed payload data
 	 */
-	private function build_payload( $resource_id ) {
+	public function build_payload( $resource_id ) {
 		// build the payload with the same user context as the user who created
 		// the webhook -- this avoids permission errors as background processing
 		// runs with no user context
