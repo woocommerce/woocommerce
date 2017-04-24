@@ -413,6 +413,8 @@ class WC_Query {
 	 * Remove ordering queries.
 	 */
 	public function remove_ordering_args() {
+		remove_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 	}
@@ -459,9 +461,11 @@ class WC_Query {
 				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
 				break;
 			case 'price' :
-				$args['orderby']  = "meta_value_num ID";
-				$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-				$args['meta_key'] = '_price';
+				if ( 'DESC' === $order ) {
+					add_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
+				} else {
+					add_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
+				}
 				break;
 			case 'popularity' :
 				$args['meta_key'] = 'total_sales';
@@ -483,6 +487,34 @@ class WC_Query {
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
+	}
+
+	/**
+	 * Handle numeric price sorting.
+	 *
+	 * @access public
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_price_asc_post_clauses( $args ) {
+		global $wpdb;
+		$args['join']    = " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+		$args['orderby'] = " price_query.price ASC ";
+		return $args;
+	}
+
+	/**
+	 * Handle numeric price sorting.
+	 *
+	 * @access public
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_price_desc_post_clauses( $args ) {
+		global $wpdb;
+		$args['join']    = " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+		$args['orderby'] = " price_query.price DESC ";
+		return $args;
 	}
 
 	/**
