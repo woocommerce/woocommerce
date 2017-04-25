@@ -79,6 +79,7 @@ class WC_Order_Factory {
 				case 'line_item' :
 				case 'product' :
 					$classname = 'WC_Order_Item_Product';
+					$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
 				break;
 				case 'coupon' :
 					$classname = 'WC_Order_Item_Coupon';
