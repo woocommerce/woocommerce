@@ -75,10 +75,10 @@ abstract class WC_Object_Query {
 
 			'status'         => array( 'publish', 'pending', 'draft', 'future', 'private', 'inherit' ),
 
-			'per_page'       => 10,
-			'nopaging'       => false,
-			'page'           => 1,
-			'offset'         => 0,
+			'per_page'       => -1,
+			'nopaging'       => '',
+			'page'           => '',
+			'offset'         => '',
 
 			'order'          => 'DESC',
 			'orderby'        => 'date',
@@ -95,10 +95,10 @@ abstract class WC_Object_Query {
 			'meta_key'       => '',
 			'meta_value'     => '',
 			'meta_value_num' => '',
-			'meta_compare'   => '=',
+			'meta_compare'   => '',
 
 			's'              => '',
-			'exact'          => true,
+			'exact'          => '',
 			'sentence'       => '',
 
 			'fields'         => '',

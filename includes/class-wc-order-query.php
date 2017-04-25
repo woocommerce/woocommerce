@@ -75,6 +75,6 @@ class WC_Order_Query extends WC_Object_Query {
 	 * @return array of WC_Order objects
 	 */
 	public function get_orders() {
-		return WC_Data_Store::load( 'order' )->query_orders( $this->query_vars );
+		return WC_Data_Store::load( 'order' )->query( $this->query_vars );
 	}
 }

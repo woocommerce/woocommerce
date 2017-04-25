@@ -634,4 +634,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_order_type( $order_id ) {
 		return get_post_type( $order_id );
 	}
+
+	public function query( $query_vars ) {
+		$args = $this->get_wp_query_args( $query_vars );
+		$query = new WP_Query( $args );
+		return array_map( 'wc_get_order', $query->posts );
+	}
 }

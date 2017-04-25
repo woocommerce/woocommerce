@@ -67,6 +67,23 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'WC_Dummy_Data_Store_CPT', $store->get_current_class_name() );
 	}
 
+	function test_get_wp_query_args() {
+		$store = new WC_Data_Store_WP();
+		$query = new WC_Mock_WC_Object_Query( array(
+			'parent__in' => array( 1 ),
+			'status' => 'publish',
+			'somethingelse' => 'value',
+			'ignored' => '',
+		) );
+
+		$args = $store->get_wp_query_args( $query->query_vars );
+
+		$this->assertEquals( array( 1 ), $args['post_parent__in'] );
+		$this->assertEquals( 'publish', $args['post_status'] );
+		$this->assertEquals( 'value', $args['somethingelse'] );
+		$this->assertFalse( isset( $args['ignored'] ) );
+	}
+
 	/* Helper Functions. */
 
 	/**

@@ -194,4 +194,66 @@ class WC_Data_Store_WP {
 		return $props_to_update;
 	}
 
+	public function get_wp_query_args( $query_vars ) {
+
+		$skipped_values = array( '', array(), null );
+		$wp_query_args = array(
+			'meta_query' => array(),
+		);
+
+		foreach( $query_vars as $key => $value ) {
+			if ( in_array( $value, $skipped_values, true ) || 'meta_query' === $key ) {
+				continue;
+			}
+
+			if ( in_array( '_' . $key, $this->internal_meta_keys ) ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_' . $key,
+					'value'   => $value,
+					'compare' => '=',
+				);
+			} else {
+				switch ( $key ) {
+					case 'parent':
+						$wp_query_args['post_parent'] = $value;
+					break;
+					case 'parent__in':
+						$wp_query_args['post_parent__in'] = $value;
+					break;
+					case 'parent__not_in':
+						$wp_query_args['post_parent__not_in'] = $value;
+					break;
+					case 'in':
+						$wp_query_args['post__in'] = $value;
+					break;
+					case 'not_in':
+						$wp_query_args['post__not_in'] = $value;
+					break;
+					case 'password':
+						$wp_query_args['post_password'] = $value;
+					break;
+					case 'status':
+						$wp_query_args['post_status'] = $value;
+					break;
+					case 'per_page':
+						$wp_query_args['posts_per_page'] = $value;
+					break;
+					case 'type':
+						$wp_query_args['post_type'] = $value;
+					default:
+						$wp_query_args[ $key ] = $value;
+				}
+			}
+		}
+
+		if ( ! empty( $query_vars['meta_query'] ) ) {
+			if ( empty( $wp_query_args['meta_query'] ) ) {
+				$wp_query_args['meta_query'] = $query_vars['meta_query'];
+			} else {
+				$wp_query_args['meta_query'][] = $query_vars['meta_query'];
+			}
+		}
+
+		return $wp_query_args;
+	}
 }
