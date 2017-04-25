@@ -472,7 +472,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_parent_id( $value ) {
-		if ( $value && ! wc_get_order( $value ) ) {
+		if ( $value && ( $value === $this->get_id() || ! wc_get_order( $value ) ) ) {
 			$this->error( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'parent_id', absint( $value ) );
