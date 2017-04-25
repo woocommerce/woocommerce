@@ -798,8 +798,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function get_items_key( $item ) {
-		
-		if ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+		if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+			return 'line_items';
+		} elseif ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
 			return 'fee_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
 			return 'shipping_lines';
@@ -808,7 +809,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
 		} else {
-			return 'line_items';
+			return apply_filters( 'woocommerce_items_type_key', '', $item );
 		}
 	}
 
