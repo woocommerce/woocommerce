@@ -42,8 +42,10 @@ class WC_Logger implements WC_Logger_Interface {
 		if ( null === $handlers ) {
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
 		}
-		if ( ! empty( $handlers ) && is_array( $handlers ) {
-			$register_handlers = array();
+
+		$register_handlers = array();
+
+		if ( ! empty( $handlers ) && is_array( $handlers ) ) {
 			foreach ( $handlers as $handler ) {
 				$implements = class_implements( $handler );
 				if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements ) ) {
