@@ -349,7 +349,7 @@ class WC_Checkout {
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
 			$product                    = $values['data'];
-			$item                       = apply_filters( 'woocommerce_order_line_item', new WC_Order_Item_Product());
+			$item                       = apply_filters( 'woocommerce_order_line_item', new WC_Order_Item_Product(), $product);
 			$item->legacy_values        = $values; // @deprecated For legacy actions.
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
