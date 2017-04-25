@@ -345,6 +345,13 @@ class WC_Admin_Assets {
 		if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
 			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'zeroclipboard' ), WC_VERSION );
 			wp_enqueue_script( 'wc-admin-system-status' );
+			wp_localize_script(
+				'wc-admin-system-status',
+				'woocommerce_admin_system_status',
+				array(
+					'delete_log_confirmation' => esc_html__( 'Are you sure you want to delete this log?', 'woocommerce' ),
+				)
+			);
 		}
 
 		if ( in_array( $screen_id, array( 'user-edit', 'profile' ) ) ) {
