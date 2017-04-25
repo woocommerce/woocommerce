@@ -13,6 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Order_Query extends WC_Object_Query {
 
+	/**
+	 * Valid query vars for orders.
+	 * @return array
+	 */
 	protected function get_default_query_vars() {
 		return array_merge(
 			parent::get_default_query_vars(),
@@ -31,7 +35,7 @@ class WC_Order_Query extends WC_Object_Query {
 				'cart_tax'             => '',
 				'total'                => '',
 				'total_tax'            => '',
-				'customer_id'          => '',
+				'customer_user'        => '',
 				'order_key'            => '',
 				'billing_first_name'   => '',
 				'billing_last_name'    => '',
@@ -64,11 +68,13 @@ class WC_Order_Query extends WC_Object_Query {
 				'date_paid'            => '',
 			)
 		);
-
 	}
 
+	/**
+	 * Get orders matching the current query vars.
+	 * @return array of WC_Order objects
+	 */
 	public function get_orders() {
 		return WC_Data_Store::load( 'order' )->query_orders( $this->query_vars );
 	}
-
 }
