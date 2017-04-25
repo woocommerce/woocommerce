@@ -91,7 +91,7 @@ class WC_Shortcodes {
 		$transient_name              = 'wc_loop' . substr( md5( json_encode( $query_args ) . $loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
 		$random_products             = strtolower($atts['orderby']);
-
+		
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) || 'rand' === $random_products ) {
 			$products = new WP_Query( $query_args );
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
