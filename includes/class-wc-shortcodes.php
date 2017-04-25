@@ -92,7 +92,7 @@ class WC_Shortcodes {
 		$products                    = get_transient( $transient_name );
 		$random_products             = strtolower($atts['orderby']);
 
-		if ( false === $products || ! is_a( $products, 'WP_Query' ) || $random_products == 'rand' ) {
+		if ( false === $products || ! is_a( $products, 'WP_Query' ) || 'rand' === $random_products ) {
 			$products = new WP_Query( $query_args );
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
 		}
