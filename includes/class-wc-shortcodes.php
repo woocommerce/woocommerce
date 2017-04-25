@@ -90,7 +90,7 @@ class WC_Shortcodes {
 		$query_args                  = apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name );
 		$transient_name              = 'wc_loop' . substr( md5( json_encode( $query_args ) . $loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
-		$random_products             =  strtolower($atts['orderby']);
+		$random_products             = strtolower($atts['orderby']);
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) || $random_products == 'rand' ) {
 			$products = new WP_Query( $query_args );
