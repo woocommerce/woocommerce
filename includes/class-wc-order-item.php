@@ -169,10 +169,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Expands things like term slugs before return.
 	 *
-	 * @param string $hideprefix (default: _)
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
 	 * @return array
 	 */
-	public function get_formatted_meta_data( $hideprefix = '_' ) {
+	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta    = array();
 		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
@@ -180,7 +181,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
@@ -197,8 +198,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
-			// Skip items with values already in the product details area of the product name
-			if ( $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			// Skip items with values already in the product details area of the product name.
+			if ( ! $include_all && $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
 				continue;
 			}
 
