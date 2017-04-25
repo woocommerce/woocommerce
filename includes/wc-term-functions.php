@@ -552,7 +552,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 	// Main query.
 	$count_query = "
-		SELECT COUNT( DISTINCT ID ) FROM wp_posts
+		SELECT COUNT( DISTINCT ID ) FROM {$wpdb->posts}
 		WHERE post_status = 'publish'
 		AND post_type = 'product'
 	";
