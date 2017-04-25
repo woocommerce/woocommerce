@@ -819,7 +819,7 @@ class WC_Checkout {
 	 * @throws Exception
 	 */
 	protected function process_customer( $data ) {
-		$customer_id = get_current_user_id();
+		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
