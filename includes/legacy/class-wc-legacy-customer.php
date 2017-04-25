@@ -173,6 +173,22 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	}
 
 	/**
+	 * Legacy get address.
+	 */
+	function get_address() {
+		wc_deprecated_function( 'WC_Customer::get_address', '3.0', 'WC_Customer::get_billing_address_1' );
+		return $this->get_billing_address_1();
+	}
+
+	/**
+	 * Legacy get address 2.
+	 */
+	function get_address_2() {
+		wc_deprecated_function( 'WC_Customer::get_address_2', '3.0', 'WC_Customer::get_billing_address_2' );
+		return $this->get_billing_address_2();
+	}
+
+	/**
 	 * Legacy get country.
 	 */
 	function get_country() {
