@@ -306,6 +306,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-emails.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-query.php' );
+		include_once( WC_ABSPATH . 'incldues/class-wc-meta-data.php' ); // Meta data internal object
 		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller

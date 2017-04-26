@@ -320,11 +320,11 @@ abstract class WC_Data {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
-					$this->meta_data[] = (object) array(
+					$this->meta_data[] = new WC_Meta_Data( array(
 						'id'    => $meta['id'],
 						'key'   => $meta['key'],
 						'value' => $meta['value'],
-					);
+					) );
 				}
 			}
 		}
@@ -343,10 +343,10 @@ abstract class WC_Data {
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
-		$this->meta_data[] = (object) array(
+		$this->meta_data[] = new WC_Meta_Data( array(
 			'key'   => $key,
 			'value' => $value,
-		);
+		) );
 	}
 
 	/**
@@ -448,11 +448,11 @@ abstract class WC_Data {
 			$raw_meta_data   = $this->data_store->read_meta( $this );
 			if ( $raw_meta_data ) {
 				foreach ( $raw_meta_data as $meta ) {
-					$this->meta_data[] = (object) array(
+					$this->meta_data[] = new WC_Meta_Data( array(
 						'id'    => (int) $meta->meta_id,
 						'key'   => $meta->meta_key,
 						'value' => maybe_unserialize( $meta->meta_value ),
-					);
+					) );
 				}
 
 				if ( ! empty( $this->cache_group ) ) {
@@ -480,8 +480,12 @@ abstract class WC_Data {
 			} elseif ( empty( $meta->id ) ) {
 				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
 				$this->meta_data[ $array_key ]->id = $new_meta_id;
+				$meta->apply_changes();
 			} else {
-				$this->data_store->update_meta( $this, $meta );
+				if ( $meta->get_changes() ) {
+					$this->data_store->update_meta( $this, $meta );
+					$meta->apply_changes();
+				}
 			}
 		}
 
