@@ -222,6 +222,8 @@ class WC_Admin_Assets {
 				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 				'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
 				'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
+				'placeholder_name'       => esc_attr__( 'Name (required)', 'woocommerce' ),
+				'placeholder_value'      => esc_attr__( 'Value (required)', 'woocommerce' ),
 			) );
 		}
 		if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
