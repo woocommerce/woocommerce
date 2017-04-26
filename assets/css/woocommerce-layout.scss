@@ -54,16 +54,6 @@
 			float: left;
 			width: 48%;
 		}
-		
-		figure {
-			a {
-				display: block;
-				
-				img {
-					max-width: 100%;
-				}
-			}
-		}
 
 		div.thumbnails {
 			@include clearfix();
