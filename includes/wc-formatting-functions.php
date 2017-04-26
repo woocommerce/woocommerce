@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Converts a string (e.g. yes or no) to a bool.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @return bool
  */
@@ -26,7 +26,7 @@ function wc_string_to_bool( $string ) {
 
 /**
  * Converts a bool to a string.
- * @since 2.7.0
+ * @since 3.0.0
  * @param bool $bool
  * @return string yes or no
  */
@@ -39,7 +39,7 @@ function wc_bool_to_string( $bool ) {
 
 /**
  * Explode a string into an array by $delimiter and remove empty values.
- * @since 2.7.0
+ * @since 3.0.0
  * @param string $string
  * @param string $delimiter
  * @return array
@@ -165,6 +165,7 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
  * @return float
  */
 function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
+	$weight  = (float) $weight;
 	$to_unit = strtolower( $to_unit );
 
 	if ( empty( $from_unit ) ) {
@@ -256,7 +257,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,]/', '', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
 	}
 
 	if ( false !== $dp ) {
@@ -314,7 +315,7 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $value
  * @return string
  */
@@ -338,7 +339,7 @@ function wc_clean( $var ) {
 
 /**
  * Run wc_clean over posted textarea but maintain line breaks.
- * @since  2.7.0
+ * @since  3.0.0
  * @param string $var
  * @return string
  */
@@ -534,13 +535,39 @@ function wc_time_format() {
 }
 
 /**
+ * Convert mysql datetime to PHP timestamp, forcing UTC. Wrapper for strtotime.
+ *
+ * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
+ *
+ * @since  3.0.0
+ * @return int
+ */
+function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
+	$original_timezone = date_default_timezone_get();
+
+	// @codingStandardsIgnoreStart
+	date_default_timezone_set( 'UTC' );
+
+	if ( null === $from_timestamp ) {
+		$next_timestamp = strtotime( $time_string );
+	} else {
+		$next_timestamp = strtotime( $time_string, $from_timestamp );
+	}
+
+	date_default_timezone_set( $original_timezone );
+	// @codingStandardsIgnoreEnd
+
+	return $next_timestamp;
+}
+
+/**
  * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
  * a WP core method exists (see https://core.trac.wordpress.org/ticket/24730).
  *
  * Adapted from https://secure.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
  *
  * @since 2.1
- * @return string a valid PHP timezone string for the site
+ * @return string PHP timezone string for the site
  */
 function wc_timezone_string() {
 
@@ -550,7 +577,7 @@ function wc_timezone_string() {
 	}
 
 	// get UTC offset, if it isn't set then return UTC
-	if ( 0 === ( $utc_offset = get_option( 'gmt_offset', 0 ) ) ) {
+	if ( 0 === ( $utc_offset = intval( get_option( 'gmt_offset', 0 ) ) ) ) {
 		return 'UTC';
 	}
 
@@ -558,31 +585,42 @@ function wc_timezone_string() {
 	$utc_offset *= 3600;
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset, 0 );
-
-	// last try, guess timezone string manually
-	if ( false === $timezone ) {
-		$is_dst = date( 'I' );
-
-		foreach ( timezone_abbreviations_list() as $abbr ) {
-			foreach ( $abbr as $city ) {
-				if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
-					return $city['timezone_id'];
-				}
-			}
-		}
-
-		// fallback to UTC
-		return 'UTC';
+	if ( $timezone = timezone_name_from_abbr( '', $utc_offset ) ) {
+		return $timezone;
 	}
 
-	return $timezone;
+	// last try, guess timezone string manually
+	foreach ( timezone_abbreviations_list() as $abbr ) {
+		foreach ( $abbr as $city ) {
+			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) {
+				return $city['timezone_id'];
+			}
+		}
+	}
+
+	// fallback to UTC
+	return 'UTC';
+}
+
+/**
+ * Get timezone offset in seconds.
+ *
+ * @since  3.0.0
+ * @return float
+ */
+function wc_timezone_offset() {
+	if ( $timezone = get_option( 'timezone_string' ) ) {
+		$timezone_object = new DateTimeZone( $timezone );
+		return $timezone_object->getOffset( new DateTime( 'now' ) );
+	} else {
+		return floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+	}
 }
 
 /**
  * Callback which can flatten post meta (gets the first value if it's an array).
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $value
  * @return mixed
  */
@@ -810,7 +848,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * @return string
  */
 function wc_format_content( $raw_string ) {
-	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
+	return apply_filters( 'woocommerce_format_content', apply_filters( 'woocommerce_short_description', $raw_string ), $raw_string );
 }
 
 /**
@@ -831,8 +869,6 @@ function wc_format_product_short_description( $content ) {
 
 	return $content;
 }
-
-add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
  * Formats curency symbols when saved in settings.
@@ -925,7 +961,7 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 /**
  * Format the stock amount ready for display based on settings.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Product $product Product object for which the stock you need to format.
  * @return string
  */
@@ -954,7 +990,7 @@ function wc_format_stock_for_display( $product ) {
 /**
  * Format the stock quantity ready for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  int  $stock_quantity
  * @param  WC_Product $product so that we can pass through the filters.
  * @return string
@@ -965,7 +1001,7 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
 
 /**
  * Format a sale price for display.
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $regular_price
  * @param  string $sale_price
  * @return string
@@ -989,7 +1025,7 @@ function wc_format_price_range( $from, $to ) {
 /**
  * Format a weight for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  float $weight Weight.
  * @return string
  */
@@ -1008,7 +1044,7 @@ function wc_format_weight( $weight ) {
 /**
  * Format dimensions for display.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  array $dimensions Array of dimensions.
  * @return string
  */
@@ -1022,4 +1058,22 @@ function wc_format_dimensions( $dimensions ) {
 	}
 
 	return apply_filters( 'woocommerce_format_dimensions', $dimension_string, $dimensions );
+}
+
+/**
+ * Format a date for output.
+ *
+ * @since  3.0.0
+ * @param  WC_DateTime $date
+ * @param  string $format Defaults to the wc_date_format function if not set.
+ * @return string
+ */
+function wc_format_datetime( $date, $format = '' ) {
+	if ( ! $format ) {
+		$format = wc_date_format();
+	}
+	if ( ! is_a( $date, 'WC_DateTime' ) ) {
+		return '';
+	}
+	return $date->date_i18n( $format );
 }

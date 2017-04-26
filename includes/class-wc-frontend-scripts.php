@@ -49,7 +49,7 @@ class WC_Frontend_Scripts {
 	/**
 	 * Add theme support for default WP themes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public static function add_default_theme_support() {
 		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -186,7 +186,7 @@ class WC_Frontend_Scripts {
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'    => array(),
-				'version' => '2.1.3',
+				'version' => '2.1.4',
 			),
 			'jquery-blockui' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
@@ -393,6 +393,7 @@ class WC_Frontend_Scripts {
 			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
 				self::enqueue_script( 'photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
+				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
 			self::enqueue_script( 'wc-single-product' );
 		}
@@ -456,7 +457,7 @@ class WC_Frontend_Scripts {
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'home_url'     => home_url(),
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
-					'hash'         => isset( $_GET['version'] ) ? wc_clean( $_GET['version'] ) : '',
+					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '',
 				);
 			break;
 			case 'wc-single-product' :
@@ -556,7 +557,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
-					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
 				);
 			break;
 		}

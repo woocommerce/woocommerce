@@ -5,7 +5,7 @@
  * @author   WooCommerce
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.7.0
+ * @version  3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -87,7 +87,6 @@ class WC_Admin_Post_Types {
 			include( 'class-wc-admin-duplicate-product.php' );
 		}
 
-		// Meta-Box Class
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
 
 		// Disable DFW feature pointer
@@ -96,11 +95,8 @@ class WC_Admin_Post_Types {
 		// Disable post type view mode options
 		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
 
-		// If first time editing, disable columns by default.
-		if ( false === get_user_option( 'manageedit-shop_ordercolumnshidden' ) ) {
-			$user = wp_get_current_user();
-			update_user_option( $user->ID, 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
-		}
+		// Update the screen options.
+		add_filter( 'default_hidden_columns', array( $this, 'adjust_shop_order_columns' ), 10, 2 );
 
 		// Show blank state
 		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
@@ -108,6 +104,20 @@ class WC_Admin_Post_Types {
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
 		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
+	}
+
+	/**
+	 * Adjust shop order columns for the user on certain conditions.
+	 */
+	public function adjust_shop_order_columns( $hidden, $screen ) {
+		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
+			if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
+				$hidden[] = 'shipping_address';
+			} else {
+				$hidden[] = 'billing_address';
+			}
+		}
+		return $hidden;
 	}
 
 	/**
@@ -314,6 +324,11 @@ class WC_Admin_Post_Types {
 			$the_product = wc_get_product( $post );
 		}
 
+		// Only continue if we have a product.
+		if ( empty( $the_product ) ) {
+			return;
+		}
+
 		switch ( $column ) {
 			case 'thumb' :
 				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'thumbnail' ) . '</a>';
@@ -424,7 +439,7 @@ class WC_Admin_Post_Types {
 				}
 
 				if ( $the_product->managing_stock() ) {
-					$stock_html .= ' (' . $the_product->get_stock_quantity() . ')';
+					$stock_html .= ' (' . wc_stock_amount( $the_product->get_stock_quantity() ) . ')';
 				}
 
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );
@@ -441,28 +456,29 @@ class WC_Admin_Post_Types {
 	 * @param string $column
 	 */
 	public function render_shop_coupon_columns( $column ) {
-		global $post;
+		global $post, $the_coupon;
+
+		if ( empty( $the_coupon ) || $the_coupon->get_id() !== $post->ID ) {
+			$the_coupon = new WC_Coupon( $post->ID );
+		}
 
 		switch ( $column ) {
 			case 'coupon_code' :
 				$edit_link = get_edit_post_link( $post->ID );
-				$title     = _draft_or_post_title();
+				$title     = $the_coupon->get_code();
 
 				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
-
 				_post_states( $post );
-
 				echo '</strong>';
 			break;
 			case 'type' :
-				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
+				echo esc_html( wc_get_coupon_type( $the_coupon->get_discount_type() ) );
 			break;
 			case 'amount' :
-				echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
+				echo esc_html( wc_format_localized_price( $the_coupon->get_amount() ) );
 			break;
 			case 'products' :
-				$product_ids = get_post_meta( $post->ID, 'product_ids', true );
-				$product_ids = $product_ids ? array_map( 'absint', explode( ',', $product_ids ) ) : array();
+				$product_ids = $the_coupon->get_product_ids();
 
 				if ( sizeof( $product_ids ) > 0 ) {
 					echo esc_html( implode( ', ', $product_ids ) );
@@ -471,7 +487,7 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'usage_limit' :
-				$usage_limit = get_post_meta( $post->ID, 'usage_limit', true );
+				$usage_limit = $the_coupon->get_usage_limit();
 
 				if ( $usage_limit ) {
 					echo esc_html( $usage_limit );
@@ -480,28 +496,27 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'usage' :
-				$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
-				$usage_limit = esc_html( get_post_meta( $post->ID, 'usage_limit', true ) );
-				$usage_url   = sprintf( '<a href="%s">%s</a>', admin_url( sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $post->post_title ) ) ), $usage_count );
+				$usage_count = $the_coupon->get_usage_count();
+				$usage_limit = $the_coupon->get_usage_limit();
 
 				/* translators: 1: count 2: limit */
 				printf(
 					__( '%1$s / %2$s', 'woocommerce' ),
-					$usage_url,
-					$usage_limit ? $usage_limit : '&infin;'
+					esc_html( $usage_count ),
+					esc_html( $usage_limit ? $usage_limit : '&infin;' )
 				);
 			break;
 			case 'expiry_date' :
-				$expiry_date = get_post_meta( $post->ID, 'expiry_date', true );
+				$expiry_date = $the_coupon->get_date_expires();
 
 				if ( $expiry_date ) {
-					echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) );
+					echo esc_html( $expiry_date->date_i18n( 'F j, Y' ) );
 				} else {
 					echo '&ndash;';
 				}
 			break;
 			case 'description' :
-				echo wp_kses_post( $post->post_excerpt );
+				echo wp_kses_post( $the_coupon->get_description() ? $the_coupon->get_description() : '&ndash;' );
 			break;
 		}
 	}
@@ -522,7 +537,7 @@ class WC_Admin_Post_Types {
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', esc_attr( date( 'c', $the_order->get_date_created() ) ), esc_html( date_i18n( __( 'Y-m-d', 'woocommerce' ), $the_order->get_date_created() ) ) );
+				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'Y-m-d', 'woocommerce' ) ) ) ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -824,7 +839,7 @@ class WC_Admin_Post_Types {
 	 * Offers a way to hook into save post without causing an infinite loop
 	 * when quick/bulk saving product info.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int    $post_id
 	 * @param object $post
 	 */
@@ -930,9 +945,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -1069,9 +1085,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			$shipping_class     = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( $shipping_class );
-			if ( $shipping_class_id ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
+				$product->set_shipping_class_id( 0 );
+			} else {
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -1271,7 +1288,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Handle shop order bulk actions.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $redirect_to URL to redirect to.
 	 * @param  string $action      Action name.
 	 * @param  array  $ids         List of ids.

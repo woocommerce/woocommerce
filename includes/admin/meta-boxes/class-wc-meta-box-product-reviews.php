@@ -27,7 +27,7 @@ class WC_Meta_Box_Product_Reviews {
 		?>
 		<select name="rating" id="rating">
 			<?php for ( $rating = 1; $rating <= 5; $rating ++ ) {
-				echo sprintf( '<option value="%1$s"%2$s>%1$s</option>', $rating, selected( $current, $rating, false ) );
+				printf( '<option value="%1$s"%2$s>%1$s</option>', $rating, selected( $current, $rating, false ) );
 			} ?>
 		</select>
 		<?php

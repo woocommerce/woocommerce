@@ -269,10 +269,10 @@ return array(
 					'state'    => '',
 					'rate'     => '24.0000',
 					'name'     => 'ALV',
-					'shipping' => true
-				)
-			)
-		)
+					'shipping' => true,
+				),
+			),
+		),
 	),
 	'FR' => array(
 		'currency_code'  => 'EUR',
@@ -436,9 +436,9 @@ return array(
 	),
 	'PL' => array(
 		'currency_code'  => 'PLN',
-		'currency_pos'   => 'right',
-		'thousand_sep'   => ',',
-		'decimal_sep'    => '.',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',

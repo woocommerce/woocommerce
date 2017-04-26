@@ -125,6 +125,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		// Get item sales data

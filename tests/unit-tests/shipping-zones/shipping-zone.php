@@ -324,7 +324,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 	/**
 	 * Test legacy zone functions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @expectedDeprecated WC_Shipping_Zone::read
 	 * @expectedDeprecated WC_Shipping_Zone::create

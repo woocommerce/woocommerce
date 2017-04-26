@@ -93,8 +93,8 @@ function wc_get_orders( $args ) {
  * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -104,6 +104,7 @@ function wc_get_order( $the_order = false ) {
  * Get all order statuses.
  *
  * @since 2.2
+ * @used-by WC_Order::set_status
  * @return array
  */
 function wc_get_order_statuses() {
@@ -131,7 +132,7 @@ function wc_is_order_status( $maybe_status ) {
 
 /**
  * Get list of statuses which are consider 'paid'.
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_is_paid_statuses() {
@@ -166,7 +167,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 /**
  * Get all registered order types.
  *
- * $for optionally define what you are getting order types for so only relevent types are returned.
+ * $for optionally define what you are getting order types for so only relevant types are returned.
  *
  * e.g. for 'order-meta-boxes', 'order-count'
  *
@@ -371,14 +372,14 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp' ) );
+	$download->set_access_granted( current_time( 'timestamp', true ) );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
 
 	if ( $expiry > 0 ) {
-		$order_completed_date = date_i18n( "Y-m-d", $order->get_date_completed() );
-		$download->set_access_expires( strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+		$from_date = $order->get_date_completed() ? $order->get_date_completed()->format( 'Y-m-d' ) : current_time( 'mysql', true );
+		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
 	return $download->save();
@@ -558,7 +559,7 @@ function wc_create_refund( $args = array() ) {
 
 		/**
 		 * Action hook to adjust refund before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
 
@@ -581,7 +582,12 @@ function wc_create_refund( $args = array() ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() ) );
+
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+
+				if ( $parent_status ) {
+					$order->update_status( $parent_status );
+				}
 			}
 		}
 
@@ -598,7 +604,7 @@ function wc_create_refund( $args = array() ) {
 /**
  * Try to refund the payment for an order via the gateway.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param WC_Order $order
  * @param string $amount
  * @param string $reason
@@ -643,7 +649,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 /**
  * Restock items during refund.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Order $order
  * @param  array $refunded_line_items
  */
@@ -742,7 +748,7 @@ function wc_order_search( $term ) {
 /**
  * Update total sales amount for each product within a paid order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_total_sales_counts( $order_id ) {
@@ -777,7 +783,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 /**
  * Update used coupon amount for each coupon within an order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_coupon_usage_counts( $order_id ) {
@@ -811,10 +817,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce' :
-					$coupon->dcr_usage_count( $used_by );
+					$coupon->decrease_usage_count( $used_by );
 				break;
 				case 'increase' :
-					$coupon->inc_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by );
 				break;
 			}
 		}

@@ -52,11 +52,11 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'address_1' => array(
-				'label' => __( 'Address 1', 'woocommerce' ),
+				'label' => __( 'Address line 1', 'woocommerce' ),
 				'show'  => false,
 			),
 			'address_2' => array(
-				'label' => __( 'Address 2', 'woocommerce' ),
+				'label' => __( 'Address line 2', 'woocommerce' ),
 				'show'  => false,
 			),
 			'city' => array(
@@ -101,11 +101,11 @@ class WC_Meta_Box_Order_Data {
 				'show'  => false,
 			),
 			'address_1' => array(
-				'label' => __( 'Address 1', 'woocommerce' ),
+				'label' => __( 'Address line 1', 'woocommerce' ),
 				'show'  => false,
 			),
 			'address_2' => array(
-				'label' => __( 'Address 2', 'woocommerce' ),
+				'label' => __( 'Address line 2', 'woocommerce' ),
 				'show'  => false,
 			),
 			'city' => array(
@@ -193,13 +193,13 @@ class WC_Meta_Box_Order_Data {
 
 						if ( $order->get_date_paid() ) {
 							/* translators: 1: date 2: time */
-							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), date_i18n( get_option( 'date_format' ), $order->get_date_paid() ), date_i18n( get_option( 'time_format' ), $order->get_date_paid() ) );
+							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), wc_format_datetime( $order->get_date_paid() ), wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) ) );
 						}
 
 						echo '. ';
 					}
 
-					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
+					if ( $ip_address = $order->get_customer_ip_address() ) {
 						/* translators: %s: IP address */
 						printf(
 							__( 'Customer IP: %s', 'woocommerce' ),
@@ -213,7 +213,7 @@ class WC_Meta_Box_Order_Data {
 						<h3><?php _e( 'General Details', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Order date:', 'woocommerce' ) ?></label>
-							<input type="text" class="date-picker" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />@<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" min="0" max="23" step="1" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" min="0" max="59" step="1" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+							<input type="text" class="date-picker" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />@&lrm;<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" min="0" max="23" step="1" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" min="0" max="59" step="1" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />&lrm;
 						</p>
 
 						<p class="form-field form-field-wide wc-order-status"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?> <?php
@@ -479,6 +479,10 @@ class WC_Meta_Box_Order_Data {
 					$field['id'] = '_billing_' . $key;
 				}
 
+				if ( ! isset( $_POST[ $field['id'] ] ) ) {
+					continue;
+				}
+
 				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
 					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
 				} else {
@@ -492,6 +496,10 @@ class WC_Meta_Box_Order_Data {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
+				}
+
+				if ( ! isset( $_POST[ $field['id'] ] ) ) {
+					continue;
 				}
 
 				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
@@ -522,9 +530,9 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date.
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time( 'timestamp' );
+			$date = current_time( 'timestamp', true );
 		} else {
-			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
+			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' ) );
 		}
 
 		$props['date_created'] = $date;

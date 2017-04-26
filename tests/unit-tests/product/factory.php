@@ -2,14 +2,14 @@
 /**
  * Products Factory Tests
  * @package WooCommerce\Tests\Product
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting product type.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_get_product_type() {
 		$simple = WC_Helper_Product::create_simple_product();
@@ -34,7 +34,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	/**
 	 * Test the helper method that returns a class name for a specific product type.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_get_classname_from_product_type() {
 		$this->assertEquals( 'WC_Product_Grouped', WC()->product_factory->get_classname_from_product_type( 'grouped' ) );
@@ -47,7 +47,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	/**
 	 * Tests getting a product using the factory.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_get_product() {
 		$test_product = WC_Helper_Product::create_simple_product();
@@ -58,7 +58,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	/**
 	 * Tests that an incorrect product returns false.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_get_invalid_product_returns_false() {
 		$product = WC()->product_factory->get_product( 50000 );

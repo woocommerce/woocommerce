@@ -192,7 +192,7 @@ class WC_Admin_Permalink_Settings {
 				}
 
 				// This is an invalid base structure and breaks pages.
-				if ( '/%product_cat%' === $product_base ) {
+				if ( '/%product_cat%/' === trailingslashit( $product_base ) ) {
 					$product_base = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_base;
 				}
 			} elseif ( empty( $product_base ) ) {

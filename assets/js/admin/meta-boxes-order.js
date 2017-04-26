@@ -240,10 +240,9 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.add-order-fee', this.add_fee )
 				.on( 'click', 'button.add-order-shipping', this.add_shipping )
 				.on( 'click', 'button.add-order-tax', this.add_tax )
-				.on( 'click', 'button.calculate-action', this.calculate_totals )
 				.on( 'click', 'button.save-action', this.save_line_items )
 				.on( 'click', 'a.delete-order-tax', this.delete_tax )
-				.on( 'click', 'button.calculate-tax-action', this.calculate_tax )
+				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
 				.on( 'click', 'tr.item, tr.fee, tr.shipping, tr.refund', this.select_row )
@@ -524,8 +523,8 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
-		calculate_tax: function() {
-			if ( window.confirm( woocommerce_admin_meta_boxes.calc_line_taxes ) ) {
+		recalculate: function() {
+			if ( window.confirm( woocommerce_admin_meta_boxes.calc_totals ) ) {
 				wc_meta_boxes_order_items.block();
 
 				var country          = '';
@@ -570,49 +569,6 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order_items.stupidtable.init();
 					}
 				});
-			}
-
-			return false;
-		},
-
-		calculate_totals: function() {
-			if ( window.confirm( woocommerce_admin_meta_boxes.calc_totals ) ) {
-
-				wc_meta_boxes_order_items.block();
-
-				// Get row totals
-				var line_totals    = 0;
-				var tax            = 0;
-				var shipping       = 0;
-
-				$( '.woocommerce_order_items tr.shipping input.line_total' ).each(function() {
-					var cost  = $( this ).val() || '0';
-					cost      = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
-					shipping  = shipping + parseFloat( cost );
-				});
-
-				$( '.woocommerce_order_items input.line_tax' ).each(function() {
-					var cost = $( this ).val() || '0';
-					cost     = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
-					tax      = tax + parseFloat( cost );
-				});
-
-				$( '.woocommerce_order_items tr.item, .woocommerce_order_items tr.fee' ).each(function() {
-					var line_total = $( this ).find( 'input.line_total' ).val() || '0';
-					line_totals    = line_totals + accounting.unformat( line_total.replace( ',', '.' ) );
-				});
-
-				// Tax
-				if ( 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal ) {
-					tax = parseFloat( accounting.toFixed( tax, woocommerce_admin_meta_boxes.rounding_precision ) );
-				}
-
-				// Set Total
-				$( '#_order_total' )
-					.val( accounting.formatNumber( line_totals + tax + shipping, woocommerce_admin_meta_boxes.currency_format_num_decimals, '', woocommerce_admin.mon_decimal_point ) )
-					.change();
-
-				$( 'button.save-action' ).click();
 			}
 
 			return false;
@@ -1058,39 +1014,27 @@ jQuery( function ( $ ) {
 			},
 
 			add_item: function( add_item_ids ) {
-				add_item_ids = add_item_ids.split( ',' );
-
 				if ( add_item_ids ) {
-
-					var count = add_item_ids.length;
-
 					wc_meta_boxes_order_items.block();
 
-					$.each( add_item_ids, function( index, value ) {
+					var data = {
+						action     : 'woocommerce_add_order_item',
+						item_to_add: add_item_ids,
+						dataType   : 'json',
+						order_id   : woocommerce_admin_meta_boxes.post_id,
+						security   : woocommerce_admin_meta_boxes.order_item_nonce
+					};
 
-						var data = {
-							action     : 'woocommerce_add_order_item',
-							item_to_add: value,
-							dataType   : 'json',
-							order_id   : woocommerce_admin_meta_boxes.post_id,
-							security   : woocommerce_admin_meta_boxes.order_item_nonce
-						};
+					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+						if ( response.success ) {
+							$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response.data.html );
+						} else {
+							window.alert( response.data.error );
+						}
 
-						$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-							if ( response.success ) {
-								$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response.data.html );
-							} else {
-								window.alert( response.data.error );
-							}
-
-							if ( !--count ) {
-								wc_meta_boxes_order.init_tiptip();
-								wc_meta_boxes_order_items.unblock();
-							}
-						});
-
+						wc_meta_boxes_order.init_tiptip();
+						wc_meta_boxes_order_items.unblock();
 					});
-
 				}
 			},
 

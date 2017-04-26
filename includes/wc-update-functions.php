@@ -973,7 +973,7 @@ function wc_update_260_db_version() {
 	WC_Install::update_db_version( '2.6.0' );
 }
 
-function wc_update_270_webhooks() {
+function wc_update_300_webhooks() {
 	/**
 	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
 	 * and woocommerce_product_bulk_edit_save hooks.
@@ -996,7 +996,7 @@ function wc_update_270_webhooks() {
  *
  * @return null
  */
-function wc_update_270_comment_type_index() {
+function wc_update_300_comment_type_index() {
 	global $wpdb;
 
 	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
@@ -1008,7 +1008,7 @@ function wc_update_270_comment_type_index() {
 	}
 }
 
-function wc_update_270_grouped_products() {
+function wc_update_300_grouped_products() {
 	global $wpdb;
 	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
 	foreach ( $parents as $parent_id ) {
@@ -1020,12 +1020,23 @@ function wc_update_270_grouped_products() {
 				'post_type'      => 'product',
 				'fields'         => 'ids',
 			) );
-			add_post_meta( $parent_id, '_children', $children_ids, true );
+			update_post_meta( $parent_id, '_children', $children_ids );
+
+			// Update children to remove the parent.
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_parent' => 0,
+				),
+				array(
+					'post_parent' => $parent_id,
+				)
+			);
 		}
 	}
 }
 
-function wc_update_270_settings() {
+function wc_update_300_settings() {
 	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 	if ( '' === $woocommerce_shipping_tax_class ) {
 		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
@@ -1037,49 +1048,51 @@ function wc_update_270_settings() {
 /**
  * Convert meta values into term for product visibility.
  */
-function wc_update_270_product_visibility() {
+function wc_update_300_product_visibility() {
 	global $wpdb;
 
+	WC_Install::create_terms();
+
 	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_taxonomy_id ) );
 	}
 
 	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_taxonomy_id ) );
 	}
 
 	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
 	}
 
-	if ( $outofstock_term = get_term_by( 'name', 'out-of-stock', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IN 'outofstock';", $outofstock_term->term_id ) );
+	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_taxonomy_id ) );
 	}
 }
 
 /**
  * Update DB Version.
  */
-function wc_update_270_db_version() {
-	WC_Install::update_db_version( '2.7.0' );
+function wc_update_300_db_version() {
+	WC_Install::update_db_version( '3.0.0' );
 }

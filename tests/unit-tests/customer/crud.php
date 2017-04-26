@@ -8,7 +8,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test creating a new customer.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_customer() {
 		$username = 'testusername-' . time();
@@ -21,12 +21,12 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $username, $customer->get_username() );
 		$this->assertNotEquals( 0, $customer->get_id() );
-		$this->assertEquals( strtotime( $wp_user->user_registered ), $customer->get_date_created() );
+		$this->assertEquals( strtotime( $wp_user->user_registered ), $customer->get_date_created()->getOffsetTimestamp() );
 	}
 
 	/**
 	 * Test updating a customer.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_customer() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -47,7 +47,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test saving a customer.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_save_customer() {
 		// test save() -> Create
@@ -73,7 +73,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test deleting a customer.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_customer() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -85,7 +85,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test reading a customer.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_read_customer() {
 		$username = 'user-' . time();
@@ -112,7 +112,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @expectedDeprecated WC_Customer::get_default_state
 	 * @expectedDeprecated WC_Customer::is_paying_customer
 	 * @expectedDeprecated WC_Customer::calculated_shipping
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_backwards_compat() {
 		// Properties.
@@ -174,11 +174,11 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test generic getters & setters
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_setters_and_getters() {
 		$time = time();
-		$standard_getters_and_setters = array(
+		$setters = array(
 			'username' => 'test',
 			'email' => 'test@woo.local',
 			'first_name' => 'Bob',
@@ -205,15 +205,27 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		);
 
 		$customer = new WC_Customer;
-		foreach ( $standard_getters_and_setters as $function => $value ) {
-			$customer->{"set_{$function}"}( $value );
-			$this->assertEquals( $value, $customer->{"get_{$function}"}(), $function );
+
+		foreach ( $setters as $method => $value ) {
+			$customer->{"set_{$method}"}( $value );
 		}
+
+		$getters = array();
+
+		foreach ( $setters as $method => $value ) {
+			$getters[ $method ] = $customer->{"get_{$method}"}();
+		}
+
+		// Get timestamps from date_created and date_modified.
+		$getters['date_created'] = $getters['date_created']->getOffsetTimestamp();
+		$getters['date_modified'] = $getters['date_modified']->getOffsetTimestamp();
+
+		$this->assertEquals( $setters, $getters );
 	}
 
 	/**
 	 * Test getting a customer's last order ID and date
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_last_order_info() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -228,7 +240,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a customer's order count from DB.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_order_count_read() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -242,7 +254,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a customer's total amount spent from DB.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_total_spent_read() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -258,7 +270,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a customer's avatar URL.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_avatar_url() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -268,35 +280,35 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a customer's creation date from DB.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_date_created_read() {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$user = new WP_User( $customer_id );
-		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created() );
+		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created()->getOffsetTimestamp() );
 	}
 
 	/**
 	 * Test getting a customer's modification date from DB.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_date_modified_read() {
 		$customer = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$last = get_user_meta( $customer_id, 'last_update', true );
 		sleep( 1 );
-		$this->assertEquals( $last, $customer->get_date_modified() );
+		$this->assertEquals( $last, $customer->get_date_modified()->getOffsetTimestamp() );
 		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();
 		$update = get_user_meta( $customer_id, 'last_update', true );
-		$this->assertEquals( $update, $customer->get_date_modified() );
+		$this->assertEquals( $update, $customer->get_date_modified()->getOffsetTimestamp() );
 		$this->assertNotEquals( $update, $last );
 	}
 
 	/**
 	 * Test getting a customer's taxable address.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_taxable_address() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -330,7 +342,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a customer's downloadable products.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_get_downloadable_products() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -340,7 +352,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a password on update - making sure it actually changes the users password.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_password() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -358,7 +370,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a customer's address to the base address.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_set_address_to_base() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -372,7 +384,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a customer's shipping address to the base address.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_set_shipping_address_to_base() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -386,7 +398,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a customer's location (multiple address fields at once)
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_set_location() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -399,7 +411,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a customer's shipping location (multiple address fields at once)
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_set_shipping_location() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -412,7 +424,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test is_customer_outside_base.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_is_customer_outside_base() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -424,7 +436,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test WC_Customer's session handling code.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_sessions() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -451,7 +463,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting meta.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_meta() {
 		$customer = WC_Helper_Customer::create_customer();
@@ -465,7 +477,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting meta.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_set_meta() {
 		$customer = WC_Helper_Customer::create_customer();

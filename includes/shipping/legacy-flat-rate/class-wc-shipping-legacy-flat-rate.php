@@ -273,7 +273,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @deprecated 2.4.0
 	 *
-	 * Additonal rates defined like this:
+	 * Additional rates defined like this:
 	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
 	public function calculate_extra_shipping( $method, $rate ) {

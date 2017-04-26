@@ -559,7 +559,6 @@ class WC_Countries {
 				'label'        => __( 'Last name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-last' ),
-				'clear'        => true,
 				'autocomplete' => 'family-name',
 				'priority'     => 20,
 			),
@@ -612,7 +611,6 @@ class WC_Countries {
 				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
-				'clear'        => true,
 				'validate'     => array( 'postcode' ),
 				'autocomplete' => 'postal-code',
 				'priority'     => 90,
@@ -652,7 +650,10 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
-				),
+                    'state' => array(
+                        'required' => false,
+					),
+                ),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -799,6 +800,16 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'GP' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'GF' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'HK' => array(
 					'postcode' => array(
 						'required' => false,
@@ -868,6 +879,21 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'KW' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'LB' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'MQ' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'NL' => array(
 					'postcode' => array(
 						'priority' => 65,
@@ -911,6 +937,11 @@ class WC_Countries {
 					),
 				),
 				'PT' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'RE' => array(
 					'state' => array(
 						'required' => false,
 					),
@@ -1016,6 +1047,11 @@ class WC_Countries {
 						'hidden'   => true,
 					),
 				),
+				'YT' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'ZA' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -1086,7 +1122,6 @@ class WC_Countries {
 			$address_fields['billing_email'] = array(
 				'label'        => __( 'Email address', 'woocommerce' ),
 				'required'     => true,
-				'clear'        => true,
 				'type'         => 'email',
 				'class'        => array( 'form-row-last' ),
 				'validate'     => array( 'email' ),

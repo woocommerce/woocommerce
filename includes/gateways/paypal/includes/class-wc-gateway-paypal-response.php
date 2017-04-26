@@ -66,7 +66,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( 'on-hold', $reason );
-		wc_reduce_stock_levels( $order_id );
+		wc_reduce_stock_levels( $order->get_id() );
 		WC()->cart->empty_cart();
 	}
 }

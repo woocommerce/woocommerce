@@ -156,17 +156,15 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 				$product_sku  = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
 			$item_meta = array();
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $formatted_meta->key,
+					'label' => $formatted_meta->display_key,
+					'value' => wc_clean( $formatted_meta->display_value ),
 				);
 			}
 
@@ -316,7 +314,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */

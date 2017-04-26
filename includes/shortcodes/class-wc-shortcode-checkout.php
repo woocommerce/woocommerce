@@ -138,7 +138,7 @@ class WC_Shortcode_Checkout {
 						</li>
 						<li class="date">
 							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo date_i18n( get_option( 'date_format' ), $order->get_date_created() ); ?></strong>
+							<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
 						</li>
 						<li class="total">
 							<?php _e( 'Total:', 'woocommerce' ); ?>
@@ -191,7 +191,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( $order->get_order_key() != $order_key ) {
+			if ( ! $order || $order->get_order_key() !== $order_key ) {
 				$order = false;
 			}
 		}

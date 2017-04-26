@@ -339,7 +339,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	}
 
 	/**
-	 * Actualy saves a customer token to the database.
+	 * Actually saves a customer token to the database.
 	 *
 	 * @param  WC_Payment_Token   $customer_token Payment Token
 	 * @param  string             $cart_token     CC Token

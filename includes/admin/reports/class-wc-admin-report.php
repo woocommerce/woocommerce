@@ -513,11 +513,13 @@ class WC_Admin_Report {
 		switch ( $current_range ) {
 
 			case 'custom' :
-				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
-				if ( ! $this->end_date ) {
-					$this->end_date = current_time( 'timestamp' );
+				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
+
+				if ( empty( $_GET['end_date'] ) ) {
+					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
+				} else {
+					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 				}
 
 				$interval = 0;
@@ -643,4 +645,21 @@ class WC_Admin_Report {
 	 * Output the report.
 	 */
 	public function output_report() {}
+
+	/**
+	 * Check nonce for current range.
+	 *
+	 * @since  3.0.4
+	 * @param  string $current_range Current range.
+	 */
+	public function check_current_range_nonce( $current_range ) {
+		if ( 'custom' !== $current_range ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( $_GET['wc_reports_nonce'], 'custom_range' ) ) {
+			wp_safe_redirect( remove_query_arg( array( 'start_date', 'end_date', 'range', 'wc_reports_nonce' ) ) );
+			exit;
+		}
+	}
 }

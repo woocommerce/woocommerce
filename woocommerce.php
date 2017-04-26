@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.7.0-beta-2
+ * Version: 3.1.0-alpha
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Requires at least: 4.4
@@ -26,7 +26,7 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	2.7.0
+ * @version	3.1.0
  */
 final class WooCommerce {
 
@@ -35,7 +35,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '2.7.0';
+	public $version = '3.1.0';
 
 	/**
 	 * The single instance of the class.
@@ -48,7 +48,7 @@ final class WooCommerce {
 	/**
 	 * Session instance.
 	 *
-	 * @var WC_Session
+	 * @var WC_Session|WC_Session_Handler
 	 */
 	public $session = null;
 
@@ -181,7 +181,6 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'woocommerce_send_queued_transactional_email', array( 'WC_Emails', 'send_queued_transactional_email' ), 10, 2 );
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 	}
@@ -296,6 +295,7 @@ final class WooCommerce {
 		 * Core classes.
 		 */
 		include_once( WC_ABSPATH . 'includes/wc-core-functions.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-datetime.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
 		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
@@ -318,6 +318,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -455,7 +456,8 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
+		$locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
+		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
 
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . '/i18n/languages' );

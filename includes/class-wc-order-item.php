@@ -9,16 +9,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A class which represents an item within an order and handles CRUD.
  * Uses ArrayAccess to be BW compatible with WC_Orders::get_items().
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -27,17 +27,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	);
 
 	/**
-	 * May store an order to prevent retriving it multiple times.
-	 * @var object
-	 */
-	protected $order;
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
 	 */
-	protected $cache_group = 'order_itemmeta';
+	protected $cache_group = 'order-items';
 
 	/**
 	 * Meta type. This should match up with
@@ -122,10 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order() {
-		if ( ! $this->order ) {
-		 	$this->order = wc_get_order( $this->get_order_id() );
-		}
-		return $this->order;
+		return wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -177,30 +168,25 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Expands things like term slugs before return.
-	 * @param string $hideprefix (default: _)
+	 *
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
 	 * @return array
 	 */
-	public function get_formatted_meta_data( $hideprefix = '_' ) {
-		$formatted_meta = array();
-		$meta_data      = $this->get_meta_data();
+	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
+		$formatted_meta    = array();
+		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
-		$product = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
-
-			// Skip items with values already in the product details area of the product name
-			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
-
-			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
-				continue;
-			}
-
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
@@ -212,6 +198,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
+			// Skip items with values already in the product details area of the product name.
+			if ( ! $include_all && $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+				continue;
+			}
+
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
@@ -220,7 +211,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			);
 		}
 
-		return $formatted_meta;
+		return apply_filters( 'woocommerce_order_item_get_formatted_meta_data', $formatted_meta, $this );
 	}
 
 	/*
@@ -250,9 +241,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			if ( is_callable( array( $this, $setter ) ) ) {
 				$this->$setter( $value );
 			}
+			return;
 		}
 
-		$this->update_meta_data( '_' . $offset, $value );
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -275,7 +267,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			unset( $this->changes[ $offset ] );
 		}
 
-		$this->delete_meta_data( '_' . $offset );
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
@@ -288,7 +280,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
 			return true;
 		}
-		return array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
+		return array_key_exists( $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) ) || array_key_exists( '_' . $offset, wp_list_pluck( $this->meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -298,11 +290,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function offsetGet( $offset ) {
 		$this->maybe_read_meta_data();
+
 		if ( 'item_meta_array' === $offset ) {
 			$return = array();
 
 			foreach ( $this->meta_data as $meta ) {
-				$return[ $meta->id ] = $meta;
+				$return[ $meta->key ] = $meta;
 			}
 
 			return $return;
@@ -322,6 +315,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
 			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
 			return $meta_values[ '_' . $offset ];
+		} elseif ( array_key_exists( $offset, $meta_values ) ) {
+			return $meta_values[ $offset ];
 		}
 
 		return null;

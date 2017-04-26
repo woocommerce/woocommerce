@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <!DOCTYPE html>
-<html dir="<?php echo is_rtl() ? 'rtl' : 'ltr'?>">
+<html <?php language_attributes(); ?>>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php bloginfo( 'charset' ); ?>" />
 		<title><?php echo get_bloginfo( 'name', 'display' ); ?></title>

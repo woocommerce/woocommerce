@@ -249,4 +249,26 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Delete product
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
+
+	/**
+	 * Test date setters/getters.
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_dates() {
+		$valid_coupon = WC_Helper_Coupon::create_coupon();
+		$valid_coupon->set_date_expires( time() + 1000 );
+		$valid_coupon->set_date_created( time() );
+		$valid_coupon->set_date_modified( time() );
+
+		$expired_coupon = WC_Helper_Coupon::create_coupon();
+		$expired_coupon->set_date_expires( time() - 10 );
+		$expired_coupon->set_date_created( time() - 20 );
+		$expired_coupon->set_date_modified( time() - 20 );
+
+		$this->assertInstanceOf( 'WC_DateTime', $valid_coupon->get_date_created() );
+		$this->assertTrue( $valid_coupon->is_valid() );
+		$this->assertFalse( $expired_coupon->is_valid() );
+		$this->assertEquals( $expired_coupon->get_error_message(), $expired_coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_EXPIRED ) );
+	}
 }

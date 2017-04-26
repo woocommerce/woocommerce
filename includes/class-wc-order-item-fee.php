@@ -6,16 +6,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (fee).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * Fee is an amount of money charged for a particular piece of work
+ * or for a particular right or service, and not supposed to be negative.
+ *
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Fee extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -64,21 +67,21 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Set total.
 	 *
-	 * @param string $value
+	 * @param string $amount Fee amount (do not enter negative amounts).
 	 * @throws WC_Data_Exception
 	 */
-	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+	public function set_total( $amount ) {
+		$this->set_prop( 'total', wc_format_decimal( $amount ) );
 	}
 
 	/**
 	 * Set total tax.
 	 *
-	 * @param string $value
+	 * @param string $amount
 	 * @throws WC_Data_Exception
 	 */
-	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+	public function set_total_tax( $amount ) {
+		$this->set_prop( 'total_tax', wc_format_decimal( $amount ) );
 	}
 
 	/**

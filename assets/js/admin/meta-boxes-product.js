@@ -407,7 +407,7 @@ jQuery( function( $ ) {
 					window.alert( response.error );
 				} else if ( response.slug ) {
 					// Success.
-					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.slug + '" selected="selected">' + response.name + '</option>' );
+					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
 					$wrapper.find( 'select.attribute_values' ).change();
 				}
 

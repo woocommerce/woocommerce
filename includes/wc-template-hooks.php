@@ -200,11 +200,6 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 add_action( 'woocommerce_product_additional_information', 'wc_display_product_attributes', 10 );
 
 /**
- * Photoswipe.
- */
-add_action( 'wp_footer', 'woocommerce_photoswipe' );
-
-/**
  * Checkout.
  *
  * @see woocommerce_checkout_login_form()

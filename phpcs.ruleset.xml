@@ -189,5 +189,6 @@
 		<!-- <exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" /> -->
 		<exclude name="WordPress.XSS.EscapeOutput.OutputNotEscaped" />
 		<exclude name="WordPress.XSS.EscapeOutput.UnsafePrintingFunction" />
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
 	</rule>
 </ruleset>

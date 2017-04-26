@@ -15,7 +15,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,7 +55,7 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 										<?php break;
 									case 'download-file' : ?>
 										<a href="<?php echo esc_url( $download['download_url'] ); ?>" class="woocommerce-MyAccount-downloads-file">
-											<?php echo esc_html( $download['file_name'] ); ?>
+											<?php echo esc_html( $download['file']['name'] ); ?>
 										</a>
 										<?php break;
 									case 'download-remaining' :

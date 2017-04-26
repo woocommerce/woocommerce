@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Download Data Store Interface.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooThemes
  */

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -108,6 +108,9 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		$data['access_expires']      = $data['access_expires'] ? wc_rest_prepare_date_response( $data['access_expires'] ) : 'never';
 		$data['downloads_remaining'] = '' === $data['downloads_remaining'] ? 'unlimited' : $data['downloads_remaining'];
 
+		// Remove "product_name" since it's new in 3.0.
+		unset( $data['product_name'] );
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -199,13 +202,13 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'downloads_remaining' => array(
-					'description' => __( 'Amount of downloads remaining.', 'woocommerce' ),
+					'description' => __( 'Number of downloads remaining.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'access_expires' => array(
-					'description' => __( "The date when the download access expires, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

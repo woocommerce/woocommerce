@@ -30,6 +30,45 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 	protected $namespace = 'wc/v2';
 
 	/**
+	 * Get formatted item data.
+	 *
+	 * @since  3.0.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
+	 */
+	protected function get_formatted_item_data( $object ) {
+		$data        = $object->get_data();
+		$format_date = array( 'date_created', 'date_modified' );
+
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			$datetime              = $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
+		}
+
+		return array(
+			'id'                 => $object->get_id(),
+			'date_created'       => $data['date_created'],
+			'date_created_gmt'   => $data['date_created_gmt'],
+			'date_modified'      => $data['date_modified'],
+			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'email'              => $data['email'],
+			'first_name'         => $data['first_name'],
+			'last_name'          => $data['last_name'],
+			'role'               => $data['role'],
+			'username'           => $data['username'],
+			'billing'            => $data['billing'],
+			'shipping'           => $data['shipping'],
+			'is_paying_customer' => $data['is_paying_customer'],
+			'orders_count'       => $object->get_order_count(),
+			'total_spent'        => $object->get_total_spent(),
+			'avatar_url'         => $object->get_avatar_url(),
+			'meta_data'          => $data['meta_data'],
+		);
+	}
+
+	/**
 	 * Prepare a single customer output for response.
 	 *
 	 * @param  WP_User          $user_data User object.
@@ -38,28 +77,11 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
 		$customer    = new WC_Customer( $user_data->ID );
-		$data        = $customer->get_data();
-		$format_date = array( 'date_created', 'date_modified' );
-		$meta_data   = $data['meta_data'];
-		unset( $data['meta_data'] );
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
-		}
-
-		// Additional non-crud data.
-		$data['orders_count'] = $customer->get_order_count();
-		$data['total_spent']  = $customer->get_total_spent();
-		$data['avatar_url']   = $customer->get_avatar_url();
-
-		// Includes meta_data as last item.
-		$data['meta_data'] = $meta_data;
-
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
+		$data        = $this->get_formatted_item_data( $customer );
+		$context     = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data        = $this->add_additional_fields_to_object( $data, $request );
+		$data        = $this->filter_response_by_context( $data, $context );
+		$response    = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $user_data ) );
 
 		/**
@@ -114,8 +136,20 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( 'The date the order was created, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -182,12 +216,12 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -245,12 +279,12 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
