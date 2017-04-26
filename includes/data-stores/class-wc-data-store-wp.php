@@ -194,6 +194,13 @@ class WC_Data_Store_WP {
 		return $props_to_update;
 	}
 
+	/**
+	 * Get valid WP_Query args from a WC_Object_Query's query variables.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Object_Query
+	 * @return array
+	 */
 	public function get_wp_query_args( $query_vars ) {
 
 		$skipped_values = array( '', array(), null );
@@ -213,35 +220,22 @@ class WC_Data_Store_WP {
 					'compare' => '=',
 				);
 			} else {
-				switch ( $key ) {
-					case 'parent':
-						$wp_query_args['post_parent'] = $value;
-					break;
-					case 'parent__in':
-						$wp_query_args['post_parent__in'] = $value;
-					break;
-					case 'parent__not_in':
-						$wp_query_args['post_parent__not_in'] = $value;
-					break;
-					case 'in':
-						$wp_query_args['post__in'] = $value;
-					break;
-					case 'not_in':
-						$wp_query_args['post__not_in'] = $value;
-					break;
-					case 'password':
-						$wp_query_args['post_password'] = $value;
-					break;
-					case 'status':
-						$wp_query_args['post_status'] = $value;
-					break;
-					case 'per_page':
-						$wp_query_args['posts_per_page'] = $value;
-					break;
-					case 'type':
-						$wp_query_args['post_type'] = $value;
-					default:
-						$wp_query_args[ $key ] = $value;
+				$key_mapping = array (
+					'parent' => 'post_parent',
+					'parent__in' => 'post_parent__in',
+					'parent__not_in' => 'post_parent__not_in',
+					'in' => 'post__in',
+					'not_in' => 'post__not_in',
+					'password' => 'post_password',
+					'status' => 'post_status',
+					'per_page' => 'posts_per_page',
+					'type' => 'post_type',
+				);
+
+				if ( isset( $key_mapping[ $key ] ) ) {
+					$wp_query_args[ $key_mapping[ $key ] ] = $value;
+				} else {
+					$wp_query_args[ $key ] = $value;
 				}
 			}
 		}

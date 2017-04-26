@@ -35,7 +35,7 @@ class WC_Order_Query extends WC_Object_Query {
 				'cart_tax'             => '',
 				'total'                => '',
 				'total_tax'            => '',
-				'customer_user'        => '',
+				'customer_id'          => '',
 				'order_key'            => '',
 				'billing_first_name'   => '',
 				'billing_last_name'    => '',

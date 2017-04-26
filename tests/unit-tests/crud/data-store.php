@@ -67,6 +67,11 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'WC_Dummy_Data_Store_CPT', $store->get_current_class_name() );
 	}
 
+	/**
+	 * Test converting WP_Object_Query query vars to WP_Query args.
+	 *
+	 * @since 3.1.0
+	 */
 	function test_get_wp_query_args() {
 		$store = new WC_Data_Store_WP();
 		$query = new WC_Mock_WC_Object_Query( array(

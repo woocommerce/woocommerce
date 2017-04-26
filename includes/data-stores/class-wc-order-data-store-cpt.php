@@ -635,6 +635,36 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		return get_post_type( $order_id );
 	}
 
+	/**
+	 * Get valid WP_Query args from a WC_Order_Query's query variables.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array
+	 */
+	public function get_wp_query_args( $query_vars ) {
+
+		$key_mapping = array(
+			'customer_id' => 'customer_user',
+		);
+
+		foreach( $key_mapping as $query_key => $db_key ) {
+			if ( isset( $query_vars[ $query_key ] ) ) {
+				$query_vars[ $db_key ] = $query_vars[ $query_key ];
+				unset( $query_vars[ $query_key ] );
+			}
+		}
+
+		return parent::get_wp_query_args( $query_vars );
+	}
+
+	/**
+	 * Query for Orders matching specific criteria.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array of WC_Order objects
+	 */
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );
 		$query = new WP_Query( $args );

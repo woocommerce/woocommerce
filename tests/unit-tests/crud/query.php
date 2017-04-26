@@ -3,9 +3,15 @@
 /**
  * WC_Object_Query tests
  * @package WooCommerce\Tests\CRUD
+ * @since 3.1.0
  */
 class WC_Tests_WC_Object_Query extends WC_Unit_Test_Case {
 
+	/**
+	 * Test the default query var values.
+	 *
+	 * @since 3.1.0
+	 */
 	function test_default_query() {
 		$query = new WC_Mock_WC_Object_Query();
 
@@ -14,6 +20,11 @@ class WC_Tests_WC_Object_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( 'date', $query->get( 'orderby' ) );
 	}
 
+	/**
+	 * Test setting/getting query vars.
+	 *
+	 * @since 3.1.0
+	 */
 	function test_query_with_args() {
 		$args = array(
 			'per_page' => 15,
