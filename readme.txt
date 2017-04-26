@@ -161,6 +161,19 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.0.5 - 2017-04-xx =
+* Fix - Tooltip display within shipping zone modals.
+* Fix - Prevent password change notification when creating a customer via the API.
+* Fix - Fix missing title for actions column on mobile.
+* Fix - Allow forward slash in telephone field.
+* Fix - Sort grouped products by menu order when displaying.
+* Fix - Fix term exclusion in term count queries.
+* Fix - Filter invalid products before returning them for wc_get_products.
+* Fix - Prevent orders being their own parent (causes errors).
+* Dev - Legacy customer class missing get_address / get_address_2 functions.
+* Dev - Restored filter `woocommerce_checkout_customer_id` during checkout validation.
+* Dev - Adds missing `$this` argument for all `woocommerce_payment_complete_order_status` filters.
+
 = 3.0.4 - 2017-04-20 =
 * Fix - Variations were not inheriting the product image and shipping class ID.
 * Fix - Prevent rating/review counts being duplicated when duplicating products.
