@@ -352,4 +352,17 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
 	}
+
+	/**
+	 * Get all the order items type in a given order
+	 *
+	 * @param WC_Order $order	Order Object
+	 *
+	 * @return Array	A list with all order_item_type
+	 */
+	public function get_order_item_types( WC_Order $order ) {
+		global $wpdb;
+		$query   = $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() );
+		return wp_list_pluck( $wpdb->get_results( $query ), 'order_item_type' );
+	}
 }

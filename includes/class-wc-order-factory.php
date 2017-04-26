@@ -50,6 +50,7 @@ class WC_Order_Factory {
 		}
 	}
 
+
 	/**
 	 * Get order item.
 	 * @param int
