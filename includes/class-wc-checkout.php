@@ -600,11 +600,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
 					break;
 					case 'billing' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
 					break;
 				}
 
@@ -622,7 +622,7 @@ class WC_Checkout {
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
 				}
 
