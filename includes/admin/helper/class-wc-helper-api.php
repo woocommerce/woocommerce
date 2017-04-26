@@ -15,6 +15,7 @@ class WC_Helper_API {
 	 */
 	public static function load() {
 		self::$api_base = apply_filters( 'woocommerce_helper_api_base', 'https://woocommerce.com/wp-json/helper/1.0' );
+		add_filter( 'http_request_host_is_external', array( __CLASS__, '_http_request_host_is_external' ), 10, 2 );
 	}
 
 	/**
@@ -23,7 +24,7 @@ class WC_Helper_API {
 	 * @param string $endpoint The endpoint to request.
 	 * @param array $args Additional data for the request. Set authenticated to a truthy value to enable auth.
 	 *
-	 * @return array The respons from wp_remote_request()
+	 * @return array The response from wp_safe_remote_request()
 	 */
 	public static function request( $endpoint, $args = array() ) {
 		$url = self::url( $endpoint );
@@ -38,7 +39,7 @@ class WC_Helper_API {
 		}
 
 		// TODO: Check response signatures on certain endpoints.
-		return wp_remote_request( $url, $args );
+		return wp_safe_remote_request( $url, $args );
 	}
 
 	/**
@@ -106,6 +107,23 @@ class WC_Helper_API {
 		$endpoint = sprintf( '%s/%s', self::$api_base, $endpoint );
 		$endpoint = esc_url_raw( $endpoint );
 		return $endpoint;
+	}
+
+	/**
+	 * Adds woocommerce.dev to "external" URls if WP_DEBUG is on so
+	 * that wp_http_validate_url allows the request.
+	 *
+	 * @param bool $r Whether the host is external
+	 * @param string $host The requested host.
+	 *
+	 * @return bool True if the host is external, false if local/internal.
+	 */
+	public static function _http_request_host_is_external( $r, $host ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $host === 'woocommerce.dev' ) {
+			$r = true;
+		}
+
+		return $r;
 	}
 }
 
