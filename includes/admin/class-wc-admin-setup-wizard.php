@@ -227,7 +227,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
 		<p><?php esc_html_e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( 'Let\'s go!', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
@@ -587,14 +587,14 @@ class WC_Admin_Setup_Wizard {
 			'paypal-braintree' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more about PayPal</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/' ),
+				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
 			'paypal-ec' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more about PayPal</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/' ),
+				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
