@@ -79,16 +79,16 @@
 					<td>
 						<?php if ( $subscription['expired'] ) : ?>
 							<strong><span class="expired" style="color: #B81C23;"><?php _e( 'Expired :(', 'woocommerce' ); ?></span></strong><br>
-							<strong><?php echo date( 'F jS, Y', $subscription['expires'] ); ?></strong>
+							<strong><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></strong>
 						<?php elseif ( $subscription['autorenew'] ) : ?>
 							<span class="renews" style="color: black;"><?php _e( 'Auto renews on:', 'woocommerce' ); ?></span><br>
-							<span><?php echo date( 'F jS, Y', $subscription['expires'] ); ?></span>
+							<span><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></span>
 						<?php elseif ( $subscription['expiring'] ) : ?>
 							<strong><span class="expiring" style="color: orange;"><?php _e( 'Expiring soon!', 'woocommerce' ); ?></span></strong><br>
-							<strong><?php echo date( 'F jS, Y', $subscription['expires'] ); ?></strong>
+							<strong><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></strong>
 						<?php else : ?>
 							<span class="renews" style="color: black;"><?php _e( 'Expires on:', 'woocommerce' ); ?></span><br>
-							<span><?php echo date( 'F jS, Y', $subscription['expires'] ); ?></span>
+							<span><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></span>
 						<?php endif; ?>
 					</td>
 					<td>
