@@ -165,23 +165,30 @@ class WC_Helper {
 			case 'activate-success':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
-					'message' => sprintf( '<strong>%s</strong> activated successfully. You will now receive updates for this product.', esc_html( $subscription['product_name'] ) ),
 					'type' => 'updated',
+					/* translators: %s: product name */
+					'message' => sprintf( __( '%s activated successfully. You will now receive updates for this product.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>' ),
 				);
 				break;
 
 			case 'activate-error':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
-					'message' => sprintf( 'An error has occurred when activating <strong>%s</strong>. Please try again later.', esc_html( $subscription['product_name'] ) ),
 					'type' => 'error',
+					/* translators: %s: product name */
+					'message' => sprintf( __( 'An error has occurred when activating %s. Please try again later.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>' ),
 				);
 				break;
 
 			case 'deactivate-success':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$local = self::_get_local_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
-				$message = sprintf( 'Subscription for <strong>%s</strong> deactivated successfully. You will no longer receive updates for this product.', esc_html( $subscription['product_name'] ) );
+
+				/* translators: %s: product name */
+				$message = sprintf( __( 'Subscription for %s deactivated successfully. You will no longer receive updates for this product.', 'woocommerce' ),
+					'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>' );
 
 				if ( $local && is_plugin_active( $local['_filename'] ) && current_user_can( 'activate_plugins' ) ) {
 					$deactivate_plugin_url = add_query_arg( array(
@@ -191,7 +198,9 @@ class WC_Helper {
 						'wc-helper-nonce' => wp_create_nonce( 'deactivate-plugin:' . $subscription['product_id'] ),
 					), admin_url( 'admin.php' ) );
 
-					$message = sprintf( 'Subscription for <strong>%1$s</strong> deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactive the plugin as well.', esc_html( $subscription['product_name'] ), esc_url( $deactivate_plugin_url ) );
+					/* translators: %1$s: product name, %2$s: deactivate url */
+					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactive the plugin as well.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>', esc_url( $deactivate_plugin_url ) );
 				}
 
 				$notices[] = array(
@@ -203,44 +212,50 @@ class WC_Helper {
 			case 'deactivate-error':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
-					'message' => sprintf( 'An error has occurred when deactivating the subscription for <strong>%s</strong>. Please try again later.', esc_html( $subscription['product_name'] ) ),
 					'type' => 'error',
+					/* translators: %s: product name */
+					'message' => sprintf( __( 'An error has occurred when deactivating the subscription for %s. Please try again later.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>' ),
 				);
 				break;
 
 			case 'deactivate-plugin-success':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
-					'message' => sprintf( 'The extension <strong>%s</strong> has been deactivated successfully.', esc_html( $subscription['product_name'] ) ),
 					'type' => 'updated',
+					/* translators: %s: product name */
+					'message' => sprintf( __( 'The extension %s has been deactivated successfully.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>' ),
 				);
 				break;
 
 			case 'deactivate-plugin-error':
 				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
-					'message' => sprintf( 'An error has occurred when deactivating the extension <strong>%1$s</strong>. Please proceed to the <a href="%2$s">Plugins screen</a> to deactivate it manually.', esc_html( $subscription['product_name'] ), admin_url( 'plugins.php' ) ),
 					'type' => 'error',
+					/* translators: %1$s: product name, %2$s: plugins screen url */
+					'message' => sprintf( __( 'An error has occurred when deactivating the extension %1$s. Please proceed to the <a href="%2$s">Plugins screen</a> to deactivate it manually.', 'woocommerce' ),
+						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>', admin_url( 'plugins.php' ) ),
 				);
 				break;
 
 			case 'helper-connected':
 				$notices[] = array(
-					'message' => 'You have successfully connected your store to WooCommerce.com',
+					'message' => __( 'You have successfully connected your store to WooCommerce.com', 'woocommerce' ),
 					'type' => 'updated',
 				);
 				break;
 
 			case 'helper-disconnected':
 				$notices[] = array(
-					'message' => 'You have successfully disconnected your store from WooCommerce.com',
+					'message' => __( 'You have successfully disconnected your store from WooCommerce.com', 'woocommerce' ),
 					'type' => 'updated',
 				);
 				break;
 
 			case 'helper-refreshed':
 				$notices[] = array(
-					'message' => 'Authentication and subscription caches refreshed successfully.',
+					'message' => __( 'Authentication and subscription caches refreshed successfully.', 'woocommerce' ),
 					'type' => 'updated',
 				);
 				break;

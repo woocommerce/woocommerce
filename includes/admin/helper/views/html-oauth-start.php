@@ -9,12 +9,12 @@
 				<img src="https://woocommerce.com/wp-content/themes/woomattic/images/logo-woocommerce@2x.png" alt="WooCommerce" style="width:180px;">
 
 				<?php if ( ! empty( $_GET['wc-helper-status'] ) && $_GET['wc-helper-status'] = 'helper-disconnected' ) : ?>
-					<p><strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.</p>
+					<p><?php _e( '<strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
 				<?php endif; ?>
 
 				<h2><?php _e( 'Connect your store to your WooCommerce.com account, and manage your purchases directly from your personal site', 'woocommerce' ); ?></h2>
 				<p><?php _e( 'When you connect your account, your purchases will automatically be listed on your site. You can disconnect the account at anytime. Once your connected, you will receive the updates &amp; support that come with your subscription. ', 'woocommerce' ); ?></p>
-				<p><a class="button-primary" href="<?php echo esc_url( $connect_url ); ?>">Connect your store</a></p>
+				<p><a class="button-primary" href="<?php echo esc_url( $connect_url ); ?>"><?php _e( 'Connect your store', 'woocommerce' ); ?></a></p>
 			</div>
 		</div>
 </div>
