@@ -5509,10 +5509,10 @@ table.bar_chart {
 .select2-dropdown--above {
 	box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1);
 }
-.select2-selection__rendered.ui-sortable li {
-	cursor: move;
-}
 .select2-container {
+	.select2-selection__rendered.ui-sortable li {
+		cursor: move;
+	}
 	.select2-selection {
 		border-color: #ddd;
 	}
