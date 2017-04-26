@@ -170,6 +170,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fix term exclusion in term count queries.
 * Fix - Filter invalid products before returning them for wc_get_products.
 * Fix - Prevent orders being their own parent (causes errors).
+* Fix - Correctly migrate legacy shipping taxes data.
+* Tweak - Add required placeholder for meta fields in backend.
+* Tweak - Don't strtolower address strings on checkout validation messages.
 * Dev - Legacy customer class missing get_address / get_address_2 functions.
 * Dev - Restored filter `woocommerce_checkout_customer_id` during checkout validation.
 * Dev - Adds missing `$this` argument for all `woocommerce_payment_complete_order_status` filters.
