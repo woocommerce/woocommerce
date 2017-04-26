@@ -3,6 +3,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper_Options Class
+ *
+ * An interface to the woocommerce_helper_data entry in the wp_options table.
+ */
 class WC_Helper_Options {
 	private static $option_name = 'woocommerce_helper_data';
 

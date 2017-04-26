@@ -3,7 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper_Plugin_Info Class
+ *
+ * Provides the "View Information" core modals with data for WooCommerce.com
+ * hosted extensions.
+ */
 class WC_Helper_Plugin_Info {
+
+	/**
+	 * Loads the class, runs on init.
+	 */
 	public static function load() {
 		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 20, 3 );
 	}

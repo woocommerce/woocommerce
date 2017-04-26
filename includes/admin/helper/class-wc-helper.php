@@ -3,13 +3,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper Class
+ *
+ * The main entry-point for all things related to the Helper.
+ */
 class WC_Helper {
 	public static $log;
 
+	/**
+	 * Get an absolute path to the requested helper view.
+	 *
+	 * @param string $view The requested view file.
+	 *
+	 * @return string The absolute path to the view file.
+	 */
 	public static function get_view_filename( $view ) {
 		return __DIR__ . "/views/$view";
 	}
 
+	/**
+	 * Loads the helper class, runs on init.
+	 */
 	public static function load() {
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 80 );
@@ -750,10 +765,16 @@ class WC_Helper {
 		return $data;
 	}
 
+	/**
+	 * Flush subscriptions cache.
+	 */
 	private static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
 	}
 
+	/**
+	 * Flush auth cache.
+	 */
 	private static function _flush_authentication_cache() {
 		$request = WC_Helper_API::get( 'oauth/me', array(
 			'authenticated' => true,
@@ -776,6 +797,9 @@ class WC_Helper {
 		return true;
 	}
 
+	/**
+	 * Flush updates cache.
+	 */
 	private static function _flush_updates_cache() {
 		WC_Helper_Updater::flush_updates_cache();
 	}

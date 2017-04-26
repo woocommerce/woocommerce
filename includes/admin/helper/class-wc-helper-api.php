@@ -3,6 +3,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper_API Class
+ *
+ * Provides a communication interface with the WooCommerce.com Helper API.
+ */
 class WC_Helper_API {
 	public static $api_base;
 

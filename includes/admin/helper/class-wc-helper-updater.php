@@ -3,7 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper_Updater Class
+ *
+ * Contains the logic to fetch available updates and hook into Core's update
+ * routines to serve WooCommerce.com-provided packages.
+ */
 class WC_Helper_Updater {
+
+	/**
+	 * Loads the class, runs on init.
+	 */
 	public static function load() {
 		add_action( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'transient_update_plugins' ), 21, 1 );
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
@@ -12,6 +22,10 @@ class WC_Helper_Updater {
 	/**
 	 * Runs in a cron thread, or in a visitor thread if triggered
 	 * by _maybe_update_plugins(), or in an auto-update thread.
+	 *
+	 * @param object $transient The update_plugins transient object.
+	 *
+	 * @return object The same or a modified version of the transient.
 	 */
 	public static function transient_update_plugins( $transient ) {
 		$update_data = self::get_update_data();
@@ -50,6 +64,14 @@ class WC_Helper_Updater {
 		return $transient;
 	}
 
+	/**
+	 * Runs on pre_set_site_transient_update_themes, provides custom
+	 * packages for WooCommerce.com-hosted extensions.
+	 *
+	 * @param object $transient The update_themes transient object.
+	 *
+	 * @return object The same or a modified version of the transient.
+	 */
 	public static function transient_update_themes( $transient ) {
 		$update_data = self::get_update_data();
 
