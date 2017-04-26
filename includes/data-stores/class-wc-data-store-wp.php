@@ -223,15 +223,15 @@ class WC_Data_Store_WP {
 			// Other vars get mapped to a 'post_*' or just left alone.
 			} else {
 				$key_mapping = array (
-					'parent' => 'post_parent',
-					'parent__in' => 'post_parent__in',
+					'parent'         => 'post_parent',
+					'parent__in'     => 'post_parent__in',
 					'parent__not_in' => 'post_parent__not_in',
-					'in' => 'post__in',
-					'not_in' => 'post__not_in',
-					'password' => 'post_password',
-					'status' => 'post_status',
-					'per_page' => 'posts_per_page',
-					'type' => 'post_type',
+					'in'             => 'post__in',
+					'not_in'         => 'post__not_in',
+					'password'       => 'post_password',
+					'status'         => 'post_status',
+					'per_page'       => 'posts_per_page',
+					'type'           => 'post_type',
 				);
 
 				if ( isset( $key_mapping[ $key ] ) ) {
