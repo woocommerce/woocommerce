@@ -52,7 +52,7 @@ abstract class WC_Object_Query {
 	}
 
 	/**
-	 * Get the default, unset allowed query vars.
+	 * Get the default allowed query vars.
 	 * @return array
 	 */
 	protected function get_default_query_vars() {

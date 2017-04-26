@@ -213,12 +213,14 @@ class WC_Data_Store_WP {
 				continue;
 			}
 
+			// Build meta queries out of vars that are stored in internal meta keys.
 			if ( in_array( '_' . $key, $this->internal_meta_keys ) ) {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => '_' . $key,
 					'value'   => $value,
 					'compare' => '=',
 				);
+			// Other vars get mapped to a 'post_*' or just left alone.
 			} else {
 				$key_mapping = array (
 					'parent' => 'post_parent',
@@ -240,6 +242,7 @@ class WC_Data_Store_WP {
 			}
 		}
 
+		// Handle custom meta queries.
 		if ( ! empty( $query_vars['meta_query'] ) ) {
 			if ( empty( $wp_query_args['meta_query'] ) ) {
 				$wp_query_args['meta_query'] = $query_vars['meta_query'];
