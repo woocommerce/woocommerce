@@ -349,7 +349,7 @@ class WC_Admin_Assets {
 				'wc-admin-system-status',
 				'woocommerce_admin_system_status',
 				array(
-					'delete_log_confirmation' => esc_html__( 'Are you sure you want to delete this log?', 'woocommerce' ),
+					'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
 				)
 			);
 		}

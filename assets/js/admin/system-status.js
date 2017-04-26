@@ -114,8 +114,8 @@ jQuery( function ( $ ) {
 
 	wcSystemStatus.init();
 
-	$( '#log-viewer-select' ).on( 'click', ' h2 a.page-title-action', function( e ) {
-		e.stopImmediatePropagation();
-		return confirm( woocommerce_admin_system_status.delete_log_confirmation );
+	$( '#log-viewer-select' ).on( 'click', 'h2 a.page-title-action', function( evt ) {
+		evt.stopImmediatePropagation();
+		return window.confirm( woocommerce_admin_system_status.delete_log_confirmation );
 	});
 });
