@@ -2576,3 +2576,12 @@ function wc_logout_url( $redirect = '' ) {
 		return wp_logout_url( $redirect );
 	}
 }
+
+/**
+ * Show notice if cart is empty.
+ *
+ * @since 3.1.0
+ */
+function wc_empty_cart_message() {
+	echo '<p class="cart-empty">' . apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) . '</p>';
+}
