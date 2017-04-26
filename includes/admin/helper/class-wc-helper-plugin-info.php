@@ -31,7 +31,7 @@ class WC_Helper_Plugin_Info {
 		// Look through local Woo plugins by slugs.
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$slug = dirname( $plugin['_filename'] );
-			if ( dirname( $plugin['_filename'] ) == $args->slug ) {
+			if ( dirname( $plugin['_filename'] ) === $args->slug ) {
 				$plugin['_slug'] = $args->slug;
 				$found_plugin = $plugin;
 				break;
