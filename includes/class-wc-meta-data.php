@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Wraps an array (meta data for now) and tells if there was any changes.
+ *
+ * The main idea behind this class is to avoid doing unneeded
+ * SQL updates if nothing changed.
+ *
+ * @version 3.0.x
+ * @package WooCommerce
+ * @category Class
+ * @author crodas
+ */
 class WC_Meta_Data {
 	public $id;
 	public $key;
@@ -9,6 +20,11 @@ class WC_Meta_Data {
 
 	protected $properties = array( 'id', 'key', 'value' );
 
+	/**
+	 * Default constructor
+	 *
+	 * @param Array	meta data to wrap behind this function
+	 */
 	public function __construct( Array $meta ) {
 		foreach ( $meta as $key => $value ) {
 			if ( in_array( $key, $this->properties ) ) {
@@ -20,7 +36,6 @@ class WC_Meta_Data {
 
 	/**
 	 * Merge changes with data and clear.
-	 *
 	 */
 	public function apply_changes() {
 		foreach ( $this->properties as $property ) {
