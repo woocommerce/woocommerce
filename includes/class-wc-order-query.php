@@ -75,6 +75,8 @@ class WC_Order_Query extends WC_Object_Query {
 	 * @return array of WC_Order objects
 	 */
 	public function get_orders() {
-		return WC_Data_Store::load( 'order' )->query( $this->query_vars );
+		$args = apply_filters( 'woocommerce_order_query_args', $this->query_vars );
+		$results = WC_Data_Store::load( 'order' )->query( $this->query_vars );
+		return apply_filters( 'woocommerce_order_query', $results, $args );
 	}
 }

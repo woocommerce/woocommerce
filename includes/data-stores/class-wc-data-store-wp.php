@@ -251,6 +251,6 @@ class WC_Data_Store_WP {
 			}
 		}
 
-		return $wp_query_args;
+		return apply_filters( 'woocommerce_get_wp_query_args', $wp_query_args, $query_vars );
 	}
 }
