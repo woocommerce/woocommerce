@@ -299,7 +299,16 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
-									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
+                                    switch ( $field_name ) {
+                                        case 'billing_phone' :
+                                            $field_value = wc_make_phone_clickable( esc_html( $field_value ) );
+                                            break;
+                                        default :
+                                            $field_value = make_clickable( esc_html( $field_value ) );
+                                            break;
+                                    }
+
+                                    echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . $field_value . '</p>';
 								}
 
 							echo '</div>';
