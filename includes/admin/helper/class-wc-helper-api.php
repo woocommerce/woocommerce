@@ -119,7 +119,7 @@ class WC_Helper_API {
 	 * @return bool True if the host is external, false if local/internal.
 	 */
 	public static function _http_request_host_is_external( $r, $host ) {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $host === 'woocommerce.dev' ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && 'woocommerce.dev' === $host ) {
 			$r = true;
 		}
 
