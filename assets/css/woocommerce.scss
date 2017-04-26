@@ -1536,10 +1536,8 @@ p.demo_store,
 			cursor: ew-resize;
 			outline: none;
 			top: -0.3em;
-
-			//&:last-child {
+			/* rtl:ignore */
 			margin-left: -0.5em;
-			//}
 		}
 
 		.ui-slider .ui-slider-range {
