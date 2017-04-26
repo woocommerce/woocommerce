@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce product variation class handles product variation data.
  *
  * @class       WC_Product_Variation
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -44,7 +44,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -61,7 +61,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * If the stock level comes from another product ID.
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return int
 	 */
 	public function get_stock_managed_by_id() {
@@ -89,6 +89,30 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$variation_attributes[ 'attribute_' . $key ] = $value;
 		}
 		return $variation_attributes;
+	}
+
+	/**
+	 * Returns a single product attribute as a string.
+	 * @param  string $attribute to get.
+	 * @return string
+	 */
+	public function get_attribute( $attribute ) {
+		$attributes = $this->get_attributes();
+		$attribute  = sanitize_title( $attribute );
+
+		if ( isset( $attributes[ $attribute ] ) ) {
+			$value = $attributes[ $attribute ];
+			$term  = taxonomy_exists( $attribute ) ? get_term_by( 'slug', $value, $attribute ) : false;
+			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
+		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
+			$value = $attributes[ 'pa_' . $attribute ];
+			$term  = taxonomy_exists( 'pa_' . $attribute ) ? get_term_by( 'slug', $value, 'pa_' . $attribute ) : false;
+			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
+		} else {
+			return '';
+		}
+
+		return $value;
 	}
 
 	/**
@@ -135,7 +159,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['sku'];
+			$value = apply_filters( $this->get_hook_prefix() . 'sku', $this->parent_data['sku'], $this );
 		}
 		return $value;
 	}
@@ -151,7 +175,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['weight'];
+			$value = apply_filters( $this->get_hook_prefix() . 'weight', $this->parent_data['weight'], $this );
 		}
 		return $value;
 	}
@@ -167,7 +191,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['length'];
+			$value = apply_filters( $this->get_hook_prefix() . 'length', $this->parent_data['length'], $this );
 		}
 		return $value;
 	}
@@ -183,7 +207,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['width'];
+			$value = apply_filters( $this->get_hook_prefix() . 'width', $this->parent_data['width'], $this );
 		}
 		return $value;
 	}
@@ -199,7 +223,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
-			$value = $this->parent_data['height'];
+			$value = apply_filters( $this->get_hook_prefix() . 'height', $this->parent_data['height'], $this );
 		}
 		return $value;
 	}
@@ -207,15 +231,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the tax class.
 	 *
-	 * @param  string $context
+	 * Does not use get_prop so it can handle 'parent' Inheritance correctly.
+	 *
+	 * @param  string $context view, edit, or unfiltered
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
-		$value = $this->get_prop( 'tax_class', $context );
+		$value = null;
 
-		// Inherit value from parent.
-		if ( 'view' === $context && 'parent' === $value ) {
-			$value = $this->parent_data['tax_class'];
+		if ( array_key_exists( 'tax_class', $this->data ) ) {
+			$value = array_key_exists( 'tax_class', $this->changes ) ? $this->changes['tax_class'] : $this->data['tax_class'];
+
+			if ( 'edit' !== $context && 'parent' === $value ) {
+				$value = $this->parent_data['tax_class'];
+			}
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . 'tax_class', $value, $this );
+			}
 		}
 		return $value;
 	}
@@ -223,7 +256,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Return if product manage stock.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return boolean|string true, false, or parent.
 	 */
@@ -248,7 +281,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['stock_quantity'];
+			$value = apply_filters( $this->get_hook_prefix() . 'stock_quantity', $this->parent_data['stock_quantity'], $this );
 		}
 		return $value;
 	}
@@ -257,7 +290,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get backorders.
 	 *
 	 * @param  string $context
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string yes no or notify
 	 */
 	public function get_backorders( $context = 'view' ) {
@@ -265,7 +298,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
-			$value = $this->parent_data['backorders'];
+			$value = apply_filters( $this->get_hook_prefix() . 'backorders', $this->parent_data['backorders'], $this );
 		}
 		return $value;
 	}
@@ -273,7 +306,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -281,7 +314,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$image_id = $this->parent_data['image_id'];
+			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
 		return $image_id;
@@ -290,7 +323,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get shipping class ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  string $context
 	 * @return int
 	 */
@@ -298,7 +331,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
 
 		if ( 'view' === $context && ! $shipping_class_id ) {
-			$shipping_class_id = $this->parent_data['shipping_class_id'];
+			$shipping_class_id = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
 		}
 
 		return $shipping_class_id;
@@ -313,7 +346,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Set the parent data array for this variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_parent_data( $parent_data ) {
@@ -323,7 +356,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get the parent data array for this variation.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_parent_data() {

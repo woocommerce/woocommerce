@@ -51,11 +51,12 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
  * Define a constant if it is not already defined.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $name
  * @param  string $value
  */
@@ -542,7 +543,6 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'LRD' => '&#36;',
 		'LSL' => 'L',
 		'LYD' => '&#x644;.&#x62f;',
-		'MAD' => '&#x62f;. &#x645;.',
 		'MAD' => '&#x62f;.&#x645;.',
 		'MDL' => 'MDL',
 		'MGA' => 'Ar',
@@ -987,7 +987,7 @@ function wc_get_customer_default_location() {
 
 /**
  * Get user agent string.
- * @since  2.7.0
+ * @since  3.0.0
  * @return string
  */
 function wc_get_user_agent() {
@@ -1386,7 +1386,7 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 
 /**
  * Used to sort shipping zone methods with uasort.
- * @since 2.7.0
+ * @since 3.0.0
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 	if ( $a->method_order === $b->method_order ) {
@@ -1441,7 +1441,7 @@ function wc_get_logger() {
 					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
 					esc_html( is_object( $class ) ? get_class( $class ) : $class )
 				),
-				'2.7'
+				'3.0'
 			);
 			$logger = new WC_Logger();
 		}
@@ -1455,7 +1455,7 @@ function wc_get_logger() {
  * Some server environments blacklist some debugging functions. This function provides a safe way to
  * turn an expression into a printable, readable form without calling blacklisted functions.
  *
- * @since 2.7
+ * @since 3.0
  *
  * @param mixed $expression The expression to be printed.
  * @param bool $return Optional. Default false. Set to true to return the human-readable string.
@@ -1490,7 +1490,7 @@ function wc_print_r( $expression, $return = false ) {
 /**
  * Registers the default log handler.
  *
- * @since 2.7
+ * @since 3.0
  * @param array $handlers
  * @return array
  */
@@ -1511,7 +1511,7 @@ add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handle
 
 /**
  * Store user agents. Used for tracker.
- * @since 2.7.0
+ * @since 3.0.0
  */
 function wc_maybe_store_user_agent( $user_login, $user ) {
 	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
@@ -1525,7 +1525,7 @@ add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
 /**
  * Based on wp_list_pluck, this calls a method instead of returning a property.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param array      $list      List of objects or arrays
  * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
  * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
@@ -1567,11 +1567,11 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 /**
  * Get permalink settings for WooCommerce independent of the user locale.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( function_exists( 'switch_to_locale' ) && did_action( 'init' ) ) {
+	if ( function_exists( 'switch_to_locale' ) && did_action( 'admin_init' ) ) {
 		switch_to_locale( get_locale() );
 	}
 
@@ -1589,7 +1589,7 @@ function wc_get_permalink_structure() {
 	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
 	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
 
-	if ( function_exists( 'restore_current_locale' ) && did_action( 'init' ) ) {
+	if ( function_exists( 'restore_current_locale' ) && did_action( 'admin_init' ) ) {
 		restore_current_locale();
 	}
 	return $permalinks;

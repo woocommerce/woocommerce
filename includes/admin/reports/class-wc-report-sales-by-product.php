@@ -138,9 +138,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );

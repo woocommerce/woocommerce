@@ -31,6 +31,12 @@ class WC_Checkout {
 	protected $fields = null;
 
 	/**
+	 * Holds posted data for backwards compatibility.
+	 * @var array
+	 */
+	protected $legacy_posted_data = array();
+
+	/**
 	 * Gets the main WC_Checkout Instance.
 	 *
 	 * @since 2.1
@@ -91,7 +97,7 @@ class WC_Checkout {
 			case 'enable_guest_checkout' :
 				$bool_value = wc_string_to_bool( $value );
 
-				if ( $bool_value !== $this->is_registration_required() ) {
+				if ( $bool_value === $this->is_registration_required() ) {
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_true', 0 );
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_false', 0 );
 					add_filter( 'woocommerce_checkout_registration_required', $bool_value ? '__return_false' : '__return_true', 0 );
@@ -103,7 +109,7 @@ class WC_Checkout {
 			case 'shipping_methods' :
 				WC()->session->set( 'chosen_shipping_methods', $value );
 				break;
-			case 'legacy_posted_data' :
+			case 'posted' :
 				$this->legacy_posted_data = $value;
 				break;
 		}
@@ -116,7 +122,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function __get( $key ) {
-		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && ! $this->legacy_posted_data ) {
+		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && empty( $this->legacy_posted_data ) ) {
 			$this->legacy_posted_data = $this->get_posted_data();
 		}
 		switch ( $key ) {
@@ -129,6 +135,7 @@ class WC_Checkout {
 			case 'checkout_fields' :
 				return $this->get_checkout_fields();
 			case 'posted' :
+				wc_doing_it_wrong( 'WC_Checkout->posted', 'Use $_POST directly.', '3.0.0' );
 				return $this->legacy_posted_data;
 			case 'shipping_method' :
 				return $this->legacy_posted_data['shipping_method'];
@@ -158,7 +165,7 @@ class WC_Checkout {
 	/**
 	 * Is registration required to checkout?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_required() {
@@ -168,7 +175,7 @@ class WC_Checkout {
 	/**
 	 * Is registration enabled on the checkout page?
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_enabled() {
@@ -202,7 +209,6 @@ class WC_Checkout {
 					'label'        => __( 'Account username', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
-					'autocomplete' => 'username',
 				);
 			}
 
@@ -212,7 +218,6 @@ class WC_Checkout {
 					'label'        => __( 'Account password', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
-					'autocomplete' => 'password',
 				);
 			}
 
@@ -321,7 +326,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust order before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
 
@@ -368,9 +373,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values );
+			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -399,9 +404,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee );
+			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -435,9 +440,9 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package );
+				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -465,9 +470,9 @@ class WC_Checkout {
 
 				/**
 				 * Action hook to adjust item before save.
-				 * @since 2.7.0
+				 * @since 3.0.0
 				 */
-				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id );
+				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
 				// Add item to order and save.
 				$order->add_item( $item );
@@ -491,9 +496,9 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust item before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
-			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon );
+			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );
@@ -503,7 +508,7 @@ class WC_Checkout {
 	/**
 	 * See if a fieldset should be skipped.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $fieldset_key
 	 * @param array $data
 	 */
@@ -520,8 +525,8 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  2.7.0
-	 * @return array of data and errors.
+	 * @since  3.0.0
+	 * @return array of data.
 	 */
 	protected function get_posted_data() {
 		$skipped = array();
@@ -557,10 +562,13 @@ class WC_Checkout {
 				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
+
+				// BW compatibility.
+				$this->legacy_posted_data[ $key ] = $data[ $key ];
 			}
 		}
 
-		if ( in_array( 'shipping', $skipped ) && WC()->cart->needs_shipping_address() ) {
+		if ( in_array( 'shipping', $skipped ) && ( WC()->cart->needs_shipping_address() || wc_ship_to_billing_address_only() ) ) {
 			foreach ( $this->get_checkout_fields( 'shipping' ) as $key => $field ) {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
 			}
@@ -572,7 +580,7 @@ class WC_Checkout {
 	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -618,12 +626,13 @@ class WC_Checkout {
 					}
 				}
 
-				if ( in_array( 'email', $format ) ) {
+				if ( in_array( 'email', $format ) && '' !== $data[ $key ] ) {
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( '' !== $data[ $key ] && ! is_email( $data[ $key ] ) ) {
+					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						continue;
 					}
 				}
 
@@ -657,7 +666,7 @@ class WC_Checkout {
 	/**
 	 * Validates that the checkout has enough info to proceed.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data An array of posted data.
 	 * @param  WP_Error $errors
 	 */
@@ -703,7 +712,7 @@ class WC_Checkout {
 	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
@@ -750,7 +759,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that does require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 * @param  string $payment_method
 	 */
@@ -783,7 +792,7 @@ class WC_Checkout {
 	/**
 	 * Process an order that doesn't require payment.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $order_id
 	 */
 	protected function process_order_without_payment( $order_id ) {
@@ -810,7 +819,7 @@ class WC_Checkout {
 	 * @throws Exception
 	 */
 	protected function process_customer( $data ) {
-		$customer_id = get_current_user_id();
+		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
@@ -834,8 +843,14 @@ class WC_Checkout {
 		// Add customer info from other fields.
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
-			$customer->set_first_name( $data['billing_first_name'] );
-			$customer->set_last_name( $data['billing_last_name'] );
+
+			if ( ! empty( $data['billing_first_name'] ) ) {
+				$customer->set_first_name( $data['billing_first_name'] );
+			}
+
+			if ( ! empty( $data['billing_last_name'] ) ) {
+				$customer->set_last_name( $data['billing_last_name'] );
+			}
 
 			foreach ( $data as $key => $value ) {
 				// Use setters where available.
@@ -850,7 +865,7 @@ class WC_Checkout {
 
 			/**
 			 * Action hook to adjust customer before save.
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_update_customer', $customer, $data );
 
@@ -950,7 +965,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
-		if ( 'billing' === $type || false === $this->posted_data['ship_to_different_address'] ) {
+		if ( 'billing' === $type || false === $this->legacy_posted_data['ship_to_different_address'] ) {
 			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
 		} else {
 			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
@@ -972,13 +987,13 @@ class WC_Checkout {
 
 			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-			if ( $value !== null ) {
+			if ( null !== $value ) {
 				return $value;
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}();
-			} else {
+				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+			} elseif ( WC()->customer->meta_exists( $input ) ) {
 				$value = WC()->customer->get_meta( $input, true );
 			}
 

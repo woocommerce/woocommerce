@@ -9,7 +9,7 @@
  * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
  * https://github.com/wp-cli/restful
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_REST_Command {
@@ -139,7 +139,7 @@ class WC_CLI_REST_Command {
 		list( $status, $body, $headers ) = $this->do_request( 'GET', $route, $assoc_args );
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
-			$body = self::limit_item_to_fields( $body, $fields );
+			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
 		if ( 'headers' === $assoc_args['format'] ) {
@@ -179,7 +179,7 @@ class WC_CLI_REST_Command {
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
 			foreach ( $items as $key => $item ) {
-				$items[ $key ] = self::limit_item_to_fields( $item, $fields );
+				$items[ $key ] = self::limit_item_to_fields( $item, $assoc_args['fields'] );
 			}
 		}
 
@@ -281,7 +281,15 @@ EOT;
 			$query_total_time = round( $query_total_time, 6 );
 			WP_CLI::debug( "wc command executed {$query_count} queries in {$query_total_time} seconds{$slow_query_message}", 'wc' );
 		}
+
 		if ( $error = $response->as_error() ) {
+			// For authentication errors (status 401), include a reminder to set the --user flag.
+			// WP_CLI::error will only return the first message from WP_Error, so we will pass a string containing both instead.
+			if ( 401 === $response->get_status() ) {
+				$errors   = $error->get_error_messages();
+				$errors[] = __( 'Make sure to include the --user flag with an account that has permissions for this action.', 'woocommerce' ) . ' {"status":401}';
+				$error    = implode( "\n", $errors );
+			}
 			WP_CLI::error( $error );
 		}
 		return array( $response->get_status(), $response->get_data(), $response->get_headers() );
@@ -333,17 +341,21 @@ EOT;
 	 * @return string
 	 */
 	private function get_filled_route( $args = array() ) {
-		$parent_id_matched = false;
-		$route             = $this->route;
+		$supported_id_matched = false;
+		$route                = $this->route;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
 			if ( strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
-				$route             = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
-				$parent_id_matched = true;
+				$route                = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
+				$supported_id_matched = true;
 			}
 		}
 
-		$route = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)' ), ( $parent_id_matched && ! empty( $args[1] ) ? $args[1] : $args[0] ), $route );
+		if ( ! empty( $args ) ) {
+			$id_replacement = $supported_id_matched && ! empty( $args[1] ) ? $args[1] : $args[0];
+			$route          = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)' ), $id_replacement, $route );
+		}
+
 		return rtrim( $route );
 	}
 

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Your own data store doesn't need to use WC_Data_Store_WP -- you can write
  * your own meta handling functions.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -17,7 +17,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'post';
@@ -32,7 +32,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an object.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array();
@@ -40,7 +40,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Get and store terms from a taxonomy.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data|integer $object
 	 * @param  string $taxonomy Taxonomy name e.g. product_cat
 	 * @return array of terms
@@ -61,7 +61,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Returns an array of meta for an object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @return array
 	 */
@@ -82,7 +82,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing at least ->id)
 	 * @return array
@@ -94,10 +94,10 @@ class WC_Data_Store_WP {
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing ->key and ->value)
-	 * @return meta ID
+	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
 		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, $meta->value, false );
@@ -106,7 +106,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Update meta.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing ->id, ->key and ->value)
 	 */
@@ -117,7 +117,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Table structure is slightly different between meta types, this function will return what we need to know.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */
 	protected function get_db_info() {

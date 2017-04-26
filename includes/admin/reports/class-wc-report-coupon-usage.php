@@ -105,14 +105,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		$total_coupons  = absint( $this->get_order_report_data( $total_coupons_query ) );
 
 		$legend[] = array(
-			/* translators: %s: discount ammount */
+			/* translators: %s: discount amount */
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
 			'color' => $this->chart_colours['discount_amount'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
-			/* translators: %s: coupons ammount */
+			/* translators: %s: coupons amount */
 			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
 			'color' => $this->chart_colours['coupon_count'],
 			'highlight_series' => 0,
@@ -144,6 +144,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );

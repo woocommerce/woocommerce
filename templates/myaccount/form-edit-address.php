@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.6.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,11 +35,11 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 		<div class="woocommerce-address-fields">
 			<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>
 
-			<?php foreach ( $address as $key => $field ) : ?>
-
-				<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
-
-			<?php endforeach; ?>
+			<div class="woocommerce-address-fields__field-wrapper">
+				<?php foreach ( $address as $key => $field ) : ?>
+					<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
+				<?php endforeach; ?>
+			</div>
 
 			<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 

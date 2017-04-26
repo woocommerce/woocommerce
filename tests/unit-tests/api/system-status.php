@@ -2,7 +2,7 @@
 /**
  * System Status REST Tests
  * @package WooCommerce\Tests\API
- * @since 2.7
+ * @since 3.0
  */
 class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
@@ -30,7 +30,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure system status cannot be accessed without valid creds
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_without_permission() {
 		wp_set_current_user( 0 );
@@ -42,7 +42,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * Test to make sure root properties are present.
 	 * (environment, theme, database, etc).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
 		wp_set_current_user( $this->user );
@@ -61,7 +61,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure environment response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_environment() {
 		wp_set_current_user( $this->user );
@@ -81,7 +81,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure database response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_database() {
 		global $wpdb;
@@ -99,7 +99,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure active plugins response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
 		wp_set_current_user( $this->user );
@@ -119,7 +119,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure theme response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_theme() {
 		wp_set_current_user( $this->user );
@@ -136,7 +136,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure settings response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_settings() {
 		wp_set_current_user( $this->user );
@@ -151,7 +151,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 		$settings = (array) $data['settings'];
 
-		$this->assertEquals( 10, count( $settings ) );
+		$this->assertEquals( 11, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -160,7 +160,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure security response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_security() {
 		wp_set_current_user( $this->user );
@@ -177,7 +177,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure pages response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_pages() {
 		wp_set_current_user( $this->user );
@@ -190,7 +190,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test system status schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_system_status_schema() {
 		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
@@ -210,7 +210,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure get_items (all tools) response is correct.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_tools() {
 		wp_set_current_user( $this->user );
@@ -243,7 +243,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure system status tools cannot be accessed without valid creds
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tools_without_permission() {
 		wp_set_current_user( 0 );
@@ -254,7 +254,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure we can load a single tool correctly.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_tool() {
 		wp_set_current_user( $this->user );
@@ -277,7 +277,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure a single system status toolscannot be accessed without valid creds.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tool_without_permission() {
 		wp_set_current_user( 0 );
@@ -288,7 +288,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure we can RUN a tool correctly.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_execute_system_tool() {
 		wp_set_current_user( $this->user );
@@ -313,7 +313,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure a tool cannot be run without valid creds.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_execute_system_status_tool_without_permission() {
 		wp_set_current_user( 0 );
@@ -324,7 +324,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test system status schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_system_status_tool_schema() {
 		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );

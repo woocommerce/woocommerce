@@ -352,6 +352,11 @@
 			float: right;
 		}
 	}
+
+	.woocommerce-billing-fields,
+	.woocommerce-shipping-fields {
+		@include clearfix();
+	}
 }
 
 .woocommerce-account {

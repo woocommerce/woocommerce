@@ -3,7 +3,7 @@
  * Settings API Tests.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Settings extends WC_REST_Unit_Test_Case {
@@ -13,7 +13,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Settings_Options_Controller();
+		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
@@ -23,19 +23,19 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/settings', $routes );
-		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group>[\w-]+)', $routes );
-		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group>[\w-]+)/(?P<id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group_id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group_id>[\w-]+)/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
 	 * Test getting all groups.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_groups() {
 		wp_set_current_user( $this->user );
@@ -52,10 +52,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'description' => 'My awesome test settings.',
 			'sub_groups'  => array( 'sub-test' ),
 			'_links'      => array(
-				'item' => array(
+				'options' => array(
 					array(
-						'href'       => rest_url( '/wc/v2/settings/test' ),
-						'embeddable' => true,
+						'href' => rest_url( '/wc/v2/settings/test' ),
 					),
 				),
 			),
@@ -68,10 +67,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'description' => '',
 			'sub_groups'  => array(),
 			'_links'      => array(
-				'item' => array(
+				'options' => array(
 					array(
-						'href'       => rest_url( '/wc/v2/settings/sub-test' ),
-						'embeddable' => true,
+						'href' => rest_url( '/wc/v2/settings/sub-test' ),
 					),
 				),
 			),
@@ -81,7 +79,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test /settings without valid permissions/creds.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_groups_without_permission() {
 		wp_set_current_user( 0 );
@@ -93,7 +91,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test /settings without valid permissions/creds.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @covers WC_Rest_Settings_Controller::get_items
 	 */
 	public function test_get_groups_none_registered() {
@@ -110,7 +108,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test groups schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_group_schema() {
 		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/settings' );
@@ -128,7 +126,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test settings schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting_schema() {
 		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/settings/test/woocommerce_shop_page_display' );
@@ -150,7 +148,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single group.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_group() {
 		wp_set_current_user( $this->user );
@@ -204,7 +202,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single group without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_group_without_permission() {
 		wp_set_current_user( 0 );
@@ -216,7 +214,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single setting.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_setting() {
 		wp_set_current_user( $this->user );
@@ -261,7 +259,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating multiple settings at once.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_settings() {
 		wp_set_current_user( $this->user );
@@ -276,13 +274,14 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$request->set_body_params( array(
 			'update' => array(
 				array(
-				'id'    => 'woocommerce_shop_page_display',
-				'value' => 'both',
+					'id'    => 'woocommerce_shop_page_display',
+					'value' => 'both',
 				),
 			),
 		) );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
+
 		$this->assertEquals( 'both', $data['update'][0]['value'] );
 		$this->assertEquals( 'both', get_option( 'woocommerce_shop_page_display' ) );
 
@@ -305,7 +304,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single setting.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting() {
 		wp_set_current_user( $this->user );
@@ -336,7 +335,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single setting without valid user permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting_without_permission() {
 		wp_set_current_user( 0 );
@@ -348,7 +347,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests the GET single setting route handler receiving an empty setting ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting_empty_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', '' );
@@ -359,7 +358,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests the GET single setting route handler receiving an invalid setting ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting_invalid_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', 'invalid' );
@@ -370,11 +369,11 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests the GET single setting route handler encountering an invalid setting type.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_setting_invalid_setting_type() {
-		// $controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
-		$controller = $this->getMockBuilder( 'WC_Rest_Settings_Options_Controller' )->setMethods( array( 'get_group_settings', 'is_setting_type_valid' ) )->getMock();
+		// $controller = $this->getMock( 'WC_Rest_Setting_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+		$controller = $this->getMockBuilder( 'WC_Rest_Setting_Options_Controller' )->setMethods( array( 'get_group_settings', 'is_setting_type_valid' ) )->getMock();
 
 		$controller
 			->expects( $this->any() )
@@ -394,7 +393,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single setting without valid user permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_setting_without_permission() {
 		wp_set_current_user( 0 );
@@ -411,7 +410,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating multiple settings without valid user permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_settings_without_permission() {
 		wp_set_current_user( 0 );
@@ -432,8 +431,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a bad setting ID.
 	 *
-	 * @since 2.7.0
-	 * @covers WC_Rest_Settings_Options_Controller::update_item
+	 * @since 3.0.0
+	 * @covers WC_Rest_Setting_Options_Controller::update_item
 	 */
 	public function test_update_setting_bad_setting_id() {
 		wp_set_current_user( $this->user );
@@ -449,7 +448,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_classic_settings() {
 		wp_set_current_user( $this->user );
@@ -501,7 +500,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests our email etting registration to make sure settings added for WP-Admin are available over the API.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_email_settings() {
 		wp_set_current_user( $this->user );
@@ -592,7 +591,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of checkbox settings.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_checkbox() {
 		wp_set_current_user( $this->user );
@@ -625,7 +624,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of radio settings.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_radio() {
 		wp_set_current_user( $this->user );
@@ -650,7 +649,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of multiselect.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_multiselect() {
 		wp_set_current_user( $this->user );
@@ -671,7 +670,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of select.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_select() {
 		wp_set_current_user( $this->user );
@@ -701,7 +700,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test validation of image_width.
 	 *
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_validation_image_width() {
 		wp_set_current_user( $this->user );

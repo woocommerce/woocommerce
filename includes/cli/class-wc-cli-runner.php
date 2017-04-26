@@ -8,7 +8,7 @@
  * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
  * https://github.com/wp-cli/restful
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_Runner {
@@ -19,9 +19,9 @@ class WC_CLI_Runner {
 	 */
 	private static $disabled_endpoints = array(
 		'settings',
-		'settings/(?P<group>[\w-]+)',
-		'settings/(?P<group>[\w-]+)/batch',
-		'settings/(?P<group>[\w-]+)/(?P<id>[\w-]+)',
+		'settings/(?P<group_id>[\w-]+)',
+		'settings/(?P<group_id>[\w-]+)/batch',
+		'settings/(?P<group_id>[\w-]+)/(?P<id>[\w-]+)',
 		'system_status',
 		'system_status/tools',
 		'system_status/tools/(?P<id>[\w-]+)',
@@ -29,6 +29,12 @@ class WC_CLI_Runner {
 		'reports/sales',
 		'reports/top_sellers',
 	);
+
+	/**
+	 * The version of the REST API we should target to
+	 * generate commands.
+	 */
+	private static $target_rest_version = 'v2';
 
 	/**
 	 * Register's all endpoints as commands once WP and WC have all loaded.
@@ -48,10 +54,11 @@ class WC_CLI_Runner {
 
 		// Loop through all of our endpoints and register any valid WC endpoints.
 		foreach ( $response_data['routes'] as $route => $route_data ) {
-			// Only register WC endpoints
-			if ( substr( $route, 0, 4 ) !== '/wc/' ) {
+			// Only register endpoints for WC and our target version.
+			if ( substr( $route, 0, 4 + strlen( self::$target_rest_version ) ) !== '/wc/' . self::$target_rest_version ) {
 				continue;
 			}
+
 			// Only register endpoints with schemas
 			if ( empty( $route_data['schema']['title'] ) ) {
 				WP_CLI::debug( sprintf( __( 'No schema title found for %s, skipping REST command registration.', 'woocommerce' ), $route ), 'wc' );

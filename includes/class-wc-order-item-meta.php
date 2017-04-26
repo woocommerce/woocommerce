@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
- * @deprecated  2.7.0 wc_display_item_meta function is used instead.
+ * @deprecated  3.0.0 wc_display_item_meta function is used instead.
  * @class 		order_item_meta
  * @version		2.4
  * @package		WooCommerce/Classes
@@ -35,6 +35,8 @@ class WC_Order_Item_Meta {
 	 * @param \WC_Product $product defaults to null
 	 */
 	public function __construct( $item = array(), $product = null ) {
+		wc_deprecated_function( 'WC_Order_Item_Meta::__construct', '3.1', 'WC_Order_Item_Product' );
+
 		// Backwards (pre 2.4) compat
 		if ( ! isset( $item['item_meta'] ) ) {
 			$this->legacy = true;

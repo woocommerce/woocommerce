@@ -31,8 +31,8 @@ class WC_Report_Stock extends WP_List_Table {
 	public function __construct() {
 
 		parent::__construct( array(
-			'singular'  => __( 'Stock', 'woocommerce' ),
-			'plural'    => __( 'Stock', 'woocommerce' ),
+			'singular'  => 'stock',
+			'plural'    => 'stock',
 			'ajax'      => false,
 		) );
 	}
@@ -78,6 +78,10 @@ class WC_Report_Stock extends WP_List_Table {
 
 		if ( ! $product || $product->get_id() !== $item->id ) {
 			$product = wc_get_product( $item->id );
+		}
+
+		if ( ! $product ) {
+			return;
 		}
 
 		switch ( $column_name ) {

@@ -23,8 +23,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct( array(
-			'singular' => __( 'webhook', 'woocommerce' ),
-			'plural'   => __( 'webhooks', 'woocommerce' ),
+			'singular' => 'webhook',
+			'plural'   => 'webhooks',
 			'ajax'     => false,
 		) );
 	}
@@ -101,12 +101,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
 			if ( 'trash' == $post_status ) {
-				$actions['untrash'] = '<a aria-label="' . esc_attr__( 'Restore this item from the Trash', 'woocommerce' ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
+				$actions['untrash'] = '<a aria-label="' . esc_attr__( 'Restore this item from the Trash', 'woocommerce' ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . esc_html__( 'Restore', 'woocommerce' ) . '</a>';
 			} elseif ( EMPTY_TRASH_DAYS ) {
-				$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
+				$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Move this item to the Trash', 'woocommerce' ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . esc_html__( 'Trash', 'woocommerce' ) . '</a>';
 			}
 			if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" aria-label="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete permanently', 'woocommerce' ) . '</a>';
+				$actions['delete'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Delete this item permanently', 'woocommerce' ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>';
 			}
 		}
 

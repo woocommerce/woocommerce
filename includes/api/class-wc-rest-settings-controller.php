@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Register routes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
@@ -53,7 +53,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings groups items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -97,9 +97,8 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	protected function prepare_links( $group_id ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
-			'item' => array(
-				'href'       => rest_url( trailingslashit( $base ) . $group_id ),
-				'embeddable' => true,
+			'options' => array(
+				'href' => rest_url( trailingslashit( $base ) . $group_id ),
 			),
 		);
 
@@ -109,7 +108,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param array $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -130,7 +129,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Filters out bad values from the groups array/filter so we
 	 * only return known values via the API.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $group
 	 * @return array
 	 */
@@ -144,7 +143,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each group response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
@@ -155,7 +154,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Returns default settings for groups. null means the field is required.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	protected function group_defaults() {
@@ -171,7 +170,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -186,49 +185,44 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	/**
 	 * Get the groups schema, conforming to JSON Schema.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'setting_group',
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'               => array(
-					'description'  => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_title',
-					),
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'setting_group',
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array(
+					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'label'            => array(
-					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'label' => array(
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'description'      => array(
-					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'description' => array(
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'parent_id'        => array(
-					'description'  => __( 'ID of parent grouping.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'parent_id' => array(
+					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'sub_groups'        => array(
-					'description'  => __( 'IDs for settings sub groups.', 'woocommerce' ),
-					'type'         => 'string',
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+				'sub_groups' => array(
+					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Rest Posts Controler Class
+ * Abstract Rest Posts Controller Class
  *
  * @author   WooThemes
  * @category API
@@ -204,7 +204,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -282,7 +282,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -324,9 +324,11 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			$args['date_query'][0]['after'] = $request['after'];
 		}
 
-		if ( is_array( $request['filter'] ) ) {
-			$args = array_merge( $args, $request['filter'] );
-			unset( $args['filter'] );
+		if ( 'wc/v1' === $this->namespace ) {
+			if ( is_array( $request['filter'] ) ) {
+				$args = array_merge( $args, $request['filter'] );
+				unset( $args['filter'] );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -692,10 +694,12 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			);
 		}
 
-		$params['filter'] = array(
-			'type'        => 'object',
-			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
-		);
+		if ( 'wc/v1' === $this->namespace ) {
+			$params['filter'] = array(
+				'type'        => 'object',
+				'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
+			);
+		}
 
 		return $params;
 	}

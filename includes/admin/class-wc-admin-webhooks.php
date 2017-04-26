@@ -129,7 +129,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook Webhook instance.
 	 */
 	private function update_api_version( $webhook ) {
-		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v1';
+		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v2';
 
 		$webhook->set_api_version( $version );
 	}
@@ -225,7 +225,7 @@ class WC_Admin_Webhooks {
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
 		$webhook = new WC_Webhook( $webhook_id );
-		$webhook->set_api_version( 'wp_api_v1' );
+		$webhook->set_api_version( 'wp_api_v2' );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 

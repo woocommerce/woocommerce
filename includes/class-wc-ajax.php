@@ -200,9 +200,9 @@ class WC_AJAX {
 	public static function remove_coupon() {
 		check_ajax_referer( 'remove-coupon', 'security' );
 
-		$coupon = wc_clean( $_POST['coupon'] );
+		$coupon = isset( $_POST['coupon'] ) ? wc_clean( $_POST['coupon'] ) : false;
 
-		if ( ! isset( $coupon ) || empty( $coupon ) ) {
+		if ( empty( $coupon ) ) {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
@@ -726,10 +726,14 @@ class WC_AJAX {
 		$customer = new WC_Customer( $user_id );
 
 		if ( has_filter( 'woocommerce_found_customer_details' ) ) {
-			wc_deprecated_function( 'The woocommerce_found_customer_details filter', '2.7', 'woocommerce_found_customer_details' );
+			wc_deprecated_function( 'The woocommerce_found_customer_details filter', '3.0', 'woocommerce_ajax_get_customer_details' );
 		}
 
-		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $customer->get_data(), $customer, $user_id );
+		$data = $customer->get_data();
+		$data['date_created']  = $data['date_created'] ? $data['date_created']->getTimestamp() : null;
+		$data['date_modified'] = $data['date_modified'] ? $data['date_modified']->getTimestamp() : null;
+
+		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $data, $customer, $user_id );
 		wp_send_json( $customer_data );
 	}
 
@@ -744,22 +748,28 @@ class WC_AJAX {
 		}
 
 		try {
-			$item_to_add = absint( $_POST['item_to_add'] );
-			$order_id    = absint( $_POST['order_id'] );
-			$order       = wc_get_order( $order_id );
+			$order_id     = absint( $_POST['order_id'] );
+			$order        = wc_get_order( $order_id );
+			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
 
-			if ( ! $order || ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
-				throw new Exception( __( 'Invalid product', 'woocommerce' ) );
+			if ( ! $order ) {
+				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			$item_id     = $order->add_product( wc_get_product( $item_to_add ) );
-			$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-			$order_taxes = $order->get_taxes();
-			$class       = 'new_row';
-
 			ob_start();
-			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-			include( 'admin/meta-boxes/views/html-order-item.php' );
+
+			foreach ( $items_to_add as $item_to_add ) {
+				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
+					continue;
+				}
+				$item_id     = $order->add_product( wc_get_product( $item_to_add ) );
+				$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				$order_taxes = $order->get_taxes();
+				$class       = 'new_row';
+
+				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+				include( 'admin/meta-boxes/views/html-order-item.php' );
+			}
 
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
@@ -930,9 +940,9 @@ class WC_AJAX {
 					continue;
 				}
 				$_product = $order_item->get_product();
-				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
-					$new_stock    = $_product->reduce_stock( $stock_change );
+					$new_stock    = wc_update_product_stock( $_product, $stock_change, 'decrease' );
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
 					$note         = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
@@ -969,10 +979,10 @@ class WC_AJAX {
 					continue;
 				}
 				$_product = $order_item->get_product();
-				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
-					$new_quantity = $_product->increase_stock( $stock_change );
+					$new_quantity = wc_update_product_stock( $_product, $stock_change, 'increase' );
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
 					$note         = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
@@ -1016,9 +1026,7 @@ class WC_AJAX {
 		// Grab the order and recalc taxes
 		$order = wc_get_order( $order_id );
 		$order->calculate_taxes( $calculate_tax_args );
-
-		// Return HTML items
-		$order = wc_get_order( $order_id );
+		$order->calculate_totals( false );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 		wp_die();
 	}
@@ -1183,7 +1191,7 @@ class WC_AJAX {
 		}
 
 		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, (array) $_GET['exclude'] );
+			$ids = array_intersect( $ids, (array) $_GET['include'] );
 		}
 
 		if ( ! empty( $_GET['limit'] ) ) {
@@ -1219,8 +1227,26 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$data_store      = WC_Data_Store::load( 'customer' );
-		$ids             = $data_store->search_customers( $term );
+		// Stop if it is not numeric and smaller than 3 characters.
+		if ( ! is_numeric( $term ) && 2 >= strlen( $term ) ) {
+			wp_die();
+		}
+
+		// Search by ID.
+		if ( is_numeric( $term ) ) {
+			$customer = new WC_Customer( intval( $term ) );
+
+			// Customer does not exists.
+			if ( 0 === $customer->get_id() ) {
+				wp_die();
+			}
+
+			$ids = array( $customer->get_id() );
+		} else {
+			$data_store = WC_Data_Store::load( 'customer' );
+			$ids        = $data_store->search_customers( $term );
+		}
+
 		$found_customers = array();
 
 		if ( ! empty( $_GET['exclude'] ) ) {
@@ -1362,7 +1388,7 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = array_map( 'wc_format_decimal', $tax_totals );
+				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ) );
 			}
 
 			// Create the refund object.
@@ -1795,7 +1821,7 @@ class WC_AJAX {
 			}
 
 			if ( 'false' !== $data['date_to'] ) {
-				$variation->set_date_on_sale_from( wc_clean( $data['date_to'] ) );
+				$variation->set_date_on_sale_to( wc_clean( $data['date_to'] ) );
 			}
 
 			$variation->save();

@@ -49,7 +49,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	 * @param WC_Order $order Order object.
 	 */
 	public function trigger( $order_id, $order = false ) {
-		if ( $order_id && ! is_a( $order, 'WC_Order' ) ){
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
 			$order = wc_get_order( $order_id );
 		}
 
@@ -57,7 +57,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			$this->object                  = $order;
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
+			$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 

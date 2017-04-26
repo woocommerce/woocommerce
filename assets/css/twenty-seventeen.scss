@@ -281,16 +281,24 @@ a.remove {
 	}
 }
 
-dl.variation {
-	dt {
+dl.variation, .wc-item-meta {
+	list-style: none outside;
+
+	dt, .wc-item-meta-label {
 		float: left;
 		clear: both;
 		margin-right: .25em;
 		display: inline-block;
+		list-style: none outside;
 	}
 
 	dd {
 		margin: 0;
+	}
+
+	p,
+	&:last-child {
+		margin-bottom: 0;
 	}
 }
 
@@ -362,6 +370,10 @@ table.variations {
 
 	figure {
 		margin: 0;
+	}
+
+	.zoomImg {
+		background-color: #fff;
 	}
 
 	.woocommerce-product-gallery__image:nth-child(n+2) {
@@ -521,6 +533,26 @@ table.variations {
 			}
 		}
 	}
+}
+
+/**
+ * Photoswipe
+ * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
+ */
+
+button.pswp__button,
+button.pswp__button:hover,
+button.pswp__button--arrow--left::before,
+button.pswp__button--arrow--right::before {
+	background-color: transparent !important; /* 1 */
+}
+
+button.pswp__button--close:hover {
+	background-position: 0 -44px;
+}
+
+button.pswp__button--zoom:hover {
+	background-position: -88px 0;
 }
 
 /**
@@ -948,6 +980,32 @@ table.variations {
 		&:checked + label {
 			&:before {
 				background: black;
+			}
+		}
+	}
+}
+
+.colors-dark.woocommerce-checkout {
+	.wc_payment_method {
+		.payment_box {
+			background: #333;
+		}
+	}
+	.select2-container--default {
+		.select2-results {
+			.select2-results__options {
+				background:#333;
+			}
+			.select2-results__option[aria-selected="true"]{
+				color: #333;
+			}
+		}
+		.select2-selection--single {
+			background-color: #333;
+			border: 1px solid #555;
+
+			.select2-selection__rendered {
+				color: #ccc;
 			}
 		}
 	}
