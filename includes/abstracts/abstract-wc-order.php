@@ -780,7 +780,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's type.
+	 * Get an order item object, based on it's ID. The item must belong to the current
+	 * order. If the item cannot be found or it doens't belong to current order
+	 * FALSE will be returned.
 	 *
 	 * @since  3.0.0
 	 * @param  int $item_id
