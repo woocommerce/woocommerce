@@ -257,7 +257,7 @@ jQuery( function( $ ) {
 		}
 
 		var options = $.extend( {
-			index: $( clicked ).index(),
+			index: $( clicked ).index()
 		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
