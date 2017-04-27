@@ -214,8 +214,9 @@ function wc_get_featured_product_ids() {
 	$featured_product_ids = get_transient( 'wc_featured_products' );
 
 	// Valid cache found
-	if ( false !== $featured_product_ids )
+	if ( false !== $featured_product_ids ) {
 		return $featured_product_ids;
+	}
 
 	$data_store           = WC_Data_Store::load( 'product' );
 	$featured             = $data_store->get_featured_product_ids();
@@ -497,10 +498,11 @@ function wc_track_product_view() {
 
 	global $post;
 
-	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
+	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) ) {
 		$viewed_products = array();
-	else
+	} else {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
+	}
 
 	if ( ! in_array( $post->ID, $viewed_products ) ) {
 		$viewed_products[] = $post->ID;
