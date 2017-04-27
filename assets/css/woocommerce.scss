@@ -2049,6 +2049,12 @@ button.pswp__button--zoom:hover {
 	}
 }
 
+.woocommerce-terms-and-conditions {
+	border: 1px solid rgba(0,0,0,.2);
+	box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+	background: rgba(0,0,0,.05);
+}
+
 /**
  * Password strength meter
  */
