@@ -1045,48 +1045,14 @@ function wc_format_datetime( $date, $format = '' ) {
 /**
  * Process oEmbeds.
  *
- * @since  3.0.0
+ * @since  3.1.0
  * @param string $content
  * @return string
  */
 function wc_do_oembeds( $content ) {
 	global $wp_embed;
 
-	$layout_css_enqueued = wp_style_is( 'woocommerce-layout', 'enqueued' );
-
-	if ( $layout_css_enqueued ) {
-		add_filter( 'embed_oembed_html', 'wc_wrap_oembed' );
-	}
-
 	$content = $wp_embed->autoembed( $content );
 
-	if ( $layout_css_enqueued ) {
-		remove_filter( 'embed_oembed_html', 'wc_wrap_oembed' );
-	}
-
 	return $content;
-}
-
-/**
- * Wrap an oEmbed with a container that keeps the ratio in narrow containers.
- *
- * @since  3.0.0
- * @param string $html oEmbed html (generally an iframe)
- * @return string
- */
-function wc_wrap_oembed( $html ) {
-	$classes = array( 'woocommerce-oembed' );
-	$width_regex = '/width="([0-9]+)/';
-	$height_regex = '/height="([0-9]+)/';
-	$width = preg_match( $width_regex, $html, $matches ) ? (int) $matches[1] : 0;
-	$height = preg_match( $height_regex, $html, $matches ) ? (int) $matches[1] : 0;
-	$padding_bottom_percent = ( $width && $height && $width > $height ) ? round( $height / $width, 2 ) * 100 : 0;
-
-	if ( $padding_bottom_percent ) {
-		$classes[] = 'force-ratio';
-	}
-
-	$html = '<div class="' . implode( ' ', $classes ) . '" style="padding-bottom: ' . $padding_bottom_percent . '%">' . $html . '</div>';
-
-	return $html;
 }

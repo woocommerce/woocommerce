@@ -644,21 +644,4 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
 		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
-
-	/**
-	 * Test wc_wrap_oembed().
-	 *
-	 * @since 3.0.0
-	 */
-	public function test_wc_wrap_oembed() {
-		$ratio_html = '<iframe width="625" height="352" src="https://www.youtube.com/embed/1KahlicghaE?feature=oembed" frameborder="0" allowfullscreen></iframe>';
-		$natural_html = '<blockquote class="twitter-tweet" data-width="550"><p lang="en" dir="ltr">Apple Pay is now available for <a href="https://twitter.com/hashtag/WooCommerce?src=hash">#WooCommerce</a>. Quicker checkouts for your<br>customers, better conversion rates for you: <a href="https://t.co/89zhGGZlhS">https://t.co/89zhGGZlhS</a> <a href="https://t.co/oFh11vQsAJ">pic.twitter.com/oFh11vQsAJ</a></p>&mdash; WooCommerce (@WooCommerce) <a href="https://twitter.com/WooCommerce/status/842406075374698497">March 16, 2017</a></blockquote><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>';
-		$ratio_html_expected = '<div class="woocommerce-oembed force-ratio" style="padding-bottom: 56%"><iframe width="625" height="352" src="https://www.youtube.com/embed/1KahlicghaE?feature=oembed" frameborder="0" allowfullscreen></iframe></div>';
-
-		$ratio_wrapped = wc_wrap_oembed( $ratio_html );
-		$natural_wrapped = wc_wrap_oembed( $natural_html );
-
-		$this->assertEquals( $ratio_html_expected, $ratio_wrapped );
-		$this->assertFalse( strpos( $natural_wrapped, 'force-ratio' ) );
-	}
 }

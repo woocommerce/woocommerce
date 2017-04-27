@@ -348,19 +348,6 @@
 	 */
 	 .woocommerce-oembed {
 	 	position: relative;
-
-	 	&.force-ratio {
-			width: 100%;
-			height: 0;
-
-			embed, iframe, object, video {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-			}
-	 	}
 	 }
 
 }
