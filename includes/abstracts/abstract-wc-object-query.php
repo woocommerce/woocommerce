@@ -19,7 +19,7 @@ abstract class WC_Object_Query {
 	 * Stores query data.
 	 * @var array
 	 */
-	public $query_vars = array();
+	protected $query_vars = array();
 
 	/**
 	 * Create a new query.

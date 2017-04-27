@@ -201,7 +201,7 @@ class WC_Data_Store_WP {
 	 * @param array $query_vars query vars from a WC_Object_Query
 	 * @return array
 	 */
-	public function get_wp_query_args( $query_vars ) {
+	protected function get_wp_query_args( $query_vars ) {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(

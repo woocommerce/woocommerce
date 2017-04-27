@@ -642,7 +642,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param array $query_vars query vars from a WC_Order_Query
 	 * @return array
 	 */
-	public function get_wp_query_args( $query_vars ) {
+	protected function get_wp_query_args( $query_vars ) {
 
 		$key_mapping = array(
 			'customer_id' => 'customer_user',
