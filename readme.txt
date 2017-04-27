@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.4
+Stable tag: 3.0.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.5 - 2017-04-xx =
+= 3.0.5 - 2017-04-27 =
 * Fix - Tooltip display within shipping zone modals.
 * Fix - Prevent password change notification when creating a customer via the API.
 * Fix - Fix missing title for actions column on mobile.
@@ -171,8 +171,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Filter invalid products before returning them for wc_get_products.
 * Fix - Prevent orders being their own parent (causes errors).
 * Fix - Correctly migrate legacy shipping taxes data.
+* Fix - Make sure the meta data cache is not shared among instances.
+* Fix - Correct the stock display notice when a variable product manages stock for it's children.
+* Fix - On multisite, add user to blog during checkout if not a user to prevent errors.
+* Fix - Correct sale price date handling with some timezone setups.
+* Fix - wc_attribute_taxonomy_id_by_name needs to use lowercase attribute slug to work.
 * Tweak - Add required placeholder for meta fields in backend.
 * Tweak - Don't strtolower address strings on checkout validation messages.
+* Dev - Make get_price_html handling match 2.6 and pass all values through woocommerce_get_price_html filter.
 * Dev - Legacy customer class missing get_address / get_address_2 functions.
 * Dev - Restored filter `woocommerce_checkout_customer_id` during checkout validation.
 * Dev - Adds missing `$this` argument for all `woocommerce_payment_complete_order_status` filters.
@@ -375,5 +381,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.4 =
+= 3.0.5 =
 3.0 is a major update. [Make a full site backup](https://docs.woocommerce.com/document/backup-wordpress-content), update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
