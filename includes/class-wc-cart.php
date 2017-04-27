@@ -1554,8 +1554,9 @@ class WC_Cart {
 	 * @return bool
 	 */
 	public function show_shipping() {
-		if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
+		if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) ) {
 			return false;
+		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
 			if ( ! WC()->customer->has_calculated_shipping() ) {
@@ -2225,11 +2226,15 @@ class WC_Cart {
 	public function get_taxes_total( $compound = true, $display = true ) {
 		$total = 0;
 		foreach ( $this->taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
+			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
+				continue;
+			}
 			$total += $tax;
 		}
 		foreach ( $this->shipping_taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
+			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
+				continue;
+			}
 			$total += $tax;
 		}
 		if ( $display ) {

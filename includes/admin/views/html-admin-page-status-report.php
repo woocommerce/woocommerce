@@ -538,7 +538,9 @@ $pages          = $system_status->get_pages();
 					}
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				if ( ! $error ) {
+					echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				}
 
 				echo '</td></tr>';
 			}
@@ -608,13 +610,13 @@ $pages          = $system_status->get_pages();
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); ?></td>
-			<td><?php
-				if ( ! $theme['has_woocommerce_support'] ) {
+			<td>
+				<?php if ( ! $theme['has_woocommerce_support'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
-				}
-			?></td>
+				} ?>
+			</td>
 		</tr>
 	</tbody>
 </table>

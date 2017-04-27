@@ -17,7 +17,7 @@
 		<exclude name="Generic.Commenting.DocComment.ShortNotCapital" />
 		<exclude name="Generic.Commenting.DocComment.SpacingAfter" />
 		<exclude name="Generic.Commenting.DocComment.SpacingBeforeTags" />
-		<exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
+		<!-- <exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" /> -->
 		<!-- <exclude name="Generic.Files.EndFileNewline.NotFound" /> -->
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />

@@ -370,7 +370,9 @@ class WC_Admin_Assets {
 	 */
 	public function product_taxonomy_styles() {
 
-		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
 		?>
 		<style type="text/css">
 			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>

@@ -235,8 +235,9 @@ class WC_Shortcode_Checkout {
 
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
-			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout )
+			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout ) {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );
+			}
 
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 

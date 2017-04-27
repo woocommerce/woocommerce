@@ -84,8 +84,9 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * Output for the order received page.
 	 */
 	public function thankyou_page() {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
 			echo wpautop( wptexturize( $this->instructions ) );
+		}
 	}
 
 	/**
