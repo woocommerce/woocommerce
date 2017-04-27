@@ -448,10 +448,10 @@ class WC_Admin_Webhooks {
 			$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
 			$webhooks_table_list->display();
 		} else {
-			echo '<div class="woocommerce-BlankState">';
+			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
 			?>
-			<h2 class="woocommerce-BlankState-message"><?php _e( 'Webhooks are event notifications sent to a URL of your choice. They are useful for integrating with third-party services and other external API that support them.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ) ); ?>"><?php _e( 'Create your first webhook!', 'woocommerce' ); ?></a>
+			<h2 class="woocommerce-BlankState-message"><?php _e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ); ?>"><?php _e( 'Create a new webhook', 'woocommerce' ); ?></a>
 
 			<?php echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}

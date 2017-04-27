@@ -78,10 +78,10 @@ class WC_Admin_API_Keys {
 			$keys_table_list->search_box( __( 'Search key', 'woocommerce' ), 'key' );
 			$keys_table_list->display();
 		} else {
-			echo '<div class="woocommerce-BlankState">';
+			echo '<div class="woocommerce-BlankState woocommerce-BlankState--api">';
 			?>
-			<h2 class="woocommerce-BlankState-message"><?php _e( 'The WooCommerce REST API works on a key system to control access. These keys are linked to WordPress users on your website.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ); ?>"><?php _e( 'Create your first key!', 'woocommerce' ); ?></a>
+			<h2 class="woocommerce-BlankState-message"><?php _e( 'The WooCommerce REST API allows external apps to view and manage store data. Access is granted only to those with valid API keys.', 'woocommerce' ); ?></h2>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ); ?>"><?php _e( 'Create an API key', 'woocommerce' ); ?></a>
 
 			<?php echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}

@@ -4925,6 +4925,14 @@ table.bar_chart {
 	@include icon( '\e006' );
 }
 
+.woocommerce-BlankState--api .woocommerce-BlankState-message::before {
+	@include icon( '\e01c' );
+}
+
+.woocommerce-BlankState--webhooks .woocommerce-BlankState-message::before {
+	@include icon( '\e01b' );
+}
+
 .woocommerce-BlankState {
 	text-align: center;
 	padding: 5em 0 0;
