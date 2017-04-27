@@ -222,6 +222,8 @@ class WC_Admin_Assets {
 				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 				'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
 				'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
+				'placeholder_name'       => esc_attr__( 'Name (required)', 'woocommerce' ),
+				'placeholder_value'      => esc_attr__( 'Value (required)', 'woocommerce' ),
 			) );
 		}
 		if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
@@ -252,8 +254,7 @@ class WC_Admin_Assets {
 				'visible_label'                 => __( 'Visible on the product page', 'woocommerce' ),
 				'used_for_variations_label'     => __( 'Used for variations', 'woocommerce' ),
 				'new_attribute_prompt'          => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
-				'calc_totals'                   => __( 'Calculate totals based on order items, discounts, and shipping?', 'woocommerce' ),
-				'calc_line_taxes'               => __( 'Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.', 'woocommerce' ),
+				'calc_totals'                   => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
 				'copy_billing'                  => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 				'load_billing'                  => __( 'Load the customer\'s billing information? This will remove any currently entered billing information.', 'woocommerce' ),
 				'load_shipping'                 => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),

@@ -93,8 +93,8 @@ function wc_get_orders( $args ) {
  * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -104,6 +104,7 @@ function wc_get_order( $the_order = false ) {
  * Get all order statuses.
  *
  * @since 2.2
+ * @used-by WC_Order::set_status
  * @return array
  */
 function wc_get_order_statuses() {
@@ -166,7 +167,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 /**
  * Get all registered order types.
  *
- * $for optionally define what you are getting order types for so only relevent types are returned.
+ * $for optionally define what you are getting order types for so only relevant types are returned.
  *
  * e.g. for 'order-meta-boxes', 'order-count'
  *

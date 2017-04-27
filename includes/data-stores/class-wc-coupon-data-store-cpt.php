@@ -61,11 +61,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'post_type'     => 'shop_coupon',
 			'post_status'   => 'publish',
 			'post_author'   => get_current_user_id(),
-			'post_title'    => $coupon->get_code(),
+			'post_title'    => $coupon->get_code( 'edit' ),
 			'post_content'  => '',
-			'post_excerpt'  => $coupon->get_description(),
-			'post_date'     => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
-			'post_date_gmt' => date( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
+			'post_excerpt'  => $coupon->get_description( 'edit' ),
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 		) ), true );
 
 		if ( $coupon_id ) {
@@ -94,8 +94,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->set_props( array(
 			'code'                        => $post_object->post_title,
 			'description'                 => $post_object->post_excerpt,
-			'date_created'                => strtotime( $post_object->post_date_gmt ),
-			'date_modified'               => strtotime( $post_object->post_modified_gmt ),
+			'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
 			'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ),
 			'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 			'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
@@ -105,7 +105,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'excluded_product_ids'        => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ),
 			'usage_limit'                 => get_post_meta( $coupon_id, 'usage_limit', true ),
 			'usage_limit_per_user'        => get_post_meta( $coupon_id, 'usage_limit_per_user', true ),
-			'limit_usage_to_x_items'      => get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ),
+			'limit_usage_to_x_items'      => 0 < get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) ? get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) : null,
 			'free_shipping'               => 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ),
 			'product_categories'          => array_filter( (array) get_post_meta( $coupon_id, 'product_categories', true ) ),
 			'excluded_product_categories' => array_filter( (array) get_post_meta( $coupon_id, 'exclude_product_categories', true ) ),
@@ -127,14 +127,36 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon
 	 */
 	public function update( &$coupon ) {
-		$post_data = array(
-			'ID'           => $coupon->get_id(),
-			'post_title'   => $coupon->get_code(),
-			'post_excerpt' => $coupon->get_description(),
-		);
-		wp_update_post( $post_data );
-		$this->update_post_meta( $coupon );
 		$coupon->save_meta_data();
+		$changes = $coupon->get_changes();
+
+		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+			$post_data = array(
+				'post_title'        => $coupon->get_code( 'edit' ),
+				'post_excerpt'      => $coupon->get_description( 'edit' ),
+				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getTimestamp() )       : current_time( 'mysql', 1 ),
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $coupon->get_id() ) );
+				clean_post_cache( $coupon->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) );
+			}
+			$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+		}
+		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
 	}

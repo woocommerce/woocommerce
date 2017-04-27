@@ -37,7 +37,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$legend   = array();
 
 		$legend[] = array(
-			/* translators: %s: signups ammount */
+			/* translators: %s: signups amount */
 			'title' => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . sizeof( $this->customers ) . '</strong>' ),
 			'color' => $this->chart_colours['signups'],
 			'highlight_series' => 2,
@@ -178,6 +178,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		$admin_users = new WP_User_Query(

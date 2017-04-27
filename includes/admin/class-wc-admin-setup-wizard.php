@@ -54,7 +54,7 @@ class WC_Admin_Setup_Wizard {
 		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) {
 			return;
 		}
-		$this->steps = array(
+		$default_steps = array(
 			'introduction' => array(
 				'name'    => __( 'Introduction', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_introduction' ),
@@ -86,6 +86,8 @@ class WC_Admin_Setup_Wizard {
 				'handler' => '',
 			),
 		);
+
+		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
@@ -116,7 +118,7 @@ class WC_Admin_Setup_Wizard {
 		) );
 
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
-			call_user_func( $this->steps[ $this->step ]['handler'] );
+			call_user_func( $this->steps[ $this->step ]['handler'], $this );
 		}
 
 		ob_start();
@@ -127,9 +129,30 @@ class WC_Admin_Setup_Wizard {
 		exit;
 	}
 
-	public function get_next_step_link() {
+	/**
+	 * Get the URL for the next step's screen.
+	 * @param string step   slug (default: current step)
+	 * @return string       URL for next step if a next step exists.
+	 *                      Admin URL if it's the last step.
+	 *                      Empty string on failure.
+	 * @since 3.0.0
+	 */
+	public function get_next_step_link( $step = '' ) {
+		if ( ! $step ) {
+			$step = $this->step;
+		}
+
 		$keys = array_keys( $this->steps );
-		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ] );
+		if ( end( $keys ) === $step ) {
+			return admin_url();
+		}
+
+		$step_index = array_search( $step, $keys );
+		if ( false === $step_index ) {
+			return '';
+		}
+
+		return add_query_arg( 'step', $keys[ $step_index + 1 ] );
 	}
 
 	/**
@@ -191,7 +214,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
-		call_user_func( $this->steps[ $this->step ]['view'] );
+		call_user_func( $this->steps[ $this->step ]['view'], $this );
 		echo '</div>';
 	}
 
@@ -503,12 +526,30 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$enable_shipping = isset( $_POST['woocommerce_calc_shipping'] );
-		$enable_taxes    = isset( $_POST['woocommerce_calc_taxes'] );
+		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
+		$enable_taxes     = isset( $_POST['woocommerce_calc_taxes'] );
+		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+
+			/*
+			 * If this is the initial shipping setup, create a shipping
+			 * zone containing the country the store is located in, with
+			 * a "free shipping" method preconfigured.
+			 */
+			if ( false === $current_shipping ) {
+				$default_country = get_option( 'woocommerce_default_country' );
+				$location        = wc_format_country_state_string( $default_country );
+
+				$zone = new WC_Shipping_Zone( null );
+				$zone->set_zone_order( 0 );
+				$zone->add_location( $location['country'], 'country' );
+				$zone->set_zone_name( $zone->get_formatted_location() );
+				$zone->add_shipping_method( 'free_shipping' );
+				$zone->save();
+			}
 		} else {
 			update_option( 'woocommerce_ship_to_countries', 'disabled' );
 		}

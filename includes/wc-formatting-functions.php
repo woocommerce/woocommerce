@@ -165,6 +165,7 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
  * @return float
  */
 function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
+	$weight  = (float) $weight;
 	$to_unit = strtolower( $to_unit );
 
 	if ( empty( $from_unit ) ) {
@@ -534,13 +535,39 @@ function wc_time_format() {
 }
 
 /**
+ * Convert mysql datetime to PHP timestamp, forcing UTC. Wrapper for strtotime.
+ *
+ * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
+ *
+ * @since  3.0.0
+ * @return int
+ */
+function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
+	$original_timezone = date_default_timezone_get();
+
+	// @codingStandardsIgnoreStart
+	date_default_timezone_set( 'UTC' );
+
+	if ( null === $from_timestamp ) {
+		$next_timestamp = strtotime( $time_string );
+	} else {
+		$next_timestamp = strtotime( $time_string, $from_timestamp );
+	}
+
+	date_default_timezone_set( $original_timezone );
+	// @codingStandardsIgnoreEnd
+
+	return $next_timestamp;
+}
+
+/**
  * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
  * a WP core method exists (see https://core.trac.wordpress.org/ticket/24730).
  *
  * Adapted from https://secure.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
  *
  * @since 2.1
- * @return string a valid PHP timezone string for the site
+ * @return string PHP timezone string for the site
  */
 function wc_timezone_string() {
 
@@ -550,7 +577,7 @@ function wc_timezone_string() {
 	}
 
 	// get UTC offset, if it isn't set then return UTC
-	if ( 0 === ( $utc_offset = get_option( 'gmt_offset', 0 ) ) ) {
+	if ( 0 === ( $utc_offset = intval( get_option( 'gmt_offset', 0 ) ) ) ) {
 		return 'UTC';
 	}
 
@@ -558,25 +585,36 @@ function wc_timezone_string() {
 	$utc_offset *= 3600;
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset, 0 );
-
-	// last try, guess timezone string manually
-	if ( false === $timezone ) {
-		$is_dst = date( 'I' );
-
-		foreach ( timezone_abbreviations_list() as $abbr ) {
-			foreach ( $abbr as $city ) {
-				if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
-					return $city['timezone_id'];
-				}
-			}
-		}
-
-		// fallback to UTC
-		return 'UTC';
+	if ( $timezone = timezone_name_from_abbr( '', $utc_offset ) ) {
+		return $timezone;
 	}
 
-	return $timezone;
+	// last try, guess timezone string manually
+	foreach ( timezone_abbreviations_list() as $abbr ) {
+		foreach ( $abbr as $city ) {
+			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) {
+				return $city['timezone_id'];
+			}
+		}
+	}
+
+	// fallback to UTC
+	return 'UTC';
+}
+
+/**
+ * Get timezone offset in seconds.
+ *
+ * @since  3.0.0
+ * @return float
+ */
+function wc_timezone_offset() {
+	if ( $timezone = get_option( 'timezone_string' ) ) {
+		$timezone_object = new DateTimeZone( $timezone );
+		return $timezone_object->getOffset( new DateTime( 'now' ) );
+	} else {
+		return floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+	}
 }
 
 /**
@@ -810,7 +848,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * @return string
  */
 function wc_format_content( $raw_string ) {
-	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
+	return apply_filters( 'woocommerce_format_content', apply_filters( 'woocommerce_short_description', $raw_string ), $raw_string );
 }
 
 /**
@@ -831,8 +869,6 @@ function wc_format_product_short_description( $content ) {
 
 	return $content;
 }
-
-add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
  * Formats curency symbols when saved in settings.

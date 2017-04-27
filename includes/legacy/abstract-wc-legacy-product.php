@@ -162,7 +162,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_variation_default_attributes() {
 		wc_deprecated_function( 'WC_Product_Variable::get_variation_default_attributes', '3.0', 'WC_Product::get_default_attributes' );
-		return apply_filters( 'woocommerce_product_default_attributes', array_filter( (array) maybe_unserialize( $this->get_default_attributes() ) ), $this );
+		return apply_filters( 'woocommerce_product_default_attributes', $this->get_default_attributes(), $this );
 	}
 
 	/**
@@ -535,10 +535,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 		}
 
 		// Sync prices with children
-		self::sync( $product_id );
-
-		// Re-load prices
-		$this->read_product_data();
+		if ( is_callable( array( __CLASS__, 'sync' ) ) ) {
+			self::sync( $product_id );
+		}
 	}
 
 	/**

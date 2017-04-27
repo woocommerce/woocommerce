@@ -372,6 +372,10 @@ table.variations {
 		margin: 0;
 	}
 
+	.zoomImg {
+		background-color: #fff;
+	}
+
 	.woocommerce-product-gallery__image:nth-child(n+2) {
 		width: 25%;
 		display: inline-block;
@@ -976,6 +980,32 @@ button.pswp__button--zoom:hover {
 		&:checked + label {
 			&:before {
 				background: black;
+			}
+		}
+	}
+}
+
+.colors-dark.woocommerce-checkout {
+	.wc_payment_method {
+		.payment_box {
+			background: #333;
+		}
+	}
+	.select2-container--default {
+		.select2-results {
+			.select2-results__options {
+				background:#333;
+			}
+			.select2-results__option[aria-selected="true"]{
+				color: #333;
+			}
+		}
+		.select2-selection--single {
+			background-color: #333;
+			border: 1px solid #555;
+
+			.select2-selection__rendered {
+				color: #ccc;
 			}
 		}
 	}

@@ -26,9 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key = null ) {
-	// Test if terms exists.
-	// get_the_terms() return false when don't found terms.
-	if ( $terms = get_the_terms( $object_id, $taxonomy ) ) {
+	// Test if terms exists. get_the_terms() return false when it finds no terms.
+	$terms = get_the_terms( $object_id, $taxonomy );
+
+	if ( $terms && ! is_wp_error( $terms ) ) {
 		if ( ! is_null( $field ) ) {
 			$terms = wp_list_pluck( $terms, $field, $index_key );
 		}
@@ -150,10 +151,13 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
  * @return int
  */
 function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
-	if ( $a->name + 0 === $b->name + 0 ) {
+    $a_name = (int) $a->name;
+    $b_name = (int) $b->name;
+
+	if ( $a_name === $b_name ) {
 		return 0;
 	}
-	return ( $a->name + 0 < $b->name + 0 ) ? -1 : 1;
+	return ( $a_name < $b_name ) ? -1 : 1;
 }
 
 /**
@@ -548,21 +552,24 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 	// Main query.
 	$count_query = "
-		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		SELECT COUNT( DISTINCT ID ) FROM {$wpdb->posts}
 		WHERE post_status = 'publish'
 		AND post_type = 'product'
 	";
 
 	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
+	$exclude_term_ids            = array();
 
 	if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
-		$count_query .= " AND term_taxonomy_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
+		$exclude_term_ids[] = $product_visibility_term_ids['exclude-from-catalog'];
 	}
 
 	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
-		$count_query .= " AND term_taxonomy_id !=" . $product_visibility_term_ids['outofstock'];
+		$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
+	}
+
+	if ( $exclude_term_ids ) {
+		$count_query .= " AND ID NOT IN ( SELECT object_ID FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " ) ) ";
 	}
 
 	// Pre-process term taxonomy ids.
@@ -606,7 +613,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		}
 
 		// Generate term query
-		$term_query = ' AND term_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
+		$term_query = " AND ID IN ( SELECT object_ID FROM {$wpdb->term_relationships} LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id ) WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) ";
 
 		// Get the count
 		$count = $wpdb->get_var( $count_query . $term_query );

@@ -198,6 +198,19 @@ function wc_get_attribute_types() {
 }
 
 /**
+ * Get attribute type label.
+ *
+ * @since  3.0.0
+ * @param  string $type Attribute type slug.
+ * @return string
+ */
+function wc_get_attribute_type_label( $type ) {
+	$types = wc_get_attribute_types();
+
+	return isset( $types[ $type ] ) ? $types[ $type ] : ucfirst( $type );
+}
+
+/**
  * Check if attribute name is reserved.
  * https://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
  *
@@ -307,4 +320,17 @@ function wc_attributes_array_filter_visible( $attribute ) {
  */
 function wc_attributes_array_filter_variation( $attribute ) {
 	return $attribute && is_a( $attribute, 'WC_Product_Attribute' ) && $attribute->get_variation();
+}
+
+/**
+ * Check if an attribute is included in the attributes area of a variation name.
+ *
+ * @since  3.0.2
+ * @param  string $attribute Attribute value to check for
+ * @param  string $name      Product name to check in
+ * @return bool
+ */
+function wc_is_attribute_in_product_name( $attribute, $name ) {
+	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
+	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
 }

@@ -23,7 +23,7 @@ interface WC_Shipping_Zone_Data_Store_Interface {
 
 	/**
 	 * Get count of methods for a zone.
-	 * @param  int Zone ID
+	 * @param  int $zone_id Zone ID
 	 * @return int Method Count
 	 */
 	public function get_method_count( $zone_id );

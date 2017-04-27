@@ -51,6 +51,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wc_average_rating',
 		'_wc_review_count',
 		'_variation_description',
+		'_thumbnail_id',
+		'_file_paths',
+		'_product_image_gallery',
+		'_product_version',
+		'_wp_old_slug',
+		'_edit_last',
+		'_edit_lock',
 	);
 
 	/**
@@ -91,8 +98,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
-			'post_date'      => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt'  => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_name'      => $product->get_slug( 'edit' ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -130,8 +138,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->set_props( array(
 			'name'              => $post_object->post_title,
 			'slug'              => $post_object->post_name,
-			'date_created'      => strtotime( $post_object->post_date_gmt ),
-			'date_modified'     => strtotime( $post_object->post_modified_gmt ),
+			'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
 			'status'            => $post_object->post_status,
 			'description'       => $post_object->post_content,
 			'short_description' => $post_object->post_excerpt,
@@ -154,24 +162,48 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $product->get_id(),
-				'post_content'      => $product->get_description( 'edit' ),
-				'post_excerpt'      => $product->get_short_description( 'edit' ),
-				'post_title'        => $product->get_name( 'edit' ),
-				'post_parent'       => $product->get_parent_id( 'edit' ),
-				'comment_status'    => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
-				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => date( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-			) );
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ), array_keys( $changes ) ) ) {
+			$post_data = array(
+				'post_content'   => $product->get_description( 'edit' ),
+				'post_excerpt'   => $product->get_short_description( 'edit' ),
+				'post_title'     => $product->get_name( 'edit' ),
+				'post_parent'    => $product->get_parent_id( 'edit' ),
+				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
+				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'post_name'      => $product->get_slug( 'edit' ),
+			);
+			if ( $product->get_date_created( 'edit' ) ) {
+				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() );
+			}
+			if ( isset( $changes['date_modified'] ) && $product->get_date_modified( 'edit' ) ) {
+				$post_data['post_modified']     = gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_modified_gmt'] = gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() );
+			} else {
+				$post_data['post_modified']     = current_time( 'mysql' );
+				$post_data['post_modified_gmt'] = current_time( 'mysql', 1 );
+			}
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
+				clean_post_cache( $product->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+			}
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
@@ -181,7 +213,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_version_and_type( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->clear_caches( $product );
@@ -333,11 +364,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_values = maybe_unserialize( get_post_meta( $product->get_id(), '_product_attributes', true ) );
+		$meta_values = get_post_meta( $product->get_id(), '_product_attributes', true );
 
-		if ( $meta_values ) {
+		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
+				$meta_value = array_merge( array(
+					'name'         => '',
+					'value'        => '',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				), (array) $meta_value );
+
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
@@ -346,6 +386,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
+
 				$attribute = new WC_Product_Attribute();
 				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
 				$attribute->set_name( $meta_value['name'] );
@@ -366,11 +407,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function read_downloads( &$product ) {
-		$meta_values = array_filter( (array) maybe_unserialize( get_post_meta( $product->get_id(), '_downloadable_files', true ) ) );
+		$meta_values = array_filter( (array) get_post_meta( $product->get_id(), '_downloadable_files', true ) );
 
 		if ( $meta_values ) {
 			$downloads = array();
 			foreach ( $meta_values as $key => $value ) {
+				if ( ! isset( $value['name'], $value['file'] ) ) {
+					continue;
+				}
 				$download    = new WC_Product_Download();
 				$download->set_id( $key );
 				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
@@ -688,7 +732,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
-		wp_cache_delete( 'object-' . $product->get_id(), 'products' );
 	}
 
 	/*
@@ -772,7 +815,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
 			WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-			AND $wpdb->posts.post_status = 'publish'
+			AND $wpdb->posts.post_status != 'trash'
 			AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
 			AND $wpdb->postmeta.post_id <> %d LIMIT 1
 		 ", wp_slash( $sku ), $product_id ) );
@@ -792,7 +835,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			FROM $wpdb->posts AS posts
 			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
 			WHERE posts.post_type IN ( 'product', 'product_variation' )
-			AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
+			AND posts.post_status != 'trash'
+			AND postmeta.meta_key = '_sku'
+			AND postmeta.meta_value = '%s'
 			LIMIT 1
 		 ", $sku ) );
 	}
@@ -1122,7 +1167,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'order'          => $args['order'],
 			'tax_query'      => array(),
 		);
-		// Do not load unneccessary post data if the user only wants IDs.
+		// Do not load unnecessary post data if the user only wants IDs.
 		if ( 'ids' === $args['return'] ) {
 			$wp_query_args['fields'] = 'ids';
 		}
@@ -1193,7 +1238,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$products = new WP_Query( $wp_query_args );
 
 		if ( 'objects' === $args['return'] ) {
-			$return = array_map( 'wc_get_product', $products->posts );
+			$return = array_filter( array_map( 'wc_get_product', $products->posts ) );
 		} else {
 			$return = $products->posts;
 		}
@@ -1223,10 +1268,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_product_search_fields', array(
 			'_sku',
 		) ) );
-		$like_term  = '%' . $wpdb->esc_like( $term ) . '%';
-		$post_types = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$type_join  = '';
-		$type_where = '';
+		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
+		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
+		$type_join     = '';
+		$type_where    = '';
 
 		if ( $type ) {
 			if ( in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
@@ -1248,7 +1294,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					)
 				)
 				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
-				AND posts.post_status = 'publish'
+				AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "')
 				$type_where
 				ORDER BY posts.post_parent ASC, posts.post_title ASC
 				",

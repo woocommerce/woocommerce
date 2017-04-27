@@ -174,9 +174,6 @@
 
 		// Show reset link.
 		form.toggleResetLink( attributes.chosenCount > 0 );
-
-		// added to get around variation image flicker issue
-		$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
 	};
 
 	/**
@@ -564,11 +561,12 @@
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
 			$product_img.wc_set_variation_attr( 'title', variation.image.title );
 			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
+			$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
 			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
 			$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
 			$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
 			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
-			$gallery_img.wc_set_variation_attr( 'src', variation.image.src );
+			$gallery_img.wc_set_variation_attr( 'src', variation.image.thumb_src );
 			$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
@@ -578,6 +576,7 @@
 			$product_img.wc_reset_variation_attr( 'sizes' );
 			$product_img.wc_reset_variation_attr( 'title' );
 			$product_img.wc_reset_variation_attr( 'alt' );
+			$product_img.wc_reset_variation_attr( 'data-src' );
 			$product_img.wc_reset_variation_attr( 'data-large_image' );
 			$product_img.wc_reset_variation_attr( 'data-large_image_width' );
 			$product_img.wc_reset_variation_attr( 'data-large_image_height' );

@@ -1155,13 +1155,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 			// Validate the file extension
 			if ( ! $download_object->is_allowed_filetype() ) {
-				$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				if ( $this->get_object_read() ) {
+					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
+				}
 				continue;
 			}
 
 			// Validate the file exists.
 			if ( ! $download_object->file_exists() ) {
-				$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				if ( $this->get_object_read() ) {
+					$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
+				}
 				continue;
 			}
 
@@ -1289,7 +1293,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$this->data_store->create( $this );
 			}
 			if ( $this->get_parent_id() ) {
-				wp_schedule_single_event( time(), 'woocommerce_deferred_product_sync', array( 'product_id' => $this->get_parent_id() ) );
+				wc_deferred_product_sync( $this->get_parent_id() );
 			}
 			return $this->get_id();
 		}
@@ -1581,6 +1585,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->is_downloadable() && $this->get_file( $download_id );
 	}
 
+	/**
+	 * Returns whether or not the product has additonal options that need
+	 * selecting before adding to cart.
+	 *
+	 * @since  3.0.0
+	 * @return boolean
+	 */
+	public function has_options() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1834,7 +1849,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the availability of the product.
 	 *
-	 * @return string
+	 * @return string[]
 	 */
 	public function get_availability() {
 		return apply_filters( 'woocommerce_get_availability', array(
@@ -1852,7 +1867,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
-			$availability = __( 'Available on backorder', 'woocommerce' );
+			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : '';
 		} elseif ( $this->managing_stock() ) {
 			$availability = wc_format_stock_for_display( $this );
 		} else {

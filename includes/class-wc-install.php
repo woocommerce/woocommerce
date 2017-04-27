@@ -309,7 +309,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Create pages that the plugin relies on, storing page id's in variables.
+	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
 		include_once( dirname( __FILE__ ) . '/admin/wc-admin-functions.php' );
@@ -375,7 +375,7 @@ class WC_Install {
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
 	 */
-	private static function create_terms() {
+	public static function create_terms() {
 		$taxonomies = array(
 			'product_type' => array(
 				'simple',
@@ -521,7 +521,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
   order_item_name TEXT NOT NULL,
-  order_item_type varchar(20) NOT NULL DEFAULT '',
+  order_item_type varchar(200) NOT NULL DEFAULT '',
   order_id BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (order_item_id),
   KEY order_id (order_id)
@@ -855,19 +855,27 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$upgrade_notice = '';
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
-			$version = trim( $matches[1] );
 			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
-			// Check the latest stable version and ignore trunk.
-			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
+			// Convert the full version strings to minor versions.
+			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
+			$current_version_parts = explode( '.', WC_VERSION );
 
-				$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
+			if ( 3 !== sizeof( $notice_version_parts ) ) {
+				return;
+			}
+
+			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
+			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
+
+			// Check the latest stable version and ignore trunk.
+			if ( version_compare( $current_version, $notice_version, '<' ) ) {
+
+				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
 
 				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
+					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
 				}
-
-				$upgrade_notice .= '</div> ';
 			}
 		}
 

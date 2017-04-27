@@ -36,7 +36,13 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'name' => array(
+						'required'    => true,
+						'type'        => 'string',
+						'description' => __( 'Shipping zone name.', 'woocommerce' ),
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -275,7 +281,6 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 					'description' => __( 'Shipping zone name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -284,10 +289,6 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 					'description' => __( 'Shipping zone order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
 				),
 			),
 		);

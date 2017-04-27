@@ -23,8 +23,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct( array(
-			'singular' => __( 'key', 'woocommerce' ),
-			'plural'   => __( 'keys', 'woocommerce' ),
+			'singular' => 'key',
+			'plural'   => 'keys',
 			'ajax'     => false,
 		) );
 	}

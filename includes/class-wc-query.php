@@ -563,9 +563,8 @@ class WC_Query {
 			}
 		}
 
-		$product_visibility_terms   = wc_get_product_visibility_term_ids();
+		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() && $main_query ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
-		$product_visibility_in     = array();
 
 		// Hide out of stock products.
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
@@ -744,7 +743,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
+	 * Get an unpaginated list all product IDs (both filtered and unfiltered). Makes use of transients.
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {

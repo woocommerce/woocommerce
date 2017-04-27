@@ -252,7 +252,7 @@ class WC_Shortcode_My_Account {
 		do_action( 'lostpassword_post', $errors );
 
 		if ( $errors->get_error_code() ) {
-			wc_add_notice( $allow->get_error_message(), 'error' );
+			wc_add_notice( $errors->get_error_message(), 'error' );
 			return false;
 		}
 

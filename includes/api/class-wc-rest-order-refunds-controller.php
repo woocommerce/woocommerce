@@ -369,7 +369,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				'refunded_by' => array(
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'meta_data' => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
@@ -523,6 +523,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 							),
 						),
 					),
+				),
+				'api_refund' => array(
+					'description' => __( 'When true, the payment gateway API is used to generate the refund.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'edit' ),
+					'default'     => true,
 				),
 			),
 		);

@@ -166,7 +166,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order->get_order_key() === $order_key ) {
+			if ( $order && $order->get_order_key() === $order_key ) {
 				WC()->cart->empty_cart();
 			}
 		}
@@ -259,9 +259,8 @@ function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 }
 
 /**
- * Get a coupon value.
+ * Get coupon display HTML.
  *
- * @access public
  * @param string $coupon
  */
 function wc_cart_totals_coupon_html( $coupon ) {
@@ -269,25 +268,18 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
-	$value  = array();
+	$discount_amount_html = '';
 
 	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
-		$discount_html = '-' . wc_price( $amount );
-	} else {
-		$discount_html = '';
+		$discount_amount_html = '-' . wc_price( $amount );
+	} elseif ( $coupon->get_free_shipping() ) {
+		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
-	$value[] = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_html, $coupon );
+	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
+	$coupon_html          = $discount_amount_html . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->get_code() ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
-	if ( $coupon->get_free_shipping() ) {
-		$value[] = __( 'Free shipping coupon', 'woocommerce' );
-	}
-
-	// get rid of empty array elements
-	$value = array_filter( $value );
-	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->get_code() ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
-
-	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
+	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) );
 }
 
 /**

@@ -142,7 +142,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return array
 	 */
 	public function format_array( $array ) {
-		wc_deprecated_function( 'format_array', '3.0' );
+		wc_deprecated_function( 'WC_Coupon::format_array', '3.0' );
 		if ( ! is_array( $array ) ) {
 			if ( is_serialized( $array ) ) {
 				$array = maybe_unserialize( $array );
@@ -160,7 +160,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function apply_before_tax() {
-		wc_deprecated_function( 'apply_before_tax', '3.0' );
+		wc_deprecated_function( 'WC_Coupon::apply_before_tax', '3.0' );
 		return true;
 	}
 
@@ -170,7 +170,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function enable_free_shipping() {
-		wc_deprecated_function( 'enable_free_shipping', '3.0', 'get_free_shipping' );
+		wc_deprecated_function( 'WC_Coupon::enable_free_shipping', '3.0', 'WC_Coupon::get_free_shipping' );
 		return $this->get_free_shipping();
 	}
 
@@ -180,7 +180,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @return bool
 	 */
 	public function exclude_sale_items() {
-		wc_deprecated_function( 'exclude_sale_items', '3.0', 'get_exclude_sale_items' );
+		wc_deprecated_function( 'WC_Coupon::exclude_sale_items', '3.0', 'WC_Coupon::get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
 

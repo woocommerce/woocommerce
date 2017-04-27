@@ -38,8 +38,8 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
-		// Add endpoints custom URLs in Appearance > Menus > Pages
-		add_action( 'admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
+		// Add endpoints custom URLs in Appearance > Menus > Pages.
+		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
 		// Admin bar menus
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
@@ -94,7 +94,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'System status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 	}
 
 	/**
@@ -238,30 +238,39 @@ class WC_Admin_Menus {
 	 * Output menu links.
 	 */
 	public function nav_menu_links() {
-		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
+		// Get items from account menu.
+		$endpoints = wc_get_account_menu_items();
+
+		// Remove dashboard item.
+		if ( isset( $endpoints['dashboard'] ) ) {
+			unset( $endpoints['dashboard'] );
+		}
+
+		// Include missing lost password.
+		$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+
+		$endpoints = apply_filters( 'woocommerce_custom_nav_menu_items', $endpoints );
+
 		?>
 		<div id="posttype-woocommerce-endpoints" class="posttypediv">
 			<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
 				<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
 					<?php
 					$i = -1;
-					foreach ( WC()->query->query_vars as $key => $value ) {
-						if ( in_array( $key, $exclude ) ) {
-							continue;
-						}
+					foreach ( $endpoints as $key => $value ) :
 						?>
 						<li>
 							<label class="menu-item-title">
-								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $value ); ?>
 							</label>
 							<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
-							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
-							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" />
+							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $value ); ?>" />
+							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_account_endpoint_url( $key ) ); ?>" />
 							<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
 						</li>
 						<?php
-						$i --;
-					}
+						$i--;
+					endforeach;
 					?>
 				</ul>
 			</div>

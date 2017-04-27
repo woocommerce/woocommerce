@@ -1225,7 +1225,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
 
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 
@@ -1285,7 +1285,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$_product = wc_get_product( $child_id );
 
-			if ( ! $_product->exists() ) {
+			if ( ! $_product || ! $_product->exists() ) {
 				continue;
 			}
 
@@ -1312,6 +1312,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
@@ -1751,7 +1752,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id         = $product->get_id();
 		$variations = $request['variations'];
-		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
+		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;

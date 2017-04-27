@@ -31,6 +31,12 @@ class WC_Checkout {
 	protected $fields = null;
 
 	/**
+	 * Holds posted data for backwards compatibility.
+	 * @var array
+	 */
+	protected $legacy_posted_data = array();
+
+	/**
 	 * Gets the main WC_Checkout Instance.
 	 *
 	 * @since 2.1
@@ -91,7 +97,7 @@ class WC_Checkout {
 			case 'enable_guest_checkout' :
 				$bool_value = wc_string_to_bool( $value );
 
-				if ( $bool_value !== $this->is_registration_required() ) {
+				if ( $bool_value === $this->is_registration_required() ) {
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_true', 0 );
 					remove_filter( 'woocommerce_checkout_registration_required', '__return_false', 0 );
 					add_filter( 'woocommerce_checkout_registration_required', $bool_value ? '__return_false' : '__return_true', 0 );
@@ -103,7 +109,7 @@ class WC_Checkout {
 			case 'shipping_methods' :
 				WC()->session->set( 'chosen_shipping_methods', $value );
 				break;
-			case 'legacy_posted_data' :
+			case 'posted' :
 				$this->legacy_posted_data = $value;
 				break;
 		}
@@ -116,7 +122,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function __get( $key ) {
-		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && ! $this->legacy_posted_data ) {
+		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && empty( $this->legacy_posted_data ) ) {
 			$this->legacy_posted_data = $this->get_posted_data();
 		}
 		switch ( $key ) {
@@ -129,6 +135,7 @@ class WC_Checkout {
 			case 'checkout_fields' :
 				return $this->get_checkout_fields();
 			case 'posted' :
+				wc_doing_it_wrong( 'WC_Checkout->posted', 'Use $_POST directly.', '3.0.0' );
 				return $this->legacy_posted_data;
 			case 'shipping_method' :
 				return $this->legacy_posted_data['shipping_method'];
@@ -519,7 +526,7 @@ class WC_Checkout {
 	 * Get posted data from the checkout form.
 	 *
 	 * @since  3.0.0
-	 * @return array of data and errors.
+	 * @return array of data.
 	 */
 	protected function get_posted_data() {
 		$skipped = array();
@@ -555,10 +562,13 @@ class WC_Checkout {
 				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
+
+				// BW compatibility.
+				$this->legacy_posted_data[ $key ] = $data[ $key ];
 			}
 		}
 
-		if ( in_array( 'shipping', $skipped ) && WC()->cart->needs_shipping_address() ) {
+		if ( in_array( 'shipping', $skipped ) && ( WC()->cart->needs_shipping_address() || wc_ship_to_billing_address_only() ) ) {
 			foreach ( $this->get_checkout_fields( 'shipping' ) as $key => $field ) {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
 			}
@@ -590,11 +600,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
 					break;
 					case 'billing' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
 					break;
 				}
 
@@ -612,7 +622,7 @@ class WC_Checkout {
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
 				}
 
@@ -622,6 +632,7 @@ class WC_Checkout {
 					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						continue;
 					}
 				}
 
@@ -808,7 +819,7 @@ class WC_Checkout {
 	 * @throws Exception
 	 */
 	protected function process_customer( $data ) {
-		$customer_id = get_current_user_id();
+		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
@@ -954,7 +965,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
-		if ( 'billing' === $type || false === $this->posted_data['ship_to_different_address'] ) {
+		if ( 'billing' === $type || false === $this->legacy_posted_data['ship_to_different_address'] ) {
 			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
 		} else {
 			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
@@ -981,8 +992,8 @@ class WC_Checkout {
 			}
 
 			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}();
-			} else {
+				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+			} elseif ( WC()->customer->meta_exists( $input ) ) {
 				$value = WC()->customer->get_meta( $input, true );
 			}
 

@@ -233,7 +233,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'name'         => $item->get_name(),
 				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 				'sku'          => is_object( $product ) ? $product->get_sku() : null,
-				'meta'         => $item_meta,
+				'meta'         => array_values( $item_meta ),
 			);
 		}
 
@@ -275,7 +275,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item->get_code(),
-				'amount' => wc_format_decimal( $coupon_item->get_discount_total(), $dp ),
+				'amount' => wc_format_decimal( $coupon_item->get_discount(), $dp ),
 			);
 		}
 
@@ -615,6 +615,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// Order status.
 			if ( ! empty( $data['status'] ) ) {
+				// Refresh the order instance.
+				$order = wc_get_order( $order->get_id() );
 				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
@@ -1532,7 +1534,7 @@ class WC_API_Orders extends WC_API_Resource {
 					'name'             => $item->get_name(),
 					'product_id'       => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 					'sku'              => is_object( $product ) ? $product->get_sku() : null,
-					'meta'             => $item_meta,
+					'meta'             => array_values( $item_meta ),
 					'refunded_item_id' => (int) $item->get_meta( 'refunded_item_id' ),
 				);
 			}

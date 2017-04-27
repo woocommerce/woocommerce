@@ -54,12 +54,20 @@ class WC_Data_Store {
 	private $current_class_name = '';
 
 	/**
+	 * The object type this store works with.
+	 * @var string
+	 */
+	private $object_type = '';
+
+
+	/**
 	 * Tells WC_Data_Store which object (coupon, product, order, etc)
 	 * store we want to work with.
 	 *
 	 * @param string $object_type Name of object.
 	 */
 	public function __construct( $object_type ) {
+		$this->object_type = $object_type;
 		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
 		// If this object type can't be found, check to see if we can load one
@@ -87,6 +95,22 @@ class WC_Data_Store {
 		} else {
 			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Only store the object type to avoid serializing the data store instance.
+	 *
+	 * @return array
+	 */
+	public function __sleep() {
+		return array( 'object_type' );
+	}
+
+	/**
+	 * Re-run the constructor with the object type.
+	 */
+	public function __wakeup() {
+		$this->__construct( $this->object_type );
 	}
 
 	/**

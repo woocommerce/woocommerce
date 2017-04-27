@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooCommerce
  */
 class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface, WC_Order_Item_Product_Data_Store_Interface {
+
 	/**
 	 * Data stored in meta keys.
 	 * @since 3.0.0
@@ -22,7 +23,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * Read/populate data properties specific to this order item.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item_Product $item
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
@@ -44,7 +45,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * Ran after both create and update, so $id will be set.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item_Product $item
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();
@@ -68,7 +69,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * Get a list of download IDs for a specific item from an order.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item_Product $item
 	 * @param WC_Order $order
 	 * @return array
 	 */

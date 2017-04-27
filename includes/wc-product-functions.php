@@ -153,7 +153,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_related_',
 		'wc_child_has_weight_',
 		'wc_child_has_dimensions_',
-		'wc_child_is_in_stock_',
 	);
 
 	if ( $post_id > 0 ) {
@@ -342,8 +341,14 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 		$variation_attributes = $variation->get_attributes();
 		$product              = $variation;
 	} else {
-		$variation_attributes = $variation;
 		$product              = false;
+		// Remove attribute_ prefix from names.
+		$variation_attributes = array();
+		if ( is_array( $variation ) ) {
+			foreach ( $variation as $key => $value ) {
+				$variation_attributes[ str_replace( 'attribute_', '', $key ) ] = $value;
+			}
+		}
 	}
 
 	$list_type = $include_names ? 'dl' : 'ul';
@@ -704,6 +709,12 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
 
+		// Thumbnail version.
+		$src                 = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$props['thumb_src']   = $src[0];
+		$props['thumb_src_w'] = $src[1];
+		$props['thumb_src_h'] = $src[2];
+
 		// Image source.
 		$src             = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
 		$props['src']    = $src[0];
@@ -884,11 +895,11 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 	) );
 
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
-	$qty   = '' !== $args['qty'] ? max( 0, (int) $args['qty'] ) : 1;
+	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
 		return '';
-	} elseif ( 0 === $qty ) {
+	} elseif ( empty( $qty ) ) {
 		return 0.0;
 	}
 
@@ -903,7 +914,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			$return_price = round( $line_price + $tax_amount, wc_get_price_decimals() );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
-			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
+			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 
 			/**
 			 * If the customer is excempt from VAT, remove the taxes here.
@@ -943,16 +954,16 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	) );
 
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
-	$qty   = '' !== $args['qty'] ? max( 0, (int) $args['qty'] ) : 1;
+	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
 		return '';
-	} elseif ( 0 === $qty ) {
+	} elseif ( empty( $qty ) ) {
 		return 0.0;
 	}
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
+		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 		$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 	} else {
@@ -1136,4 +1147,19 @@ function wc_products_array_orderby_price( $a, $b ) {
 		return 0;
 	}
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
+}
+
+/**
+ * Queue a product for syncing at the end of the request.
+ *
+ * @param  int $product_id
+ */
+function wc_deferred_product_sync( $product_id ) {
+	global $wc_deferred_product_sync;
+
+	if ( empty( $wc_deferred_product_sync ) ) {
+		$wc_deferred_product_sync = array();
+	}
+
+	$wc_deferred_product_sync[] = $product_id;
 }

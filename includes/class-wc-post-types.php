@@ -223,7 +223,7 @@ class WC_Post_types {
 						),
 					);
 
-					if ( 1 === $tax->attribute_public ) {
+					if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
 						$taxonomy_data['rewrite'] = array(
 							'slug'         => trailingslashit( $permalinks['attribute_rewrite_slug'] ) . sanitize_title( $tax->attribute_name ),
 							'with_front'   => false,
@@ -257,8 +257,9 @@ class WC_Post_types {
 					'labels'              => array(
 							'name'                  => __( 'Products', 'woocommerce' ),
 							'singular_name'         => __( 'Product', 'woocommerce' ),
+							'all_items'             => __( 'All Products', 'woocommerce' ),
 							'menu_name'             => _x( 'Products', 'Admin menu name', 'woocommerce' ),
-							'add_new'               => __( 'Add product', 'woocommerce' ),
+							'add_new'               => __( 'Add New', 'woocommerce' ),
 							'add_new_item'          => __( 'Add new product', 'woocommerce' ),
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit product', 'woocommerce' ),
@@ -449,6 +450,8 @@ class WC_Post_types {
 				)
 			)
 		);
+
+		do_action( 'woocommerce_after_register_post_type' );
 	}
 
 	/**

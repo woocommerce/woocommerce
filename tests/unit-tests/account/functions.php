@@ -33,7 +33,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 			'order-date'    => 'Date',
 			'order-status'  => 'Status',
 			'order-total'   => 'Total',
-			'order-actions' => '&nbsp;',
+			'order-actions' => 'Actions',
 		), wc_get_account_orders_columns() );
 	}
 

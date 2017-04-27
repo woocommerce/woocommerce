@@ -27,12 +27,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	);
 
 	/**
-	 * May store an order to prevent retriving it multiple times.
-	 * @var object
-	 */
-	protected $order;
-
-	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -122,10 +116,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return int
 	 */
 	public function get_order() {
-		if ( ! $this->order ) {
-		 	$this->order = wc_get_order( $this->get_order_id() );
-		}
-		return $this->order;
+		return wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -178,30 +169,24 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Expands things like term slugs before return.
 	 *
-	 * @param string $hideprefix (default: _)
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
 	 * @return array
 	 */
-	public function get_formatted_meta_data( $hideprefix = '_' ) {
+	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta    = array();
 		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
-
-			// Skip items with values already in the product details area of the product name
-			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
-
-			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
-				continue;
-			}
-
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
@@ -213,6 +198,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
+			// Skip items with values already in the product details area of the product name.
+			if ( ! $include_all && $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+				continue;
+			}
+
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
@@ -221,7 +211,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			);
 		}
 
-		return $formatted_meta;
+		return apply_filters( 'woocommerce_order_item_get_formatted_meta_data', $formatted_meta, $this );
 	}
 
 	/*
@@ -305,7 +295,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$return = array();
 
 			foreach ( $this->meta_data as $meta ) {
-				$return[ $meta->id ] = $meta;
+				$return[ $meta->key ] = $meta;
 			}
 
 			return $return;

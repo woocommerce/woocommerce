@@ -402,6 +402,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Get attribute taxonomy label.
 	 *
+	 * @deprecated 3.0.0
+	 *
 	 * @param  string $name Taxonomy name.
 	 * @return string
 	 */
@@ -410,6 +412,33 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
+	}
+
+	/**
+	 * Get product attribute taxonomy name.
+	 *
+	 * @since  3.0.0
+	 * @param  string     $slug    Taxonomy name.
+	 * @param  WC_Product $product Product data.
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_name( $slug, $product ) {
+		$attributes = $product->get_attributes();
+
+		if ( ! isset( $attributes[ $slug ] ) ) {
+			return str_replace( 'pa_', '', $slug );
+		}
+
+		$attribute = $attributes[ $slug ];
+
+		// Taxonomy attribute name.
+		if ( $attribute->is_taxonomy() ) {
+			$taxonomy = $attribute->get_taxonomy_object();
+			return $taxonomy->attribute_label;
+		}
+
+		// Custom product attribute name.
+		return $attribute->get_name();
 	}
 
 	/**
@@ -426,13 +455,13 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				if ( 0 === strpos( $key, 'pa_' ) ) {
 					$default[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
-						'name'   => $this->get_attribute_taxonomy_label( $key ),
+						'name'   => $this->get_attribute_taxonomy_name( $key, $product ),
 						'option' => $value,
 					);
 				} else {
 					$default[] = array(
 						'id'     => 0,
-						'name'   => str_replace( 'pa_', '', $key ),
+						'name'   => $this->get_attribute_taxonomy_name( $key, $product ),
 						'option' => $value,
 					);
 				}
@@ -469,7 +498,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		$attributes = array();
 
 		if ( $product->is_type( 'variation' ) ) {
-			// Variation attributes.
+			$_product = wc_get_product( $product->get_parent_id() );
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				$name = str_replace( 'attribute_', '', $attribute_name );
 
@@ -482,38 +511,27 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					$option_term = get_term_by( 'slug', $attribute, $name );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
-						'name'   => $this->get_attribute_taxonomy_label( $name ),
+						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
 					);
 				} else {
 					$attributes[] = array(
 						'id'     => 0,
-						'name'   => $name,
+						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'option' => $attribute,
 					);
 				}
 			}
 		} else {
 			foreach ( $product->get_attributes() as $attribute ) {
-				if ( $attribute['is_taxonomy'] ) {
-					$attributes[] = array(
-						'id'        => wc_attribute_taxonomy_id_by_name( $attribute['name'] ),
-						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
-						'position'  => (int) $attribute['position'],
-						'visible'   => (bool) $attribute['is_visible'],
-						'variation' => (bool) $attribute['is_variation'],
-						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
-					);
-				} else {
-					$attributes[] = array(
-						'id'        => 0,
-						'name'      => $attribute['name'],
-						'position'  => (int) $attribute['position'],
-						'visible'   => (bool) $attribute['is_visible'],
-						'variation' => (bool) $attribute['is_variation'],
-						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
-					);
-				}
+				$attributes[] = array(
+					'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+					'name'      => $this->get_attribute_taxonomy_name( $attribute['name'], $product ),
+					'position'  => (int) $attribute['position'],
+					'visible'   => (bool) $attribute['is_visible'],
+					'variation' => (bool) $attribute['is_variation'],
+					'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
+				);
 			}
 		}
 
@@ -559,7 +577,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'downloads'             => $this->get_downloads( $product ),
 			'download_limit'        => $product->get_download_limit(),
 			'download_expiry'       => $product->get_download_expiry(),
-			'download_type'         => 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'tax_status'            => $product->get_tax_status(),
@@ -1171,7 +1188,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$attributes = $product->get_variation_attributes();
+
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $attribute ) {
@@ -1529,23 +1547,16 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
-				),
-				'download_type' => array(
-					'description' => __( 'Download type, this controls the schema on the front-end.', 'woocommerce' ),
-					'type'        => 'string',
-					'default'     => 'standard',
-					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
@@ -1903,7 +1914,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				'variations' => array(
 					'description' => __( 'List of variations IDs.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'    => 'integer',
 					),

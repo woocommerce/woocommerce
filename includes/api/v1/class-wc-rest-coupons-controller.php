@@ -164,7 +164,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $format_date as $key ) {
 			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
 		}
-		foreach( $format_date_utc as $key ) {
+		foreach ( $format_date_utc as $key ) {
 			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
 		}
 
@@ -323,7 +323,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -362,7 +362,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 			/**
 			 * Fires after a single item is created or updated via the REST API.
 			 *
-			 * @param object          $post      Inserted object (not a WP_Post object).
+			 * @param WP_Post         $post      Post object.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
 			 */
@@ -447,7 +447,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'amount' => array(
-					'description' => __( 'The amount of discount.', 'woocommerce' ),
+					'description' => __( 'The amount of discount. Should always be numeric, even if setting a percentage.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -463,13 +463,13 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'individual_use' => array(
-					'description' => __( 'Whether coupon can only be used individually.', 'woocommerce' ),
+					'description' => __( 'If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_ids' => array(
-					'description' => __( "List of product ID's the coupon can be used on.", 'woocommerce' ),
+					'description' => __( "List of product IDs the coupon can be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -477,7 +477,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'exclude_product_ids' => array(
-					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
+					'description' => __( "List of product IDs the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -485,7 +485,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_limit' => array(
-					'description' => __( 'How many times the coupon can be used.', 'woocommerce' ),
+					'description' => __( 'How many times the coupon can be used in total.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -500,13 +500,13 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'free_shipping' => array(
-					'description' => __( 'Define if can be applied for free shipping.', 'woocommerce' ),
+					'description' => __( 'If true and if the free shipping method requires a coupon, this coupon will enable free shipping.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_categories' => array(
-					'description' => __( "List of category ID's the coupon applies to.", 'woocommerce' ),
+					'description' => __( "List of category IDs the coupon applies to.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -514,7 +514,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'excluded_product_categories' => array(
-					'description' => __( "List of category ID's the coupon does not apply to.", 'woocommerce' ),
+					'description' => __( "List of category IDs the coupon does not apply to.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -522,7 +522,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'exclude_sale_items' => array(
-					'description' => __( 'Define if should not apply when have sale items.', 'woocommerce' ),
+					'description' => __( 'If true, this coupon will not be applied to items that have sale prices.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
@@ -546,7 +546,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'used_by' => array(
-					'description' => __( 'List of user IDs who have used the coupon.', 'woocommerce' ),
+					'description' => __( 'List of user IDs (or guest email addresses) that have used the coupon.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',

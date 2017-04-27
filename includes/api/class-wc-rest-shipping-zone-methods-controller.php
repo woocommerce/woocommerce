@@ -42,7 +42,13 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'method_id' => array(
+						'required'    => true,
+						'readonly'    => false,
+						'description' => __( 'Shipping method ID.', 'woocommerce' ),
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -440,21 +446,17 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'description' => __( 'Shipping method sort order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
 				),
 				'enabled' => array(
 					'description' => __( 'Shipping method enabled status.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => false,
 				),
 				'method_id' => array(
-					'description' => __( 'Shipping method ID. Write on create only.', 'woocommerce' ),
+					'description' => __( 'Shipping method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'method_title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
@@ -472,6 +474,56 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'description' => __( 'Shipping method settings.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
+					'properties' => array(
+						'id' => array(
+							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'label' => array(
+							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'type' => array(
+							'description' => __( 'Type of setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
+							'readonly'    => true,
+						),
+						'value' => array(
+							'description' => __( 'Setting value.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'default' => array(
+							'description' => __( 'Default value for the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tip' => array(
+							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'placeholder' => array(
+							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
 				),
 			),
 		);

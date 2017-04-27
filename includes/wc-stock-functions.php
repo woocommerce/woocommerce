@@ -96,6 +96,9 @@ function wc_reduce_stock_levels( $order_id ) {
 					/* translators: 1: item name 2: old stock quantity 3: new stock quantity */
 					$order->add_order_note( sprintf( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
 
+					// Get the latest product data.
+					$product = wc_get_product( $product->get_id() );
+
 					if ( '' !== get_option( 'woocommerce_notify_no_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 						do_action( 'woocommerce_no_stock', $product );
 					} elseif ( '' !== get_option( 'woocommerce_notify_low_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {

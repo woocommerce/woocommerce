@@ -559,7 +559,7 @@ class WC_Cart {
 				}
 
 				// Check the nicename against the title.
-				if ( '' === $value || stristr( $cart_item['data']->get_name(), $value ) ) {
+				if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
 					continue;
 				}
 
@@ -609,7 +609,7 @@ class WC_Cart {
 	 */
 	public function get_cross_sells() {
 		$cross_sells = array();
-		$in_cart = array();
+		$in_cart     = array();
 		if ( ! $this->is_empty() ) {
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
 				if ( $values['quantity'] > 0 ) {
@@ -619,7 +619,7 @@ class WC_Cart {
 			}
 		}
 		$cross_sells = array_diff( $cross_sells, $in_cart );
-		return $cross_sells;
+		return wp_parse_id_list( $cross_sells );
 	}
 
 	/**
@@ -904,10 +904,10 @@ class WC_Cart {
 
 			// Force quantity to 1 if sold individually and check for existing item in cart
 			if ( $product_data->is_sold_individually() ) {
-				$quantity         = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
-				$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
+				$quantity      = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
+				$found_in_cart = apply_filters( 'woocommerce_add_to_cart_sold_individually_found_in_cart', $cart_item_key && $this->cart_contents[ $cart_item_key ]['quantity'] > 0, $product_id, $variation_id, $cart_item_data, $cart_id );
 
-				if ( $in_cart_quantity > 0 ) {
+				if ( $found_in_cart ) {
 					/* translators: %s: product name */
 					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() ) ) );
 				}
@@ -1138,8 +1138,8 @@ class WC_Cart {
 			} elseif ( $this->prices_include_tax ) {
 
 				// Get base tax rates
-				if ( empty( $shop_tax_rates[ $product->get_tax_class( true ) ] ) ) {
-					$shop_tax_rates[ $product->get_tax_class( true ) ] = WC_Tax::get_base_tax_rates( $product->get_tax_class( true ) );
+				if ( empty( $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] ) ) {
+					$shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 				}
 
 				// Get item tax rates
@@ -1147,7 +1147,7 @@ class WC_Cart {
 					$tax_rates[ $product->get_tax_class() ] = WC_Tax::get_rates( $product->get_tax_class() );
 				}
 
-				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( true ) ];
+				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ];
 				$item_tax_rates = $tax_rates[ $product->get_tax_class() ];
 
 				/**
@@ -1241,7 +1241,7 @@ class WC_Cart {
 			 */
 			} elseif ( $this->prices_include_tax ) {
 
-				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( true ) ];
+				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ];
 				$item_tax_rates = $tax_rates[ $product->get_tax_class() ];
 
 				/**

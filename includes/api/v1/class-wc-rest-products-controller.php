@@ -151,37 +151,35 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
-			if ( ! empty( $request[ $key ] ) ) {
-				$terms = explode( ',', $request[ $key ] );
+			if ( ! empty( $request[ $key ] ) && is_array( $request[ $key ] ) ) {
+				$request[ $key ] = array_filter( $request[ $key ] );
+			}
 
+			if ( ! empty( $request[ $key ] ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -192,15 +190,17 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'][] = array(
+			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'     => '_sku',
-				'value'   => $request['sku'],
-				'compare' => '=',
-			);
+				'value'   => $skus,
+				'compare' => 'IN',
+			) );
 		}
 
 		// Apply all WP_Query filters again.
@@ -211,7 +211,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Force the post_type argument, since it's not a user input variable.
 		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = $this->get_post_types();
+			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
 		}
@@ -540,7 +540,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		foreach ( $product->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 
@@ -1003,7 +1003,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$attributes = $product->get_variation_attributes();
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $attribute ) {
@@ -1898,13 +1898,13 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
@@ -1914,7 +1914,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'default'     => 'standard',
 					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
@@ -2376,13 +2376,13 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'download_limit' => array(
-								'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
+								'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 								'type'        => 'integer',
 								'default'     => null,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'download_expiry' => array(
-								'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
+								'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 								'type'        => 'integer',
 								'default'     => null,
 								'context'     => array( 'view', 'edit' ),

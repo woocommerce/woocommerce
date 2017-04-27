@@ -51,6 +51,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
+		$this->set_prop( 'name', wc_clean( $value ) );
 		$this->set_prop( 'method_title', wc_clean( $value ) );
 	}
 
@@ -98,6 +99,9 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		);
 		if ( ! empty( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
+			// Older versions just used an array.
+			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data );
 		}
 		$this->set_prop( 'taxes', $tax_data );
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );

@@ -189,7 +189,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
-				foreach ( $items as $item_key => $item ) {
+				foreach ( array_filter( $items ) as $item_key => $item ) {
 					$item->set_order_id( $this->get_id() );
 					$item_id = $item->save();
 
@@ -412,7 +412,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->rate_id           = $tax->get_rate_id();
 			$tax_totals[ $code ]->is_compound       = $tax->is_compound();
 			$tax_totals[ $code ]->label             = $tax->get_label();
-			$tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
+			$tax_totals[ $code ]->amount           += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
 		}
 
@@ -434,6 +434,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_keys( wc_get_order_statuses() );
 	}
 
+	/**
+	 * Get user ID. Used by orders, not other order types like refunds.
+	 *
+	 * @param  string $context
+	 * @return int
+	 */
+	public function get_user_id( $context = 'view' ) {
+		return 0;
+	}
+
+	/**
+	 * Get user. Used by orders, not other order types like refunds.
+	 *
+	 * @return WP_User|false
+	 */
+	public function get_user() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -453,7 +472,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_parent_id( $value ) {
-		if ( $value && ! wc_get_order( $value ) ) {
+		if ( $value && ( $value === $this->get_id() || ! wc_get_order( $value ) ) ) {
 			$this->error( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'parent_id', absint( $value ) );
@@ -470,17 +489,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
-		// Only allow valid new status
-		if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) && 'trash' !== $new_status ) {
-			$new_status = 'pending';
+		// If setting the status, ensure it's set to a valid status.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) && 'trash' !== $new_status ) {
+				$new_status = 'pending';
+			}
+
+			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) && 'trash' !== $old_status ) {
+				$old_status = 'pending';
+			}
 		}
 
 		$this->set_prop( 'status', $new_status );
-
-		// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-		if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) && 'trash' !== $old_status ) {
-			$old_status = 'pending';
-		}
 
 		return array(
 			'from' => $old_status,
@@ -652,13 +674,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string group
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = array(
+		$type_to_group = apply_filters( 'woocommerce_order_type_to_group', array(
 			'line_item' => 'line_items',
 			'tax'       => 'tax_lines',
 			'shipping'  => 'shipping_lines',
 			'fee'       => 'fee_lines',
 			'coupon'    => 'coupon_lines',
-		);
+		) );
 		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
@@ -678,7 +700,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 				}
 				// Don't use array_merge here because keys are numeric
-				$items = $items + $this->items[ $group ];
+				$items = array_filter( $items + $this->items[ $group ] );
 			}
 		}
 
@@ -1075,14 +1097,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax : $tax;
+				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
 			}
 		}
 
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax : $tax;
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
 			}
 		}
 
@@ -1348,7 +1370,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			// Remove non-compound taxes.
 			foreach ( $this->get_taxes() as $tax ) {
-				if ( $this->is_compound() ) {
+				if ( $tax->is_compound() ) {
 					continue;
 				}
 				$subtotal = $subtotal + $tax->get_tax_total() + $tax->get_shipping_tax_total();

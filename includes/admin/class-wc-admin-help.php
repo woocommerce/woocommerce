@@ -49,18 +49,6 @@ class WC_Admin_Help {
 				'title' => __( 'Product Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?',
 			),
-			'wc-settings-products-display' => array(
-				'title' => __( 'Display Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=55s&',
-			),
-			'wc-settings-products-inventory' => array(
-				'title' => __( 'Inventory Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=2m38s&',
-			),
-			'wc-settings-products-downloadable' => array(
-				'title' => __( 'Downloadable Products Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/lolkan4fxf.jsonp?time=3m50s&',
-			),
 			'wc-settings-tax' => array(
 				'title' => __( 'Tax Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/qp1v19dwrh.jsonp?',
@@ -133,53 +121,29 @@ class WC_Admin_Help {
 				'title' => __( 'API Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq.jsonp?',
 			),
-			'wc-settings-api-keys' => array(
-				'title' => __( 'Keys & Apps', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq.jsonp?time=1m06s&',
-			),
-			'wc-settings-api-webhooks' => array(
-				'title' => __( 'Webhooks', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq.jsonp?time=1m52s&',
-			),
 			'product' => array(
 				'title' => __( 'Creating Products', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/ziyjmd4kut.jsonp?',
+				'url'   => '//fast.wistia.net/embed/iframe/fw0477t6wr.jsonp?',
 			),
 			'edit-product_cat' => array(
 				'title' => __( 'Product Categories', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp?time=21s&',
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp?',
 			),
 			'edit-product_tag' => array(
 				'title' => __( 'Product Tags', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp??time=1m56s&',
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp?',
 			),
 			'product_attributes' => array(
 				'title' => __( 'Product Attributes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp??time=2m18s&',
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg.jsonp?',
 			),
 			'wc-status' => array(
 				'title' => __( 'System Status', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/xdn733nnhi.jsonp?',
 			),
-			'wc-status-tools' => array(
-				'title' => __( 'Tools', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/xdn733nnhi.jsonp?time=3m55s&',
-			),
 			'wc-reports' => array(
 				'title' => __( 'Reports', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99.jsonp?',
-			),
-			'wc-reports-customers' => array(
-				'title' => __( 'Customer Reports', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99.jsonp?time=2m07s&',
-			),
-			'wc-reports-stock' => array(
-				'title' => __( 'Stock Reports', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99.jsonp?time=2m41s&',
-			),
-			'wc-reports-taxes' => array(
-				'title' => __( 'Tax Reports', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/6aasex0w99.jsonp?time=3m14s&',
 			),
 			'edit-shop_coupon' => array(
 				'title' => __( 'Coupons', 'woocommerce' ),

@@ -89,14 +89,14 @@ if ( ! comments_open() ) {
 					}
 
 					if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' ) {
-						$comment_form['comment_field'] = '<p class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . '</label><select name="rating" id="rating" aria-required="true" required>
+						$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . '</label><select name="rating" id="rating" aria-required="true" required>
 							<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
 							<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
 							<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>
 							<option value="3">' . esc_html__( 'Average', 'woocommerce' ) . '</option>
 							<option value="2">' . esc_html__( 'Not that bad', 'woocommerce' ) . '</option>
 							<option value="1">' . esc_html__( 'Very poor', 'woocommerce' ) . '</option>
-						</select></p>';
+						</select></div>';
 					}
 
 					$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . esc_html__( 'Your review', 'woocommerce' ) . ' <span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true" required></textarea></p>';

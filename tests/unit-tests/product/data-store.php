@@ -350,6 +350,37 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'green', $_attribute['color'] );
 	}
 
+	function test_variable_child_has_dimensions() {
+		$product = new WC_Product_Variable;
+		$product->save();
+
+		$variation = new WC_Product_variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_width( 10 );
+		$variation->save();
+
+		$product = wc_get_product( $product->get_id() );
+
+		$store = new WC_Product_Variable_Data_Store_CPT();
+
+		$this->assertTrue( $store->child_has_dimensions( $product ) );
+	}
+
+	function test_variable_child_has_dimensions_no_dimensions() {
+		$product = new WC_Product_Variable;
+		$product->save();
+
+		$variation = new WC_Product_variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$product = wc_get_product( $product->get_id() );
+
+		$store = new WC_Product_Variable_Data_Store_CPT();
+
+		$this->assertFalse( $store->child_has_dimensions( $product ) );
+	}
+
 	function test_get_on_sale_products() {
 		$product_store = new WC_Product_Data_Store_CPT();
 
@@ -386,30 +417,46 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$one_attribute_variation = new WC_Product_Variation;
 		$one_attribute_variation->set_parent_id( $product->get_id() );
-		$one_attribute_variation->set_attributes( array( 'Color' => 'green' ) );
+		$one_attribute_variation->set_attributes( array( 'color' => 'green' ) );
 		$one_attribute_variation->save();
 
 		$two_attribute_variation = new WC_Product_Variation;
 		$two_attribute_variation->set_parent_id( $product->get_id() );
-		$two_attribute_variation->set_attributes( array( 'Color' => 'green', 'Size' => 'large' ) );
+		$two_attribute_variation->set_attributes( array( 'color' => 'green', 'size' => 'large' ) );
 		$two_attribute_variation->save();
 
 		$multiword_attribute_variation = new WC_Product_Variation;
 		$multiword_attribute_variation->set_parent_id( $product->get_id() );
-		$multiword_attribute_variation->set_attributes( array( 'Color' => 'green', 'Mounting Plate' => 'galaxy-s6', 'Support' => 'one-year' ) );
+		$multiword_attribute_variation->set_attributes( array( 'color' => 'green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
 		$multiword_attribute_variation->save();
 
 		// Check the one attribute variation title.
 		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Green", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green", $loaded_variation->get_name() );
 
 		// Check the two attribute variation title.
 		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Color: Green, Size: Large", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green, Large", $loaded_variation->get_name() );
 
-		// Check the variation with multiple attributes but only one 1-word attribute.
+		// Check the variation with a multiword attribute name.
 		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product &ndash; Green, Galaxy S6, One Year", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
+	}
+
+	function test_generate_product_title_disable() {
+		add_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
+
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation;
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'green' ) );
+		$variation->save();
+
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
 	}
 
 	function test_generate_product_title_no_attributes() {
@@ -424,5 +471,34 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$loaded_variation = wc_get_product( $variation->get_id() );
 		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
+	}
+
+	/**
+	 * Test to make sure meta can still be set while hooked using save_post.
+	 * https://github.com/woocommerce/woocommerce/issues/13960
+	 * @since 3.0.1
+	 */
+	function test_product_meta_save_post() {
+		$product = new WC_Product;
+		$product->set_name( 'Test Product' );
+		$product->save();
+		update_post_meta( $product->get_id(), '_test2', 'default' ); // this is the value we don't want to get back.
+
+		// This takes place of WC_Meta_Box do_action( 'woocommerce_admin_process_product_object ' ) just adding simple meta.
+		$product->update_meta_data( '_test', 'hello' );
+		$product->set_name( 'Test Product_' );
+
+		add_action( 'save_post', array( 'WC_Helper_Product', 'save_post_test_update_meta_data_direct' ), 11 );
+		$product->save();
+
+		$test  = get_post_meta( $product->get_id(), '_test', true );
+		$test2 = get_post_meta( $product->get_id(), '_test2', true );
+
+		$this->assertEquals( 'hello', $test );
+		$this->assertEquals( 'world', $test2 ); // this would be 'default' without the force meta refresh in WC_Product_Data_Store::update();
+		$this->assertEquals( 'world', $product->get_meta( '_test2' ) );
+		$this->assertEquals( 'Test Product_', $product->get_name() );
+
+		remove_action( 'save_post', array( 'WC_Helper_Product', 'save_post_test_update_meta_data_direct' ) );
 	}
 }
