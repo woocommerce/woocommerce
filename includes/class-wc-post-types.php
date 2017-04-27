@@ -257,8 +257,9 @@ class WC_Post_types {
 					'labels'              => array(
 							'name'                  => __( 'Products', 'woocommerce' ),
 							'singular_name'         => __( 'Product', 'woocommerce' ),
+							'all_items'             => __( 'All Products', 'woocommerce' ),
 							'menu_name'             => _x( 'Products', 'Admin menu name', 'woocommerce' ),
-							'add_new'               => __( 'Add product', 'woocommerce' ),
+							'add_new'               => __( 'Add New', 'woocommerce' ),
 							'add_new_item'          => __( 'Add new product', 'woocommerce' ),
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit product', 'woocommerce' ),

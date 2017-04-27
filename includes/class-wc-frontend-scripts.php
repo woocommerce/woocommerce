@@ -467,7 +467,7 @@ class WC_Frontend_Scripts {
 					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
-						'smoothHeight'   => false,
+						'smoothHeight'   => true,
 						'directionNav'   => false,
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
@@ -476,6 +476,13 @@ class WC_Frontend_Scripts {
 					) ),
 					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
 					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
+					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
+						'shareEl'               => false,
+						'closeOnScroll'         => false,
+						'history'               => false,
+						'hideAnimationDuration' => 0,
+						'showAnimationDuration' => 0
+					) ),
 					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
 				);
 			break;

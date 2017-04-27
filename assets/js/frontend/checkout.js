@@ -608,7 +608,19 @@ jQuery( function( $ ) {
 		}
 	};
 
+	var wc_terms_toggle = {
+		init: function() {
+			$( document.body ).on( 'click', 'a.woocommerce-terms-and-conditions-link', this.toggle_terms );
+		},
+
+		toggle_terms: function() {
+			$( '.woocommerce-terms-and-conditions' ).slideToggle();
+			return false;
+		}
+	};
+
 	wc_checkout_form.init();
 	wc_checkout_coupons.init();
 	wc_checkout_login_form.init();
+	wc_terms_toggle.init();
 });

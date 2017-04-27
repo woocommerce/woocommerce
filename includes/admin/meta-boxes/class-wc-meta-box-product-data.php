@@ -57,7 +57,7 @@ class WC_Meta_Box_Product_Data {
 				'id'            => '_virtual',
 				'wrapper_class' => 'show_if_simple',
 				'label'         => __( 'Virtual', 'woocommerce' ),
-				'description'   => __( 'Virtual products are intangible and aren\'t shipped.', 'woocommerce' ),
+				'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
 				'default'       => 'no',
 			),
 			'downloadable' => array(
