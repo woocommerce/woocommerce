@@ -794,8 +794,11 @@ function wc_get_page_children( $page_id ) {
  * Flushes rewrite rules when the shop page (or it's children) gets saved.
  */
 function flush_rewrite_rules_on_shop_page_save() {
-	// Check if is in edit page.
-	if ( 'page' !== get_current_screen()->id ) {
+	$screen    = get_current_screen();
+	$screen_id = $screen ? $screen->id : '';
+
+	// Check if this is the edit page.
+	if ( 'page' !== $screen_id ) {
 		return;
 	}
 
