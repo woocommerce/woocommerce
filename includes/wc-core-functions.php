@@ -793,13 +793,25 @@ function wc_get_page_children( $page_id ) {
 /**
  * Flushes rewrite rules when the shop page (or it's children) gets saved.
  */
-function flush_rewrite_rules_on_shop_page_save( $post_id ) {
+function flush_rewrite_rules_on_shop_page_save() {
+	// Check if is in edit page.
+	if ( 'page' !== get_current_screen()->id ) {
+		return;
+	}
+
+	// Check if page is edited.
+	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) {
+		return;
+	}
+
+	$post_id      = intval( $_GET['post'] );
 	$shop_page_id = wc_get_page_id( 'shop' );
+
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
-add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
+add_action( 'admin_footer', 'flush_rewrite_rules_on_shop_page_save' );
 
 /**
  * Various rewrite rule fixes.
