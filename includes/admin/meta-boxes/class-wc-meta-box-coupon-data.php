@@ -225,7 +225,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'                => 'customer_email',
 					'label'             => __( 'Email restrictions', 'woocommerce' ),
 					'placeholder'       => __( 'No restrictions', 'woocommerce' ),
-					'description'       => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
+					'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
 					'value'             => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
 					'desc_tip'          => true,
 					'type'              => 'email',
