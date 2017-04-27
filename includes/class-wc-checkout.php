@@ -840,6 +840,11 @@ class WC_Checkout {
 			WC()->cart->calculate_totals();
 		}
 
+		// On multisite, ensure user exists on current site, if not add them before allowing login.
+		if ( $customer_id && is_multisite() && is_user_logged_in() && ! is_user_member_of_blog() ) {
+			add_user_to_blog( get_current_blog_id(), $customer_id, 'customer' );
+		}
+
 		// Add customer info from other fields.
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
