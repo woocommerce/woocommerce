@@ -94,8 +94,7 @@ class WC_Template_Loader {
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
-		$search_files   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
-		$search_files[] = 'woocommerce.php';
+		$search_files = array( 'woocommerce.php' => 'woocommerce.php' );
 
 		if ( is_product_taxonomy() ) {
 			$term   = get_queried_object();
@@ -107,6 +106,8 @@ class WC_Template_Loader {
 
 		$search_files[] = $default_file;
 		$search_files[] = WC()->template_path() . $default_file;
+
+		$search_files = apply_filters( 'woocommerce_template_loader_files', $search_files, $default_file );
 
 		return array_unique( $search_files );
 	}
