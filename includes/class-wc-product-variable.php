@@ -148,7 +148,7 @@ class WC_Product_Variable extends WC_Product {
 				$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
 			} else {
 				$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
-			}		
+			}
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
