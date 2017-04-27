@@ -94,7 +94,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'System status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 	}
 
 	/**
