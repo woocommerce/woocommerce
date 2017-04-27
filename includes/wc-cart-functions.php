@@ -227,6 +227,8 @@ function wc_cart_totals_shipping_html() {
 			'index'                    => $i,
 			'chosen_method'            => $chosen_method,
 		) );
+
+		$first = false;
 	}
 }
 
