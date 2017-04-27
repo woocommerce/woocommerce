@@ -1643,10 +1643,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_price_html( $deprecated = '' ) {
 		if ( '' === $this->get_price() ) {
-			return apply_filters( 'woocommerce_empty_price_html', '', $this );
-		}
-
-		if ( $this->is_on_sale() ) {
+			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
+		} elseif ( $this->is_on_sale() ) {
 			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		} else {
 			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
