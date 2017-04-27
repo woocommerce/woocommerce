@@ -127,8 +127,7 @@ jQuery( function( $ ) {
 	 * Initialize flexSlider.
 	 */
 	ProductGallery.prototype.initFlexslider = function() {
-		var images  = this.$images,
-			$target = this.$target;
+		var $target = this.$target;
 
 		$target.flexslider( {
 			selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
@@ -141,20 +140,6 @@ jQuery( function( $ ) {
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
 			start: function() {
 				$target.css( 'opacity', 1 );
-
-				var largest_height = 0;
-
-				images.each( function() {
-					var height = $( this ).height();
-
-					if ( height > largest_height ) {
-						largest_height = height;
-					}
-				} );
-
-				images.each( function() {
-					$( this ).css( 'min-height', largest_height );
-				} );
 			}
 		} );
 	};
