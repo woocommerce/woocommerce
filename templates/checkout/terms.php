@@ -11,10 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $terms_page_id = wc_get_page_id( 'terms' );
-$terms         = get_post( $terms_page_id );
-$terms_content = wc_format_content( $terms->post_content );
 
-if ( $terms_page_id > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) : ?>
+if ( $terms_page_id > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) :
+	$terms         = get_post( $terms_page_id );
+	$terms_content = wc_format_content( $terms->post_content );
+	?>
 	<?php
 		do_action( 'woocommerce_checkout_before_terms_and_conditions' );
 		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . $terms_content . '</div>';
