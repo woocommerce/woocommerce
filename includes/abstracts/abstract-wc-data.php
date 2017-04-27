@@ -327,6 +327,7 @@ abstract class WC_Data {
 					);
 				}
 			}
+			$this->update_meta_data_cache();
 		}
 	}
 
@@ -347,6 +348,7 @@ abstract class WC_Data {
 			'key'   => $key,
 			'value' => $value,
 		);
+		$this->update_meta_data_cache();
 	}
 
 	/**
@@ -455,10 +457,20 @@ abstract class WC_Data {
 					);
 				}
 
-				if ( ! empty( $this->cache_group ) ) {
-					wp_cache_set( $cache_key, $this->meta_data, $this->cache_group );
-				}
+				$this->update_meta_data_cache();
 			}
+		}
+	}
+
+	/**
+	 * Saves the meta_data Array in the object global cache. It should be called
+	 * everytime a new entry is added to meta_data. Updates are reflected automatically
+	 * in the global cache because objects are always by reference.
+	 */
+	protected function update_meta_data_cache() {
+		if ( ! empty( $this->cache_group ) ) {
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
+			wp_cache_set( $cache_key, $this->meta_data, $this->cache_group );
 		}
 	}
 

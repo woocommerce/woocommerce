@@ -257,6 +257,22 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 
+	function test_metadata_global_cache() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->save();
+
+		$object = new WC_Mock_WC_Data_With_Cache( $object_id );
+		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
+		$object->add_meta_data( 'test_meta_key', 'val2', true );
+		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key' ) );
+
+		$object = new WC_Mock_WC_Data_With_Cache( $object_id );
+		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key' ) );
+	}
+
+
 	/**
 	 * Test saving metadata.. (Actually making sure changes are written to DB)
 	 */
