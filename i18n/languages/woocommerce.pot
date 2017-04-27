@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.0.4\n"
+"Project-Id-Version: WooCommerce 3.0.5\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-04-20 18:22:34+00:00\n"
+"POT-Creation-Date: 2017-04-27 17:19:11+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5206,26 +5206,26 @@ msgstr ""
 msgid "The downloadable file %s cannot be used as it does not exist on the server."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1707
+#: includes/abstracts/abstract-wc-product.php:1705
 #: includes/class-wc-product-simple.php:54
 msgid "Add to cart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1716
+#: includes/abstracts/abstract-wc-product.php:1714
 #: includes/class-wc-embed.php:112 includes/class-wc-product-simple.php:54
 #: includes/class-wc-product-variable.php:60
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1868
+#: includes/abstracts/abstract-wc-product.php:1866
 #: includes/admin/class-wc-admin-post-types.php:438
 #: includes/admin/class-wc-admin-reports.php:100
 #: includes/admin/reports/class-wc-report-stock.php:114
-#: includes/wc-product-functions.php:814
+#: includes/wc-product-functions.php:815
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1870 templates/cart/cart.php:91
+#: includes/abstracts/abstract-wc-product.php:1868 templates/cart/cart.php:91
 msgid "Available on backorder"
 msgstr ""
 
@@ -5698,7 +5698,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:82
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1122
+#: includes/wc-template-functions.php:1128
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -5905,46 +5905,56 @@ msgid "%qty% variations"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:222
-#: includes/admin/class-wc-admin-assets.php:358
+#: includes/admin/class-wc-admin-assets.php:360
 #: includes/admin/settings/views/html-webhooks-edit.php:54
 #: includes/class-wc-frontend-scripts.php:543
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:240
+#: includes/admin/class-wc-admin-assets.php:225
+#: includes/admin/meta-boxes/views/html-order-item-meta.php:41
+msgid "Name (required)"
+msgstr ""
+
+#: includes/admin/class-wc-admin-assets.php:226
+#: includes/admin/meta-boxes/views/html-order-item-meta.php:42
+msgid "Value (required)"
+msgstr ""
+
+#: includes/admin/class-wc-admin-assets.php:242
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:241
+#: includes/admin/class-wc-admin-assets.php:243
 msgid "Please select some items."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:242
+#: includes/admin/class-wc-admin-assets.php:244
 msgid "Are you sure you wish to process this refund? This action cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:243
+#: includes/admin/class-wc-admin-assets.php:245
 msgid "Are you sure you wish to delete this refund? This action cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:244
+#: includes/admin/class-wc-admin-assets.php:246
 msgid ""
 "Are you sure you wish to delete this tax column? This action cannot be "
 "undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:245
+#: includes/admin/class-wc-admin-assets.php:247
 msgid "Remove this item meta?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:246
+#: includes/admin/class-wc-admin-assets.php:248
 msgid "Remove this attribute?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:247
+#: includes/admin/class-wc-admin-assets.php:249
 #: includes/admin/class-wc-admin-attributes.php:280
 #: includes/admin/class-wc-admin-attributes.php:334
 #: includes/admin/class-wc-admin-attributes.php:369
@@ -5964,68 +5974,68 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:248
+#: includes/admin/class-wc-admin-assets.php:250
 #: includes/admin/meta-boxes/views/html-product-attribute.php:3
 #: includes/admin/meta-boxes/views/html-variation-admin.php:16
 #: includes/admin/settings/views/html-admin-page-shipping-classes.php:48
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:249
+#: includes/admin/class-wc-admin-assets.php:251
 #: includes/admin/meta-boxes/views/html-order-download-permission.php:10
 #: includes/admin/meta-boxes/views/html-product-attribute.php:4
 #: includes/admin/meta-boxes/views/html-variation-admin.php:17
 msgid "Click to toggle"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:250
+#: includes/admin/class-wc-admin-assets.php:252
 #: includes/admin/meta-boxes/views/html-product-attribute.php:24
 msgid "Value(s)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:251
+#: includes/admin/class-wc-admin-assets.php:253
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:252
+#: includes/admin/class-wc-admin-assets.php:254
 #: includes/admin/meta-boxes/views/html-product-attribute.php:76
 msgid "Visible on the product page"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:253
+#: includes/admin/class-wc-admin-assets.php:255
 #: includes/admin/meta-boxes/views/html-product-attribute.php:82
 msgid "Used for variations"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:254
+#: includes/admin/class-wc-admin-assets.php:256
 msgid "Enter a name for the new attribute term:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:255
+#: includes/admin/class-wc-admin-assets.php:257
 msgid ""
 "Recalculate totals? This will calculate taxes based on the customers "
 "country (or the store base country) and update totals."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:256
+#: includes/admin/class-wc-admin-assets.php:258
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:257
+#: includes/admin/class-wc-admin-assets.php:259
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:258
+#: includes/admin/class-wc-admin-assets.php:260
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:259
+#: includes/admin/class-wc-admin-assets.php:261
 #: includes/admin/class-wc-admin-post-types.php:267
 #: includes/admin/class-wc-admin-post-types.php:1797
 #: includes/admin/views/html-bulk-edit-product.php:199
@@ -6033,30 +6043,30 @@ msgstr ""
 msgid "Featured"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:263
+#: includes/admin/class-wc-admin-assets.php:265
 msgid "No customer selected"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:287
+#: includes/admin/class-wc-admin-assets.php:289
 msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:288
+#: includes/admin/class-wc-admin-assets.php:290
 msgid "Are you sure you want to revoke access to this download?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:289
+#: includes/admin/class-wc-admin-assets.php:291
 msgid "You cannot add the same tax rate twice!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:290
+#: includes/admin/class-wc-admin-assets.php:292
 msgid "Are you sure you wish to delete this note? This action cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:339
+#: includes/admin/class-wc-admin-assets.php:341
 #: includes/admin/views/html-admin-page-status-report.php:32
 msgid "Copying to clipboard failed. Please press Ctrl/Cmd+C to copy."
 msgstr ""
@@ -7280,6 +7290,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:215
 #: includes/admin/reports/class-wc-report-stock.php:172
+#: includes/wc-account-functions.php:187
 msgid "Actions"
 msgstr ""
 
@@ -7342,7 +7353,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:436
 #: includes/admin/reports/class-wc-report-stock.php:112
 #: includes/wc-formatting-functions.php:969
-#: includes/wc-product-functions.php:813
+#: includes/wc-product-functions.php:814
 msgid "In stock"
 msgstr ""
 
@@ -7440,22 +7451,22 @@ msgid "Show all product types"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1463
-#: includes/wc-product-functions.php:528
+#: includes/wc-product-functions.php:529
 msgid "Grouped product"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1466
-#: includes/wc-product-functions.php:529
+#: includes/wc-product-functions.php:530
 msgid "External/Affiliate product"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1469
-#: includes/wc-product-functions.php:530
+#: includes/wc-product-functions.php:531
 msgid "Variable product"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1472
-#: includes/wc-product-functions.php:527
+#: includes/wc-product-functions.php:528
 msgid "Simple product"
 msgstr ""
 
@@ -7636,7 +7647,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:129
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:1943
+#: includes/wc-template-functions.php:1949
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -8146,7 +8157,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:778
 #: includes/admin/views/html-notice-tracking.php:13
-#: includes/wc-product-functions.php:828
+#: includes/wc-product-functions.php:829
 msgid "Allow"
 msgstr ""
 
@@ -8936,7 +8947,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:27
 #: includes/admin/settings/class-wc-settings-tax.php:178
 #: includes/admin/settings/views/html-settings-tax.php:32
-#: includes/class-wc-order-item-shipping.php:155
+#: includes/class-wc-order-item-shipping.php:158
 #: templates/cart/cart-totals.php:55 templates/cart/cart-totals.php:56
 msgid "Shipping"
 msgstr ""
@@ -11669,7 +11680,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:95
 #: includes/admin/views/html-quick-edit-product.php:73
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:217
-#: includes/wc-product-functions.php:795
+#: includes/wc-product-functions.php:796
 msgid "Standard"
 msgstr ""
 
@@ -12834,19 +12845,19 @@ msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:187
 #: includes/admin/views/html-quick-edit-product.php:144
-#: includes/wc-product-functions.php:743
+#: includes/wc-product-functions.php:744
 msgid "Catalog"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:188
 #: includes/admin/views/html-quick-edit-product.php:145
-#: includes/wc-product-functions.php:744
+#: includes/wc-product-functions.php:745
 msgid "Search"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:189
 #: includes/admin/views/html-quick-edit-product.php:146
-#: includes/wc-product-functions.php:745
+#: includes/wc-product-functions.php:746
 msgid "Hidden"
 msgstr ""
 
@@ -17282,7 +17293,7 @@ msgid "Get cart should not be called before the wp_loaded action."
 msgstr ""
 
 #: includes/class-wc-cart.php:912 includes/class-wc-frontend-scripts.php:523
-#: includes/wc-cart-functions.php:115 includes/wc-template-functions.php:1429
+#: includes/wc-cart-functions.php:115 includes/wc-template-functions.php:1435
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -17398,11 +17409,11 @@ msgstr ""
 msgid "Invalid payment method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:910
+#: includes/class-wc-checkout.php:915
 msgid "We were unable to process your order, please try again."
 msgstr ""
 
-#: includes/class-wc-checkout.php:919
+#: includes/class-wc-checkout.php:924
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" "
 "class=\"wc-backward\">Return to shop</a>"
@@ -17867,7 +17878,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:500
-#: includes/wc-template-functions.php:1884
+#: includes/wc-template-functions.php:1890
 msgid "required"
 msgstr ""
 
@@ -17938,13 +17949,13 @@ msgid ""
 "activate it manually by clicking here.</a>"
 msgstr ""
 
-#: includes/class-wc-logger.php:55
+#: includes/class-wc-logger.php:57
 msgid ""
 "The provided handler <code>%s</code> does not implement "
 "WC_Log_Handler_Interface."
 msgstr ""
 
-#: includes/class-wc-logger.php:122
+#: includes/class-wc-logger.php:125
 msgid "WC_Logger::log was called with an invalid level \"%s\"."
 msgstr ""
 
@@ -18540,8 +18551,8 @@ msgstr ""
 msgid "Invalid coupon."
 msgstr ""
 
-#: includes/data-stores/class-wc-customer-data-store.php:129
-#: includes/data-stores/class-wc-customer-data-store.php:134
+#: includes/data-stores/class-wc-customer-data-store.php:133
+#: includes/data-stores/class-wc-customer-data-store.php:138
 msgid "Invalid customer."
 msgstr ""
 
@@ -19809,13 +19820,13 @@ msgid "Refund was declined."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:504
-#: includes/wc-template-functions.php:2452
+#: includes/wc-template-functions.php:2458
 #. translators: 1: current item count
 msgid "Download %d"
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:504
-#: includes/wc-template-functions.php:2452 templates/myaccount/downloads.php:76
+#: includes/wc-template-functions.php:2458 templates/myaccount/downloads.php:76
 msgid "Download"
 msgstr ""
 
@@ -21123,15 +21134,15 @@ msgstr ""
 msgid "wc_get_product should not be called before the woocommerce_init action."
 msgstr ""
 
-#: includes/wc-product-functions.php:742
+#: includes/wc-product-functions.php:743
 msgid "Visible"
 msgstr ""
 
-#: includes/wc-product-functions.php:826
+#: includes/wc-product-functions.php:827
 msgid "Do not allow"
 msgstr ""
 
-#: includes/wc-product-functions.php:827
+#: includes/wc-product-functions.php:828
 msgid "Allow, but notify customer"
 msgstr ""
 
@@ -21188,46 +21199,46 @@ msgstr ""
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:1131
+#: includes/wc-template-functions.php:1137
 #: templates/checkout/form-shipping.php:56
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1140
+#: includes/wc-template-functions.php:1146
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1441
+#: includes/wc-template-functions.php:1447
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1566
+#: includes/wc-template-functions.php:1572
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:1951
+#: includes/wc-template-functions.php:1957
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1972
+#: includes/wc-template-functions.php:1978
 #: templates/cart/shipping-calculator.php:63
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2017
-#: includes/wc-template-functions.php:2169
-#: includes/wc-template-functions.php:2179
+#: includes/wc-template-functions.php:2023
+#: includes/wc-template-functions.php:2175
+#: includes/wc-template-functions.php:2185
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2538
+#: includes/wc-template-functions.php:2544
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:166
 #: includes/widgets/class-wc-widget-rating-filter.php:188
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/wc-template-functions.php:2539
+#: includes/wc-template-functions.php:2545
 msgid "out of 5"
 msgstr ""
 
@@ -22677,12 +22688,12 @@ msgid_plural "Shipping %d"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:1516
+#: includes/wc-template-functions.php:1522
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2554
+#: includes/wc-template-functions.php:2560
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
