@@ -673,7 +673,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( isset( $query_vars[ 'date_created_after'] ) && '' !== $query_vars[ 'date_created_after' ] ) {
 			$wp_query_args['date_query'][] = array(
 				'column' => 'post_date',
-				'after' => $query_vars['date_created_before']
+				'after' => $query_vars['date_created_after']
 			);
 		}
 
