@@ -646,6 +646,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$key_mapping = array(
 			'customer_id' => 'customer_user',
+			'status' => 'post_status',
 		);
 
 		foreach( $key_mapping as $query_key => $db_key ) {
@@ -656,7 +657,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
-		if ( ! isset( $wp_query_args['date_query' ) ) {
+
+		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
