@@ -48,7 +48,7 @@ abstract class WC_Object_Query {
 	 * @param mixed $value Value to set for query variable.
 	 */
 	public function set( $query_var, $value ) {
-		$this->query_vars[$query_var] = $value;
+		$this->query_vars[ $query_var ] = $value;
 	}
 
 	/**
@@ -58,11 +58,6 @@ abstract class WC_Object_Query {
 	protected function get_default_query_vars() {
 
 		return array(
-			'tax_query'      => array(),
-			'meta_query'     => array(),
-			'date_query'     => array(),
-
-			'p'              => '',
 			'name'           => '',
 			'parent'         => '',
 			'parent__in'     => array(),
@@ -70,38 +65,19 @@ abstract class WC_Object_Query {
 			'in'             => array(),
 			'not_in'         => array(),
 
-			'has_password'   => null,
-			'password'       => '',
-
 			'status'         => array( 'publish', 'pending', 'draft', 'future', 'private', 'inherit' ),
 
 			'per_page'       => -1,
-			'nopaging'       => '',
 			'page'           => '',
 			'offset'         => '',
 
 			'order'          => 'DESC',
 			'orderby'        => 'date',
 
-			'year'           => '',
-			'monthnum'       => '',
-			'w'              => '',
-			'day'            => '',
-			'hour'           => '',
-			'minute'         => '',
-			'second'         => '',
-			'm'              => '',
+		    'date_before'    => '',
+		    'date_after'     => '',
 
-			'meta_key'       => '',
-			'meta_value'     => '',
-			'meta_value_num' => '',
-			'meta_compare'   => '',
-
-			's'              => '',
-			'exact'          => '',
-			'sentence'       => '',
-
-			'fields'         => '',
+			'return'         => 'objects',
 		);
 	}
 }

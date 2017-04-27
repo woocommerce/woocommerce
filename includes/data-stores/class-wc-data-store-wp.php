@@ -206,6 +206,7 @@ class WC_Data_Store_WP {
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(
 			'meta_query' => array(),
+			'date_query' => array(),
 		);
 
 		foreach( $query_vars as $key => $value ) {
@@ -228,26 +229,21 @@ class WC_Data_Store_WP {
 					'parent__not_in' => 'post_parent__not_in',
 					'in'             => 'post__in',
 					'not_in'         => 'post__not_in',
-					'password'       => 'post_password',
 					'status'         => 'post_status',
 					'per_page'       => 'posts_per_page',
 					'type'           => 'post_type',
+					'return'         => 'fields',
 				);
 
 				if ( isset( $key_mapping[ $key ] ) ) {
 					$wp_query_args[ $key_mapping[ $key ] ] = $value;
+				} elseif ( ! empty( $query_vars['date_before'] ) ) {
+					$wp_query_args['date_query']['before'] = $query_vars['date_before'];
+				} elseif ( ! empty( $query_vars['date_after'] ) ) {
+					$wp_query_args['date_query']['after'] = $query_vars['date_after'];
 				} else {
 					$wp_query_args[ $key ] = $value;
 				}
-			}
-		}
-
-		// Handle custom meta queries.
-		if ( ! empty( $query_vars['meta_query'] ) ) {
-			if ( empty( $wp_query_args['meta_query'] ) ) {
-				$wp_query_args['meta_query'] = $query_vars['meta_query'];
-			} else {
-				$wp_query_args['meta_query'][] = $query_vars['meta_query'];
 			}
 		}
 

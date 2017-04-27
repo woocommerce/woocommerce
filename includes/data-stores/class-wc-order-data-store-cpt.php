@@ -663,11 +663,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @since 3.1.0
 	 * @param array $query_vars query vars from a WC_Order_Query
-	 * @return array of WC_Order objects
+	 * @return array of WC_Order objects or ids
 	 */
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );
 		$query = new WP_Query( $args );
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			return $query->posts;
+		}
 		return array_map( 'wc_get_order', $query->posts );
 	}
 }

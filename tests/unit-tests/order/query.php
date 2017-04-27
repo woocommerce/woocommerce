@@ -62,36 +62,6 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test querying with custom meta queries.
-	 *
-	 * @since 3.1
-	 */
-	public function test_order_query_meta() {
-		$order = new WC_Order();
-		$order->set_billing_first_name( 'Eduardo' );
-		$order->save();
-		update_post_meta( $order->get_id(), 'testkey', 'testvalue' );
-
-		// Get orders with a custom meta query.
-		$query = new WC_Order_Query( array(
-			'meta_query' => array(
-				array(
-					'key' => 'testkey',
-					'value' => 'testvalue',
-					'compare' => '='
-				)
-			)
-		) );
-		$results = $query->get_orders();
-		$this->assertEquals( 1, count( $results ) );
-
-		// Get orders with a custom meta query and a specific property.
-		$query->set( 'billing_first_name', 'Eduardo' );
-		$results = $query->get_orders();
-		$this->assertEquals( 1, count( $results ) );
-	}
-
-	/**
 	 * Test the query var mapping customer_id => customer_user.
 	 *
 	 * @since 3.1
