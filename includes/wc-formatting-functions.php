@@ -1077,3 +1077,18 @@ function wc_format_datetime( $date, $format = '' ) {
 	}
 	return $date->date_i18n( $format );
 }
+
+/**
+ * Process oEmbeds.
+ *
+ * @since  3.1.0
+ * @param string $content
+ * @return string
+ */
+function wc_do_oembeds( $content ) {
+	global $wp_embed;
+
+	$content = $wp_embed->autoembed( $content );
+
+	return $content;
+}
