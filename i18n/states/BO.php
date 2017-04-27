@@ -5,7 +5,7 @@
  * @author      Roman Random
  * @category    i18n
  * @package     WooCommerce/i18n
- * @version     1.0.0
+ * @version     3.1.0
  */
 global $states;
 
@@ -18,5 +18,5 @@ $states['BO'] = array(
 	'N' => __( 'Pando', 'woocommerce' ),
 	'P' => __( 'Potosí', 'woocommerce' ),
 	'S' => __( 'Santa Cruz', 'woocommerce' ),
-	'T' => __( 'Tarija', 'woocommerce' )
+	'T' => __( 'Tarija', 'woocommerce' ),
 );
