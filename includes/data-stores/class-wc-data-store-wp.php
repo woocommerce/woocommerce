@@ -205,8 +205,7 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(
-			'meta_query' => array(),
-			'date_query' => array(),
+			'meta_query' => array()
 		);
 
 		foreach( $query_vars as $key => $value ) {
@@ -221,26 +220,19 @@ class WC_Data_Store_WP {
 					'value'   => $value,
 					'compare' => '=',
 				);
-			// Other vars get mapped to a 'post_*' or just left alone.
+			// Other vars get mapped to wp_query args or just left alone.
 			} else {
 				$key_mapping = array (
 					'parent'         => 'post_parent',
-					'parent__in'     => 'post_parent__in',
-					'parent__not_in' => 'post_parent__not_in',
-					'in'             => 'post__in',
-					'not_in'         => 'post__not_in',
-					'status'         => 'post_status',
-					'per_page'       => 'posts_per_page',
+					'parent_exclude' => 'post_parent__not_in',
+					'exclude'        => 'post__not_in',
+					'limit'          => 'posts_per_page',
 					'type'           => 'post_type',
 					'return'         => 'fields',
 				);
 
 				if ( isset( $key_mapping[ $key ] ) ) {
 					$wp_query_args[ $key_mapping[ $key ] ] = $value;
-				} elseif ( ! empty( $query_vars['date_before'] ) ) {
-					$wp_query_args['date_query']['before'] = $query_vars['date_before'];
-				} elseif ( ! empty( $query_vars['date_after'] ) ) {
-					$wp_query_args['date_query']['after'] = $query_vars['date_after'];
 				} else {
 					$wp_query_args[ $key ] = $value;
 				}

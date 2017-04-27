@@ -29,6 +29,10 @@ abstract class WC_Object_Query {
 		$this->query_vars = wp_parse_args( $args, $this->get_default_query_vars() );
 	}
 
+	public function get_query_vars() {
+		return $this->query_vars;
+	}
+
 	/**
 	 * Get the value of a query variable.
 	 * @param string $query_var Query variable to get value for.
@@ -60,22 +64,16 @@ abstract class WC_Object_Query {
 		return array(
 			'name'           => '',
 			'parent'         => '',
-			'parent__in'     => array(),
-			'parent__not_in' => array(),
-			'in'             => array(),
-			'not_in'         => array(),
+			'parent_exclude' => '',
+			'exclude'        => '',
 
-			'status'         => array( 'publish', 'pending', 'draft', 'future', 'private', 'inherit' ),
-
-			'per_page'       => -1,
+			'limit'          => -1,
 			'page'           => '',
 			'offset'         => '',
+		    'paginate'       => false,
 
 			'order'          => 'DESC',
 			'orderby'        => 'date',
-
-		    'date_before'    => '',
-		    'date_after'     => '',
 
 			'return'         => 'objects',
 		);

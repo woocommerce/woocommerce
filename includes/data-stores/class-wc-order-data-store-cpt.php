@@ -655,7 +655,75 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		return parent::get_wp_query_args( $query_vars );
+		$wp_query_args = parent::get_wp_query_args( $query_vars );
+		if ( ! isset( $wp_query_args['date_query' ) ) {
+			$wp_query_args['date_query'] = array();
+		}
+		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( isset( $query_vars[ 'date_created_before'] ) && '' !== $query_vars['date_created_before'] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_date',
+				'before' => $query_vars['date_created_before']
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_created_after'] ) && '' !== $query_vars[ 'date_created_after' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_date',
+				'after' => $query_vars['date_created_before']
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_modified_before'] ) && '' !== $query_vars[ 'date_modified_before' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_modified',
+				'after' => $query_vars['date_modified_before']
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_modified_after'] ) && '' !== $query_vars[ 'date_modified_after' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_modified',
+				'after' => $query_vars['date_modified_after']
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_completed_before' ] ) && '' !== $query_vars[ 'date_completed_before' ] && strtotime( $query_vars[ 'date_completed_before' ] ) ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_completed',
+				'value'   => strtotime( $query_vars[ 'date_completed_before' ] ),
+				'compare' => '<',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_completed_after' ] ) && '' !== $query_vars[ 'date_completed_after' ] && strtotime( $query_vars[ 'date_completed_after' ] ) ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_completed',
+				'value'   => strtotime( $query_vars[ 'date_completed_after' ] ),
+				'compare' => '>',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_paid_before' ] ) && '' !== $query_vars[ 'date_paid_before' ] && strtotime( $query_vars[ 'date_paid_before' ] ) ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_paid',
+				'value'   => strtotime( $query_vars[ 'date_paid_before' ] ),
+				'compare' => '<',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_paid_after' ] ) && '' !== $query_vars[ 'date_paid_after' ] && strtotime( $query_vars[ 'date_paid_after' ] ) ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_paid',
+				'value'   => strtotime( $query_vars[ 'date_paid_after' ] ),
+				'compare' => '>',
+			);
+		}
+
+		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
 	}
 
 	/**
@@ -671,6 +739,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
 			return $query->posts;
 		}
+		// paged?
 		return array_map( 'wc_get_order', $query->posts );
 	}
 }
