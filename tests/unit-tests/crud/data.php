@@ -202,7 +202,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = new WC_Mock_WC_Data();
 		$object->set_meta_data( $metadata );
 
-		$this->assertEquals( $metadata, $object->get_meta_data() );
+		foreach ( $object->get_meta_data() as $id => $meta ) {
+			$this->assertEquals( get_object_vars( $metadata[ $id ] ), get_object_vars( $meta ) );
+		}
+
 	}
 
 	/**

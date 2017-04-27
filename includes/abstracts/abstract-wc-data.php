@@ -360,11 +360,9 @@ abstract class WC_Data {
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$this->maybe_read_meta_data();
 		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
-			$this->meta_data[ current( $array_key ) ] = (object) array(
-				'id'    => $meta_id,
-				'key'   => $key,
-				'value' => $value,
-			);
+			$meta = $this->meta_data[ current( $array_key ) ];
+			$meta->key = $key;
+			$meta->value = $value;
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
