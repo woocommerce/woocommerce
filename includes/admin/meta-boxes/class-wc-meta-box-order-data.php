@@ -467,7 +467,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		// Update customer.
-		$customer_id = absint( $_POST['customer_user'] );
+		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
 		if ( $customer_id !== $order->get_customer_id() ) {
 			$props['customer_id'] = $customer_id;
 		}
