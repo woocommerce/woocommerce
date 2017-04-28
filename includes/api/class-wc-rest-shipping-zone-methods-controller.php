@@ -26,7 +26,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Register the routes for Shipping Zone Methods.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods', array(
 			'args' => array(
 				'zone_id' => array(
 					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
@@ -53,7 +53,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods/(?P<instance_id>[\d-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d-]+)', array(
 			'args' => array(
 				'zone_id' => array(
 					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
