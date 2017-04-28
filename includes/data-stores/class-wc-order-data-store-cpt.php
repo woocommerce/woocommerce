@@ -725,6 +725,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			);
 		}
 
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$wp_query_args['no_found_rows'] = true;
+		}
+
 		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
 	}
 
@@ -742,6 +746,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
 			return $query->posts;
 		}
-		return array_map( 'wc_get_order', $query->posts );
+
+		$orders = array_map( 'wc_get_order', $query->posts );
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_posts,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
 	}
 }

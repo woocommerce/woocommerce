@@ -205,7 +205,7 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(
-			'meta_query' => array()
+			'meta_query'    => array(),
 		);
 
 		foreach( $query_vars as $key => $value ) {
@@ -229,7 +229,6 @@ class WC_Data_Store_WP {
 					'limit'          => 'posts_per_page',
 					'type'           => 'post_type',
 					'return'         => 'fields',
-					'paginate'       => 'no_found_rows',
 				);
 
 				if ( isset( $key_mapping[ $key ] ) ) {

@@ -70,7 +70,7 @@ abstract class WC_Object_Query {
 			'limit'          => -1,
 			'page'           => '',
 			'offset'         => '',
-		    'paginate'       => false,
+			'paginate'       => false,
 
 			'order'          => 'DESC',
 			'orderby'        => 'date',
