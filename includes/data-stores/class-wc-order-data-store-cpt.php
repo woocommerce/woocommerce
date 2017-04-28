@@ -747,7 +747,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			return $query->posts;
 		}
 
-		$orders = array_map( 'wc_get_order', $query->posts );
+		$orders = array_filter( array_map( 'wc_get_order', $query->posts ) );
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
 			return (object) array(
