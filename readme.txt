@@ -161,9 +161,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.5 - 2017-04-27 =
+= 3.0.5 - 2017-04-28 =
 * Fix - Tooltip display within shipping zone modals.
-* Fix - Prevent password change notification when creating a customer via the API.
 * Fix - Fix missing title for actions column on mobile.
 * Fix - Allow forward slash in telephone field.
 * Fix - Sort grouped products by menu order when displaying.
@@ -176,8 +175,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - On multisite, add user to blog during checkout if not a user to prevent errors.
 * Fix - Correct sale price date handling with some timezone setups.
 * Fix - wc_attribute_taxonomy_id_by_name needs to use lowercase attribute slug to work.
+* FIx - Make changes to the buyer's company name in the shipping section of checkout persisted.
 * Tweak - Add required placeholder for meta fields in backend.
 * Tweak - Don't strtolower address strings on checkout validation messages.
+* REST API - Prevent password change notification when creating a customer.
+* REST API - Removed duplicated items returned in shipping and checkout endpoints.
+* CLI - Fixed missing shipping zones route.
 * Dev - Make get_price_html handling match 2.6 and pass all values through woocommerce_get_price_html filter.
 * Dev - Legacy customer class missing get_address / get_address_2 functions.
 * Dev - Restored filter `woocommerce_checkout_customer_id` during checkout validation.
