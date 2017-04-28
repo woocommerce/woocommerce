@@ -175,7 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - On multisite, add user to blog during checkout if not a user to prevent errors.
 * Fix - Correct sale price date handling with some timezone setups.
 * Fix - wc_attribute_taxonomy_id_by_name needs to use lowercase attribute slug to work.
-* Fix - Make changes to the buyer's company name in the shipping section of checkout persisted.
+* Fix - Make changes to the buyer's company name in the shipping section of checkout persist.
 * Tweak - Add required placeholder for meta fields in backend.
 * Tweak - Don't strtolower address strings on checkout validation messages.
 * REST API - Prevent password change notification when creating a customer.
