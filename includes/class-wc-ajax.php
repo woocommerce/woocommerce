@@ -1695,6 +1695,28 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Stock Status as In Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_instock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'instock' );
+	}
+
+	/**
+	 * Bulk action - Set Stock Status as Out of Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_outofstock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'outofstock' );
+	}
+
+	/**
 	 * Bulk action - Set Stock.
 	 * @access private
 	 * @used-by bulk_edit_variations
