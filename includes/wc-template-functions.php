@@ -2552,7 +2552,7 @@ function wc_get_rating_html( $rating ) {
 	if ( $rating > 0 ) {
 		/* translators: %s: rating */
 		$html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-		$html .= wc_get_star_rating_html();
+		$html .= wc_get_star_rating_html( $rating );
 		$html .= '</div>';
 	} else {
 		$html  = '';
