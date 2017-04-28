@@ -241,4 +241,41 @@ class WC_Data_Store_WP {
 
 		return apply_filters( 'woocommerce_get_wp_query_args', $wp_query_args, $query_vars );
 	}
+
+	/**
+	 * Get a valid date for use in WP_Query date queries.
+	 *
+	 * @since 3.1.0
+	 * @param mixed $query_var Value from a WC_Object_Query's query variable.
+	 */
+	protected function get_date_for_wp_query( $query_var, $as_timestamp = false ) {
+		if ( ! $query_var ) {
+			return '';
+		}
+
+		if ( is_a( $query_var, 'WC_DateTime' ) ) {
+			$datetime = $query_var;
+		} elseif ( is_numeric( $query_var ) ) {
+			// Timestamps are handled as UTC timestamps in all cases.
+			$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
+		} else {
+			// Strings are defined in local WP timezone. Convert to UTC.
+			if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $query_var, $date_bits ) ) {
+				$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
+				$timestamp = gmmktime( $date_bits[4], $date_bits[5], $date_bits[6], $date_bits[2], $date_bits[3], $date_bits[1] ) - $offset;
+			} else {
+				$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $query_var ) ) ) );
+			}
+			$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+		}
+
+		// Set local timezone or offset.
+		if ( get_option( 'timezone_string' ) ) {
+			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		} else {
+			$datetime->set_utc_offset( wc_timezone_offset() );
+		}
+
+		return $as_timestamp ? $datetime->getTimestamp() : (string) $datetime;
+	}
 }
