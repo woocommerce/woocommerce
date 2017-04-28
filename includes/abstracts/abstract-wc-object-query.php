@@ -29,6 +29,10 @@ abstract class WC_Object_Query {
 		$this->query_vars = wp_parse_args( $args, $this->get_default_query_vars() );
 	}
 
+	/**
+	 * Get the current query vars.
+	 * @return array
+	 */
 	public function get_query_vars() {
 		return $this->query_vars;
 	}
