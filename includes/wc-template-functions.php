@@ -2550,6 +2550,7 @@ function wc_get_stock_html( $product ) {
  */
 function wc_get_rating_html( $rating ) {
 	if ( $rating > 0 ) {
+		/* translators: %s: rating */
 		$html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 		$html .= wc_get_star_rating_html();
 		$html .= '</div>';
@@ -2567,7 +2568,10 @@ function wc_get_rating_html( $rating ) {
  * @return string
  */
 function wc_get_star_rating_html( $rating ) {
-	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . esc_html__( 'out of 5', 'woocommerce' ) . '</span>';
+	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
+	/* translators: %s: rating */
+	$html .= sprintf( esc_html__( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . $rating . '</strong>' );
+	$html .= '</span>';
 
 	return apply_filters( 'woocommerce_get_star_rating_html', $html );
 }
