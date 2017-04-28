@@ -2546,18 +2546,20 @@ function wc_get_stock_html( $product ) {
  *
  * @since  3.0.0
  * @param  float $rating Rating being shown.
+ * @param  int   $count  Total of ratings.
  * @return string
  */
-function wc_get_rating_html( $rating ) {
-	if ( $rating > 0 ) {
+function wc_get_rating_html( $rating, $count = 0 ) {
+	if ( 0 < $rating ) {
 		/* translators: %s: rating */
 		$html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-		$html .= wc_get_star_rating_html( $rating );
+		$html .= wc_get_star_rating_html( $rating, $count );
 		$html .= '</div>';
 	} else {
 		$html  = '';
 	}
-	return apply_filters( 'woocommerce_product_get_rating_html', $html, $rating );
+
+	return apply_filters( 'woocommerce_product_get_rating_html', $html, $rating, $count );
 }
 
 /**
@@ -2565,15 +2567,23 @@ function wc_get_rating_html( $rating ) {
  *
  * @since  3.1.0
  * @param  float $rating Rating being shown.
+ * @param  int   $count  Total of ratings.
  * @return string
  */
-function wc_get_star_rating_html( $rating ) {
+function wc_get_star_rating_html( $rating, $count = 0 ) {
 	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
-	/* translators: %s: rating */
-	$html .= sprintf( esc_html__( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . $rating . '</strong>' );
+
+	if ( 0 < $count ) {
+		/* translators: 1: rating 2: rating count */
+		$html .= sprintf( _n( '%1$s out of 5 based on %2$s customer rating', '%1$s out of 5 based on %2$s customer ratings', $count, 'woocommerce' ), '<strong class="rating">' . esc_html( $rating ) . '</strong>', '<span class="rating">' . esc_html( $count ) . '</span>' );
+	} else {
+		/* translators: %s: rating */
+		$html .= sprintf( esc_html__( '%s out of 5', 'woocommerce' ), '<strong class="rating">' . esc_html( $rating ) . '</strong>' );
+	}
+
 	$html .= '</span>';
 
-	return apply_filters( 'woocommerce_get_star_rating_html', $html );
+	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count  );
 }
 
 /**
