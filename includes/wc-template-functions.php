@@ -2550,13 +2550,26 @@ function wc_get_stock_html( $product ) {
  */
 function wc_get_rating_html( $rating ) {
 	if ( $rating > 0 ) {
-		$rating_html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-		$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . esc_html__( 'out of 5', 'woocommerce' ) . '</span>';
-		$rating_html .= '</div>';
+		$html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
+		$html .= wc_get_star_rating_html();
+		$html .= '</div>';
 	} else {
-		$rating_html  = '';
+		$html  = '';
 	}
-	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+	return apply_filters( 'woocommerce_product_get_rating_html', $html, $rating );
+}
+
+/**
+ * Get HTML for star rating.
+ *
+ * @since  3.1.0
+ * @param  float $rating Rating being shown.
+ * @return string
+ */
+function wc_get_star_rating_html( $rating ) {
+	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . esc_html__( 'out of 5', 'woocommerce' ) . '</span>';
+
+	return apply_filters( 'woocommerce_get_star_rating_html', $html );
 }
 
 /**
