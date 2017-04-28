@@ -2551,7 +2551,6 @@ function wc_get_stock_html( $product ) {
  */
 function wc_get_rating_html( $rating, $count = 0 ) {
 	if ( 0 < $rating ) {
-		/* translators: %s: rating */
 		$html  = '<div class="star-rating">';
 		$html .= wc_get_star_rating_html( $rating, $count );
 		$html .= '</div>';
