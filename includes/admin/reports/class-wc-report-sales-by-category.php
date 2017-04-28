@@ -202,7 +202,17 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 */
 	public function category_widget() {
 
-		$categories = get_terms( 'product_cat', array( 'orderby' => 'name' ) );
+		/**
+		 * Filter to modify the product categories shown in the "Sales
+         * by category" report
+		 *
+		 * @since 3.0.x
+		 *
+         * @param array $terms Array of WP_Term objects containing product_cat
+         *                     terms information.
+		 */
+		$categories = apply_filters( 'woocommerce_report_sales_by_category_get_product_categories',
+									 get_terms( 'product_cat', array( 'orderby' => 'name' ) ) );
 		?>
 		<form method="GET">
 			<div>
