@@ -21,4 +21,4 @@ This repository is not suitable for support. Please don't use our issue tracker 
 Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
-If you have a patch or stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
