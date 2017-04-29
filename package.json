@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "grunt": "~1.0.1",
+	"grunt-autoprefixer": "^3.0.4",
     "grunt-checktextdomain": "~1.0.0",
     "grunt-contrib-clean": "~1.0.0",
     "grunt-contrib-cssmin": "~1.0.0",

@@ -284,6 +284,22 @@ module.exports = function( grunt ) {
 					'!vendor/**'                                                 // Exclude vendor/
 				]
 			}
+		},
+
+		// Autoprefixer
+		autoprefixer: {
+			options: {
+				browsers: [
+					'> 0.1%',
+					'ie 8',
+					'ie 9'
+				]
+			},
+			dist: {
+				src: [
+					'<%= dirs.css %>/*.css'
+				]
+			}
 		}
 	});
 
@@ -301,6 +317,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
+	grunt.loadNpmTasks( 'grunt-autoprefixer' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -319,7 +336,8 @@ module.exports = function( grunt ) {
 		'sass',
 		'rtlcss',
 		'cssmin',
-		'concat'
+		'concat',
+		'autoprefixer'
 	]);
 
 	grunt.registerTask( 'docs', [
