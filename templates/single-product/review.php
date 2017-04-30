@@ -66,3 +66,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		</div>
 	</div>
+
+</li>
