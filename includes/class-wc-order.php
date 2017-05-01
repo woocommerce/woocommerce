@@ -255,7 +255,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
@@ -730,7 +730,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_date_paid( $context = 'view' ) {
 		$date_paid = $this->get_prop( 'date_paid', $context );
 
-		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}

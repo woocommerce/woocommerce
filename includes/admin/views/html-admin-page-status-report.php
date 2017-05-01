@@ -41,7 +41,7 @@ $pages          = $system_status->get_pages();
 	<tbody>
 		<tr>
 			<td data-export-label="Home URL"><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The URL of your site\'s homepage.', 'woocommerce' ) ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'The homepage URL of your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['home_url'] ) ?></td>
 		</tr>
 		<tr>
@@ -516,7 +516,7 @@ $pages          = $system_status->get_pages();
 				}
 
 				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
-				echo '<td class="help">' . wc_help_tip( sprintf( __( 'The URL of your WooCommerce shop\'s %s (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
+				echo '<td class="help">' . wc_help_tip( sprintf( __( 'The URL of your %s page (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
 
 				// Page ID check.
 				if ( ! $page['page_set'] ) {
@@ -538,7 +538,9 @@ $pages          = $system_status->get_pages();
 					}
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				if ( ! $error ) {
+					echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				}
 
 				echo '</td></tr>';
 			}
@@ -577,7 +579,7 @@ $pages          = $system_status->get_pages();
 			<td data-export-label="Child Theme"><?php _e( 'Child theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); ?></td>
 			<td><?php
-				echo $theme['is_child_theme'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce on a parent theme you didn\'t build personally, then we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' );
+				echo $theme['is_child_theme'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' );
 			?></td>
 		</tr>
 		<?php
@@ -608,13 +610,13 @@ $pages          = $system_status->get_pages();
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); ?></td>
-			<td><?php
-				if ( ! $theme['has_woocommerce_support'] ) {
+			<td>
+				<?php if ( ! $theme['has_woocommerce_support'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
-				}
-			?></td>
+				} ?>
+			</td>
 		</tr>
 	</tbody>
 </table>

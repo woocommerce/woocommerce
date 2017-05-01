@@ -44,19 +44,22 @@ class WC_Logger implements WC_Logger_Interface {
 		}
 
 		$register_handlers = array();
-		foreach ( $handlers as $handler ) {
-			$implements = class_implements( $handler );
-			if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements ) ) {
-				$register_handlers[] = $handler;
-			} else {
-				wc_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						__( 'The provided handler <code>%s</code> does not implement WC_Log_Handler_Interface.', 'woocommerce' ),
-						esc_html( is_object( $handler ) ? get_class( $handler ) : $handler )
-					),
-					'3.0'
-				);
+
+		if ( ! empty( $handlers ) && is_array( $handlers ) ) {
+			foreach ( $handlers as $handler ) {
+				$implements = class_implements( $handler );
+				if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements ) ) {
+					$register_handlers[] = $handler;
+				} else {
+					wc_doing_it_wrong(
+						__METHOD__,
+						sprintf(
+							__( 'The provided handler <code>%s</code> does not implement WC_Log_Handler_Interface.', 'woocommerce' ),
+							esc_html( is_object( $handler ) ? get_class( $handler ) : $handler )
+						),
+						'3.0'
+					);
+				}
 			}
 		}
 

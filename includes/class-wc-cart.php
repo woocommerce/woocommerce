@@ -904,10 +904,10 @@ class WC_Cart {
 
 			// Force quantity to 1 if sold individually and check for existing item in cart
 			if ( $product_data->is_sold_individually() ) {
-				$quantity         = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
-				$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
+				$quantity      = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
+				$found_in_cart = apply_filters( 'woocommerce_add_to_cart_sold_individually_found_in_cart', $cart_item_key && $this->cart_contents[ $cart_item_key ]['quantity'] > 0, $product_id, $variation_id, $cart_item_data, $cart_id );
 
-				if ( $in_cart_quantity > 0 ) {
+				if ( $found_in_cart ) {
 					/* translators: %s: product name */
 					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() ) ) );
 				}
@@ -937,7 +937,7 @@ class WC_Cart {
 						'<a href="%s" class="button wc-forward">%s</a> %s',
 						wc_get_cart_url(),
 						__( 'View Cart', 'woocommerce' ),
-						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ), wc_format_stock_quantity_for_display( $products_qty_in_cart[ $product_data->get_id() ], $product_data ) )
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ), wc_format_stock_quantity_for_display( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ], $product_data ) )
 					) );
 				}
 			}
@@ -1554,8 +1554,9 @@ class WC_Cart {
 	 * @return bool
 	 */
 	public function show_shipping() {
-		if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
+		if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) ) {
 			return false;
+		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
 			if ( ! WC()->customer->has_calculated_shipping() ) {
@@ -2225,11 +2226,15 @@ class WC_Cart {
 	public function get_taxes_total( $compound = true, $display = true ) {
 		$total = 0;
 		foreach ( $this->taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
+			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
+				continue;
+			}
 			$total += $tax;
 		}
 		foreach ( $this->shipping_taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
+			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
+				continue;
+			}
 			$total += $tax;
 		}
 		if ( $display ) {

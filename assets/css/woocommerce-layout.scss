@@ -347,6 +347,18 @@
 	.woocommerce-shipping-fields {
 		@include clearfix();
 	}
+
+	.woocommerce-terms-and-conditions {
+		margin-bottom: 1.618em;
+		padding: 1.618em;
+	}
+
+	/**
+	 * oEmbeds
+	 */
+	.woocommerce-oembed {
+		position: relative;
+	}
 }
 
 .woocommerce-account {

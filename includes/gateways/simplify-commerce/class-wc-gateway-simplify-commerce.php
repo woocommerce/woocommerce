@@ -420,7 +420,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 				$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 				if ( 'yes' == $this->sandbox ) {
-					$error_msg .= ' ' . __( 'Developers: Please make sure that you\'re including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
+					$error_msg .= ' ' . __( 'Developers: Please make sure that you are including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
 				}
 
 				throw new Simplify_ApiException( $error_msg );

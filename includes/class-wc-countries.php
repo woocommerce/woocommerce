@@ -380,27 +380,29 @@ class WC_Countries {
 	 * @param bool   $escape (default: false)
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
-		if ( $this->countries ) foreach ( $this->countries as $key => $value ) :
-			if ( $states = $this->get_states( $key ) ) :
-				echo '<optgroup label="' . esc_attr( $value ) . '">';
-					foreach ( $states as $state_key => $state_value ) :
-					echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
+		if ( $this->countries ) :
+			foreach ( $this->countries as $key => $value ) :
+				if ( $states = $this->get_states( $key ) ) :
+					echo '<optgroup label="' . esc_attr( $value ) . '">';
+						foreach ( $states as $state_key => $state_value ) :
+						echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
-					if ( $selected_country == $key && $selected_state == $state_key ) {
+						if ( $selected_country == $key && $selected_state == $state_key ) {
+							echo ' selected="selected"';
+							}
+
+						echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
+						endforeach;
+					echo '</optgroup>';
+				else :
+					echo '<option';
+					if ( $selected_country == $key && '*' == $selected_state ) {
 						echo ' selected="selected"';
-						}
-
-					echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
-					endforeach;
-				echo '</optgroup>';
-			else :
-				echo '<option';
-				if ( $selected_country == $key && '*' == $selected_state ) {
-					echo ' selected="selected"';
-				}
-				echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
-			endif;
-		endforeach;
+					}
+					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
+				endif;
+			endforeach;
+		endif;
 	}
 
 	/**
@@ -577,8 +579,9 @@ class WC_Countries {
 				'priority'     => 40,
 			),
 			'address_1' => array(
-				'label'        => __( 'Address', 'woocommerce' ),
-				'placeholder'  => esc_attr__( 'Street address', 'woocommerce' ),
+				'label'        => __( 'Street address', 'woocommerce' ),
+				/* translators: use local order of street name and house number. */
+				'placeholder'  => esc_attr__( 'House number and street name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
