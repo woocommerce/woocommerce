@@ -138,7 +138,7 @@ class WC_Admin_Pointers {
 					),
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Prices', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'Next you\'ll need to give your product a price.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( 'Next you need to give your product a price.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
 							'align' => 'middle',
@@ -166,7 +166,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product_tag',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product images', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'Upload or assign an image to your product here. This image will be shown in your store\'s catalog.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( "Upload or assign an image to your product here. This image will be shown in your store's catalog.", 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
 							'align' => 'middle',

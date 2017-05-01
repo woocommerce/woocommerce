@@ -54,6 +54,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'billing_email',
 		'shipping_first_name',
 		'shipping_last_name',
+		'shipping_company',
 		'wptests_capabilities',
 		'wptests_user_level',
 		'_order_count',
@@ -101,6 +102,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$customer->set_id( $id );
 		$this->update_user_meta( $customer );
+
+		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email
+		$customer->set_password( '' );
+
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'role'         => $customer->get_role(),

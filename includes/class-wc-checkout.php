@@ -600,11 +600,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
 					break;
 					case 'billing' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
 					break;
 				}
 
@@ -622,7 +622,7 @@ class WC_Checkout {
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
 				}
 
@@ -819,7 +819,7 @@ class WC_Checkout {
 	 * @throws Exception
 	 */
 	protected function process_customer( $data ) {
-		$customer_id = get_current_user_id();
+		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
@@ -838,6 +838,11 @@ class WC_Checkout {
 
 			// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
 			WC()->cart->calculate_totals();
+		}
+
+		// On multisite, ensure user exists on current site, if not add them before allowing login.
+		if ( $customer_id && is_multisite() && is_user_logged_in() && ! is_user_member_of_blog() ) {
+			add_user_to_blog( get_current_blog_id(), $customer_id, 'customer' );
 		}
 
 		// Add customer info from other fields.

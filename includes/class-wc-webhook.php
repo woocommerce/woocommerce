@@ -137,8 +137,8 @@ class WC_Webhook {
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
 			$should_deliver = false;
-		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
-			// Only deliver deleted event for coupons, orders, and products.
+		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post', 'untrashed_post' ), true ) ) {
+			// Only deliver deleted/restored event for coupons, orders, and products.
 			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 				$should_deliver = false;
 			}
@@ -619,6 +619,9 @@ class WC_Webhook {
 			'coupon.deleted' => array(
 				'wp_trash_post',
 			),
+			'coupon.restored' => array(
+				'untrashed_post',
+			),
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
@@ -646,6 +649,9 @@ class WC_Webhook {
 			'order.deleted' => array(
 				'wp_trash_post',
 			),
+			'order.restored' => array(
+				'untrashed_post',
+			),
 			'product.created' => array(
 				'woocommerce_process_product_meta',
 				'woocommerce_api_create_product',
@@ -658,6 +664,9 @@ class WC_Webhook {
 			),
 			'product.deleted' => array(
 				'wp_trash_post',
+			),
+			'product.restored' => array(
+				'untrashed_post',
 			),
 		);
 
