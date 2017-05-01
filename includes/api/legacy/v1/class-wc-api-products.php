@@ -69,9 +69,8 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1 ) {
 
-		if ( ! empty( $type ) ) {
+		if ( ! empty( $type ) )
 			$filter['type'] = $type;
-		}
 
 		$filter['page'] = $page;
 
@@ -81,9 +80,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		foreach ( $query->posts as $product_id ) {
 
-			if ( ! $this->is_readable( $product_id ) ) {
+			if ( ! $this->is_readable( $product_id ) )
 				continue;
-			}
 
 			$products[] = current( $this->get_product( $product_id, $fields ) );
 		}
@@ -105,9 +103,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
-		if ( is_wp_error( $id ) ) {
+		if ( is_wp_error( $id ) )
 			return $id;
-		}
 
 		$product = wc_get_product( $id );
 
@@ -137,13 +134,11 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function get_products_count( $type = null, $filter = array() ) {
 
-		if ( ! empty( $type ) ) {
+		if ( ! empty( $type ) )
 			$filter['type'] = $type;
-		}
 
-		if ( ! current_user_can( 'read_private_products' ) ) {
+		if ( ! current_user_can( 'read_private_products' ) )
 			return new WP_Error( 'woocommerce_api_user_cannot_read_products_count', __( 'You do not have permission to read the products count', 'woocommerce' ), array( 'status' => 401 ) );
-		}
 
 		$query = $this->query_products( $filter );
 
@@ -161,9 +156,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'edit' );
 
-		if ( is_wp_error( $id ) ) {
+		if ( is_wp_error( $id ) )
 			return $id;
-		}
 
 		return $this->get_product( $id );
 	}
@@ -179,9 +173,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'delete' );
 
-		if ( is_wp_error( $id ) ) {
+		if ( is_wp_error( $id ) )
 			return $id;
-		}
 
 		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
@@ -198,9 +191,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
-		if ( is_wp_error( $id ) ) {
+		if ( is_wp_error( $id ) )
 			return $id;
-		}
 
 		$args = array(
 			'post_id' => $id,
