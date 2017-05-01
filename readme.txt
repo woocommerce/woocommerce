@@ -171,4 +171,4 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Upgrade Notice ==
 
 = 3.0.2 =
-3.0 is a major update. Make sure you have a complete site backup and read our [best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
+3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
