@@ -31,11 +31,35 @@ class WC_Admin_Importers {
 	 * Add menu items.
 	 */
 	public function register_importers() {
+		register_importer( 'woocommerce_product_csv', __( 'WooCommerce products (CSV)', 'woocommerce' ), __( 'Import <strong>products</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'product_importer' ) );
 		register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce tax rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'tax_rates_importer' ) );
 	}
 
 	/**
-	 * Add menu item.
+	 * Add product importer menu item.
+	 */
+	public function product_importer() {
+		// Load Importer API
+		require_once ABSPATH . 'wp-admin/includes/import.php';
+
+		if ( ! class_exists( 'WP_Importer' ) ) {
+			$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
+
+			if ( file_exists( $class_wp_importer ) ) {
+				require $class_wp_importer;
+			}
+		}
+
+		// includes
+		require( dirname( __FILE__ ) . '/importers/class-wc-product-importer.php' );
+
+		// Dispatch
+		$importer = new WC_Product_Importer();
+		$importer->dispatch();
+	}
+
+	/**
+	 * Add tax rate importer menu item.
 	 */
 	public function tax_rates_importer() {
 		// Load Importer API
