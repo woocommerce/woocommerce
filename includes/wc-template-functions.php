@@ -2546,7 +2546,7 @@ function wc_get_stock_html( $product ) {
  *
  * @since  3.0.0
  * @param  float $rating Rating being shown.
- * @param  int   $count  Total of ratings.
+ * @param  int   $count  Total number of ratings.
  * @return string
  */
 function wc_get_rating_html( $rating, $count = 0 ) {
@@ -2566,7 +2566,7 @@ function wc_get_rating_html( $rating, $count = 0 ) {
  *
  * @since  3.1.0
  * @param  float $rating Rating being shown.
- * @param  int   $count  Total of ratings.
+ * @param  int   $count  Total number of ratings.
  * @return string
  */
 function wc_get_star_rating_html( $rating, $count = 0 ) {
