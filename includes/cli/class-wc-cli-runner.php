@@ -99,6 +99,7 @@ class WC_CLI_Runner {
 				'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
 				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
 				'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
+				'instance_id'  => __( 'Instance ID.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
 		$positional_args = array_keys( $supported_ids );
@@ -153,15 +154,6 @@ class WC_CLI_Runner {
 						'optional'    => false,
 					);
 				}
-			}
-
-			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) ) {
-				$synopsis[] = array(
-					'name'		  => 'id',
-					'type'		  => 'positional',
-					'description' => __( 'The id for the resource.', 'woocommerce' ),
-					'optional'	  => false,
-				);
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
