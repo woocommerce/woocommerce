@@ -97,6 +97,15 @@ class WC_CLI_REST_Command {
 	}
 
 	/**
+	 * Returns the ID of updated or created item
+	 * 
+	 * @param array $body
+	 */
+	private function get_item_id( $body ) {
+		return isset( $body['instance_id'] ) ? $body['instance_id'] : $body['id'];
+	}
+
+	/**
 	 * Create a new item.
 	 *
 	 * @subcommand create
@@ -104,10 +113,11 @@ class WC_CLI_REST_Command {
 	public function create_item( $args, $assoc_args ) {
 		$assoc_args = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
+		$id = $this->get_item_id( $body );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
-			WP_CLI::line( $body['id'] );
+			WP_CLI::line( $id );
 		} else {
-			WP_CLI::success( "Created {$this->name} {$body['id']}." );
+			WP_CLI::success( "Created {$this->name} $id." );
 		}
 	}
 
@@ -118,13 +128,14 @@ class WC_CLI_REST_Command {
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
+		$id = $this->get_item_id( $body );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
-			WP_CLI::line( $body['id'] );
+			WP_CLI::line( $id );
 		} else {
 			if ( empty( $assoc_args['force'] ) ) {
-				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} {$body['id']}" );
+				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} $id." );
 			} else {
-				WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} {$body['id']}." );
+				WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} $id." );
 			}
 		}
 	}
@@ -210,10 +221,11 @@ class WC_CLI_REST_Command {
 	public function update_item( $args, $assoc_args ) {
 		$assoc_args = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
+		$id = $this->get_item_id( $body );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
-			WP_CLI::line( $body['id'] );
+			WP_CLI::line( $id );
 		} else {
-			WP_CLI::success( __( 'Updated', 'woocommerce' ) . " {$this->name} {$body['id']}." );
+			WP_CLI::success( __( 'Updated', 'woocommerce' ) . " {$this->name} $id." );
 		}
 	}
 
