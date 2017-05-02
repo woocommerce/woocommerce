@@ -114,25 +114,18 @@ class WC_Product_Importer extends WP_Importer {
 
 		$this->import_start();
 
-		$loop = 0;
+		$raw_data = $this->read_csv( $file, array( 'lines' => 3 ) );
 
-		if ( ( $handle = fopen( $file, "r" ) ) !== false ) {
-
-			$header = fgetcsv( $handle, 0, $this->delimiter );
-
-			while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== false ) {
-				// TODO. Parse and process input.
-			}
-
-			fclose( $handle );
-		}
+		// TODO: Remove temporary code once mapping screen is ready.
+		// Mapping screen.
+		var_dump( $raw_data );
 
 		// Show Result
 		echo '<div class="updated settings-error"><p>';
 		/* translators: %s: products count */
 		printf(
 			__( 'Import complete - imported %s products.', 'woocommerce' ),
-			'<strong>' . $loop . '</strong>'
+			'<strong>' . count( $raw_data['data'] ) . '</strong>'
 		);
 		echo '</p></div>';
 
@@ -172,6 +165,83 @@ class WC_Product_Importer extends WP_Importer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Read a CSV file.
+	 *
+	 * @param mixed $file
+	 * @param array $args Args to modify reading
+	 * @return array
+	 */
+	public function read_csv( $file, $args ) {
+
+		$default_args = array(
+			'start_pos' => 0,
+			'end_pos' => -1,
+			'lines' => -1,
+			'mapping' => array()
+		);
+		$args = wp_parse_args( $args, $default_args );
+
+		$data = array(
+			'raw_headers' => array(),
+			'data' => array()
+		);
+
+		if ( false !== ( $handle = fopen( $file, "r" ) ) ) {
+
+			$data['raw_headers'] = fgetcsv( $handle, 0, $this->delimiter );
+
+			if ( $args['start_pos'] != 0 ) {
+				fseek( $handle, (int) $args['start_pos'] );
+			}
+
+			while( false !== ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) ) {
+				$data['data'][] = $row;
+	            $position = ftell( $handle );
+
+	            if ( ( $args['end_pos'] > 0 && ftell( $handle ) >= $args['end_pos'] ) || 0 >= --$args[
+	            	'lines'] ) {
+	            	break;
+				}
+			}
+		}
+
+		if ( ! empty( $args['mapping'] ) ) {
+			$data = $this->parse_data( $data, $args['mapping'] );
+		}
+
+		return apply_filters( 'woocommerce_csv_product_import_data', $data, $file, $args );
+	}
+
+	/**
+	 * Map and format raw data to known fields.
+	 *
+	 * @param array $data
+	 * @param array $mapping 'raw column name' => 'mapped column name'
+	 */
+	private function parse_data( $data, $mapping ) {
+
+		$data_formatting = array(
+			'ID' => 'absint',
+			'Published' => 'boolval',
+			'Is featured' => 'boolval',
+			'Date sale price starts' => 'wc_format_datetime',
+			'Date sale price ends' => 'wc_format_datetime',
+			'In stock?' => 'boolval',
+			'Sold individually?' => 'boolval',
+			// etc.
+		);
+
+		$data['headers'] = array();
+		foreach ( $data['raw_headers'] as $heading ) {
+			$data['headers'] = isset( $mapping[ $heading ] ) ? $mapping[ $heading ] : $heading;
+		}
+
+		// Run columns through formatting.
+
+		return $data;
 	}
 
 	/**
