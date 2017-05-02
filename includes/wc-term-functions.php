@@ -82,6 +82,8 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	if ( ! taxonomy_exists( $taxonomy ) ) {
 		return array();
 	}
+	
+	$initial_args = $args;
 
 	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
@@ -141,7 +143,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 	}
 
-	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $args );
+	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $initial_args );
 }
 
 /**
