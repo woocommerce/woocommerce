@@ -368,6 +368,8 @@ class WC_Admin_Assets {
 				)
 			);
 		}
+
+		do_action( 'woocommerce_admin_js' );
 	}
 
 	/**
