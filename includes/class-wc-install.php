@@ -110,7 +110,7 @@ class WC_Install {
 	/**
 	 * Check WooCommerce version and run the updater is required.
 	 *
-	 * This check is done on all requests and runs if he versions do not match.
+	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
