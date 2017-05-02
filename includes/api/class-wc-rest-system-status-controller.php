@@ -686,6 +686,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		}
 
 		$active_plugins_data = array();
+		$available_updates   = get_plugin_updates();
+
 		foreach ( $active_plugins as $plugin ) {
 			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 			$dirname        = dirname( $plugin );
@@ -712,20 +714,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					}
 				}
 				$version_latest = $version_data['version'];
-			} else {
-				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-
-				$api = plugins_api( 'plugin_information', array(
-					'slug'     => $slug,
-					'fields'   => array(
-						'sections' => false,
-						'tags'     => false,
-					),
-				) );
-
-				if ( is_object( $api ) && ! is_wp_error( $api ) && ! empty( $api->version ) ) {
-					$version_latest = $api->version;
-				}
+			} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+				$version_latest = $available_updates[ $plugin ]->update->new_version;
 			}
 
 			// convert plugin data to json response format.
