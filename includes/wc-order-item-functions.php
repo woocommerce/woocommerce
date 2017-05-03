@@ -20,9 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return int|bool Item ID or false
  */
 function wc_add_order_item( $order_id, $item_array ) {
-	$order_id = absint( $order_id );
-
-	if ( ! $order_id ) {
+	if ( ! $order_id = absint( $order_id ) ) {
 		return false;
 	}
 

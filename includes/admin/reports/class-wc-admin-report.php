@@ -300,9 +300,8 @@ class WC_Admin_Report {
 					$where_value = "{$value['operator']} '{$value['value']}'";
 				}
 
-				if ( ! empty( $where_value ) ) {
+				if ( ! empty( $where_value ) )
 					$query['where'] .= " AND {$value['key']} {$where_value}";
-				}
 			}
 		}
 

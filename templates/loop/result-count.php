@@ -24,9 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wp_query;
 
-if ( ! woocommerce_products_will_display() ) {
+if ( ! woocommerce_products_will_display() )
 	return;
-}
 ?>
 <p class="woocommerce-result-count">
 	<?php

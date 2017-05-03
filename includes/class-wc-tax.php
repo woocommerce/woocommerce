@@ -162,9 +162,8 @@ class WC_Tax {
 		$non_compound_price = $price / $compound_tax_rate;
 
 		foreach ( $rates as $key => $rate ) {
-			if ( ! isset( $taxes[ $key ] ) ) {
+			if ( ! isset( $taxes[ $key ] ) )
 				$taxes[ $key ] = 0;
-			}
 
 			$the_rate      = $rate['rate'] / 100;
 
@@ -208,11 +207,10 @@ class WC_Tax {
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
 
 				// Add rate
-				if ( ! isset( $taxes[ $key ] ) ) {
+				if ( ! isset( $taxes[ $key ] ) )
 					$taxes[ $key ] = $tax_amount;
-				} else {
+				else
 					$taxes[ $key ] += $tax_amount;
-				}
 			}
 
 			$pre_compound_total = array_sum( $taxes );
