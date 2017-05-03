@@ -181,7 +181,7 @@ class WC_Helper_Updater {
 			'authenticated' => true,
 		) );
 
-		if ( wp_remote_retrieve_response_code( $request ) != 200 ) {
+		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
