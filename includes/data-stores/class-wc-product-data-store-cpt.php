@@ -377,18 +377,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'is_variation' => 0,
 					'is_taxonomy'  => 0,
 				), (array) $meta_value );
+				$attribute = new WC_Product_Attribute();
 
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
 					}
 					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+					$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
 
-				$attribute = new WC_Product_Attribute();
-				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
 				$attribute->set_name( $meta_value['name'] );
 				$attribute->set_options( $options );
 				$attribute->set_position( $meta_value['position'] );
