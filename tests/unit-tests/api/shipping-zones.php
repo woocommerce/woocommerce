@@ -66,7 +66,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<id>[\d-]+)', $routes );
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<id>[\d]+)/locations', $routes );
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<zone_id>[\d]+)/methods', $routes );
-		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d]+)', $routes );
 	}
 
 	/**
@@ -565,6 +565,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping/zones/' . $zone->get_id() . '/methods' ) );
 		$data     = $response->get_data();
 		$expected = array(
+			'id'                 => $instance_id,
 			'instance_id'        => $instance_id,
 			'title'              => $method->instance_settings['title'],
 			'order'              => $method->method_order,
