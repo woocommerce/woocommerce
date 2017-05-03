@@ -20,7 +20,6 @@ class WC_Helper_API {
 	 */
 	public static function load() {
 		self::$api_base = apply_filters( 'woocommerce_helper_api_base', 'https://woocommerce.com/wp-json/helper/1.0' );
-		add_filter( 'http_request_host_is_external', array( __CLASS__, '_http_request_host_is_external' ), 10, 2 );
 	}
 
 	/**
@@ -38,10 +37,11 @@ class WC_Helper_API {
 			self::_authenticate( $url, $args );
 		}
 
-		// Disable SSL verification for the dev environment.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && strpos( self::$api_base, 'https://woocommerce.dev/' ) === 0 ) {
-			$args['sslverify'] = false;
-		}
+		/**
+		 * Allow developers to filter the request args passed to wp_safe_remote_request().
+		 * Useful to remove sslverify when working on a local api dev environment.
+		 */
+		$args = apply_filters( 'woocommerce_helper_api_request_args', $args, $endpoint );
 
 		// TODO: Check response signatures on certain endpoints.
 		return wp_safe_remote_request( $url, $args );
@@ -120,23 +120,6 @@ class WC_Helper_API {
 		$endpoint = sprintf( '%s/%s', self::$api_base, $endpoint );
 		$endpoint = esc_url_raw( $endpoint );
 		return $endpoint;
-	}
-
-	/**
-	 * Adds woocommerce.dev to "external" URls if WP_DEBUG is on so
-	 * that wp_http_validate_url allows the request.
-	 *
-	 * @param bool $r Whether the host is external
-	 * @param string $host The requested host.
-	 *
-	 * @return bool True if the host is external, false if local/internal.
-	 */
-	public static function _http_request_host_is_external( $r, $host ) {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && 'woocommerce.dev' === $host ) {
-			$r = true;
-		}
-
-		return $r;
 	}
 }
 
