@@ -287,12 +287,16 @@ module.exports = function( grunt ) {
 		},
 
 		// Autoprefixer
-		autoprefixer: {
+		postcss: {
 			options: {
-				browsers: [
-					'> 0.1%',
-					'ie 8',
-					'ie 9'
+				processors: [
+					require('autoprefixer')({
+						browsers: [
+							'> 0.1%',
+							'ie 8',
+							'ie 9'
+						]
+					})
 				]
 			},
 			dist: {
@@ -317,7 +321,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
-	grunt.loadNpmTasks( 'grunt-autoprefixer' );
+	grunt.loadNpmTasks( 'grunt-postcss' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -337,7 +341,7 @@ module.exports = function( grunt ) {
 		'rtlcss',
 		'cssmin',
 		'concat',
-		'autoprefixer'
+		'postcss'
 	]);
 
 	grunt.registerTask( 'docs', [
