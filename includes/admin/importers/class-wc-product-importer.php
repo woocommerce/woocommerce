@@ -114,7 +114,7 @@ class WC_Product_Importer extends WP_Importer {
 
 		$this->import_start();
 
-		$raw_data = $this->read_csv( $file, array( 'lines' => 3 ) );
+		$raw_data = $this->read_csv( $file, array( 'lines' => 3, 'parse' => true ) );
 
 		// TODO: Remove temporary code once mapping screen is ready.
 		// Mapping screen.
@@ -171,16 +171,17 @@ class WC_Product_Importer extends WP_Importer {
 	 * Read a CSV file.
 	 *
 	 * @param mixed $file
-	 * @param array $args Args to modify reading
+	 * @param array $args See $default_args
 	 * @return array
 	 */
 	public function read_csv( $file, $args ) {
 
 		$default_args = array(
-			'start_pos' => 0,
-			'end_pos' => -1,
-			'lines' => -1,
-			'mapping' => array()
+			'start_pos' => 0, // File pointer start.
+			'end_pos' => -1, // File pointer end.
+			'lines' => -1, // Max lines to read.
+			'mapping' => array(), // Column mapping. csv_heading => schema_heading.
+			'parse' => false, // Whether to sanitize and format data.
 		);
 		$args = wp_parse_args( $args, $default_args );
 
@@ -209,10 +210,22 @@ class WC_Product_Importer extends WP_Importer {
 		}
 
 		if ( ! empty( $args['mapping'] ) ) {
-			$data = $this->parse_data( $data, $args['mapping'] );
+			$data = $this->map_headers( $data, $args['mapping'] );
+		}
+
+		if ( $args['parse'] ) {
+			$data = $this->parse_data( $data );
 		}
 
 		return apply_filters( 'woocommerce_csv_product_import_data', $data, $file, $args );
+	}
+
+	private function map_headers( $data, $mapping ) {
+		$data['headers'] = array();
+		foreach ( $data['raw_headers'] as $heading ) {
+			$data['headers'] = isset( $mapping[ $heading ] ) ? $mapping[ $heading ] : $heading;
+		}
+		return $data;
 	}
 
 	/**
@@ -224,24 +237,74 @@ class WC_Product_Importer extends WP_Importer {
 	private function parse_data( $data, $mapping ) {
 
 		$data_formatting = array(
-			'ID' => 'absint',
-			'Published' => 'boolval',
-			'Is featured' => 'boolval',
-			'Date sale price starts' => 'wc_format_datetime',
-			'Date sale price ends' => 'wc_format_datetime',
-			'In stock?' => 'boolval',
-			'Sold individually?' => 'boolval',
-			// etc.
+			'ID'                      => 'absint',
+			'Published'               => 'boolval',
+			'Is featured'             => 'boolval',
+			'Date sale price starts'  => 'wc_format_datetime',
+			'Date sale price ends'    => 'wc_format_datetime',
+			'In stock?'               => 'boolval',
+			'Sold individually?'      => 'boolval',
+			'Weight'                  => 'absint',
+			'Length'                  => 'absint',
+			'Height'                  => 'absint',
+			'Width'                   => 'absint',
+			'Allow customer reviews?' => 'boolval',
+			'Purchase Note'           => 'wp_kses',
+			'Price'                   => 'wc_format_decimal',
+			'Regular Price'           => 'wc_format_decimal',
+			'Stock'                   => 'absint',
+			'Categories'              => array( $this, 'parse_categories' ),
+			'Tags'                    => array( $this, 'parse_comma_field' ),
+			'Images'                  => array( $this, 'parse_comma_field' ),
+			'Upsells'                 => array( $this, 'parse_comma_field' ),
+			'Cross-sells'             => array( $this, 'parse_comma_field' ),
+			'Download Limit'          => 'absint',
+			'Download Expiry Days'    => 'absint',
 		);
 
-		$data['headers'] = array();
-		foreach ( $data['raw_headers'] as $heading ) {
-			$data['headers'] = isset( $mapping[ $heading ] ) ? $mapping[ $heading ] : $heading;
+
+		$regex_match_data_formatting = array(
+			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
+			'/Attribute * Visible/' => 'boolval',
+			'/Download * URL/' => 'esc_url',
+		);
+
+
+		// special cases: attribute * name, attribute * value(s), attribute * default, attribute * visible
+		// Download 1 Name, Download 1 URL,
+		$headers = isset( $data['headers'] ) && ! empty( $data['headers'] ) ? $data['headers'] : $data['raw_headers'];
+
+		foreach ( $headers as $index => $heading ) {
+
+			// Figure out the parse function.
+			$formatting_function = 'esc_attr';
+			if ( isset( $data_formatting[ $heading ] ) ) {
+				$formatting_function = $data_formatting[ $heading ];
+			}
+			else {
+				foreach ( $regex_match_data_formatting as $regex => $callback ) {
+					if ( preg_match( $regex, $heading ) ) {
+						$formatting_function = $callback;
+						break;
+					}
+				}
+			}
+
+			// Go down the column parsing.
+			foreach ( $data['data'] as &$row ) {
+				$row[ $index ] = call_user_func( $formatting_function, $row[ $index ] );
+			}
 		}
 
-		// Run columns through formatting.
-
 		return $data;
+	}
+
+	public function parse_comma_field( $field ) {
+		return $field;
+	}
+
+	public function parse_categories( $field ) {
+		return $field;
 	}
 
 	/**
