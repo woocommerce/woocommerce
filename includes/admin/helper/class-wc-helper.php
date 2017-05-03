@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The main entry-point for all things related to the Helper.
  */
 class WC_Helper {
+	/**
+	 * A log object returned by wc_get_logger().
+	 */
 	public static $log;
 
 	/**
@@ -31,6 +34,10 @@ class WC_Helper {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
 		add_filter( 'extra_plugin_headers', array( __CLASS__, 'extra_headers' ) );
 		add_filter( 'extra_theme_headers', array( __CLASS__, 'extra_headers' ) );
+
+		// Attempt to toggle subscription state upon plugin activation/deactivation
+		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
+		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
 
 		// Stop the nagging about WooThemes Updater
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
@@ -178,7 +185,7 @@ class WC_Helper {
 
 		switch ( $return_status ) {
 			case 'activate-success':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
 					'type' => 'updated',
 					/* translators: %s: product name */
@@ -188,7 +195,7 @@ class WC_Helper {
 				break;
 
 			case 'activate-error':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
 					'type' => 'error',
 					/* translators: %s: product name */
@@ -198,7 +205,7 @@ class WC_Helper {
 				break;
 
 			case 'deactivate-success':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$local = self::_get_local_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 
 				/* translators: %s: product name */
@@ -225,7 +232,7 @@ class WC_Helper {
 				break;
 
 			case 'deactivate-error':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
 					'type' => 'error',
 					/* translators: %s: product name */
@@ -235,7 +242,7 @@ class WC_Helper {
 				break;
 
 			case 'deactivate-plugin-success':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
 					'type' => 'updated',
 					/* translators: %s: product name */
@@ -245,7 +252,7 @@ class WC_Helper {
 				break;
 
 			case 'deactivate-plugin-error':
-				$subscription = self::_get_subscription_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
+				$subscription = self::_get_subscriptions_from_product_id( absint( $_GET['wc-helper-product-id'] ) );
 				$notices[] = array(
 					'type' => 'error',
 					/* translators: %1$s: product name, %2$s: plugins screen url */
@@ -496,7 +503,7 @@ class WC_Helper {
 			) ),
 		) );
 
-		$activated = wp_remote_retrieve_response_code( $request ) == 200;
+		$activated = wp_remote_retrieve_response_code( $request ) === 200;
 		$body = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' == $body['code'] ) {
 			$activated = true;
@@ -539,7 +546,7 @@ class WC_Helper {
 		) );
 
 		$code = wp_remote_retrieve_response_code( $request );
-		$deactivated = 200 == $code;
+		$deactivated = 200 === $code;
 		if ( ! $deactivated ) {
 			self::log( sprintf( 'Deactivate API call returned a non-200 response code (%d)', $code ) );
 		}
@@ -614,17 +621,19 @@ class WC_Helper {
 
 	/**
 	 * Get a subscription entry from product_id. If multiple subscriptions are
-	 * found with the same product id, will return the first one in the list, so
-	 * only use this method to get things like extension name, version, etc.
+	 * found with the same product id and $single is set to true, will return the
+	 * first one in the list, so you can use this method to get things like extension
+	 * name, version, etc.
 	 *
 	 * @param int $product_id The product id.
+	 * @param bool $single Whether to return a single subscription or all matching a product id.
 	 *
 	 * @return array|bool The array containing sub data or false.
 	 */
-	private static function _get_subscription_from_product_id( $product_id ) {
+	private static function _get_subscriptions_from_product_id( $product_id, $single = true ) {
 		$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
 		if ( ! empty( $subscriptions ) ) {
-			return array_shift( $subscriptions );
+			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
 
 		return false;
@@ -751,7 +760,7 @@ class WC_Helper {
 			'authenticated' => true,
 		) );
 
-		if ( wp_remote_retrieve_response_code( $request ) != 200 ) {
+		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 			return array();
 		}
@@ -763,6 +772,139 @@ class WC_Helper {
 
 		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
 		return $data;
+	}
+
+	/**
+	 * Runs when any plugin is activated.
+	 *
+	 * Depending on the activated plugin attempts to look through available
+	 * subscriptions and auto-activate one if possible, so the user does not
+	 * need to visit the Helper UI at all after installing a new extension.
+	 *
+	 * @param string $filename The filename of the activated plugin.
+	 */
+	public static function activated_plugin( $filename ) {
+		$plugins = self::get_local_woo_plugins();
+
+		// Not a local woo plugin
+		if ( empty( $plugins[ $filename ] ) ) {
+			return;
+		}
+
+		// Make sure we have a connection.
+		$auth = WC_Helper_Options::get( 'auth' );
+		if ( empty( $auth ) ) {
+			return;
+		}
+
+		$plugin = $plugins[ $filename ];
+		$subscriptions = self::_get_subscriptions_from_product_id( $plugin['_product_id'], false );
+
+		// No valid subscriptions for this product
+		if ( empty( $subscriptions ) ) {
+			return;
+		}
+
+		$subscription = null;
+		foreach ( $subscriptions as $_sub ) {
+
+			// Don't attempt to activate expired subscriptions.
+			if ( $_sub['expired'] ) {
+				continue;
+			}
+
+			// No more sites available in this subscription.
+			if ( $_sub['sites_active'] >= $_sub['sites_max'] ) {
+				continue;
+			}
+
+			// Looks good.
+			$subscription = $_sub;
+			break;
+		}
+
+		// No valid subscription found.
+		if ( ! $subscription ) {
+			return;
+		}
+
+		$request = WC_Helper_API::post( 'activate', array(
+			'authenticated' => true,
+			'body' => json_encode( array(
+				'product_key' => $subscription['product_key'],
+			) ),
+		) );
+
+		$activated = wp_remote_retrieve_response_code( $request ) === 200;
+		$body = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' == $body['code'] ) {
+			$activated = true;
+		}
+
+		if ( ! $activated ) {
+			self::log( 'Could not activate a subscription upon plugin activation: ' . $$filename );
+			return;
+		}
+
+		self::log( 'Auto-activated a subscripton for ' . $filename );
+		self::_flush_subscriptions_cache();
+	}
+
+	/**
+	 * Runs when any plugin is deactivated.
+	 *
+	 * When a user deactivates a plugin, attempt to deactivate any subscriptions
+	 * associated with the extension.
+	 *
+	 * @param string $filename The filename of the deactivated plugin.
+	 */
+	public static function deactivated_plugin( $filename ) {
+		$plugins = self::get_local_woo_plugins();
+
+		// Not a local woo plugin
+		if ( empty( $plugins[ $filename ] ) ) {
+			return;
+		}
+
+		// Make sure we have a connection.
+		$auth = WC_Helper_Options::get( 'auth' );
+		if ( empty( $auth ) ) {
+			return;
+		}
+
+		$plugin = $plugins[ $filename ];
+		$subscriptions = self::_get_subscriptions_from_product_id( $plugin['_product_id'], false );
+		$site_id = absint( $auth['site_id'] );
+
+		// No valid subscriptions for this product
+		if ( empty( $subscriptions ) ) {
+			return;
+		}
+
+		$deactivated = 0;
+
+		foreach ( $subscriptions as $subscription ) {
+			// Don't touch subscriptions that aren't activated on this site.
+			if ( ! in_array( $site_id, $subscription['connections'] ) ) {
+				continue;
+			}
+
+			$request = WC_Helper_API::post( 'deactivate', array(
+				'authenticated' => true,
+				'body' => json_encode( array(
+					'product_key' => $subscription['product_key'],
+				) ),
+			) );
+
+			if ( wp_remote_retrieve_response_code( $request ) === 200 ) {
+				$deactivated++;
+			}
+		}
+
+		if ( $deactivated ) {
+			self::log( sprintf( 'Auto-deactivated %d subscripton(s) for %s', $deactivated, $filename ) );
+			self::_flush_subscriptions_cache();
+		}
 	}
 
 	/**
