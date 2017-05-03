@@ -369,6 +369,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
+				$id         = 0;
 				$meta_value = array_merge( array(
 					'name'         => '',
 					'value'        => '',
@@ -378,17 +379,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'is_taxonomy'  => 0,
 				), (array) $meta_value );
 
+				// Check if is a taxonomy attribute.
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
 					}
+					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
 					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
 
 				$attribute = new WC_Product_Attribute();
-				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
+
+				$attribute->set_id( $id );
 				$attribute->set_name( $meta_value['name'] );
 				$attribute->set_options( $options );
 				$attribute->set_position( $meta_value['position'] );
@@ -652,7 +656,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 					} elseif ( $attribute->is_taxonomy() ) {
 						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
-
 					} else {
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
