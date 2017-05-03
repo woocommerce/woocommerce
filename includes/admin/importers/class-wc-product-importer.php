@@ -220,6 +220,9 @@ class WC_Product_Importer extends WP_Importer {
 		return apply_filters( 'woocommerce_csv_product_import_data', $data, $file, $args );
 	}
 
+	/**
+	 * @param array $mapping 'raw column name' => 'mapped column name'
+	 */
 	private function map_headers( $data, $mapping ) {
 		$data['headers'] = array();
 		foreach ( $data['raw_headers'] as $heading ) {
@@ -232,16 +235,15 @@ class WC_Product_Importer extends WP_Importer {
 	 * Map and format raw data to known fields.
 	 *
 	 * @param array $data
-	 * @param array $mapping 'raw column name' => 'mapped column name'
 	 */
-	private function parse_data( $data, $mapping ) {
+	private function parse_data( $data ) {
 
 		$data_formatting = array(
 			'ID'                      => 'absint',
 			'Published'               => 'boolval',
 			'Is featured'             => 'boolval',
-			'Date sale price starts'  => 'wc_format_datetime',
-			'Date sale price ends'    => 'wc_format_datetime',
+			//'Date sale price starts'  => 'wc_format_datetime',
+			//'Date sale price ends'    => 'wc_format_datetime',
 			'In stock?'               => 'boolval',
 			'Sold individually?'      => 'boolval',
 			'Weight'                  => 'absint',
@@ -300,10 +302,12 @@ class WC_Product_Importer extends WP_Importer {
 	}
 
 	public function parse_comma_field( $field ) {
-		return $field;
+		return array_map( 'esc_attr', explode( ',', $field ) );
 	}
 
 	public function parse_categories( $field ) {
+		$sections = explode( ',', $field );
+
 		return $field;
 	}
 
