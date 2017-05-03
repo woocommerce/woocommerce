@@ -83,7 +83,7 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" />
+				<input type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $post->post_status ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
