@@ -9,6 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * An interface to the woocommerce_helper_data entry in the wp_options table.
  */
 class WC_Helper_Options {
+	/**
+	 * The option name used to store the helper data.
+	 *
+	 * @var string
+	 */
 	private static $option_name = 'woocommerce_helper_data';
 
 	/**

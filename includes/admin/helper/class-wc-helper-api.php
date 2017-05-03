@@ -52,8 +52,6 @@ class WC_Helper_API {
 	 *
 	 * @param string $url The request URI.
 	 * @param array $args By-ref, the args that will be passed to wp_remote_request().
-	 *
-	 * @return null
 	 */
 	private static function _authenticate( $url, &$args ) {
 		$auth = WC_Helper_Options::get( 'auth' );
@@ -86,6 +84,11 @@ class WC_Helper_API {
 
 	/**
 	 * Wrapper for self::request().
+	 *
+	 * @param string $endpoint The helper API endpoint to request.
+	 * @param array $args Arguments passed to wp_remote_request().
+	 *
+	 * @return array The response object from wp_safe_remote_request().
 	 */
 	public static function get( $endpoint, $args = array() ) {
 		$args['method'] = 'GET';
@@ -94,6 +97,11 @@ class WC_Helper_API {
 
 	/**
 	 * Wrapper for self::request().
+	 *
+	 * @param string $endpoint The helper API endpoint to request.
+	 * @param array $args Arguments passed to wp_remote_request().
+	 *
+	 * @return array The response object from wp_safe_remote_request().
 	 */
 	public static function post( $endpoint, $args = array() ) {
 		$args['method'] = 'POST';
