@@ -140,6 +140,7 @@ abstract class WC_Data {
 		$this->maybe_read_meta_data();
 		if ( ! empty( $this->meta_data ) ) {
 			foreach ( $this->meta_data as $array_key => $meta ) {
+				$this->meta_data[ $array_key ] = clone $meta;
 				if ( ! empty( $meta->id ) ) {
 					unset( $this->meta_data[ $array_key ]->id );
 				}
