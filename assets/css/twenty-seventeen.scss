@@ -826,8 +826,11 @@ button.pswp__button--zoom:hover {
 		content: "→";
 	}
 }
-.colors-dark .checkout-button{border: 2px solid #555;} 
-.colors-dark .checkout-button:hover{border: 2px solid #ffffff;}
+.colors-dark {
+    .checkout-button{border: 2px solid #555;
+                     &:hover{border: 2px solid #ffffff;}
+    } 
+}	
 
 /**
  * Checkout
