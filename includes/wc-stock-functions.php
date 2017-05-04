@@ -83,7 +83,8 @@ add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
  * @param int $order_id
  */
 function wc_reduce_stock_levels( $order_id ) {
-	$order = wc_get_order( $order_id );
+	$order      = wc_get_order( $order_id );
+	$data_store = WC_Data_Store::load( 'order' );
 
 	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
@@ -111,6 +112,9 @@ function wc_reduce_stock_levels( $order_id ) {
 				}
 			}
 		}
+
+		// ensure stock is marked as "reduced" in case payment complete or other stock actions are called
+		$data_store->set_stock_reduced( $order_id, true );
 
 		do_action( 'woocommerce_reduce_order_stock', $order );
 	}
