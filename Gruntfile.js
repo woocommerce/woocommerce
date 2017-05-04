@@ -286,11 +286,11 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Autoprefixer
+		// Autoprefixer.
 		postcss: {
 			options: {
 				processors: [
-					require('autoprefixer')({
+					require( 'autoprefixer' )({
 						browsers: [
 							'> 0.1%',
 							'ie 8',
@@ -339,9 +339,9 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
+		'postcss',
 		'cssmin',
-		'concat',
-		'postcss'
+		'concat'
 	]);
 
 	grunt.registerTask( 'docs', [
