@@ -72,8 +72,8 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 /**
  * Get the attribute name used when storing values in post meta.
  *
- * @param string $attribute_name Attribute name.
  * @since 2.6.0
+ * @param string $attribute_name Attribute name.
  * @return string
  */
 function wc_variation_attribute_name( $attribute_name ) {
@@ -121,7 +121,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  * Get a product attributes label.
  *
  * @param string $name
- * @param  object $product object Optional
+ * @param object $product object Optional
  * @return string
  */
 function wc_attribute_label( $name, $product = '' ) {
@@ -304,7 +304,7 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
  * Callback for array filter to get visible only.
  *
  * @since  3.0.0
- * @param  WC_Product $product
+ * @param  WC_Product_Attribute $attribute
  * @return bool
  */
 function wc_attributes_array_filter_visible( $attribute ) {
@@ -315,7 +315,7 @@ function wc_attributes_array_filter_visible( $attribute ) {
  * Callback for array filter to get variation attributes only.
  *
  * @since  3.0.0
- * @param  WC_Product $product
+ * @param  WC_Product_Attribute $attribute
  * @return bool
  */
 function wc_attributes_array_filter_variation( $attribute ) {
