@@ -272,6 +272,29 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertCount( 2, $object->get_items() );
 	}
+	
+	/**
+	 * Test: get_different_items
+	 */
+	function test_get_different_items() {
+		$object  = new WC_Order();
+		$item_1  = new WC_Order_Item_Product();
+		$item_1->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+		$item_2  = new WC_Order_Item_Fee();
+		$item_2->set_props( array(
+			'name'       => 'Some Fee',
+			'tax_status' => 'taxable',
+			'total'      => '100',
+			'tax_class'  => '',
+		) );
+		$object->add_item( $item_1 );
+		$object->add_item( $item_2 );
+		$object->save();
+		$this->assertCount( 2, $object->get_items( array( 'line_item', 'fee' ) ) );
+	}
 
 	/**
 	 * Test: get_fees
