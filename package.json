@@ -14,7 +14,9 @@
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --compilers js:babel-register"
   },
   "devDependencies": {
+    "autoprefixer": "^6.7.7",
     "grunt": "~1.0.1",
+	"grunt-autoprefixer": "^3.0.4",
     "grunt-checktextdomain": "~1.0.0",
     "grunt-contrib-clean": "~1.0.0",
     "grunt-contrib-cssmin": "~1.0.0",
@@ -26,6 +28,7 @@
     "grunt-shell": "~2.1.0",
     "grunt-stylelint": "^0.6.0",
     "grunt-wp-i18n": "~0.5.4",
+    "grunt-postcss": "^0.8.0",
     "grunt-rtlcss": "2.0.1",
     "grunt-contrib-concat": "1.0.1",
     "node-bourbon": "~4.2.3",
