@@ -196,7 +196,6 @@ class WC_Product_Importer extends WP_Importer {
 
 			while( false !== ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) ) {
 				$data['data'][] = $row;
-	            $position = ftell( $handle );
 
 	            if ( ( $args['end_pos'] > 0 && ftell( $handle ) >= $args['end_pos'] ) || 0 === --$args[
 	            	'lines'] ) {
@@ -217,7 +216,11 @@ class WC_Product_Importer extends WP_Importer {
 	}
 
 	/**
-	 * @param array $mapping 'raw column name' => 'mapped column name'
+	 * Map raw headers to known headers.
+	 *
+	 * @param array $data
+	 * @param array $mapping 'raw column name' => 'schema column name'
+	 * @return array
 	 */
 	public function map_headers( $data, $mapping ) {
 		$data['headers'] = array();
