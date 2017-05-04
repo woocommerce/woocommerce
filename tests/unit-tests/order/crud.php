@@ -292,7 +292,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		) );
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
-		$object->save();
+		// $object->save();
 		$this->assertCount( 2, $object->get_items( array( 'line_item', 'fee' ) ) );
 	}
 
