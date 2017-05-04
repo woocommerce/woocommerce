@@ -533,7 +533,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			) );
 		}
 
-		return $order_ids;
+		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
 	}
 
 	/**
