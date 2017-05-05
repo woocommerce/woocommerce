@@ -589,10 +589,8 @@ class WC_Form_Handler {
 				if ( taxonomy_is_product_attribute( $meta->key ) ) {
 					$term = get_term_by( 'slug', $meta->value, $meta->key );
 					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
-					$test['tax'][] = $meta->key;
 				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
-					$test['tax'][] = $meta->key;
 				}
 			}
 
