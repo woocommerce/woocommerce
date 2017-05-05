@@ -635,12 +635,12 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 		// Generate term query
 		$join_index++;
-		$term_query_select = " INNER JOIN ( SELECT object_ID FROM {$wpdb->term_relationships} LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id ) WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) AS include_join{$join_index} ON include_join{$join_index}.object_ID = ID ";
+		$term_query_join = " INNER JOIN ( SELECT object_ID FROM {$wpdb->term_relationships} LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id ) WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) AS include_join{$join_index} ON include_join{$join_index}.object_ID = ID ";
 
 		//$term_query = " AND ID IN ( SELECT object_ID FROM {$wpdb->term_relationships} LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id ) WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) ";
 
 		// Get the count
-		$count = $wpdb->get_var( $count_query_select . $count_query_where . $term_query );
+		$count = $wpdb->get_var( $count_query_select . $term_query_join . $count_query_where );
 
 		// Update the count
 		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
