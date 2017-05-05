@@ -38,7 +38,7 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 * Each test method should cover a single method or function with one or more assertions
 * A single method or function can have multiple associated test methods if it's a large or complex method
 * Use the test coverage HTML report (under `tmp/coverage/index.html`) to examine which lines your tests are covering and aim for 100% coverage
-* For code that cannot be tested (e.g. they require a certain PHP version), you can exclude them from coverage using a comment: `// @codeCoverageIgnoreStart` and `// @codeCoverageIgnoreEnd`. For example, see [`wc_round_tax_total()`](https://github.com/woothemes/woocommerce/blob/master/includes/wc-formatting-functions.php#L155-155)
+* For code that cannot be tested (e.g. they require a certain PHP version), you can exclude them from coverage using a comment: `// @codeCoverageIgnoreStart` and `// @codeCoverageIgnoreEnd`. For example, see [`wc_round_tax_total()`](https://github.com/woocommerce/woocommerce/blob/35f83867736713955fa2c4f463a024578bb88795/includes/wc-formatting-functions.php#L208-L219)
 * In addition to covering each line of a method/function, make sure to test common input and edge cases.
 * Prefer `assertsEquals()` where possible as it tests both type & equality
 * Remember that only methods prefixed with `test` will be run so use helper methods liberally to keep test methods small and reduce code duplication. If there is a common helper method used in multiple test files, consider adding it to the `WC_Unit_Test_Case` class so it can be shared by all test cases

@@ -1,44 +1,43 @@
-/* global wp, pwsL10n */
+/* global wp, pwsL10n, wc_password_strength_meter_params */
 jQuery( function( $ ) {
 
 	/**
-	 * Password Strength Meter class
+	 * Password Strength Meter class.
 	 */
 	var wc_password_strength_meter = {
 
 		/**
-		 * Initialize strength meter actions
+		 * Initialize strength meter actions.
 		 */
 		init: function() {
 			$( document.body )
-				.on( 'keyup', 'form.register #reg_password, form.checkout #account_password', this.strengthMeter )
-				.on( 'change', 'form.checkout #createaccount', this.checkoutNeedsRegistration );
-
+				.on( 'keyup change', 'form.register #reg_password, form.checkout #account_password, form.edit-account #password_1, form.lost_reset_password #password_1', this.strengthMeter );
 			$( 'form.checkout #createaccount' ).change();
 		},
 
 		/**
-		 * Strength Meter
+		 * Strength Meter.
 		 */
 		strengthMeter: function() {
-			var wrapper  = $( 'form.register, form.checkout' ),
-				submit   = $( 'input[type="submit"]', wrapper ),
-				field    = $( '#reg_password, #account_password', wrapper ),
-				strength = 1;
+			var wrapper    = $( 'form.register, form.checkout, form.edit-account, form.lost_reset_password' ),
+				submit     = $( 'input[type="submit"]', wrapper ),
+				field      = $( '#reg_password, #account_password, #password_1', wrapper ),
+				strength   = 1,
+				fieldValue = field.val();
 
 			wc_password_strength_meter.includeMeter( wrapper, field );
 
-			strength = wc_password_strength_meter.checkPasswordStrength( field );
+			strength = wc_password_strength_meter.checkPasswordStrength( wrapper, field );
 
-			if ( 3 === strength || 4 === strength ) {
-				submit.removeAttr( 'disabled' );
+			if ( fieldValue.length > 0 && strength < wc_password_strength_meter_params.min_password_strength && ! wrapper.is( 'form.checkout' ) ) {
+				submit.attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 			} else {
-				submit.attr( 'disabled', 'disabled' );
+				submit.removeAttr( 'disabled', 'disabled' ).removeClass( 'disabled' );
 			}
 		},
 
 		/**
-		 * Include meter HTML
+		 * Include meter HTML.
 		 *
 		 * @param {Object} wrapper
 		 * @param {Object} field
@@ -46,59 +45,63 @@ jQuery( function( $ ) {
 		includeMeter: function( wrapper, field ) {
 			var meter = wrapper.find( '.woocommerce-password-strength' );
 
-			if ( 0 === meter.length ) {
-				field.after( '<div class="woocommerce-password-strength" aria-live="polite"></div>' );
-			} else if ( '' === field.val() ) {
+			if ( '' === field.val() ) {
 				meter.remove();
+				$( document.body ).trigger( 'wc-password-strength-removed' );
+			} else if ( 0 === meter.length ) {
+				field.after( '<div class="woocommerce-password-strength" aria-live="polite"></div>' );
+				$( document.body ).trigger( 'wc-password-strength-added' );
 			}
 		},
 
 		/**
-		 * Check password strength
+		 * Check password strength.
 		 *
-		 * @param  {Object} field
+		 * @param {Object} field
 		 *
 		 * @return {Int}
 		 */
-		checkPasswordStrength: function( field ) {
-			var meter = $( '.woocommerce-password-strength' );
-			var strength = wp.passwordStrength.meter( field.val(), wp.passwordStrength.userInputBlacklist() );
+		checkPasswordStrength: function( wrapper, field ) {
+			var meter     = wrapper.find( '.woocommerce-password-strength' );
+			var hint      = wrapper.find( '.woocommerce-password-hint' );
+			var hint_html = '<small class="woocommerce-password-hint">' + wc_password_strength_meter_params.i18n_password_hint + '</small>';
+			var strength  = wp.passwordStrength.meter( field.val(), wp.passwordStrength.userInputBlacklist() );
+			var error     = '';
 
-			// Reset classes
+			// Reset
 			meter.removeClass( 'short bad good strong' );
+			hint.remove();
+
+			// Error to append
+			if ( strength < wc_password_strength_meter_params.min_password_strength ) {
+				error = ' - ' + wc_password_strength_meter_params.i18n_password_error;
+			}
 
 			switch ( strength ) {
+				case 0 :
+					meter.addClass( 'short' ).html( pwsL10n['short'] + error );
+					meter.after( hint_html );
+					break;
+				case 1 :
+					meter.addClass( 'bad' ).html( pwsL10n.bad + error );
+					meter.after( hint_html );
+					break;
 				case 2 :
-					meter.addClass( 'bad' ).html( pwsL10n.bad );
+					meter.addClass( 'bad' ).html( pwsL10n.bad + error );
+					meter.after( hint_html );
 					break;
 				case 3 :
-					meter.addClass( 'good' ).html( pwsL10n.good );
+					meter.addClass( 'good' ).html( pwsL10n.good + error );
 					break;
 				case 4 :
-					meter.addClass( 'strong' ).html( pwsL10n.strong );
+					meter.addClass( 'strong' ).html( pwsL10n.strong + error );
 					break;
 				case 5 :
 					meter.addClass( 'short' ).html( pwsL10n.mismatch );
 					break;
-
-				default :
-					meter.addClass( 'short' ).html( pwsL10n['short'] );
 			}
 
 			return strength;
-		},
-
-		/**
-		 * Check if user wants register on checkout.
-		 */
-		checkoutNeedsRegistration: function() {
-			var submit = $( 'form.checkout input[type="submit"]' );
-
-			if ( $( this ).is( ':checked' ) ) {
-				submit.attr( 'disabled', 'disabled' );
-			} else {
-				submit.removeAttr( 'disabled' );
-			}
 		}
 	};
 

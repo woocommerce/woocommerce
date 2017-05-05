@@ -13,14 +13,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) :
+if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker', false ) ) :
 
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
+	/**
+	 * What the class handles.
+	 *
+	 * @var string
+	 */
 	public $tree_type = 'category';
-	public $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
+	 * DB fields to use.
+	 *
+	 * @var array
+	 */
+	public $db_fields = array(
+		'parent' => 'parent',
+		'id'     => 'term_id',
+		'slug'   => 'slug',
+	);
+
+	/**
+	 * Starts the list before the elements are added.
+	 *
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
@@ -30,26 +47,26 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 */
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
-		if ( ! empty( $args['hierarchical'] ) )
-			$pad = str_repeat('&nbsp;', $depth * 3);
-		else
+		if ( ! empty( $args['hierarchical'] ) ) {
+			$pad = str_repeat( '&nbsp;', $depth * 3 );
+		} else {
 			$pad = '';
+		}
 
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );
+		$value    = ( isset( $args['value'] ) && 'id' === $args['value'] ) ? $cat->term_id : $cat->slug;
+		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . "\"";
 
-		$value = isset( $args['value'] ) && $args['value'] == 'id' ? $cat->term_id : $cat->slug;
-
-		$output .= "\t<option class=\"level-$depth\" value=\"" . $value . "\"";
-
-		if ( $value == $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'] ) ) )
+		if ( $value === $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'] ) ) ) {
 			$output .= ' selected="selected"';
+		}
 
 		$output .= '>';
+		$output .= esc_html( $pad . _x( $cat_name, 'product category name', 'woocommerce' ) );
 
-		$output .= $pad . __( $cat_name, 'woocommerce' );
-
-		if ( ! empty( $args['show_count'] ) )
-			$output .= '&nbsp;(' . $cat->count . ')';
+		if ( ! empty( $args['show_count'] ) ) {
+			$output .= '&nbsp;(' . absint( $cat->count ) . ')';
+		}
 
 		$output .= "</option>\n";
 	}
@@ -75,7 +92,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 * @return null Null on failure with no changes to parameters.
 	 */
 	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
-		if ( ! $element || 0 === $element->count ) {
+		if ( ! $element || ( 0 === $element->count && ! empty( $args[0]['hide_empty'] ) ) ) {
 			return;
 		}
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );

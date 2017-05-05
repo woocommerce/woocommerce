@@ -12,13 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Tax' ) ) :
+if ( ! class_exists( 'WC_Settings_Tax', false ) ) :
 
 /**
  * WC_Settings_Tax.
  */
 class WC_Settings_Tax extends WC_Settings_Page {
 
+	/**
+	 * Setting page id.
+	 *
+	 * @var string
+	 */
 	protected $id = 'tax';
 
 	/**
@@ -30,21 +35,32 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Add this page to settings.
+	 */
+	public function add_settings_page( $pages ) {
+		if ( wc_tax_enabled() ) {
+			return parent::add_settings_page( $pages );
+		} else {
+			return $pages;
+		}
+	}
+
+	/**
 	 * Get sections.
 	 *
 	 * @return array
 	 */
 	public function get_sections() {
 		$sections = array(
-			''         => __( 'Tax Options', 'woocommerce' ),
-			'standard' => __( 'Standard Rates', 'woocommerce' )
+			''         => __( 'Tax options', 'woocommerce' ),
+			'standard' => __( 'Standard rates', 'woocommerce' ),
 		);
 
 		// Get tax classes and display as links
 		$tax_classes = WC_Tax::get_tax_classes();
 
 		foreach ( $tax_classes as $class ) {
-			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
+			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s rates', 'woocommerce' ), $class );
 		}
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -56,13 +72,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-		$tax_classes     = WC_Tax::get_tax_classes();
-		$classes_options = array();
-
-		foreach ( $tax_classes as $class ) {
-			$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-		}
-
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
 	}
 
@@ -72,9 +81,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output() {
 		global $current_section;
 
-		$tax_classes = WC_Tax::get_tax_classes();
+		$tax_classes = WC_Tax::get_tax_class_slugs();
 
-		if ( $current_section == 'standard' || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes ) ) {
 			$this->output_tax_rates();
 		} else {
 			$settings = $this->get_settings();
@@ -104,16 +113,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
-		global $wpdb,
-				$current_section;
+		global $wpdb, $current_section;
 
 		$current_class = $this->get_current_tax_class();
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
 			$countries[] = array(
-				'label' => $label,
 				'value' => $value,
+				'label' => esc_js( html_entity_decode( $label ) ),
 			);
 		}
 
@@ -121,8 +129,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		foreach ( WC()->countries->get_allowed_country_states() as $label ) {
 			foreach ( $label as $code => $state ) {
 				$states[] = array(
-					'label' => $state,
 					'value' => $code,
+					'label' => esc_js( html_entity_decode( $state ) ),
 				);
 			}
 		}
@@ -159,16 +167,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'csv_data_cols' => array(
-					__( 'Country Code', 'woocommerce' ),
-					__( 'State Code', 'woocommerce' ),
-					__( 'ZIP/Postcode', 'woocommerce' ),
+					__( 'Country code', 'woocommerce' ),
+					__( 'State code', 'woocommerce' ),
+					__( 'Postcode / ZIP', 'woocommerce' ),
 					__( 'City', 'woocommerce' ),
 					__( 'Rate %', 'woocommerce' ),
-					__( 'Tax Name', 'woocommerce' ),
+					__( 'Tax name', 'woocommerce' ),
 					__( 'Priority', 'woocommerce' ),
 					__( 'Compound', 'woocommerce' ),
 					__( 'Shipping', 'woocommerce' ),
-					__( 'Tax Class', 'woocommerce' ),
+					__( 'Tax class', 'woocommerce' ),
 				),
 			),
 		) );
@@ -187,7 +195,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$tax_classes   = WC_Tax::get_tax_classes();
 		$current_class = '';
 
-		foreach( $tax_classes as $class ) {
+		foreach ( $tax_classes as $class ) {
 			if ( sanitize_title( $class ) == $current_section ) {
 				$current_class = $class;
 			}
@@ -210,7 +218,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'tax_rate_state',
 			'tax_rate',
 			'tax_rate_name',
-			'tax_rate_priority'
+			'tax_rate_priority',
 		);
 
 		foreach ( $tax_rate_keys as $tax_rate_key ) {
@@ -245,7 +253,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// Loop posted fields
 		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
-			$mode        = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
+			$mode        = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
 			$tax_rate    = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {

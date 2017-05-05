@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Importers' ) ) :
+if ( ! class_exists( 'WC_Admin_Importers', false ) ) :
 
 /**
  * WC_Admin_Importers Class.
@@ -31,7 +31,7 @@ class WC_Admin_Importers {
 	 * Add menu items.
 	 */
 	public function register_importers() {
-		register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce Tax Rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce'), array( $this, 'tax_rates_importer' ) );
+		register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce tax rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'tax_rates_importer' ) );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class WC_Admin_Importers {
 		}
 
 		// includes
-		require 'importers/class-wc-tax-rate-importer.php';
+		require( dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php' );
 
 		// Dispatch
 		$importer = new WC_Tax_Rate_Importer();
@@ -94,7 +94,7 @@ class WC_Admin_Importers {
 												'attribute_name'    => $attribute_name,
 												'attribute_type'    => 'select',
 												'attribute_orderby' => 'menu_order',
-												'attribute_public'  => 0
+												'attribute_public'  => 0,
 											);
 											$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
 											delete_transient( 'wc_attribute_taxonomies' );

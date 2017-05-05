@@ -1,15 +1,11 @@
 <?php
 
-namespace WooCommerce\Tests\Formatting;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Formatting
  * @since 2.2
- *
- * @todo Split formatting class into smaller classes
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_sanitize_taxonomy_name().
@@ -31,10 +27,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_filename_from_url() {
 
-		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'http://www.woothemes.com/woocommerce.pdf' ) );
+		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce.pdf' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'ftp://wc' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'http://www.skyverge.com' ) );
-		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'http://www.woothemes.com/woocommerce' ) );
+		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
 	}
 
 	/**
@@ -95,10 +91,17 @@ class Functions extends \WC_Unit_Test_Case {
 			array( 0, wc_get_dimension( -10, 'mm' ) ),
 		);
 
+		$custom = array(
+			array( 25.4, wc_get_dimension( 10, 'cm', 'in' ) ),
+			array( 914.4, wc_get_dimension( 10, 'cm', 'yd' ) ),
+			array( 393.7, wc_get_dimension( 10, 'in', 'm' ) ),
+			array( 0.010936133, wc_get_dimension( 10, 'yd', 'mm' ) ),
+		);
+
 		// restore default
 		update_option( 'woocommerce_dimension_unit', $default_unit );
 
-		return array_merge( $cm, $in, $m, $mm, $yd, $n );
+		return array_merge( $cm, $in, $m, $mm, $yd, $n, $custom );
 
 	}
 
@@ -151,6 +154,12 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( 283.495, wc_get_weight( 10, 'g' ) );
 		$this->assertEquals( 0.6249987469, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 10, wc_get_weight( 10, 'oz' ) );
+
+		// custom from unit
+		$this->assertEquals( 0.283495, wc_get_weight( 10, 'kg', 'oz' ) );
+		$this->assertEquals( 0.01, wc_get_weight( 10, 'kg', 'g' ) );
+		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg', 'lbs' ) );
+		$this->assertEquals( 10, wc_get_weight( 10, 'kg', 'kg' ) );
 
 		// negative
 		$this->assertEquals( 0, wc_get_weight( -10, 'g' ) );
@@ -302,7 +311,7 @@ class Functions extends \WC_Unit_Test_Case {
 			'pear'       => 'grape',
 			'vegetables' => array(
 				'cucumber' => 'asparagus',
-			)
+			),
 		);
 
 		$a2 = array(
@@ -436,32 +445,32 @@ class Functions extends \WC_Unit_Test_Case {
 	public function test_wc_price() {
 
 		// common prices
-		$this->assertEquals( '<span class="amount">&pound;1.00</span>', wc_price( 1 ) );
-		$this->assertEquals( '<span class="amount">&pound;1.10</span>', wc_price( 1.1 ) );
-		$this->assertEquals( '<span class="amount">&pound;1.17</span>', wc_price( 1.17 ) );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span>', wc_price( 1111.17 ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 0 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.00</span>', wc_price( 1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.10</span>', wc_price( 1.1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.17</span>', wc_price( 1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</span>', wc_price( 1111.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 0 ) );
 
 		// different currency
-		$this->assertEquals( '<span class="amount">&#36;1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
 
 		// negative price
-		$this->assertEquals( '<span class="amount">-&pound;1.17</span>', wc_price( -1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount">-<span class="woocommerce-Price-currencySymbol">&pound;</span>1.17</span>', wc_price( -1.17 ) );
 
 		// bogus prices
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( null ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 'Q' ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 'ಠ_ಠ' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( null ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 'Q' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 'ಠ_ಠ' ) );
 
 		// trim zeros
 		add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
-		$this->assertEquals( '<span class="amount">&pound;1</span>', wc_price( 1.00 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1</span>', wc_price( 1.00 ) );
 		remove_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		// ex tax label
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small class="tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</span> <small class="woocommerce-Price-taxLabel tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
@@ -524,7 +533,7 @@ class Functions extends \WC_Unit_Test_Case {
 
 		// test with manually set UTC offset
 		update_option( 'gmt_offset', -4 );
-		$this->assertEquals( 'America/Halifax', wc_timezone_string() );
+		$this->assertNotEquals( 'UTC', wc_timezone_string() );
 
 		// test with invalid offset
 		update_option( 'gmt_offset', 99 );
@@ -604,8 +613,11 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_format_postcode() {
 
-		// generic postcode
+		// Generic postcode
 		$this->assertEquals( '02111', wc_format_postcode( ' 02111	', 'US' ) );
+
+		// US 9-digit postcode
+		$this->assertEquals( '02111-9999', wc_format_postcode( ' 021119999	', 'US' ) );
 
 		// UK postcode
 		$this->assertEquals( 'PCRN 1ZZ', wc_format_postcode( 'pcrn1zz', 'GB' ) );
@@ -627,10 +639,9 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_trim_string() {
-
 		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
 		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
 		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
-
 }

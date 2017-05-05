@@ -1,13 +1,11 @@
 <?php
 
-namespace WooCommerce\Tests\Util;
-
 /**
  * Class Core_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */
-class Core_Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test get_woocommerce_currency().
@@ -27,57 +25,168 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	public function test_get_woocommerce_currencies() {
 
 		$expected_currencies = array(
-			'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
-			'ARS' => __( 'Argentine Peso', 'woocommerce' ),
-			'AUD' => __( 'Australian Dollars', 'woocommerce' ),
-			'BDT' => __( 'Bangladeshi Taka', 'woocommerce' ),
-			'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
-			'BRL' => __( 'Brazilian Real', 'woocommerce' ),
-			'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
-			'CHF' => __( 'Swiss Franc', 'woocommerce' ),
-			'CLP' => __( 'Chilean Peso', 'woocommerce' ),
-			'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
-			'COP' => __( 'Colombian Peso', 'woocommerce' ),
-			'CZK' => __( 'Czech Koruna', 'woocommerce' ),
-			'DKK' => __( 'Danish Krone', 'woocommerce' ),
-			'DOP' => __( 'Dominican Peso', 'woocommerce' ),
-			'EGP' => __( 'Egyptian Pound', 'woocommerce' ),
-			'EUR' => __( 'Euros', 'woocommerce' ),
-			'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
-			'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
-			'HRK' => __( 'Croatia kuna', 'woocommerce' ),
-			'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
-			'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
-			'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
-			'INR' => __( 'Indian Rupee', 'woocommerce' ),
-			'ISK' => __( 'Icelandic krona', 'woocommerce' ),
-			'JPY' => __( 'Japanese Yen', 'woocommerce' ),
-			'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-			'LAK' => __( 'Lao Kip', 'woocommerce' ),
-			'KRW' => __( 'South Korean Won', 'woocommerce' ),
-			'MXN' => __( 'Mexican Peso', 'woocommerce' ),
-			'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
-			'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
-			'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
-			'NPR' => __( 'Nepali Rupee', 'woocommerce' ),
-			'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
-			'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
-			'PKR' => __( 'Pakistani Rupee', 'woocommerce' ),
-			'PLN' => __( 'Polish Zloty', 'woocommerce' ),
-			'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
-			'RON' => __( 'Romanian Leu', 'woocommerce' ),
-			'RUB' => __( 'Russian Ruble', 'woocommerce' ),
-			'SEK' => __( 'Swedish Krona', 'woocommerce' ),
-			'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
-			'THB' => __( 'Thai Baht', 'woocommerce' ),
-			'TRY' => __( 'Turkish Lira', 'woocommerce' ),
-			'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
-			'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
-			'USD' => __( 'US Dollars', 'woocommerce' ),
-			'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
-			'ZAR' => __( 'South African rand', 'woocommerce' ),
+			'AED' => 'United Arab Emirates dirham',
+			'AFN' => 'Afghan afghani',
+			'ALL' => 'Albanian lek',
+			'AMD' => 'Armenian dram',
+			'ANG' => 'Netherlands Antillean guilder',
+			'AOA' => 'Angolan kwanza',
+			'ARS' => 'Argentine peso',
+			'AUD' => 'Australian dollar',
+			'AWG' => 'Aruban florin',
+			'AZN' => 'Azerbaijani manat',
+			'BAM' => 'Bosnia and Herzegovina convertible mark',
+			'BBD' => 'Barbadian dollar',
+			'BDT' => 'Bangladeshi taka',
+			'BGN' => 'Bulgarian lev',
+			'BHD' => 'Bahraini dinar',
+			'BIF' => 'Burundian franc',
+			'BMD' => 'Bermudian dollar',
+			'BND' => 'Brunei dollar',
+			'BOB' => 'Bolivian boliviano',
+			'BRL' => 'Brazilian real',
+			'BSD' => 'Bahamian dollar',
+			'BTC' => 'Bitcoin',
+			'BTN' => 'Bhutanese ngultrum',
+			'BWP' => 'Botswana pula',
+			'BYR' => 'Belarusian ruble',
+			'BZD' => 'Belize dollar',
+			'CAD' => 'Canadian dollar',
+			'CDF' => 'Congolese franc',
+			'CHF' => 'Swiss franc',
+			'CLP' => 'Chilean peso',
+			'CNY' => 'Chinese yuan',
+			'COP' => 'Colombian peso',
+			'CRC' => 'Costa Rican col&oacute;n',
+			'CUC' => 'Cuban convertible peso',
+			'CUP' => 'Cuban peso',
+			'CVE' => 'Cape Verdean escudo',
+			'CZK' => 'Czech koruna',
+			'DJF' => 'Djiboutian franc',
+			'DKK' => 'Danish krone',
+			'DOP' => 'Dominican peso',
+			'DZD' => 'Algerian dinar',
+			'EGP' => 'Egyptian pound',
+			'ERN' => 'Eritrean nakfa',
+			'ETB' => 'Ethiopian birr',
+			'EUR' => 'Euro',
+			'FJD' => 'Fijian dollar',
+			'FKP' => 'Falkland Islands pound',
+			'GBP' => 'Pound sterling',
+			'GEL' => 'Georgian lari',
+			'GGP' => 'Guernsey pound',
+			'GHS' => 'Ghana cedi',
+			'GIP' => 'Gibraltar pound',
+			'GMD' => 'Gambian dalasi',
+			'GNF' => 'Guinean franc',
+			'GTQ' => 'Guatemalan quetzal',
+			'GYD' => 'Guyanese dollar',
+			'HKD' => 'Hong Kong dollar',
+			'HNL' => 'Honduran lempira',
+			'HRK' => 'Croatian kuna',
+			'HTG' => 'Haitian gourde',
+			'HUF' => 'Hungarian forint',
+			'IDR' => 'Indonesian rupiah',
+			'ILS' => 'Israeli new shekel',
+			'IMP' => 'Manx pound',
+			'INR' => 'Indian rupee',
+			'IQD' => 'Iraqi dinar',
+			'IRR' => 'Iranian rial',
+			'IRT' => 'Iranian toman',
+			'ISK' => 'Icelandic kr&oacute;na',
+			'JEP' => 'Jersey pound',
+			'JMD' => 'Jamaican dollar',
+			'JOD' => 'Jordanian dinar',
+			'JPY' => 'Japanese yen',
+			'KES' => 'Kenyan shilling',
+			'KGS' => 'Kyrgyzstani som',
+			'KHR' => 'Cambodian riel',
+			'KMF' => 'Comorian franc',
+			'KPW' => 'North Korean won',
+			'KRW' => 'South Korean won',
+			'KWD' => 'Kuwaiti dinar',
+			'KYD' => 'Cayman Islands dollar',
+			'KZT' => 'Kazakhstani tenge',
+			'LAK' => 'Lao kip',
+			'LBP' => 'Lebanese pound',
+			'LKR' => 'Sri Lankan rupee',
+			'LRD' => 'Liberian dollar',
+			'LSL' => 'Lesotho loti',
+			'LYD' => 'Libyan dinar',
+			'MAD' => 'Moroccan dirham',
+			'MDL' => 'Moldovan leu',
+			'MGA' => 'Malagasy ariary',
+			'MKD' => 'Macedonian denar',
+			'MMK' => 'Burmese kyat',
+			'MNT' => 'Mongolian t&ouml;gr&ouml;g',
+			'MOP' => 'Macanese pataca',
+			'MRO' => 'Mauritanian ouguiya',
+			'MUR' => 'Mauritian rupee',
+			'MVR' => 'Maldivian rufiyaa',
+			'MWK' => 'Malawian kwacha',
+			'MXN' => 'Mexican peso',
+			'MYR' => 'Malaysian ringgit',
+			'MZN' => 'Mozambican metical',
+			'NAD' => 'Namibian dollar',
+			'NGN' => 'Nigerian naira',
+			'NIO' => 'Nicaraguan c&oacute;rdoba',
+			'NOK' => 'Norwegian krone',
+			'NPR' => 'Nepalese rupee',
+			'NZD' => 'New Zealand dollar',
+			'OMR' => 'Omani rial',
+			'PAB' => 'Panamanian balboa',
+			'PEN' => 'Peruvian nuevo sol',
+			'PGK' => 'Papua New Guinean kina',
+			'PHP' => 'Philippine peso',
+			'PKR' => 'Pakistani rupee',
+			'PLN' => 'Polish z&#x142;oty',
+			'PRB' => 'Transnistrian ruble',
+			'PYG' => 'Paraguayan guaran&iacute;',
+			'QAR' => 'Qatari riyal',
+			'RON' => 'Romanian leu',
+			'RSD' => 'Serbian dinar',
+			'RUB' => 'Russian ruble',
+			'RWF' => 'Rwandan franc',
+			'SAR' => 'Saudi riyal',
+			'SBD' => 'Solomon Islands dollar',
+			'SCR' => 'Seychellois rupee',
+			'SDG' => 'Sudanese pound',
+			'SEK' => 'Swedish krona',
+			'SGD' => 'Singapore dollar',
+			'SHP' => 'Saint Helena pound',
+			'SLL' => 'Sierra Leonean leone',
+			'SOS' => 'Somali shilling',
+			'SRD' => 'Surinamese dollar',
+			'SSP' => 'South Sudanese pound',
+			'STD' => 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra',
+			'SYP' => 'Syrian pound',
+			'SZL' => 'Swazi lilangeni',
+			'THB' => 'Thai baht',
+			'TJS' => 'Tajikistani somoni',
+			'TMT' => 'Turkmenistan manat',
+			'TND' => 'Tunisian dinar',
+			'TOP' => 'Tongan pa&#x2bb;anga',
+			'TRY' => 'Turkish lira',
+			'TTD' => 'Trinidad and Tobago dollar',
+			'TWD' => 'New Taiwan dollar',
+			'TZS' => 'Tanzanian shilling',
+			'UAH' => 'Ukrainian hryvnia',
+			'UGX' => 'Ugandan shilling',
+			'USD' => 'United States dollar',
+			'UYU' => 'Uruguayan peso',
+			'UZS' => 'Uzbekistani som',
+			'VEF' => 'Venezuelan bol&iacute;var',
+			'VND' => 'Vietnamese &#x111;&#x1ed3;ng',
+			'VUV' => 'Vanuatu vatu',
+			'WST' => 'Samoan t&#x101;l&#x101;',
+			'XAF' => 'Central African CFA franc',
+			'XCD' => 'East Caribbean dollar',
+			'XOF' => 'West African CFA franc',
+			'XPF' => 'CFP franc',
+			'YER' => 'Yemeni rial',
+			'ZAR' => 'South African rand',
+			'ZMW' => 'Zambian kwacha',
 		);
-
 
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
 	}
@@ -130,13 +239,42 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_logger().
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_get_logger() {
+		// This filter should have no effect because the class does not implement WC_Logger_Interface
+		add_filter( 'woocommerce_logging_class', array( $this, 'return_bad_logger' ) );
+
+		$this->setExpectedIncorrectUsage( 'wc_get_logger' );
+		$log_a = wc_get_logger();
+		$log_b = wc_get_logger();
+
+		$this->assertInstanceOf( 'WC_Logger', $log_a );
+		$this->assertInstanceOf( 'WC_Logger', $log_b );
+		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
+	}
+
+	/**
+	 * Return class which does not implement WC_Logger_Interface
+	 *
+	 * This is a helper function to test woocommerce_logging_class filter and wc_get_logger.
+	 *
+	 * @return string Class name
+	 */
+	public function return_bad_logger() {
+		return __CLASS__;
+	}
+
+	/**
 	 * Test wc_get_core_supported_themes().
 	 *
 	 * @since 2.2
 	 */
 	public function test_wc_get_core_supported_themes() {
 
-		$expected_themes = array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+		$expected_themes = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}
@@ -153,5 +291,122 @@ class Core_Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( '', $default['state'] );
 	}
 
-}
+	/**
+	 * Test wc_format_country_state_string().
+	 *
+	 * @since 2.6.0
+	 */
+	public function test_wc_format_country_state_string() {
+		// Test with correct values.
+		$this->assertEquals( array( 'country' => 'US', 'state' => 'CA' ), wc_format_country_state_string( 'US:CA' ) );
+		// Test what happens when we pass an incorrect value.
+		$this->assertEquals( array( 'country' => 'US-CA', 'state' => '' ), wc_format_country_state_string( 'US-CA' ) );
+	}
 
+	/**
+	 * Test wc_get_shipping_method_count()
+	 *
+	 * @since 2.6.0
+	 */
+	public function test_wc_get_shipping_method_count() {
+		// Without legacy methods.
+		$this->assertEquals( 0, wc_get_shipping_method_count( false ) );
+
+		// With legacy methods.
+		$this->assertEquals( 0, wc_get_shipping_method_count( true ) );
+	}
+
+	/**
+	 * Test wc_print_r()
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_print_r() {
+		$arr = array( 1, 2, 'a', 'b', 'c' => 'd' );
+
+		// This filter will sequentially remove handlers, allowing us to test as though our
+		// functions were accumulatively blacklisted, adding one on each call.
+		add_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
+
+		$this->expectOutputString(
+			print_r( $arr, true ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			var_export( $arr, true ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			json_encode( $arr ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			serialize( $arr ),
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertTrue( $return_value );
+		ob_clean();
+
+		$this->expectOutputString(
+			'',
+			$return_value = wc_print_r( $arr )
+		);
+		$this->assertFalse( $return_value );
+		ob_clean();
+
+		// Reset filter to include all handlers
+		$this->filter_wc_print_r_alternatives( array(), true );
+
+		$this->assertEquals( print_r( $arr, true ), wc_print_r( $arr, true ) );
+		$this->assertEquals( var_export( $arr, true ), wc_print_r( $arr, true ) );
+		$this->assertEquals( json_encode( $arr ), wc_print_r( $arr, true ) );
+		$this->assertEquals( serialize( $arr ), wc_print_r( $arr, true ) );
+		$this->assertFalse( wc_print_r( $arr, true ) );
+
+		remove_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
+	}
+
+	/**
+	 * Filter function to help test wc_print_r alternatives via filter.
+	 *
+	 * On the first run, all alternatives are returned.
+	 * On each successive run, an alternative is excluded from the beginning.
+	 * Eventually, no handlers are returned.
+	 *
+	 * @param array $alternatives Input array of alternatives.
+	 * @param bool $reset Optional. Default false. True to reset excluded alternatives.
+	 * @return array|bool Alternatives. True on reset.
+	 */
+	public function filter_wc_print_r_alternatives( $alternatives, $reset = false ) {
+		static $skip = 0;
+		if ( $reset ) {
+			$skip = 0;
+			return true;
+		}
+		return array_slice( $alternatives, $skip++ );
+	}
+
+	/**
+	 * Test wc_get_wildcard_postcodes
+	 */
+	public function test_wc_get_wildcard_postcodes() {
+		$postcode  = 'cb23 6as';
+		$country   = 'GB';
+		$wildcards = array( 'cb23 6as', 'CB23 6AS', 'CB23 6AS*', 'CB23 6A*', 'CB23 6*', 'CB23 *', 'CB23*', 'CB2*', 'CB*', 'C*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
+
+		$postcode  = 'GIJóN';
+		$country   = '';
+		$wildcards = array( 'GIJóN', 'GIJÓN', 'GIJÓN*', 'GIJÓ*', 'GIJ*', 'GI*', 'G*', '*' );
+		$this->assertEquals( $wildcards, wc_get_wildcard_postcodes( $postcode, $country ) );
+	}
+}

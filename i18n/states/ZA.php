@@ -18,5 +18,5 @@ $states['ZA'] = array(
 	'MP'  => __( 'Mpumalanga', 'woocommerce' ),
 	'NC'  => __( 'Northern Cape', 'woocommerce' ),
 	'NW'  => __( 'North West', 'woocommerce' ),
-	'WC'  => __( 'Western Cape', 'woocommerce' )
+	'WC'  => __( 'Western Cape', 'woocommerce' ),
 );

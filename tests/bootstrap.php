@@ -6,7 +6,7 @@
  */
 class WC_Unit_Tests_Bootstrap {
 
-	/** @var \WC_Unit_Tests_Bootstrap instance */
+	/** @var WC_Unit_Tests_Bootstrap instance */
 	protected static $instance = null;
 
 	/** @var string directory where wordpress-tests-lib is installed */
@@ -27,6 +27,11 @@ class WC_Unit_Tests_Bootstrap {
 
 		ini_set( 'display_errors','on' );
 		error_reporting( E_ALL );
+
+		// Ensure server variable is set for WP email functions.
+		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
+			$_SERVER['SERVER_NAME'] = 'localhost';
+		}
 
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
@@ -64,17 +69,22 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function install_wc() {
 
-		// clean existing install first
+		// Clean existing install first.
 		define( 'WP_UNINSTALL_PLUGIN', true );
+		define( 'WC_REMOVE_ALL_DATA', true );
 		include( $this->plugin_dir . '/uninstall.php' );
 
 		WC_Install::install();
-		update_option( 'woocommerce_calc_shipping', 'yes' ); // Needed for tests cart and shipping methods
 
-		// reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
-		$GLOBALS['wp_roles']->reinit();
+		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
+		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+			$GLOBALS['wp_roles']->reinit();
+		} else {
+			$GLOBALS['wp_roles'] = null;
+			wp_roles();
+		}
 
-		echo "Installing WooCommerce..." . PHP_EOL;
+		echo 'Installing WooCommerce...' . PHP_EOL;
 	}
 
 	/**
@@ -91,10 +101,14 @@ class WC_Unit_Tests_Bootstrap {
 		// framework
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-factory.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-data.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-payment-token-stub.php' );
+		require_once( $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php' );
 
 		// test cases
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-case.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-api-unit-test-case.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php' );
 
 		// Helpers
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-product.php' );
@@ -103,6 +117,9 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-customer.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-order.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php' );
 	}
 
 	/**
@@ -118,7 +135,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		return self::$instance;
 	}
-
 }
 
 WC_Unit_Tests_Bootstrap::instance();

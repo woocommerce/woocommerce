@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -9,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
+ * @deprecated  3.0.0 wc_display_item_meta function is used instead.
  * @class 		order_item_meta
  * @version		2.4
  * @package		WooCommerce/Classes
@@ -33,16 +33,16 @@ class WC_Order_Item_Meta {
 	 *
 	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
-	 * @return \WC_Order_Item_Meta instance
 	 */
 	public function __construct( $item = array(), $product = null ) {
+		wc_deprecated_function( 'WC_Order_Item_Meta::__construct', '3.1', 'WC_Order_Item_Product' );
+
 		// Backwards (pre 2.4) compat
 		if ( ! isset( $item['item_meta'] ) ) {
 			$this->legacy = true;
 			$this->meta   = array_filter( (array) $item );
 			return;
 		}
-
 		$this->item    = $item;
 		$this->meta    = array_filter( (array) $item['item_meta'] );
 		$this->product = $product;
@@ -116,24 +116,26 @@ class WC_Order_Item_Meta {
 
 		if ( ! empty( $this->item['item_meta_array'] ) ) {
 			foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-				if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
+				if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) === $hideprefix ) ) {
 					continue;
 				}
 
 				$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
+				$meta_value    = $meta->value;
 
 				// If this is a term slug, get the term's nice name
 				if ( taxonomy_exists( $attribute_key ) ) {
-					$term = get_term_by( 'slug', $meta->value, $attribute_key );
+					$term = get_term_by( 'slug', $meta_value, $attribute_key );
+
 					if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
-						$meta->value = $term->name;
+						$meta_value = $term->name;
 					}
 				}
 
 				$formatted_meta[ $meta_id ] = array(
 					'key'   => $meta->key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
-					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta->value ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
 				);
 			}
 		}
@@ -148,7 +150,7 @@ class WC_Order_Item_Meta {
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {
 		if ( ! is_ajax() ) {
-			_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+			wc_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
 		}
 
 		$formatted_meta = array();

@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Coupon_Usage
  *
@@ -10,11 +15,15 @@
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
+	 * Chart colors.
+	 *
 	 * @var array
 	 */
 	public $chart_colours = array();
 
 	/**
+	 * Coupon codes.
+	 *
 	 * @var array
 	 */
 	public $coupon_codes = array();
@@ -44,15 +53,15 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'coupon',
 					'function'        => 'SUM',
-					'name'            => 'discount_amount'
-				)
+					'name'            => 'discount_amount',
+				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
-				)
+					'operator' => '=',
+				),
 			),
 			'query_type'   => 'get_var',
 			'filter_range' => true,
@@ -65,15 +74,15 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'type'            => 'order_item',
 					'order_item_type' => 'coupon',
 					'function'        => 'COUNT',
-					'name'            => 'order_coupon_count'
-				)
+					'name'            => 'order_coupon_count',
+				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
-				)
+					'operator' => '=',
+				),
 			),
 			'query_type'   => 'get_var',
 			'filter_range' => true,
@@ -85,7 +94,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				'type'     => 'order_item',
 				'key'      => 'order_item_name',
 				'value'    => $this->coupon_codes,
-				'operator' => 'IN'
+				'operator' => 'IN',
 			);
 
 			$total_discount_query['where'][] = $coupon_code_query;
@@ -96,15 +105,17 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		$total_coupons  = absint( $this->get_order_report_data( $total_coupons_query ) );
 
 		$legend[] = array(
+			/* translators: %s: discount amount */
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
 			'color' => $this->chart_colours['discount_amount'],
-			'highlight_series' => 1
+			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
-			'title' => sprintf( __( '%d coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
-			'color' => $this->chart_colours['coupon_count' ],
-			'highlight_series' => 0
+			/* translators: %s: coupons amount */
+			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
+			'color' => $this->chart_colours['coupon_count'],
+			'highlight_series' => 0,
 		);
 
 		return $legend;
@@ -117,9 +128,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
+			'last_month'   => __( 'Last month', 'woocommerce' ),
+			'month'        => __( 'This month', 'woocommerce' ),
+			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -133,13 +144,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */
@@ -148,14 +160,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$widgets[] = array(
 			'title'    => '',
-			'callback' => array( $this, 'coupons_widget' )
+			'callback' => array( $this, 'coupons_widget' ),
 		);
 
 		return $widgets;
 	}
 
 	/**
-	 * Product selection.
+	 * Output coupons widget.
 	 */
 	public function coupons_widget() {
 		?>
@@ -171,21 +183,21 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 									'order_item_type' => 'coupon',
 									'function'        => '',
 									'distinct'        => true,
-									'name'            => 'order_item_name'
-								)
+									'name'            => 'order_item_name',
+								),
 							),
 							'where' => array(
 								array(
 									'key'      => 'order_item_type',
 									'value'    => 'coupon',
-									'operator' => '='
-								)
+									'operator' => '=',
+								),
 							),
 							'query_type'   => 'get_col',
-							'filter_range' => false
+							'filter_range' => false,
 						) );
 
-						if ( ! is_null( $used_coupons ) ) :
+						if ( ! empty( $used_coupons ) && is_array( $used_coupons ) ) :
 					?>
 						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php esc_attr_e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
@@ -196,19 +208,19 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							 ?>
 						</select>
 						<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
-						<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-						<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-						<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-						<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-						<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-						<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+						<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( $_GET['range'] ) : ''; ?>" />
+						<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( $_GET['start_date'] ) : ''; ?>" />
+						<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( $_GET['end_date'] ) : ''; ?>" />
+						<input type="hidden" name="page" value="<?php echo ( ! empty( $_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : ''; ?>" />
+						<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( $_GET['tab'] ) : ''; ?>" />
+						<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( $_GET['report'] ) : ''; ?>" />
 					<?php else : ?>
 						<span><?php _e( 'No used coupons found', 'woocommerce' ); ?></span>
 					<?php endif; ?>
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Most Popular', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Most popular', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -218,13 +230,13 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'type'            => 'order_item',
 							'order_item_type' => 'coupon',
 							'function'        => '',
-							'name'            => 'coupon_code'
+							'name'            => 'coupon_code',
 						),
 						'order_item_id' => array(
 							'type'            => 'order_item',
 							'order_item_type' => 'coupon',
 							'function'        => 'COUNT',
-							'name'            => 'coupon_count'
+							'name'            => 'coupon_count',
 						),
 					),
 					'where' => array(
@@ -232,17 +244,17 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'type'     => 'order_item',
 							'key'      => 'order_item_type',
 							'value'    => 'coupon',
-							'operator' => '='
-						)
+							'operator' => '=',
+						),
 					),
 					'order_by'     => 'coupon_count DESC',
 					'group_by'     => 'order_item_name',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
 				) );
 
-				if ( ! is_null( $most_popular ) ) {
+				if ( ! empty( $most_popular ) && is_array( $most_popular ) ) {
 					foreach ( $most_popular as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . $coupon->coupon_count . '</td>
@@ -255,7 +267,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Most Discount', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php _e( 'Most discount', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -265,32 +277,31 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'type'            => 'order_item',
 							'order_item_type' => 'coupon',
 							'function'        => '',
-							'name'            => 'coupon_code'
+							'name'            => 'coupon_code',
 						),
 						'discount_amount' => array(
 							'type'            => 'order_item_meta',
 							'order_item_type' => 'coupon',
 							'function'        => 'SUM',
-							'name'            => 'discount_amount'
-						)
+							'name'            => 'discount_amount',
+						),
 					),
 					'where' => array(
 						array(
 							'type'     => 'order_item',
 							'key'      => 'order_item_type',
 							'value'    => 'coupon',
-							'operator' => '='
-						)
+							'operator' => '=',
+						),
 					),
 					'order_by'     => 'discount_amount DESC',
 					'group_by'     => 'order_item_name',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
 				) );
 
-				if ( ! is_null( $most_discount ) ) {
-
+				if ( ! empty( $most_discount ) && is_array( $most_discount ) ) {
 					foreach ( $most_discount as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . wc_price( $coupon->discount_amount ) . '</td>
@@ -335,7 +346,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
@@ -361,26 +372,26 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'type'            => 'order_item',
 					'order_item_type' => 'coupon',
 					'function'        => 'COUNT',
-					'name'            => 'order_coupon_count'
+					'name'            => 'order_coupon_count',
 				),
 				'post_date' => array(
 					'type'     => 'post_data',
 					'function' => '',
-					'name'     => 'post_date'
+					'name'     => 'post_date',
 				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
-				)
+					'operator' => '=',
+				),
 			),
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
 			'filter_range' => true,
-			'order_types'  => wc_get_order_types( 'order-count' )
+			'order_types'  => wc_get_order_types( 'order-count' ),
 		);
 
 		$order_discount_amounts_query = array(
@@ -389,26 +400,26 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'coupon',
 					'function'        => 'SUM',
-					'name'            => 'discount_amount'
+					'name'            => 'discount_amount',
 				),
 				'post_date' => array(
 					'type'     => 'post_data',
 					'function' => '',
-					'name'     => 'post_date'
+					'name'     => 'post_date',
 				),
 			),
 			'where' => array(
 				array(
 					'key'      => 'order_item_type',
 					'value'    => 'coupon',
-					'operator' => '='
-				)
+					'operator' => '=',
+				),
 			),
 			'group_by'     => $this->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
 			'filter_range' => true,
-			'order_types'  => wc_get_order_types( 'order-count' )
+			'order_types'  => wc_get_order_types( 'order-count' ),
 		);
 
 		if ( ! empty( $this->coupon_codes ) ) {
@@ -416,7 +427,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				'type'     => 'order_item',
 				'key'      => 'order_item_name',
 				'value'    => $this->coupon_codes,
-				'operator' => 'IN'
+				'operator' => 'IN',
 			);
 
 			$order_coupon_counts_query['where'][]    = $coupon_code_query;
@@ -433,7 +444,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		// Encode in json format
 		$chart_data = json_encode( array(
 			'order_coupon_counts'    => array_values( $order_coupon_counts ),
-			'order_discount_amounts' => array_values( $order_discount_amounts )
+			'order_discount_amounts' => array_values( $order_discount_amounts ),
 		) );
 		?>
 		<div class="chart-container">
@@ -450,8 +461,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						{
 							label: "<?php echo esc_js( __( 'Number of coupons used', 'woocommerce' ) ) ?>",
 							data: order_data.order_coupon_counts,
-							color: '<?php echo $this->chart_colours['coupon_count' ]; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colours['coupon_count' ]; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+							color: '<?php echo $this->chart_colours['coupon_count']; ?>',
+							bars: { fillColor: '<?php echo $this->chart_colours['coupon_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
 							shadowSize: 0,
 							hoverable: false
 						},
@@ -498,7 +509,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 								position: "bottom",
 								tickColor: 'transparent',
 								mode: "time",
-								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
 								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 								tickLength: 1,
 								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],

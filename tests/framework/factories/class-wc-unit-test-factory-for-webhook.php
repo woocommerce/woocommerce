@@ -61,11 +61,10 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_Post::get_object_by_id()
 	 * @param int $id webhook ID
-	 * @return \WC_Webhook webhook instance
+	 * @return WC_Webhook webhook instance
 	 */
 	public function get_object_by_id( $id ) {
 
 		return new WC_Webhook( $id );
 	}
-
 }

@@ -4,12 +4,13 @@
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/auth/form-grant-access.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
- * will need to copy the new files to your theme to maintain compatibility. We try to do this.
- * as little as possible, but it does happen. When this occurs the version of the template file will.
- * be bumped and the readme will list any important changes.
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Auth
  * @version 2.4.0
@@ -25,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php wc_print_notices(); ?>
 
-<p><?php printf( __( 'This will give "%s" <strong>%s</strong> access which will allow it to:' , 'woocommerce' ), esc_html( $app_name ), esc_html( $scope ) ); ?></p>
+<p><?php printf( __( 'This will give "%1$s" %2$s access which will allow it to:' , 'woocommerce' ), '<strong>' . esc_html( $app_name ) . '</strong>', '<strong>' . esc_html( $scope ) . '</strong>' ); ?></p>
 
 <ul class="wc-auth-permissions">
 	<?php foreach ( $permissions as $permission ) : ?>

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Report_Stock' ) ) {
-	require_once( 'class-wc-report-stock.php' );
+	require_once( dirname( __FILE__ ) . '/class-wc-report-stock.php' );
 }
 
 /**
@@ -20,6 +20,9 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria.
+	 *
+	 * @param int $current_page
+	 * @param int $per_page
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

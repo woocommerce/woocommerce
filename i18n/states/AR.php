@@ -33,5 +33,5 @@ $states['AR'] = array(
 	'S' => __( 'Santa Fe', 'woocommerce' ),
 	'G' => __( 'Santiago del Estero', 'woocommerce' ),
 	'V' => __( 'Tierra del Fuego', 'woocommerce' ),
-	'T' => __( 'Tucum&aacute;n', 'woocommerce' )
+	'T' => __( 'Tucum&aacute;n', 'woocommerce' ),
 );

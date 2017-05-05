@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Integrations' ) ) :
+if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 
 /**
  * WC_Settings_Integrations.
@@ -71,8 +71,9 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 		$integrations = WC()->integrations->get_integrations();
 
-		if ( isset( $integrations[ $current_section ] ) )
+		if ( isset( $integrations[ $current_section ] ) ) {
 			$integrations[ $current_section ]->admin_options();
+		}
 	}
 }
 

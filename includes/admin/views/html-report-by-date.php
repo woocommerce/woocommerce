@@ -11,7 +11,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div id="poststuff" class="woocommerce-reports-wide">
 	<div class="postbox">
-		<h3 class="stats_range">
+
+	<?php if ( 'custom' === $current_range && isset( $_GET['start_date'], $_GET['end_date'] ) ) : ?>
+		<h3 class="screen-reader-text"><?php
+			/* translators: 1: start date 2: end date */
+			printf(
+				esc_html__( 'From %1$s to %2$s', 'woocommerce' ),
+				esc_html( wc_clean( $_GET['start_date'] ) ),
+				esc_html( wc_clean( $_GET['end_date'] ) )
+			);
+		?></h3>
+	<?php else : ?>
+		<h3 class="screen-reader-text"><?php echo esc_html( $ranges[ $current_range ] ); ?></h3>
+	<?php endif; ?>
+
+		<div class="stats_range">
 			<?php $this->get_export_button(); ?>
 			<ul>
 				<?php
@@ -19,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<li class="' . ( $current_range == $range ? 'active' : '' ) . '"><a href="' . esc_url( remove_query_arg( array( 'start_date', 'end_date' ), add_query_arg( 'range', $range ) ) ) . '">' . $name . '</a></li>';
 					}
 				?>
-				<li class="custom <?php echo $current_range == 'custom' ? 'active' : ''; ?>">
+				<li class="custom <?php echo ( 'custom' === $current_range ) ? 'active' : ''; ?>">
 					<?php _e( 'Custom:', 'woocommerce' ); ?>
 					<form method="GET">
 						<div>
@@ -36,20 +50,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 								}
 							?>
 							<input type="hidden" name="range" value="custom" />
-							<input type="text" size="9" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ); ?>" name="start_date" class="range_datepicker from" />
-							<input type="text" size="9" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" name="end_date" class="range_datepicker to" />
+							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( $_GET['start_date'] ) : ''; ?>" name="start_date" class="range_datepicker from" />
+							<span>&ndash;</span>
+							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( $_GET['end_date'] ) : ''; ?>" name="end_date" class="range_datepicker to" />
 							<input type="submit" class="button" value="<?php esc_attr_e( 'Go', 'woocommerce' ); ?>" />
+							<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
 						</div>
 					</form>
 				</li>
 			</ul>
-		</h3>
+		</div>
 		<?php if ( empty( $hide_sidebar ) ) : ?>
 			<div class="inside chart-with-sidebar">
 				<div class="chart-sidebar">
 					<?php if ( $legends = $this->get_chart_legend() ) : ?>
 						<ul class="chart-legend">
 							<?php foreach ( $legends as $legend ) : ?>
+								<?php // @codingStandardsIgnoreLine ?>
 								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series ' . ( isset( $legend['placeholder'] ) ? 'tips' : '' ) . '" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?> data-tip="<?php echo isset( $legend['placeholder'] ) ? $legend['placeholder'] : ''; ?>">
 									<?php echo $legend['title']; ?>
 								</li>

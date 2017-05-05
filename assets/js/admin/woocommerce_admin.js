@@ -7,10 +7,11 @@ jQuery( function ( $ ) {
 
 	// Field validation error tips
 	$( document.body )
+
 		.on( 'wc_add_error_tip', function( e, element, error_type ) {
 			var offset = element.position();
 
-			if ( element.parent().find( '.wc_error_tip' ).size() === 0 ) {
+			if ( element.parent().find( '.wc_error_tip' ).length === 0 ) {
 				element.after( '<div class="wc_error_tip ' + error_type + '">' + woocommerce_admin[error_type] + '</div>' );
 				element.parent().find( '.wc_error_tip' )
 					.css( 'left', offset.left + element.width() - ( element.width() / 2 ) - ( $( '.wc_error_tip' ).width() / 2 ) )
@@ -18,51 +19,78 @@ jQuery( function ( $ ) {
 					.fadeIn( '100' );
 			}
 		})
+
 		.on( 'wc_remove_error_tip', function( e, element, error_type ) {
-			element.parent().find( '.wc_error_tip.' + error_type ).remove();
+			element.parent().find( '.wc_error_tip.' + error_type ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
+
 		.on( 'click', function() {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
+
 		.on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
-		.on( 'keyup change', '.wc_input_price[type=text]', function() {
+
+		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc-order-totals #refund_amount[type=text]', function() {
+			var regex;
+
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+			} else {
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+			}
+
 			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
 				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
 			}
 		})
-		.on( 'keyup change', '.wc_input_decimal[type=text]', function() {
+
+		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text], .wc-order-totals #refund_amount[type=text]', function() {
+			var regex, error;
+
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+				error = 'i18n_mon_decimal_error';
+			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
+				regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
+				error = 'i18n_country_iso_error';
+			} else {
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+				error = 'i18n_decimal_error';
+			}
+
 			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
-				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_decimal_error' ] );
+				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), error ] );
 			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_decimal_error' ] );
+				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), error ] );
 			}
 		})
-		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
-			var value = $( this ).val();
-			var regex = new RegExp( '^([A-Z])?([A-Z])$' );
 
-			if ( ! regex.test( value ) ) {
+		.on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+			var sale_price_field = $( this ), regular_price_field;
+
+			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
+				regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
+			} else {
+				regular_price_field = $( '#_regular_price' );
+			}
+
+			var sale_price    = parseFloat( window.accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+			var regular_price = parseFloat( window.accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+
+			if ( sale_price >= regular_price ) {
 				$( this ).val( '' );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_country_iso_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_country_iso_error' ] );
 			}
 		})
-		.on( 'keyup change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+
+		.on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
 			var sale_price_field = $( this ), regular_price_field;
 
 			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
@@ -79,21 +107,26 @@ jQuery( function ( $ ) {
 			} else {
 				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
 			}
+		})
+
+		.on( 'init_tooltips', function() {
+			var tiptip_args = {
+				'attribute': 'data-tip',
+				'fadeIn': 50,
+				'fadeOut': 50,
+				'delay': 200
+			};
+
+			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
+
+			// Add tiptip to parent element for widefat tables
+			$( '.parent-tips' ).each( function() {
+				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
+			});
 		});
 
 	// Tooltips
-	var tiptip_args = {
-		'attribute': 'data-tip',
-		'fadeIn': 50,
-		'fadeOut': 50,
-		'delay': 200
-	};
-	$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
-
-	// Add tiptip to parent element for widefat tables
-	$( '.parent-tips' ).each( function() {
-		$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
-	});
+	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables
 	$( '.wc_input_table.sortable tbody' ).sortable({
@@ -115,7 +148,7 @@ jQuery( function ( $ ) {
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
-		if ( $tbody.find( 'tr.current' ).size() > 0 ) {
+		if ( $tbody.find( 'tr.current' ).length > 0 ) {
 			var $current = $tbody.find( 'tr.current' );
 			$current.each( function() {
 				$( this ).remove();
@@ -125,15 +158,16 @@ jQuery( function ( $ ) {
 	});
 
 	var controlled = false;
-	var shifted = false;
-	var hasFocus = false;
+	var shifted    = false;
+	var hasFocus   = false;
 
 	$( document.body ).bind( 'keyup keydown', function( e ) {
-		shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey;
+		shifted    = e.shiftKey;
+		controlled = e.ctrlKey || e.metaKey;
 	});
 
 	$( '.wc_input_table' ).on( 'focus click', 'input', function( e ) {
-		var $this_table = $( this ).closest( 'table' );
+		var $this_table = $( this ).closest( 'table, tbody' );
 		var $this_row   = $( this ).closest( 'tr' );
 
 		if ( ( e.type === 'focus' && hasFocus !== $this_row.index() ) || ( e.type === 'click' && $( this ).is( ':focus' ) ) ) {
@@ -146,7 +180,7 @@ jQuery( function ( $ ) {
 				$( 'tr', $this_table ).removeClass( 'current' );
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
-				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
+				if ( $( 'tr.last_selected', $this_table ).length > 0 ) {
 					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
@@ -221,4 +255,11 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
+	// Load videos when help button is clicked.
+	$( '#contextual-help-link' ).on( 'click', function() {
+		var frame = $( '#tab-panel-woocommerce_guided_tour_tab iframe' );
+
+		frame.attr( 'src', frame.data( 'src' ) );
+	});
 });

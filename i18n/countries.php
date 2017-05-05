@@ -7,11 +7,11 @@
  * @author      WooThemes
  * @category    i18n
  * @package     WooCommerce/i18n
- * @version     2.2.0
+ * @version     2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 return array(
@@ -19,6 +19,7 @@ return array(
 	'AX' => __( '&#197;land Islands', 'woocommerce' ),
 	'AL' => __( 'Albania', 'woocommerce' ),
 	'DZ' => __( 'Algeria', 'woocommerce' ),
+	'AS' => __( 'American Samoa', 'woocommerce' ),
 	'AD' => __( 'Andorra', 'woocommerce' ),
 	'AO' => __( 'Angola', 'woocommerce' ),
 	'AI' => __( 'Anguilla', 'woocommerce' ),
@@ -72,7 +73,7 @@ return array(
 	'CR' => __( 'Costa Rica', 'woocommerce' ),
 	'HR' => __( 'Croatia', 'woocommerce' ),
 	'CU' => __( 'Cuba', 'woocommerce' ),
-	'CW' => __( 'Cura&Ccedil;ao', 'woocommerce' ),
+	'CW' => __( 'Cura&ccedil;ao', 'woocommerce' ),
 	'CY' => __( 'Cyprus', 'woocommerce' ),
 	'CZ' => __( 'Czech Republic', 'woocommerce' ),
 	'DK' => __( 'Denmark', 'woocommerce' ),
@@ -104,6 +105,7 @@ return array(
 	'GL' => __( 'Greenland', 'woocommerce' ),
 	'GD' => __( 'Grenada', 'woocommerce' ),
 	'GP' => __( 'Guadeloupe', 'woocommerce' ),
+	'GU' => __( 'Guam', 'woocommerce' ),
 	'GT' => __( 'Guatemala', 'woocommerce' ),
 	'GG' => __( 'Guernsey', 'woocommerce' ),
 	'GN' => __( 'Guinea', 'woocommerce' ),
@@ -119,7 +121,7 @@ return array(
 	'ID' => __( 'Indonesia', 'woocommerce' ),
 	'IR' => __( 'Iran', 'woocommerce' ),
 	'IQ' => __( 'Iraq', 'woocommerce' ),
-	'IE' => __( 'Republic of Ireland', 'woocommerce' ),
+	'IE' => __( 'Ireland', 'woocommerce' ),
 	'IM' => __( 'Isle of Man', 'woocommerce' ),
 	'IL' => __( 'Israel', 'woocommerce' ),
 	'IT' => __( 'Italy', 'woocommerce' ),
@@ -169,7 +171,6 @@ return array(
 	'NR' => __( 'Nauru', 'woocommerce' ),
 	'NP' => __( 'Nepal', 'woocommerce' ),
 	'NL' => __( 'Netherlands', 'woocommerce' ),
-	'AN' => __( 'Netherlands Antilles', 'woocommerce' ),
 	'NC' => __( 'New Caledonia', 'woocommerce' ),
 	'NZ' => __( 'New Zealand', 'woocommerce' ),
 	'NI' => __( 'Nicaragua', 'woocommerce' ),
@@ -177,6 +178,7 @@ return array(
 	'NG' => __( 'Nigeria', 'woocommerce' ),
 	'NU' => __( 'Niue', 'woocommerce' ),
 	'NF' => __( 'Norfolk Island', 'woocommerce' ),
+	'MP' => __( 'Northern Mariana Islands', 'woocommerce' ),
 	'KP' => __( 'North Korea', 'woocommerce' ),
 	'NO' => __( 'Norway', 'woocommerce' ),
 	'OM' => __( 'Oman', 'woocommerce' ),
@@ -190,6 +192,7 @@ return array(
 	'PN' => __( 'Pitcairn', 'woocommerce' ),
 	'PL' => __( 'Poland', 'woocommerce' ),
 	'PT' => __( 'Portugal', 'woocommerce' ),
+	'PR' => __( 'Puerto Rico', 'woocommerce' ),
 	'QA' => __( 'Qatar', 'woocommerce' ),
 	'RE' => __( 'Reunion', 'woocommerce' ),
 	'RO' => __( 'Romania', 'woocommerce' ),
@@ -247,6 +250,8 @@ return array(
 	'AE' => __( 'United Arab Emirates', 'woocommerce' ),
 	'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
 	'US' => __( 'United States (US)', 'woocommerce' ),
+	'UM' => __( 'United States (US) Minor Outlying Islands', 'woocommerce' ),
+	'VI' => __( 'United States (US) Virgin Islands', 'woocommerce' ),
 	'UY' => __( 'Uruguay', 'woocommerce' ),
 	'UZ' => __( 'Uzbekistan', 'woocommerce' ),
 	'VU' => __( 'Vanuatu', 'woocommerce' ),
@@ -255,8 +260,8 @@ return array(
 	'VN' => __( 'Vietnam', 'woocommerce' ),
 	'WF' => __( 'Wallis and Futuna', 'woocommerce' ),
 	'EH' => __( 'Western Sahara', 'woocommerce' ),
-	'WS' => __( 'Western Samoa', 'woocommerce' ),
+	'WS' => __( 'Samoa', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
-	'ZW' => __( 'Zimbabwe', 'woocommerce' )
+	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
 );

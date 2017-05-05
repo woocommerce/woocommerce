@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 
 /**
  * Customer New Account.
@@ -19,15 +19,38 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
  */
 class WC_Email_Customer_New_Account extends WC_Email {
 
+	/**
+	 * User login name.
+	 *
+	 * @var string
+	 */
 	public $user_login;
+
+	/**
+	 * User email.
+	 *
+	 * @var string
+	 */
 	public $user_email;
+
+	/**
+	 * User password.
+	 *
+	 * @var string
+	 */
 	public $user_pass;
+
+	/**
+	 * Is the password generated?
+	 *
+	 * @var bool
+	 */
 	public $password_generated;
 
 	/**
 	 * Constructor.
 	 */
-	function __construct() {
+	public function __construct() {
 
 		$this->id             = 'customer_new_account';
 		$this->customer_email = true;
@@ -37,17 +60,21 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->template_html  = 'emails/customer-new-account.php';
 		$this->template_plain = 'emails/plain/customer-new-account.php';
 
-		$this->subject        = __( 'Your account on {site_title}', 'woocommerce');
-		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce');
+		$this->subject        = __( 'Your account on {site_title}', 'woocommerce' );
+		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce' );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $user_id
+	 * @param string $user_pass
+	 * @param bool $password_generated
 	 */
-	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
+	public function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 
 		if ( $user_id ) {
 			$this->object             = new WP_User( $user_id );
@@ -67,12 +94,12 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
 	 */
-	function get_content_html() {
+	public function get_content_html() {
 		return wc_get_template_html( $this->template_html, array(
 			'email_heading'      => $this->get_heading(),
 			'user_login'         => $this->user_login,
@@ -81,17 +108,17 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
 			'plain_text'         => false,
-			'email'				 => $this
+			'email'				 => $this,
 		) );
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string
 	 */
-	function get_content_plain() {
+	public function get_content_plain() {
 		return wc_get_template_html( $this->template_plain, array(
 			'email_heading'      => $this->get_heading(),
 			'user_login'         => $this->user_login,
@@ -100,7 +127,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
 			'plain_text'         => true,
-			'email'			     => $this
+			'email'			     => $this,
 		) );
 	}
 }

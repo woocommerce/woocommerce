@@ -19,7 +19,7 @@ class WC_HTTPS {
 	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public static function init() {
-		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
+		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
 			// HTTPS urls with SSL on
 			$filters = array(
 				'post_thumbnail_html',
@@ -31,7 +31,7 @@ class WC_HTTPS {
 				'style_loader_src',
 				'template_directory_uri',
 				'stylesheet_directory_uri',
-				'site_url'
+				'site_url',
 			);
 
 			foreach ( $filters as $filter ) {
@@ -45,10 +45,11 @@ class WC_HTTPS {
 				add_action( 'template_redirect', array( __CLASS__, 'unforce_https_template_redirect' ) );
 			}
 		}
+		add_action( 'http_api_curl', array( __CLASS__, 'http_api_curl' ), 10, 3 );
 	}
 
 	/**
-	 * force_https_url function.
+	 * Force https for urls.
 	 *
 	 * @param mixed $content
 	 * @return string
@@ -72,7 +73,7 @@ class WC_HTTPS {
 	public static function force_https_page_link( $link, $page_id ) {
 		if ( in_array( $page_id, array( get_option( 'woocommerce_checkout_page_id' ), get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
 			$link = str_replace( 'http:', 'https:', $link );
-		} elseif ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
+		} elseif ( 'yes' === get_option( 'woocommerce_unforce_ssl_checkout' ) && ! wc_site_is_https() ) {
 			$link = str_replace( 'https:', 'http:', $link );
 		}
 		return $link;
@@ -102,7 +103,7 @@ class WC_HTTPS {
 			return;
 		}
 
-		if ( is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+		if ( ! wc_site_is_https() && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 				wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
@@ -111,6 +112,18 @@ class WC_HTTPS {
 				wp_safe_redirect( 'http://' . ( ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] ) . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Force posts to PayPal to use TLS v1.2. See:
+	 * 		https://core.trac.wordpress.org/ticket/36320
+	 * 		https://core.trac.wordpress.org/ticket/34924#comment:13
+	 * 		https://www.paypal-knowledge.com/infocenter/index?page=content&widgetview=true&id=FAQ1914&viewlocale=en_US
+	 */
+	public static function http_api_curl( $handle, $r, $url ) {
+		if ( strstr( $url, 'https://' ) && ( strstr( $url, '.paypal.com/nvp' ) || strstr( $url, '.paypal.com/cgi-bin/webscr' ) ) ) {
+			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
 		}
 	}
 }

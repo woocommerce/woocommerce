@@ -4,12 +4,13 @@
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/cart/shipping-calculator.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
- * will need to copy the new files to your theme to maintain compatibility. We try to do this.
- * as little as possible, but it does happen. When this occurs the version of the template file will.
- * be bumped and the readme will list any important changes.
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.0.8
@@ -29,7 +30,7 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 
 <form class="woocommerce-shipping-calculator" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
 
-	<p><a href="#" class="shipping-calculator-button"><?php _e( 'Calculate Shipping', 'woocommerce' ); ?></a></p>
+	<p><a href="#" class="shipping-calculator-button"><?php _e( 'Calculate shipping', 'woocommerce' ); ?></a></p>
 
 	<section class="shipping-calculator-form" style="display:none;">
 
@@ -37,8 +38,9 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 			<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
 				<option value=""><?php _e( 'Select a country&hellip;', 'woocommerce' ); ?></option>
 				<?php
-					foreach( WC()->countries->get_shipping_countries() as $key => $value )
+					foreach ( WC()->countries->get_shipping_countries() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '"' . selected( WC()->customer->get_shipping_country(), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
+					}
 				?>
 			</select>
 		</p>
@@ -52,17 +54,18 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 				// Hidden Input
 				if ( is_array( $states ) && empty( $states ) ) {
 
-					?><input type="hidden" name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / county', 'woocommerce' ); ?>" /><?php
+					?><input type="hidden" name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / County', 'woocommerce' ); ?>" /><?php
 
 				// Dropdown Input
 				} elseif ( is_array( $states ) ) {
 
 					?><span>
-						<select name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / county', 'woocommerce' ); ?>">
-							<option value=""><?php _e( 'Select a state&hellip;', 'woocommerce' ); ?></option>
+						<select name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / County', 'woocommerce' ); ?>">
+							<option value=""><?php esc_html_e( 'Select a state&hellip;', 'woocommerce' ); ?></option>
 							<?php
-								foreach ( $states as $ckey => $cvalue )
-									echo '<option value="' . esc_attr( $ckey ) . '" ' . selected( $current_r, $ckey, false ) . '>' . __( esc_html( $cvalue ), 'woocommerce' ) .'</option>';
+								foreach ( $states as $ckey => $cvalue ) {
+									echo '<option value="' . esc_attr( $ckey ) . '" ' . selected( $current_r, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
+								}
 							?>
 						</select>
 					</span><?php
@@ -70,7 +73,7 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 				// Standard Input
 				} else {
 
-					?><input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php esc_attr_e( 'State / county', 'woocommerce' ); ?>" name="calc_shipping_state" id="calc_shipping_state" /><?php
+					?><input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php esc_attr_e( 'State / County', 'woocommerce' ); ?>" name="calc_shipping_state" id="calc_shipping_state" /><?php
 
 				}
 			?>
@@ -92,7 +95,7 @@ if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->
 
 		<?php endif; ?>
 
-		<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e( 'Update Totals', 'woocommerce' ); ?></button></p>
+		<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e( 'Update totals', 'woocommerce' ); ?></button></p>
 
 		<?php wp_nonce_field( 'woocommerce-cart' ); ?>
 	</section>

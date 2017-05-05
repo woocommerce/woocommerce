@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Util;
-
 /**
  * Class Main_Class.
  * @package WooCommerce\Tests\Util
  */
-class Main_Class extends \WC_Unit_Test_Case {
+class WC_Tests_Main_Class extends WC_Unit_Test_Case {
 
 	/** @var \WooCommerce instance */
 	protected $wc;
@@ -72,4 +70,3 @@ class Main_Class extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 	}
 }
-

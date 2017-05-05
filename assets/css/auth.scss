@@ -18,7 +18,7 @@ body {
 
 .wc-auth-content {
 	background: #fff;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
 	overflow: hidden;
 	padding: 24px 24px 0;
 	zoom: 1;
@@ -43,7 +43,7 @@ body {
 	}
 
 	a {
-		color: #A16696;
+		color: #a16696;
 		&:hover, &:focus {
 			color: #111;
 		}
@@ -53,13 +53,13 @@ body {
 		label {
 			color: #999;
 			display: block;
-			margin-bottom: .5em;
+			margin-bottom: 0.5em;
 		}
 
 		input {
 			box-sizing: border-box;
 			font-size: 1.3em;
-			padding: .5em;
+			padding: 0.5em;
 			width: 100%;
 		}
 
@@ -133,10 +133,10 @@ body {
 		color: #fff;
 		float: right;
 		opacity: 1;
-		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
+		text-shadow: 0 -1px 1px #8a4f7f, 1px 0 1px #8a4f7f, 0 1px 1px #8a4f7f, -1px 0 1px #8a4f7f;
 
 		&:hover, &:focus {
-			background: #B472A8;
+			background: #b472a8;
 			color: #fff;
 		}
 	}

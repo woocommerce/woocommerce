@@ -23,5 +23,5 @@ $states['NP'] = array(
 	'NAR' => __( 'Narayani', 'woocommerce' ),
 	'RAP' => __( 'Rapti', 'woocommerce' ),
 	'SAG' => __( 'Sagarmatha', 'woocommerce' ),
-	'SET' => __( 'Seti', 'woocommerce' )
+	'SET' => __( 'Seti', 'woocommerce' ),
 );

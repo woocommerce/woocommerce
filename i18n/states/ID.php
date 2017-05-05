@@ -43,5 +43,5 @@ $states['ID'] = array(
 	'MA' => __( 'Maluku', 'woocommerce' ),
 	'MU' => __( 'Maluku Utara', 'woocommerce' ),
 	'PA' => __( 'Papua', 'woocommerce' ),
-	'PB' => __( 'Papua Barat', 'woocommerce' )
+	'PB' => __( 'Papua Barat', 'woocommerce' ),
 );

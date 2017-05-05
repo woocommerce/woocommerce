@@ -17,9 +17,32 @@ if ( ! class_exists( 'WP_Importer' ) ) {
  */
 class WC_Tax_Rate_Importer extends WP_Importer {
 
+	/**
+	 * The current file id.
+	 *
+	 * @var int
+	 */
 	public $id;
+
+	/**
+	 * The current file url.
+	 *
+	 * @var string
+	 */
 	public $file_url;
+
+	/**
+	 * The current import page.
+	 *
+	 * @var string
+	 */
 	public $import_page;
+
+	/**
+	 * The current delimiter.
+	 *
+	 * @var string
+	 */
 	public $delimiter;
 
 	/**
@@ -27,7 +50,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	public function __construct() {
 		$this->import_page = 'woocommerce_tax_rate_csv';
-		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : wc_clean( $_POST['delimiter'] );
+		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : (string) wc_clean( $_POST['delimiter'] );
 	}
 
 	/**
@@ -75,27 +98,25 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		if ( function_exists( 'gc_enable' ) ) {
 			gc_enable();
 		}
-		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			@set_time_limit( 0 );
-		}
+		wc_set_time_limit( 0 );
 		@ob_flush();
 		@flush();
 		@ini_set( 'auto_detect_line_endings', '1' );
 	}
 
 	/**
-	 * format_data_from_csv function.
+	 * UTF-8 encode the data if `$enc` value isn't UTF-8.
 	 *
 	 * @param mixed $data
 	 * @param string $enc
 	 * @return string
 	 */
 	public function format_data_from_csv( $data, $enc ) {
-		return ( $enc == 'UTF-8' ) ? $data : utf8_encode( $data );
+		return ( 'UTF-8' === $enc ) ? $data : utf8_encode( $data );
 	}
 
 	/**
-	 * import function.
+	 * Import the file if it exists and is valid.
 	 *
 	 * @param mixed $file
 	 */
@@ -127,14 +148,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 						'tax_rate_compound' => $compound ? 1 : 0,
 						'tax_rate_shipping' => $shipping ? 1 : 0,
 						'tax_rate_order'    => $loop ++,
-						'tax_rate_class'    => $class
+						'tax_rate_class'    => $class,
 					);
 
 					$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 					WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( $postcode ) );
 					WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( $city ) );
 				}
-
 			} else {
 				$this->import_error( __( 'The CSV is invalid.', 'woocommerce' ) );
 			}
@@ -143,9 +163,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		}
 
 		// Show Result
-		echo '<div class="updated settings-error below-h2"><p>
-			' . sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ) . '
-		</p></div>';
+		echo '<div class="updated settings-error"><p>';
+		/* translators: %s: tax rates count */
+		printf(
+			__( 'Import complete - imported %s tax rates.', 'woocommerce' ),
+			'<strong>' . $loop . '</strong>'
+		);
+		echo '</p></div>';
 
 		$this->import_end();
 	}
@@ -154,7 +178,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * Performs post-import cleanup of files and the cache.
 	 */
 	public function import_end() {
-		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=wc-settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+		echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">' . __( 'View tax rates', 'woocommerce' ) . '</a>' . '</p>';
 
 		do_action( 'import_end' );
 	}
@@ -186,27 +210,27 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	}
 
 	/**
-	 * header function.
+	 * Output header html.
 	 */
 	public function header() {
-		echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
-		echo '<h1>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h1>';
+		echo '<div class="wrap">';
+		echo '<h1>' . __( 'Import tax rates', 'woocommerce' ) . '</h1>';
 	}
 
 	/**
-	 * footer function.
+	 * Output footer html.
 	 */
 	public function footer() {
 		echo '</div>';
 	}
 
 	/**
-	 * greet function.
+	 * Output information about the uploading process.
 	 */
 	public function greet() {
 
 		echo '<div class="narrow">';
-		echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
+		echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ) . '</p>';
 
 		echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), WC()->plugin_url() . '/dummy-data/sample_tax_rates.csv' ) . '</p>';
 
@@ -220,7 +244,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 			<p><strong><?php echo $upload_dir['error']; ?></strong></p></div><?php
 		else :
 			?>
-			<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr(wp_nonce_url($action, 'import-upload')); ?>">
+			<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr( wp_nonce_url( $action, 'import-upload' ) ); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr>
@@ -231,7 +255,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 								<input type="file" id="upload" name="import" size="25" />
 								<input type="hidden" name="action" value="save" />
 								<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
-								<small><?php printf( __('Maximum size: %s', 'woocommerce' ), $size ); ?></small>
+								<small><?php
+									/* translators: %s: maximum upload size */
+									printf(
+										__( 'Maximum size: %s', 'woocommerce' ),
+										$size
+									);
+								?></small>
 							</td>
 						</tr>
 						<tr>

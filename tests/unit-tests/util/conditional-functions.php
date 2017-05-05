@@ -1,12 +1,11 @@
 <?php
-namespace WooCommerce\Tests\Util;
 
 /**
  * Class Conditional_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.3.0
  */
-class Conditional_Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test is_store_notice_showing().
@@ -15,7 +14,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_store_notice_showing() {
 
-		$this->assertEquals( false, is_store_notice_showing() );
+		$this->assertFalse( is_store_notice_showing() );
 	}
 
 	/**
@@ -25,7 +24,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_tax_enabled() {
 
-		$this->assertEquals( false, wc_tax_enabled() );
+		$this->assertFalse( wc_tax_enabled() );
 	}
 
 	/**
@@ -35,7 +34,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_prices_include_tax() {
 
-		$this->assertEquals( false, wc_prices_include_tax() );
+		$this->assertFalse( wc_prices_include_tax() );
 	}
 
 	/**
@@ -50,19 +49,22 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 			array( true, wc_is_webhook_valid_topic( 'product.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.restored' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'order.restored' ) ),
 			array( true, wc_is_webhook_valid_topic( 'customer.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'customer.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'customer.deleted' ) ),
 			array( true, wc_is_webhook_valid_topic( 'coupon.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'coupon.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'coupon.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'coupon.restored' ) ),
 			array( false, wc_is_webhook_valid_topic( 'coupon.upgraded' ) ),
 			array( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) ),
 			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
-			array( false, wc_is_webhook_valid_topic( 'with space' ) )
+			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
 		);
 	}
 
@@ -94,8 +96,28 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 			array( true,  wc_is_valid_url( 'https://google.com' ) ),
 			array( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) ),
 			array( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) )
+			array( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) ),
 		);
+	}
+
+	/**
+	 * Test wc_site_is_https().
+	 */
+	public function test_wc_site_is_https() {
+		$this->assertFalse( wc_site_is_https() );
+
+		add_filter( 'pre_option_home', array( $this, '_https_url' ) );
+
+		$this->assertTrue( wc_site_is_https() );
+	}
+
+	/**
+	 * Callback for chaning home url to https.
+	 *
+	 * @return string
+	 */
+	public function _https_url() {
+		return 'https://example.org';
 	}
 
 	/**

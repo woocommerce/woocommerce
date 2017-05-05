@@ -3,7 +3,7 @@ jQuery(function( $ ) {
 	function showTooltip( x, y, contents ) {
 		$( '<div class="chart-tooltip">' + contents + '</div>' ).css( {
 			top: y - 16,
-	   		left: x + 20
+			left: x + 20
 		}).appendTo( 'body' ).fadeIn( 200 );
 	}
 
@@ -110,6 +110,7 @@ jQuery(function( $ ) {
 		defaultDate: '',
 		dateFormat: 'yy-mm-dd',
 		numberOfMonths: 1,
+		minDate: '-20Y',
 		maxDate: '+0D',
 		showButtonPanel: true,
 		showOn: 'focus',
@@ -136,26 +137,27 @@ jQuery(function( $ ) {
 		exclude_series    = exclude_series.split( ',' );
 		var xaxes_label   = $( this ).data( 'xaxes' );
 		var groupby       = $( this ) .data( 'groupby' );
+		var index_type    = $( this ).data( 'index_type' );
 		var export_format = $( this ).data( 'export' );
 		var csv_data      = 'data:application/csv;charset=utf-8,';
 		var s, series_data, d;
 
 		if ( 'table' === export_format ) {
 
-			$( this ).closest( 'div' ).find( 'thead tr,tbody tr' ).each( function() {
+			$( this ).offsetParent().find( 'thead tr,tbody tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
-					value = value.replace( '[?]', '' );
+					value = value.replace( '[?]', '' ).replace( '#', '' );
 					csv_data += '"' + value + '"' + ',';
 				});
 				csv_data = csv_data.substring( 0, csv_data.length - 1 );
 				csv_data += '\n';
 			});
 
-			$( this ).closest( 'div' ).find( 'tfoot tr' ).each( function() {
+			$( this ).offsetParent().find( 'tfoot tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
-					value = value.replace( '[?]', '' );
+					value = value.replace( '[?]', '' ).replace( '#', '' );
 					csv_data += '"' + value + '"' + ',';
 					if ( $( this ).attr( 'colspan' ) > 0 ) {
 						for ( i = 1; i < $(this).attr('colspan'); i++ ) {
@@ -175,7 +177,7 @@ jQuery(function( $ ) {
 
 			var the_series = window.main_chart.getData();
 			var series     = [];
-			csv_data      += xaxes_label + ',';
+			csv_data      += '"' + xaxes_label + '",';
 
 			$.each( the_series, function( index, value ) {
 				if ( ! exclude_series || $.inArray( index.toString(), exclude_series ) === -1 ) {
@@ -185,7 +187,7 @@ jQuery(function( $ ) {
 
 			// CSV Headers
 			for ( s = 0; s < series.length; ++s ) {
-				csv_data += series[s].label + ',';
+				csv_data += '"' + series[s].label + '",';
 			}
 
 			csv_data = csv_data.substring( 0, csv_data.length - 1 );
@@ -217,10 +219,14 @@ jQuery(function( $ ) {
 			$.each( xaxis, function( index, value ) {
 				var date = new Date( parseInt( index, 10 ) );
 
-				if ( groupby === 'day' ) {
-					csv_data += date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '-' + date.getUTCDate() + ',';
+				if ( 'none' === index_type ) {
+					csv_data += '"' + index + '",';
 				} else {
-					csv_data += date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + ',';
+					if ( groupby === 'day' ) {
+						csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '-' + date.getUTCDate() + '",';
+					} else {
+						csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '",';
+					}
 				}
 
 				for ( var d = 0; d < value.length; ++d ) {
@@ -231,7 +237,7 @@ jQuery(function( $ ) {
 						val = val.toFixed( 2 );
 					}
 
-					csv_data += val + ',';
+					csv_data += '"' + val + '",';
 				}
 				csv_data = csv_data.substring( 0, csv_data.length - 1 );
 				csv_data += '\n';

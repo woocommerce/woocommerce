@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Cart;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Cart
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Helper method to get the checkout URL.
@@ -46,6 +44,8 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_regular() {
+		// Make sure pages exist
+		WC_Install::create_pages();
 
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
@@ -66,6 +66,8 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_ssl() {
+		// Make sure pages exist
+		WC_Install::create_pages();
 
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
@@ -87,10 +89,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_empty_cart() {
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add the product to the cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Empty the cart
 		wc_empty_cart();
@@ -99,7 +101,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
 		// Delete the previously created product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -110,23 +112,22 @@ class Functions extends \WC_Unit_Test_Case {
 	public function test_wc_format_list_of_items() {
 		$items = array( 'Title 1', 'Title 2' );
 
-		$this->assertEquals( "&ldquo;Title 1&rdquo; and &ldquo;Title 2&rdquo;", wc_format_list_of_items( $items ) );
+		$this->assertEquals( 'Title 1 and Title 2', wc_format_list_of_items( $items ) );
 	}
 
 	/**
 	 * Test wc_cart_totals_subtotal_html().
 	 *
-	 * @todo  test with taxes incl./excl.
 	 * @since 2.4
 	 */
 	public function test_wc_cart_totals_subtotal_html() {
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$this->expectOutputString( wc_price( $product->price ), wc_cart_totals_subtotal_html() );
+		$this->expectOutputString( wc_price( $product->get_price( 'edit' ) ), wc_cart_totals_subtotal_html() );
 
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -135,11 +136,11 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_cart_totals_coupon_label() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 
-		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->code ), wc_cart_totals_coupon_label( $coupon ) );
+		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->get_code() ), wc_cart_totals_coupon_label( $coupon ) );
 
-		\WC_Helper_Coupon::delete_coupon( $coupon->id );
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**
@@ -151,5 +152,30 @@ class Functions extends \WC_Unit_Test_Case {
 		$cart_page_url = wc_get_page_permalink( 'cart' );
 
 		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' ), wc_get_cart_url() );
+	}
+
+	/**
+	 * Test wc_add_to_cart_message
+	 */
+	public function test_wc_add_to_cart_message() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), false, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), false, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), true, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), true, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> 3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( $product->get_id(), false, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( $product->get_id(), true, true );
+		$this->assertEquals( '<a href="http://example.org" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 	}
 }

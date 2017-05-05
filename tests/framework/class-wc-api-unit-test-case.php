@@ -30,7 +30,8 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_METHOD'] = null;
 
 		// mock the API server to prevent headers from being sent
-		$this->mock_server = $this->getMock( 'WC_API_Server', array ('header' ), array( '/' ) );
+		// $this->mock_server = $this->getMock( 'WC_API_Server', array( 'header' ), array( '/' ) );
+		$this->mock_server = $this->getMockBuilder( 'WC_API_Server' )->setMethods( array( 'header' ) )->disableOriginalConstructor()->getMock();
 
 		WC()->api->register_resources( $this->mock_server );
 	}
@@ -75,5 +76,4 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		$user->get_role_caps();
 		$user->update_user_level_from_caps();
 	}
-
 }

@@ -35,5 +35,5 @@ $states['PE'] = array(
 	'SAM' => __( 'San Mart&iacute;n', 'woocommerce' ),
 	'TAC' => __( 'Tacna', 'woocommerce' ),
 	'TUM' => __( 'Tumbes', 'woocommerce' ),
-	'UCA' => __( 'Ucayali', 'woocommerce' )
+	'UCA' => __( 'Ucayali', 'woocommerce' ),
 );

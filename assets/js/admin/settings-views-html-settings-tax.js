@@ -1,8 +1,8 @@
 /* global htmlSettingsTaxLocalizeScript, ajaxurl */
+
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
-
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 
@@ -39,7 +39,9 @@
 					var changes = this.changes || {};
 
 					_.each( changedRows, function( row, id ) {
-						changes[ id ] = _.extend( changes[ id ] || { tax_rate_id : id }, row );
+						changes[ id ] = _.extend( changes[ id ] || {
+							tax_rate_id : id
+						}, row );
 					} );
 
 					this.changes = changes;
@@ -82,7 +84,7 @@
 					Backbone.ajax({
 						method: 'POST',
 						dataType: 'json',
-						url: ajaxurl + '?action=woocommerce_tax_rates_save_changes',
+						url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
 						data: {
 							current_class: data.current_class,
 							wc_tax_nonce: data.wc_tax_nonce,
@@ -95,6 +97,9 @@
 
 								WCTaxTableModelInstance.changes = {};
 								WCTaxTableModelInstance.trigger( 'saved:rates' );
+
+								// Reload view.
+								WCTaxTableInstance.render();
 							}
 
 							self.unblock();
@@ -114,8 +119,7 @@
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
-					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
-					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
+					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
@@ -173,13 +177,9 @@
 							current_page: this.page,
 							qty_pages:    qty_pages
 						} ) );
-					}
-
-					// Disable sorting if there is a search term filtering the items.
-					if ( $search_field.val() ) {
-						$tbody.sortable( 'disable' );
 					} else {
-						$tbody.sortable( 'enable' );
+						$pagination.empty();
+						view.page = 1;
 					}
 				},
 				updateUrl: function() {
@@ -243,6 +243,8 @@
 								return parseInt( val, 10 );
 							}
 						);
+						// Move the last page
+						view.page = view.qty_pages;
 					}
 
 					rates[ newRow.tax_rate_id ]   = newRow;
@@ -258,27 +260,13 @@
 						model   = view.model,
 						rates   = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
 						changes = {},
-						$current, current_id, current_order, rates_to_reorder, reordered_rates;
+						$current, current_id;
 
 					event.preventDefault();
 
 					if ( $current = $tbody.children( '.current' ) ) {
 						$current.each(function(){
 							current_id    = $( this ).data('id');
-							current_order = parseInt( rates[ current_id ].tax_rate_order, 10 );
-
-							rates_to_reorder = _.filter( rates, function( rate ) {
-								if ( parseInt( rate.tax_rate_order, 10 ) > current_order ) {
-									return true;
-								}
-								return false;
-							} );
-
-							reordered_rates = _.map( rates_to_reorder, function( rate ) {
-								rate.tax_rate_order--;
-								changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
-								return rate;
-							} );
 
 							delete rates[ current_id ];
 
@@ -368,55 +356,6 @@
 
 					model.setRateAttribute( id, attribute, val );
 				},
-				updateModelOnSort: function( event, ui ) {
-					var view         = event.data.view,
-						model        = view.model,
-						$tr          = ui.item,
-						tax_rate_id  = $tr.data( 'id' ),
-						rates        = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
-						old_position = rates[ tax_rate_id ].tax_rate_order,
-						new_position = $tr.index() + ( ( view.page - 1 ) * view.per_page ),
-						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
-						changes      = {},
-						rates_to_reorder, reordered_rates;
-
-					rates_to_reorder = _.filter( rates, function( rate ) {
-						var order  = parseInt( rate.tax_rate_order, 10 ),
-							limits = [ old_position, new_position ];
-
-						if ( parseInt( rate.tax_rate_id, 10 ) === parseInt( tax_rate_id, 10 ) ) {
-							return true;
-						} else if ( order > _.min( limits ) && order < _.max( limits ) ) {
-							return true;
-						} else if ( 'higher' === which_way && order === _.max( limits ) ) {
-							return true;
-						} else if ( 'lower' === which_way && order === _.min( limits ) ) {
-							return true;
-						}
-						return false;
-					} );
-
-					reordered_rates = _.map( rates_to_reorder, function( rate ) {
-						var order = parseInt( rate.tax_rate_order, 10 );
-
-						if ( parseInt( rate.tax_rate_id, 10 ) === parseInt( tax_rate_id, 10 ) ) {
-							rate.tax_rate_order = new_position;
-						} else if ( 'higher' === which_way ) {
-							rate.tax_rate_order = order - 1;
-						} else if ( 'lower' === which_way ) {
-							rate.tax_rate_order = order + 1;
-						}
-
-						changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
-
-						return rate;
-					} );
-
-					if ( reordered_rates.length ) {
-						model.logChanges( changes );
-						view.render(); // temporary, probably should get yanked.
-					}
-				},
 				sanitizePage: function( page_num ) {
 					page_num = parseInt( page_num, 10 );
 					if ( page_num < 1 ) {
@@ -432,8 +371,6 @@
 			} ),
 			WCTaxTableInstance = new WCTaxTableViewConstructor({
 				model:    WCTaxTableModelInstance,
-				// page:     data.page,  // I'd prefer to have these two specified down here in the instance,
-				// per_page: data.limit, // but it doesn't seem to recognize them in render if I do. :\
 				el:       '#rates'
 			} );
 
