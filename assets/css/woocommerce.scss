@@ -217,7 +217,7 @@ p.demo_store,
 					position: absolute;
 					top: 19px;
 					left: 22px;
-					@include transform(rotate(-45deg));
+					transform: rotate(-45deg);
 					box-sizing: content-box;
 				}
 			}
@@ -337,8 +337,6 @@ p.demo_store,
 
 					&::before {
 						left: -6px;
-						-webkit-border-bottom-right-radius: 4px;
-						-moz-border-bottom-right-radius: 4px;
 						border-bottom-right-radius: 4px;
 						border-width: 0 1px 1px 0;
 						box-shadow: 2px 2px 0 $secondary;
@@ -346,8 +344,6 @@ p.demo_store,
 
 					&::after {
 						right: -6px;
-						-webkit-border-bottom-left-radius: 4px;
-						-moz-border-bottom-left-radius: 4px;
 						border-bottom-left-radius: 4px;
 						border-width: 0 0 1px 1px;
 						box-shadow: -2px 2px 0 $secondary;
@@ -659,7 +655,6 @@ p.demo_store,
 		display: inline-block;
 		background-image: none;
 		box-shadow: none;
-		-webkit-box-shadow: none;
 		text-shadow: none;
 
 		&.loading {
@@ -675,8 +670,6 @@ p.demo_store,
 				position: absolute;
 				top: 0.618em;
 				right: 1em;
-				-webkit-animation: spin 2s linear infinite;
-				-moz-animation: spin 2s linear infinite;
 				animation: spin 2s linear infinite;
 			}
 		}
@@ -1239,8 +1232,6 @@ p.demo_store,
 		margin: 0 0 6px;
 
 		[placeholder]:focus::-webkit-input-placeholder {
-			-webkit-transition: opacity 0.5s 0.5s ease;
-			-moz-transition: opacity 0.5s 0.5s ease;
 			transition: opacity 0.5s 0.5s ease;
 			opacity: 0;
 		}
@@ -1288,8 +1279,6 @@ p.demo_store,
 			height: 4em;
 			line-height: 1.5;
 			display: block;
-			-moz-box-shadow: none;
-			-webkit-box-shadow: none;
 			box-shadow: none;
 		}
 
@@ -1741,8 +1730,6 @@ button.pswp__button--zoom:hover {
 
 		td.actions .coupon .input-text {
 			float: left;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
 			box-sizing: border-box;
 			border: 1px solid darken( $secondary, 10% );
 			padding: 6px 6px 5px;
