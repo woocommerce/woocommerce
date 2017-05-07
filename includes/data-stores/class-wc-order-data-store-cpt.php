@@ -634,4 +634,129 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_order_type( $order_id ) {
 		return get_post_type( $order_id );
 	}
+
+	/**
+	 * Get valid WP_Query args from a WC_Order_Query's query variables.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array
+	 */
+	protected function get_wp_query_args( $query_vars ) {
+
+		$key_mapping = array(
+			'customer_id' => 'customer_user',
+			'status' => 'post_status',
+		);
+
+		foreach( $key_mapping as $query_key => $db_key ) {
+			if ( isset( $query_vars[ $query_key ] ) ) {
+				$query_vars[ $db_key ] = $query_vars[ $query_key ];
+				unset( $query_vars[ $query_key ] );
+			}
+		}
+
+		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( ! isset( $wp_query_args['date_query'] ) ) {
+			$wp_query_args['date_query'] = array();
+		}
+		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( isset( $query_vars[ 'date_created_before'] ) && '' !== $query_vars['date_created_before'] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_date',
+				'before' => $this->get_date_for_wp_query( $query_vars['date_created_before'] )
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_created_after'] ) && '' !== $query_vars[ 'date_created_after' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_date',
+				'after' => $this->get_date_for_wp_query( $query_vars['date_created_after'] )
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_modified_before'] ) && '' !== $query_vars[ 'date_modified_before' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_modified',
+				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_before'] )
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_modified_after'] ) && '' !== $query_vars[ 'date_modified_after' ] ) {
+			$wp_query_args['date_query'][] = array(
+				'column' => 'post_modified',
+				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_after'] )
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_completed_before' ] ) && '' !== $query_vars[ 'date_completed_before' ] ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_completed',
+				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_before' ], true ),
+				'compare' => '<',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_completed_after' ] ) && '' !== $query_vars[ 'date_completed_after' ] ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_completed',
+				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_after' ], true ),
+				'compare' => '>',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_paid_before' ] ) && '' !== $query_vars[ 'date_paid_before' ] ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_paid',
+				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_before' ], true ),
+				'compare' => '<',
+			);
+		}
+
+		if ( isset( $query_vars[ 'date_paid_after' ] ) && '' !== $query_vars[ 'date_paid_after' ] ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_date_paid',
+				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_after' ], true ),
+				'compare' => '>',
+			);
+		}
+
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$wp_query_args['no_found_rows'] = true;
+		}
+
+		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
+	}
+
+	/**
+	 * Query for Orders matching specific criteria.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array of WC_Order objects or ids
+	 */
+	public function query( $query_vars ) {
+		$args = $this->get_wp_query_args( $query_vars );
+		$query = new WP_Query( $args );
+
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			return $query->posts;
+		}
+
+		$orders = array_filter( array_map( 'wc_get_order', $query->posts ) );
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_posts,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
+	}
 }
