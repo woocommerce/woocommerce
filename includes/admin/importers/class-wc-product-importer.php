@@ -183,22 +183,21 @@ class WC_Product_Importer extends WP_Importer {
 
 		$data = array(
 			'raw_headers' => array(),
-			'data' => array()
+			'data' => array(),
 		);
 
 		if ( false !== ( $handle = fopen( $file, 'r' ) ) ) {
 
 			$data['raw_headers'] = fgetcsv( $handle, 0, $this->delimiter );
 
-			if ( $args['start_pos'] != 0 ) {
+			if ( 0 !== $args['start_pos'] ) {
 				fseek( $handle, (int) $args['start_pos'] );
 			}
 
 			while ( false !== ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) ) {
 				$data['data'][] = $row;
 
-	            if ( ( $args['end_pos'] > 0 && ftell( $handle ) >= $args['end_pos'] ) || 0 === --$args[
-	            	'lines'] ) {
+	            if ( ( $args['end_pos'] > 0 && ftell( $handle ) >= $args['end_pos'] ) || 0 === --$args['lines'] ) {
 	            	break;
 				}
 			}
@@ -283,8 +282,7 @@ class WC_Product_Importer extends WP_Importer {
 			$parse_function = 'esc_attr';
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$parse_function = $data_formatting[ $heading ];
-			}
-			else {
+			} else {
 				foreach ( $regex_match_data_formatting as $regex => $callback ) {
 					if ( preg_match( $regex, $heading ) ) {
 						$parse_function = $callback;
