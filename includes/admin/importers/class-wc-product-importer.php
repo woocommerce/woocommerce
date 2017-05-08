@@ -186,7 +186,7 @@ class WC_Product_Importer extends WP_Importer {
 			'data' => array()
 		);
 
-		if ( false !== ( $handle = fopen( $file, "r" ) ) ) {
+		if ( false !== ( $handle = fopen( $file, 'r' ) ) ) {
 
 			$data['raw_headers'] = fgetcsv( $handle, 0, $this->delimiter );
 
@@ -194,7 +194,7 @@ class WC_Product_Importer extends WP_Importer {
 				fseek( $handle, (int) $args['start_pos'] );
 			}
 
-			while( false !== ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) ) {
+			while ( false !== ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) ) {
 				$data['data'][] = $row;
 
 	            if ( ( $args['end_pos'] > 0 && ftell( $handle ) >= $args['end_pos'] ) || 0 === --$args[
@@ -240,6 +240,7 @@ class WC_Product_Importer extends WP_Importer {
 
 		// Columns not mentioned here will get parsed with 'esc_attr'.
 		// column_name => callback
+		// TODO: Use slugs instead of full column name once mapping is completed.
 		$data_formatting = array(
 			'ID'                      => 'absint',
 			'Published'               => array( $this, 'parse_bool_field' ),
@@ -268,7 +269,7 @@ class WC_Product_Importer extends WP_Importer {
 		);
 		$regex_match_data_formatting = array(
 			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
-			'/Attribute * Visible/' => 'boolval',
+			'/Attribute * Visible/' => array( $this, 'parse_bool_field' ),
 			'/Download * URL/' => 'esc_url',
 		);
 
