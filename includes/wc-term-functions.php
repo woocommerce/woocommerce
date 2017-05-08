@@ -562,18 +562,8 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		_update_post_term_count( $terms, $taxonomy );
 	}
 
-	// Main query.
-	$count_query_select = "
-		SELECT COUNT( DISTINCT ID ) FROM {$wpdb->posts}
-	";
-
-	$count_query_where = "
-		WHERE post_status = 'publish'
-		AND post_type = 'product'
-	";
-
-	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 	$exclude_term_ids            = array();
+	$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 	if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
 		$exclude_term_ids[] = $product_visibility_term_ids['exclude-from-catalog'];
@@ -583,14 +573,22 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
 	}
 
-	if ( count( $exclude_term_ids ) > 0 ) {
-		$count_query_select .= " LEFT JOIN (
-				SELECT object_ID FROM {$wpdb->term_relationships}
-				WHERE term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " )
-			) AS exclude_join
-			ON exclude_join.object_ID = ID ";
+	$query = array(
+		'fields' => "
+			SELECT COUNT( DISTINCT ID ) FROM {$wpdb->posts} p
+		",
+		'join'   => '',
+		'where'  => "
+			WHERE 1=1
+			AND p.post_status = 'publish'
+			AND p.post_type = 'product'
 
-		$count_query_where .= " AND exclude_join.object_ID IS NULL ";
+		",
+	);
+
+	if ( count( $exclude_term_ids ) ) {
+		$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " ) ) AS exclude_join ON exclude_join.object_id = p.ID";
+		$query['where'] .= " AND exclude_join.object_id IS NULL";
 	}
 
 	// Pre-process term taxonomy ids.
@@ -622,8 +620,6 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	// Unique terms only.
 	$terms = array_unique( $terms );
 
-	$join_index = 0;
-
 	// Count the terms.
 	foreach ( $terms as $term_id ) {
 		$terms_to_count = array( absint( $term_id ) );
@@ -636,17 +632,11 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		}
 
 		// Generate term query
-		$join_index++;
-		$term_query_join = " INNER JOIN (
-				SELECT object_ID FROM {$wpdb->term_relationships}
-				INNER JOIN {$wpdb->term_taxonomy}
-				USING( term_taxonomy_id )
-				WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " )
-			) AS include_join{$join_index}
-			ON include_join{$join_index}.object_ID = ID ";
+		$term_query          = $query;
+		$term_query['join'] .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN wp_term_taxonomy using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
 
 		// Get the count
-		$count = $wpdb->get_var( $count_query_select . $term_query_join . $count_query_where );
+		$count = $wpdb->get_var( implode( ' ', $term_query ) );
 
 		// Update the count
 		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
