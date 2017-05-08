@@ -376,7 +376,7 @@ class WC_Product_Importer extends WP_Importer {
 			if ( false === strpos( $section, '>' ) ) {
 				$categories[] = array(
 					'parent' => false,
-					'name' => esc_attr( $section ),
+					'name'   => esc_attr( $section ),
 				);
 
 			// Subcategory.
@@ -384,7 +384,7 @@ class WC_Product_Importer extends WP_Importer {
 				$chunks = array_map( 'trim', explode( '>', $section ) );
 				$categories[] = array(
 					'parent' => esc_attr( reset( $chunks ) ),
-					'name' => esc_attr( end( $chunks ) ),
+					'name'   => esc_attr( end( $chunks ) ),
 				);
 			}
 		}
