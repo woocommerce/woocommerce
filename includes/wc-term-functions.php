@@ -639,7 +639,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$join_index++;
 		$term_query_join = " INNER JOIN (
 				SELECT object_ID FROM {$wpdb->term_relationships}
-				LEFT JOIN {$wpdb->term_taxonomy} AS tax
+				INNER JOIN {$wpdb->term_taxonomy}
 				USING( term_taxonomy_id )
 				WHERE term_id IN (" . implode( ',', array_map( 'absint', $terms_to_count ) ) . " )
 			) AS include_join{$join_index}
