@@ -583,7 +583,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
 	}
 
-	if ( $exclude_term_ids ) {
+	if ( count( $exclude_term_ids ) > 0 ) {
 		$count_query_select .= " LEFT JOIN (
 				SELECT object_ID FROM {$wpdb->term_relationships}
 				WHERE term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " )
