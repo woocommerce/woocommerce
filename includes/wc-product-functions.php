@@ -780,7 +780,7 @@ function wc_get_min_max_price_meta_query( $args ) {
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
-		'type'    => 'DECIMAL',
+		'type'    => 'NUMERIC',
 	);
 }
 
