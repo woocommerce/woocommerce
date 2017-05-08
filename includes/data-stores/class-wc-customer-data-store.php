@@ -337,13 +337,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		$spent = get_user_meta( $customer->get_id(), '_money_spent', true );
+		$spent = apply_filters( 'woocommerce_customer_get_total_spent', get_user_meta( $customer->get_id(), '_money_spent', true ), $customer );
 
 		if ( '' === $spent ) {
 			global $wpdb;
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-			$spent    = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+			$spent    = $wpdb->get_var( apply_filters( 'woocommerce_customer_get_total_spent_query', "SELECT SUM(meta2.meta_value)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
@@ -352,7 +352,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				AND     posts.post_type     = 'shop_order'
 				AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
 				AND     meta2.meta_key      = '_order_total'
-			" );
+			" ) );
 
 			if ( ! $spent ) {
 				$spent = 0;
