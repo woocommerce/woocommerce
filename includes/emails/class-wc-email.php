@@ -280,7 +280,7 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
 
-		if ( 'new_order' === $this->id ) {
+		if ( 'new_order' === $this->id && $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
 			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
 		}
 
