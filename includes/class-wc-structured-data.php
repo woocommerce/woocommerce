@@ -200,34 +200,36 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$markup_offer = array(
-			'@type'         => 'Offer',
-			'priceCurrency' => $currency,
-			'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-			'sku'           => $product->get_sku(),
-			'image'         => wp_get_attachment_url( $product->get_image_id() ),
-			'description'   => $product->get_description(),
-			'seller'        => array(
-				'@type' => 'Organization',
-				'name'  => $shop_name,
-				'url'   => $shop_url,
-			),
-		);
-
-		if ( $product->is_type( 'variable' ) ) {
-			$prices = $product->get_variation_prices();
-
-			$markup_offer['priceSpecification'] = array(
-				'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-				'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
-				'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+		if ( '' !== $product->get_price() ) {
+			$markup_offer = array(
+				'@type'         => 'Offer',
 				'priceCurrency' => $currency,
+				'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+				'sku'           => $product->get_sku(),
+				'image'         => wp_get_attachment_url( $product->get_image_id() ),
+				'description'   => $product->get_description(),
+				'seller'        => array(
+					'@type' => 'Organization',
+					'name'  => $shop_name,
+					'url'   => $shop_url,
+				),
 			);
-		} else {
-			$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
-		}
 
-		$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+			if ( $product->is_type( 'variable' ) ) {
+				$prices = $product->get_variation_prices();
+
+				$markup_offer['priceSpecification'] = array(
+					'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
+					'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+					'priceCurrency' => $currency,
+				);
+			} else {
+				$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+			}
+
+			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+		}
 
 		if ( $product->get_rating_count() ) {
 			$markup['aggregateRating'] = array(
