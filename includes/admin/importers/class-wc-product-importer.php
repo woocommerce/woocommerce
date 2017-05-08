@@ -118,9 +118,9 @@ class WC_Product_Importer extends WP_Importer {
 
 		// Show Result
 		echo '<div class="updated settings-error"><p>';
-		/* translators: %s: products count */
+		/* translators: %d: products count */
 		printf(
-			__( 'Import complete - imported %s products.', 'woocommerce' ),
+			__( 'Import complete - imported %d products.', 'woocommerce' ),
 			'<strong>' . count( $data ) . '</strong>'
 		);
 		echo '</p></div>';
@@ -174,16 +174,16 @@ class WC_Product_Importer extends WP_Importer {
 
 		$default_args = array(
 			'start_pos' => 0, // File pointer start.
-			'end_pos' => -1, // File pointer end.
-			'lines' => -1, // Max lines to read.
-			'mapping' => array(), // Column mapping. csv_heading => schema_heading.
-			'parse' => false, // Whether to sanitize and format data.
+			'end_pos'   => -1, // File pointer end.
+			'lines'     => -1, // Max lines to read.
+			'mapping'   => array(), // Column mapping. csv_heading => schema_heading.
+			'parse'     => false, // Whether to sanitize and format data.
 		);
 		$args = wp_parse_args( $args, $default_args );
 
 		$data = array(
 			'raw_headers' => array(),
-			'data' => array(),
+			'data'        => array(),
 		);
 
 		if ( false !== ( $handle = fopen( $file, 'r' ) ) ) {
@@ -237,42 +237,44 @@ class WC_Product_Importer extends WP_Importer {
 	 */
 	public function parse_data( $data ) {
 
-		// Columns not mentioned here will get parsed with 'esc_attr'.
-		// column_name => callback
-		// TODO: Use slugs instead of full column name once mapping is completed.
+		/**
+		 * Columns not mentioned here will get parsed with 'esc_attr'.
+		 * column_name => callback
+		 * @todo Use slugs instead of full column name once mapping is completed.
+		 */
 		$data_formatting = array(
-			'ID'                      => 'absint',
-			'Published'               => array( $this, 'parse_bool_field' ),
-			'Is featured?'            => array( $this, 'parse_bool_field' ),
-			'Date sale price starts'  => 'strtotime',
-			'Date sale price ends'    => 'strtotime',
-			'In stock?'               => array( $this, 'parse_bool_field' ),
-			'Backorders allowed?'     => array( $this, 'parse_bool_field' ),
-			'Sold individually?'      => array( $this, 'parse_bool_field' ),
-			'Weight'                  => array( $this, 'parse_float_field' ),
-			'Length'                  => array( $this, 'parse_float_field' ),
-			'Height'                  => array( $this, 'parse_float_field' ),
-			'Width'                   => array( $this, 'parse_float_field' ),
-			'Allow customer reviews?' => array( $this, 'parse_bool_field' ),
-			'Purchase Note'           => 'wp_kses',
-			'Price'                   => 'wc_format_decimal',
-			'Regular Price'           => 'wc_format_decimal',
-			'Stock'                   => 'absint',
-			'Categories'              => array( $this, 'parse_categories' ),
-			'Tags'                    => array( $this, 'parse_comma_field' ),
-			'Images'                  => array( $this, 'parse_comma_field' ),
-			'Upsells'                 => array( $this, 'parse_comma_field' ),
-			'Cross-sells'             => array( $this, 'parse_comma_field' ),
-			'Download Limit'          => 'absint',
-			'Download Expiry Days'    => 'absint',
+			'ID'                       => 'absint',
+			'Published'                => array( $this, 'parse_bool_field' ),
+			'Is featured?'             => array( $this, 'parse_bool_field' ),
+			'Date sale price starts'   => 'strtotime',
+			'Date sale price ends'     => 'strtotime',
+			'In stock?'                => array( $this, 'parse_bool_field' ),
+			'Backorders allowed?'      => array( $this, 'parse_bool_field' ),
+			'Sold individually?'       => array( $this, 'parse_bool_field' ),
+			'Weight'                   => array( $this, 'parse_float_field' ),
+			'Length'                   => array( $this, 'parse_float_field' ),
+			'Height'                   => array( $this, 'parse_float_field' ),
+			'Width'                    => array( $this, 'parse_float_field' ),
+			'Allow customer reviews?'  => array( $this, 'parse_bool_field' ),
+			'Purchase Note'            => 'wp_kses',
+			'Price'                    => 'wc_format_decimal',
+			'Regular Price'            => 'wc_format_decimal',
+			'Stock'                    => 'absint',
+			'Categories'               => array( $this, 'parse_categories' ),
+			'Tags'                     => array( $this, 'parse_comma_field' ),
+			'Images'                   => array( $this, 'parse_comma_field' ),
+			'Upsells'                  => array( $this, 'parse_comma_field' ),
+			'Cross-sells'              => array( $this, 'parse_comma_field' ),
+			'Download Limit'           => 'absint',
+			'Download Expiry Days'     => 'absint',
 		);
 		$regex_match_data_formatting = array(
 			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
-			'/Attribute * Visible/' => array( $this, 'parse_bool_field' ),
-			'/Download * URL/' => 'esc_url',
+			'/Attribute * Visible/'    => array( $this, 'parse_bool_field' ),
+			'/Download * URL/'         => 'esc_url',
 		);
 
-		$headers = isset( $data['headers'] ) && ! empty( $data['headers'] ) ? $data['headers'] : $data['raw_headers'];
+		$headers = ! empty( $data['headers'] ) ? $data['headers'] : $data['raw_headers'];
 		$parse_functions = array();
 		$parsed_data = array();
 
