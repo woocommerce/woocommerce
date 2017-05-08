@@ -398,7 +398,7 @@ class WC_Structured_Data {
 		$markup                       = array();
 		$markup['@type']              = 'Order';
 		$markup['url']                = $order_url;
-		$markup['orderStatus']        = isset( $order_status[ $order->get_status() ] ) ? $order_status[ $order->get_status() ] : '';
+		$markup['orderStatus']        = isset( $order_statuses[ $order->get_status() ] ) ? $order_statuses[ $order->get_status() ] : '';
 		$markup['orderNumber']        = $order->get_order_number();
 		$markup['orderDate']          = $order->get_date_created()->format( 'c' );
 		$markup['acceptedOffer']      = $markup_offers;
