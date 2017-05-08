@@ -107,6 +107,18 @@ function wc_prevent_adjacent_posts_rel_link_wp_head() {
 add_action( 'template_redirect', 'wc_prevent_adjacent_posts_rel_link_wp_head' );
 
 /**
+ * Show the gallery if JS is disabled.
+ *
+ * @since 3.0.6
+ */
+function wc_gallery_noscript() {
+	?>
+	<noscript><style>.woocommerce-product-gallery{ opacity: 1 !important; }</style></noscript>
+	<?php
+}
+add_action( 'wp_head', 'wc_gallery_noscript' );
+
+/**
  * When the_post is called, put product data into a global.
  *
  * @param mixed $post
