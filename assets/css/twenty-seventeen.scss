@@ -388,6 +388,10 @@ table.variations {
 			cursor: pointer;
 		}
 
+		li:nth-child(4n+1) {
+			clear: left;
+		}
+
 		img {
 			opacity: .5;
 

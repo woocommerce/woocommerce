@@ -249,6 +249,10 @@ p.demo_store,
 						}
 					}
 				}
+
+				li:nth-child(4n+1) {
+					clear: left;
+				}
 			}
 		}
 
