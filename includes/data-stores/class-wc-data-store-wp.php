@@ -208,7 +208,7 @@ class WC_Data_Store_WP {
 			'meta_query'    => array(),
 		);
 
-		foreach( $query_vars as $key => $value ) {
+		foreach ( $query_vars as $key => $value ) {
 			if ( in_array( $value, $skipped_values, true ) || 'meta_query' === $key ) {
 				continue;
 			}
@@ -222,7 +222,7 @@ class WC_Data_Store_WP {
 				);
 			// Other vars get mapped to wp_query args or just left alone.
 			} else {
-				$key_mapping = array (
+				$key_mapping = array(
 					'parent'         => 'post_parent',
 					'parent_exclude' => 'post_parent__not_in',
 					'exclude'        => 'post__not_in',
@@ -315,7 +315,7 @@ class WC_Data_Store_WP {
 					$query_arg['after']['minute'] = $end_date->date( 'i' );
 					$query_arg['after']['second'] = $end_date->date( 's' );
 				}
-			} elseif( '<' == $operator || '<=' == $operator ) {
+			} elseif ( '<' == $operator || '<=' == $operator ) {
 				$query_arg['before'] = array(
 					'year' => $end_date->date( 'Y' ),
 					'month' => $end_date->date( 'n' ),
@@ -325,7 +325,7 @@ class WC_Data_Store_WP {
 					$query_arg['before']['minute'] = $end_date->date( 'i' );
 					$query_arg['before']['second'] = $end_date->date( 's' );
 				}
-			} elseif( '...' == $operator ) {
+			} elseif ( '...' == $operator ) {
 				$query_arg['after'] = array(
 					'year' => $start_date->date( 'Y' ),
 					'month' => $start_date->date( 'n' ),
