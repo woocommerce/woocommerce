@@ -1443,6 +1443,7 @@ class WC_Admin_Post_Types {
 
 		// Category Filtering
 		wc_product_dropdown_categories();
+		$types = wc_get_product_types();
 
 		// Type filtering
 		$terms   = get_terms( 'product_type' );
@@ -1473,7 +1474,10 @@ class WC_Admin_Post_Types {
 					break;
 				default :
 					// Assuming that we have other types in future
-					$output .= ucfirst( $term->name );
+					if(!empty($types[$term->name]))
+						$output .= ucfirst( $types[$term->name] );
+					else
+						$output .= ucfirst($term->name);
 					break;
 			}
 
