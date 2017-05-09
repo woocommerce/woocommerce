@@ -1031,7 +1031,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( count( $include_term_ids ) ) {
-			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN wp_term_taxonomy using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
+			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN {$wpdb->term_taxonomy} using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
 		}
 
 		if ( count( $exclude_ids ) ) {
