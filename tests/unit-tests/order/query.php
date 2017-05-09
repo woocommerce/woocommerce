@@ -69,47 +69,43 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 	public function test_order_query_date_queries() {
 		$now = current_time( 'mysql', true );
 		$now_stamp = strtotime( $now );
-		$past = date( DATE_ISO8601, $now_stamp - 1000 );
-		$future = date( DATE_ISO8601, $now_stamp + 1000 );
+		$past = date( DATE_ISO8601, $now_stamp - DAY_IN_SECONDS );
+		$future = date( DATE_ISO8601, $now_stamp + DAY_IN_SECONDS );
 
 		$order = new WC_Order();
 		$order->set_date_completed( $now_stamp );
 		$order->save();
 
-		// 'date_created_after' should get orders created after the specified time.
 		$query = new WC_Order_Query( array(
-			'date_created_after' => $past
+			'date_created' => $order->get_date_created()
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
-		// 'date_created_after' should exclude orders created before the specified time.
-		$query->set( 'date_created_after', $future );
+		$query->set( 'date_created', '>' . $future );
 		$orders = $query->get_orders();
 		$this->assertEquals( 0, count( $orders ) );
 
-		// 'date_created_before' should get orders created before the specified time.
 		$query = new WC_Order_Query( array(
-			'date_created_before' => $future
+			'date_created' => '<=' . $order->get_date_created()
 		) );
-		$orders = $query->get_orders();
-		$this->assertEquals( 1, count( $orders ) );
-
-		// 'date_created_before' should get orders created before the specified time.
-		$query->set( 'date_created_before', $future );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
 		// Test with some metadata-stored date params.
 		$query = new WC_Order_Query( array(
-			'date_completed_after' => $past
+			'date_completed' => '>' . $past
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
-		$query->set( 'date_completed_after', $future );
+		$query->set( 'date_completed', '>' . $future );
 		$orders = $query->get_orders();
 		$this->assertEquals( 0, count( $orders ) );
+
+		$query->set( 'date_completed', $past . '...' . $future );
+		$orders = $query->get_orders();
+		$this->assertEquals( 1, count( $orders ) );
 	}
 
 	/**

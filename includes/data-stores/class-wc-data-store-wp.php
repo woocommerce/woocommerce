@@ -243,6 +243,141 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 *
+	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator in $valid_operators.
+	 * Also accepts a WC_DateTime object.
+	 *
+	 */
+	protected function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
+		$query_parse_regex = '/([^.<>]*)(<|>|\.\.\.=?)([^.<>]+)/';
+		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
+		$precision = 'second';
+
+		$start_date = null;
+		$operator = '=';
+		$end_date = null;
+
+		// Specific time query with a WC_DateTime.
+		if ( is_a( $query_var, 'WC_DateTime' ) ) {
+			$end_date = $query_var;
+
+		// Specific time query with a timestamp.
+		} elseif ( is_numeric( $query_var ) ) {
+			$end_date = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
+
+		// Query with operators and possible range of dates.
+		} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
+			if ( ! empty( $sections[1] ) ) {
+				$start_date = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+			}
+
+			$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
+			$end_date = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
+
+			// YYYY-MM-DD strings shouldn't match down to the second.
+			if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
+				$precision = 'day';
+			}
+
+		// Specific time query with a string.
+		} else {
+			$end_date = wc_string_to_datetime( $query_var );
+			$precision = 'day';
+		}
+
+		// Check for valid inputs.
+		if ( ! $operator || ! $end_date || ( '...' === $operator && ! $start_date ) ) {
+			return $wp_query_args;
+		}
+
+		// Build date query for 'post_date' or 'post_modified' keys.
+		if ( 'post_date' == $key || 'post_modified' == $key ) {
+			if ( ! isset( $wp_query_args['date_query'] ) ) {
+				$wp_query_args['date_query'] = array();
+			}
+
+			$query_arg = array(
+				'column' => $key . '_gmt',
+				'inclusive' => '>' !== $operator && '<' !== $operator,
+			);
+
+			if ( '>' == $operator || '>=' == $operator ) {
+				$query_arg['after'] = array(
+					'year' => $end_date->date( 'Y' ),
+					'month' => $end_date->date( 'n' ),
+					'day' => $end_date->date( 'j' ),
+				);
+				if ( 'second' === $precision ) {
+
+				}
+			} elseif( '<' == $operator || '<=' == $operator ) {
+				$query_arg['before'] = array(
+					'year' => $end_date->date( 'Y' ),
+					'month' => $end_date->date( 'n' ),
+					'day' => $end_date->date( 'j' ),
+				);
+				if ( 'second' === $precision ) {
+
+				}
+			} elseif( '...' == $operator ) {
+				$query_arg['before'] = array(
+					'year' => $start_date->date( 'Y' ),
+					'month' => $start_date->date( 'n' ),
+					'day' => $start_date->date( 'j' ),
+				);
+				$query_arg['after'] = array(
+					'year' => $end_date->date( 'Y' ),
+					'month' => $end_date->date( 'n' ),
+					'day' => $end_date->date( 'j' ),
+				);
+				if ( 'second' === $precision ) {
+
+				}
+			} else {
+				$query_arg['year'] = $end_date->date( 'Y' );
+				$query_arg['month'] = $end_date->date( 'n' );
+				$query_arg['day'] = $end_date->date( 'j' );
+				if ( 'second' === $precision ) {
+
+				}
+			}
+
+			$wp_query_args['date_query'][] = $query_arg;
+			return $wp_query_args;
+		}
+
+		// Build meta query for unrecognized keys.
+		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( '...' !== $operator ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $end_date->getTimestamp(),
+				'compare' => $operator,
+			);
+		} else {
+			$wp_query_args['meta_query'][] = array(
+				'key' => $key,
+				'value' => $start_date->getTimestamp(),
+				'compare' => '>=',
+			);
+			$wp_query_args['meta_query'][] = array(
+				'key' => '$key',
+				'value' => $end_date->getTimestamp(),
+				'compare' => '<=',
+			);
+		}
+
+		return $wp_query_args;
+	}
+
+	protected function build_wp_date_query( $start, $end, $operator, $precision ) {
+
+	}
+
+	/**
 	 * Get a valid date for use in WP_Query date queries.
 	 *
 	 * @since 3.1.0

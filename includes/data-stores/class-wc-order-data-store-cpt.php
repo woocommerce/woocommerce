@@ -665,6 +665,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['meta_query'] = array();
 		}
 
+		$date_queries = array(
+			'date_created'   => 'post_date',
+			'date_modified'  => 'post_modified',
+			'date_completed' => '_date_completed',
+			'date_paid'      => '_date_paid',
+		);
+		foreach ( $date_queries as $query_var_key => $db_key ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );
+			}
+		}
+
+/*
 		if ( isset( $query_vars[ 'date_created_before'] ) && '' !== $query_vars['date_created_before'] ) {
 			$wp_query_args['date_query'][] = array(
 				'column' => 'post_date',
@@ -723,7 +736,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_after' ], true ),
 				'compare' => '>',
 			);
-		}
+		}*/
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
