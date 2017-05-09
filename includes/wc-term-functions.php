@@ -377,8 +377,12 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  * @return int
  */
 function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
-	if ( ! $terms ) $terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
-	if ( empty( $terms ) ) return $index;
+	if ( ! $terms ) {
+		$terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
+	}
+	if ( empty( $terms ) ) {
+		return $index;
+	}
 
 	$id	= $the_term->term_id;
 
@@ -399,6 +403,11 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		// set order
 		$index++;
 		$index = wc_set_term_order( $term->term_id, $index, $taxonomy );
+
+		/**
+		 * After a term has had it's order set.
+		*/
+		do_action( 'woocommerce_after_set_term_order', $term, $index, $taxonomy );
 
 		// if that term has children we walk through them
 		$children = get_terms( $taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0" );
@@ -430,14 +439,17 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$index 		= (int) $index;
 
 	// Meta name
-	if ( taxonomy_is_product_attribute( $taxonomy ) )
+	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
 		$meta_name = 'order_' . esc_attr( $taxonomy );
-	else
+	} else {
 		$meta_name = 'order';
+	}
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 
-	if ( ! $recursive ) return $index;
+	if ( ! $recursive ) {
+		return $index;
+	}
 
 	$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
 
