@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.0.5\n"
+"Project-Id-Version: WooCommerce 3.0.6\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-04-28 17:27:44+00:00\n"
+"POT-Creation-Date: 2017-05-09 17:35:14+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5232,11 +5232,11 @@ msgstr ""
 #: includes/abstracts/abstract-wc-rest-controller.php:97
 #: includes/api/legacy/v2/class-wc-api-coupons.php:519
 #: includes/api/legacy/v2/class-wc-api-customers.php:783
-#: includes/api/legacy/v2/class-wc-api-orders.php:1770
+#: includes/api/legacy/v2/class-wc-api-orders.php:1763
 #: includes/api/legacy/v2/class-wc-api-products.php:2272
 #: includes/api/legacy/v3/class-wc-api-coupons.php:519
 #: includes/api/legacy/v3/class-wc-api-customers.php:773
-#: includes/api/legacy/v3/class-wc-api-orders.php:1820
+#: includes/api/legacy/v3/class-wc-api-orders.php:1813
 #: includes/api/legacy/v3/class-wc-api-products.php:3078
 #: includes/api/legacy/v3/class-wc-api-taxes.php:465
 #. translators: %s: items limit
@@ -5698,7 +5698,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:82
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1128
+#: includes/wc-template-functions.php:1140
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -6189,6 +6189,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:344
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:86
 msgid "Update"
 msgstr ""
 
@@ -7647,7 +7648,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:129
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:1949
+#: includes/wc-template-functions.php:1961
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -8715,11 +8716,7 @@ msgid "Apply"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:86
-msgid "Save %s"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:86
-msgid "Save/update the %s"
+msgid "Create"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:135
@@ -10909,7 +10906,7 @@ msgid "Store notice text"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:156
-#: includes/wc-template-functions.php:495
+#: includes/wc-template-functions.php:507
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
@@ -12893,7 +12890,7 @@ msgstr ""
 #: includes/admin/views/html-notice-template-check.php:13
 #: includes/admin/views/html-notice-theme-support.php:12
 #: includes/admin/views/html-notice-updated.php:12
-#: includes/wc-template-functions.php:498
+#: includes/wc-template-functions.php:510
 msgid "Dismiss"
 msgstr ""
 
@@ -13654,12 +13651,12 @@ msgid "The order ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-order-refunds-controller.php:190
-#: includes/api/legacy/v2/class-wc-api-orders.php:1501
-#: includes/api/legacy/v2/class-wc-api-orders.php:1663
-#: includes/api/legacy/v2/class-wc-api-orders.php:1724
-#: includes/api/legacy/v3/class-wc-api-orders.php:1551
-#: includes/api/legacy/v3/class-wc-api-orders.php:1713
-#: includes/api/legacy/v3/class-wc-api-orders.php:1774
+#: includes/api/legacy/v2/class-wc-api-orders.php:1494
+#: includes/api/legacy/v2/class-wc-api-orders.php:1656
+#: includes/api/legacy/v2/class-wc-api-orders.php:1717
+#: includes/api/legacy/v3/class-wc-api-orders.php:1544
+#: includes/api/legacy/v3/class-wc-api-orders.php:1706
+#: includes/api/legacy/v3/class-wc-api-orders.php:1767
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:132
 msgid "Invalid order refund ID."
 msgstr ""
@@ -13670,8 +13667,8 @@ msgid "Refund amount must be greater than zero."
 msgstr ""
 
 #: includes/api/class-wc-rest-order-refunds-controller.php:290
-#: includes/api/legacy/v2/class-wc-api-orders.php:1600
-#: includes/api/legacy/v3/class-wc-api-orders.php:1650
+#: includes/api/legacy/v2/class-wc-api-orders.php:1593
+#: includes/api/legacy/v3/class-wc-api-orders.php:1643
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:310
 msgid "Cannot create order refund, please try again."
 msgstr ""
@@ -13865,8 +13862,8 @@ msgid "Product ID or SKU is required."
 msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:644
-#: includes/api/legacy/v2/class-wc-api-orders.php:1019
-#: includes/api/legacy/v3/class-wc-api-orders.php:1069
+#: includes/api/legacy/v2/class-wc-api-orders.php:1024
+#: includes/api/legacy/v3/class-wc-api-orders.php:1074
 #: includes/api/v1/class-wc-rest-orders-controller.php:685
 msgid "Shipping method ID is required."
 msgstr ""
@@ -13877,8 +13874,8 @@ msgid "Fee name is required."
 msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:688
-#: includes/api/legacy/v2/class-wc-api-orders.php:1150
-#: includes/api/legacy/v3/class-wc-api-orders.php:1200
+#: includes/api/legacy/v2/class-wc-api-orders.php:1147
+#: includes/api/legacy/v3/class-wc-api-orders.php:1197
 #: includes/api/v1/class-wc-rest-orders-controller.php:727
 msgid "Coupon code is required."
 msgstr ""
@@ -14090,7 +14087,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:1347
 #: includes/api/class-wc-rest-shipping-zone-methods-controller.php:49
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:456
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:463
 #: includes/api/v1/class-wc-rest-orders-controller.php:1397
 msgid "Shipping method ID."
 msgstr ""
@@ -14213,51 +14210,51 @@ msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:391
 #: includes/api/class-wc-rest-setting-options-controller.php:464
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:479
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:486
 msgid "A unique identifier for the setting."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:397
 #: includes/api/class-wc-rest-setting-options-controller.php:473
 #: includes/api/class-wc-rest-settings-controller.php:204
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:485
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:492
 msgid "A human readable label for the setting used in interfaces."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:403
 #: includes/api/class-wc-rest-setting-options-controller.php:482
 #: includes/api/class-wc-rest-settings-controller.php:210
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:491
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:498
 msgid "A human readable description for the setting used in interfaces."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:409
 #: includes/api/class-wc-rest-setting-options-controller.php:520
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:497
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:504
 msgid "Type of setting."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:416
 #: includes/api/class-wc-rest-setting-options-controller.php:491
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:504
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:511
 msgid "Setting value."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:421
 #: includes/api/class-wc-rest-setting-options-controller.php:496
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:509
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:516
 msgid "Default value for the setting."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:427
 #: includes/api/class-wc-rest-setting-options-controller.php:502
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:515
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:522
 msgid "Additional help text shown to the user about the setting."
 msgstr ""
 
 #: includes/api/class-wc-rest-payment-gateways-controller.php:433
 #: includes/api/class-wc-rest-setting-options-controller.php:511
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:521
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:528
 msgid "Placeholder text to be displayed in text inputs."
 msgstr ""
 
@@ -15106,12 +15103,12 @@ msgid "Method ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-shipping-methods-controller.php:202
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:462
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:469
 msgid "Shipping method title."
 msgstr ""
 
 #: includes/api/class-wc-rest-shipping-methods-controller.php:208
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:468
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:475
 msgid "Shipping method description."
 msgstr ""
 
@@ -15145,23 +15142,24 @@ msgstr ""
 msgid "Shipping methods do not support trashing."
 msgstr ""
 
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:434
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:435
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:441
 msgid "Shipping method instance ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:440
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:447
 msgid "Shipping method customer facing title."
 msgstr ""
 
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:446
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:453
 msgid "Shipping method sort order."
 msgstr ""
 
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:451
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:458
 msgid "Shipping method enabled status."
 msgstr ""
 
-#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:474
+#: includes/api/class-wc-rest-shipping-zone-methods-controller.php:481
 msgid "Shipping method settings."
 msgstr ""
 
@@ -16009,16 +16007,16 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-coupons.php:208
 #: includes/api/legacy/v2/class-wc-api-customers.php:344
 #: includes/api/legacy/v2/class-wc-api-orders.php:363
-#: includes/api/legacy/v2/class-wc-api-orders.php:1278
-#: includes/api/legacy/v2/class-wc-api-orders.php:1568
+#: includes/api/legacy/v2/class-wc-api-orders.php:1271
+#: includes/api/legacy/v2/class-wc-api-orders.php:1561
 #: includes/api/legacy/v2/class-wc-api-products.php:210
 #: includes/api/legacy/v2/class-wc-api-products.php:1995
 #: includes/api/legacy/v2/class-wc-api-webhooks.php:169
 #: includes/api/legacy/v3/class-wc-api-coupons.php:208
 #: includes/api/legacy/v3/class-wc-api-customers.php:345
 #: includes/api/legacy/v3/class-wc-api-orders.php:400
-#: includes/api/legacy/v3/class-wc-api-orders.php:1328
-#: includes/api/legacy/v3/class-wc-api-orders.php:1618
+#: includes/api/legacy/v3/class-wc-api-orders.php:1321
+#: includes/api/legacy/v3/class-wc-api-orders.php:1611
 #: includes/api/legacy/v3/class-wc-api-products.php:259
 #: includes/api/legacy/v3/class-wc-api-products.php:690
 #: includes/api/legacy/v3/class-wc-api-products.php:943
@@ -16046,16 +16044,16 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-coupons.php:317
 #: includes/api/legacy/v2/class-wc-api-customers.php:397
 #: includes/api/legacy/v2/class-wc-api-orders.php:501
-#: includes/api/legacy/v2/class-wc-api-orders.php:1337
-#: includes/api/legacy/v2/class-wc-api-orders.php:1647
+#: includes/api/legacy/v2/class-wc-api-orders.php:1330
+#: includes/api/legacy/v2/class-wc-api-orders.php:1640
 #: includes/api/legacy/v2/class-wc-api-products.php:317
 #: includes/api/legacy/v2/class-wc-api-products.php:2076
 #: includes/api/legacy/v2/class-wc-api-webhooks.php:250
 #: includes/api/legacy/v3/class-wc-api-coupons.php:317
 #: includes/api/legacy/v3/class-wc-api-customers.php:398
 #: includes/api/legacy/v3/class-wc-api-orders.php:543
-#: includes/api/legacy/v3/class-wc-api-orders.php:1387
-#: includes/api/legacy/v3/class-wc-api-orders.php:1697
+#: includes/api/legacy/v3/class-wc-api-orders.php:1380
+#: includes/api/legacy/v3/class-wc-api-orders.php:1690
 #: includes/api/legacy/v3/class-wc-api-products.php:371
 #: includes/api/legacy/v3/class-wc-api-products.php:767
 #: includes/api/legacy/v3/class-wc-api-products.php:988
@@ -16076,11 +16074,11 @@ msgstr ""
 
 #: includes/api/legacy/v2/class-wc-api-coupons.php:511
 #: includes/api/legacy/v2/class-wc-api-customers.php:775
-#: includes/api/legacy/v2/class-wc-api-orders.php:1762
+#: includes/api/legacy/v2/class-wc-api-orders.php:1755
 #: includes/api/legacy/v2/class-wc-api-products.php:2264
 #: includes/api/legacy/v3/class-wc-api-coupons.php:511
 #: includes/api/legacy/v3/class-wc-api-customers.php:765
-#: includes/api/legacy/v3/class-wc-api-orders.php:1812
+#: includes/api/legacy/v3/class-wc-api-orders.php:1805
 #: includes/api/legacy/v3/class-wc-api-products.php:3070
 #: includes/api/legacy/v3/class-wc-api-taxes.php:457
 msgid "No %1$s data specified to create/edit %1$s"
@@ -16122,9 +16120,9 @@ msgid "Provided order currency is invalid."
 msgstr ""
 
 #: includes/api/legacy/v2/class-wc-api-orders.php:518
-#: includes/api/legacy/v2/class-wc-api-orders.php:1581
+#: includes/api/legacy/v2/class-wc-api-orders.php:1574
 #: includes/api/legacy/v3/class-wc-api-orders.php:560
-#: includes/api/legacy/v3/class-wc-api-orders.php:1631
+#: includes/api/legacy/v3/class-wc-api-orders.php:1624
 msgid "Order ID is invalid"
 msgstr ""
 
@@ -16158,148 +16156,133 @@ msgstr ""
 msgid "Product quantity is required."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:945
-#: includes/api/legacy/v3/class-wc-api-orders.php:994
+#: includes/api/legacy/v2/class-wc-api-orders.php:949
+#: includes/api/legacy/v3/class-wc-api-orders.php:998
 msgid "Cannot create line item, try again."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1012
-#: includes/api/legacy/v3/class-wc-api-orders.php:1062
+#: includes/api/legacy/v2/class-wc-api-orders.php:1017
+#: includes/api/legacy/v3/class-wc-api-orders.php:1067
 msgid "Shipping total must be a positive amount."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1029
-#: includes/api/legacy/v3/class-wc-api-orders.php:1079
-msgid "Cannot create shipping method, try again."
-msgstr ""
-
-#: includes/api/legacy/v2/class-wc-api-orders.php:1050
-#: includes/api/legacy/v3/class-wc-api-orders.php:1100
+#: includes/api/legacy/v2/class-wc-api-orders.php:1051
+#: includes/api/legacy/v3/class-wc-api-orders.php:1101
 msgid "Cannot update shipping method, try again."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1070
-#: includes/api/legacy/v3/class-wc-api-orders.php:1120
+#: includes/api/legacy/v2/class-wc-api-orders.php:1071
+#: includes/api/legacy/v3/class-wc-api-orders.php:1121
 msgid "Fee title is required"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1081
-#: includes/api/legacy/v3/class-wc-api-orders.php:1131
+#: includes/api/legacy/v2/class-wc-api-orders.php:1082
+#: includes/api/legacy/v3/class-wc-api-orders.php:1132
 msgid "Fee tax class is required when fee is taxable."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1100
-#: includes/api/legacy/v3/class-wc-api-orders.php:1150
-msgid "Cannot create fee, try again."
-msgstr ""
-
-#: includes/api/legacy/v2/class-wc-api-orders.php:1125
-#: includes/api/legacy/v3/class-wc-api-orders.php:1175
+#: includes/api/legacy/v2/class-wc-api-orders.php:1122
+#: includes/api/legacy/v3/class-wc-api-orders.php:1172
 msgid "Cannot update fee, try again."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1143
-#: includes/api/legacy/v3/class-wc-api-orders.php:1193
+#: includes/api/legacy/v2/class-wc-api-orders.php:1140
+#: includes/api/legacy/v3/class-wc-api-orders.php:1190
 msgid "Coupon discount total must be a positive amount."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1163
-#: includes/api/legacy/v3/class-wc-api-orders.php:1213
-msgid "Cannot create coupon, try again."
-msgstr ""
-
-#: includes/api/legacy/v2/class-wc-api-orders.php:1180
-#: includes/api/legacy/v3/class-wc-api-orders.php:1230
+#: includes/api/legacy/v2/class-wc-api-orders.php:1173
+#: includes/api/legacy/v3/class-wc-api-orders.php:1223
 msgid "Cannot update coupon, try again."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1245
-#: includes/api/legacy/v2/class-wc-api-orders.php:1355
-#: includes/api/legacy/v2/class-wc-api-orders.php:1419
-#: includes/api/legacy/v3/class-wc-api-orders.php:1295
-#: includes/api/legacy/v3/class-wc-api-orders.php:1405
-#: includes/api/legacy/v3/class-wc-api-orders.php:1469
+#: includes/api/legacy/v2/class-wc-api-orders.php:1238
+#: includes/api/legacy/v2/class-wc-api-orders.php:1348
+#: includes/api/legacy/v2/class-wc-api-orders.php:1412
+#: includes/api/legacy/v3/class-wc-api-orders.php:1288
+#: includes/api/legacy/v3/class-wc-api-orders.php:1398
+#: includes/api/legacy/v3/class-wc-api-orders.php:1462
 msgid "Invalid order note ID"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1251
-#: includes/api/legacy/v2/class-wc-api-orders.php:1362
-#: includes/api/legacy/v2/class-wc-api-orders.php:1426
-#: includes/api/legacy/v3/class-wc-api-orders.php:1301
-#: includes/api/legacy/v3/class-wc-api-orders.php:1412
-#: includes/api/legacy/v3/class-wc-api-orders.php:1476
+#: includes/api/legacy/v2/class-wc-api-orders.php:1244
+#: includes/api/legacy/v2/class-wc-api-orders.php:1355
+#: includes/api/legacy/v2/class-wc-api-orders.php:1419
+#: includes/api/legacy/v3/class-wc-api-orders.php:1294
+#: includes/api/legacy/v3/class-wc-api-orders.php:1405
+#: includes/api/legacy/v3/class-wc-api-orders.php:1469
 msgid "An order note with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1285
-#: includes/api/legacy/v3/class-wc-api-orders.php:1335
+#: includes/api/legacy/v2/class-wc-api-orders.php:1278
+#: includes/api/legacy/v3/class-wc-api-orders.php:1328
 msgid "You do not have permission to create order notes"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1300
-#: includes/api/legacy/v3/class-wc-api-orders.php:1350
+#: includes/api/legacy/v2/class-wc-api-orders.php:1293
+#: includes/api/legacy/v3/class-wc-api-orders.php:1343
 msgid "Order note is required"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1309
-#: includes/api/legacy/v3/class-wc-api-orders.php:1359
+#: includes/api/legacy/v2/class-wc-api-orders.php:1302
+#: includes/api/legacy/v3/class-wc-api-orders.php:1352
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:230
 msgid "Cannot create order note, please try again."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1367
-#: includes/api/legacy/v2/class-wc-api-orders.php:1431
-#: includes/api/legacy/v3/class-wc-api-orders.php:1417
-#: includes/api/legacy/v3/class-wc-api-orders.php:1481
+#: includes/api/legacy/v2/class-wc-api-orders.php:1360
+#: includes/api/legacy/v2/class-wc-api-orders.php:1424
+#: includes/api/legacy/v3/class-wc-api-orders.php:1410
+#: includes/api/legacy/v3/class-wc-api-orders.php:1474
 msgid "The order note ID provided is not associated with the order"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1438
-#: includes/api/legacy/v3/class-wc-api-orders.php:1488
+#: includes/api/legacy/v2/class-wc-api-orders.php:1431
+#: includes/api/legacy/v3/class-wc-api-orders.php:1481
 msgid "This order note cannot be deleted"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1443
-#: includes/api/legacy/v3/class-wc-api-orders.php:1493
+#: includes/api/legacy/v2/class-wc-api-orders.php:1436
+#: includes/api/legacy/v3/class-wc-api-orders.php:1486
 msgid "Permanently deleted order note"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1508
-#: includes/api/legacy/v2/class-wc-api-orders.php:1670
-#: includes/api/legacy/v2/class-wc-api-orders.php:1731
-#: includes/api/legacy/v3/class-wc-api-orders.php:1558
-#: includes/api/legacy/v3/class-wc-api-orders.php:1720
-#: includes/api/legacy/v3/class-wc-api-orders.php:1781
+#: includes/api/legacy/v2/class-wc-api-orders.php:1501
+#: includes/api/legacy/v2/class-wc-api-orders.php:1663
+#: includes/api/legacy/v2/class-wc-api-orders.php:1724
+#: includes/api/legacy/v3/class-wc-api-orders.php:1551
+#: includes/api/legacy/v3/class-wc-api-orders.php:1713
+#: includes/api/legacy/v3/class-wc-api-orders.php:1774
 msgid "An order refund with the provided ID could not be found."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1575
-#: includes/api/legacy/v3/class-wc-api-orders.php:1625
+#: includes/api/legacy/v2/class-wc-api-orders.php:1568
+#: includes/api/legacy/v3/class-wc-api-orders.php:1618
 msgid "You do not have permission to create order refunds"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1588
-#: includes/api/legacy/v3/class-wc-api-orders.php:1638
+#: includes/api/legacy/v2/class-wc-api-orders.php:1581
+#: includes/api/legacy/v3/class-wc-api-orders.php:1631
 msgid "Refund amount is required."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1590
-#: includes/api/legacy/v3/class-wc-api-orders.php:1640
+#: includes/api/legacy/v2/class-wc-api-orders.php:1583
+#: includes/api/legacy/v3/class-wc-api-orders.php:1633
 msgid "Refund amount must be positive."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1617
-#: includes/api/legacy/v3/class-wc-api-orders.php:1667
+#: includes/api/legacy/v2/class-wc-api-orders.php:1610
+#: includes/api/legacy/v3/class-wc-api-orders.php:1660
 #: includes/wc-order-functions.php:635
 msgid ""
 "An error occurred while attempting to create the refund using the payment "
 "gateway API."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1675
-#: includes/api/legacy/v2/class-wc-api-orders.php:1736
-#: includes/api/legacy/v3/class-wc-api-orders.php:1725
-#: includes/api/legacy/v3/class-wc-api-orders.php:1786
+#: includes/api/legacy/v2/class-wc-api-orders.php:1668
+#: includes/api/legacy/v2/class-wc-api-orders.php:1729
+#: includes/api/legacy/v3/class-wc-api-orders.php:1718
+#: includes/api/legacy/v3/class-wc-api-orders.php:1779
 msgid "The order refund ID provided is not associated with the order."
 msgstr ""
 
@@ -17293,7 +17276,7 @@ msgid "Get cart should not be called before the wp_loaded action."
 msgstr ""
 
 #: includes/class-wc-cart.php:912 includes/class-wc-frontend-scripts.php:523
-#: includes/wc-cart-functions.php:115 includes/wc-template-functions.php:1435
+#: includes/wc-cart-functions.php:115 includes/wc-template-functions.php:1447
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -17652,7 +17635,7 @@ msgid "Invalid download link."
 msgstr ""
 
 #: includes/class-wc-download-handler.php:93
-#: includes/class-wc-form-handler.php:659
+#: includes/class-wc-form-handler.php:660
 #: includes/data-stores/abstract-wc-order-data-store-cpt.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:169
 #: includes/shortcodes/class-wc-shortcode-my-account.php:118
@@ -17792,7 +17775,7 @@ msgstr ""
 msgid "Cart updated."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:611
+#: includes/class-wc-form-handler.php:612
 msgid ""
 "%d item from your previous order is currently unavailable and could not be "
 "added to your cart."
@@ -17802,70 +17785,70 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-form-handler.php:622
+#: includes/class-wc-form-handler.php:623
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:649
+#: includes/class-wc-form-handler.php:650
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:652
+#: includes/class-wc-form-handler.php:653
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:657
+#: includes/class-wc-form-handler.php:658
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:767
+#: includes/class-wc-form-handler.php:768
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:774
+#: includes/class-wc-form-handler.php:775
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:802
+#: includes/class-wc-form-handler.php:803
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:830
+#: includes/class-wc-form-handler.php:831
 msgid "Invalid value posted for %s"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:837
+#: includes/class-wc-form-handler.php:838
 msgid "%s is a required field"
 msgid_plural "%s are required fields"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-form-handler.php:875
-#: includes/class-wc-form-handler.php:879
-#: includes/class-wc-form-handler.php:888
-#: includes/class-wc-form-handler.php:1029 includes/wc-user-functions.php:111
+#: includes/class-wc-form-handler.php:876
+#: includes/class-wc-form-handler.php:880
+#: includes/class-wc-form-handler.php:889
+#: includes/class-wc-form-handler.php:1030 includes/wc-user-functions.php:111
 msgid "Error:"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:879
+#: includes/class-wc-form-handler.php:880
 msgid "Username is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:889
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:966
+#: includes/class-wc-form-handler.php:967
 msgid "Please enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:970
+#: includes/class-wc-form-handler.php:971
 msgid "Passwords do not match."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:1012
+#: includes/class-wc-form-handler.php:1013
 msgid "Anti-spam field was filled in."
 msgstr ""
 
@@ -17878,7 +17861,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:500
-#: includes/wc-template-functions.php:1890
+#: includes/wc-template-functions.php:1902
 msgid "required"
 msgstr ""
 
@@ -19828,13 +19811,13 @@ msgid "Refund was declined."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:504
-#: includes/wc-template-functions.php:2458
+#: includes/wc-template-functions.php:2470
 #. translators: 1: current item count
 msgid "Download %d"
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:504
-#: includes/wc-template-functions.php:2458 templates/myaccount/downloads.php:76
+#: includes/wc-template-functions.php:2470 templates/myaccount/downloads.php:76
 msgid "Download"
 msgstr ""
 
@@ -21154,7 +21137,7 @@ msgstr ""
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: includes/wc-stock-functions.php:97
+#: includes/wc-stock-functions.php:100
 #. translators: 1: item name 2: old stock quantity 3: new stock quantity
 msgid "%1$s stock reduced from %2$s to %3$s."
 msgstr ""
@@ -21163,90 +21146,90 @@ msgstr ""
 msgid "Checkout is not available whilst your cart is empty."
 msgstr ""
 
-#: includes/wc-template-functions.php:157
+#: includes/wc-template-functions.php:169
 msgid "New products"
 msgstr ""
 
-#: includes/wc-template-functions.php:165
+#: includes/wc-template-functions.php:177
 msgid "New products added to %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:173
+#: includes/wc-template-functions.php:185
 msgid "New products tagged %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:515
+#: includes/wc-template-functions.php:527
 msgid "Search results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/wc-template-functions.php:518
+#: includes/wc-template-functions.php:530
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:797
+#: includes/wc-template-functions.php:809
 msgid "Default sorting"
 msgstr ""
 
-#: includes/wc-template-functions.php:798
+#: includes/wc-template-functions.php:810
 msgid "Sort by popularity"
 msgstr ""
 
-#: includes/wc-template-functions.php:799
+#: includes/wc-template-functions.php:811
 msgid "Sort by average rating"
 msgstr ""
 
-#: includes/wc-template-functions.php:800
+#: includes/wc-template-functions.php:812
 msgid "Sort by newness"
 msgstr ""
 
-#: includes/wc-template-functions.php:801
+#: includes/wc-template-functions.php:813
 msgid "Sort by price: low to high"
 msgstr ""
 
-#: includes/wc-template-functions.php:802
+#: includes/wc-template-functions.php:814
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:1137
+#: includes/wc-template-functions.php:1149
 #: templates/checkout/form-shipping.php:56
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1146
+#: includes/wc-template-functions.php:1158
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1447
+#: includes/wc-template-functions.php:1459
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1572
+#: includes/wc-template-functions.php:1584
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:1957
+#: includes/wc-template-functions.php:1969
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1978
+#: includes/wc-template-functions.php:1990
 #: templates/cart/shipping-calculator.php:63
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2023
-#: includes/wc-template-functions.php:2175
-#: includes/wc-template-functions.php:2185
+#: includes/wc-template-functions.php:2035
+#: includes/wc-template-functions.php:2187
+#: includes/wc-template-functions.php:2197
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2544
+#: includes/wc-template-functions.php:2556
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:166
 #: includes/widgets/class-wc-widget-rating-filter.php:188
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/wc-template-functions.php:2545
+#: includes/wc-template-functions.php:2557
 msgid "out of 5"
 msgstr ""
 
@@ -22572,22 +22555,22 @@ msgctxt "Pagination"
 msgid "%1$s of %2$s"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-controller.php:880
+#: includes/api/class-wc-rest-system-status-controller.php:870
 msgctxt "Page setting"
 msgid "Shop base"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-controller.php:884
+#: includes/api/class-wc-rest-system-status-controller.php:874
 msgctxt "Page setting"
 msgid "Cart"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-controller.php:888
+#: includes/api/class-wc-rest-system-status-controller.php:878
 msgctxt "Page setting"
 msgid "Checkout"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-controller.php:892
+#: includes/api/class-wc-rest-system-status-controller.php:882
 msgctxt "Page setting"
 msgid "My account"
 msgstr ""
@@ -22696,12 +22679,12 @@ msgid_plural "Shipping %d"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:1522
+#: includes/wc-template-functions.php:1534
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2560
+#: includes/wc-template-functions.php:2572
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
