@@ -1025,16 +1025,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			",
 		);
 
-		if ( $exclude_term_ids ) {
+		if ( count( $exclude_term_ids ) ) {
 			$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " ) ) AS exclude_join ON exclude_join.object_id = p.ID";
 			$query['where'] .= " AND exclude_join.object_id IS NULL";
 		}
 
-		if ( $include_term_ids ) {
-			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} LEFT JOIN wp_term_taxonomy AS tax using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
+		if ( count( $include_term_ids ) ) {
+			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN wp_term_taxonomy using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
 		}
 
-		if ( $exclude_ids ) {
+		if ( count( $exclude_ids ) ) {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', array_map( 'absint', $exclude_ids ) ) . " )";
 		}
 
