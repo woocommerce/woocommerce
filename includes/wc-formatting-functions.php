@@ -564,6 +564,7 @@ function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
  * Convert a date string to a WC_DateTime.
  *
  * @since  3.1.0
+ * @param string $time_string
  * @return WC_DateTime
  */
 function wc_string_to_datetime( $time_string ) {
