@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.6 - 2017-04-xx =
+= 3.0.6 - 2017-05-09 =
 * Fix - Fixed conflict between global attributes and custom attributes with the same names.
 * Fix - Added missing "id" to API for shipping zone methods to support the CLI.
 * Fix - Incorrect use of `wc_format_price_range` in `get_price_html_from_to`.
@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Properly save order items in legacy REST API.
 * Fix - Use correct full size for variation images.
 * Fix - Add noscript style for gallery.
+* Fix - Fix/duplicate potential stock reduction with paypal.
 * Tweak - Improve _wc_term_recount performance.
 * Tweak - Improve plugin update detection in system status report to reduce timeouts.
 * Tweak - Improve "Save Order" button to reproduce WordPress post/page behavior.
