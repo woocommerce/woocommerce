@@ -377,12 +377,8 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  * @return int
  */
 function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
-	if ( ! $terms ) {
-		$terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
-	}
-	if ( empty( $terms ) ) {
-		return $index;
-	}
+	if ( ! $terms ) $terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
+	if ( empty( $terms ) ) return $index;
 
 	$id	= $the_term->term_id;
 
@@ -403,11 +399,6 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		// set order
 		$index++;
 		$index = wc_set_term_order( $term->term_id, $index, $taxonomy );
-
-		/**
-		 * After a term has had it's order set.
-		*/
-		do_action( 'woocommerce_after_set_term_order', $term, $index, $taxonomy );
 
 		// if that term has children we walk through them
 		$children = get_terms( $taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0" );
@@ -439,17 +430,14 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$index 		= (int) $index;
 
 	// Meta name
-	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
+	if ( taxonomy_is_product_attribute( $taxonomy ) )
 		$meta_name = 'order_' . esc_attr( $taxonomy );
-	} else {
+	else
 		$meta_name = 'order';
-	}
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 
-	if ( ! $recursive ) {
-		return $index;
-	}
+	if ( ! $recursive ) return $index;
 
 	$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
 
@@ -633,7 +621,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 		// Generate term query
 		$term_query          = $query;
-		$term_query['join'] .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN wp_term_taxonomy using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
+		$term_query['join'] .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN {$wpdb->term_taxonomy} using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $terms_to_count ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
 
 		// Get the count
 		$count = $wpdb->get_var( implode( ' ', $term_query ) );
