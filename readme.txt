@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.5
+Stable tag: 3.0.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,34 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.0.6 - 2017-04-xx =
+* Fix - Fixed conflict between global attributes and custom attributes with the same names.
+* Fix - Added missing "id" to API for shipping zone methods to support the CLI.
+* Fix - Incorrect use of `wc_format_price_range` in `get_price_html_from_to`.
+* Fix - Clone each meta object when cloning WC_Data object to avoid modifying original meta stdClass objects.
+* Fix - Fix non numeric warning for some order data.
+* Fix - Fixed a warning when no customer country is defined for state input.
+* Fix - Use term name when reordering so correct data is passed to the new order.
+* Fix - Formatting issues in wc_display_item_meta.
+* Fix - Check if IP address is valid in IP address detection code.
+* Fix - wc_attribute_taxonomy_id_by_name should use wc_sanitize_taxonomy_name to prevent breaking special chars.
+* Fix - Correct variable name in order structured data.
+* Fix - Prepend new item keys with `$items_key` to make them unique.
+* Fix - Hide offers from structured markup when blank.
+* Fix - Fixed "Process to checkout" button color in Twenty seventeen dark theme.
+* Fix - Only set reply-to if the email + name is set.
+* Fix - Correctly exclude terms in wc_get_related_products.
+* Fix - Reset post data prevents grouped products working in shortcodes.
+* Fix - Fix min price range comparisons.
+* Fix - Properly save order items in legacy REST API.
+* Fix - Use correct full size for variation images.
+* Fix - Add noscript style for gallery.
+* Tweak - Improve _wc_term_recount performance.
+* Tweak - Improve plugin update detection in system status report to reduce timeouts.
+* Tweak - Improve "Save Order" button to reproduce WordPress post/page behavior.
+* Tweak - Added zipcode validation for France.
+* Dev - Added woocommerce_shop_order_search_results filter.
 
 = 3.0.5 - 2017-04-28 =
 * Fix - Tooltip display within shipping zone modals.
@@ -384,5 +412,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.5 =
-3.0 is a major update. [Make a full site backup](https://docs.woocommerce.com/document/backup-wordpress-content), update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
+= 3.0.6 =
+3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
