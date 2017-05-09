@@ -243,14 +243,19 @@ class WC_Data_Store_WP {
 	}
 
 	/**
-	 *
-	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator in $valid_operators.
+	 * Map a valid date query var to WP_Query arguments.
+	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator from $valid_operators.
 	 * Also accepts a WC_DateTime object.
-	 *
+	 * @param mixed $query_var A valid date format
+	 * @param string $key meta or db column key
+	 * @param array $wp_query_args WP_Query args
+	 * @return array Modified $wp_query_args
 	 */
 	protected function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
-		$query_parse_regex = '/([^.<>]*)(<|>|\.\.\.=?)([^.<>]+)/';
+		$query_parse_regex = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
+
+		// YYYY-MM-DD queries have 'day' precision. Timestamp/WC_DateTime queries have 'second' precision.
 		$precision = 'second';
 
 		$start_date = null;
@@ -268,13 +273,12 @@ class WC_Data_Store_WP {
 		// Query with operators and possible range of dates.
 		} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
 			if ( ! empty( $sections[1] ) ) {
-				$start_date = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+				$start_date = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 			}
 
 			$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
-			$end_date = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
+			$end_date = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
 
-			// YYYY-MM-DD strings shouldn't match down to the second.
 			if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
 				$precision = 'day';
 			}
@@ -308,7 +312,8 @@ class WC_Data_Store_WP {
 					'day' => $end_date->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-
+					$query_arg['after']['minute'] = $end_date->date( 'i' );
+					$query_arg['after']['second'] = $end_date->date( 's' );
 				}
 			} elseif( '<' == $operator || '<=' == $operator ) {
 				$query_arg['before'] = array(
@@ -317,28 +322,33 @@ class WC_Data_Store_WP {
 					'day' => $end_date->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-
+					$query_arg['before']['minute'] = $end_date->date( 'i' );
+					$query_arg['before']['second'] = $end_date->date( 's' );
 				}
 			} elseif( '...' == $operator ) {
-				$query_arg['before'] = array(
+				$query_arg['after'] = array(
 					'year' => $start_date->date( 'Y' ),
 					'month' => $start_date->date( 'n' ),
 					'day' => $start_date->date( 'j' ),
 				);
-				$query_arg['after'] = array(
+				$query_arg['before'] = array(
 					'year' => $end_date->date( 'Y' ),
 					'month' => $end_date->date( 'n' ),
 					'day' => $end_date->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-
+					$query_arg['after']['minute'] = $start_date->date( 'i' );
+					$query_arg['after']['second'] = $start_date->date( 's' );
+					$query_arg['before']['minute'] = $end_date->date( 'i' );
+					$query_arg['before']['second'] = $end_date->date( 's' );
 				}
 			} else {
 				$query_arg['year'] = $end_date->date( 'Y' );
 				$query_arg['month'] = $end_date->date( 'n' );
 				$query_arg['day'] = $end_date->date( 'j' );
 				if ( 'second' === $precision ) {
-
+					$query_arg['minute'] = $end_date->date( 'i' );
+					$query_arg['second'] = $end_date->date( 's' );
 				}
 			}
 
@@ -351,66 +361,63 @@ class WC_Data_Store_WP {
 			$wp_query_args['meta_query'] = array();
 		}
 
-		if ( '...' !== $operator ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => $key,
-				'value'   => $end_date->getTimestamp(),
-				'compare' => $operator,
-			);
+		// Meta dates are stored as timestamps in the db.
+		// Check against begining/end-of-day timestamps when using 'day' precision.
+		if ( 'day' === $precision ) {
+			$start_timestamp = '...' !== $operator ? strtotime( $end_date->date( 'm/d/Y 00:00:00' ) ) : strtotime( $start_date->date( 'm/d/Y 00:00:00' ) );
+			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( $end_date->date( 'm/d/Y 00:00:00' ) );
+			switch ( $operator ) {
+				case '>':
+				case '<=':
+					$wp_query_args['meta_query'][] = array(
+						'key' => $key,
+						'value' => $end_timestamp,
+						'compare' => $operator,
+					);
+				break;
+
+				case '<':
+				case '>=':
+					$wp_query_args['meta_query'][] = array(
+						'key' => $key,
+						'value' => $start_timestamp,
+						'compare' => $operator,
+					);
+				break;
+
+				default:
+					$wp_query_args['meta_query'][] = array(
+						'key' => $key,
+						'value' => $start_timestamp,
+						'compare' => '>=',
+					);
+					$wp_query_args['meta_query'][] = array(
+						'key' => $key,
+						'value' => $end_timestamp,
+						'compare' => '<=',
+					);
+			}
 		} else {
-			$wp_query_args['meta_query'][] = array(
-				'key' => $key,
-				'value' => $start_date->getTimestamp(),
-				'compare' => '>=',
-			);
-			$wp_query_args['meta_query'][] = array(
-				'key' => '$key',
-				'value' => $end_date->getTimestamp(),
-				'compare' => '<=',
-			);
+			if ( '...' !== $operator ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => $key,
+					'value'   => $end_date->getTimestamp(),
+					'compare' => $operator,
+				);
+			} else {
+				$wp_query_args['meta_query'][] = array(
+					'key' => $key,
+					'value' => $start_date->getTimestamp(),
+					'compare' => '>=',
+				);
+				$wp_query_args['meta_query'][] = array(
+					'key' => $key,
+					'value' => $end_date->getTimestamp(),
+					'compare' => '<=',
+				);
+			}
 		}
 
 		return $wp_query_args;
-	}
-
-	protected function build_wp_date_query( $start, $end, $operator, $precision ) {
-
-	}
-
-	/**
-	 * Get a valid date for use in WP_Query date queries.
-	 *
-	 * @since 3.1.0
-	 * @param mixed $query_var Value from a WC_Object_Query's query variable.
-	 */
-	protected function get_date_for_wp_query( $query_var, $as_timestamp = false ) {
-		if ( ! $query_var ) {
-			return '';
-		}
-
-		if ( is_a( $query_var, 'WC_DateTime' ) ) {
-			$datetime = $query_var;
-		} elseif ( is_numeric( $query_var ) ) {
-			// Timestamps are handled as UTC timestamps in all cases.
-			$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
-		} else {
-			// Strings are defined in local WP timezone. Convert to UTC.
-			if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $query_var, $date_bits ) ) {
-				$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
-				$timestamp = gmmktime( $date_bits[4], $date_bits[5], $date_bits[6], $date_bits[2], $date_bits[3], $date_bits[1] ) - $offset;
-			} else {
-				$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $query_var ) ) ) );
-			}
-			$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
-		}
-
-		// Set local timezone or offset.
-		if ( get_option( 'timezone_string' ) ) {
-			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
-		} else {
-			$datetime->set_utc_offset( wc_timezone_offset() );
-		}
-
-		return $as_timestamp ? $datetime->getTimestamp() : (string) $datetime;
 	}
 }
