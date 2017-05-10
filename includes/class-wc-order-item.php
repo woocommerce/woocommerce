@@ -180,7 +180,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( empty( $meta->id ) || "" === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
