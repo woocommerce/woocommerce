@@ -616,7 +616,7 @@ class WC_Product_Importer extends WP_Importer {
 			'meta:' . $item      => __( 'Import as meta', 'woocommerce' ),
 		);
 
-		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options );
+		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options. $item );
 	}
 
 	/**
