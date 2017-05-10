@@ -304,44 +304,28 @@ class WC_Data_Store_WP {
 				'inclusive' => '>' !== $operator && '<' !== $operator,
 			);
 
-			if ( '>' === $operator || '>=' === $operator ) {
-				$query_arg['after'] = array(
-					'year' => $dates[0]->date( 'Y' ),
-					'month' => $dates[0]->date( 'n' ),
-					'day' => $dates[0]->date( 'j' ),
+			// Add 'before'/'after' query args.
+			$comparisons = array();
+			if ( '>' === $operator || '>=' === $operator || '...' === $operator ) {
+				$comparisons[] = 'after';
+			}
+			if ( '<' === $operator || '<=' === $operator || '...' === $operator ) {
+				$comparisons[] = 'before';
+			}
+
+			foreach ( $comparisons as $index => $comparison ) {
+				$query_arg[ $comparison ] = array(
+					'year' => $dates[ $index ]->date( 'Y' ),
+					'month' => $dates[ $index ]->date( 'n' ),
+					'day' => $dates[ $index ]->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-					$query_arg['after']['minute'] = $dates[0]->date( 'i' );
-					$query_arg['after']['second'] = $dates[0]->date( 's' );
+					$query_arg[ $comparison ]['minute'] = $dates[ $index ]->date( 'i' );
+					$query_arg[ $comparison ]['second'] = $dates[ $index ]->date( 's' );
 				}
-			} elseif ( '<' === $operator || '<=' === $operator ) {
-				$query_arg['before'] = array(
-					'year' => $dates[0]->date( 'Y' ),
-					'month' => $dates[0]->date( 'n' ),
-					'day' => $dates[0]->date( 'j' ),
-				);
-				if ( 'second' === $precision ) {
-					$query_arg['before']['minute'] = $dates[0]->date( 'i' );
-					$query_arg['before']['second'] = $dates[0]->date( 's' );
-				}
-			} elseif ( '...' === $operator ) {
-				$query_arg['after'] = array(
-					'year' => $dates[0]->date( 'Y' ),
-					'month' => $dates[0]->date( 'n' ),
-					'day' => $dates[0]->date( 'j' ),
-				);
-				$query_arg['before'] = array(
-					'year' => $dates[1]->date( 'Y' ),
-					'month' => $dates[1]->date( 'n' ),
-					'day' => $dates[1]->date( 'j' ),
-				);
-				if ( 'second' === $precision ) {
-					$query_arg['after']['minute'] = $dates[0]->date( 'i' );
-					$query_arg['after']['second'] = $dates[0]->date( 's' );
-					$query_arg['before']['minute'] = $dates[1]->date( 'i' );
-					$query_arg['before']['second'] = $dates[1]->date( 's' );
-				}
-			} else {
+			}
+
+			if ( empty( $comparisons ) ) {
 				$query_arg['year'] = $dates[0]->date( 'Y' );
 				$query_arg['month'] = $dates[0]->date( 'n' );
 				$query_arg['day'] = $dates[0]->date( 'j' );
