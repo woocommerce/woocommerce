@@ -148,6 +148,19 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					} else {
 						$value = __( 'N/A', 'woocommerce' );
 					}
+				} elseif ( 'image_id' === $column_id ) {
+					$image_ids = array_merge( array( $product->get_image_id( 'edit' ) ), $product->get_gallery_image_ids( 'edit' ) );
+					$images    = array();
+
+					foreach ( $image_ids as $image_id ) {
+						$image  = wp_get_attachment_image_src( $product->get_image_id( 'edit' ), 'full' );
+
+						if ( $image ) {
+							$images[] = $image[0];
+						}
+					}
+
+					$value = implode( ', ', $images );
 
 				// Default and custom handling.
 				} else {
@@ -177,7 +190,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				}
 			}
 
-			// @todo price, Images
+			// @todo price, meta
 
 			// Attributes are dynamic.
 			if ( $this->is_column_exporting( 'attributes' ) ) {
