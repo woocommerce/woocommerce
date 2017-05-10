@@ -126,7 +126,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 			'date_created' => $past . '...' . $future
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
-		$query->set( 'date_created', $now_date . '...' . $future );
+		$query->set( 'date_created', $past . '...' . $now_date );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', $future . '...' . $now_date );
 		$this->assertEquals( 0, count( $query->get_orders() ) );
