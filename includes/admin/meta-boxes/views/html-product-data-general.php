@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="general_product_data" class="panel woocommerce_options_panel">
 
 	<div class="options_group show_if_external">

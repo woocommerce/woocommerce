@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
