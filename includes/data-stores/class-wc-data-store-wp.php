@@ -253,12 +253,12 @@ class WC_Data_Store_WP {
 	 */
 	protected function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
 		$query_parse_regex = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
-		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
+		$valid_operators   = array( '>', '>=', '=', '<=', '<', '...' );
 
 		// YYYY-MM-DD queries have 'day' precision. Timestamp/WC_DateTime queries have 'second' precision.
 		$precision = 'second';
 
-		$dates = array();
+		$dates    = array();
 		$operator = '=';
 
 		try {
@@ -304,7 +304,7 @@ class WC_Data_Store_WP {
 			}
 
 			$query_arg = array(
-				'column' => 'day' === $precision ? $key : $key . '_gmt',
+				'column'    => 'day' === $precision ? $key : $key . '_gmt',
 				'inclusive' => '>' !== $operator && '<' !== $operator,
 			);
 
@@ -319,9 +319,9 @@ class WC_Data_Store_WP {
 
 			foreach ( $comparisons as $index => $comparison ) {
 				$query_arg[ $comparison ] = array(
-					'year' => $dates[ $index ]->date( 'Y' ),
+					'year'  => $dates[ $index ]->date( 'Y' ),
 					'month' => $dates[ $index ]->date( 'n' ),
-					'day' => $dates[ $index ]->date( 'j' ),
+					'day'   => $dates[ $index ]->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
 					$query_arg[ $comparison ]['minute'] = $dates[ $index ]->date( 'i' );
@@ -330,9 +330,9 @@ class WC_Data_Store_WP {
 			}
 
 			if ( empty( $comparisons ) ) {
-				$query_arg['year'] = $dates[0]->date( 'Y' );
+				$query_arg['year']  = $dates[0]->date( 'Y' );
 				$query_arg['month'] = $dates[0]->date( 'n' );
-				$query_arg['day'] = $dates[0]->date( 'j' );
+				$query_arg['day']   = $dates[0]->date( 'j' );
 				if ( 'second' === $precision ) {
 					$query_arg['minute'] = $dates[0]->date( 'i' );
 					$query_arg['second'] = $dates[0]->date( 's' );
@@ -357,8 +357,8 @@ class WC_Data_Store_WP {
 				case '>':
 				case '<=':
 					$wp_query_args['meta_query'][] = array(
-						'key' => $key,
-						'value' => $end_timestamp,
+						'key'     => $key,
+						'value'   => $end_timestamp,
 						'compare' => $operator,
 					);
 				break;
@@ -366,21 +366,21 @@ class WC_Data_Store_WP {
 				case '<':
 				case '>=':
 					$wp_query_args['meta_query'][] = array(
-						'key' => $key,
-						'value' => $start_timestamp,
+						'key'     => $key,
+						'value'   => $start_timestamp,
 						'compare' => $operator,
 					);
 				break;
 
 				default:
 					$wp_query_args['meta_query'][] = array(
-						'key' => $key,
-						'value' => $start_timestamp,
+						'key'     => $key,
+						'value'   => $start_timestamp,
 						'compare' => '>=',
 					);
 					$wp_query_args['meta_query'][] = array(
-						'key' => $key,
-						'value' => $end_timestamp,
+						'key'     => $key,
+						'value'   => $end_timestamp,
 						'compare' => '<=',
 					);
 			}
@@ -393,13 +393,13 @@ class WC_Data_Store_WP {
 				);
 			} else {
 				$wp_query_args['meta_query'][] = array(
-					'key' => $key,
-					'value' => $dates[0]->getTimestamp(),
+					'key'     => $key,
+					'value'   => $dates[0]->getTimestamp(),
 					'compare' => '>=',
 				);
 				$wp_query_args['meta_query'][] = array(
-					'key' => $key,
-					'value' => $dates[1]->getTimestamp(),
+					'key'     => $key,
+					'value'   => $dates[1]->getTimestamp(),
 					'compare' => '<=',
 				);
 			}
