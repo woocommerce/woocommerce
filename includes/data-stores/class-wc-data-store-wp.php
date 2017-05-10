@@ -258,26 +258,25 @@ class WC_Data_Store_WP {
 		// YYYY-MM-DD queries have 'day' precision. Timestamp/WC_DateTime queries have 'second' precision.
 		$precision = 'second';
 
-		$start_date = null;
+		$dates = array();
 		$operator = '=';
-		$end_date = null;
 
 		// Specific time query with a WC_DateTime.
 		if ( is_a( $query_var, 'WC_DateTime' ) ) {
-			$end_date = $query_var;
+			$dates[] = $query_var;
 
 		// Specific time query with a timestamp.
 		} elseif ( is_numeric( $query_var ) ) {
-			$end_date = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
+			$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
 
 		// Query with operators and possible range of dates.
 		} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
 			if ( ! empty( $sections[1] ) ) {
-				$start_date = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+				$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 			}
 
 			$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
-			$end_date = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
+			$dates[] = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
 
 			if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
 				$precision = 'day';
@@ -285,70 +284,70 @@ class WC_Data_Store_WP {
 
 		// Specific time query with a string.
 		} else {
-			$end_date = wc_string_to_datetime( $query_var );
+			$dates[] = wc_string_to_datetime( $query_var );
 			$precision = 'day';
 		}
 
 		// Check for valid inputs.
-		if ( ! $operator || ! $end_date || ( '...' === $operator && ! $start_date ) ) {
+		if ( ! $operator || empty( $dates ) || ( '...' === $operator && count( $dates ) < 2 ) ) {
 			return $wp_query_args;
 		}
 
 		// Build date query for 'post_date' or 'post_modified' keys.
-		if ( 'post_date' == $key || 'post_modified' == $key ) {
+		if ( 'post_date' === $key || 'post_modified' === $key ) {
 			if ( ! isset( $wp_query_args['date_query'] ) ) {
 				$wp_query_args['date_query'] = array();
 			}
 
 			$query_arg = array(
-				'column' => $key . '_gmt',
+				'column' => 'day' === $precision ? $key : $key . '_gmt',
 				'inclusive' => '>' !== $operator && '<' !== $operator,
 			);
 
-			if ( '>' == $operator || '>=' == $operator ) {
+			if ( '>' === $operator || '>=' === $operator ) {
 				$query_arg['after'] = array(
-					'year' => $end_date->date( 'Y' ),
-					'month' => $end_date->date( 'n' ),
-					'day' => $end_date->date( 'j' ),
+					'year' => $dates[0]->date( 'Y' ),
+					'month' => $dates[0]->date( 'n' ),
+					'day' => $dates[0]->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-					$query_arg['after']['minute'] = $end_date->date( 'i' );
-					$query_arg['after']['second'] = $end_date->date( 's' );
+					$query_arg['after']['minute'] = $dates[0]->date( 'i' );
+					$query_arg['after']['second'] = $dates[0]->date( 's' );
 				}
-			} elseif ( '<' == $operator || '<=' == $operator ) {
+			} elseif ( '<' === $operator || '<=' === $operator ) {
 				$query_arg['before'] = array(
-					'year' => $end_date->date( 'Y' ),
-					'month' => $end_date->date( 'n' ),
-					'day' => $end_date->date( 'j' ),
+					'year' => $dates[0]->date( 'Y' ),
+					'month' => $dates[0]->date( 'n' ),
+					'day' => $dates[0]->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-					$query_arg['before']['minute'] = $end_date->date( 'i' );
-					$query_arg['before']['second'] = $end_date->date( 's' );
+					$query_arg['before']['minute'] = $dates[0]->date( 'i' );
+					$query_arg['before']['second'] = $dates[0]->date( 's' );
 				}
-			} elseif ( '...' == $operator ) {
+			} elseif ( '...' === $operator ) {
 				$query_arg['after'] = array(
-					'year' => $start_date->date( 'Y' ),
-					'month' => $start_date->date( 'n' ),
-					'day' => $start_date->date( 'j' ),
+					'year' => $dates[0]->date( 'Y' ),
+					'month' => $dates[0]->date( 'n' ),
+					'day' => $dates[0]->date( 'j' ),
 				);
 				$query_arg['before'] = array(
-					'year' => $end_date->date( 'Y' ),
-					'month' => $end_date->date( 'n' ),
-					'day' => $end_date->date( 'j' ),
+					'year' => $dates[1]->date( 'Y' ),
+					'month' => $dates[1]->date( 'n' ),
+					'day' => $dates[1]->date( 'j' ),
 				);
 				if ( 'second' === $precision ) {
-					$query_arg['after']['minute'] = $start_date->date( 'i' );
-					$query_arg['after']['second'] = $start_date->date( 's' );
-					$query_arg['before']['minute'] = $end_date->date( 'i' );
-					$query_arg['before']['second'] = $end_date->date( 's' );
+					$query_arg['after']['minute'] = $dates[0]->date( 'i' );
+					$query_arg['after']['second'] = $dates[0]->date( 's' );
+					$query_arg['before']['minute'] = $dates[1]->date( 'i' );
+					$query_arg['before']['second'] = $dates[1]->date( 's' );
 				}
 			} else {
-				$query_arg['year'] = $end_date->date( 'Y' );
-				$query_arg['month'] = $end_date->date( 'n' );
-				$query_arg['day'] = $end_date->date( 'j' );
+				$query_arg['year'] = $dates[0]->date( 'Y' );
+				$query_arg['month'] = $dates[0]->date( 'n' );
+				$query_arg['day'] = $dates[0]->date( 'j' );
 				if ( 'second' === $precision ) {
-					$query_arg['minute'] = $end_date->date( 'i' );
-					$query_arg['second'] = $end_date->date( 's' );
+					$query_arg['minute'] = $dates[0]->date( 'i' );
+					$query_arg['second'] = $dates[0]->date( 's' );
 				}
 			}
 
@@ -364,8 +363,8 @@ class WC_Data_Store_WP {
 		// Meta dates are stored as timestamps in the db.
 		// Check against begining/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
-			$start_timestamp = '...' !== $operator ? strtotime( $end_date->date( 'm/d/Y 00:00:00' ) ) : strtotime( $start_date->date( 'm/d/Y 00:00:00' ) );
-			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( $end_date->date( 'm/d/Y 00:00:00' ) );
+			$start_timestamp = strtotime( $dates[0]->date( 'm/d/Y 00:00:00' ) );
+			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( $dates[1]->date( 'm/d/Y 00:00:00' ) );
 			switch ( $operator ) {
 				case '>':
 				case '<=':
@@ -401,18 +400,18 @@ class WC_Data_Store_WP {
 			if ( '...' !== $operator ) {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
-					'value'   => $end_date->getTimestamp(),
+					'value'   => $dates[0]->getTimestamp(),
 					'compare' => $operator,
 				);
 			} else {
 				$wp_query_args['meta_query'][] = array(
 					'key' => $key,
-					'value' => $start_date->getTimestamp(),
+					'value' => $dates[0]->getTimestamp(),
 					'compare' => '>=',
 				);
 				$wp_query_args['meta_query'][] = array(
 					'key' => $key,
-					'value' => $end_date->getTimestamp(),
+					'value' => $dates[1]->getTimestamp(),
 					'compare' => '<=',
 				);
 			}
