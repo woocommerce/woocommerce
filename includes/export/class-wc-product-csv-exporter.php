@@ -129,14 +129,14 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					$value    = $this->format_term_ids( $term_ids, 'product_shipping_class' );
 
 				} elseif ( in_array( $column_id, array( 'cross_sell_ids', 'upsell_ids', 'parent_id' ) ) ) {
-					$products     = array_filter( array_map( 'wc_get_product', (array) $product->{"get_{$column_id}"}( 'edit' ) ) );
-					$product_list = array();
+					$linked_products = array_filter( array_map( 'wc_get_product', (array) $product->{"get_{$column_id}"}( 'edit' ) ) );
+					$product_list    = array();
 
-					foreach ( $products as $product ) {
-						if ( $product->get_sku() ) {
-							$product_list[] = $product->get_sku();
+					foreach ( $linked_products as $linked_product ) {
+						if ( $linked_product->get_sku() ) {
+							$product_list[] = $linked_product->get_sku();
 						} else {
-							$product_list[] = 'id:' . $product->get_id();
+							$product_list[] = 'id:' . $linked_product->get_id();
 						}
 					}
 
@@ -172,45 +172,51 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$this->column_names[ 'downloads:url' . $i ]  = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
 						$row[ 'downloads:name' . $i ] = $download->get_name();
 						$row[ 'downloads:url' . $i ]  = $download->get_file();
-						++$i;
+						$i++;
 					}
 				}
 			}
 
-			// @todo price
-			// Attributes are dynamic. @todo
-			if ( ( $attributes = $product->get_attributes() ) && $this->is_column_exporting( 'attributes' ) ) {
-				$i = 1;
-				foreach ( $attributes as $attribute_name => $attribute ) {
-					$this->column_names[ 'attributes:name' . $i ]    = sprintf( __( 'Attribute %d Name', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:value' . $i ]   = sprintf( __( 'Attribute %d Value(s)', 'woocommerce' ), $i );
+			// @todo price, Images
 
-					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
+			// Attributes are dynamic.
+			if ( $this->is_column_exporting( 'attributes' ) ) {
+				$attributes = $product->get_attributes();
 
-						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
-							$values = array();
+				if ( count( $attributes ) ) {
+					$i = 1;
+					foreach ( $attributes as $attribute_name => $attribute ) {
+						$this->column_names[ 'attributes:name' . $i ]  = sprintf( __( 'Attribute %d Name', 'woocommerce' ), $i );
+						$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d Value(s)', 'woocommerce' ), $i );
 
-							foreach ( $terms as $term ) {
-								$values[] = $term->name;
+						if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+							$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
+
+							if ( $attribute->is_taxonomy() ) {
+								$terms  = $attribute->get_terms();
+								$values = array();
+
+								foreach ( $terms as $term ) {
+									$values[] = $term->name;
+								}
+
+								$row[ 'attributes:value' . $i ] = implode( ', ', $values );
+							} else {
+								$row[ 'attributes:value' . $i ] = implode( ', ', $attribute->get_options() );
 							}
-
-							$row[ 'attributes:value' . $i ] = implode( ', ', $values );
 						} else {
-							$row[ 'attributes:value' . $i ] = implode( ', ', $attribute->get_options() );
-						}
-					} else {
-						$row[ 'attributes:name' . $i ]  = wc_attribute_label( $attribute_name, $product );
+							$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
 
-						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
-							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
-							$row[ 'attributes:value' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
-						} else {
-							$row[ 'attributes:value' . $i ] = $attribute;
+							if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
+								$option_term = get_term_by( 'slug', $attribute, $attribute_name );
+								$row[ 'attributes:value' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
+							} else {
+								$row[ 'attributes:value' . $i ] = $attribute;
+							}
 						}
+
+						$i++;
 					}
-					++$i;
 				}
 			}
 
