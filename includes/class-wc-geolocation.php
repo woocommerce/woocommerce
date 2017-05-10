@@ -73,7 +73,7 @@ class WC_Geolocation {
 	 * @param  string $ip_address IP address.
 	 * @return string|bool The valid IP address, otherwise false.
 	 */
-	private function is_ip_address( $ip_address ) {
+	private static function is_ip_address( $ip_address ) {
 		// WP 4.7+ only.
 		if ( function_exists( 'rest_is_ip_address' ) ) {
 			return rest_is_ip_address( $ip_address );
