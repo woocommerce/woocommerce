@@ -388,10 +388,6 @@ table.variations {
 			cursor: pointer;
 		}
 
-		li:nth-child(4n+1) {
-			clear: left;
-		}
-
 		img {
 			opacity: .5;
 
@@ -411,17 +407,26 @@ table.variations {
 	.flex-control-thumbs li {
 		width: 33.3333%;
 	}
+	.flex-control-thumbs li:nth-child(3n+1) {
+		clear: left;
+	}
 }
 
 .woocommerce-product-gallery--columns-4 {
 	.flex-control-thumbs li {
 		width: 25%;
 	}
+	.flex-control-thumbs li:nth-child(4n+1) {
+		clear: left;
+	}
 }
 
 .woocommerce-product-gallery--columns-5 {
 	.flex-control-thumbs li {
 		width: 20%;
+	}
+	.flex-control-thumbs li:nth-child(5n+1) {
+		clear: left;
 	}
 }
 
