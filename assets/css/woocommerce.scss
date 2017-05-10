@@ -249,10 +249,24 @@ p.demo_store,
 						}
 					}
 				}
+			}
+		}
 
-				li:nth-child(4n+1) {
-					clear: left;
-				}
+		.woocommerce-product-gallery--columns-3 {
+			.flex-control-thumbs li:nth-child(3n+1) {
+				clear: left;
+			}
+		}
+
+		.woocommerce-product-gallery--columns-4 {
+			.flex-control-thumbs li:nth-child(4n+1) {
+				clear: left;
+			}
+		}
+
+		.woocommerce-product-gallery--columns-5 {
+			.flex-control-thumbs li:nth-child(5n+1) {
+				clear: left;
 			}
 		}
 
