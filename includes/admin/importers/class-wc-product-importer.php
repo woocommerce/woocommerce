@@ -50,7 +50,7 @@ class WC_Product_Importer extends WP_Importer {
 	 */
 	public function __construct() {
 		$this->import_page = 'woocommerce_product_csv';
-		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : (string) wc_clean( $_POST['delimiter'] );
+		$this->delimiter   = empty( $_REQUEST['delimiter'] ) ? ',' : (string) wc_clean( $_REQUEST['delimiter'] );
 	}
 
 	/**
@@ -86,18 +86,18 @@ class WC_Product_Importer extends WP_Importer {
 
 			case 2 :
 				check_admin_referer( 'woocommerce-csv-importer' );
-				$this->id       = absint( $_POST['file_id'] );
-				$this->file_url = sanitize_text_field( $_POST['file_url'] );
+				$file           = null;
+				$this->id       = isset( $_REQUEST['file_id'] ) ? absint( $_REQUEST['file_id'] ) : '';
+				$this->file_url = isset( $_REQUEST['file_url'] ) ? sanitize_text_field( $_REQUEST['file_url'] ) : '';
 
-				if ( $this->handle_upload() ) {
-					if ( $this->id ) {
-						$file = get_attached_file( $this->id );
-					} else {
-						$file = ABSPATH . $this->file_url;
-					}
-
-					$this->import( $file );
+				if ( $this->id ) {
+					$file = get_attached_file( $this->id );
+				} elseif ( $this->file_url ) {
+					$file = ABSPATH . $this->file_url;
 				}
+
+				$this->import( $file );
+
 				break;
 		}
 
@@ -328,6 +328,55 @@ class WC_Product_Importer extends WP_Importer {
 		}
 
 		return apply_filters( 'woocommerce_csv_product_parsed_data', $parsed_data, $data );
+	}
+
+	/**
+	 * Get default fields.
+	 *
+	 * @return array
+	 */
+	protected function get_default_fields() {
+		$fields = array(
+			'id',
+			'type',
+			'sku',
+			'name',
+			'status',
+			'featured',
+			'catalog_visibility',
+			'short_description',
+			'description',
+			'date_on_sale_from',
+			'date_on_sale_to',
+			'tax_status',
+			'tax_class',
+			'stock_status',
+			'backorders',
+			'sold_individually',
+			'weight',
+			'length',
+			'width',
+			'height',
+			'reviews_allowed',
+			'purchase_note',
+			'price',
+			'regular_price',
+			'manage_stock',
+			'stock_quantity',
+			'category_ids',
+			'tag_ids',
+			'shipping_class_id',
+			'image_id',
+			'gallery_image_ids',
+			'downloads',
+			'download_limit',
+			'download_expiry',
+			'parent_id',
+			'upsell_ids',
+			'cross_sell_ids',
+		);
+
+		return apply_filters( 'woocommerce_csv_product_default_fields', $fields );
 	}
 
 	/**
@@ -577,6 +626,20 @@ class WC_Product_Importer extends WP_Importer {
 		$data    = $this->read_csv( $file, array( 'lines' => 1 ) );
 		$headers = $data['raw_headers'];
 		$sample  = $data['data'][0];
+
+		// Check if all fields matches.
+		if ( 0 === count( array_diff( $headers, $this->get_default_fields() ) ) ) {
+			$params = array(
+				'import'    => $this->import_page,
+				'step'      => 2,
+				'file_id'   => $this->id,
+				'file_url'  => $this->file_url,
+				'delimiter' => $this->delimiter,
+				'_wpnonce'  => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			);
+
+			wp_redirect( add_query_arg( $params, admin_url( 'admin.php' ) ) );
+		}
 
 		include_once( dirname( __FILE__ ) . '/views/html-csv-mapping.php' );
 	}
