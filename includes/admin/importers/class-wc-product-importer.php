@@ -120,7 +120,7 @@ class WC_Product_Importer extends WP_Importer {
 		echo '<div class="updated settings-error"><p>';
 		/* translators: %d: products count */
 		printf(
-			__( 'Import complete - imported %d products.', 'woocommerce' ),
+			__( 'Import complete - imported %s products.', 'woocommerce' ),
 			'<strong>' . count( $data ) . '</strong>'
 		);
 		echo '</p></div>';
@@ -256,7 +256,7 @@ class WC_Product_Importer extends WP_Importer {
 			'Height'                   => array( $this, 'parse_float_field' ),
 			'Width'                    => array( $this, 'parse_float_field' ),
 			'Allow customer reviews?'  => array( $this, 'parse_bool_field' ),
-			'Purchase Note'            => 'wp_kses',
+			'Purchase Note'            => 'wp_kses_post',
 			'Price'                    => 'wc_format_decimal',
 			'Regular Price'            => 'wc_format_decimal',
 			'Stock'                    => 'absint',
