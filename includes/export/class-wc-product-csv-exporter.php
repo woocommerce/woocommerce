@@ -108,7 +108,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				// Handle special columns which don't map 1:1 to product data.
 				if ( 'published' === $column_id ) {
-					$value = 'published' === $product->get_status( 'edit' ) ? 1 : 0;
+					$value = 'publish' === $product->get_status( 'edit' ) ? 1 : 0;
 
 				} elseif ( 'category_ids' === $column_id ) {
 					$term_ids = $product->get_category_ids( 'edit' );
