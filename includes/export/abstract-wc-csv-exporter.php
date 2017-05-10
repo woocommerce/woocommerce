@@ -58,12 +58,18 @@ abstract class WC_CSV_Exporter {
 	protected $column_names = array();
 
 	/**
+	 * List of columns to export, or empty for all.
+	 * @var array
+	 */
+	protected $columns_to_export = array();
+
+	/**
 	 * Prepare data that will be exported.
 	 */
 	abstract function prepare_data_to_export();
 
 	/**
-	 * Return an array of columns to export.
+	 * Return an array of supported column names and ids.
 	 *
 	 * @return array
 	 */
@@ -81,6 +87,41 @@ abstract class WC_CSV_Exporter {
 		foreach ( $column_names as $column_id => $column_name ) {
 			$this->column_names[ wc_clean( $column_id ) ] = wc_clean( $column_name );
 		}
+	}
+
+	/**
+	 * Return an array of columns to export.
+	 *
+	 * @return array
+	 */
+	public function get_columns_to_export() {
+		return $this->columns_to_export;
+	}
+
+	/**
+	 * Set columns to export.
+	 * @param array $column_names
+	 */
+	public function set_columns_to_export( $columns ) {
+		$this->columns_to_export = array_map( 'wc_clean', $columns );
+	}
+
+	/**
+	 * See if a column is to be exported or not.
+	 * @return boolean
+	 */
+	public function is_column_exporting( $column_id ) {
+		$columns_to_export = $this->get_columns_to_export();
+
+		if ( empty( $columns_to_export ) ) {
+			return true;
+		}
+
+		if ( in_array( $column_id, $columns_to_export ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -143,17 +184,17 @@ abstract class WC_CSV_Exporter {
 	 * Export column headers in CSV format.
 	 */
 	protected function export_column_headers() {
-		$columns     = $this->get_column_names();
-		$column_ids  = array_keys( $columns );
-		$last_column = end( $column_ids );
-		$row         = '';
+		$columns = $this->get_column_names();
+		$row     = '';
 
 		foreach ( $columns as $column_id => $column_name ) {
-			$row .= '"' . addslashes( $column_name ) . '"';
-			$row .= $column_id === $last_column ? '' : ',';
+			if ( ! $this->is_column_exporting( $column_id ) ) {
+				continue;
+			}
+			$row .= '"' . addslashes( $column_name ) . '",';
 		}
 
-		return $row;
+		return rtrim( $row, ',' );
 	}
 
 	/**
@@ -179,21 +220,21 @@ abstract class WC_CSV_Exporter {
 	 * Export a row in CSV format.
 	 */
 	protected function export_row( $row_data ) {
-		$columns     = $this->get_column_names();
-		$column_ids  = array_keys( $columns );
-		$last_column = end( $column_ids );
-		$row         = '';
+		$columns = $this->get_column_names();
+		$row     = '';
 
 		foreach ( $columns as $column_id => $column_name ) {
-			if ( isset( $row_data[ $column_id ] ) ) {
-				$row .= '"' . $this->format_data( $row_data[ $column_id ] ) . '"';
-			} else {
-				$row .= '""';
+			if ( ! $this->is_column_exporting( $column_id ) ) {
+				continue;
 			}
-			$row .= $column_id === $last_column ? '' : ',';
+			if ( isset( $row_data[ $column_id ] ) ) {
+				$row .= '"' . $this->format_data( $row_data[ $column_id ] ) . '",';
+			} else {
+				$row .= '"",';
+			}
 		}
 
-		$this->csv_rows[] = $row;
+		$this->csv_rows[] = rtrim( $row, ',' );
 		++ $this->exported_row_count;
 	}
 

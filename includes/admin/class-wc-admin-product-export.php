@@ -36,6 +36,10 @@ class WC_Admin_Product_Export {
 	 * Export page UI.
 	 */
 	public function admin_screen() {
+		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+
+		$exporter = new WC_Product_CSV_Exporter();
+
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-product-export.php' );
 	}
 
@@ -62,6 +66,11 @@ class WC_Admin_Product_Export {
 		if ( ! empty( $_POST['columns'] ) ) {
 			$exporter->set_column_names( $_POST['columns'] );
 		}
+
+		if ( ! empty( $_POST['selected_columns'] ) ) {
+			$exporter->set_columns_to_export( $_POST['selected_columns'] );
+		}
+
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 

@@ -106,6 +106,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					continue;
 				}
 
+				// Skip columns if we're being selective.
+				if ( ! $this->is_column_exporting( $column_id ) ) {
+					continue;
+				}
+
 				// Handle special columns which don't map 1:1 to product data.
 				if ( 'published' === $column_id ) {
 					$value = 'publish' === $product->get_status( 'edit' ) ? 1 : 0;
@@ -156,7 +161,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 
 			// Downloads are dynamic.
-			if ( $product->is_downloadable() ) {
+			if ( $product->is_downloadable() && $this->is_column_exporting( 'downloads' ) ) {
 				$downloads = $product->get_downloads( 'edit' );
 
 				if ( $downloads ) {
@@ -171,6 +176,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				}
 			}
 
+			// @todo price
 			// Attributes are dynamic. @todo
 			if ( $product->is_downloadable() ) {
 

@@ -15,8 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><?php esc_html_e( 'Generate and download a CSV file containing a list of all products.', 'woocommerce' ); ?></p>
 		<div class="form-row">
 			<label><?php esc_html_e( 'Which columns should be exported? @todo', 'woocommerce' ); ?></label>
-			<select class="wc-enhanced-select" style="width:50%;" multiple data-placeholder="<?php esc_attr_e( 'Export all data', 'woocommerce' ); ?>">
-				<option>Export all product data</option>
+			<select class="woocommerce-exporter-columns wc-enhanced-select" style="width:50%;" multiple data-placeholder="<?php esc_attr_e( 'Export all data', 'woocommerce' ); ?>">
+				<?php
+					foreach ( $exporter->get_default_column_names() as $column_id => $column_name ) {
+						echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
+					}
+				?>
 			</select>
 		</div>
 		<div class="form-row form-row-submit">
@@ -60,16 +64,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * Process the current export step.
 			 */
 			productExportForm.prototype.processStep = function( step, data, columns ) {
-				var $this = this;
+				var $this = this,
+					selected_columns = $( '.woocommerce-exporter-columns' ).val();
 
 				$.ajax( {
 					type: 'POST',
 					url: ajaxurl,
 					data: {
-						form    : data,
-						action  : 'woocommerce_do_ajax_product_export',
-						step    : step,
-						columns : columns
+						form             : data,
+						action           : 'woocommerce_do_ajax_product_export',
+						step             : step,
+						columns          : columns,
+						selected_columns : selected_columns
 					},
 					dataType: "json",
 					success: function( response ) {
