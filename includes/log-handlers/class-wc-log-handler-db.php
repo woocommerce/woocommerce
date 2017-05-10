@@ -39,13 +39,12 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			$source = $this->get_log_source();
 		}
 
-		return $this->add( $timestamp, $level, $message, $source, $context );
+		return $this->add( $level, $message, $source, $context );
 	}
 
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param int $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
 	 * @param string $source Log source. Useful for filtering and sorting.
@@ -55,18 +54,16 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	 *
 	 * @return bool True if write was successful.
 	 */
-	protected static function add( $timestamp, $level, $message, $source, $context ) {
+	protected static function add($level, $message, $source, $context ) {
 		global $wpdb;
 
 		$insert = array(
-			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
 			'level' => WC_Log_Levels::get_level_severity( $level ),
 			'message' => $message,
 			'source' => $source,
 		);
 
 		$format = array(
-			'%s',
 			'%d',
 			'%s',
 			'%s',

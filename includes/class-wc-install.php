@@ -605,7 +605,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_log (
   log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  timestamp datetime NOT NULL,
+  timestamp datetime(6) NOT NULL DEFAULT NOW(5),
   level smallint(4) NOT NULL,
   source varchar(200) NOT NULL,
   message longtext NOT NULL,
