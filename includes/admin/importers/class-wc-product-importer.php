@@ -557,9 +557,10 @@ class WC_Product_Importer extends WP_Importer {
 	/**
 	 * Get mapping options.
 	 *
+	 * @param  string $item Item name
 	 * @return array
 	 */
-	protected function get_mapping_options() {
+	protected function get_mapping_options( $item = '' ) {
 		$weight_unit    = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 		$options        = array(
@@ -612,6 +613,7 @@ class WC_Product_Importer extends WP_Importer {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'meta:' . $item      => __( 'Import as meta', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options );

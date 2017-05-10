@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select name="map_to[<?php echo esc_attr( $name ); ?>]">
 							<option value=""><?php esc_html_e( 'Do not import', 'woocommerce' ); ?></option>
 
-							<?php foreach ( $this->get_mapping_options() as $key => $value ) : ?>
+							<?php foreach ( $this->get_mapping_options( $name ) as $key => $value ) : ?>
 								<?php if ( is_array( $value ) ) : ?>
 									<optgroup label="<?php echo esc_attr( $value['name'] ); ?>">
 										<?php foreach ( $value['options'] as $sub_key => $sub_value ) : ?>
