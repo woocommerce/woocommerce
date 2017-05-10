@@ -83,6 +83,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$columns  = $this->get_column_names();
 		$products = wc_get_products( array(
 			'status'   => array( 'private', 'publish' ),
+			'type'     => array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ),
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
 			'orderby'  => array(
@@ -102,7 +103,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				$column_id = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
 
 				// Skip some columns if dynamically handled later.
-				if ( in_array( $column_id, array( 'download_name', 'download_url' ) ) ) {
+				if ( in_array( $column_id, array( 'downloads', 'attributes' ) ) ) {
 					continue;
 				}
 
@@ -167,19 +168,50 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				if ( $downloads ) {
 					$i = 1;
 					foreach ( $downloads as $download ) {
-						$this->column_names[ 'download_name:' . $i ] = sprintf( __( 'Download %d Name', 'woocommerce' ), $i );
-						$this->column_names[ 'download_url:' . $i ]  = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
-						$row[ 'download_name:' . $i ] = $download->get_name();
-						$row[ 'download_url:' . $i ]  = $download->get_file();
+						$this->column_names[ 'downloads:name' . $i ] = sprintf( __( 'Download %d Name', 'woocommerce' ), $i );
+						$this->column_names[ 'downloads:url' . $i ]  = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
+						$row[ 'downloads:name' . $i ] = $download->get_name();
+						$row[ 'downloads:url' . $i ]  = $download->get_file();
+						++$i;
 					}
-					++$i;
 				}
 			}
 
 			// @todo price
 			// Attributes are dynamic. @todo
-			if ( $product->is_downloadable() ) {
+			if ( ( $attributes = $product->get_attributes() ) && $this->is_column_exporting( 'attributes' ) ) {
+				$i = 1;
+				foreach ( $attributes as $attribute_name => $attribute ) {
+					$this->column_names[ 'attributes:name' . $i ]    = sprintf( __( 'Attribute %d Name', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:value' . $i ]   = sprintf( __( 'Attribute %d Value(s)', 'woocommerce' ), $i );
 
+					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
+
+						if ( $attribute->is_taxonomy() ) {
+							$terms  = $attribute->get_terms();
+							$values = array();
+
+							foreach ( $terms as $term ) {
+								$values[] = $term->name;
+							}
+
+							$row[ 'attributes:value' . $i ] = implode( ', ', $values );
+						} else {
+							$row[ 'attributes:value' . $i ] = implode( ', ', $attribute->get_options() );
+						}
+					} else {
+						$row[ 'attributes:name' . $i ]  = wc_attribute_label( $attribute_name, $product );
+
+						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
+							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
+							$row[ 'attributes:value' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
+						} else {
+							$row[ 'attributes:value' . $i ] = $attribute;
+						}
+					}
+					++$i;
+				}
 			}
 
 			$this->row_data[] = $row;

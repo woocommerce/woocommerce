@@ -111,6 +111,7 @@ abstract class WC_CSV_Exporter {
 	 * @return boolean
 	 */
 	public function is_column_exporting( $column_id ) {
+		$column_id         = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
 		$columns_to_export = $this->get_columns_to_export();
 
 		if ( empty( $columns_to_export ) ) {

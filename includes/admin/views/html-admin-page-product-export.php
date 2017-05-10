@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
 					}
 				?>
+				<option value="downloads"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></option>
+				<option value="attributes"><?php esc_html_e( 'Attributes', 'woocommerce' ); ?></option>
 			</select>
 		</div>
 		<div class="form-row form-row-submit">
