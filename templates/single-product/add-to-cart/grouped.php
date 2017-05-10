@@ -80,7 +80,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					</tr>
 					<?php
 				}
-				$post = $previous_post;
+				// Return data to original post.
+				setup_postdata( $post =& $previous_post );
 			?>
 		</tbody>
 	</table>
