@@ -261,31 +261,35 @@ class WC_Data_Store_WP {
 		$dates = array();
 		$operator = '=';
 
-		// Specific time query with a WC_DateTime.
-		if ( is_a( $query_var, 'WC_DateTime' ) ) {
-			$dates[] = $query_var;
+		try {
+			// Specific time query with a WC_DateTime.
+			if ( is_a( $query_var, 'WC_DateTime' ) ) {
+				$dates[] = $query_var;
 
-		// Specific time query with a timestamp.
-		} elseif ( is_numeric( $query_var ) ) {
-			$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
+			// Specific time query with a timestamp.
+			} elseif ( is_numeric( $query_var ) ) {
+				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
 
-		// Query with operators and possible range of dates.
-		} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
-			if ( ! empty( $sections[1] ) ) {
-				$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
-			}
+			// Query with operators and possible range of dates.
+			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
+				if ( ! empty( $sections[1] ) ) {
+					$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+				}
 
-			$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
-			$dates[] = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
+				$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
+				$dates[] = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
 
-			if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
+				if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
+					$precision = 'day';
+				}
+
+			// Specific time query with a string.
+			} else {
+				$dates[] = wc_string_to_datetime( $query_var );
 				$precision = 'day';
 			}
-
-		// Specific time query with a string.
-		} else {
-			$dates[] = wc_string_to_datetime( $query_var );
-			$precision = 'day';
+		} catch ( Exception $e ) {
+			return $wp_query_args;
 		}
 
 		// Check for valid inputs.
@@ -347,8 +351,8 @@ class WC_Data_Store_WP {
 		// Meta dates are stored as timestamps in the db.
 		// Check against begining/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
-			$start_timestamp = strtotime( $dates[0]->date( 'm/d/Y 00:00:00' ) );
-			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( $dates[1]->date( 'm/d/Y 00:00:00' ) );
+			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
+			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
 			switch ( $operator ) {
 				case '>':
 				case '<=':
