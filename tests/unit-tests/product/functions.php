@@ -322,7 +322,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'key'     => '_price',
 			'value'   => array( 10, 100 ),
 			'compare' => 'BETWEEN',
-			'type'    => 'DECIMAL',
+			'type'    => 'NUMERIC',
 		), $meta_query );
 	}
 

@@ -73,7 +73,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
-		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) ) {
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && ( $parent_title = get_post_field( 'post_title', $product->get_parent_id() ) ) && 0 !== strpos( $post_object->post_title, $parent_title ) ) {
 			global $wpdb;
 
 			$new_title = $this->generate_product_title( $product );

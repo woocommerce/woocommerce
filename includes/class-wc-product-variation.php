@@ -391,6 +391,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return $this->get_prop( 'attributes', $context );
 	}
 
+	/**
+	 * Returns whether or not the product has any visible attributes.
+	 *
+	 * Variations are mapped to specific attributes unlike products, and the return
+	 * value of ->get_attributes differs. Therefore this returns false.
+	 *
+	 * @return boolean
+	 */
+	public function has_attributes() {
+		return false;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Conditionals
