@@ -50,7 +50,7 @@ class WC_Product_Importer extends WP_Importer {
 	 */
 	public function __construct() {
 		$this->import_page = 'woocommerce_product_csv';
-		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : (string) wc_clean( $_POST['delimiter'] );
+		$this->delimiter   = empty( $_REQUEST['delimiter'] ) ? ',' : (string) wc_clean( $_REQUEST['delimiter'] );
 	}
 
 	/**
@@ -70,19 +70,34 @@ class WC_Product_Importer extends WP_Importer {
 				$this->greet();
 				break;
 
-			case 1:
+			case 1 :
 				check_admin_referer( 'import-upload' );
 
 				if ( $this->handle_upload() ) {
-
 					if ( $this->id ) {
 						$file = get_attached_file( $this->id );
 					} else {
 						$file = ABSPATH . $this->file_url;
 					}
 
-					$this->import( $file );
+					$this->importer_mapping( $file );
 				}
+				break;
+
+			case 2 :
+				check_admin_referer( 'woocommerce-csv-importer' );
+				$file           = null;
+				$this->id       = isset( $_REQUEST['file_id'] ) ? absint( $_REQUEST['file_id'] ) : '';
+				$this->file_url = isset( $_REQUEST['file_url'] ) ? sanitize_text_field( $_REQUEST['file_url'] ) : '';
+
+				if ( $this->id ) {
+					$file = get_attached_file( $this->id );
+				} elseif ( $this->file_url ) {
+					$file = ABSPATH . $this->file_url;
+				}
+
+				$this->import( $file );
+
 				break;
 		}
 
@@ -114,7 +129,13 @@ class WC_Product_Importer extends WP_Importer {
 
 		$this->import_start();
 
-		$data = $this->read_csv( $file, array( 'parse' => true ) );
+		$args = array( 'parse' => true );
+
+		if ( ! empty( $_POST['map_to'] ) ) {
+			$args['mapping'] = wp_unslash( $_POST['map_to'] );
+		}
+
+		$data = $this->read_csv( $file, $args );
 
 		// Show Result
 		echo '<div class="updated settings-error"><p>';
@@ -224,8 +245,9 @@ class WC_Product_Importer extends WP_Importer {
 	public function map_headers( $data, $mapping ) {
 		$data['headers'] = array();
 		foreach ( $data['raw_headers'] as $heading ) {
-			$data['headers'] = isset( $mapping[ $heading ] ) ? $mapping[ $heading ] : $heading;
+			$data['headers'][] = isset( $mapping[ $heading ] ) ? $mapping[ $heading ] : $heading;
 		}
+
 		return $data;
 	}
 
@@ -239,34 +261,33 @@ class WC_Product_Importer extends WP_Importer {
 
 		/**
 		 * Columns not mentioned here will get parsed with 'esc_attr'.
-		 * column_name => callback
-		 * @todo Use slugs instead of full column name once mapping is completed.
+		 * column_name => callback.
 		 */
 		$data_formatting = array(
-			'ID'                       => 'absint',
-			'Published'                => array( $this, 'parse_bool_field' ),
-			'Is featured?'             => array( $this, 'parse_bool_field' ),
-			'Date sale price starts'   => 'strtotime',
-			'Date sale price ends'     => 'strtotime',
-			'In stock?'                => array( $this, 'parse_bool_field' ),
-			'Backorders allowed?'      => array( $this, 'parse_bool_field' ),
-			'Sold individually?'       => array( $this, 'parse_bool_field' ),
-			'Weight'                   => array( $this, 'parse_float_field' ),
-			'Length'                   => array( $this, 'parse_float_field' ),
-			'Height'                   => array( $this, 'parse_float_field' ),
-			'Width'                    => array( $this, 'parse_float_field' ),
-			'Allow customer reviews?'  => array( $this, 'parse_bool_field' ),
-			'Purchase Note'            => 'wp_kses_post',
-			'Price'                    => 'wc_format_decimal',
-			'Regular Price'            => 'wc_format_decimal',
-			'Stock'                    => 'absint',
-			'Categories'               => array( $this, 'parse_categories' ),
-			'Tags'                     => array( $this, 'parse_comma_field' ),
-			'Images'                   => array( $this, 'parse_comma_field' ),
-			'Upsells'                  => array( $this, 'parse_comma_field' ),
-			'Cross-sells'              => array( $this, 'parse_comma_field' ),
-			'Download Limit'           => 'absint',
-			'Download Expiry Days'     => 'absint',
+			'id'                => 'absint',
+			'status'            => array( $this, 'parse_bool_field' ),
+			'featured'          => array( $this, 'parse_bool_field' ),
+			'date_on_sale_from' => 'strtotime',
+			'date_on_sale_to'   => 'strtotime',
+			'manage_stock'      => array( $this, 'parse_bool_field' ),
+			'backorders'        => array( $this, 'parse_bool_field' ),
+			'sold_individually' => array( $this, 'parse_bool_field' ),
+			'width'             => array( $this, 'parse_float_field' ),
+			'length'            => array( $this, 'parse_float_field' ),
+			'height'            => array( $this, 'parse_float_field' ),
+			'width'             => array( $this, 'parse_float_field' ),
+			'reviews_allowed'   => array( $this, 'parse_bool_field' ),
+			'purchase_note'     => 'wp_kses_post',
+			'price'             => 'wc_format_decimal',
+			'regular_price'     => 'wc_format_decimal',
+			'stock_quantity'    => 'absint',
+			'category_ids'      => array( $this, 'parse_categories' ),
+			'tag_ids'           => array( $this, 'parse_comma_field' ),
+			'images'            => array( $this, 'parse_comma_field' ),
+			'upsell_ids'        => array( $this, 'parse_comma_field' ),
+			'cross_sell_ids'    => array( $this, 'parse_comma_field' ),
+			'download_limit'    => 'absint',
+			'download_expiry'   => 'absint',
 		);
 		$regex_match_data_formatting = array(
 			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
@@ -306,6 +327,54 @@ class WC_Product_Importer extends WP_Importer {
 		}
 
 		return apply_filters( 'woocommerce_csv_product_parsed_data', $parsed_data, $data );
+	}
+
+	/**
+	 * Get default fields.
+	 *
+	 * @return array
+	 */
+	protected function get_default_fields() {
+		$fields = array(
+			'id',
+			'type',
+			'sku',
+			'name',
+			'status',
+			'featured',
+			'catalog_visibility',
+			'short_description',
+			'description',
+			'date_on_sale_from',
+			'date_on_sale_to',
+			'tax_status',
+			'tax_class',
+			'stock_status',
+			'backorders',
+			'sold_individually',
+			'weight',
+			'length',
+			'width',
+			'height',
+			'reviews_allowed',
+			'purchase_note',
+			'price',
+			'regular_price',
+			'manage_stock',
+			'stock_quantity',
+			'category_ids',
+			'tag_ids',
+			'shipping_class_id',
+			'images',
+			'downloads',
+			'download_limit',
+			'download_expiry',
+			'parent_id',
+			'upsell_ids',
+			'cross_sell_ids',
+		);
+
+		return apply_filters( 'woocommerce_csv_product_default_fields', $fields );
 	}
 
 	/**
@@ -483,4 +552,94 @@ class WC_Product_Importer extends WP_Importer {
 		die();
 	}
 
+	/**
+	 * Get mapping options.
+	 *
+	 * @param  string $item Item name
+	 * @return array
+	 */
+	protected function get_mapping_options( $item = '' ) {
+		$weight_unit    = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$options        = array(
+			'id'                 => __( 'ID', 'woocommerce' ),
+			'type'               => __( 'Type', 'woocommerce' ),
+			'sku'                => __( 'SKU', 'woocommerce' ),
+			'name'               => __( 'Name', 'woocommerce' ),
+			'status'             => __( 'Published', 'woocommerce' ),
+			'featured'           => __( 'Is featured?', 'woocommerce' ),
+			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
+			'short_description'  => __( 'Short Description', 'woocommerce' ),
+			'description'        => __( 'Description', 'woocommerce' ),
+			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
+			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'tax_status'         => __( 'Tax Status', 'woocommerce' ),
+			'tax_class'          => __( 'Tax Class', 'woocommerce' ),
+			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			/* translators: %s: weight unit */
+			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ),
+			/* translators: %s: dimension unit */
+			'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
+			/* translators: %s: dimension unit */
+			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
+			/* translators: %s: dimension unit */
+			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
+			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase Note', 'woocommerce' ),
+			'price'              => __( 'Price', 'woocommerce' ),
+			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
+			'manage_stock'       => __( 'Manage stock?', 'woocommerce' ),
+			'stock_quantity'     => __( 'Amount in stock', 'woocommerce' ),
+			'category_ids'       => __( 'Categories', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
+			'attributes'         => array(
+				'name'    => __( 'Attributes', 'woocommerce' ),
+				'options' => array(
+					'attributes_name'    => __( 'Attributes name', 'woocommerce' ),
+					'attributes_value'   => __( 'Attributes value', 'woocommerce' ),
+					'default_attributes' => __( 'Default attribute', 'woocommerce' ),
+				),
+			),
+			'images'             => __( 'Image', 'woocommerce' ),
+			'downloads'          => __( 'Download Name:URL', 'woocommerce' ),
+			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
+			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
+			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'meta:' . $item      => __( 'Import as meta', 'woocommerce' ),
+		);
+
+		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options. $item );
+	}
+
+	/**
+	 * CSV mapping.
+	 *
+	 * @param  string $file File path.
+	 */
+	protected function importer_mapping( $file ) {
+		$data    = $this->read_csv( $file, array( 'lines' => 1 ) );
+		$headers = $data['raw_headers'];
+		$sample  = $data['data'][0];
+
+		// Check if all fields matches.
+		if ( 0 === count( array_diff( $headers, $this->get_default_fields() ) ) ) {
+			$params = array(
+				'import'    => $this->import_page,
+				'step'      => 2,
+				'file_id'   => $this->id,
+				'file_url'  => $this->file_url,
+				'delimiter' => $this->delimiter,
+				'_wpnonce'  => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			);
+
+			wp_redirect( add_query_arg( $params, admin_url( 'admin.php' ) ) );
+		}
+
+		include_once( dirname( __FILE__ ) . '/views/html-csv-mapping.php' );
+	}
 }
