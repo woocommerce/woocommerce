@@ -918,7 +918,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				continue;
 			}
 
-			$attribute_field_name = apply_filters( 'woocommerce_matching_product_variation_attribute_name', 'attribute_' . sanitize_title( $attribute->get_name() ), $attribute );
+			$attribute_field_name = apply_filters( 'woocommerce_matching_product_variation_attribute_name', 'attribute_' . sanitize_title( $attribute->get_name() ), $attribute, $product );
 
 			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
 				return 0;
