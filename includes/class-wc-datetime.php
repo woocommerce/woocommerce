@@ -51,7 +51,10 @@ class WC_DateTime extends DateTime {
 
 	/**
 	 * Set timezone.
+	 *
 	 * @param DateTimeZone $timezone
+	 *
+	 * @return static
 	 */
 	public function setTimezone( $timezone ) {
 		$this->utc_offset = 0;

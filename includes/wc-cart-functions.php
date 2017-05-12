@@ -85,6 +85,8 @@ function wc_get_raw_referer() {
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
+ *
+ * @return mixed|void
  */
 function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
@@ -245,8 +247,11 @@ function wc_cart_totals_taxes_total_html() {
  * Get a coupon label.
  *
  * @access public
+ *
  * @param string $coupon
  * @param bool $echo or return
+ *
+ * @return string
  */
 function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 	if ( is_string( $coupon ) ) {

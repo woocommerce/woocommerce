@@ -221,7 +221,10 @@ class WC_CLI_REST_Command {
 	 * Do a REST Request
 	 *
 	 * @param string $method
+	 * @param string $route
+	 * @param array  $assoc_args
 	 *
+	 * @return array
 	 */
 	private function do_request( $method, $route, $assoc_args ) {
 		if ( ! defined( 'REST_REQUEST' ) ) {
@@ -437,6 +440,8 @@ EOT;
 	 * This function decodes the json (if present) and tries to get it's value.
 	 *
 	 * @param array $arr
+	 *
+	 * @return array
 	 */
 	protected function decode_json( $arr ) {
 		foreach ( $arr as $key => $value ) {
