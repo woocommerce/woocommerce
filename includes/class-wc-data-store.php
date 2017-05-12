@@ -65,6 +65,8 @@ class WC_Data_Store {
 	 * store we want to work with.
 	 *
 	 * @param string $object_type Name of object.
+	 *
+	 * @throws Exception
 	 */
 	public function __construct( $object_type ) {
 		$this->object_type = $object_type;

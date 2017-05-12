@@ -544,7 +544,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * Gets the product ID from the SKU or posted ID.
 	 *
 	 * @param array $posted Request data
+	 *
 	 * @return int
+	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {

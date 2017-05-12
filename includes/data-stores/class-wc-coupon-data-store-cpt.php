@@ -81,7 +81,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Method to read a coupon.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 *
+	 * @param WC_Data $coupon
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$coupon ) {
 		$coupon->set_defaults();
