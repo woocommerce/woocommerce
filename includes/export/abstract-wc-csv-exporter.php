@@ -74,7 +74,7 @@ abstract class WC_CSV_Exporter {
 	 * @return array
 	 */
 	public function get_column_names() {
-		return $this->column_names;
+		return apply_filters( "woocommerce_{$export_type}_export_column_names", $this->column_names, $this );
 	}
 
 	/**
@@ -214,7 +214,7 @@ abstract class WC_CSV_Exporter {
 		$this->csv_rows = array();
 		$data = $this->get_data_to_export();
 		array_walk( $data, array( $this, 'export_row' ) );
-		return $this->csv_rows;
+		return apply_filters( "woocommerce_{$export_type}_export_rows", $this->csv_rows, $this );
 	}
 
 	/**

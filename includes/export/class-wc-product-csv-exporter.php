@@ -151,8 +151,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
 					$value = $product->{"get_{$column_id}"}( 'edit' );
 
-				} elseif ( has_filter( "woocommerce_export_{$this->export_type}_column_{$column_id}" ) ) {
-					$value = apply_filters( "woocommerce_export_{$this->export_type}_column_{$column_id}", '', $product );
+				} elseif ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
 				}
 
 				$row[ $column_id ] = $value;
@@ -162,7 +162,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$this->prepare_attributes_for_export( $product, $row );
 			$this->prepare_meta_for_export( $product, $row );
 
-			$this->row_data[] = $row;
+			$this->row_data[] = apply_filters( 'woocommerce_product_export_row_data', $row, $product );
 		}
 	}
 
