@@ -71,6 +71,14 @@ class WC_Admin_Product_Export {
 			$exporter->set_columns_to_export( $_POST['selected_columns'] );
 		}
 
+		if ( ! empty( $_POST['export_meta'] ) ) {
+			$exporter->enable_meta_export( true );
+		}
+
+		if ( ! empty( $_POST['export_types'] ) ) {
+			$exporter->set_product_types_to_export( $_POST['export_types'] );
+		}
+
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
