@@ -46,9 +46,6 @@ class WC_Admin_Product_Export {
 	 */
 	public function admin_screen() {
 		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
-
-		$exporter = new WC_Product_CSV_Exporter();
-
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-product-export.php' );
 	}
 
@@ -94,12 +91,10 @@ class WC_Admin_Product_Export {
 		$percentage = $exporter->get_percent_complete();
 
 		if ( 100 === $percentage ) {
-			$download_url = add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=woocommerce_importer' ) );
-
 			wp_send_json_success( array(
 				'step'       => 'done',
 				'percentage' => $percentage,
-				'url'        => $download_url,
+				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=woocommerce_importer' ) ),
 			) );
 		} else {
 			wp_send_json_success( array(

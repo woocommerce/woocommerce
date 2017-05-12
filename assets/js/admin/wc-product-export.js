@@ -54,9 +54,11 @@
 				if ( response.success ) {
 					if ( 'done' === response.data.step ) {
 						$this.$form.find('.woocommerce-exporter-progress').val( response.data.percentage );
-						$this.$form.removeClass( 'woocommerce-exporter__exporting' );
-						$this.$form.find('.woocommerce-exporter-button').prop( 'disabled', false );
 						window.location = response.data.url;
+						setTimeout( function() {
+							$this.$form.removeClass( 'woocommerce-exporter__exporting' );
+							$this.$form.find('.woocommerce-exporter-button').prop( 'disabled', false );
+						}, 2000 );
 					} else {
 						$this.$form.find('.woocommerce-exporter-progress').val( response.data.percentage );
 						$this.processStep( parseInt( response.data.step, 10 ), data, response.data.columns );

@@ -7,6 +7,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 wp_enqueue_script( 'wc-product-export' );
+
+$exporter = new WC_Product_CSV_Exporter();
 ?>
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Import / Export Data', 'woocommerce' ); ?></h1>
