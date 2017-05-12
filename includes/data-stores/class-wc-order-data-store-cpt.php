@@ -633,7 +633,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
-		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
+		return apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
 	}
 
 	/**
