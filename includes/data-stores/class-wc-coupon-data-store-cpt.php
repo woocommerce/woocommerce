@@ -165,8 +165,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Deletes a coupon from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param array $args Array of args to pass to the delete method.
+	 *
+	 * @param WC_Coupon $coupon
+	 * @param array     $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$coupon, $args = array() ) {
 		$args = wp_parse_args( $args, array(

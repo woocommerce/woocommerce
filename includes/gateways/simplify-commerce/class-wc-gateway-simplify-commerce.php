@@ -341,9 +341,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	/**
 	 * Actually saves a customer token to the database.
 	 *
-	 * @param  WC_Payment_Token   $customer_token Payment Token
-	 * @param  string             $cart_token     CC Token
-	 * @param  array              $customer_info  'email', 'name'
+	 * @param  WC_Payment_Token $customer_token Payment Token
+	 * @param  string $cart_token CC Token
+	 * @param  array $customer_info 'email', 'name'
+	 *
+	 * @return null|WC_Payment_Token|WC_Payment_Token_CC
 	 */
 	public function save_token( $customer_token, $cart_token, $customer_info ) {
 		if ( ! is_null( $customer_token ) ) {
@@ -568,6 +570,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 * Process the payment.
 	 *
 	 * @param int $order_id
+	 *
+	 * @return array|void
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
