@@ -13,33 +13,77 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Wrapper for get_posts specific to orders.
+ * Standard way of retrieving orders based on certain parameters.
  *
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
  * Args:
- *      status array|string List of order statuses to find
- *      type array|string Order type, e.g. shop_order or shop_order_refund
- *      parent int post/order parent
- *      customer int|string|array User ID or billing email to limit orders to a
- *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
- *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
- *      limit int Maximum of orders to retrieve.
- *      offset int Offset of orders to retrieve.
- *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
- *      date_before string Get orders before a certain date ( strtotime() compatibile string )
- *      date_after string Get orders after a certain date ( strtotime() compatibile string )
- *      exclude array Order IDs to exclude from the query.
- *      orderby string Order by date, title, id, modified, rand etc
- *      order string ASC or DESC
- *      return string Type of data to return. Allowed values:
- *          ids array of order ids
- *          objects array of order objects (default)
- *      paginate bool If true, the return value will be an array with values:
+ * 		'name'
+ *		'parent' int post/order parent
+ *		'parent_exclude'
+ *		'exclude' array Order IDs to exclude from the query.
+ *		'limit' int Maximum of orders to retrieve.
+ *		'page' int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ *		'offset' int Offset of orders to retrieve.
+ *		'paginate' bool If true, the return value will be an array with values:
  *          'orders'        => array of data (return value above),
  *          'total'         => total number of orders matching the query
  *          'max_num_pages' => max number of pages found
+ *		'order' string ASC or DESC.
+ *		'orderby' string Order by date, title, id, modified, rand etc.
+ *		'return' string Type of data to return. Allowed values:
+ *          ids array of order ids
+ *          objects array of order objects (default)
+ *
+ *		'status' array|string List of order statuses to find
+ *		'type' array|string Order type, e.g. shop_order or shop_order_refund
+ *		'currency'
+ *		'version'
+ *		'prices_include_tax'
+ *		'date_created'
+ *		'date_modified'
+ *		'date_completed'
+ *		'date_paid'
+ *		'discount_total'
+ *		'discount_tax'
+ *		'shipping_total'
+ *		'shipping_tax'
+ *		'cart_tax'
+ *		'total'
+ *		'total_tax'
+ *		'customer_id'
+ *      'customer' int|string|array User ID or billing email to limit orders to a
+ *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
+ *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
+ *		'order_key'
+ *		'billing_first_name'
+ *		'billing_last_name'
+ *		'billing_company'
+ *		'billing_address_1'
+ *		'billing_address_2'
+ *		'billing_city'
+ *		'billing_state'
+ *		'billing_postcode'
+ *		'billing_country'
+ *		'billing_email'
+ *		'billing_phone'
+ *		'shipping_first_name'
+ *		'shipping_last_name'
+ *		'shipping_company'
+ *		'shipping_address_1'
+ *		'shipping_address_2'
+ *		'shipping_city'
+ *		'shipping_state'
+ *		'shipping_postcode'
+ *		'shipping_country'
+ *		'payment_method'
+ *		'payment_method_title'
+ *		'transaction_id'
+ *		'customer_ip_address'
+ *		'customer_user_agent'
+ *		'created_via'
+ *		'customer_note'
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -47,31 +91,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
-	$args = wp_parse_args( $args, array(
-		'status'      => array_keys( wc_get_order_statuses() ),
-		'type'        => wc_get_order_types( 'view-orders' ),
-		'parent'      => null,
-		'customer'    => null,
-		'email'       => '',
-		'limit'       => get_option( 'posts_per_page' ),
-		'offset'      => null,
-		'page'        => 1,
-		'exclude'     => array(),
-		'orderby'     => 'date',
-		'order'       => 'DESC',
-		'return'      => 'objects',
-		'paginate'    => false,
-		'date_before' => '',
-		'date_after'  => '',
-	) );
-
-	// Handle some BW compatibility arg names where wp_query args differ in naming.
 	$map_legacy = array(
 		'numberposts'    => 'limit',
 		'post_type'      => 'type',
 		'post_status'    => 'status',
 		'post_parent'    => 'parent',
 		'author'         => 'customer',
+		'email'          => 'billing_email',
 		'posts_per_page' => 'limit',
 		'paged'          => 'page',
 	);
@@ -82,7 +108,19 @@ function wc_get_orders( $args ) {
 		}
 	}
 
-	return WC_Data_Store::load( 'order' )->get_orders( $args );
+	// Map legacy date args to modern date args.
+	$date_before = ! empty( $args['date_before'] ) ? strtotime( $args['date_before'] ) : false;
+	$date_after = ! empty( $args['date_after'] ) ? strtotime( $args['date_after'] ) : false;
+	if ( $date_before && $date_after ) {
+		$args['date_created'] = $date_before . '...' . $date_after;
+	} elseif ( $date_before ) {
+		$args['date_created'] = '<' . $date_before;
+	} elseif ( $date_after ) {
+		$args['date_created'] = '>' . $date_after;
+	}
+
+	$query = new WC_Order_Query( $args );
+	return $query->get_orders();
 }
 
 /**

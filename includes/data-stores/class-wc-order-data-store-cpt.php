@@ -684,6 +684,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
+		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] ) {
+			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
+		}
+
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
 		}
