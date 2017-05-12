@@ -109,8 +109,22 @@ function wc_get_orders( $args ) {
 	}
 
 	// Map legacy date args to modern date args.
-	$date_before = ! empty( $args['date_before'] ) ? strtotime( $args['date_before'] ) : false;
-	$date_after = ! empty( $args['date_after'] ) ? strtotime( $args['date_after'] ) : false;
+	$date_before = false;
+	$date_after = false;
+
+	if ( ! empty( $args['date_before'] ) ) {
+		$date_before = strtotime( $args['date_before'] );
+		if ( $date_before && ! strpos( $args['date_before'], ':' ) ) {
+			$date_before = date( 'Y-m-d', $date_before );
+		}
+	}
+	if ( ! empty ( $args['date_after'] ) ) {
+		$date_after = strtotime( $args['date_after'] );
+		if ( $date_after && ! strpos( $args['date_after'], ':' ) ) {
+			$date_after = date( 'Y-m-d', $date_after );
+		}
+	}
+
 	if ( $date_before && $date_after ) {
 		$args['date_created'] = $date_before . '...' . $date_after;
 	} elseif ( $date_before ) {
