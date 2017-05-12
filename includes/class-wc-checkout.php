@@ -744,7 +744,7 @@ class WC_Checkout {
 			'country',
 		);
 
-		array_walk( $billing_fields, array( $this, 'set_customer_address_fields' ), $data );
+		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
 		// Update customer shipping and payment method to posted method
