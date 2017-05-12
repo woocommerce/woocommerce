@@ -161,6 +161,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.0.7 - 2017-05-xx =
+* Fix - Display of grouped product permalinks + names.
+* Fix - Ensure wc_get_payment_gateway_by_order has a valid order ID to avoid errors.
+* Fix - Correctly set rating term after updating product visibility.
+* Fix - is_ip_address should be static.
+* Fix - Handle clearing for 3, 4, and 5 columns in the product gallery.
+* Fix - Some added prevention against notices/errors in the assets and variation data store files.
+
 = 3.0.6 - 2017-05-09 =
 * Fix - Fixed conflict between global attributes and custom attributes with the same names.
 * Fix - Added missing "id" to API for shipping zone methods to support the CLI.
