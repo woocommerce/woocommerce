@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles the products CSV exporter UI in admin.
+ * Handles the product CSV exporter UI in admin.
  *
  * @author   Automattic
  * @category Admin
@@ -39,6 +39,9 @@ class WC_Admin_Product_Export {
 	public function admin_scripts() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'wc-product-export', WC()->plugin_url() . '/assets/js/admin/wc-product-export' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+		wp_localize_script( 'wc-product-export', 'wc_product_export_params', array(
+			'export_nonce' => wp_create_nonce( 'wc-product-export' ),
+		) );
 	}
 
 	/**
@@ -61,9 +64,15 @@ class WC_Admin_Product_Export {
 	}
 
 	/**
-	 * Export data.
+	 * AJAX callback for doing the actual export to the CSV file.
 	 */
 	public function do_ajax_product_export() {
+		check_ajax_referer( 'wc-product-export', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
 		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 
 		$step     = absint( $_POST['step'] );
@@ -88,18 +97,16 @@ class WC_Admin_Product_Export {
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
-		$percentage = $exporter->get_percent_complete();
-
-		if ( 100 === $percentage ) {
+		if ( 100 === $exporter->get_percent_complete() ) {
 			wp_send_json_success( array(
 				'step'       => 'done',
-				'percentage' => $percentage,
+				'percentage' => 100,
 				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=woocommerce_importer' ) ),
 			) );
 		} else {
 			wp_send_json_success( array(
 				'step'       => ++$step,
-				'percentage' => $percentage,
+				'percentage' => $exporter->get_percent_complete(),
 				'columns'    => $exporter->get_column_names(),
 			) );
 		}

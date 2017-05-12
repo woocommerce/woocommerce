@@ -18,6 +18,7 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Type of export used in filter names.
+	 * @var string
 	 */
 	protected $export_type = '';
 
@@ -25,7 +26,7 @@ abstract class WC_CSV_Exporter {
 	 * Batch limit.
 	 * @var integer
 	 */
-	protected $limit = 10;
+	protected $limit = 30;
 
 	/**
 	 * Number exported.
@@ -35,7 +36,7 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Raw data to export.
-	 * @var integer
+	 * @var array
 	 */
 	protected $row_data = array();
 
@@ -71,14 +72,17 @@ abstract class WC_CSV_Exporter {
 	/**
 	 * Return an array of supported column names and ids.
 	 *
+	 * @since 3.1.0
 	 * @return array
 	 */
 	public function get_column_names() {
-		return apply_filters( "woocommerce_{$export_type}_export_column_names", $this->column_names, $this );
+		return apply_filters( "woocommerce_{$this->export_type}_export_column_names", $this->column_names, $this );
 	}
 
 	/**
 	 * Set column names.
+	 *
+	 * @since 3.1.0
 	 * @param array $column_names
 	 */
 	public function set_column_names( $column_names ) {
@@ -92,6 +96,7 @@ abstract class WC_CSV_Exporter {
 	/**
 	 * Return an array of columns to export.
 	 *
+	 * @since 3.1.0
 	 * @return array
 	 */
 	public function get_columns_to_export() {
@@ -100,6 +105,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Set columns to export.
+	 *
+	 * @since 3.1.0
 	 * @param array $column_names
 	 */
 	public function set_columns_to_export( $columns ) {
@@ -108,6 +115,9 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * See if a column is to be exported or not.
+	 *
+	 * @since 3.1.0
+	 * @param  string $column_id
 	 * @return boolean
 	 */
 	public function is_column_exporting( $column_id ) {
@@ -128,6 +138,7 @@ abstract class WC_CSV_Exporter {
 	/**
 	 * Return default columns.
 	 *
+	 * @since 3.1.0
 	 * @return array
 	 */
 	public function get_default_column_names() {
@@ -136,6 +147,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Do the export.
+	 *
+	 * @since 3.1.0
 	 */
 	public function export() {
 		$this->prepare_data_to_export();
@@ -146,6 +159,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Set the export headers.
+	 *
+	 * @since 3.1.0
 	 */
 	public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
@@ -161,13 +176,24 @@ abstract class WC_CSV_Exporter {
 		wc_set_time_limit( 0 );
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=wc-' . $this->export_type . '-export.csv' );
+		header( 'Content-Disposition: attachment; filename=' . $this->get_filename() );
 		header( 'Pragma: no-cache' );
 		header( 'Expires: 0' );
 	}
 
 	/**
+	 * Generate and return a filename.
+	 *
+	 * @return string
+	 */
+	public function get_filename() {
+		return sanitize_file_name( 'wc-' . $this->export_type . '-export-' . date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) . '.csv' );
+	}
+
+	/**
 	 * Set the export content.
+	 *
+	 * @since 3.1.0
 	 */
 	public function send_content( $csv_data ) {
 		echo $csv_data;
@@ -175,6 +201,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Get CSV data for this export.
+	 *
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_csv_data() {
@@ -183,6 +211,9 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Export column headers in CSV format.
+	 *
+	 * @since 3.1.0
+	 * @return string
 	 */
 	protected function export_column_headers() {
 		$columns = $this->get_column_names();
@@ -201,6 +232,7 @@ abstract class WC_CSV_Exporter {
 	/**
 	 * Get data that will be exported.
 	 *
+	 * @since 3.1.0
 	 * @return array
 	 */
 	protected function get_data_to_export() {
@@ -209,16 +241,22 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Export rows in CSV format.
+	 *
+	 * @since 3.1.0
+	 * @return array
 	 */
 	protected function export_rows() {
 		$this->csv_rows = array();
 		$data = $this->get_data_to_export();
 		array_walk( $data, array( $this, 'export_row' ) );
-		return apply_filters( "woocommerce_{$export_type}_export_rows", $this->csv_rows, $this );
+		return apply_filters( "woocommerce_{$this->export_type}_export_rows", $this->csv_rows, $this );
 	}
 
 	/**
 	 * Export a row in CSV format.
+	 *
+	 * @since 3.1.0
+	 * @param array $row_data
 	 */
 	protected function export_row( $row_data ) {
 		$columns = $this->get_column_names();
@@ -241,6 +279,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Get batch limit.
+	 *
+	 * @since 3.1.0
 	 * @return int
 	 */
 	public function get_limit() {
@@ -249,6 +289,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Set batch limit.
+	 *
+	 * @since 3.1.0
 	 * @param int $limit
 	 */
 	public function set_limit( $limit ) {
@@ -257,6 +299,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Get count of records exported.
+	 *
+	 * @since 3.1.0
 	 * @return int
 	 */
 	public function get_total_exported() {
@@ -275,8 +319,8 @@ abstract class WC_CSV_Exporter {
 	 * @see http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
 	 * @see https://hackerone.com/reports/72785
 	 *
+	 * @since 3.1.0
 	 * @param string $field CSV field to escape
-	 *
 	 * @return string
 	 */
 	public function escape_data( $data ) {
@@ -291,6 +335,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Format and escape data ready for the CSV file.
+	 *
+	 * @since 3.1.0
 	 * @param  string $data
 	 * @return string
 	 */
@@ -312,6 +358,8 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Format term ids to names.
+	 *
+	 * @since 3.1.0
 	 * @param  array $term_ids
 	 * @param  string $taxonomy
 	 * @return array

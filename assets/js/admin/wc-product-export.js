@@ -1,4 +1,4 @@
-/*global ajaxurl */
+/*global ajaxurl, wc_product_export_params */
 ;(function ( $, window ) {
 	/**
 	 * productExportForm handles the export process.
@@ -47,7 +47,8 @@
 				columns          : columns,
 				selected_columns : selected_columns,
 				export_meta      : export_meta,
-				export_types     : export_types
+				export_types     : export_types,
+				security         : wc_product_export_params.export_nonce
 			},
 			dataType: 'json',
 			success: function( response ) {

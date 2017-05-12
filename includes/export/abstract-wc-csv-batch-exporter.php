@@ -27,6 +27,8 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 
 	/**
 	 * The file being exported to.
+	 *
+	 * @var string
 	 */
 	protected $file;
 
@@ -42,13 +44,14 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function __construct() {
 		$upload_dir         = wp_upload_dir();
-		$this->file         = trailingslashit( $upload_dir['basedir'] ) . 'wc-' . $this->export_type . '-export.csv';
+		$this->file         = trailingslashit( $upload_dir['basedir'] ) . $this->get_filename();
 		$this->column_names = $this->get_default_column_names();
 	}
 
 	/**
 	 * Get the file contents.
 	 *
+	 * @since 3.1.0
 	 * @return string
 	 */
 	public function get_file() {
@@ -63,7 +66,9 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	}
 
 	/**
-	 * Do the export.
+	 * Serve the file and remove once sent to the client.
+	 *
+	 * @since 3.1.0
 	 */
 	public function export() {
 		$this->send_headers();
@@ -74,6 +79,8 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 
 	/**
 	 * Generate the CSV file.
+	 *
+	 * @since 3.1.0
 	 */
 	public function generate_file() {
 		if ( 1 === $this->get_page() ) {
@@ -86,6 +93,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	/**
 	 * Write data to the file.
 	 *
+	 * @since 3.1.0
 	 * @param  string $data
 	 */
 	protected function write_csv_data( $data ) {
@@ -103,6 +111,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	/**
 	 * Get page.
 	 *
+	 * @since 3.1.0
 	 * @return int
 	 */
 	public function get_page() {
@@ -112,6 +121,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	/**
 	 * Set page.
 	 *
+	 * @since 3.1.0
 	 * @param int $page
 	 */
 	public function set_page( $page ) {
@@ -121,6 +131,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	/**
 	 * Get count of records exported.
 	 *
+	 * @since 3.1.0
 	 * @return int
 	 */
 	public function get_total_exported() {
@@ -130,6 +141,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	/**
 	 * Get total % complete.
 	 *
+	 * @since 3.1.0
 	 * @return int
 	 */
 	public function get_percent_complete() {
