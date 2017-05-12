@@ -69,47 +69,158 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 	public function test_order_query_date_queries() {
 		$now = current_time( 'mysql', true );
 		$now_stamp = strtotime( $now );
-		$past = date( DATE_ISO8601, $now_stamp - 1000 );
-		$future = date( DATE_ISO8601, $now_stamp + 1000 );
+		$now_date = date( 'Y-m-d', $now_stamp );
+		$past_stamp = $now_stamp - DAY_IN_SECONDS;
+		$past = date( 'Y-m-d', $past_stamp );
+		$future_stamp = $now_stamp + DAY_IN_SECONDS;
+		$future = date( 'Y-m-d', $future_stamp );
 
 		$order = new WC_Order();
 		$order->set_date_completed( $now_stamp );
 		$order->save();
 
-		// 'date_created_after' should get orders created after the specified time.
+		// Check WC_DateTime support.
 		$query = new WC_Order_Query( array(
-			'date_created_after' => $past
+			'date_created' => $order->get_date_created()
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
-		// 'date_created_after' should exclude orders created before the specified time.
-		$query->set( 'date_created_after', $future );
-		$orders = $query->get_orders();
-		$this->assertEquals( 0, count( $orders ) );
-
-		// 'date_created_before' should get orders created before the specified time.
+		// Check date support.
 		$query = new WC_Order_Query( array(
-			'date_created_before' => $future
+			'date_created' => $now_date
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $past );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+
+		// Check timestamp support.
+		$query = new WC_Order_Query( array(
+			'date_created' => $order->get_date_created()->getTimestamp()
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $future_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+
+		// Check comparison support.
+		$query = new WC_Order_Query( array(
+			'date_created' => '>' . $past
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', '<' . $past );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+		$query->set( 'date_created', '>=' . $now_date );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+
+		// Check timestamp comparison support.
+		$query = new WC_Order_Query( array(
+			'date_created' => '<' . $future_stamp
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', '<' . $past_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+		$query->set( 'date_created', '>=' . $now_stamp );
+
+		// Check date range support.
+		$query = new WC_Order_Query( array(
+			'date_created' => $past . '...' . $future
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $past . '...' . $now_date );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $future . '...' . $now_date );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+
+		// Check timestamp range support.
+		$query = new WC_Order_Query( array(
+			'date_created' => $past_stamp . '...' . $future_stamp
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $now_stamp . '...' . $future_stamp );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_created', $future_stamp . '...' . $now_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+	}
+
+	/**
+	 * Test querying by order date properties for dates stored in metadata.
+	 *
+	 * @since 3.1
+	 */
+	public function test_order_query_meta_date_queries() {
+		$now = current_time( 'mysql', true );
+		$now_stamp = strtotime( $now );
+		$now_date = date( 'Y-m-d', $now_stamp );
+		$past_stamp = $now_stamp - DAY_IN_SECONDS;
+		$past = date( 'Y-m-d', $past_stamp );
+		$future_stamp = $now_stamp + DAY_IN_SECONDS;
+		$future = date( 'Y-m-d', $future_stamp );
+
+		$order = new WC_Order();
+		$order->set_date_completed( $now_stamp );
+		$order->save();
+
+		// Check WC_DateTime support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => $order->get_date_completed()
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
-		// 'date_created_before' should get orders created before the specified time.
-		$query->set( 'date_created_before', $future );
-		$orders = $query->get_orders();
-		$this->assertEquals( 1, count( $orders ) );
-
-		// Test with some metadata-stored date params.
+		// Check date support.
 		$query = new WC_Order_Query( array(
-			'date_completed_after' => $past
+			'date_completed' => $now_date
 		) );
-		$orders = $query->get_orders();
-		$this->assertEquals( 1, count( $orders ) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $past );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
 
-		$query->set( 'date_completed_after', $future );
-		$orders = $query->get_orders();
-		$this->assertEquals( 0, count( $orders ) );
+		// Check timestamp support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => $order->get_date_completed()->getTimestamp()
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $future_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+
+		// Check comparison support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => '>' . $past
+		) );
+		//$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', '<' . $past );
+		//$this->assertEquals( 0, count( $query->get_orders() ) );
+		$query->set( 'date_completed', '>=' . $now_date );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+
+		// Check timestamp comparison support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => '<' . $future_stamp
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', '<' . $past_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+		$query->set( 'date_completed', '>=' . $now_stamp );
+
+		// Check date range support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => $past . '...' . $future
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $now_date . '...' . $future );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $future . '...' . $now_date );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
+
+		// Check timestamp range support.
+		$query = new WC_Order_Query( array(
+			'date_completed' => $past_stamp . '...' . $future_stamp
+		) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $now_stamp . '...' . $future_stamp );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
+		$query->set( 'date_completed', $future_stamp . '...' . $now_stamp );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
 	}
 
 	/**

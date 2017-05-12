@@ -677,6 +677,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_active_plugins() {
 		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		require_once( ABSPATH . 'wp-admin/includes/update.php' );
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
 
 		// Get both site plugins and network plugins
 		$active_plugins = (array) get_option( 'active_plugins', array() );

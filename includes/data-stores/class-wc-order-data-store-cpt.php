@@ -649,7 +649,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'status' => 'post_status',
 		);
 
-		foreach( $key_mapping as $query_key => $db_key ) {
+		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
 				unset( $query_vars[ $query_key ] );
@@ -665,64 +665,23 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['meta_query'] = array();
 		}
 
-		if ( isset( $query_vars[ 'date_created_before'] ) && '' !== $query_vars['date_created_before'] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_date',
-				'before' => $this->get_date_for_wp_query( $query_vars['date_created_before'] )
-			);
-		}
+		$date_queries = array(
+			'date_created'   => 'post_date',
+			'date_modified'  => 'post_modified',
+			'date_completed' => '_date_completed',
+			'date_paid'      => '_date_paid',
+		);
+		foreach ( $date_queries as $query_var_key => $db_key ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
 
-		if ( isset( $query_vars[ 'date_created_after'] ) && '' !== $query_vars[ 'date_created_after' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_date',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_created_after'] )
-			);
-		}
+				// Remove any existing meta queries for the same keys to prevent conflicts.
+				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
+				foreach ( $existing_queries as $query_index => $query_contents ) {
+					unset( $wp_query_args['meta_query'][ $query_index ] );
+				}
 
-		if ( isset( $query_vars[ 'date_modified_before'] ) && '' !== $query_vars[ 'date_modified_before' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_modified',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_before'] )
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_modified_after'] ) && '' !== $query_vars[ 'date_modified_after' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_modified',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_after'] )
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_completed_before' ] ) && '' !== $query_vars[ 'date_completed_before' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_completed',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_before' ], true ),
-				'compare' => '<',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_completed_after' ] ) && '' !== $query_vars[ 'date_completed_after' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_completed',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_after' ], true ),
-				'compare' => '>',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_paid_before' ] ) && '' !== $query_vars[ 'date_paid_before' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_paid',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_before' ], true ),
-				'compare' => '<',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_paid_after' ] ) && '' !== $query_vars[ 'date_paid_after' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_paid',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_after' ], true ),
-				'compare' => '>',
-			);
+				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );
+			}
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
