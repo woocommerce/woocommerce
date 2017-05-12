@@ -24,11 +24,6 @@ if ( ! class_exists( 'WC_CSV_Exporter', false ) ) {
 class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 	/**
-	 * The filename to export to.
-	 */
-	protected $filename = 'wc-product-export.csv';
-
-	/**
 	 * Type of export used in filter names.
 	 */
 	protected $export_type = 'product';
@@ -137,22 +132,24 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$row = array();
 			foreach ( $columns as $column_id => $column_name ) {
 				$column_id = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
+				$value     = '';
 
 				// Skip some columns if dynamically handled later or if we're being selective.
 				if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ) ) || ! $this->is_column_exporting( $column_id ) ) {
 					continue;
 				}
 
+				// Filter for 3rd parties.
+				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
+
 				// Handle special columns which don't map 1:1 to product data.
-				if ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
+				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
 					$value = $this->{"get_column_value_{$column_id}"}( $product );
 
 				// Default and custom handling.
 				} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
 					$value = $product->{"get_{$column_id}"}( 'edit' );
-
-				} elseif ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
 				}
 
 				$row[ $column_id ] = $value;

@@ -24,15 +24,11 @@ if ( ! class_exists( 'WC_CSV_Exporter', false ) ) {
  * WC_CSV_Exporter Class.
  */
 abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
+
 	/**
 	 * The file being exported to.
 	 */
 	protected $file;
-
-	/**
-	 * The filename to export to.
-	 */
-	protected $filename = 'export.csv';
 
 	/**
 	 * Page being exported
@@ -46,7 +42,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function __construct() {
 		$upload_dir         = wp_upload_dir();
-		$this->file         = trailingslashit( $upload_dir['basedir'] ) . $this->filename;
+		$this->file         = trailingslashit( $upload_dir['basedir'] ) . 'wc-' . $this->export_type . '-export.csv';
 		$this->column_names = $this->get_default_column_names();
 	}
 
