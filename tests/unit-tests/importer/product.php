@@ -125,7 +125,7 @@ class WC_Tests_Product_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_Importer();
 
 		$data = array(
-			'headers' => array( 'ID', 'Weight', 'Price', 'Categories', 'Tags', 'Extra thing', 'Is featured?', 'Download 1 URL' ),
+			'headers' => array( 'id', 'weight', 'price', 'category_ids', 'tag_ids', 'extra_thing', 'featured', 'Download 1 URL' ),
 			'data' => array(
 				array( '', '12.2', '12.50', 'category1, category1 > subcategory', 'products, things, etc', 'metadata', '1', '' ),
 				array( '12', '', '5', 'category2', '', '', '0', 'http://www.example.com' ),
@@ -134,28 +134,28 @@ class WC_Tests_Product_Importer extends WC_Unit_Test_Case {
 
 		$expected = array(
 			array(
-				'ID' => 0,
-				'Weight' => 12.2,
-				'Price' => '12.50',
-				'Categories' => array(
+				'id' => 0,
+				'weight' => 12.2,
+				'price' => '12.50',
+				'category_ids' => array(
 					array( 'parent' => false, 'name' => 'category1' ),
 					array( 'parent' => 'category1', 'name' => 'subcategory' ),
 				),
-				'Tags' => array( 'products', 'things', 'etc' ),
-				'Extra thing' => 'metadata',
-				'Is featured?' => true,
+				'tag_ids' => array( 'products', 'things', 'etc' ),
+				'extra_thing' => 'metadata',
+				'featured' => true,
 				'Download 1 URL' => '',
 			),
 			array(
-				'ID' => 12,
-				'Weight' => '',
-				'Price' => '5',
-				'Categories' => array(
+				'id' => 12,
+				'weight' => '',
+				'price' => '5',
+				'category_ids' => array(
 					array( 'parent' => false, 'name' => 'category2' ),
 				),
-				'Tags' => array(),
-				'Extra thing' => '',
-				'Is featured?' => false,
+				'tag_ids' => array(),
+				'extra_thing' => '',
+				'featured' => false,
 				'Download 1 URL' => 'http://www.example.com',
 			),
 		);

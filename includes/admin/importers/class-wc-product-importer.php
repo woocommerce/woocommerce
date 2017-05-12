@@ -275,7 +275,7 @@ class WC_Product_Importer extends WP_Importer {
 			'width'             => array( $this, 'parse_float_field' ),
 			'length'            => array( $this, 'parse_float_field' ),
 			'height'            => array( $this, 'parse_float_field' ),
-			'width'             => array( $this, 'parse_float_field' ),
+			'weight'            => array( $this, 'parse_float_field' ),
 			'reviews_allowed'   => array( $this, 'parse_bool_field' ),
 			'purchase_note'     => 'wp_kses_post',
 			'price'             => 'wc_format_decimal',
@@ -289,6 +289,9 @@ class WC_Product_Importer extends WP_Importer {
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
 		);
+		/**
+		 * @todo switch these to some standard, slug format.
+		 */
 		$regex_match_data_formatting = array(
 			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
 			'/Attribute * Visible/'    => array( $this, 'parse_bool_field' ),
