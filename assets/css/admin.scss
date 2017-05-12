@@ -5421,20 +5421,28 @@ table.bar_chart {
 	padding: 24px;
 	margin: 16px 0 16px;
 	box-shadow: 0 1px 3px rgba(0,0,0,.13);
-	color: #666;
+	color: #555;
+
+	header {
+		border-bottom: 1px solid #eee;
+		padding: 0 24px;
+		margin: 0 -24px 24px;
+	}
 
 	h2 {
 		margin: 0 0 24px;
-		color: #666;
+		color: #555;
 		font-size: 24px;
 		font-weight: normal;
+		line-height: 1em;
 	}
 
 	p {
 		font-size: 1em;
 		line-height: 1.75em;
 		font-size: 16px;
-		color: #666;
+		color: #555;
+		margin: 0 0 24px;
 	}
 
 	.form-row {
@@ -5446,7 +5454,7 @@ table.bar_chart {
 	}
 
 	.woocommerce-exporter-options th {
-		width: 300px;
+		width: 320px;
 	}
 
 	.woocommerce-exporter-options th, .woocommerce-exporter-options td {
@@ -5454,8 +5462,16 @@ table.bar_chart {
 
 		label {
 			font-weight: normal;
-			color: #666;
+			color: #555;
 		}
+	}
+
+	.form-row-submit {
+		border-top: 1px solid #eee;
+		padding: 23px 24px 24px;
+		margin: 24px -24px -24px;
+		background: #fff;
+		background: #fefefe;
 	}
 
 	.woocommerce-exporter-button {

@@ -30,7 +30,7 @@ class WC_Admin_Product_Export {
 	 * Add menu items.
 	 */
 	public function admin_menu() {
-		add_submenu_page( 'edit.php?post_type=product', __( 'Import / Export', 'woocommerce' ), __( 'Import / Export', 'woocommerce' ), 'edit_products', 'woocommerce_importer', array( $this, 'admin_screen' ) );
+		add_submenu_page( 'edit.php?post_type=product', __( 'Product Export', 'woocommerce' ), __( 'Export', 'woocommerce' ), 'edit_products', 'product_exporter', array( $this, 'admin_screen' ) );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class WC_Admin_Product_Export {
 			wp_send_json_success( array(
 				'step'       => 'done',
 				'percentage' => 100,
-				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=woocommerce_importer' ) ),
+				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
 			) );
 		} else {
 			wp_send_json_success( array(

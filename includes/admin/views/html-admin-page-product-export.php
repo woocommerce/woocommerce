@@ -11,12 +11,14 @@ wp_enqueue_script( 'wc-product-export' );
 $exporter = new WC_Product_CSV_Exporter();
 ?>
 <div class="wrap woocommerce">
-	<h1><?php esc_html_e( 'Import / Export Data', 'woocommerce' ); ?></h1>
+	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
 
 	<form class="woocommerce-exporter">
-		<span class="spinner is-active"></span>
-		<h2><?php esc_html_e( 'Export products', 'woocommerce' ); ?></h2>
-		<p><?php esc_html_e( 'Generate and download a CSV file containing a list of all products.', 'woocommerce' ); ?></p>
+		<header>
+			<span class="spinner is-active"></span>
+			<h2><?php esc_html_e( 'Export products to a CSV file', 'woocommerce' ); ?></h2>
+			<p><?php esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' ); ?></p>
+		</header>
 
 		<table class="form-table woocommerce-exporter-options">
 			<tbody>
