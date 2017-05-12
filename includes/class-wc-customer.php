@@ -266,7 +266,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Has customer calculated shipping?
 	 *
-	 * @param  string $context
 	 * @return bool
 	 */
 	public function get_calculated_shipping() {

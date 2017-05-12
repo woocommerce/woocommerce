@@ -193,6 +193,11 @@ function wc_products_rss_feed() {
  * Output generator tag to aid debugging.
  *
  * @access public
+ *
+ * @param string $gen
+ * @param string $type
+ *
+ * @return string
  */
 function wc_generator_tag( $gen, $type ) {
 	switch ( $type ) {
@@ -311,7 +316,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @param int $post_id
  * @return array
  */
-function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
+function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ) ) ) {
 		return $classes;
 	}
@@ -374,6 +379,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
  * @param array $values Name value pairs.
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
+ * @param bool $return
  *
  * @return string
  */
@@ -610,6 +616,8 @@ if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 
 	/**
 	 * Show the subcategory title in the product loop.
+	 *
+	 * @param object $category
 	 */
 	function woocommerce_template_loop_category_title( $category ) {
 		?>
@@ -637,8 +645,11 @@ function woocommerce_template_loop_product_link_open() {
 function woocommerce_template_loop_product_link_close() {
 	echo '</a>';
 }
+
 /**
  * Insert the opening anchor tag for categories in the loop.
+ *
+ * @param int|object|string $category
  */
 function woocommerce_template_loop_category_link_open( $category ) {
 	echo '<a href="' . get_term_link( $category, 'product_cat' ) . '">';
@@ -695,7 +706,9 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	/**
 	 * Get the add to cart template for the loop.
 	 *
-	 * @subpackage	Loop
+	 * @subpackage    Loop
+	 *
+	 * @param array $args
 	 */
 	function woocommerce_template_loop_add_to_cart( $args = array() ) {
 		global $product;
@@ -1339,7 +1352,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * @param string $orderby Supported values - rand, title, ID, date, modified, menu_order, price.
 	 * @param string $order Sort direction.
 	 */
-	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
+	function woocommerce_upsell_display( $limit = -1, $columns = 4, $orderby = 'rand', $order = 'desc' ) {
 		global $product, $woocommerce_loop;
 
 		if ( ! $product ) {
@@ -1571,7 +1584,9 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	/**
 	 * Output the Order review table for the checkout.
 	 *
-	 * @subpackage	Checkout
+	 * @subpackage    Checkout
+	 *
+	 * @param $deprecated
 	 */
 	function woocommerce_order_review( $deprecated = false ) {
 		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
@@ -2625,6 +2640,9 @@ function wc_get_price_html_from_text() {
  * Get logout endpoint.
  *
  * @since  2.6.9
+ *
+ * @param string $redirect
+ *
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {

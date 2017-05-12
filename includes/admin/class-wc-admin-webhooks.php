@@ -491,6 +491,8 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the webhook topic data.
 	 *
+	 * @param WC_Webhook $webhook
+	 *
 	 * @return array
 	 */
 	public static function get_topic_data( $webhook ) {
@@ -519,6 +521,7 @@ class WC_Admin_Webhooks {
 	 * Get the logs navigation.
 	 *
 	 * @param  int $total
+	 * @param  WC_Webhook $webhook
 	 *
 	 * @return string
 	 */

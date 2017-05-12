@@ -385,9 +385,11 @@ class WC_API_Server {
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
 	 * @since 2.1
+	 *
 	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	protected function sort_callback_params( $callback, $provided ) {
 		if ( is_array( $callback ) ) {

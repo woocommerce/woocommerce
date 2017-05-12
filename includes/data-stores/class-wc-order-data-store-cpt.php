@@ -355,8 +355,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get all orders matching the passed in args.
 	 *
 	 * @see    wc_get_orders()
+	 *
 	 * @param  array $args
-	 * @return array of orders
+	 *
+	 * @return array|object
 	 */
 	public function get_orders( $args = array() ) {
 		/**
@@ -471,7 +473,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get unpaid orders after a certain date,
 	 *
-	 * @param  int timestamp $date
+	 * @param  int $date timestamp
 	 * @return array
 	 */
 	public function get_unpaid_orders( $date ) {
@@ -695,8 +697,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Query for Orders matching specific criteria.
 	 *
 	 * @since 3.1.0
+	 *
 	 * @param array $query_vars query vars from a WC_Order_Query
-	 * @return array of WC_Order objects or ids
+	 *
+	 * @return array|object
 	 */
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );

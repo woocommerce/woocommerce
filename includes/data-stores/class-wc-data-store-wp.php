@@ -155,7 +155,10 @@ class WC_Data_Store_WP {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array
+	 *
+	 * @param string $key
+	 *
+	 * @return string
 	 */
 	protected function prefix_key( $key ) {
 		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;

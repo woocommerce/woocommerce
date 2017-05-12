@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Gets text attributes from a string.
  *
  * @since  2.4
+ *
+ * @param string $raw_attributes
+ *
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
@@ -124,7 +127,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  * @param object $product object Optional
  * @return string
  */
-function wc_attribute_label( $name, $product = '' ) {
+function wc_attribute_label( $name, $product = null ) {
 	global $wpdb;
 
 	if ( taxonomy_is_product_attribute( $name ) ) {

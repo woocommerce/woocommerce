@@ -80,7 +80,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to create a new product in the database.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
@@ -125,7 +125,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to read a product from the database.
 	 *
-	 * @param WC_Data $product
+	 * @param WC_Product $product
 	 *
 	 * @throws Exception
 	 */
@@ -162,7 +162,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to update a product in the database.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -225,7 +225,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to delete a product from the database.
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$product, $args = array() ) {
@@ -592,8 +592,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update visibility terms based on props.
 	 *
 	 * @since 3.0.0
-	 * @param bool Force update. Used during create.
-	 * @param WC_Product
+	 *
+	 * @param WC_Product $product
+	 * @param bool $force Force update. Used during create.
 	 */
 	protected function update_visibility( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -994,11 +995,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Builds the related posts query.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
 	 * @param int   $limit       Limit of results.
-	 * @return string
+	 *
+	 * @return array
 	 */
 	public function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
 		global $wpdb;
@@ -1157,7 +1160,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Returns an array of products.
 	 *
 	 * @param  array $args @see wc_get_products
-	 * @return array
+	 *
+	 * @return array|object
 	 */
 	public function get_products( $args = array() ) {
 		/**

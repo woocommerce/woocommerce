@@ -36,6 +36,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
 	 * Add this page to settings.
+	 *
+	 * @param array $pages
+	 *
+	 * @return array|mixed
 	 */
 	public function add_settings_page( $pages ) {
 		if ( wc_tax_enabled() ) {
