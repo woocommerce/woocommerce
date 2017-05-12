@@ -57,7 +57,10 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Method to read a shipping zone from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 *
+	 * @param WC_Data $zone
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
