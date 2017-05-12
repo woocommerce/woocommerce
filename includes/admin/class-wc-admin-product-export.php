@@ -21,6 +21,7 @@ class WC_Admin_Product_Export {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 55 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_init', array( $this, 'download_export_file' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_export', array( $this, 'do_ajax_product_export' ) );
 	}
@@ -30,6 +31,14 @@ class WC_Admin_Product_Export {
 	 */
 	public function admin_menu() {
 		add_submenu_page( 'edit.php?post_type=product', __( 'Import / Export', 'woocommerce' ), __( 'Import / Export', 'woocommerce' ), 'edit_products', 'woocommerce_importer', array( $this, 'admin_screen' ) );
+	}
+
+	/**
+	 * Enqueue scripts.
+	 */
+	public function admin_scripts() {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		wp_register_script( 'wc-product-export', WC()->plugin_url() . '/assets/js/admin/wc-product-export' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 	}
 
 	/**
