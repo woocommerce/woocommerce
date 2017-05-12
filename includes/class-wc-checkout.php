@@ -528,7 +528,7 @@ class WC_Checkout {
 	 * @since  3.0.0
 	 * @return array of data.
 	 */
-	protected function get_posted_data() {
+	public function get_posted_data() {
 		$skipped = array();
 		$data    = array(
 			'terms'                              => (int) isset( $_POST['terms'] ),
