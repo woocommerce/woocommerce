@@ -89,6 +89,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
 			'tax_status'         => __( 'Tax Class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'stock'              => __( 'Stock', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
@@ -274,6 +275,62 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Get download_limit value.
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_download_limit( $product ) {
+		return $product->is_downloadable() && $product->get_download_limit( 'edit' ) ? $product->get_download_limit( 'edit' ) : '';
+	}
+
+	/**
+	 * Get download_expiry value.
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_download_expiry( $product ) {
+		return $product->is_downloadable() && $product->get_download_expiry( 'edit' ) ? $product->get_download_expiry( 'edit' ) : '';
+	}
+
+	/**
+	 * Get stock value.
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_stock( $product ) {
+		$manage_stock   = $product->get_manage_stock( 'edit' );
+		$stock_quantity = $product->get_stock_quantity( 'edit' );
+
+		if ( $product->is_type( 'variation' && 'parent' === $manage_stock ) ) {
+			return 'parent';
+		} elseif ( $manage_stock ) {
+			return $stock_quantity;
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * Get download_expiry value.
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_type( $product ) {
+		$types   = array();
+		$types[] = $product->get_type();
+
+		if ( $product->is_downloadable() ) {
+			$types[] = 'downloadable';
+		}
+
+		if ( $product->is_virtual() ) {
+			$types[] = 'virtual';
+		}
+
+		return implode( ', ', $types );
+	}
+
+	/**
 	 * Export downloads.
 	 * @param  array $row
 	 */
@@ -300,7 +357,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	protected function prepare_attributes_for_export( $product, &$row ) {
 		if ( $this->is_column_exporting( 'attributes' ) ) {
-			$attributes = $product->get_attributes();
+			$attributes         = $product->get_attributes();
+			$default_attributes = $product->get_default_attributes();
 
 			if ( count( $attributes ) ) {
 				$i = 1;
@@ -331,6 +389,18 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 							$row[ 'attributes:value' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
 						} else {
 							$row[ 'attributes:value' . $i ] = $attribute;
+						}
+					}
+
+					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
+						$this->column_names[ 'attributes:default' . $i ] = sprintf( __( 'Attribute %d Default', 'woocommerce' ), $i );
+						$default_value                                   = $default_attributes[ sanitize_title( $attribute_name ) ];
+
+						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
+							$option_term = get_term_by( 'slug', $default_value, $attribute_name );
+							$row[ 'attributes:default' . $i ]   = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
+						} else {
+							$row[ 'attributes:default' . $i ] = $default_value;
 						}
 					}
 					$i++;
