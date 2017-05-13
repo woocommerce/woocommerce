@@ -51,7 +51,7 @@ function wc_get_orders( $args ) {
 		$datetime    = wc_string_to_datetime( $args['date_before'] );
 		$date_before = strpos( $args['date_before'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
 	}
-	if ( ! empty ( $args['date_after'] ) ) {
+	if ( ! empty( $args['date_after'] ) ) {
 		$datetime   = wc_string_to_datetime( $args['date_after'] );
 		$date_after = strpos( $args['date_after'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
 	}
