@@ -508,6 +508,7 @@
 			this.removeAttr( attr );
 		} else {
 			this.attr( attr, value );
+			this.prop( attr, value ); // Edge fix.
 		}
 	};
 
