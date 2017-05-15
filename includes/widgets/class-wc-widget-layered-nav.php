@@ -262,6 +262,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Get current page URL for layered nav items.
+	 *
+	 * @param string $taxonomy
+	 *
 	 * @return string
 	 */
 	protected function get_page_base_url( $taxonomy ) {

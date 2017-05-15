@@ -113,7 +113,8 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 	 * Get all webhook deliveries.
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
 		$webhook = new WC_Webhook( (int) $request['webhook_id'] );

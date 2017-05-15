@@ -32,7 +32,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 *
+	 * @param WC_Product $product
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -90,7 +93,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Create a new product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
@@ -134,7 +137,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Updates an existing product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();

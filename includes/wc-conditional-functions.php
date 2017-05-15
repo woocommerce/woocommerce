@@ -121,7 +121,7 @@ if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 	 * @param  string $endpoint
 	 * @return bool
 	 */
-	function is_wc_endpoint_url( $endpoint = false ) {
+	function is_wc_endpoint_url( $endpoint = null ) {
 		global $wp;
 
 		$wc_endpoints = WC()->query->get_query_vars();

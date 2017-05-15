@@ -91,7 +91,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Method to create a new customer in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 *
+	 * @param WC_Data $customer
+	 *
+	 * @throws WC_Data_Exception
 	 */
 	public function create( &$customer ) {
 		$id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
@@ -123,7 +126,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Method to read a customer object.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @throws Exception
 	 */
 	public function read( &$customer ) {
@@ -160,7 +163,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Updates a customer in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function update( &$customer ) {
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
@@ -184,7 +187,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {

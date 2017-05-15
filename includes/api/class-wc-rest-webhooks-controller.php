@@ -32,7 +32,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
+	 * @param object $post
 	 * @param WP_REST_Request $request Request object.
+	 *
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $post, $request ) {

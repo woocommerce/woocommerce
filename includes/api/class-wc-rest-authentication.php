@@ -321,7 +321,7 @@ class WC_REST_Authentication {
 	 *
 	 * @param stdClass $user
 	 * @param array $params The request parameters.
-	 * @return null|WP_Error
+	 * @return true|WP_Error
 	 */
 	private function check_oauth_signature( $user, $params ) {
 		$http_method  = strtoupper( $_SERVER['REQUEST_METHOD'] );

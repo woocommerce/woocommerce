@@ -1793,6 +1793,9 @@ class WC_Cart {
 
 	/**
 	 * Get array of applied coupon objects and codes.
+	 *
+	 * @param null $deprecated
+	 *
 	 * @return array of applied coupons
 	 */
 	public function get_coupons( $deprecated = null ) {
@@ -1847,6 +1850,8 @@ class WC_Cart {
 
 	/**
 	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
+	 *
+	 * @param null $deprecated
 	 */
 	public function remove_coupons( $deprecated = null ) {
 		$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
@@ -2305,6 +2310,9 @@ class WC_Cart {
 	/**
 	 * Function to apply cart discounts after tax.
 	 * @deprecated Coupons can not be applied after tax
+	 *
+	 * @param $values
+	 * @param $price
 	 */
 	public function apply_cart_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
@@ -2313,6 +2321,9 @@ class WC_Cart {
 	/**
 	 * Function to apply product discounts after tax.
 	 * @deprecated Coupons can not be applied after tax
+	 *
+	 * @param $values
+	 * @param $price
 	 */
 	public function apply_product_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );

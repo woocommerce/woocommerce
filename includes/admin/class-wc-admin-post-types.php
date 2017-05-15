@@ -108,6 +108,11 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Adjust shop order columns for the user on certain conditions.
+	 *
+	 * @param array $hidden
+	 * @param object $screen
+	 *
+	 * @return array
 	 */
 	public function adjust_shop_order_columns( $hidden, $screen ) {
 		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
@@ -1899,6 +1904,8 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Show blank slate.
+	 *
+	 * @param string $which
 	 */
 	public function maybe_render_blank_state( $which ) {
 		global $post_type;
@@ -1941,6 +1948,11 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * When editing the shop page, we should hide templates.
+	 *
+	 * @param array $page_templates
+	 * @param $class
+	 * @param object $post
+	 *
 	 * @return array
 	 */
 	public function hide_cpt_archive_templates( $page_templates, $class, $post ) {
@@ -1955,6 +1967,8 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Show a notice above the CPT archive.
+	 *
+	 * @param object $post
 	 */
 	public function show_cpt_archive_notice( $post ) {
 		$shop_page_id = wc_get_page_id( 'shop' );
