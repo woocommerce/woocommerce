@@ -1024,7 +1024,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_class           = $item->get_tax_class();
 			$tax_status          = $item->get_tax_status();
 
-			if ( '0' !== $tax_class && 'taxable' === $tax_status ) {
+			if ( '0' !== $tax_class && 'taxable' === $tax_status && wc_tax_enabled() ) {
 				$tax_rates = WC_Tax::find_rates( array(
 					'country'   => $args['country'],
 					'state'     => $args['state'],
@@ -1043,43 +1043,49 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				} else {
 					$item->set_taxes( array( 'total' => $taxes ) );
 				}
-				$item->save();
+			} else {
+				$item->set_taxes( false );
 			}
+			$item->save();
 		}
 
 		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
-			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+			if ( wc_tax_enabled() ) {
+				$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-			// Inherit tax class from items
-			if ( 'inherit' === $shipping_tax_class ) {
-				$tax_rates         = array();
-				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
-				$found_tax_classes = $this->get_items_tax_classes();
+				// Inherit tax class from items
+				if ( 'inherit' === $shipping_tax_class ) {
+					$tax_rates         = array();
+					$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
+					$found_tax_classes = $this->get_items_tax_classes();
 
-				foreach ( $tax_classes as $tax_class ) {
-					if ( in_array( $tax_class, $found_tax_classes ) ) {
-						$tax_rates = WC_Tax::find_shipping_rates( array(
-							'country'   => $args['country'],
-							'state'     => $args['state'],
-							'postcode'  => $args['postcode'],
-							'city'      => $args['city'],
-							'tax_class' => $tax_class,
-						) );
-						break;
+					foreach ( $tax_classes as $tax_class ) {
+						if ( in_array( $tax_class, $found_tax_classes ) ) {
+							$tax_rates = WC_Tax::find_shipping_rates( array(
+								'country'   => $args['country'],
+								'state'     => $args['state'],
+								'postcode'  => $args['postcode'],
+								'city'      => $args['city'],
+								'tax_class' => $tax_class,
+							) );
+							break;
+						}
 					}
+				} else {
+					$tax_rates = WC_Tax::find_shipping_rates( array(
+						'country'   => $args['country'],
+						'state'     => $args['state'],
+						'postcode'  => $args['postcode'],
+						'city'      => $args['city'],
+						'tax_class' => $shipping_tax_class,
+					) );
 				}
-			} else {
-				$tax_rates = WC_Tax::find_shipping_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
-					'tax_class' => $shipping_tax_class,
-				) );
-			}
 
-			$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
+				$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
+			} else {
+				$item->set_taxes( false );
+			}
 			$item->save();
 		}
 		$this->update_taxes();
@@ -1151,7 +1157,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		if ( $and_taxes && wc_tax_enabled() ) {
+		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
 
