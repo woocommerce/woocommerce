@@ -93,6 +93,13 @@ class WC_Admin_Profile {
 			'shipping' => array(
 				'title' => __( 'Customer shipping address', 'woocommerce' ),
 				'fields' => array(
+					'copy_billing' => array(
+						'label'       => __( 'Copy from billing address', 'woocommerce' ),
+						'description' => '',
+						'class'       => 'js_copy-billing',
+						'type'        => 'button',
+						'text'        => __( 'Copy', 'woocommerce' ),
+					),
 					'shipping_first_name' => array(
 						'label'       => __( 'First name', 'woocommerce' ),
 						'description' => '',
@@ -151,10 +158,10 @@ class WC_Admin_Profile {
 
 		$show_fields = $this->get_customer_meta_fields();
 
-		foreach ( $show_fields as $fieldset ) :
+		foreach ( $show_fields as $fieldset_key => $fieldset ) :
 			?>
 			<h2><?php echo $fieldset['title']; ?></h2>
-			<table class="form-table">
+			<table class="form-table" id="<?php echo esc_attr( 'fieldset-' . $fieldset_key ); ?>">
 				<?php
 				foreach ( $fieldset['fields'] as $key => $field ) :
 					?>
@@ -171,6 +178,8 @@ class WC_Admin_Profile {
 								</select>
 							<?php elseif ( ! empty( $field['type'] ) && 'checkbox' === $field['type'] ) : ?>
 								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
+							<?php elseif ( ! empty( $field['type'] ) && 'button' === $field['type'] ) : ?>
+								<button id="<?php echo esc_attr( $key ); ?>" class="button <?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>"><?php echo esc_attr( $field['text'] ); ?></button>
 							<?php else : ?>
 								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
