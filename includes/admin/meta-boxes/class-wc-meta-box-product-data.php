@@ -25,7 +25,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-		global $post, $thepostid, $product_object;
+		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
