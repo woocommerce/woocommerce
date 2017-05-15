@@ -307,8 +307,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function get_item( $request ) {
-		global $wpdb;
-
 		$attribute = $this->get_attribute( (int) $request['id'] );
 
 		if ( is_wp_error( $attribute ) ) {

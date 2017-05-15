@@ -364,8 +364,6 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		global $wpdb;
-
 		$data = new stdClass;
 
 		// Post ID.

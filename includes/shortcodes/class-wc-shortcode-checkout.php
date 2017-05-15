@@ -34,8 +34,6 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$atts = shortcode_atts( array(), $atts, 'woocommerce_checkout' );
-
 		// Backwards compat with old pay and thanks link arguments
 		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) {
 			wc_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
