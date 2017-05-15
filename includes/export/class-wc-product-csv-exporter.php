@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Include dependencies.
  */
-if ( ! class_exists( 'WC_CSV_Exporter', false ) ) {
+if ( ! class_exists( 'WC_CSV_Batch_Exporter', false ) ) {
 	include_once( WC_ABSPATH . 'includes/export/abstract-wc-csv-batch-exporter.php' );
 }
 
@@ -101,7 +101,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'purchase_note'      => __( 'Purchase Note', 'woocommerce' ),
 			'sale_price'         => __( 'Sale Price', 'woocommerce' ),
 			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
-			'stock_quantity'     => __( 'Stock', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
@@ -341,6 +340,36 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			return $stock_quantity;
 		} else {
 			return '';
+		}
+	}
+
+	/**
+	 * Get stock status value.
+	 *
+	 * @since 3.1.0
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_stock_status( $product ) {
+		$status = $product->get_stock_status( 'edit' );
+		return 'instock' === $status ? 1 : 0;
+	}
+
+	/**
+	 * Get backorders.
+	 *
+	 * @since 3.1.0
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_backorders( $product ) {
+		$backorders = $product->get_backorders( 'edit' );
+
+		switch ( $backorders ) {
+			case 'notify' :
+				return 'notify';
+			default :
+				return wc_string_to_bool( $backorders ) ? 1 : 0;
 		}
 	}
 

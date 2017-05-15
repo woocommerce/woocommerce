@@ -83,4 +83,4 @@
 
 	$( '.woocommerce-exporter' ).wc_product_export_form();
 
-})( jQuery, window, document );
+})( jQuery, window );
