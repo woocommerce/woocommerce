@@ -139,15 +139,28 @@ class WC_Product_Importer extends WP_Importer {
 		$importer = $this->get_importer( $file, $args );
 		$data     = $importer->import();
 
+		$imported = count( $data['imported'] );
+		$failed   = count( $data['failed'] );
+
+		$results = sprintf(
+			/* translators: %d: products count */
+			_n( 'Imported %s product.', 'Imported %s products.', $imported, 'woocommerce' ),
+			'<strong>' . number_format_i18n( $imported ) . '</strong>'
+		);
+
+		// @todo create a view to display errors or log with WC_Logger.
+		if ( 0 < $failed ) {
+			$results .= ' ' . sprintf(
+				/* translators: %d: products count */
+				_n( 'Failed %s product.', 'Failed %s products.', $failed, 'woocommerce' ),
+				'<strong>' . number_format_i18n( $failed ) . '</strong>'
+			);
+		}
+
 		// Show result.
 		echo '<div class="updated settings-error"><p>';
-
-		/* translators: %d: products count */
-		printf(
-			__( 'Import complete - imported %s products.', 'woocommerce' ),
-			// @todo count failed too.
-			'<strong>' . count( $data ) . '</strong>'
-		);
+		/* translators: %d: import results */
+		printf( __( 'Import complete: %s', 'woocommerce' ), $results );
 		echo '</p></div>';
 
 		$this->import_end();
