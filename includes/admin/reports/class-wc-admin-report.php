@@ -417,7 +417,7 @@ class WC_Admin_Report {
 	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
 	 * @return string
 	 */
-	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
+	public function sales_sparkline( $id = 0, $days = 7, $type = 'sales' ) {
 
 		if ( $id ) {
 			$meta_key = ( 'sales' === $type ) ? '_line_total' : '_qty';

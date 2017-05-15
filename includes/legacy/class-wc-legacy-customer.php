@@ -164,7 +164,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Is the user a paying customer?
 	 * @return bool
 	 */
-	function is_paying_customer( $user_id = '' ) {
+	function is_paying_customer( $user_id = 0 ) {
 		wc_deprecated_function( 'WC_Customer::is_paying_customer', '3.0', 'WC_Customer::get_is_paying_customer' );
 		if ( ! empty( $user_id ) ) {
 			$user_id = get_current_user_id();

@@ -688,7 +688,7 @@ function wc_get_product_cat_ids( $product_id ) {
  * @param object|bool $product
  * @return array
  */
-function wc_get_product_attachment_props( $attachment_id = null, $product = false ) {
+function wc_get_product_attachment_props( $attachment_id = 0, $product = null ) {
 	$props = array(
 		'title'   => '',
 		'caption' => '',
