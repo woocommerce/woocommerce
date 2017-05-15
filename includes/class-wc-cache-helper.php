@@ -131,6 +131,8 @@ class WC_Cache_Helper {
 	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
 	 *
 	 * @since  2.3.10
+	 *
+	 * @param string $version
 	 */
 	public static function delete_version_transients( $version = '' ) {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {

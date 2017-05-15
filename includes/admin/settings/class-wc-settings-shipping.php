@@ -33,6 +33,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Add this page to settings.
+	 *
+	 * @param array $pages
+	 *
+	 * @return array|mixed
 	 */
 	public function add_settings_page( $pages ) {
 		return wc_shipping_enabled() ? parent::add_settings_page( $pages ) : $pages;
@@ -68,6 +72,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Get settings array.
+	 *
+	 * @param string $current_section
 	 *
 	 * @return array
 	 */

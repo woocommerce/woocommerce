@@ -436,7 +436,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns formatted dimensions.
 	 *
-	 * @param  $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @param  $formatted bool True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
 	 * @return string|array
 	 */
 	public function get_dimensions( $formatted = true ) {
@@ -1639,6 +1639,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the price in html format.
+	 *
+	 * @param string $deprecated
+	 *
 	 * @return string
 	 */
 	public function get_price_html( $deprecated = '' ) {
@@ -1719,7 +1722,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
 	 * @param array $attr
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param bool $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {

@@ -145,7 +145,8 @@ abstract class WP_REST_Controller {
 	 *
 	 * @param mixed $item WordPress representation of the item.
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response
+	 *
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
@@ -155,7 +156,8 @@ abstract class WP_REST_Controller {
 	 * Prepare a response for inserting into a collection.
 	 *
 	 * @param WP_REST_Response $response Response object.
-	 * @return array Response data, ready for insertion into collection data.
+	 *
+	 * @return array|WP_REST_Response
 	 */
 	public function prepare_response_for_collection( $response ) {
 		if ( ! ( $response instanceof WP_REST_Response ) ) {

@@ -52,7 +52,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 * @param WC_Coupon $coupon
 	 */
 	public function create( &$coupon ) {
 		$coupon->set_date_created( current_time( 'timestamp', true ) );
@@ -124,7 +124,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Updates a coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 * @param WC_Coupon $coupon
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();

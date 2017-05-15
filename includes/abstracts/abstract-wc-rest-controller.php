@@ -228,7 +228,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param array $values
 	 * @param array  $setting
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
 	public function validate_setting_multiselect_field( $values, $setting ) {
 		if ( empty( $values ) ) {
@@ -253,7 +253,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate image_width based settings.
 	 *
 	 * @since 3.0.0
-	 * @param array $value
+	 * @param array $values
 	 * @param array $setting
 	 * @return string|WP_Error
 	 */

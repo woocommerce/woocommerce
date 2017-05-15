@@ -100,6 +100,9 @@ class WC_CLI_REST_Command {
 	 * Create a new item.
 	 *
 	 * @subcommand create
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
 	 */
 	public function create_item( $args, $assoc_args ) {
 		$assoc_args = self::decode_json( $assoc_args );
@@ -115,6 +118,9 @@ class WC_CLI_REST_Command {
 	 * Delete an existing item.
 	 *
 	 * @subcommand delete
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
@@ -133,6 +139,9 @@ class WC_CLI_REST_Command {
 	 * Get a single item.
 	 *
 	 * @subcommand get
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
 	 */
 	public function get_item( $args, $assoc_args ) {
 		$route = $this->get_filled_route( $args );
@@ -162,6 +171,9 @@ class WC_CLI_REST_Command {
 	 * List all items.
 	 *
 	 * @subcommand list
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
 	 */
 	public function list_items( $args, $assoc_args ) {
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
@@ -206,6 +218,9 @@ class WC_CLI_REST_Command {
 	 * Update an existing item.
 	 *
 	 * @subcommand update
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
 	 */
 	public function update_item( $args, $assoc_args ) {
 		$assoc_args = self::decode_json( $assoc_args );
@@ -379,6 +394,9 @@ EOT;
 
 	/**
 	 * Output a line that's appropriately nested
+	 *
+	 * @param string $line
+	 * @param bool|string $change
 	 */
 	private function nested_line( $line, $change = false ) {
 		if ( 'add' == $change ) {

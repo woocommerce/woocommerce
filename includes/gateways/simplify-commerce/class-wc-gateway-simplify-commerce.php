@@ -408,10 +408,12 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 	 * Process standard payments.
 	 *
 	 * @param  WC_Order $order
-	 * @param  string   $cart_token
+	 * @param  string $cart_token
+	 * @param string $customer_token
+	 *
+	 * @return array
 	 * @uses   Simplify_ApiException
 	 * @uses   Simplify_BadRequestException
-	 * @return array
 	 */
 	protected function process_standard_payments( $order, $cart_token = '', $customer_token = '' ) {
 		try {
@@ -481,13 +483,15 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 		}
 	}
 
- 	/**
+	/**
 	 * do payment function.
 	 *
 	 * @param WC_order $order
 	 * @param int $amount (default: 0)
-	 * @uses  Simplify_BadRequestException
+	 * @param array $token
+	 *
 	 * @return bool|WP_Error
+	 * @uses  Simplify_BadRequestException
 	 */
 	public function do_payment( $order, $amount = 0, $token = array() ) {
 		if ( $amount * 100 < 50 ) {

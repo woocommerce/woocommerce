@@ -234,6 +234,9 @@ function wc_round_tax_total( $tax ) {
 
 /**
  * Make a refund total negative.
+ *
+ * @param float $amount
+ *
  * @return float
  */
 function wc_format_refund_total( $amount ) {
@@ -540,6 +543,10 @@ function wc_time_format() {
  * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
  *
  * @since  3.0.0
+ *
+ * @param string $time_string
+ * @param int|null $from_timestamp
+ *
  * @return int
  */
 function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
@@ -661,7 +668,8 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
-	 * @return string
+	 *
+	 * @return array
 	 */
 	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );

@@ -95,7 +95,7 @@ function wc_get_products( $args ) {
  *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
- * @return WC_Product|null
+ * @return WC_Product|null|false
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -317,6 +317,9 @@ function wc_placeholder_img_src() {
  * Get the placeholder image.
  *
  * @access public
+ *
+ * @param string $size
+ *
  * @return string
  */
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
@@ -687,7 +690,10 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param object|bool $product
+ *
+ * @param int $attachment_id
+ * @param object $product
+ *
  * @return array
  */
 function wc_get_product_attachment_props( $attachment_id = null, $product = false ) {
@@ -1045,8 +1051,11 @@ function wc_products_array_filter_editable( $product ) {
 /**
  * Sort an array of products by a value.
  * @since  3.0.0
- * @param  array $products
- * @param  string $orderby
+ *
+ * @param array $products
+ * @param string $orderby
+ * @param string $order
+ *
  * @return array
  */
 function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc' ) {

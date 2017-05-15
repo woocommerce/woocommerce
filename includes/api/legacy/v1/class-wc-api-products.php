@@ -99,7 +99,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the product ID
 	 * @param string $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_product( $id, $fields = null ) {
 
@@ -131,9 +131,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the total number of orders
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $type
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_products_count( $type = null, $filter = array() ) {
 
@@ -155,7 +157,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @param int $id the product ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_product( $id, $data ) {
 
@@ -173,7 +175,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_product( $id, $force = false ) {
 
@@ -192,7 +194,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the product ID to get reviews for
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_product_reviews( $id, $fields = null ) {
 

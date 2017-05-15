@@ -1387,6 +1387,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets shipping (formatted).
 	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
@@ -1427,6 +1429,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 * @since  2.3.0
+	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
@@ -1568,6 +1573,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Checks the order status against a passed in status.
+	 *
+	 * @param array|string $status
 	 *
 	 * @return bool
 	 */

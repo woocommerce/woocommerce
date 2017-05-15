@@ -153,7 +153,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 	/**
 	 * Method to delete an order from the database.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {

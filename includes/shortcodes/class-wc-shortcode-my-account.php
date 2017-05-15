@@ -333,6 +333,8 @@ class WC_Shortcode_My_Account {
 
 	/**
 	 * Set or unset the cookie.
+	 *
+	 * @param string $value
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;

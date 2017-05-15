@@ -58,7 +58,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 	 * in the next pass through. Or, return false to remove the
 	 * item from the queue.
 	 *
-	 * @param string $callback Update callback function
+	 * @param array $callback Update callback function
 	 * @return mixed
 	 */
 	protected function task( $callback ) {

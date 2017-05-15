@@ -152,6 +152,8 @@ class WC_Admin_Reports {
 
 	/**
 	 * Get a report from our reports subfolder.
+	 *
+	 * @param string $name
 	 */
 	public static function get_report( $name ) {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
