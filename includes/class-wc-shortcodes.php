@@ -87,6 +87,7 @@ class WC_Shortcodes {
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $loop_name;
+		$woocommerce_loop['found']   = 0;
 		$query_args                  = apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name );
 		$transient_name              = 'wc_loop' . substr( md5( json_encode( $query_args ) . $loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
@@ -99,6 +100,7 @@ class WC_Shortcodes {
 		ob_start();
 
 		if ( $products->have_posts() ) {
+			$woocommerce_loop['found']    = $products->found_posts;
 			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>
