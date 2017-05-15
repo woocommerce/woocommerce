@@ -37,8 +37,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->set_email_strings();
 		$this->customer_email = true;
+		$this->setup_locale();
+		$this->set_email_strings();
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
@@ -46,6 +47,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 		// Call parent constuctor
 		parent::__construct();
+		$this->restore_locale();
 	}
 
 	/**

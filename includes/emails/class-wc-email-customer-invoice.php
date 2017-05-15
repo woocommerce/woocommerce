@@ -39,6 +39,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	public function __construct() {
 
 		$this->id             = 'customer_invoice';
+		$this->customer_email = true;
+
+		$this->setup_locale();
 		$this->title          = __( 'Customer invoice', 'woocommerce' );
 		$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
@@ -54,10 +57,10 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		// Call parent constructor
 		parent::__construct();
 
-		$this->customer_email = true;
 		$this->manual         = true;
 		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
 		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
+		$this->restore_locale();
 	}
 
 	/**

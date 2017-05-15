@@ -243,6 +243,18 @@ class WC_Email extends WC_Settings_API {
 		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
+	public function setup_locale() {
+		if ( function_exists( 'switch_to_locale' ) && $this->is_customer_email() ) {
+			switch_to_locale( get_locale() );
+		}
+	}
+
+	public function restore_locale( $email ) {
+		if ( function_exists( 'restore_previous_locale' ) && $this->is_customer_email() ) {
+			restore_previous_locale();
+		}
+	}
+
 	/**
 	 * Get email subject.
 	 *
@@ -388,6 +400,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
+		$this->setup_locale();
 		$this->sending = true;
 
 		if ( 'plain' === $this->get_email_type() ) {
@@ -395,6 +408,7 @@ class WC_Email extends WC_Settings_API {
 		} else {
 			$email_content = $this->get_content_html();
 		}
+		$this->restore_locale();
 
 		return wordwrap( $email_content, 70 );
 	}

@@ -54,6 +54,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 		$this->id             = 'customer_new_account';
 		$this->customer_email = true;
+
+		$this->setup_locale();
 		$this->title          = __( 'New account', 'woocommerce' );
 		$this->description    = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
 
@@ -65,6 +67,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 		// Call parent constructor
 		parent::__construct();
+		$this->restore_locale();
 	}
 
 	/**

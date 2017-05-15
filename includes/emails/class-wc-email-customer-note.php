@@ -33,6 +33,8 @@ class WC_Email_Customer_Note extends WC_Email {
 
 		$this->id             = 'customer_note';
 		$this->customer_email = true;
+
+		$this->setup_locale();
 		$this->title          = __( 'Customer note', 'woocommerce' );
 		$this->description    = __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
 
@@ -47,6 +49,7 @@ class WC_Email_Customer_Note extends WC_Email {
 
 		// Call parent constructor
 		parent::__construct();
+		$this->restore_locale();
 	}
 
 	/**

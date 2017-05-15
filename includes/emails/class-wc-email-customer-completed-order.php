@@ -26,6 +26,8 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		$this->id             = 'customer_completed_order';
 		$this->customer_email = true;
+
+		$this->setup_locale();
 		$this->title          = __( 'Completed order', 'woocommerce' );
 		$this->description    = __( 'Order complete emails are sent to customers when their orders are marked completed and usually indicate that their orders have been shipped.', 'woocommerce' );
 
@@ -44,6 +46,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		// Call parent constuctor
 		parent::__construct();
+		$this->restore_locale();
 	}
 
 	/**
