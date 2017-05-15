@@ -181,7 +181,7 @@ class WC_Admin_Profile {
 							<?php elseif ( ! empty( $field['type'] ) && 'button' === $field['type'] ) : ?>
 								<button id="<?php echo esc_attr( $key ); ?>" class="button <?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>"><?php echo esc_attr( $field['text'] ); ?></button>
 							<?php else : ?>
-								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
+								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $this->get_user_meta( $user->ID, $key ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
 							<?php endif; ?>
 							<br/>
 							<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
@@ -214,6 +214,25 @@ class WC_Admin_Profile {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get user meta for a given key, with fallbacks to core user info for pre-existing fields.
+	 *
+	 * @param int    $user_id User ID of the user being edited
+	 * @param string $key     Key for user meta field
+	 */
+	public function get_user_meta( $user_id, $key ) {
+		$value = get_user_meta( $user_id, $key, true );
+		$existing_fields = array( 'billing_first_name', 'billing_last_name' );
+		if ( ! $value && in_array( $key, $existing_fields ) ) {
+			$value = get_user_meta( $user_id, str_replace( 'billing_', '', $key ), true );
+		} else if ( ! $value && $key === 'billing_email' ) {
+			$user = get_userdata( $user_id );
+			$value = $user->user_email;
+		}
+
+		return $value;
 	}
 }
 
