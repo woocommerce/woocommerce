@@ -71,8 +71,8 @@ abstract class WC_Object_Query {
 			'parent_exclude' => '',
 			'exclude'        => '',
 
-			'limit'          => -1,
-			'page'           => '',
+			'limit'          => get_option( 'posts_per_page' ),
+			'page'           => 1,
 			'offset'         => '',
 			'paginate'       => false,
 

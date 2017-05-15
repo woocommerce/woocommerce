@@ -318,14 +318,21 @@ class WC_Data_Store_WP {
 			}
 
 			foreach ( $comparisons as $index => $comparison ) {
-				$query_arg[ $comparison ] = array(
-					'year'  => $dates[ $index ]->date( 'Y' ),
-					'month' => $dates[ $index ]->date( 'n' ),
-					'day'   => $dates[ $index ]->date( 'j' ),
-				);
-				if ( 'second' === $precision ) {
-					$query_arg[ $comparison ]['minute'] = $dates[ $index ]->date( 'i' );
-					$query_arg[ $comparison ]['second'] = $dates[ $index ]->date( 's' );
+				/**
+				 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
+				 * 'after' string query, so we have to use the array format in 'day' precision.
+				 * @see https://core.trac.wordpress.org/ticket/29908
+				 */
+				if ( 'day' === $precision ) {
+					$query_arg[ $comparison ]['year']  = $dates[ $index ]->date( 'Y' );
+					$query_arg[ $comparison ]['month'] = $dates[ $index ]->date( 'n' );
+					$query_arg[ $comparison ]['day']   = $dates[ $index ]->date( 'j' );
+				/**
+				 * WordPress doesn't support 'hour'/'second'/'minute' in array format 'before'/'after' queries,
+				 * so we have to use a string query.
+				 */
+				} else {
+					$query_arg[ $comparison ] = gmdate( 'm/d/Y H:i:s', $dates[ $index ]->getTimestamp() );
 				}
 			}
 
@@ -334,11 +341,11 @@ class WC_Data_Store_WP {
 				$query_arg['month'] = $dates[0]->date( 'n' );
 				$query_arg['day']   = $dates[0]->date( 'j' );
 				if ( 'second' === $precision ) {
+					$query_arg['hour']   = $dates[0]->date( 'H' );
 					$query_arg['minute'] = $dates[0]->date( 'i' );
 					$query_arg['second'] = $dates[0]->date( 's' );
 				}
 			}
-
 			$wp_query_args['date_query'][] = $query_arg;
 			return $wp_query_args;
 		}
