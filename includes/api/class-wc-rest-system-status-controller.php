@@ -892,7 +892,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$pages_output = array();
 		foreach ( $check_pages as $page_name => $values ) {
-			$errors   = array();
 			$page_id  = get_option( $values['option'] );
 			$page_set = $page_exists = $page_visible = false;
 			$shortcode_present = $shortcode_required = false;

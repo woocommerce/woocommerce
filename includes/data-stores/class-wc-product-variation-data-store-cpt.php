@@ -41,7 +41,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			return;
 		}
 
-		$id = $product->get_id();
 		$product->set_parent_id( $post_object->post_parent );
 		$parent_id = $product->get_parent_id();
 

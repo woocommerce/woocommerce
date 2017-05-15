@@ -601,8 +601,6 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
  * @return int
  */
 function wc_get_product_id_by_sku( $sku ) {
-	global $wpdb;
-
 	$data_store = WC_Data_Store::load( 'product' );
 	$product_id = $data_store->get_product_id_by_sku( $sku );
 
@@ -842,8 +840,6 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
-	global $wpdb;
-
 	$product_id     = absint( $product_id );
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;

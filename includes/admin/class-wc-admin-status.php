@@ -35,8 +35,6 @@ class WC_Admin_Status {
 	 * Handles output of tools.
 	 */
 	public static function status_tools() {
-		global $wpdb;
-
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {

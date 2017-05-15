@@ -397,8 +397,6 @@ class WC_Post_Data {
 	 * Remove downloadable permissions on permanent order deletion.
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
-		global $wpdb;
-
 		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
