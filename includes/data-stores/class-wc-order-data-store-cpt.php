@@ -624,7 +624,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		if ( isset( $query_vars['customer'] ) && ! empty( $query_vars['customer'] ) ) {
+		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
 			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
 			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
 		}
