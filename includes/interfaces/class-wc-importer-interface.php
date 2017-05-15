@@ -18,7 +18,9 @@ interface WC_Importer_Interface {
 
 	/**
 	 * Process importation.
-	 * Returns an array with the imported and failed objects.
+	 * Returns an array with the imported and failed items.
+	 * 'imported' contains a list of IDs.
+	 * 'failed' contains a list of WP_Error objects.
 	 *
 	 * Example:
 	 * ['imported' => [], 'failed' => []]
