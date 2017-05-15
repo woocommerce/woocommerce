@@ -208,7 +208,6 @@ class WC_Post_types {
 						'show_ui'            => true,
 						'show_in_quick_edit' => false,
 						'show_in_menu'       => false,
-						'show_in_nav_menus'  => false,
 						'meta_box_cb'        => false,
 						'query_var'          => 1 === $tax->attribute_public,
 						'rewrite'            => false,
