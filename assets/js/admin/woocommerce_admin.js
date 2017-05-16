@@ -3,10 +3,15 @@ jQuery( function ( $ ) {
 
 	// Add buttons to product screen.
 	var $product_screen = $( '.edit-php.post-type-product' ),
-		$title_action   = $product_screen.find( '.page-title-action:first' );
+		$title_action   = $product_screen.find( '.page-title-action:first' ),
+		$blankslate     = $product_screen.find( '.woocommerce-BlankState' );
 
-	$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
-	$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
+	if ( 0 === $blankslate.length ) {
+		$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
+		$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
+	} else {
+		$title_action.hide();
+	}
 
 	// Field validation error tips
 	$( document.body )
