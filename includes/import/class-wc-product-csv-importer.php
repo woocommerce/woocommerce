@@ -88,34 +88,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Process importer.
-	 *
-	 * @return array
-	 */
-	public function import() {
-		$data = array(
-			'imported' => array(),
-			'failed'   => array(),
-		);
-
-		foreach ( $this->parsed_data as $parsed_data ) {
-			$result = $this->process_item( $parsed_data );
-
-			if ( is_wp_error( $result ) ) {
-				$data['failed'][] = $result;
-			} else {
-				$data['imported'][] = $result;
-
-				// Clean cache for updated products.
-				wc_delete_product_transients( $result );
-				wp_cache_delete( 'product-' . $result, 'products' );
-			}
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Get file raw headers.
 	 *
 	 * @return array
@@ -355,5 +327,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 			$this->parsed_data[] = $item;
 		}
+	}
+
+	/**
+	 * Process importer.
+	 *
+	 * @return array
+	 */
+	public function import() {
+		$data = array(
+			'imported' => array(),
+			'failed'   => array(),
+		);
+
+		foreach ( $this->parsed_data as $parsed_data ) {
+			$result = $this->process_item( $parsed_data );
+
+			if ( is_wp_error( $result ) ) {
+				$data['failed'][] = $result;
+			} else {
+				$data['imported'][] = $result;
+			}
+		}
+
+		return $data;
 	}
 }
