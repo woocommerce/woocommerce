@@ -255,7 +255,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Restore the locale to the default locale. Use after finished with setup_locale.
 	 */
-	public function restore_locale( $email ) {
+	public function restore_locale() {
 		if ( function_exists( 'restore_previous_locale' ) && $this->is_customer_email() ) {
 			restore_previous_locale();
 		}
