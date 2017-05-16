@@ -54,6 +54,7 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-product-import.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-product-export.php' );
 
 		// Help Tabs
