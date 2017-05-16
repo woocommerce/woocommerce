@@ -352,6 +352,10 @@ class WC_Product_Variable extends WC_Product {
 			$this->set_backorders( 'no' );
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 
+		// If backorders are enabled, always in stock.
+		} elseif ( 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'instock' );
+
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$this->set_stock_status( 'outofstock' );
