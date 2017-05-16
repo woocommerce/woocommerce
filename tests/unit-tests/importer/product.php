@@ -29,16 +29,29 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 3.1.0
 	 */
 	public function test_import() {
-		//
-		$importer = new WC_Product_CSV_Importer( $this->csv_file );
-
-		$expected = array(
-			'imported' => array(),
-			'failed'   => array(),
+		$mapped = array(
+			'Type'          => 'type',
+			'SKU'           => 'sku',
+			'Name'          => 'name',
+			'Status'        => 'status',
+			'Regular price' => 'regular_price',
 		);
 
-		// $this->assertEquals( $expected, $importer->import() );
-		$this->assertEquals( true, true );
+		$args = array(
+			'mapping' => $mapped,
+			'parse'   => true,
+		);
+
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
+		$results  = $importer->import();
+
+		$this->assertEquals( 3, count( $results['imported'] ) );
+		$this->assertEquals( 0, count( $results['failed'] ) );
+
+		// Exclude imported products.
+		foreach ( $results['imported'] as $id ) {
+			wp_delete_post( $id );
+		}
 	}
 
 	/**
@@ -88,21 +101,21 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false ) );
 		$items    = array(
 			array(
-				'regular',
+				'simple',
 				'PRODUCT-01',
 				'Imported Product 1',
 				1,
 				40,
 			),
 			array(
-				'regular',
+				'simple',
 				'PRODUCT-02',
 				'Imported Product 2',
 				1,
 				41,
 			),
 			array(
-				'regular',
+				'simple',
 				'PRODUCT-03',
 				'Imported Product 3',
 				1,
@@ -134,21 +147,21 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
 		$items    = array(
 			array(
-				'type'          => 'regular',
+				'type'          => 'simple',
 				'sku'           => 'PRODUCT-01',
 				'name'          => 'Imported Product 1',
 				'status'        => 1,
 				'regular_price' => 40,
 			),
 			array(
-				'type'          => 'regular',
+				'type'          => 'simple',
 				'sku'           => 'PRODUCT-02',
 				'name'          => 'Imported Product 2',
 				'status'        => 1,
 				'regular_price' => 41,
 			),
 			array(
-				'type'          => 'regular',
+				'type'          => 'simple',
 				'sku'           => 'PRODUCT-03',
 				'name'          => 'Imported Product 3',
 				'status'        => 1,
