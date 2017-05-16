@@ -19,6 +19,8 @@ jQuery( function( $ ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
 			} else if ( url.indexOf( 'comment-page-' ) > 0 || url.indexOf( 'cpage=' ) > 0 ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
+			} else if ( hash === '#tab-additional_information' ) {
+				$tabs.find( 'li.additional_information_tab a' ).click();
 			} else {
 				$tabs.find( 'li:first a' ).click();
 			}
