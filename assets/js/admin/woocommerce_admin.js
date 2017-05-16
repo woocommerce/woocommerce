@@ -1,9 +1,12 @@
 /* global woocommerce_admin */
-
-/**
- * WooCommerce Admin JS
- */
 jQuery( function ( $ ) {
+
+	// Add buttons to product screen.
+	var $product_screen = $( '.edit-php.post-type-product' ),
+		$title_action   = $product_screen.find( '.page-title-action:first' );
+
+	$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
+	$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
 
 	// Field validation error tips
 	$( document.body )
