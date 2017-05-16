@@ -673,6 +673,10 @@ table.wc_status_table {
 	}
 }
 
+.edit-php.post-type-product .top .bulkactions {
+	display: none;
+}
+
 #woocommerce-fields.inline-edit-col {
 	clear: left;
 
@@ -4961,6 +4965,7 @@ table.bar_chart {
 		font-size: 1.2em;
 		padding: 0.75em 1.5em;
 		height: auto;
+		display: inline-block !important
 	}
 }
 

@@ -20,7 +20,8 @@ class WC_Admin_Product_Export {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'admin_menu' ), 55 );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'admin_head', array( $this, 'admin_menu_hide' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_init', array( $this, 'download_export_file' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_export', array( $this, 'do_ajax_product_export' ) );
@@ -31,6 +32,21 @@ class WC_Admin_Product_Export {
 	 */
 	public function admin_menu() {
 		add_submenu_page( 'edit.php?post_type=product', __( 'Product Export', 'woocommerce' ), __( 'Export', 'woocommerce' ), 'edit_products', 'product_exporter', array( $this, 'admin_screen' ) );
+	}
+
+	/**
+	 * Hide menu item from view.
+	 */
+	public function admin_menu_hide() {
+		global $submenu;
+
+		if ( isset( $submenu['edit.php?post_type=product'] ) ) {
+			foreach ( $submenu['edit.php?post_type=product'] as $key => $menu ) {
+				if ( 'product_exporter' === $menu[2] ) {
+					unset( $submenu['edit.php?post_type=product'][ $key ] );
+				}
+			}
+		}
 	}
 
 	/**
