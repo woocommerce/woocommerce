@@ -39,7 +39,6 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 
 		// Call parent constructor
 		parent::__construct();
-		$this->restore_locale();
 	}
 
 	/**
