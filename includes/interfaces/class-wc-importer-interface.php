@@ -41,6 +41,20 @@ interface WC_Importer_Interface {
 	public function get_raw_keys();
 
 	/**
+	 * Get file mapped headers.
+	 *
+	 * @return array
+	 */
+	public function get_mapped_keys();
+
+	/**
+	 * Get raw data.
+	 *
+	 * @return array
+	 */
+	public function get_raw_data();
+
+	/**
 	 * Get parsed data.
 	 *
 	 * @return array
