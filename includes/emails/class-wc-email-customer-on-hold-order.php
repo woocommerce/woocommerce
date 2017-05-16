@@ -26,13 +26,12 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 		$this->id               = 'customer_on_hold_order';
 		$this->customer_email   = true;
 
-		$this->setup_locale();
 		$this->title            = __( 'Order on-hold', 'woocommerce' );
 		$this->description      = __( 'This is an order notification sent to customers containing order details after an order is placed on-hold.', 'woocommerce' );
-		$this->heading          = __( 'Thank you for your order', 'woocommerce' );
-		$this->subject          = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
 		$this->template_html    = 'emails/customer-on-hold-order.php';
 		$this->template_plain   = 'emails/plain/customer-on-hold-order.php';
+
+		$this->set_email_strings();
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
@@ -40,6 +39,15 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 
 		// Call parent constructor
 		parent::__construct();
+	}
+
+	/**
+	 * Set email strings.
+	 */
+	public function set_email_strings() {
+		$this->setup_locale();
+		$this->heading = __( 'Thank you for your order', 'woocommerce' );
+		$this->subject = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
 		$this->restore_locale();
 	}
 

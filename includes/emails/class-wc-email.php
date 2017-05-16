@@ -243,12 +243,18 @@ class WC_Email extends WC_Settings_API {
 		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
+	/**
+	 * Set the locale to the store locale for customer emails to make sure emails are in the store language.
+	 */
 	public function setup_locale() {
 		if ( function_exists( 'switch_to_locale' ) && $this->is_customer_email() ) {
 			switch_to_locale( get_locale() );
 		}
 	}
 
+	/**
+	 * Restore the locale to the default locale. Use after finished with setup_locale.
+	 */
 	public function restore_locale( $email ) {
 		if ( function_exists( 'restore_previous_locale' ) && $this->is_customer_email() ) {
 			restore_previous_locale();

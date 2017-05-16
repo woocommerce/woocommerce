@@ -27,15 +27,13 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		$this->id             = 'customer_completed_order';
 		$this->customer_email = true;
 
-		$this->setup_locale();
 		$this->title          = __( 'Completed order', 'woocommerce' );
 		$this->description    = __( 'Order complete emails are sent to customers when their orders are marked completed and usually indicate that their orders have been shipped.', 'woocommerce' );
 
-		$this->heading        = __( 'Your order is complete', 'woocommerce' );
-		$this->subject        = __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-completed-order.php';
 		$this->template_plain = 'emails/plain/customer-completed-order.php';
+
+		$this->set_email_strings();
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ), 10, 2 );
@@ -46,6 +44,15 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		// Call parent constuctor
 		parent::__construct();
+	}
+
+	/**
+	 * Set email strings.
+	 */
+	public function set_email_strings() {
+		$this->setup_locale();
+		$this->heading = __( 'Your order is complete', 'woocommerce' );
+		$this->subject = __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
 		$this->restore_locale();
 	}
 

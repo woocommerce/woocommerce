@@ -38,7 +38,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 */
 	public function __construct() {
 		$this->customer_email = true;
-		$this->setup_locale();
+
 		$this->set_email_strings();
 
 		// Triggers for this email
@@ -47,7 +47,6 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 		// Call parent constuctor
 		parent::__construct();
-		$this->restore_locale();
 	}
 
 	/**
@@ -56,11 +55,13 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @param bool $partial_refund
 	 */
 	public function set_email_strings( $partial_refund = false ) {
+		$this->setup_locale();
 		$this->subject_partial     = $this->get_option( 'subject_partial', __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' ) );
 		$this->subject_full        = $this->get_option( 'subject_full', __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' ) );
 
 		$this->heading_full        = $this->get_option( 'heading_full', __( 'Your order has been fully refunded', 'woocommerce' ) );
 		$this->heading_partial     = $this->get_option( 'heading_partial', __( 'Your order has been partially refunded', 'woocommerce' ) );
+		$this->restore_locale();
 
 		$this->template_html  = 'emails/customer-refunded-order.php';
 		$this->template_plain = 'emails/plain/customer-refunded-order.php';

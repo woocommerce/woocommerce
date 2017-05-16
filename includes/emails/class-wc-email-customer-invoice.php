@@ -41,18 +41,12 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		$this->id             = 'customer_invoice';
 		$this->customer_email = true;
 
-		$this->setup_locale();
 		$this->title          = __( 'Customer invoice', 'woocommerce' );
 		$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-invoice.php';
 		$this->template_plain = 'emails/plain/customer-invoice.php';
 
-		$this->subject        = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
-		$this->heading        = __( 'Invoice for order {order_number}', 'woocommerce' );
-
-		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce' );
-		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce' );
+		$this->set_email_strings();
 
 		// Call parent constructor
 		parent::__construct();
@@ -60,6 +54,17 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		$this->manual         = true;
 		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
 		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
+	}
+
+	/**
+	 * Set email strings.
+	 */
+	public function set_email_strings() {
+		$this->setup_locale();
+		$this->subject      = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
+		$this->heading      = __( 'Invoice for order {order_number}', 'woocommerce' );
+		$this->subject_paid = __( 'Your {site_title} order from {order_date}', 'woocommerce' );
+		$this->heading_paid = __( 'Order {order_number} details', 'woocommerce' );
 		$this->restore_locale();
 	}
 
