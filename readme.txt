@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.6
+Stable tag: 3.0.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,13 +161,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.0.7 - 2017-05-xx =
+= 3.0.7 - 2017-05-16 =
 * Fix - Display of grouped product permalinks + names.
-* Fix - Ensure wc_get_payment_gateway_by_order has a valid order ID to avoid errors.
+* Fix - Ensure `wc_get_payment_gateway_by_order` has a valid order ID to avoid errors.
+* Fix - Ensure `get_plugin_updates` exists in API.
 * Fix - Correctly set rating term after updating product visibility.
-* Fix - is_ip_address should be static.
+* Fix - `is_ip_address` should be static.
 * Fix - Handle clearing for 3, 4, and 5 columns in the product gallery.
-* Fix - Some added prevention against notices/errors in the assets and variation data store files.
+* Fix - Some added protection against notices/errors in the assets and variation data-store files.
+* Fix - If backorders are enabled, do not make variable products out of stock.
+* Fix - Undefined function in `class-wc-embed.php`.
+* Fix - Fix 'base location' not being returned via the settings API.
+* Fix - When re-filling fields on checkout, only change the empty ones to avoid conflicts with gateway plugins and hidden fields.
+* Fix - Make calculate tax function clear taxes if taxes are disabled on recalculation.
+* Fix - Update all customer session address fields when updating via checkout.
+* Fix - Support customer searches < 3 characters long, but with result limiting.
 
 = 3.0.6 - 2017-05-09 =
 * Fix - Fixed conflict between global attributes and custom attributes with the same names.
@@ -421,5 +429,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.6 =
+= 3.0.7 =
 3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
