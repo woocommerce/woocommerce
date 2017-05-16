@@ -1,4 +1,4 @@
 Type,SKU,Name,Status,Regular price
-regular,PRODUCT-01,Imported Product 1,1,40
-regular,PRODUCT-02,Imported Product 2,1,41
-regular,PRODUCT-03,Imported Product 3,1,42
+simple,PRODUCT-01,Imported Product 1,1,40
+simple,PRODUCT-02,Imported Product 2,1,41
+simple,PRODUCT-03,Imported Product 3,1,42

@@ -51,10 +51,10 @@ class WC_Admin_Importers {
 		}
 
 		// includes
-		require( dirname( __FILE__ ) . '/importers/class-wc-product-importer.php' );
+		require( dirname( __FILE__ ) . '/importers/class-wc-product-wp-importer.php' );
 
 		// Dispatch
-		$importer = new WC_Product_Importer();
+		$importer = new WC_Product_WP_Importer();
 		$importer->dispatch();
 	}
 

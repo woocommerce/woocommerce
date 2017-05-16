@@ -15,7 +15,7 @@ if ( ! class_exists( 'WP_Importer' ) ) {
  * @package     WooCommerce/Admin/Importers
  * @version     3.1.0
  */
-class WC_Product_Importer extends WP_Importer {
+class WC_Product_WP_Importer extends WP_Importer {
 
 	/**
 	 * The current file id.
@@ -138,7 +138,6 @@ class WC_Product_Importer extends WP_Importer {
 
 		$importer = $this->get_importer( $file, $args );
 		$data     = $importer->import();
-
 		$imported = count( $data['imported'] );
 		$failed   = count( $data['failed'] );
 
