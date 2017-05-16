@@ -367,17 +367,20 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Search customers and return customer IDs.
 	 *
 	 * @param  string $term
+	 * @oaram  int|string $limit @since 3.0.7
 	 * @return array
 	 */
-	public function search_customers( $term ) {
+	public function search_customers( $term, $limit = '' ) {
 		$query = new WP_User_Query( array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 			'fields'         => 'ID',
+			'number'         => $limit,
 		) );
 
 		$query2 = new WP_User_Query( array(
 			'fields'         => 'ID',
+			'number'         => $limit,
 			'meta_query'     => array(
 				'relation' => 'OR',
 				array(
@@ -392,6 +395,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				),
 			),
 		) );
-		return wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+
+		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+
+		if ( $limit && count( $results ) > $limit ) {
+			$results = array_slice( $results, 0, $limit );
+		}
+
+		return $results;
 	}
 }
