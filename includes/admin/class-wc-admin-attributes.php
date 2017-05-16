@@ -202,7 +202,7 @@ class WC_Admin_Attributes {
 			);
 		}
 
-		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . ecs_url( 'edit.php?post_type=product&amp;page=product_attributes' ) . '">&larr; ' . __( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
+		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . ecs_url( admin_url( 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">&larr; ' . __( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
 
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
