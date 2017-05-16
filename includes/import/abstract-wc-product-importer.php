@@ -24,6 +24,84 @@ if ( ! class_exists( 'WC_Importer_Interface', false ) ) {
 abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
+	 * CSV file.
+	 *
+	 * @var string
+	 */
+	protected $file = '';
+
+	/**
+	 * Importer parameters.
+	 *
+	 * @var array
+	 */
+	protected $params = array();
+
+	/**
+	 * Raw keys - CSV raw headers.
+	 *
+	 * @var array
+	 */
+	protected $raw_keys = array();
+
+	/**
+	 * Mapped keys - CSV headers.
+	 *
+	 * @var array
+	 */
+	protected $mapped_keys = array();
+
+	/**
+	 * Raw data.
+	 *
+	 * @var array
+	 */
+	protected $raw_data = array();
+
+	/**
+	 * Parsed data.
+	 *
+	 * @var array
+	 */
+	protected $parsed_data = array();
+
+	/**
+	 * Get file raw headers.
+	 *
+	 * @return array
+	 */
+	public function get_raw_keys() {
+		return $this->raw_keys;
+	}
+
+	/**
+	 * Get file mapped headers.
+	 *
+	 * @return array
+	 */
+	public function get_mapped_keys() {
+		return $this->mapped_keys;
+	}
+
+	/**
+	 * Get raw data.
+	 *
+	 * @return array
+	 */
+	public function get_raw_data() {
+		return $this->raw_data;
+	}
+
+	/**
+	 * Get parsed data.
+	 *
+	 * @return array
+	 */
+	public function get_parsed_data() {
+		return apply_filters( 'woocommerce_product_parsed_data', $this->parsed_data, $this->get_raw_data() );
+	}
+
+	/**
 	 * Process a single item and save.
 	 *
 	 * @param  array $data Raw CSV data.
@@ -62,8 +140,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected function clear_cache( $object ) {
 		$id = $object->get_id();
 
-		if ( 'variation' === $product->get_type() ) {
-			$id = $product->get_parent_id();
+		if ( 'variation' === $object->get_type() ) {
+			$id = $object->get_parent_id();
 		}
 
 		wc_delete_product_transients( $id );

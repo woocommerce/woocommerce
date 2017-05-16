@@ -24,48 +24,6 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
-	 * CSV file.
-	 *
-	 * @var string
-	 */
-	protected $file = '';
-
-	/**
-	 * Importer parameters.
-	 *
-	 * @var array
-	 */
-	protected $params = array();
-
-	/**
-	 * Raw keys - CSV raw headers.
-	 *
-	 * @var array
-	 */
-	protected $raw_keys = array();
-
-	/**
-	 * Mapped keys - CSV headers.
-	 *
-	 * @var array
-	 */
-	protected $mapped_keys = array();
-
-	/**
-	 * Raw data.
-	 *
-	 * @var array
-	 */
-	protected $raw_data = array();
-
-	/**
-	 * Parsed data.
-	 *
-	 * @var array
-	 */
-	protected $parsed_data = array();
-
-	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file File to read.
@@ -85,42 +43,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$this->file   = $file;
 
 		$this->read_file();
-	}
-
-	/**
-	 * Get file raw headers.
-	 *
-	 * @return array
-	 */
-	public function get_raw_keys() {
-		return $this->raw_keys;
-	}
-
-	/**
-	 * Get file mapped headers.
-	 *
-	 * @return array
-	 */
-	public function get_mapped_keys() {
-		return $this->mapped_keys;
-	}
-
-	/**
-	 * Get raw data.
-	 *
-	 * @return array
-	 */
-	public function get_raw_data() {
-		return $this->raw_data;
-	}
-
-	/**
-	 * Get parsed data.
-	 *
-	 * @return array
-	 */
-	public function get_parsed_data() {
-		return apply_filters( 'woocommerce_csv_product_parsed_data', $this->parsed_data, $this->get_raw_data() );
 	}
 
 	/**
