@@ -84,7 +84,7 @@ class WC_Admin_Exporters {
 	 * Export page UI.
 	 */
 	public function product_exporter() {
-		include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
+		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-product-export.php' );
 	}
 
@@ -93,7 +93,7 @@ class WC_Admin_Exporters {
 	 */
 	public function download_export_file() {
 		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'product-csv' ) && 'download_product_csv' === $_GET['action'] ) {
-			include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
+			include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 			$exporter = new WC_Product_CSV_Exporter();
 			$exporter->export();
 		}
@@ -109,7 +109,7 @@ class WC_Admin_Exporters {
 			wp_die( -1 );
 		}
 
-		include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
+		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 
 		$step     = absint( $_POST['step'] );
 		$exporter = new WC_Product_CSV_Exporter();

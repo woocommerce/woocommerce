@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_CSV_Batch_Exporter', false ) ) {
-	include_once( WC_ABSPATH . 'includes/admin/exporters/abstract-wc-csv-batch-exporter.php' );
+	include_once( WC_ABSPATH . 'includes/export/abstract-wc-csv-batch-exporter.php' );
 }
 
 /**
