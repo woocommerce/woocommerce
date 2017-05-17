@@ -23,6 +23,8 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
  */
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
+	protected $file_position = 0;
+
 	/**
 	 * Initialize importer.
 	 *
@@ -46,6 +48,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Get file pointer position from the last read.
+	 *
+	 * @return int
+	 */
+	public function get_file_position() {
+		return $this->file_position;
+	}
+
+	/**
+	 * Get file pointer position as a percentage of file size.
+	 *
+	 * @return int
+	 */
+	public function get_percent_complete() {
+		$size = filesize( $this->file );
+		if ( ! $size ) {
+			return 0;
+		}
+
+		return min( round( ( $this->file_position / $size ) * 100 ), 100 );
+	}
+
+	/**
 	 * Read file.
 	 *
 	 * @return array
@@ -65,6 +90,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	            	break;
 				}
 			}
+
+			$this->file_position = ftell( $handle );
 		}
 
 		if ( ! empty( $this->params['mapping'] ) ) {

@@ -171,7 +171,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Dispatch current step and show correct view.
 	 */
 	public function dispatch() {
-		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
+		if ( ! empty( $_POST['save_step'] ) && ! empty( $this->steps[ $this->step ]['handler'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['handler'], $this );
 		}
 		$this->output_header();
@@ -179,24 +179,6 @@ class WC_Product_CSV_Importer_Controller {
 		$this->output_errors();
 		call_user_func( $this->steps[ $this->step ]['view'], $this );
 		$this->output_footer();
-
-		/*switch ( $this->step ) {
-			case 2 :
-				check_admin_referer( 'woocommerce-csv-importer' );
-				$file           = null;
-				$this->id       = isset( $_REQUEST['file_id'] ) ? absint( $_REQUEST['file_id'] ) : '';
-				$this->file_url = isset( $_REQUEST['file_url'] ) ? sanitize_text_field( $_REQUEST['file_url'] ) : '';
-
-				if ( $this->id ) {
-					$file = get_attached_file( $this->id );
-				} elseif ( $this->file_url ) {
-					$file = ABSPATH . $this->file_url;
-				}
-
-				$this->import( $file );
-
-				break;
-		}*/
 	}
 
 	/**
@@ -299,7 +281,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Import the file if it exists and is valid.
+	 * Import step.
 	 */
 	public function import() {
 		if ( ! is_file( $this->file ) ) {
@@ -307,16 +289,28 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		$args = array( 'parse' => true );
+		$mapping = array();
 
 		if ( ! empty( $_POST['map_to'] ) ) {
-			$args['mapping'] = wp_unslash( $_POST['map_to'] );
+			$mapping = $_POST['map_to'];
 		}
 
-		$importer = $this->get_importer( $this->file, $args );
-		$data     = $importer->import();
-		$imported = count( $data['imported'] );
-		$failed   = count( $data['failed'] );
+		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
+		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
+			'import_nonce' => wp_create_nonce( 'wc-product-import' ),
+			'mapping' => $mapping,
+			'file' => $this->file,
+		) );
+		wp_enqueue_script( 'wc-product-import' );
+	}
+
+	/**
+	 * Done step.
+	 * @todo Make this better.
+	 */
+	protected function done() {
+		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
+		$failed = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
 
 		$results = sprintf(
 			/* translators: %d: products count */
@@ -338,13 +332,6 @@ class WC_Product_CSV_Importer_Controller {
 		/* translators: %d: import results */
 		printf( __( 'Import complete: %s', 'woocommerce' ), $results );
 		echo '</p></div>';
-	}
-
-	/**
-	 * @todo
-	 */
-	protected function done() {
-
 	}
 
 	/**
