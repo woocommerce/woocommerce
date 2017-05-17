@@ -109,7 +109,6 @@ class WC_Product_CSV_Importer_Controller {
 		$params = array(
 			'step'      => $keys[ $step_index + 1 ],
 			'file'      => $this->file,
-			'file_url'  => $this->file_url,
 			'delimiter' => $this->delimiter,
 			'_wpnonce'  => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);

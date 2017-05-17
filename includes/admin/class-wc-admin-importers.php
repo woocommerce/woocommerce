@@ -2,7 +2,7 @@
 /**
  * Init WooCommerce data importers.
  *
- * @author      WooThemes
+ * @author      Automattic
  * @category    Admin
  * @package     WooCommerce/Admin
  * @version     3.1.0
