@@ -54,8 +54,8 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-product-import.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-product-export.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
@@ -69,11 +69,6 @@ class WC_Admin {
 					include_once( dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php' );
 				break;
 			}
-		}
-
-		// Importers
-		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		}
 	}
 

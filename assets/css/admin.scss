@@ -5421,118 +5421,188 @@ table.bar_chart {
 	}
 }
 
-.woocommerce-exporter {
-	background: #fff;
-	padding: 24px;
-	margin: 16px 0 16px;
-	box-shadow: 0 1px 3px rgba(0,0,0,.13);
-	color: #555;
+.woocommerce-progress-form-wrapper,
+.woocommerce-exporter-wrapper {
+	text-align: center;
+	max-width: 700px;
+	margin: 40px auto;
 
-	header {
-		border-bottom: 1px solid #eee;
-		padding: 0 24px;
-		margin: 0 -24px 24px;
-	}
-
-	h2 {
-		margin: 0 0 24px;
-		color: #555;
-		font-size: 24px;
-		font-weight: normal;
-		line-height: 1em;
-	}
-
-	p {
-		font-size: 1em;
-		line-height: 1.75em;
-		font-size: 16px;
-		color: #555;
-		margin: 0 0 24px;
-	}
-
-	.form-row {
-		margin-top: 24px;
-	}
-
-	.spinner {
-		display: none;
-	}
-
-	.woocommerce-exporter-options th {
-		width: 320px;
-	}
-
-	.woocommerce-exporter-options th, .woocommerce-exporter-options td {
-		vertical-align: middle;
-
-		label {
-			font-weight: normal;
-			color: #555;
+	.wc-progress-steps {
+		padding: 0 0 24px;
+		margin: 0;
+		list-style: none outside;
+		overflow: hidden;
+		color: #ccc;
+		width:100%;
+		display: -webkit-inline-flex;
+		display: -ms-inline-flexbox;
+		display: inline-flex;
+		li {
+			width: 25%;
+			float: left;
+			padding: 0 0 0.8em;
+			margin: 0;
+			text-align: center;
+			position: relative;
+			border-bottom: 4px solid #ccc;
+			line-height: 1.4em;
+		}
+		li::before {
+			content: '';
+			border: 4px solid #ccc;
+			border-radius: 100%;
+			width: 4px;
+			height: 4px;
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			margin-left: -6px;
+			margin-bottom: -8px;
+			background: #fff;
+		}
+		li.active {
+			border-color: #a16696;
+			color: #a16696;
+			&::before {
+				border-color: #a16696;
+			}
+		}
+		li.done {
+			border-color: #a16696;
+			color: #a16696;
+			&::before {
+				border-color: #a16696;
+				background: #a16696;
+			}
 		}
 	}
 
-	.woocommerce-exporter-button {
-		font-size: 1.25em;
-		padding: 0.5em 1em !important;
-		line-height: 1.5em !important;
-		margin-right: 0.5em;
-		margin-bottom: 2px;
-		height: auto !important;
-		border-radius: 4px;
-		background-color: #bb77ae;
-		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
-		margin: 0;
-		opacity: 1;
-
-		&:hover, &:focus, &:active {
-			background: #a36597;
+	.wc-actions {
+		overflow: hidden;
+		padding: 0 0 2px;
+		margin: 0 0 24px;
+		.button {
+			float: right;
+			font-size: 1.25em;
+			padding: 0.5em 1em !important;
+			line-height: 1.5em !important;
+			margin-right: 0.5em;
+			margin-bottom: 2px;
+			height: auto !important;
+			border-radius: 4px;
+			background-color: #bb77ae;
 			border-color: #a36597;
 			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+			text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
+			margin: 0;
+			opacity: 1;
+
+			&:hover, &:focus, &:active {
+				background: #a36597;
+				border-color: #a36597;
+				-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+			}
 		}
 	}
 
-	progress {
-		width: 100%;
-		height: 42px;
-		margin: 24px auto 0;
-		display: block;
-		-webkit-appearance: none;
-		border: none;
-		display: none;
-	}
+	.woocommerce-exporter,
+	.wc-progress-form-content {
+		background: #fff;
+		overflow: hidden;
+		padding: 24px 24px 0;
+		margin: 0 0 16px;
+		box-shadow: 0 1px 3px rgba(0,0,0,.13);
+		color: #555;
+		text-align: left;
 
-	/* All good till now. Now we'll style the background */
-	progress::-webkit-progress-bar {
-		background: #f5f5f5;
-		border: 2px solid #eee;
-		border-radius: 4px;
-		padding: 0;
-		box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
-	}
+		header {
+			border-bottom: 1px solid #eee;
+			padding: 0;
+			margin: 0;
+		}
 
-	/* Now the value part */
-	progress::-webkit-progress-value {
-		border-radius: 3px;
-		box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-		background:
-			-webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
-			#A46497;
-		transition: width 1s ease;
-	}
+		h2 {
+			margin: 0 0 24px;
+			color: #555;
+			font-size: 24px;
+			font-weight: normal;
+			line-height: 1em;
+		}
 
-	&.woocommerce-exporter__exporting {
+		p {
+			font-size: 1em;
+			line-height: 1.75em;
+			font-size: 16px;
+			color: #555;
+			margin: 0 0 24px;
+		}
+
+		.form-row {
+			margin-top: 24px;
+		}
+
 		.spinner {
-			display: block;
-		}
-		progress {
-			display: block;
-		}
-		.form-row-submit, .woocommerce-exporter-options {
 			display: none;
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-importer-options th {
+			width: 30%;
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-exporter-options td {
+			vertical-align: top;
+
+			label {
+				color: #555;
+				font-weight: normal;
+			}
+		}
+
+		progress {
+			width: 100%;
+			height: 42px;
+			margin: 24px auto 24px;
+			display: block;
+			-webkit-appearance: none;
+			border: none;
+			display: none;
+		}
+
+		/* All good till now. Now we'll style the background */
+		progress::-webkit-progress-bar {
+			background: #f5f5f5;
+			border: 2px solid #eee;
+			border-radius: 4px;
+			padding: 0;
+			box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
+		}
+
+		/* Now the value part */
+		progress::-webkit-progress-value {
+			border-radius: 3px;
+			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+			background:
+				-webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+				#A46497;
+			transition: width 1s ease;
+		}
+
+		&.woocommerce-exporter__exporting,
+		&.woocommerce-importer__importing {
+			.spinner {
+				display: block;
+			}
+			progress {
+				display: block;
+			}
+			.wc-actions,
+			.woocommerce-exporter-options {
+				display: none;
+			}
 		}
 	}
 }
