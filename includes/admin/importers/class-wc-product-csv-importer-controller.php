@@ -281,7 +281,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Import step.
+	 * Import the file if it exists and is valid.
 	 */
 	public function import() {
 		if ( ! is_file( $this->file ) ) {
@@ -292,7 +292,7 @@ class WC_Product_CSV_Importer_Controller {
 		$mapping = array();
 
 		if ( ! empty( $_POST['map_to'] ) ) {
-			$mapping = $_POST['map_to'];
+			$mapping = wp_unslash( $_POST['map_to'] );
 		}
 
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );

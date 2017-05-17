@@ -23,6 +23,11 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
  */
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
+	/**
+	 * The file position after the last read.
+	 *
+	 * @var int
+	 */
 	protected $file_position = 0;
 
 	/**
