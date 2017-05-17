@@ -280,9 +280,10 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step @todo
 	 */
 	protected function mapping_form() {
-		$importer = $this->get_importer( $this->file, array( 'lines' => 1 ) );
-		$headers  = $importer->get_raw_keys();
-		$sample   = current( $importer->get_raw_data() );
+		$importer     = $this->get_importer( $this->file, array( 'lines' => 1 ) );
+		$headers      = $importer->get_raw_keys();
+		$mapped_items = $this->auto_mapping( $raw_headers );
+		$sample       = current( $importer->get_raw_data() );
 
 		if ( empty( $sample ) ) {
 			$this->add_error( __( 'The file is empty, please try again with a new file.', 'woocommerce' ) );
@@ -290,7 +291,7 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		// Check if all fields matches.
-		if ( 0 === count( array_diff( $headers, $this->get_default_fields() ) ) ) {
+		if ( 0 === count( array_diff( $mapped_items, $this->get_default_fields() ) ) ) {
 			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
@@ -395,6 +396,53 @@ class WC_Product_CSV_Importer_Controller {
 		return apply_filters( 'woocommerce_csv_product_default_fields', $fields );
 	}
 
+	protected function auto_mapping( $fields ) {
+		$weight_unit    = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$default        = array_flip( array(
+			'id'                 => __( 'ID', 'woocommerce' ),
+			'type'               => __( 'Type', 'woocommerce' ),
+			'sku'                => __( 'SKU', 'woocommerce' ),
+			'name'               => __( 'Name', 'woocommerce' ),
+			'published'          => __( 'Published', 'woocommerce' ),
+			'featured'           => __( 'Is featured?', 'woocommerce' ),
+			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
+			'short_description'  => __( 'Short Description', 'woocommerce' ),
+			'description'        => __( 'Description', 'woocommerce' ),
+			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
+			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'tax_status'         => __( 'Tax Class', 'woocommerce' ),
+			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'stock'              => __( 'Stock', 'woocommerce' ),
+			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ),
+			'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
+			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
+			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
+			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase Note', 'woocommerce' ),
+			'sale_price'         => __( 'Sale Price', 'woocommerce' ),
+			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
+			'category_ids'       => __( 'Categories', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
+			'image_id'           => __( 'Images', 'woocommerce' ),
+			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
+			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
+			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+		) );
+
+		$new_fields = array();
+		foreach ( $fields as $field ) {
+			$new_fields[] = isset( $default[ $field ] ) ? $default[ $field ] : $field;
+		}
+
+		return $new_fields;
+	}
+
 	/**
 	 * Get mapping options.
 	 *
@@ -409,7 +457,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
-			'status'             => __( 'Published', 'woocommerce' ),
+			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
 			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
 			'short_description'  => __( 'Short Description', 'woocommerce' ),
@@ -431,13 +479,19 @@ class WC_Product_CSV_Importer_Controller {
 			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase Note', 'woocommerce' ),
-			'price'              => __( 'Price', 'woocommerce' ),
+			'sale_price'         => __( 'Sale Price', 'woocommerce' ),
 			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
-			'manage_stock'       => __( 'Manage stock?', 'woocommerce' ),
-			'stock_quantity'     => __( 'Amount in stock', 'woocommerce' ),
+			'stock'              => __( 'Stock', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
+			'image_id'           => __( 'Images', 'woocommerce' ),
+			'downloads'          => __( 'Download Name:URL', 'woocommerce' ),
+			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
+			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
+			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
@@ -446,13 +500,6 @@ class WC_Product_CSV_Importer_Controller {
 					'default_attributes' => __( 'Default attribute', 'woocommerce' ),
 				),
 			),
-			'images'             => __( 'Image', 'woocommerce' ),
-			'downloads'          => __( 'Download Name:URL', 'woocommerce' ),
-			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
-			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
-			'parent_id'          => __( 'Parent', 'woocommerce' ),
-			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
-			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'meta:' . $item      => __( 'Import as meta', 'woocommerce' ),
 		);
 
