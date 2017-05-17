@@ -79,22 +79,10 @@ class WC_Admin_Importers {
 			exit;
 		}
 
-		// Load Importer API
-		require_once ABSPATH . 'wp-admin/includes/import.php';
+		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
+		include_once( WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php' );
 
-		if ( ! class_exists( 'WP_Importer' ) ) {
-			$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-
-			if ( file_exists( $class_wp_importer ) ) {
-				require $class_wp_importer;
-			}
-		}
-
-		// includes
-		require( dirname( __FILE__ ) . '/importers/class-wc-product-wp-importer.php' );
-
-		// Dispatch
-		$importer = new WC_Product_WP_Importer();
+		$importer = new WC_Product_CSV_Importer_Controller();
 		$importer->dispatch();
 	}
 

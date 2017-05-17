@@ -30,6 +30,7 @@ function wc_get_screen_ids() {
 		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
 		'product_page_product_exporter',
+		'product_page_product_importer',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',

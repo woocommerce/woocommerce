@@ -1,23 +1,16 @@
 <?php
 /**
  * Admin View: Importer - CSV mapping
- *
- * @var array $headers CSV headers.
- * @var array $sample  CSV sample.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-
-<form action="<?php echo esc_url( admin_url( 'admin.php?import=' . $this->import_page . '&step=2' ) ); ?>" method="post">
-	<h2 class="title"><?php esc_html_e( 'Fields to map', 'woocommerce' ); ?></h2>
-	<p><?php esc_html_e( 'Select fields from your CSV file to map against products fields.', 'woocommerce' ); ?></p>
-
-	<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
-	<input type="hidden" name="file_id" value="<?php echo esc_attr( $this->id ); ?>" />
-	<input type="hidden" name="file_url" value="<?php echo esc_attr( $this->file_url ); ?>" />
-	<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
+<form class="wc-progress-form-content woocommerce-importer" method="post" action="<?php echo esc_url( $this->get_next_step_link() ) ?>">
+	<header>
+		<h2><?php esc_html_e( 'Map CSV fields to products', 'woocommerce' ); ?></h2>
+		<p><?php esc_html_e( 'Select fields from your CSV file to map against products fields, or to ignore during import.', 'woocommerce' ); ?></p>
+	</header>
 
 	<table class="widefat wc-importer__mapping--table">
 		<thead>
@@ -53,6 +46,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-
-	<?php submit_button( __( 'Submit', 'woocommerce' ), 'secondary' ); ?>
+	<div class="wc-progress-form-actions">
+		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Run the importer', 'woocommerce' ); ?>" name="save_step" />
+		<input type="hidden" name="file" value="<?php echo esc_attr( $this->file ); ?>" />
+		<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
+		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
+	</div>
 </form>

@@ -13,6 +13,18 @@ jQuery( function ( $ ) {
 		$title_action.hide();
 	}
 
+	// Progress indicators when showing steps.
+	$( '.woocommerce-progress-form-wrapper .button-next' ).on( 'click', function() {
+		$('.wc-progress-form-content').block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+		return true;
+	} );
+
 	// Field validation error tips
 	$( document.body )
 
