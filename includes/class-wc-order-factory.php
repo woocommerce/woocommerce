@@ -56,8 +56,6 @@ class WC_Order_Factory {
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
-		global $wpdb;
-
 		if ( is_numeric( $item_id ) ) {
 			$item_type = WC_Data_Store::load( 'order-item' )->get_order_item_type( $item_id );
 			$id        = $item_id;
@@ -68,7 +66,6 @@ class WC_Order_Factory {
 			$id        = $item_id->order_item_id;
 			$item_type = $item_id->order_item_type;
 		} else {
-			$item_data = false;
 			$item_type = false;
 			$id        = false;
 		}

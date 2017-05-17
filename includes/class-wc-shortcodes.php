@@ -429,7 +429,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_add_to_cart( $atts ) {
-		global $wpdb, $post;
+		global $post;
 
 		if ( empty( $atts ) ) {
 			return '';
@@ -486,8 +486,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_add_to_cart_url( $atts ) {
-		global $wpdb;
-
 		if ( empty( $atts ) ) {
 			return '';
 		}

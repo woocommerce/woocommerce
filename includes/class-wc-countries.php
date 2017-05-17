@@ -1107,7 +1107,6 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
-			$keys = array_keys( $fields );
 			$address_fields[ $type . $key ] = $value;
 		}
 

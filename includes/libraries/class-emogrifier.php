@@ -1089,7 +1089,6 @@ class Emogrifier
 			$mediaTypesExpression = '|' . implode('|', array_keys($this->allowedMediaTypes));
 		}
 
-		$media = '';
 		$cssForAllowedMediaTypes = preg_replace_callback(
 			'#@media\\s+(?:only\\s)?(?:[\\s{\\(]' . $mediaTypesExpression . ')\\s?[^{]+{.*}\\s*}\\s*#misU',
 			array( $this, '_media_concat' ),

@@ -93,6 +93,13 @@ class WC_Admin_Profile {
 			'shipping' => array(
 				'title' => __( 'Customer shipping address', 'woocommerce' ),
 				'fields' => array(
+					'copy_billing' => array(
+						'label'       => __( 'Copy from billing address', 'woocommerce' ),
+						'description' => '',
+						'class'       => 'js_copy-billing',
+						'type'        => 'button',
+						'text'        => __( 'Copy', 'woocommerce' ),
+					),
 					'shipping_first_name' => array(
 						'label'       => __( 'First name', 'woocommerce' ),
 						'description' => '',
@@ -151,10 +158,10 @@ class WC_Admin_Profile {
 
 		$show_fields = $this->get_customer_meta_fields();
 
-		foreach ( $show_fields as $fieldset ) :
+		foreach ( $show_fields as $fieldset_key => $fieldset ) :
 			?>
 			<h2><?php echo $fieldset['title']; ?></h2>
-			<table class="form-table">
+			<table class="form-table" id="<?php echo esc_attr( 'fieldset-' . $fieldset_key ); ?>">
 				<?php
 				foreach ( $fieldset['fields'] as $key => $field ) :
 					?>
@@ -162,7 +169,7 @@ class WC_Admin_Profile {
 						<th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
 						<td>
 							<?php if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) : ?>
-								<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" style="width: 25em;">
+								<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo esc_attr( $field['class'] ); ?>" style="width: 25em;">
 									<?php
 										$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
 										foreach ( $field['options'] as $option_key => $option_value ) : ?>
@@ -170,9 +177,11 @@ class WC_Admin_Profile {
 									<?php endforeach; ?>
 								</select>
 							<?php elseif ( ! empty( $field['type'] ) && 'checkbox' === $field['type'] ) : ?>
-								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : '' ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
+								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" class="<?php echo esc_attr( $field['class'] ); ?>" <?php checked( (int) get_user_meta( $user->ID, $key, true ), 1, true ); ?> />
+							<?php elseif ( ! empty( $field['type'] ) && 'button' === $field['type'] ) : ?>
+								<button id="<?php echo esc_attr( $key ); ?>" class="button <?php echo esc_attr( $field['class'] ); ?>"><?php echo esc_html( $field['text'] ); ?></button>
 							<?php else : ?>
-								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? $field['class'] : 'regular-text' ); ?>" />
+								<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $this->get_user_meta( $user->ID, $key ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? esc_attr( $field['class'] ) : 'regular-text' ); ?>" />
 							<?php endif; ?>
 							<br/>
 							<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
@@ -205,6 +214,27 @@ class WC_Admin_Profile {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get user meta for a given key, with fallbacks to core user info for pre-existing fields.
+	 *
+	 * @since 3.1.0
+	 * @param int    $user_id User ID of the user being edited
+	 * @param string $key     Key for user meta field
+	 * @return string
+	 */
+	protected function get_user_meta( $user_id, $key ) {
+		$value = get_user_meta( $user_id, $key, true );
+		$existing_fields = array( 'billing_first_name', 'billing_last_name' );
+		if ( ! $value && in_array( $key, $existing_fields ) ) {
+			$value = get_user_meta( $user_id, str_replace( 'billing_', '', $key ), true );
+		} elseif ( ! $value && ( 'billing_email' === $key ) ) {
+			$user = get_userdata( $user_id );
+			$value = $user->user_email;
+		}
+
+		return $value;
 	}
 }
 

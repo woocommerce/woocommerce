@@ -34,8 +34,6 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$atts = shortcode_atts( array(), $atts, 'woocommerce_checkout' );
-
 		// Backwards compat with old pay and thanks link arguments
 		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) {
 			wc_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
@@ -81,44 +79,53 @@ class WC_Shortcode_Checkout {
 		$order_id = absint( $order_id );
 
 		// Handle payment
-		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && $order_id ) {
+		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) {
 
 			// Pay for existing order
-			$order_key            = $_GET['key'];
-			$order                = wc_get_order( $order_id );
+			$order_key = $_GET['key'];
+			$order     = wc_get_order( $order_id );
 
-			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My account', 'woocommerce' ) . '</a>' . '</div>';
-				return;
-			}
-
-			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
-
-				if ( $order->needs_payment() ) {
-					WC()->customer->set_props( array(
-						'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
-						'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
-						'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
-					) );
-					WC()->customer->save();
-
-					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-					if ( sizeof( $available_gateways ) ) {
-						current( $available_gateways )->set_current();
-					}
-
-					wc_get_template( 'checkout/form-pay.php', array(
-						'order'              => $order,
-						'available_gateways' => $available_gateways,
-						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
-					) );
-
-				} else {
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
-				}
-			} else {
+			// Order or payment link is invalid.
+			if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
 				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
+
+			// Logged out customer does not have permission to pay for this order.
+			} elseif ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
+				echo '<div class="woocommerce-info">' . __( 'Please login to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
+				woocommerce_login_form( array(
+					'redirect' => $order->get_checkout_payment_url(),
+				) );
+				return;
+
+			// Logged in customer trying to pay for someone else's order.
+			} elseif ( ! current_user_can( 'pay_for_order', $order_id ) ) {
+				wc_add_notice( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
+
+			// Order does not need to be paid.
+			} elseif ( ! $order->needs_payment() ) {
+				wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
+
+			// Show payment form.
+			} else {
+
+				WC()->customer->set_props( array(
+					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
+					'billing_state'    => $order->get_billing_state() ? $order->get_billing_state()       : null,
+					'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+				) );
+				WC()->customer->save();
+
+				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+				if ( sizeof( $available_gateways ) ) {
+					current( $available_gateways )->set_current();
+				}
+
+				wc_get_template( 'checkout/form-pay.php', array(
+					'order'              => $order,
+					'available_gateways' => $available_gateways,
+					'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
+				) );
 			}
 		} elseif ( $order_id ) {
 
@@ -126,7 +133,7 @@ class WC_Shortcode_Checkout {
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
 
-			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
+			if ( $order && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
