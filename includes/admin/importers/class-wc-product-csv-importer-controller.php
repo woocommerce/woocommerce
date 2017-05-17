@@ -219,7 +219,7 @@ class WC_Product_CSV_Importer_Controller {
 		$file = $this->handle_upload();
 
 		if ( is_wp_error( $file ) ) {
-			$this->add_error( $file->get_message() );
+			$this->add_error( $file->get_error_message() );
 			return;
 		} else {
 			$this->file = $file;
