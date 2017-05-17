@@ -56,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		</tbody>
 	</table>
-	<div class="wc-progress-form-actions">
+	<div class="wc-actions">
 		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>

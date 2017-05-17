@@ -5421,7 +5421,8 @@ table.bar_chart {
 	}
 }
 
-.woocommerce-progress-form-wrapper {
+.woocommerce-progress-form-wrapper,
+.woocommerce-exporter-wrapper {
 	text-align: center;
 	max-width: 700px;
 	margin: 40px auto;
@@ -5475,16 +5476,8 @@ table.bar_chart {
 			}
 		}
 	}
-	.wc-progress-form-content {
-		background: #fff;
-		overflow: hidden;
-		padding: 24px 24px 0;
-		margin: 0 0 16px;
-		box-shadow: 0 1px 3px rgba(0,0,0,.13);
-		color: #555;
-		text-align: left;
-	}
-	.wc-progress-form-actions {
+
+	.wc-actions {
 		overflow: hidden;
 		padding: 0 0 2px;
 		margin: 0 0 24px;
@@ -5513,99 +5506,103 @@ table.bar_chart {
 			}
 		}
 	}
-}
-.woocommerce-exporter,
-.woocommerce-importer {
 
-
-	header {
-		border-bottom: 1px solid #eee;
-		padding: 0;
-		margin: 0;
-	}
-
-	h2 {
-		margin: 0 0 24px;
+	.woocommerce-exporter,
+	.wc-progress-form-content {
+		background: #fff;
+		overflow: hidden;
+		padding: 24px 24px 0;
+		margin: 0 0 16px;
+		box-shadow: 0 1px 3px rgba(0,0,0,.13);
 		color: #555;
-		font-size: 24px;
-		font-weight: normal;
-		line-height: 1em;
-	}
+		text-align: left;
 
-	p {
-		font-size: 1em;
-		line-height: 1.75em;
-		font-size: 16px;
-		color: #555;
-		margin: 0 0 24px;
-	}
+		header {
+			border-bottom: 1px solid #eee;
+			padding: 0;
+			margin: 0;
+		}
 
-	.form-row {
-		margin-top: 24px;
-	}
-
-	.spinner {
-		display: none;
-	}
-
-	.woocommerce-exporter-options th,
-	.woocommerce-importer-options th {
-		width: 30%;
-	}
-
-	.woocommerce-exporter-options th,
-	.woocommerce-exporter-options td,
-	.woocommerce-importer-options th,
-	.woocommerce-importer-options td {
-		vertical-align: top;
-
-		label {
+		h2 {
+			margin: 0 0 24px;
 			color: #555;
+			font-size: 24px;
 			font-weight: normal;
+			line-height: 1em;
 		}
-	}
 
-	progress {
-		width: 100%;
-		height: 42px;
-		margin: 24px auto 0;
-		display: block;
-		-webkit-appearance: none;
-		border: none;
-		display: none;
-	}
+		p {
+			font-size: 1em;
+			line-height: 1.75em;
+			font-size: 16px;
+			color: #555;
+			margin: 0 0 24px;
+		}
 
-	/* All good till now. Now we'll style the background */
-	progress::-webkit-progress-bar {
-		background: #f5f5f5;
-		border: 2px solid #eee;
-		border-radius: 4px;
-		padding: 0;
-		box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
-	}
+		.form-row {
+			margin-top: 24px;
+		}
 
-	/* Now the value part */
-	progress::-webkit-progress-value {
-		border-radius: 3px;
-		box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-		background:
-			-webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
-			#A46497;
-		transition: width 1s ease;
-	}
-
-	&.woocommerce-exporter__exporting,
-	&.woocommerce-importer__importing {
 		.spinner {
-			display: block;
-		}
-		progress {
-			display: block;
-		}
-		.form-row-submit,
-		.woocommerce-exporter-options,
-		.woocommerce-importer-options {
 			display: none;
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-importer-options th {
+			width: 30%;
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-exporter-options td {
+			vertical-align: top;
+
+			label {
+				color: #555;
+				font-weight: normal;
+			}
+		}
+
+		progress {
+			width: 100%;
+			height: 42px;
+			margin: 24px auto 24px;
+			display: block;
+			-webkit-appearance: none;
+			border: none;
+			display: none;
+		}
+
+		/* All good till now. Now we'll style the background */
+		progress::-webkit-progress-bar {
+			background: #f5f5f5;
+			border: 2px solid #eee;
+			border-radius: 4px;
+			padding: 0;
+			box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
+		}
+
+		/* Now the value part */
+		progress::-webkit-progress-value {
+			border-radius: 3px;
+			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+			background:
+				-webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+				#A46497;
+			transition: width 1s ease;
+		}
+
+		&.woocommerce-exporter__exporting,
+		&.woocommerce-importer__importing {
+			.spinner {
+				display: block;
+			}
+			progress {
+				display: block;
+			}
+			.wc-actions,
+			.woocommerce-exporter-options {
+				display: none;
+			}
 		}
 	}
 }

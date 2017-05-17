@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-	<div class="wc-progress-form-actions">
+	<div class="wc-actions">
 		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Run the importer', 'woocommerce' ); ?>" name="save_step" />
 		<input type="hidden" name="file" value="<?php echo esc_attr( $this->file ); ?>" />
 		<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
