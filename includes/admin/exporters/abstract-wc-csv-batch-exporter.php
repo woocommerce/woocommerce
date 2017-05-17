@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_CSV_Exporter', false ) ) {
-	include_once( WC_ABSPATH . 'includes/export/abstract-wc-csv-exporter.php' );
+	include_once( WC_ABSPATH . 'includes/admin/exporters/abstract-wc-csv-exporter.php' );
 }
 
 /**

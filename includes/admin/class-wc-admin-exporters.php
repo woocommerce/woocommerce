@@ -1,49 +1,69 @@
 <?php
 /**
- * Handles the product CSV exporter UI in admin.
+ * Init WooCommerce data exporters.
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.1.0
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
+ * @version     3.1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * WC_Admin_Product_Export Class.
+ * WC_Admin_Exporters Class.
  */
-class WC_Admin_Product_Export {
+class WC_Admin_Exporters {
+
+	/**
+	 * Array of exporter IDs.
+	 *
+	 * @var string[]
+	 */
+	protected $exporters = array();
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_action( 'admin_head', array( $this, 'admin_menu_hide' ) );
+		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
+		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_init', array( $this, 'download_export_file' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_export', array( $this, 'do_ajax_product_export' ) );
+
+		// Register WooCommerce exporters.
+		$this->exporters['product_exporter'] = array(
+			'menu'       => 'edit.php?post_type=product',
+			'name'       => __( 'Product Export', 'woocommerce' ),
+			'capability' => 'edit_products',
+			'callback'   => array( $this, 'product_exporter' ),
+		);
 	}
 
 	/**
-	 * Add menu items.
+	 * Add menu items for our custom exporters.
 	 */
-	public function admin_menu() {
-		add_submenu_page( 'edit.php?post_type=product', __( 'Product Export', 'woocommerce' ), __( 'Export', 'woocommerce' ), 'edit_products', 'product_exporter', array( $this, 'admin_screen' ) );
+	public function add_to_menus() {
+		foreach ( $this->exporters as $id => $exporter ) {
+			add_submenu_page( $exporter['menu'], $exporter['name'], $exporter['name'], $exporter['capability'], $id, $exporter['callback'] );
+		}
 	}
 
 	/**
-	 * Hide menu item from view.
+	 * Hide menu items from view so the pages exist, but the menu items do not.
 	 */
-	public function admin_menu_hide() {
+	public function hide_from_menus() {
 		global $submenu;
 
-		if ( isset( $submenu['edit.php?post_type=product'] ) ) {
-			foreach ( $submenu['edit.php?post_type=product'] as $key => $menu ) {
-				if ( 'product_exporter' === $menu[2] ) {
-					unset( $submenu['edit.php?post_type=product'][ $key ] );
+		foreach ( $this->exporters as $id => $exporter ) {
+			if ( isset( $submenu[ $exporter['menu'] ] ) ) {
+				foreach ( $submenu[ $exporter['menu'] ] as $key => $menu ) {
+					if ( $id === $menu[2] ) {
+						unset( $submenu[ $exporter['menu'] ][ $key ] );
+					}
 				}
 			}
 		}
@@ -63,8 +83,8 @@ class WC_Admin_Product_Export {
 	/**
 	 * Export page UI.
 	 */
-	public function admin_screen() {
-		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+	public function product_exporter() {
+		include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-product-export.php' );
 	}
 
@@ -73,7 +93,7 @@ class WC_Admin_Product_Export {
 	 */
 	public function download_export_file() {
 		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'product-csv' ) && 'download_product_csv' === $_GET['action'] ) {
-			include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+			include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
 			$exporter = new WC_Product_CSV_Exporter();
 			$exporter->export();
 		}
@@ -89,7 +109,7 @@ class WC_Admin_Product_Export {
 			wp_die( -1 );
 		}
 
-		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+		include_once( WC_ABSPATH . 'includes/admin/exporters/class-wc-product-csv-exporter.php' );
 
 		$step     = absint( $_POST['step'] );
 		$exporter = new WC_Product_CSV_Exporter();
@@ -129,4 +149,4 @@ class WC_Admin_Product_Export {
 	}
 }
 
-new WC_Admin_Product_Export();
+new WC_Admin_Exporters();
