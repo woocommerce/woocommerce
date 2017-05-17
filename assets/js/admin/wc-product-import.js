@@ -2,7 +2,7 @@
 ;(function ( $, window ) {
 
 	/**
-	 * prodeuctImportForm handles the import process.
+	 * productImportForm handles the import process.
 	 */
 	var productImportForm = function( $form ) {
 		this.$form = $form;
