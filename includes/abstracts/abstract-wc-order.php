@@ -853,7 +853,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $item_id = $item->get_id() ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
-			$this->items[ $items_key ][ 'new:' . sizeof( $this->items[ $items_key ] ) ] = $item;
+			$this->items[ $items_key ][ 'new:' . $items_key . sizeof( $this->items[ $items_key ] ) ] = $item;
 		}
 	}
 
@@ -1194,7 +1194,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( $inc_tax ) {
 				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$subtotal = ( $item->get_subtotal() / max( 1, $item->get_quantity() ) );
+				$subtotal = ( floatval( $item->get_subtotal() ) / max( 1, $item->get_quantity() ) );
 			}
 
 			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
@@ -1242,7 +1242,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( $inc_tax ) {
 				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_quantity() );
 			} else {
-				$total = $item->get_total() / max( 1, $item->get_quantity() );
+				$total = floatval( $item->get_total() ) / max( 1, $item->get_quantity() );
 			}
 
 			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;

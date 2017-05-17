@@ -533,7 +533,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			) );
 		}
 
-		return $order_ids;
+		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
 	}
 
 	/**
@@ -633,5 +633,89 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_order_type( $order_id ) {
 		return get_post_type( $order_id );
+	}
+
+	/**
+	 * Get valid WP_Query args from a WC_Order_Query's query variables.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array
+	 */
+	protected function get_wp_query_args( $query_vars ) {
+
+		$key_mapping = array(
+			'customer_id' => 'customer_user',
+			'status' => 'post_status',
+		);
+
+		foreach ( $key_mapping as $query_key => $db_key ) {
+			if ( isset( $query_vars[ $query_key ] ) ) {
+				$query_vars[ $db_key ] = $query_vars[ $query_key ];
+				unset( $query_vars[ $query_key ] );
+			}
+		}
+
+		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( ! isset( $wp_query_args['date_query'] ) ) {
+			$wp_query_args['date_query'] = array();
+		}
+		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			$wp_query_args['meta_query'] = array();
+		}
+
+		$date_queries = array(
+			'date_created'   => 'post_date',
+			'date_modified'  => 'post_modified',
+			'date_completed' => '_date_completed',
+			'date_paid'      => '_date_paid',
+		);
+		foreach ( $date_queries as $query_var_key => $db_key ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+
+				// Remove any existing meta queries for the same keys to prevent conflicts.
+				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
+				foreach ( $existing_queries as $query_index => $query_contents ) {
+					unset( $wp_query_args['meta_query'][ $query_index ] );
+				}
+
+				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );
+			}
+		}
+
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$wp_query_args['no_found_rows'] = true;
+		}
+
+		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
+	}
+
+	/**
+	 * Query for Orders matching specific criteria.
+	 *
+	 * @since 3.1.0
+	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @return array of WC_Order objects or ids
+	 */
+	public function query( $query_vars ) {
+		$args = $this->get_wp_query_args( $query_vars );
+		$query = new WP_Query( $args );
+
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			return $query->posts;
+		}
+
+		$orders = array_filter( array_map( 'wc_get_order', $query->posts ) );
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_posts,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
 	}
 }

@@ -369,6 +369,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
 			$attributes = array();
 			foreach ( $meta_values as $meta_value ) {
+				$id         = 0;
 				$meta_value = array_merge( array(
 					'name'         => '',
 					'value'        => '',
@@ -378,17 +379,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'is_taxonomy'  => 0,
 				), (array) $meta_value );
 
+				// Check if is a taxonomy attribute.
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
 					}
+					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
 					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
 				} else {
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
 
 				$attribute = new WC_Product_Attribute();
-				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $meta_value['name'] ) );
+
+				$attribute->set_id( $id );
 				$attribute->set_name( $meta_value['name'] );
 				$attribute->set_options( $options );
 				$attribute->set_position( $meta_value['position'] );
@@ -602,8 +606,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$terms[] = 'outofstock';
 			}
 
-			$rating  = max( array( 5, min( array( 1, round( $product->get_average_rating(), 0 ) ) ) ) );
-			$terms[] = 'rated-' . $rating;
+			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+
+			if ( $rating > 0 ) {
+				$terms[] = 'rated-' . $rating;
+			}
 
 			switch ( $product->get_catalog_visibility() ) {
 				case 'hidden' :
@@ -652,7 +659,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 					} elseif ( $attribute->is_taxonomy() ) {
 						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
-
 					} else {
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
@@ -994,50 +1000,46 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
 		global $wpdb;
 
-		// Arrays to string.
-		$exclude_ids = implode( ',', array_map( 'absint', $exclude_ids ) );
-		$cats_array  = implode( ',', array_map( 'absint', $cats_array ) );
-		$tags_array  = implode( ',', array_map( 'absint', $tags_array ) );
-
-		$limit           = absint( $limit );
-		$query           = array();
-		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-		$query['join']   = " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-		$query['where']  = ' WHERE 1=1';
-		$query['where'] .= " AND p.post_status = 'publish'";
-		$query['where'] .= " AND p.post_type = 'product'";
-		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
-
+		$include_term_ids            = array_merge( $cats_array, $tags_array );
+		$exclude_term_ids            = array();
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
-			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
+			$exclude_term_ids[] = $product_visibility_term_ids['exclude-from-catalog'];
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
-			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['outofstock'];
+			$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
 		}
 
-		if ( $cats_array || $tags_array ) {
-			$query['where'] .= ' AND (';
+		$query = array(
+			'fields' => "
+				SELECT DISTINCT ID FROM {$wpdb->posts} p
+			",
+			'join'   => '',
+			'where'  => "
+				WHERE 1=1
+				AND p.post_status = 'publish'
+				AND p.post_type = 'product'
 
-			if ( $cats_array ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
-				if ( $tags_array ) {
-					$query['where'] .= ' OR ';
-				}
-			}
+			",
+			'limits' => "
+				LIMIT " . absint( $limit ) . "
+			",
+		);
 
-			if ( $tags_array ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( {$tags_array} ) ) ";
-			}
-
-			$query['where'] .= ')';
+		if ( count( $exclude_term_ids ) ) {
+			$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " ) ) AS exclude_join ON exclude_join.object_id = p.ID";
+			$query['where'] .= " AND exclude_join.object_id IS NULL";
 		}
 
-		$query['limits'] = " LIMIT {$limit} ";
+		if ( count( $include_term_ids ) ) {
+			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN {$wpdb->term_taxonomy} using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
+		}
+
+		if ( count( $exclude_ids ) ) {
+			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', array_map( 'absint', $exclude_ids ) ) . " )";
+		}
 
 		return $query;
 	}
@@ -1159,7 +1161,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * Generate WP_Query args.
 		 */
 		$wp_query_args = array(
-			'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
 			'post_status'    => $args['status'],
 			'posts_per_page' => $args['limit'],
 			'meta_query'     => array(),
@@ -1167,17 +1168,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'order'          => $args['order'],
 			'tax_query'      => array(),
 		);
-		// Do not load unnecessary post data if the user only wants IDs.
-		if ( 'ids' === $args['return'] ) {
-			$wp_query_args['fields'] = 'ids';
-		}
 
-		if ( 'variation' !== $args['type'] ) {
+		if ( 'variation' === $args['type'] ) {
+			$wp_query_args['post_type'] = 'product_variation';
+		} elseif ( is_array( $args['type'] ) && in_array( 'variation', $args['type'] ) ) {
+			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
+			$wp_query_args['tax_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => $args['type'],
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'id',
+					'operator' => 'NOT EXISTS',
+				),
+			);
+		} else {
+			$wp_query_args['post_type']   = 'product';
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
 				'terms'    => $args['type'],
 			);
+		}
+
+		// Do not load unnecessary post data if the user only wants IDs.
+		if ( 'ids' === $args['return'] ) {
+			$wp_query_args['fields'] = 'ids';
 		}
 
 		if ( ! empty( $args['sku'] ) ) {

@@ -1332,7 +1332,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * Backwards compat with downloadable/virtual.
 	 *
-	 * @param string $type Array or string of types
+	 * @param string|array $type Array or string of types
 	 * @return bool
 	 */
 	public function is_type( $type ) {

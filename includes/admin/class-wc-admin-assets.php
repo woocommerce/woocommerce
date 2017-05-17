@@ -72,7 +72,6 @@ class WC_Admin_Assets {
 		/**
 		 * @deprecated 2.3
 		 */
-
 		if ( has_action( 'woocommerce_admin_css' ) ) {
 			do_action( 'woocommerce_admin_css' );
 			wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
@@ -155,6 +154,14 @@ class WC_Admin_Assets {
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+				'strings' => array(
+					'import_products' => __( 'Import', 'woocommerce' ),
+					'export_products' => __( 'Export', 'woocommerce' ),
+				),
+				'urls' => array(
+					'import_products' => esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ),
+					'export_products' => esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
+				),
 			);
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
@@ -233,8 +240,7 @@ class WC_Admin_Assets {
 			$post_id  = isset( $post->ID ) ? $post->ID : '';
 			$currency = '';
 
-			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
-				$order    = wc_get_order( $post_id );
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) && ( $order = wc_get_order( $post_id ) ) ) {
 				$currency = $order->get_currency();
 			}
 

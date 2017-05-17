@@ -707,7 +707,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
 		// Large version.
-		$src                 = wp_get_attachment_image_src( $attachment_id, 'large' );
+		$src                 = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$props['full_src']   = $src[0];
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
@@ -782,7 +782,7 @@ function wc_get_min_max_price_meta_query( $args ) {
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
-		'type'    => 'DECIMAL',
+		'type'    => 'NUMERIC',
 	);
 }
 
