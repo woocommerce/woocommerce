@@ -384,6 +384,62 @@ body {
 	text-align: center;
 }
 
+.wc-wizard-storefront {
+	.wc-wizard-storefront-intro {
+		padding: 40px 40px 0;
+		background: #F5F5F5;
+		text-align: center;
+
+		img {
+			margin: 40px 0 0 0;
+			width: 100%;
+			display: block;
+		}
+	}
+	.wc-wizard-storefront-features {
+		list-style: none outside;
+		margin: 0 0 20px;
+		padding: 0 0 0 30px;
+		overflow: hidden;
+	}
+	.wc-wizard-storefront-feature {
+		margin: 0;
+		padding: 20px 30px 20px 2em;
+		width: 50%;
+		box-sizing: border-box;
+
+		&::before {
+			margin-left: -2em;
+			position: absolute;
+		}
+		&.first {
+			clear: both;
+			float: left;
+		}
+		&.last {
+			float: right;
+		}
+	}
+	.wc-wizard-storefront-feature__bulletproof::before {
+		content: '🔒';
+	}
+	.wc-wizard-storefront-feature__mobile::before {
+		content: '📱';
+	}
+	.wc-wizard-storefront-feature__accessibility::before {
+		content: '👓';
+	}
+	.wc-wizard-storefront-feature__search::before {
+		content: '🔍';
+	}
+	.wc-wizard-storefront-feature__compatibility::before {
+		content: '🔧';
+	}
+	.wc-wizard-storefront-feature__extendable::before {
+		content: '🎨';
+	}
+}
+
 ul.wc-wizard-payment-gateways {
 	border: 1px solid #eee;
 	border-bottom-width: 2px;
