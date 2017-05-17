@@ -219,7 +219,7 @@ class WC_Product_CSV_Importer_Controller {
 		$file = $this->handle_upload();
 
 		if ( is_wp_error( $file ) ) {
-			$this->add_error( $file->get_message() );
+			$this->add_error( $file->get_error_message() );
 			return;
 		} else {
 			$this->file = $file;
@@ -238,7 +238,7 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		if ( empty( $_POST['file_url'] ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
-				return new WP_Error( __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
+				return new WP_Error(  'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
 			$overrides                 = array( 'test_form' => false, 'test_type' => false );
@@ -246,7 +246,7 @@ class WC_Product_CSV_Importer_Controller {
 			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
-				return new WP_Error( $upload['error'] );
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
 			}
 
 			// Construct the object array
@@ -273,7 +273,7 @@ class WC_Product_CSV_Importer_Controller {
 			return ABSPATH . $_POST['file_url'];
 		}
 
-		return new WP_Error( __( 'Please upload or provide the link to a valid CSV file.', 'woocommerce' ) );
+		return new WP_Error( 'woocommerce_product_csv_importer_upload_invalid_file', __( 'Please upload or provide the link to a valid CSV file.', 'woocommerce' ) );
 	}
 
 	/**
