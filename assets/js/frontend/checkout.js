@@ -426,7 +426,7 @@ jQuery( function( $ ) {
 						} catch ( e ) {
 
 							// Attempt to fix the malformed JSON
-							var valid_json = raw_response.match( /{"result.*"}/ );
+							var valid_json = raw_response.match( /{"result.*"?}/ );
 
 							if ( null === valid_json ) {
 								console.log( 'Unable to fix malformed JSON' );
