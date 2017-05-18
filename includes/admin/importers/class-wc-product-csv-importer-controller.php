@@ -403,9 +403,9 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected function auto_map_columns( $fields ) {
-		$weight_unit          = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit       = get_option( 'woocommerce_dimension_unit' );
-		$default_column_names = array_flip( array(
+		$weight_unit     = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit  = get_option( 'woocommerce_dimension_unit' );
+		$default_columns = array_flip( apply_filters( 'woocommerce_csv_product_import_mapping_default_columns', array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
@@ -439,24 +439,29 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
-		) );
-		$special_data = array_map( array( $this, 'sanitize_special_column_name_regex' ), array(
-			'attributes:name'    => __( 'Attribute %d Name', 'woocommerce' ),
-			'attributes:value'   => __( 'Attribute %d Value(s)', 'woocommerce' ),
-			'attributes:default' => __( 'Attribute %d Default', 'woocommerce' ),
-			'downloads:name'     => __( 'Download %d Name', 'woocommerce' ),
-			'downloads:url'      => __( 'Download %d URL', 'woocommerce' ),
-			'meta:'              => __( 'Meta: %s', 'woocommerce' ),
-		) );
+		) ) );
+		$special_columns = array_map(
+			array( $this, 'sanitize_special_column_name_regex' ),
+			apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
+				array(
+					'attributes:name'    => __( 'Attribute %d Name', 'woocommerce' ),
+					'attributes:value'   => __( 'Attribute %d Value(s)', 'woocommerce' ),
+					'attributes:default' => __( 'Attribute %d Default', 'woocommerce' ),
+					'downloads:name'     => __( 'Download %d Name', 'woocommerce' ),
+					'downloads:url'      => __( 'Download %d URL', 'woocommerce' ),
+					'meta:'              => __( 'Meta: %s', 'woocommerce' ),
+				)
+			)
+		);
 
 		$new_fields = array();
 		foreach ( $fields as $index => $field ) {
 			$new_fields[ $index ] = $field;
 
-			if ( isset( $default_column_names[ $field ] ) ) {
-				$new_fields[ $index ] = $default_column_names[ $field ];
+			if ( isset( $default_columns[ $field ] ) ) {
+				$new_fields[ $index ] = $default_columns[ $field ];
 			} else {
-				foreach ( $special_data as $special_key => $regex ) {
+				foreach ( $special_columns as $special_key => $regex ) {
 					if ( preg_match( $regex, $field, $matches ) ) {
 						$new_fields[ $index ] = $special_key . $matches[1];
 						break;
@@ -465,7 +470,7 @@ class WC_Product_CSV_Importer_Controller {
 			}
 		}
 
-		return apply_filters( 'woocommerce_csv_product_import_mapped_fields', $new_fields, $fields );
+		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $new_fields, $fields );
 	}
 
 	/**
@@ -485,13 +490,15 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected function get_mapping_options( $item = '' ) {
-		// Get number for special column names.
-		$special_index = $item;
+		// Get index for special column names.
+		$index = $item;
 		if ( preg_match('/\d+$/', $item, $matches ) ) {
-			$special_index = $matches[0];
+			$index = $matches[0];
 		}
+		// Properly format for meta field.
 		$meta = str_replace( 'meta:', '', $item );
 
+		// Available options.
 		$weight_unit    = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 		$options        = array(
@@ -539,18 +546,18 @@ class WC_Product_CSV_Importer_Controller {
 			'downloads'          => array(
 				'name'    => __( 'Downloads', 'woocommerce' ),
 				'options' => array(
-					'downloads:name' . $special_index => __( 'Download Name', 'woocommerce' ),
-					'downloads:url' . $special_index  => __( 'Download URL', 'woocommerce' ),
-					'download_limit'                  => __( 'Download Limit', 'woocommerce' ),
-					'download_expiry'                 => __( 'Download Expiry Days', 'woocommerce' ),
+					'downloads:name' . $index => __( 'Download Name', 'woocommerce' ),
+					'downloads:url' . $index  => __( 'Download URL', 'woocommerce' ),
+					'download_limit'          => __( 'Download Limit', 'woocommerce' ),
+					'download_expiry'         => __( 'Download Expiry Days', 'woocommerce' ),
 				),
 			),
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
-					'attributes:name' . $special_index    => __( 'Attributes name', 'woocommerce' ),
-					'attributes:value' . $special_index   => __( 'Attributes value', 'woocommerce' ),
-					'attributes:default' . $special_index => __( 'Default attribute', 'woocommerce' ),
+					'attributes:name' . $index    => __( 'Attributes name', 'woocommerce' ),
+					'attributes:value' . $index   => __( 'Attributes value', 'woocommerce' ),
+					'attributes:default' . $index => __( 'Default attribute', 'woocommerce' ),
 				),
 			),
 			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
