@@ -62,6 +62,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
 		add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_shop_order_bulk_actions' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
+		add_filter( 'bulk_actions-edit-product', array( $this, 'product_bulk_actions' ) );
 
 		// Order Search
 		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
@@ -1371,6 +1372,20 @@ class WC_Admin_Post_Types {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Product bulk actions.
+	 *
+	 * @since  3.1.0
+	 * @param  array $actions Bulk actions.
+	 * @return array
+	 */
+	public function product_bulk_actions( $actions ) {
+		// Remove bulk edit in favor of CSV importer.
+		unset( $actions['edit'] );
+
+		return $actions;
 	}
 
 	/**
