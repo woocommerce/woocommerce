@@ -96,9 +96,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Handle `id:xx` and SKUs.
 	 *
 	 * @param  string $field Field value.
-	 * @return int
+	 * @return int|string
 	 */
 	protected function parse_relative_field( $field ) {
+		if ( empty( $field ) ) {
+			return '';
+		}
+
 		if ( preg_match( '/^id:(\d+)$/', $field, $matches ) ) {
 			return intval( $matches[1] );
 		}
