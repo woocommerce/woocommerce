@@ -1066,7 +1066,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes', array_filter( (array) $default_attributes ) );
+		$this->set_prop( 'default_attributes',
+			array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) );
 	}
 
 	/**
