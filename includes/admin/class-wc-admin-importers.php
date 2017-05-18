@@ -198,6 +198,7 @@ class WC_Admin_Importers {
 			wp_die( -1 );
 		}
 
+		include_once( WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php' );
 		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
 
 		$file = wc_clean( $_POST['file'] );

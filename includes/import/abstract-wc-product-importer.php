@@ -31,6 +31,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected $file = '';
 
 	/**
+	 * The file position after the last read.
+	 *
+	 * @var int
+	 */
+	protected $file_position = 0;
+
+	/**
 	 * Importer parameters.
 	 *
 	 * @var array
@@ -99,6 +106,29 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	public function get_parsed_data() {
 		return apply_filters( 'woocommerce_product_parsed_data', $this->parsed_data, $this->get_raw_data() );
+	}
+
+	/**
+	 * Get file pointer position from the last read.
+	 *
+	 * @return int
+	 */
+	public function get_file_position() {
+		return $this->file_position;
+	}
+
+	/**
+	 * Get file pointer position as a percentage of file size.
+	 *
+	 * @return int
+	 */
+	public function get_percent_complete() {
+		$size = filesize( $this->file );
+		if ( ! $size ) {
+			return 0;
+		}
+
+		return min( round( ( $this->file_position / $size ) * 100 ), 100 );
 	}
 
 	/**
