@@ -94,7 +94,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse a comma-delineated field from a CSV.
 	 *
-	 * @param string $field
+	 * @param string $field Field value.
 	 * @return array
 	 */
 	protected function parse_comma_field( $field ) {
@@ -102,13 +102,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_map( 'esc_attr', array_map( 'trim', explode( ',', $field ) ) );
+		return array_map( 'wc_clean', array_map( 'trim', explode( ',', $field ) ) );
 	}
 
 	/**
 	 * Parse a field that is generally '1' or '0' but can be something else.
 	 *
-	 * @param string $field
+	 * @param string $field Field value.
 	 * @return bool|string
 	 */
 	protected function parse_bool_field( $field ) {
@@ -121,13 +121,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// Don't return explicit true or false for empty fields or values like 'notify'.
-		return esc_attr( $field );
+		return wc_clean( $field );
 	}
 
 	/**
 	 * Parse a float value field.
 	 *
-	 * @param string $field
+	 * @param string $field Field value.
 	 * @return float|string
 	 */
 	protected function parse_float_field( $field ) {
@@ -142,7 +142,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Parse a category field from a CSV.
 	 * Categories are separated by commas and subcategories are "parent > subcategory".
 	 *
-	 * @param string $field
+	 * @param string $field Field value.
 	 * @return array of arrays with "parent" and "name" keys.
 	 */
 	protected function parse_categories( $field ) {
@@ -159,15 +159,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( false === strpos( $section, '>' ) ) {
 				$categories[] = array(
 					'parent' => false,
-					'name'   => esc_attr( $section ),
+					'name'   => wc_clean( $section ),
 				);
 
 			// Subcategory.
 			} else {
 				$chunks = array_map( 'trim', explode( '>', $section ) );
 				$categories[] = array(
-					'parent' => esc_attr( reset( $chunks ) ),
-					'name'   => esc_attr( end( $chunks ) ),
+					'parent' => wc_clean( reset( $chunks ) ),
+					'name'   => wc_clean( end( $chunks ) ),
 				);
 			}
 		}
@@ -183,15 +183,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function set_parsed_data() {
 
 		/**
-		 * Columns not mentioned here will get parsed with 'esc_attr'.
+		 * Columns not mentioned here will get parsed with 'wc_clean'.
 		 * column_name => callback.
 		 */
 		$data_formatting = array(
 			'id'                => 'absint',
-			'status'            => array( $this, 'parse_bool_field' ),
+			'published'         => array( $this, 'parse_bool_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => 'strtotime',
 			'date_on_sale_to'   => 'strtotime',
+			'short_description' => 'wp_kses_post',
+			'description'       => 'wp_kses_post',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_bool_field' ),
 			'sold_individually' => array( $this, 'parse_bool_field' ),
@@ -206,7 +208,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'stock_quantity'    => 'absint',
 			'category_ids'      => array( $this, 'parse_categories' ),
 			'tag_ids'           => array( $this, 'parse_comma_field' ),
-			'images'            => array( $this, 'parse_comma_field' ),
+			'image_id'          => array( $this, 'parse_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_comma_field' ),
 			'download_limit'    => 'absint',
@@ -214,12 +216,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		/**
-		 * @todo switch these to some standard, slug format.
+		 * Match special column names.
 		 */
 		$regex_match_data_formatting = array(
-			'/Attribute * Value\(s\)/' => array( $this, 'parse_comma_field' ),
-			'/Attribute * Visible/'    => array( $this, 'parse_bool_field' ),
-			'/Download * URL/'         => 'esc_url',
+			'/attributes:value*/' => array( $this, 'parse_comma_field' ),
+			'/downloads:url*/'    => 'esc_url',
 		);
 
 		$headers         = ! empty( $this->mapped_keys ) ? $this->mapped_keys : $this->raw_keys;
@@ -227,8 +228,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Figure out the parse function for each column.
 		foreach ( $headers as $index => $heading ) {
+			$parse_function = 'wc_clean';
 
-			$parse_function = 'esc_attr';
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$parse_function = $data_formatting[ $heading ];
 			} else {
@@ -247,8 +248,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		foreach ( $this->raw_data as $row ) {
 			$item = array();
 			foreach ( $row as $index => $field ) {
+				// Skip ignored columns.
+				if ( empty( $headers[ $index ] ) ) {
+					continue;
+				}
+
 				$item[ $headers[ $index ] ] = call_user_func( $parse_functions[ $index ], $field );
 			}
+
 			$this->parsed_data[] = $item;
 		}
 	}

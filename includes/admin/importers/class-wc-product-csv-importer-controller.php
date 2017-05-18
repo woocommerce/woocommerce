@@ -480,7 +480,7 @@ class WC_Product_CSV_Importer_Controller {
 	protected function get_mapping_options( $item = '' ) {
 		// Get index for special column names.
 		$index = $item;
-		if ( preg_match('/\d+$/', $item, $matches ) ) {
+		if ( preg_match( '/\d+$/', $item, $matches ) ) {
 			$index = $matches[0];
 		}
 		// Properly format for meta field.
