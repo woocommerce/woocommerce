@@ -92,6 +92,35 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse relative field and return product ID.
+	 * Handle `id:xx` and SKUs.
+	 *
+	 * @param  string $field Field value.
+	 * @return int
+	 */
+	protected function parse_relative_field( $field ) {
+		if ( preg_match( '/^id:(\d+)$/', $field, $matches ) ) {
+			return intval( $matches[1] );
+		}
+
+		return wc_get_product_id_by_sku( $field );
+	}
+
+	/**
+	 * Parse reletive comma-delineated field and return product ID.
+	 *
+	 * @param string $field Field value.
+	 * @return array
+	 */
+	protected function parse_relative_comma_field( $field ) {
+		if ( empty( $field ) ) {
+			return array();
+		}
+
+		return array_filter( array_map( array( $this, 'parse_relative_field' ), array_map( 'trim', explode( ',', $field ) ) ) );
+	}
+
+	/**
 	 * Parse a comma-delineated field from a CSV.
 	 *
 	 * @param string $field Field value.
@@ -209,8 +238,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'category_ids'      => array( $this, 'parse_categories' ),
 			'tag_ids'           => array( $this, 'parse_comma_field' ),
 			'image_id'          => array( $this, 'parse_comma_field' ),
-			'upsell_ids'        => array( $this, 'parse_comma_field' ),
-			'cross_sell_ids'    => array( $this, 'parse_comma_field' ),
+			'parent_id'         => array( $this, 'parse_relative_field' ),
+			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
+			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
 		);
