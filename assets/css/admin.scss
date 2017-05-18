@@ -5422,7 +5422,8 @@ table.bar_chart {
 }
 
 .woocommerce-progress-form-wrapper,
-.woocommerce-exporter-wrapper {
+.woocommerce-exporter-wrapper,
+.woocommerce-importer-wrapper {
 	text-align: center;
 	max-width: 700px;
 	margin: 40px auto;
@@ -5508,6 +5509,7 @@ table.bar_chart {
 	}
 
 	.woocommerce-exporter,
+	.woocommerce-importer,
 	.wc-progress-form-content {
 		background: #fff;
 		overflow: hidden;

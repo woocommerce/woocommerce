@@ -65,6 +65,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	            	break;
 				}
 			}
+
+			$this->file_position = ftell( $handle );
 		}
 
 		if ( ! empty( $this->params['mapping'] ) ) {
