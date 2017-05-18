@@ -53,6 +53,19 @@ class WC_Product_CSV_Importer_Controller {
 	protected $delimiter = ',';
 
 	/**
+	 * Get importer instance.
+	 *
+	 * @param  string $file File to import.
+	 * @param  array  $args Importer arguments.
+	 * @return WC_Product_CSV_Importer
+	 */
+	public static function get_importer( $file, $args = array() ) {
+		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
+		return new $importer_class( $file, $args );
+	}
+
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -135,18 +148,6 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function output_footer() {
 		include( dirname( __FILE__ ) . '/views/html-csv-import-footer.php' );
-	}
-
-	/**
-	 * Get importer instance.
-	 *
-	 * @param  string $file File to import.
-	 * @param  array  $args Importer arguments.
-	 * @return WC_Product_CSV_Importer
-	 */
-	protected function get_importer( $file, $args = array() ) {
-		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-		return new $importer_class( $file, $args );
 	}
 
 	/**
@@ -262,7 +263,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step @todo
 	 */
 	protected function mapping_form() {
-		$importer = $this->get_importer( $this->file, array( 'lines' => 1 ) );
+		$importer = $this::get_importer( $this->file, array( 'lines' => 1 ) );
 		$headers  = $importer->get_raw_keys();
 		$sample   = current( $importer->get_raw_data() );
 
@@ -298,8 +299,8 @@ class WC_Product_CSV_Importer_Controller {
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
 			'import_nonce' => wp_create_nonce( 'wc-product-import' ),
-			'mapping' => $mapping,
-			'file' => $this->file,
+			'mapping'      => $mapping,
+			'file'         => $this->file,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
 	}

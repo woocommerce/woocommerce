@@ -5,19 +5,16 @@
 	 * productImportForm handles the import process.
 	 */
 	var productImportForm = function( $form ) {
-		this.$form = $form;
-		this.xhr   = false;
-		this.mapping = wc_product_import_params.mapping;
+		this.$form    = $form;
+		this.xhr      = false;
+		this.mapping  = wc_product_import_params.mapping;
 		this.position = 0;
-		this.file = wc_product_import_params.file;
+		this.file     = wc_product_import_params.file;
 		this.security = wc_product_import_params.import_nonce;
 
 		// Number of import successes/failures.
 		this.imported = 0;
-		this.failed = 0;
-
-		// Number of lines to import in one batch.
-		this.lines = 10;
+		this.failed   = 0;
 
 		// Initial state.
 		this.$form.find('.woocommerce-importer-progress').val( 0 );
@@ -38,19 +35,18 @@
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				action: 'woocommerce_do_ajax_product_import',
-				position: $this.position,
-				lines: $this.lines,
-				mapping: $this.mapping,
-				file: $this.file,
+				action   : 'woocommerce_do_ajax_product_import',
+				position : $this.position,
+				mapping  : $this.mapping,
+				file     : $this.file,
 				security : $this.security
 			},
 			dataType: 'json',
 			success: function( response ) {
 				if ( response.success ) {
-					$this.position = response.data.position;
+					$this.position  = response.data.position;
 					$this.imported += response.data.imported;
-					$this.failed += response.data.failed;
+					$this.failed   += response.data.failed;
 					$this.$form.find('.woocommerce-importer-progress').val( response.data.percentage );
 
 					if ( 'done' === response.data.position ) {

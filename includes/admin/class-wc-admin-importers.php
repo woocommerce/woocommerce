@@ -200,32 +200,32 @@ class WC_Admin_Importers {
 
 		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
 
-		$file = $_POST['file'];
+		$file = wc_clean( $_POST['file'] );
 		$params = array(
 			'start_pos' => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0,
-			'lines' => isset( $_POST['lines'] ) ? absint( $_POST['lines'] ) : 10,
-			'mapping' => isset( $_POST['mapping'] ) ? (array) $_POST['mapping'] : array(),
-			'parse' => true,
+			'mapping'   => isset( $_POST['mapping'] ) ? (array) $_POST['mapping'] : array(),
+			'lines'     => apply_filters( 'woocommerce_product_import_batch_size', 10 ),
+			'parse'     => true,
 		);
 
-		$importer = new WC_Product_CSV_Importer( $file, $params );
+		$importer = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
 		$results = $importer->import();
 		$position = $importer->get_file_position();
 
 		if ( 100 == $importer->get_percent_complete() ) {
 			wp_send_json_success( array(
-				'position' => 'done',
+				'position'   => 'done',
 				'percentage' => 100,
-				'url' => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-				'imported' => count( $results['imported'] ),
-				'failed' => count( $results['failed'] ),
+				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
+				'imported'   => count( $results['imported'] ),
+				'failed'     => count( $results['failed'] ),
 			) );
 		} else {
 			wp_send_json_success( array(
-				'position' => $position,
+				'position'   => $position,
 				'percentage' => $importer->get_percent_complete(),
-				'imported' => count( $results['imported'] ),
-				'failed' => count( $results['failed'] ),
+				'imported'   => count( $results['imported'] ),
+				'failed'     => count( $results['failed'] ),
 			) );
 		}
 	}
