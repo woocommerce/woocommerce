@@ -211,9 +211,9 @@ class WC_Admin_Importers {
 
 		$importer = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
 		$results = $importer->import();
-		$position = $importer->get_file_position();
+		$percent_complete = $importer->get_percent_complete();
 
-		if ( 100 == $importer->get_percent_complete() ) {
+		if ( 100 == $percent_complete ) {
 			wp_send_json_success( array(
 				'position'   => 'done',
 				'percentage' => 100,
@@ -223,8 +223,8 @@ class WC_Admin_Importers {
 			) );
 		} else {
 			wp_send_json_success( array(
-				'position'   => $position,
-				'percentage' => $importer->get_percent_complete(),
+				'position'   => $importer->get_file_position(),
+				'percentage' => $percent_complete,
 				'imported'   => count( $results['imported'] ),
 				'failed'     => count( $results['failed'] ),
 			) );
