@@ -60,4 +60,18 @@ interface WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_parsed_data();
+
+	/**
+	 * Get file pointer position from the last read.
+	 *
+	 * @return int
+	 */
+	public function get_file_position();
+
+	/**
+	 * Get file pointer position as a percentage of file size.
+	 *
+	 * @return int
+	 */
+	public function get_percent_complete();
 }
