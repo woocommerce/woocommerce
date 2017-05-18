@@ -1548,6 +1548,9 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 		}
 
 		$args['breadcrumb'] = $breadcrumbs->generate();
+		
+		$args['breadcrumb'] = apply_filters( 'woocommerce_breadcrumbs', $args['breadcrumb'] );
+
 
 		/**
 		 * @hooked WC_Structured_Data::generate_breadcrumblist_data() - 10
