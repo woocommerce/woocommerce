@@ -31,7 +31,7 @@ if ( $upsells ) : ?>
 			<?php foreach ( $upsells as $upsell ) : ?>
 
 				<?php
-				 	$post_object = get_post( $upsell->get_id() );
+				 	$post_object = get_post( apply_filters( 'woocommerce_cart_up_sells_post_id', $upsell->get_id(), $upsell ) );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 
