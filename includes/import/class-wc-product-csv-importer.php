@@ -221,6 +221,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 */
 		$data_formatting = array(
 			'id'                => 'absint',
+			'type'              => array( $this, 'parse_comma_field' ),
 			'published'         => array( $this, 'parse_bool_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => 'strtotime',
@@ -229,6 +230,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'description'       => 'wp_kses_post',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_bool_field' ),
+			'stock_status'      => array( $this, 'parse_bool_field' ),
 			'sold_individually' => array( $this, 'parse_bool_field' ),
 			'width'             => array( $this, 'parse_float_field' ),
 			'length'            => array( $this, 'parse_float_field' ),

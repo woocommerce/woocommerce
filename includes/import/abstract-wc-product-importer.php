@@ -138,12 +138,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return WC_Product|WC_Error
 	 */
 	protected function process_item( $data ) {
-		// Ignore IDs and create new products.
-		// @todo Mike said that we should have something to force create.
-		$force_create = false;
+		// Only update.
+		// @todo
+		$update_only = false;
 
 		try {
-			$object = $this->prepare_product( $data, $force_create );
+			$object = $this->prepare_product( $data, $update_only );
 
 			if ( is_wp_error( $object ) ) {
 				return $object;
@@ -185,16 +185,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  bool  $creating If should force create a new product.
 	 * @return WC_Product|WP_Error
 	 */
-	protected function prepare_product( $data, $force_create = false ) {
-		$id = ! $force_create && isset( $data['id'] ) ? absint( $data['id'] ) : 0;
+	protected function prepare_product( $data, $update_only = false ) {
+		$id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
+
+		// @todo
+		if ( $update_only && ! $id ) {
+			return new WP_Error( 'woocommerce_product_csv_importer_product_does_not_exists', __( 'Product does not exists, to create new products disable "Update only" option.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			if ( ! in_array( $data['type'], array_keys( wc_get_product_types() ), true ) ) {
+			$type = current( $data['type'] );
+
+			if ( ! in_array( $type, array_keys( wc_get_product_types() ), true ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
-			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
+			$classname = WC_Product_Factory::get_classname_from_product_type( $type );
 
 			if ( ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
@@ -207,7 +214,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = new WC_Product_Simple();
 		}
 
-		// @todo need to check first how we'll handle variations.
 		if ( 'variation' === $product->get_type() ) {
 			$product = $this->save_variation_data( $product, $data );
 		} else {
@@ -227,34 +233,29 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function save_product_data( $product, $data ) {
 
-		// Post title.
+		// Name.
 		if ( isset( $data['name'] ) ) {
 			$product->set_name( wp_filter_post_kses( $data['name'] ) );
 		}
 
-		// Post content.
+		// Description.
 		if ( isset( $data['description'] ) ) {
 			$product->set_description( wp_filter_post_kses( $data['description'] ) );
 		}
 
-		// Post excerpt.
+		// Short description.
 		if ( isset( $data['short_description'] ) ) {
 			$product->set_short_description( wp_filter_post_kses( $data['short_description'] ) );
 		}
 
-		// Post status.
-		if ( isset( $data['status'] ) ) {
-			$product->set_status( $data['status'] ? 'publish' : 'draft' );
+		// Status.
+		if ( isset( $data['published'] ) ) {
+			$product->set_status( $data['published'] ? 'publish' : 'draft' );
 		}
 
-		// Post slug.
+		// Slug.
 		if ( isset( $data['slug'] ) ) {
 			$product->set_slug( $data['slug'] );
-		}
-
-		// Menu order.
-		if ( isset( $data['menu_order'] ) ) {
-			$product->set_menu_order( $data['menu_order'] );
 		}
 
 		// Comment status.
@@ -263,8 +264,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Virtual.
-		if ( isset( $data['virtual'] ) ) {
-			$product->set_virtual( $data['virtual'] );
+		if ( isset( $data['type'] ) && in_array( 'virtual', $data['type'], true ) ) {
+			$product->set_virtual( true );
 		}
 
 		// Tax status.
@@ -284,7 +285,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Purchase Note.
 		if ( isset( $data['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $data['purchase_note'] ) );
+			$product->set_purchase_note( $data['purchase_note'] );
 		}
 
 		// Featured Product.
@@ -297,10 +298,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// SKU.
 		if ( isset( $data['sku'] ) ) {
-			$product->set_sku( wc_clean( $data['sku'] ) );
+			$product->set_sku( $data['sku'] );
 		}
 
 		// Attributes.
+		// @todo
 		if ( isset( $data['attributes'] ) ) {
 			$attributes = array();
 
@@ -388,16 +390,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$product->set_date_on_sale_from( $data['date_on_sale_from'] );
 			}
 
-			if ( isset( $data['date_on_sale_from_gmt'] ) ) {
-				$product->set_date_on_sale_from( $data['date_on_sale_from_gmt'] ? strtotime( $data['date_on_sale_from_gmt'] ) : null );
-			}
-
 			if ( isset( $data['date_on_sale_to'] ) ) {
 				$product->set_date_on_sale_to( $data['date_on_sale_to'] );
-			}
-
-			if ( isset( $data['date_on_sale_to_gmt'] ) ) {
-				$product->set_date_on_sale_to( $data['date_on_sale_to_gmt'] ? strtotime( $data['date_on_sale_to_gmt'] ) : null );
 			}
 		}
 
@@ -412,8 +406,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Stock status.
-		if ( isset( $data['in_stock'] ) ) {
-			$stock_status = true === $data['in_stock'] ? 'instock' : 'outofstock';
+		if ( isset( $data['stock_status'] ) ) {
+			$stock_status = $data['stock_status'] ? 'instock' : 'outofstock';
 		} else {
 			$stock_status = $product->get_stock_status();
 		}
@@ -421,8 +415,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Stock data.
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			// Manage stock.
-			if ( isset( $data['manage_stock'] ) ) {
-				$product->set_manage_stock( $data['manage_stock'] );
+			if ( isset( $data['stock_quantity'] ) ) {
+				$product->set_manage_stock( '' !== $data['stock_quantity'] );
 			}
 
 			// Backorders.
@@ -431,13 +425,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			} elseif ( $product->is_type( 'external' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
 			} elseif ( $product->get_manage_stock() ) {
@@ -449,14 +443,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
-				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $product->get_stock_quantity() );
-					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				// Don't manage stock.
-				$product->set_manage_stock( 'no' );
+				$product->set_manage_stock( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
@@ -466,52 +456,34 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Upsells.
 		if ( isset( $data['upsell_ids'] ) ) {
-			$upsells = array();
-			$ids     = $data['upsell_ids'];
-
-			if ( ! empty( $ids ) ) {
-				foreach ( $ids as $id ) {
-					if ( $id && $id > 0 ) {
-						$upsells[] = $id;
-					}
-				}
-			}
-
-			$product->set_upsell_ids( $upsells );
+			$product->set_upsell_ids( $data['upsell_ids'] );
 		}
 
 		// Cross sells.
 		if ( isset( $data['cross_sell_ids'] ) ) {
-			$crosssells = array();
-			$ids        = $data['cross_sell_ids'];
-
-			if ( ! empty( $ids ) ) {
-				foreach ( $ids as $id ) {
-					if ( $id && $id > 0 ) {
-						$crosssells[] = $id;
-					}
-				}
-			}
-
-			$product->set_cross_sell_ids( $crosssells );
+			$product->set_cross_sell_ids( $data['cross_sell_ids'] );
 		}
 
 		// Product categories.
+		// @todo
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
 			$product = $this->save_taxonomy_terms( $product, $data['categories'] );
 		}
 
 		// Product tags.
+		// @todo
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
 			$product = $this->save_taxonomy_terms( $product, $data['tags'], 'tag' );
 		}
 
 		// Downloadable.
+		// @todo
 		if ( isset( $data['downloadable'] ) ) {
 			$product->set_downloadable( $data['downloadable'] );
 		}
 
 		// Downloadable options.
+		// @todo
 		if ( $product->get_downloadable() ) {
 
 			// Downloadable files.
@@ -531,6 +503,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Product url and button text for external products.
+		// @todo
 		if ( $product->is_type( 'external' ) ) {
 			if ( isset( $data['external_url'] ) ) {
 				$product->set_product_url( $data['external_url'] );
@@ -542,16 +515,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Save default attributes for variable products.
+		// @todo
 		if ( $product->is_type( 'variable' ) ) {
 			$product = $this->save_default_attributes( $product, $data );
 		}
 
 		// Check for featured/gallery images, upload it and set it.
+		// @todo
 		if ( isset( $data['images'] ) ) {
 			$product = $this->save_product_images( $product, $data['images'] );
 		}
 
 		// Allow set meta_data.
+		// @todo
 		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
 				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
@@ -564,16 +540,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Set variation data.
 	 *
+	 * @todo
+	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Row data.
 	 *
-	 * @return WC_Product
+	 * @return WC_Product|WP_Error
 	 */
 	protected function save_variation_data( $variation, $data ) {
-		if ( isset( $data['product_id'] ) ) {
-			$variation->set_parent_id( absint( $data['product_id'] ) );
+		// Check if parent exist.
+		if ( isset( $data['product_id'] ) && ! wc_get_product( $data['product_id'] ) ) {
+			$variation->set_parent_id( $data['product_id'] );
 		} else {
-			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing variation product parent ID', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		// Status.
@@ -758,6 +737,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Set product images.
 	 *
+	 * @todo
+	 *
 	 * @param WC_Product $product Product instance.
 	 * @param array      $images  Images data.
 	 * @return WC_Product
@@ -824,7 +805,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function save_product_shipping_data( $product, $data ) {
 		// Virtual.
-		if ( isset( $data['virtual'] ) && true === $data['virtual'] ) {
+		if ( $product->is_virtual() ) {
 			$product->set_weight( '' );
 			$product->set_height( '' );
 			$product->set_length( '' );
@@ -852,7 +833,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class_id'] ) ) {
-			$shipping_class_term = get_term_by( 'id', wc_clean( $data['shipping_class_id'] ), 'product_shipping_class' );
+			$shipping_class_term = get_term_by( 'name', wc_clean( $data['shipping_class_id'] ), 'product_shipping_class' );
 
 			if ( $shipping_class_term ) {
 				$product->set_shipping_class_id( $shipping_class_term->term_id );
@@ -864,6 +845,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Save downloadable files.
+	 *
+	 * @todo
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
@@ -891,6 +874,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Save taxonomy terms.
 	 *
+	 * @todo
+	 *
 	 * @param WC_Product $product  Product instance.
 	 * @param array      $terms    Terms data.
 	 * @param string     $taxonomy Taxonomy name.
@@ -910,6 +895,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Save default attributes.
+	 *
+	 * @todo
 	 *
 	 * @since 3.0.0
 	 *
