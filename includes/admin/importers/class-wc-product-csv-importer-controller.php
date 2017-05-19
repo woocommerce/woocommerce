@@ -64,7 +64,6 @@ class WC_Product_CSV_Importer_Controller {
 		return new $importer_class( $file, $args );
 	}
 
-
 	/**
 	 * Constructor.
 	 */
@@ -163,7 +162,7 @@ class WC_Product_CSV_Importer_Controller {
 	protected function output_errors() {
 		if ( $this->errors ) {
 			foreach ( $this->errors as $error ) {
-				echo '<p class="error inline">' . esc_html( $error ) . '</p>';
+				echo '<div class="error inline"><p>' . esc_html( $error ) . '</p></div>';
 			}
 		}
 	}
@@ -221,7 +220,7 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		if ( empty( $_POST['file_url'] ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
-				return new WP_Error(  'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
 			$overrides                 = array( 'test_form' => false, 'test_type' => false );
@@ -297,13 +296,14 @@ class WC_Product_CSV_Importer_Controller {
 			$mapping = wp_unslash( $_POST['map_to'] );
 		}
 
-		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
 			'import_nonce' => wp_create_nonce( 'wc-product-import' ),
 			'mapping'      => $mapping,
 			'file'         => $this->file,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
+
+		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
 	}
 
 	/**
@@ -312,28 +312,9 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function done() {
 		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
-		$failed = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
+		$failed   = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
 
-		$results = sprintf(
-			/* translators: %d: products count */
-			_n( 'Imported %s product.', 'Imported %s products.', $imported, 'woocommerce' ),
-			'<strong>' . number_format_i18n( $imported ) . '</strong>'
-		);
-
-		// @todo create a view to display errors or log with WC_Logger.
-		if ( 0 < $failed ) {
-			$results .= ' ' . sprintf(
-				/* translators: %d: products count */
-				_n( 'Failed %s product.', 'Failed %s products.', $failed, 'woocommerce' ),
-				'<strong>' . number_format_i18n( $failed ) . '</strong>'
-			);
-		}
-
-		// Show result.
-		echo '<div class="updated settings-error"><p>';
-		/* translators: %d: import results */
-		printf( __( 'Import complete: %s', 'woocommerce' ), $results );
-		echo '</p></div>';
+		include_once( dirname( __FILE__ ) . '/views/html-csv-import-done.php' );
 	}
 
 	/**
@@ -428,6 +409,7 @@ class WC_Product_CSV_Importer_Controller {
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 		) ) );
+
 		$special_columns = array_map(
 			array( $this, 'sanitize_special_column_name_regex' ),
 			apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
@@ -480,9 +462,11 @@ class WC_Product_CSV_Importer_Controller {
 	protected function get_mapping_options( $item = '' ) {
 		// Get index for special column names.
 		$index = $item;
-		if ( preg_match('/\d+$/', $item, $matches ) ) {
+
+		if ( preg_match( '/\d+$/', $item, $matches ) ) {
 			$index = $matches[0];
 		}
+
 		// Properly format for meta field.
 		$meta = str_replace( 'meta:', '', $item );
 
