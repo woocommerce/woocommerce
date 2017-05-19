@@ -61,8 +61,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'] ) ) ) {
 				$this->raw_data[] = $row;
 
-	            if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
-	            	break;
+				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
+					break;
 				}
 			}
 
