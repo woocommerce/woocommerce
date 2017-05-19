@@ -209,11 +209,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Map and format raw data to known fields.
+	 * Get formatting callback.
 	 *
 	 * @return array
 	 */
-	protected function set_parsed_data() {
+	protected function get_formating_callback() {
 
 		/**
 		 * Columns not mentioned here will get parsed with 'wc_clean'.
@@ -257,42 +257,152 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$regex_match_data_formatting = array(
 			'/attributes:value*/' => array( $this, 'parse_comma_field' ),
 			'/downloads:url*/'    => 'esc_url',
+			'/meta:*/'            => 'wp_kses_post', // Allow some HTML in meta fields.
 		);
 
-		$headers         = ! empty( $this->mapped_keys ) ? $this->mapped_keys : $this->raw_keys;
-		$parse_functions = array();
+		$callbacks = array();
 
 		// Figure out the parse function for each column.
-		foreach ( $headers as $index => $heading ) {
-			$parse_function = 'wc_clean';
+		foreach ( $this->get_mapped_keys() as $index => $heading ) {
+			$callback = 'wc_clean';
 
 			if ( isset( $data_formatting[ $heading ] ) ) {
-				$parse_function = $data_formatting[ $heading ];
+				$callback = $data_formatting[ $heading ];
 			} else {
 				foreach ( $regex_match_data_formatting as $regex => $callback ) {
 					if ( preg_match( $regex, $heading ) ) {
-						$parse_function = $callback;
+						$callback = $callback;
 						break;
 					}
 				}
 			}
 
-			$parse_functions[] = $parse_function;
+			$callbacks[] = $callback;
 		}
+
+		return $callbacks;
+	}
+
+	/**
+	 * Check if strings starts with determined word.
+	 *
+	 * @param  string $haystack Complete sentence.
+	 * @param  string $needle   Excerpt.
+	 * @return bool
+	 */
+	protected function starts_with( $haystack, $needle ) {
+		return $needle === substr( $haystack, 0, strlen( $needle ) );
+	}
+
+	/**
+	 * Expand special and internal data.
+	 *
+	 * @param  array $data Data to import.
+	 * @return array
+	 */
+	protected function expand_data( $data ) {
+		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
+
+		// Meta data.
+		$data['meta_data']          = array();
+		$data['attributes']         = array();
+		$data['default_attributes'] = array();
+		$data['downloads']          = array();
+
+		// Manage stock.
+		if ( isset( $data['stock_quantity'] ) ) {
+			$data['manage_stock'] = 0 < $data['stock_quantity'];
+		}
+
+		// Type, virtual and downlodable.
+		if ( isset( $data['type'] ) ) {
+			$data['virtual']      = in_array( 'virtual', $data['type'], true );
+			$data['downloadable'] = in_array( 'downloadable', $data['type'], true );
+
+			// Convert type to string.
+			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
+		}
+
+		// Handle special column names.
+		foreach ( $data as $key => $value ) {
+			// Attributes.
+			if ( $this->starts_with( $key, 'attributes:name' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['attributes'][ str_replace( 'attributes:name', '', $key ) ]['name'] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+			if ( $this->starts_with( $key, 'attributes:value' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['attributes'][ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+
+			// Default attributes
+			if ( $this->starts_with( $key, 'attributes:default' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['default_attributes'][] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+
+			// Downloads.
+			if ( $this->starts_with( $key, 'downloads:name' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['attributes'][ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+			if ( $this->starts_with( $key, 'downloads:url' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['attributes'][ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+
+			// Meta data.
+			if ( $this->starts_with( $key, 'meta:' ) ) {
+				$data['meta_data'][] = array(
+					'key'   => str_replace( 'meta:', '', $key ),
+					'value' => $value,
+				);
+
+				unset( $data[ $key ] );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Map and format raw data to known fields.
+	 *
+	 * @return array
+	 */
+	protected function set_parsed_data() {
+		$parse_functions = $this->get_formating_callback();
+		$mapped_keys     = $this->get_mapped_keys();
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row ) {
-			$item = array();
-			foreach ( $row as $index => $field ) {
+			$data = array();
+
+			foreach ( $row as $id => $value ) {
 				// Skip ignored columns.
-				if ( empty( $headers[ $index ] ) ) {
+				if ( empty( $mapped_keys[ $id ] ) ) {
 					continue;
 				}
 
-				$item[ $headers[ $index ] ] = call_user_func( $parse_functions[ $index ], $field );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
-			$this->parsed_data[] = $item;
+			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ) );
 		}
 	}
 
