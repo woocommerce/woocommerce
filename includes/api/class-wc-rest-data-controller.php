@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Data_Index_Controller extends WC_REST_Data_Controller {
+class WC_REST_Data_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -52,6 +52,20 @@ class WC_REST_Data_Index_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Check whether a given request has permission to read site data
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Return the list of data resources
 	 *
 	 * @since  3.1.0
@@ -59,7 +73,7 @@ class WC_REST_Data_Index_Controller extends WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$data    = array();
+		$data = array();
 		$resources = array(
 			array(
 				'slug' => 'locations',

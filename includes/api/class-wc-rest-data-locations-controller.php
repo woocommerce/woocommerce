@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.6.0
+ * @since    3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Data_Location_Controller extends WC_REST_Data_Controller {
+class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -144,5 +144,18 @@ class WC_REST_Data_Location_Controller extends WC_REST_Data_Controller {
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_locations', $response, $data, $request );
+	}
+
+	/**
+	 * Prepare the data object for response.
+	 *
+	 * @since  3.1.0
+	 * @param object $item Data object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$response = rest_ensure_response( $item );
+		return $response;
 	}
 }
