@@ -33,7 +33,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Type'          => 'type',
 			'SKU'           => 'sku',
 			'Name'          => 'name',
-			'Status'        => 'status',
+			'Published'     => 'published',
 			'Regular price' => 'regular_price',
 		);
 
@@ -64,7 +64,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Type',
 			'SKU',
 			'Name',
-			'Status',
+			'Published',
 			'Regular price',
 		);
 
@@ -80,7 +80,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Type'          => 'type',
 			'SKU'           => 'sku',
 			'Name'          => 'name',
-			'Status'        => 'status',
+			'Published'     => 'published',
 			'Regular price' => 'regular_price',
 		);
 
@@ -135,7 +135,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Type'          => 'type',
 			'SKU'           => 'sku',
 			'Name'          => 'name',
-			'Status'        => 'status',
+			'Published'     => 'published',
 			'Regular price' => 'regular_price',
 		);
 
@@ -147,25 +147,43 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
 		$items    = array(
 			array(
-				'type'          => 'simple',
-				'sku'           => 'PRODUCT-01',
-				'name'          => 'Imported Product 1',
-				'status'        => 1,
-				'regular_price' => 40,
+				'type'               => 'simple',
+				'sku'                => 'PRODUCT-01',
+				'name'               => 'Imported Product 1',
+				'published'          => 1,
+				'regular_price'      => '40',
+				'meta_data'          => array(),
+				'attributes'         => array(),
+				'default_attributes' => array(),
+				'downloads'          => array(),
+				'virtual'            => false,
+				'downloadable'       => false,
 			),
 			array(
-				'type'          => 'simple',
-				'sku'           => 'PRODUCT-02',
-				'name'          => 'Imported Product 2',
-				'status'        => 1,
-				'regular_price' => 41,
+				'type'               => 'simple',
+				'sku'                => 'PRODUCT-02',
+				'name'               => 'Imported Product 2',
+				'published'          => 1,
+				'regular_price'      => '41',
+				'meta_data'          => array(),
+				'attributes'         => array(),
+				'default_attributes' => array(),
+				'downloads'          => array(),
+				'virtual'            => false,
+				'downloadable'       => false,
 			),
 			array(
-				'type'          => 'simple',
-				'sku'           => 'PRODUCT-03',
-				'name'          => 'Imported Product 3',
-				'status'        => 1,
-				'regular_price' => 42,
+				'type'               => 'simple',
+				'sku'                => 'PRODUCT-03',
+				'name'               => 'Imported Product 3',
+				'published'          => 1,
+				'regular_price'      => '42',
+				'meta_data'          => array(),
+				'attributes'         => array(),
+				'default_attributes' => array(),
+				'downloads'          => array(),
+				'virtual'            => false,
+				'downloadable'       => false,
 			),
 		);
 
