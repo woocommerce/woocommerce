@@ -294,6 +294,9 @@ class WC_Product_CSV_Importer_Controller {
 
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping = wp_unslash( $_POST['map_to'] );
+		} else {
+			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
+			exit;
 		}
 
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
