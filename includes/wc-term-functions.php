@@ -519,7 +519,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'] . ', tm.meta_value';
+	$clauses['fields'] = $clauses['fields'] . ', tm.meta_value';
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
@@ -527,6 +527,9 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	} else {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	}
+
+	// Grouping.
+	$clauses['where'] .= ' GROUP BY t.term_id ';
 
 	// Default to ASC.
 	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) {
