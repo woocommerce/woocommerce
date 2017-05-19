@@ -56,6 +56,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<th><label><?php _e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
 				</tr>
+				<tr>
+					<th><label><?php _e( 'Skip existing products', 'woocommerce' ); ?></label><br/></th>
+					<td>
+						<input type="hidden" name="skip_existing" value="0" />
+						<input type="checkbox" name="skip_existing" value="1" />
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</section>

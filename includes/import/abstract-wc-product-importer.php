@@ -138,12 +138,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return WC_Product|WC_Error
 	 */
 	protected function process_item( $data ) {
-		// Ignore IDs and create new products.
-		// @todo Mike said that we should have something to force create.
-		$force_create = false;
-
 		try {
-			$object = $this->prepare_product( $data, $force_create );
+			$object = $this->prepare_product( $data );
 
 			if ( is_wp_error( $object ) ) {
 				return $object;
@@ -182,11 +178,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  array $data     Row data.
-	 * @param  bool  $creating If should force create a new product.
 	 * @return WC_Product|WP_Error
 	 */
-	protected function prepare_product( $data, $force_create = false ) {
-		$id = ! $force_create && isset( $data['id'] ) ? absint( $data['id'] ) : 0;
+	protected function prepare_product( $data ) {
+		$id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {

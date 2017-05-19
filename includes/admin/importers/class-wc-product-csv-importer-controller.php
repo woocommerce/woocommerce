@@ -53,6 +53,13 @@ class WC_Product_CSV_Importer_Controller {
 	protected $delimiter = ',';
 
 	/**
+	 * Whether to skip existing products.
+	 *
+	 * @var bool
+	 */
+	protected $skip_existing = false;
+
+	/**
 	 * Get importer instance.
 	 *
 	 * @param  string $file File to import.
@@ -92,6 +99,7 @@ class WC_Product_CSV_Importer_Controller {
 		);
 		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->skip_existing = isset( $_REQUEST['skip_existing'] ) ? (bool) $_REQUEST['skip_existing'] : false;
 	}
 
 	/**
@@ -119,10 +127,11 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$params = array(
-			'step'      => $keys[ $step_index + 1 ],
-			'file'      => $this->file,
-			'delimiter' => $this->delimiter,
-			'_wpnonce'  => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			'step'          => $keys[ $step_index + 1 ],
+			'file'          => $this->file,
+			'delimiter'     => $this->delimiter,
+			'skip_existing' => $this->skip_existing,
+			'_wpnonce'      => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
 		return add_query_arg( $params );
@@ -300,9 +309,10 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
-			'import_nonce' => wp_create_nonce( 'wc-product-import' ),
-			'mapping'      => $mapping,
-			'file'         => $this->file,
+			'import_nonce'  => wp_create_nonce( 'wc-product-import' ),
+			'mapping'       => $mapping,
+			'file'          => $this->file,
+			'skip_existing' => $this->skip_existing,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
 
