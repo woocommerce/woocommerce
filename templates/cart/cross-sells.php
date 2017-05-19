@@ -31,7 +31,7 @@ if ( $cross_sells ) : ?>
 			<?php foreach ( $cross_sells as $cross_sell ) : ?>
 
 				<?php
-				 	$post_object = get_post( $cross_sell->get_id() );
+				 	$post_object = get_post( apply_filters( 'woocommerce_cart_cross_sells_post_id', $cross_sell->get_id(), $cross_sell ) );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 
