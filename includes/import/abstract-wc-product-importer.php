@@ -190,8 +190,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			if ( ! in_array( $data['type'], array_keys( wc_get_product_types() ), true ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
+			$product_type = 'simple';
+			$types        = array_filter( array_map( 'trim', explode( ',', $data['type'] ) ) );
+
+			foreach ( $types as $key => $type ) {
+				if ( 'downloadable' === $type ) {
+					$data['downloadable'] = true;
+				} elseif ( 'virtual' === $type ) {
+					$data['virtual'] = true;
+				} elseif ( in_array( $type, array_keys( wc_get_product_types() ), true ) || 'variation' === $type ) {
+					$product_type = $type;
+				} else {
+					return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
+				}
 			}
 
 			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
@@ -750,7 +761,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$variation->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 			}
 		}
-
 
 		return $variation;
 	}
