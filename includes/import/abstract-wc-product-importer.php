@@ -105,7 +105,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_parsed_data() {
-		return apply_filters( 'woocommerce_product_parsed_data', $this->parsed_data, $this->get_raw_data() );
+		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this->get_raw_data() );
 	}
 
 	/**
@@ -158,7 +158,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_product_csv_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -190,18 +190,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// @todo
 		if ( $update_only && ! $id ) {
-			return new WP_Error( 'woocommerce_product_csv_importer_product_does_not_exists', __( 'Product does not exists, to create new products disable "Update only" option.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_product_importer_product_does_not_exists', __( 'Product does not exists, to create new products disable "Update only" option.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			$type = current( $data['type'] );
-
-			if ( ! in_array( $type, array_keys( wc_get_product_types() ), true ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
+			if ( ! in_array( $data['type'], array_keys( wc_get_product_types() ), true ) ) {
+				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
-			$classname = WC_Product_Factory::get_classname_from_product_type( $type );
+			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
 
 			if ( ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
@@ -220,7 +218,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = $this->save_product_data( $product, $data );
 		}
 
-		return apply_filters( 'woocommerce_product_csv_import_pre_insert_product_object', $product, $data );
+		return apply_filters( 'woocommerce_product_import_pre_insert_product_object', $product, $data );
 	}
 
 	/**
@@ -264,8 +262,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Virtual.
-		if ( isset( $data['type'] ) && in_array( 'virtual', $data['type'], true ) ) {
-			$product->set_virtual( true );
+		if ( isset( $data['virtual'] ) ) {
+			$product->set_virtual( $data['virtual'] );
 		}
 
 		// Tax status.
