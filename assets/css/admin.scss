@@ -5550,18 +5550,33 @@ table.bar_chart {
 		}
 
 		.woocommerce-exporter-options th,
-		.woocommerce-importer-options th {
-			width: 30%;
-		}
-
-		.woocommerce-exporter-options th,
 		.woocommerce-exporter-options td {
 			vertical-align: top;
+			line-height: 1.75em;
+			padding: 20px 0;
 
 			label {
 				color: #555;
 				font-weight: normal;
 			}
+
+			input[type="checkbox"] {
+				margin: 0 4px 0 0;
+				padding: 7px;
+			}
+
+			input[type="text"],
+			input[type="number"] {
+				padding: 7px;
+				height: auto;
+				margin: 0;
+			}
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-importer-options th {
+			width: 40%;
+				padding-right: 20px;
 		}
 
 		progress {
