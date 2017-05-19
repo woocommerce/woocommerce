@@ -87,7 +87,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_mapped_keys() {
-		return $this->mapped_keys;
+		return ! empty( $this->mapped_keys ) ? $this->mapped_keys : $this->raw_keys;
 	}
 
 	/**
