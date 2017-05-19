@@ -275,7 +275,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			// Don't import products with IDs or SKUs that already exist if option is true.
 			if ( $this->params['skip_existing'] ) {
 				$id = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-				$sku = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : 0;
+				$sku = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 
 				if ( $id && wc_get_product( $id ) ) {
 					$data['failed'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id ) );
