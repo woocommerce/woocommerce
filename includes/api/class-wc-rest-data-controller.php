@@ -123,4 +123,34 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 
 		return $response;
 	}
+
+	/**
+	 * Get the data index schema, conforming to JSON Schema.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'data_index',
+			'type' => 'object',
+			'properties' => array(
+				'slug' => array(
+					'description' => __( 'Data resource ID.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'description' => array(
+					'description' => __( 'Data resource description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
 }

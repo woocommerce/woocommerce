@@ -143,4 +143,68 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 		$response = rest_ensure_response( $item );
 		return $response;
 	}
+
+
+	/**
+	 * Get the location schema, conforming to JSON Schema.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'data_locations',
+			'type'       => 'object',
+			'properties' => array(
+				'code' => array(
+					'type'        => 'string',
+					'description' => __( '2-character continent code', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'name' => array(
+					'type'        => 'string',
+					'description' => __( 'Full name of continent', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'countries' => array(
+					'type'     => 'array',
+					'context'  => array( 'view' ),
+					'readonly' => true,
+					'items'    => array(
+						'type'       => 'object',
+						'context'    => array( 'view' ),
+						'readonly'   => true,
+						'properties' => array(
+							'code' => array(
+								'type'        => 'string',
+								'description' => __( 'ISO3166 alpha-2 country code', 'woocommerce' ),
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'name' => array(
+								'type'        => 'string',
+								'description' => __( 'Full name of country', 'woocommerce' ),
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'states' => array(
+								'type'                 => 'object',
+								'description'          => __( 'List of states in (code, name) pairs', 'woocommerce' ),
+								'context'              => array( 'view' ),
+								'readonly'             => true,
+								'additionalProperties' => array(
+									'type' => 'string',
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
 }
