@@ -5428,6 +5428,10 @@ table.bar_chart {
 	max-width: 700px;
 	margin: 40px auto;
 
+	.error {
+		text-align: left;
+	}
+
 	.wc-progress-steps {
 		padding: 0 0 24px;
 		margin: 0;
@@ -5480,8 +5484,10 @@ table.bar_chart {
 
 	.wc-actions {
 		overflow: hidden;
-		padding: 0 0 2px;
-		margin: 0 0 24px;
+		border-top: 1px solid #eee;
+		margin: 0;
+		padding: 23px 24px 24px;
+
 		.button {
 			float: right;
 			font-size: 1.25em;
@@ -5513,7 +5519,7 @@ table.bar_chart {
 	.wc-progress-form-content {
 		background: #fff;
 		overflow: hidden;
-		padding: 24px 24px 0;
+		padding: 0;
 		margin: 0 0 16px;
 		box-shadow: 0 1px 3px rgba(0,0,0,.13);
 		color: #555;
@@ -5521,8 +5527,12 @@ table.bar_chart {
 
 		header {
 			border-bottom: 1px solid #eee;
-			padding: 0;
 			margin: 0;
+			padding: 24px 24px 0;
+		}
+
+		section {
+			padding: 24px 24px 0;
 		}
 
 		h2 {
@@ -5549,11 +5559,13 @@ table.bar_chart {
 			display: none;
 		}
 
+		.woocommerce-importer-options th,
+		.woocommerce-importer-options td,
 		.woocommerce-exporter-options th,
 		.woocommerce-exporter-options td {
 			vertical-align: top;
 			line-height: 1.75em;
-			padding: 20px 0;
+			padding: 0 0 24px 0;
 
 			label {
 				color: #555;
@@ -5576,13 +5588,13 @@ table.bar_chart {
 		.woocommerce-exporter-options th,
 		.woocommerce-importer-options th {
 			width: 40%;
-				padding-right: 20px;
+			padding-right: 20px;
 		}
 
 		progress {
 			width: 100%;
 			height: 42px;
-			margin: 24px auto 24px;
+			margin: 0 auto 24px;
 			display: block;
 			-webkit-appearance: none;
 			border: none;
@@ -5619,6 +5631,73 @@ table.bar_chart {
 			.wc-actions,
 			.woocommerce-exporter-options {
 				display: none;
+			}
+		}
+
+		.wc-importer-mapping-table-wrapper {
+			padding: 0;
+		}
+
+		.wc-importer-mapping-table {
+			margin: 0;
+			border: 0;
+			box-shadow: none;
+
+			td, th {
+				border: 0;
+				padding: 12px;
+				vertical-align: middle;
+
+				select {
+					width: 100%;
+				}
+			}
+
+			tr:nth-child(odd) td {
+				background: #fbfbfb;
+			}
+
+			th {
+				font-weight: bold;
+			}
+
+			td:first-child,
+			th:first-child {
+				padding-left: 24px;
+			}
+
+			td:last-child,
+			th:last-child {
+				padding-right: 24px;
+			}
+
+			.wc-importer-mapping-table-name {
+				width: 50%;
+				.description {
+					color: #999;
+					margin-top: 4px;
+					display: block;
+					code {
+						background: none;
+						padding: 0;
+					}
+				}
+			}
+		}
+
+		.woocommerce-importer-done {
+			text-align: center;
+			padding: 48px 24px;
+			font-size: 1.5em;
+
+			&::before {
+				@include icon( '\e015' );
+				color: #A16696;
+				position: static;
+				font-size: 100px;
+				display: block;
+				float: none;
+				margin: 0 0 24px;
 			}
 		}
 	}
