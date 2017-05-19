@@ -79,10 +79,6 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 				'slug'        => 'locations',
 				'description' => __( 'List of supported continents, countries, and states', 'woocommerce' ),
 			),
-			array(
-				'slug' => 'locations/<location>',
-				'description' => __( 'List of supported continents, countries, and states; restricted to the given continent or country', 'woocommerce' ),
-			),
 		);
 
 		foreach ( $resources as $resource ) {

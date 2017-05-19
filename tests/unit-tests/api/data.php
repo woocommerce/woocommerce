@@ -37,7 +37,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data' ) );
 		$index = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $index ) );
+		$this->assertCount( 1, $index );
 		$this->assertEquals( 'locations', $index[0]['slug'] );
 	}
 
