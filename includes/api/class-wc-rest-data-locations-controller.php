@@ -49,31 +49,14 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
 		) );
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<continent>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args' => array(
 					'continent' => array(
-						'description' => __( 'Continent name to restrict country list', 'woocommerce' ),
-						'type'        => 'string',
-					),
-				),
-			),
-		) );
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<continent>[\w-]+)/(?P<country>[\w-]+)', array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args' => array(
-					'continent' => array(
-						'description' => __( 'Continent name to restrict country list', 'woocommerce' ),
-						'type'        => 'string',
-					),
-					'country' => array(
-						'description' => __( 'Country name to restrict states list', 'woocommerce' ),
+						'description' => __( 'ISO3166 alpha-2 country or continent code', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -92,10 +75,12 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 		$continents = WC()->countries->get_continents();
 		$countries = WC()->countries->get_countries();
 		$states = WC()->countries->get_states();
+		$location_filter = strtoupper( $request['location'] );
+		$is_continent_filter = in_array( $location_filter, array_map( 'strtoupper', array_keys( $continents ) ) );
 
 		$data = array();
 		foreach ( $continents as $continent_code => $continent_list ) {
-			if ( isset( $request['continent'] ) && ( strtolower( $continent_code ) !== strtolower( $request['continent'] ) ) ) {
+			if ( $is_continent_filter && ( strtoupper( $continent_code ) !== $location_filter ) ) {
 				continue;
 			}
 
@@ -105,7 +90,7 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 			);
 			$local_countries = array();
 			foreach ( $continent_list['countries'] as $country_code ) {
-				if ( isset( $request['country'] ) && ( strtolower( $country_code ) !== strtolower( $request['country'] ) ) ) {
+				if ( ! $is_continent_filter && $location_filter && ( strtoupper( $country_code ) !== $location_filter ) ) {
 					continue;
 				}
 				if ( isset( $countries[ $country_code ] ) ) {

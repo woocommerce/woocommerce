@@ -37,7 +37,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data' ) );
 		$index = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 3, count( $index ) );
+		$this->assertEquals( 2, count( $index ) );
 		$this->assertEquals( 'locations', $index[0]['slug'] );
 	}
 
@@ -79,7 +79,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations_from_country() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/na/us' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/us' ) );
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
@@ -93,32 +93,12 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting locations from one country, with the wrong continent
-	 * @since 3.1.0
-	 */
-	public function test_get_locations_from_country_wrong_continent() {
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/af/us' ) );
-		$this->assertEquals( 404, $response->get_status() );
-	}
-
-	/**
-	 * Test getting locations from an invalid continent
+	 * Test getting locations from an invalid code
 	 * @since 3.1.0
 	 */
 	public function test_get_locations_from_invalid_continent() {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/xx' ) );
-		$this->assertEquals( 404, $response->get_status() );
-	}
-
-	/**
-	 * Test getting locations from an invalid country
-	 * @since 3.1.0
-	 */
-	public function test_get_locations_from_invalid_country() {
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/na/xx' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
