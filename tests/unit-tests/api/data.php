@@ -58,7 +58,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting locations restricted to one continent
+	 * Test getting locations restricted to one continent.
 	 * @since 3.1.0
 	 */
 	public function test_get_locations_from_continent() {
@@ -74,7 +74,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting locations restricted to one country
+	 * Test getting locations restricted to one country.
 	 * @since 3.1.0
 	 */
 	public function test_get_locations_from_country() {
@@ -93,7 +93,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting locations from an invalid code
+	 * Test getting locations from an invalid code.
 	 * @since 3.1.0
 	 */
 	public function test_get_locations_from_invalid_continent() {

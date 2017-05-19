@@ -1,10 +1,10 @@
 <?php
 /**
- * REST API Data controller
+ * REST API Data controller.
  *
- * Handles requests to the /data/location endpoint.
+ * Handles requests to the /data endpoint.
  *
- * @author   WooThemes
+ * @author   Automattic
  * @category API
  * @package  WooCommerce/API
  * @since    3.1.0
@@ -52,7 +52,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check whether a given request has permission to read site data
+	 * Check whether a given request has permission to read site data.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -66,7 +66,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Return the list of data resources
+	 * Return the list of data resources.
 	 *
 	 * @since  3.1.0
 	 * @param  WP_REST_Request $request
@@ -76,7 +76,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 		$data = array();
 		$resources = array(
 			array(
-				'slug' => 'locations',
+				'slug'        => 'locations',
 				'description' => __( 'List of supported continents, countries, and states', 'woocommerce' ),
 			),
 			array(
@@ -106,9 +106,8 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 			'description' => $resource->description,
 		);
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
+		$data = $this->filter_response_by_context( $data, 'view' );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );

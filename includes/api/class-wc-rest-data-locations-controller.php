@@ -1,10 +1,10 @@
 <?php
 /**
- * REST API Data controller
+ * REST API Data controller.
  *
- * Handles requests to the /data/location endpoint.
+ * Handles requests to the /data/locations endpoint.
  *
- * @author   WooThemes
+ * @author   Automattic
  * @category API
  * @package  WooCommerce/API
  * @since    3.1.0
@@ -65,17 +65,17 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Return the list of continents, countries, and states, possibly restricted by args in $request
+	 * Return the list of continents, countries, and states, possibly restricted by args in $request.
 	 *
 	 * @since  3.1.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$continents = WC()->countries->get_continents();
-		$countries = WC()->countries->get_countries();
-		$states = WC()->countries->get_states();
-		$location_filter = strtoupper( $request['location'] );
+		$continents          = WC()->countries->get_continents();
+		$countries           = WC()->countries->get_countries();
+		$states              = WC()->countries->get_states();
+		$location_filter     = strtoupper( $request['location'] );
 		$is_continent_filter = in_array( $location_filter, array_map( 'strtoupper', array_keys( $continents ) ) );
 
 		$data = array();
