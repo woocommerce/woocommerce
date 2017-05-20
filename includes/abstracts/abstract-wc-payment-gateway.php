@@ -97,6 +97,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $max_amount = 0;
 
 	/**
+	 * Minimum transaction amount, zero does not define a minimum.
+	 * @var int
+	 */
+	public $min_amount = 0;
+
+	/**
 	 * Optional URL to view a transaction.
 	 * @var string
 	 */
@@ -235,6 +241,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$is_available = ( 'yes' === $this->enabled );
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
+			$is_available = false;
+		}
+
+		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->min_amount && $this->min_amount > $this->get_order_total() ) {
 			$is_available = false;
 		}
 
