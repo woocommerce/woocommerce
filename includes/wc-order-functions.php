@@ -486,7 +486,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_item_count       = 0;
 		$refund                  = new WC_Order_Refund( $args['refund_id'] );
 
-		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
+		if ( 0 >= $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
 			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
 		}
 
