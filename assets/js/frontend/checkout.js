@@ -413,9 +413,11 @@ jQuery( function( $ ) {
 							return raw_response;
 						}
 
+						var data = '';
+
 						try {
 							// Check for valid JSON
-							var data = $.parseJSON( raw_response );
+							data = $.parseJSON( raw_response );
 
 							if ( data && 'object' === typeof data ) {
 
@@ -426,14 +428,21 @@ jQuery( function( $ ) {
 						} catch ( e ) {
 
 							// Attempt to fix the malformed JSON
-							var valid_json = raw_response.match( /{"result.*"?}/ );
+							var maybe_valid_json = raw_response.match( /{"result.*}/ );
 
-							if ( null === valid_json ) {
+							if ( null === maybe_valid_json ) {
 								console.log( 'Unable to fix malformed JSON' );
 							} else {
-								console.log( 'Fixed malformed JSON. Original:' );
-								console.log( raw_response );
-								raw_response = valid_json[0];
+								// Check for valid JSON
+								data = $.parseJSON( maybe_valid_json[0] );
+
+								if ( data && 'object' === typeof data ) {
+									console.log( 'Fixed malformed JSON. Original:' );
+									console.log( raw_response );
+									raw_response = maybe_valid_json[0];
+								} else {
+									console.log( 'Unable to fix malformed JSON' );
+								}
 							}
 						}
 
