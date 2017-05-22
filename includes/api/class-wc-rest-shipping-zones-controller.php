@@ -166,6 +166,10 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			return $zone;
 		}
 
+		if ( 0 === $zone->get_id() ) {
+			return new WP_Error( "woocommerce_rest_shipping_zone_invalid_zone", __( 'The "rest of the world" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+		}
+
 		$zone_changed = false;
 
 		if ( ! is_null( $request->get_param( 'name' ) ) ) {
