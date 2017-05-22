@@ -54,7 +54,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertGreaterThan( 1, count( $locations ) );
 		$this->assertNotEmpty( $locations[0]['code'] );
 		$this->assertNotEmpty( $locations[0]['name'] );
-		$this->assertNotEmpty( $locations[0]['countries'] );
+		$this->assertNotEmpty( $locations[0]['locations'] );
 	}
 
 	/**
@@ -67,10 +67,9 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
-		$this->assertCount( 1, $locations );
-		$this->assertEquals( 'NA', $locations[0]['code'] );
-		$this->assertNotEmpty( $locations[0]['name'] );
-		$this->assertNotEmpty( $locations[0]['countries'] );
+		$this->assertEquals( 'NA', $locations['code'] );
+		$this->assertNotEmpty( $locations['name'] );
+		$this->assertNotEmpty( $locations['locations'] );
 	}
 
 	/**
@@ -83,13 +82,9 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
-		$this->assertCount( 1, $locations );
-		$this->assertEquals( 'NA', $locations[0]['code'] );
-		$this->assertNotEmpty( $locations[0]['name'] );
-		$this->assertNotEmpty( $locations[0]['countries'] );
-
-		$this->assertCount( 1, $locations[0]['countries'] );
-		$this->assertEquals( 'US', $locations[0]['countries'][0]['code'] );
+		$this->assertEquals( 'US', $locations['code'] );
+		$this->assertNotEmpty( $locations['name'] );
+		$this->assertCount( 54, $locations['locations'] );
 	}
 
 	/**

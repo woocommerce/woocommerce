@@ -99,18 +99,31 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 						'name' => $countries[ $country_code ],
 					);
 
+					$local_states = array();
 					if ( isset( $states[ $country_code ] ) ) {
-						$country['states'] = $states[ $country_code ];
-					} else {
-						$country['states'] = array();
+						foreach ( $states[ $country_code ] as $state_code => $state_name ) {
+							$local_states[] = array(
+								'code' => $state_code,
+								'name' => $state_name,
+							);
+						}
 					}
+					$country['locations'] = $local_states;
 					$local_countries[] = $country;
 				}
 			}
+
 			if ( ! empty( $local_countries ) ) {
-				$continent['countries'] = $local_countries;
+				$continent['locations'] = $local_countries;
 				$data[] = $continent;
 			}
+		}
+
+		// If the data is filtered by continent or country, we don't need the entire continent wrapper
+		if ( $location_filter && ! $is_continent_filter && isset( $country ) ) {
+			$data = $country;
+		} elseif ( $location_filter && $is_continent_filter ) {
+			$data = $continent;
 		}
 
 		if ( empty( $data ) ) {
