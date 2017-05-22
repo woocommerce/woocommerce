@@ -209,6 +209,43 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse a tag field from a CSV.
+	 *
+	 * @param  string $field Field value.
+	 * @return array
+	 */
+	protected function parse_tags( $field ) {
+		if ( empty( $field ) ) {
+			return array();
+		}
+
+		$names = array_map( 'wc_clean', array_map( 'trim', explode( ',', $field ) ) );
+		$tags  = array();
+
+		foreach ( $names as $name ) {
+			if ( $term = get_term_by( 'name', $name, 'product_tag' ) ) {
+				$tags[] = $term->term_id;
+			}
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Parse a shipping class field from a CSV.
+	 *
+	 * @param  string $field Field value.
+	 * @return int
+	 */
+	protected function parse_shipping_class( $field ) {
+		if ( $term = get_term_by( 'name', $field, 'product_tag' ) ) {
+			return $term->term_id;
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -242,7 +279,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'regular_price'     => 'wc_format_decimal',
 			'stock_quantity'    => 'absint',
 			'category_ids'      => array( $this, 'parse_categories' ),
-			'tag_ids'           => array( $this, 'parse_comma_field' ),
+			'tag_ids'           => array( $this, 'parse_tags' ),
+			'shipping_class_id' => array( $this, 'parse_shipping_class' ),
 			'image_id'          => array( $this, 'parse_comma_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),

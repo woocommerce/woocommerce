@@ -463,15 +463,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Product categories.
-		// @todo
-		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $data['categories'] );
+		if ( isset( $data['category_ids'] ) ) {
+			$product->set_category_ids( $data['category_ids'] );
 		}
 
 		// Product tags.
-		// @todo
-		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $data['tags'], 'tag' );
+		if ( isset( $data['tag_ids'] ) ) {
+			$product->set_tag_ids( $data['tag_ids'] );
 		}
 
 		// Downloadable.
@@ -831,11 +829,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class_id'] ) ) {
-			$shipping_class_term = get_term_by( 'name', wc_clean( $data['shipping_class_id'] ), 'product_shipping_class' );
-
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
-			}
+			$product->set_shipping_class_id($data['shipping_class_id'] );
 		}
 
 		return $product;
@@ -865,28 +859,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$files[]  = $download;
 		}
 		$product->set_downloads( $files );
-
-		return $product;
-	}
-
-	/**
-	 * Save taxonomy terms.
-	 *
-	 * @todo
-	 *
-	 * @param WC_Product $product  Product instance.
-	 * @param array      $terms    Terms data.
-	 * @param string     $taxonomy Taxonomy name.
-	 * @return WC_Product
-	 */
-	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
-		$term_ids = wp_list_pluck( $terms, 'id' );
-
-		if ( 'cat' === $taxonomy ) {
-			$product->set_category_ids( $term_ids );
-		} elseif ( 'tag' === $taxonomy ) {
-			$product->set_tag_ids( $term_ids );
-		}
 
 		return $product;
 	}
