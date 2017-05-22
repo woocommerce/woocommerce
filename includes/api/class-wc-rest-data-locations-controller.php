@@ -48,6 +48,7 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
 			array(
@@ -61,6 +62,7 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 					),
 				),
 			),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
 
@@ -172,44 +174,61 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 			'properties' => array(
 				'code' => array(
 					'type'        => 'string',
-					'description' => __( '2-character continent code', 'woocommerce' ),
+					'description' => __( 'ISO3166 alpha-2 continent or country code', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name' => array(
 					'type'        => 'string',
-					'description' => __( 'Full name of continent', 'woocommerce' ),
+					'description' => __( 'Full name of continent or country', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'countries' => array(
-					'type'     => 'array',
-					'context'  => array( 'view' ),
-					'readonly' => true,
-					'items'    => array(
+				'locations' => array(
+					'type'        => 'array',
+					'description' => __( 'List of locations in this continent or country', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
 						'type'       => 'object',
 						'context'    => array( 'view' ),
 						'readonly'   => true,
 						'properties' => array(
 							'code' => array(
 								'type'        => 'string',
-								'description' => __( 'ISO3166 alpha-2 country code', 'woocommerce' ),
+								'description' => __( 'ISO3166 alpha-2 country code, or unique code for state', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 							),
 							'name' => array(
 								'type'        => 'string',
-								'description' => __( 'Full name of country', 'woocommerce' ),
+								'description' => __( 'Full name of country or state', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 							),
-							'states' => array(
-								'type'                 => 'object',
-								'description'          => __( 'List of states in (code, name) pairs', 'woocommerce' ),
-								'context'              => array( 'view' ),
-								'readonly'             => true,
-								'additionalProperties' => array(
-									'type' => 'string',
+							'locations' => array(
+								'type'        => 'array',
+								'description' => __( 'List of locations in this country (absent if state)', 'woocommerce' ),
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+								'items'       => array(
+									'type'       => 'object',
+									'context'    => array( 'view' ),
+									'readonly'   => true,
+									'properties' => array(
+										'code' => array(
+											'type'        => 'string',
+											'description' => __( 'State code', 'woocommerce' ),
+											'context'     => array( 'view' ),
+											'readonly'    => true,
+										),
+										'name' => array(
+											'type'        => 'string',
+											'description' => __( 'Full name of state', 'woocommerce' ),
+											'context'     => array( 'view' ),
+											'readonly'    => true,
+										),
+									),
 								),
 							),
 						),

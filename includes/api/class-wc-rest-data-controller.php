@@ -48,6 +48,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
 
@@ -127,9 +128,9 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'data_index',
-			'type' => 'object',
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'data_index',
+			'type'       => 'object',
 			'properties' => array(
 				'slug' => array(
 					'description' => __( 'Data resource ID.', 'woocommerce' ),
