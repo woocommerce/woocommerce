@@ -54,6 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Run the importer', 'woocommerce' ); ?>" name="save_step" />
 		<input type="hidden" name="file" value="<?php echo esc_attr( $this->file ); ?>" />
 		<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
+		<input type="hidden" name="skip_existing" value="<?php echo (int) $this->skip_existing; ?>" />
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>
 </form>

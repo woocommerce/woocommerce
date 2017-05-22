@@ -31,12 +31,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function __construct( $file, $params = array() ) {
 		$default_args = array(
-			'start_pos' => 0,       // File pointer start.
-			'end_pos'   => -1,      // File pointer end.
-			'lines'     => -1,      // Max lines to read.
-			'mapping'   => array(), // Column mapping. csv_heading => schema_heading.
-			'parse'     => false,   // Whether to sanitize and format data.
-			'delimiter' => ',',     // CSV delimiter.
+			'start_pos'     => 0,       // File pointer start.
+			'end_pos'       => -1,      // File pointer end.
+			'lines'         => -1,      // Max lines to read.
+			'mapping'       => array(), // Column mapping. csv_heading => schema_heading.
+			'parse'         => false,   // Whether to sanitize and format data.
+			'skip_existing' => false,   // Whether to skip existing items.
+			'delimiter'     => ',',     // CSV delimiter.
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -270,6 +271,21 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data ) {
+
+			// Don't import products with IDs or SKUs that already exist if option is true.
+			if ( $this->params['skip_existing'] ) {
+				$id = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+				$sku = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+
+				if ( $id && wc_get_product( $id ) ) {
+					$data['failed'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id ) );
+					continue;
+				} elseif( $sku && wc_get_product_id_by_sku( $sku ) ) {
+					$data['failed'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku ) );
+					continue;
+				}
+			}
+
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
