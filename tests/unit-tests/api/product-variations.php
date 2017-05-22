@@ -169,6 +169,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 10, $variation['regular_price'] );
 		$this->assertEmpty( $variation['sale_price'] );
 		$this->assertEquals( 'small', $variation['attributes'][0]['option'] );
+		$this->assertEquals( 'publish', $variation['status'] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_body_params( array(
@@ -177,6 +178,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			'description' => 'O_O',
 			'image'       => array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ),
 			'attributes'  => array( array( 'name' => 'pa_size', 'option' => 'medium' ) ),
+			'status'      => 'private',
 		) );
 		$response  = $this->server->dispatch( $request );
 		$variation = $response->get_data();
@@ -189,6 +191,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
 		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'] );
 		$this->assertContains( 'test upload image', $variation['image']['alt'] );
+		$this->assertEquals( 'private', $variation['status'] );
 		$product->delete( true );
 	}
 
@@ -343,7 +346,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 37, count( $properties ) );
+		$this->assertEquals( 38, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -363,6 +366,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'downloads', $properties );
 		$this->assertArrayHasKey( 'download_limit', $properties );
 		$this->assertArrayHasKey( 'download_expiry', $properties );
+		$this->assertArrayHasKey( 'status', $properties );
 		$this->assertArrayHasKey( 'tax_status', $properties );
 		$this->assertArrayHasKey( 'tax_class', $properties );
 		$this->assertArrayHasKey( 'manage_stock', $properties );

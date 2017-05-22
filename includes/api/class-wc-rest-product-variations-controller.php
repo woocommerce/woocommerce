@@ -176,6 +176,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'downloads'             => $this->get_downloads( $object ),
 			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
 			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
+			'status'                => $object->get_status(),
 			'tax_status'            => $object->get_tax_status(),
 			'tax_class'             => $object->get_tax_class(),
 			'manage_stock'          => $object->managing_stock(),
@@ -248,9 +249,15 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 		$variation->set_parent_id( absint( $request['product_id'] ) );
 
-		// Status.
+		// TODO Fix/Remove in future API version bump. This controls the wrong thing.
+		// https://github.com/woocommerce/woocommerce/issues/15215
 		if ( isset( $request['visible'] ) ) {
 			$variation->set_status( false === $request['visible'] ? 'private' : 'publish' );
+		}
+
+		// Status.
+		if ( isset( $request['status'] ) ) {
+			$variation->set_status( get_post_status_object( $request['status'] ) ? $request['status'] : 'draft' );
 		}
 
 		// SKU.
@@ -671,7 +678,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'readonly'    => true,
 				),
 				'visible' => array(
-					'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
+					'description' => __( 'Variation status. True for published and false for private.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
@@ -730,6 +737,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'status' => array(
+					'description' => __( 'Variation status.', 'woocommerce' ),
+					'type'        => 'string',
+					'default'     => 'publish',
+					'enum'        => array_keys( get_post_statuses() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_status' => array(
