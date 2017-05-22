@@ -243,8 +243,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'meta'         => array_values( $item_meta ),
 			);
 
-			if ( in_array( 'products', $expand ) ) {
-				$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+			if ( in_array( 'products', $expand ) && is_object( $product ) ) {
+				$_product_data = WC()->api->WC_API_Products->get_product( $product->get_id() );
 
 				if ( isset( $_product_data['product'] ) ) {
 					$line_item['product_data'] = $_product_data['product'];
