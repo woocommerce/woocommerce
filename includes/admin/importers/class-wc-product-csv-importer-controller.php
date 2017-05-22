@@ -427,6 +427,8 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'external_url'       => __( 'External URL', 'woocommerce' ),
+			'button_text'        => __( 'Button text', 'woocommerce' ),
 		) ) );
 		$special_columns = array_map(
 			array( $this, 'sanitize_special_column_name_regex' ),
@@ -531,6 +533,13 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'external'           => array(
+				'name'    => __( 'External product', 'woocommerce' ),
+				'options' => array(
+					'external_url' => __( 'External URL', 'woocommerce' ),
+					'button_text'  => __( 'Button text', 'woocommerce' ),
+				),
+			),
 			'downloads'          => array(
 				'name'    => __( 'Downloads', 'woocommerce' ),
 				'options' => array(

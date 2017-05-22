@@ -499,7 +499,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Product url and button text for external products.
-		// @todo
 		if ( $product->is_type( 'external' ) ) {
 			if ( isset( $data['external_url'] ) ) {
 				$product->set_product_url( $data['external_url'] );

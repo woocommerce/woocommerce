@@ -293,6 +293,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
+			'external_url'      => 'esc_url',
 		);
 
 		/**
