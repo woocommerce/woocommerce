@@ -78,8 +78,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_default( $user, $column_name ) {
-		global $wpdb;
-
 		switch ( $column_name ) {
 
 			case 'customer_name' :
@@ -245,8 +243,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Prepare customer list items.
 	 */
 	public function prepare_items() {
-		global $wpdb;
-
 		$current_page = absint( $this->get_pagenum() );
 		$per_page     = 20;
 

@@ -600,11 +600,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
 					break;
 					case 'billing' :
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), strtolower( $field_label ) );
+						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
 					break;
 				}
 
@@ -622,7 +622,7 @@ class WC_Checkout {
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
 				}
 
@@ -710,33 +710,41 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Set address field for customer.
+	 *
+	 * @since 3.0.7
+	 * @param $field string to update
+	 * @param $key
+	 * @param $data array of data to get the value from
+	 */
+	protected function set_customer_address_fields( $field, $key, $data ) {
+		if ( isset( $data[ "billing_{$field}" ] ) ) {
+			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
+		}
+		if ( isset( $data[ "shipping_{$field}" ] ) ) {
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
+		}
+	}
+
+	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
 	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
-		if ( isset( $data['billing_country'] ) ) {
-			WC()->customer->set_billing_country( $data['billing_country'] );
-			WC()->customer->set_shipping_country( $data['billing_country'] );
-		}
-		if ( isset( $data['billing_state'] ) ) {
-			WC()->customer->set_billing_state( $data['billing_state'] );
-			WC()->customer->set_shipping_state( $data['billing_state'] );
-		}
-		if ( isset( $data['billing_postcode'] ) ) {
-			WC()->customer->set_billing_postcode( $data['billing_postcode'] );
-			WC()->customer->set_shipping_postcode( $data['billing_postcode'] );
-		}
-		if ( isset( $data['shipping_country'] ) ) {
-			WC()->customer->set_shipping_country( $data['shipping_country'] );
-		}
-		if ( isset( $data['shipping_state'] ) ) {
-			WC()->customer->set_shipping_state( $data['shipping_state'] );
-		}
-		if ( isset( $data['shipping_postcode'] ) ) {
-			WC()->customer->set_shipping_postcode( $data['shipping_postcode'] );
-		}
+		// Update both shipping and billing to the passed billing address first if set.
+		$address_fields = array(
+			'address_1',
+			'address_2',
+			'city',
+			'postcode',
+			'state',
+			'country',
+		);
+
+		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
 		// Update customer shipping and payment method to posted method
@@ -838,6 +846,11 @@ class WC_Checkout {
 
 			// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
 			WC()->cart->calculate_totals();
+		}
+
+		// On multisite, ensure user exists on current site, if not add them before allowing login.
+		if ( $customer_id && is_multisite() && is_user_logged_in() && ! is_user_member_of_blog() ) {
+			add_user_to_blog( get_current_blog_id(), $customer_id, 'customer' );
 		}
 
 		// Add customer info from other fields.

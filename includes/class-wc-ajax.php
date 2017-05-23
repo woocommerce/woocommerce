@@ -1222,13 +1222,9 @@ class WC_AJAX {
 
 		$term    = wc_clean( stripslashes( $_GET['term'] ) );
 		$exclude = array();
+		$limit   = '';
 
 		if ( empty( $term ) ) {
-			wp_die();
-		}
-
-		// Stop if it is not numeric and smaller than 3 characters.
-		if ( ! is_numeric( $term ) && 2 >= strlen( $term ) ) {
 			wp_die();
 		}
 
@@ -1244,7 +1240,13 @@ class WC_AJAX {
 			$ids = array( $customer->get_id() );
 		} else {
 			$data_store = WC_Data_Store::load( 'customer' );
-			$ids        = $data_store->search_customers( $term );
+
+			// If search is smaller than 3 characters, limit result set to avoid
+			// too many rows being returned.
+			if ( 3 > strlen( $term ) ) {
+				$limit = 20;
+			}
+			$ids = $data_store->search_customers( $term, $limit );
 		}
 
 		$found_customers = array();
@@ -1326,6 +1328,13 @@ class WC_AJAX {
 			$index ++;
 			$menu_orders[ $id ] = $index;
 			$wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) );
+
+			/**
+			 * When a single product has gotten it's ordering updated.
+			 * $id The product ID
+			 * $index The new menu order
+			*/
+			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
 		}
 
 		if ( isset( $menu_orders[ $previd ] ) ) {
@@ -1533,7 +1542,7 @@ class WC_AJAX {
 				$key_id                  = $wpdb->insert_id;
 				$data['consumer_key']    = $consumer_key;
 				$data['consumer_secret'] = $consumer_secret;
-				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new API keys now. You won\'t be able to see it again!', 'woocommerce' );
+				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
 				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 
@@ -1692,6 +1701,28 @@ class WC_AJAX {
 	 */
 	private static function variation_bulk_action_variable_sale_price( $variations, $data ) {
 		self::variation_bulk_set( $variations, 'sale_price', $data['value'] );
+	}
+
+	/**
+	 * Bulk action - Set Stock Status as In Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_instock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'instock' );
+	}
+
+	/**
+	 * Bulk action - Set Stock Status as Out of Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_outofstock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'outofstock' );
 	}
 
 	/**

@@ -735,4 +735,21 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array( 'width' => 200, 'height' => 100, 'crop' => false ), $setting['value'] );
 	}
 
+	/**
+	 * Test to make sure the 'base location' setting is present in the response.
+	 * That it is returned as 'select' and not 'single_select_country',
+	 * and that both state and country options are returned.
+	 *
+	 * @since 3.0.7
+	 */
+	public function test_woocommerce_default_country() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_default_country' ) );
+		$setting  = $response->get_data();
+
+		$this->assertEquals( 'select', $setting['type'] );
+		$this->assertArrayHasKey( 'GB', $setting['options'] );
+		$this->assertArrayHasKey( 'US:OR', $setting['options'] );
+	}
+
 }

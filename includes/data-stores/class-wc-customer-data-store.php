@@ -54,6 +54,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'billing_email',
 		'shipping_first_name',
 		'shipping_last_name',
+		'shipping_company',
 		'wptests_capabilities',
 		'wptests_user_level',
 		'_order_count',
@@ -101,6 +102,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$customer->set_id( $id );
 		$this->update_user_meta( $customer );
+
+		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email
+		$customer->set_password( '' );
+
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'role'         => $customer->get_role(),
@@ -122,8 +127,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @throws Exception
 	 */
 	public function read( &$customer ) {
-		global $wpdb;
-
 		// User object is required.
 		if ( ! $customer->get_id() || ! ( $user_object = get_user_by( 'id', $customer->get_id() ) ) || empty( $user_object->ID ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
@@ -362,17 +365,20 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Search customers and return customer IDs.
 	 *
 	 * @param  string $term
+	 * @oaram  int|string $limit @since 3.0.7
 	 * @return array
 	 */
-	public function search_customers( $term ) {
+	public function search_customers( $term, $limit = '' ) {
 		$query = new WP_User_Query( array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 			'fields'         => 'ID',
+			'number'         => $limit,
 		) );
 
 		$query2 = new WP_User_Query( array(
 			'fields'         => 'ID',
+			'number'         => $limit,
 			'meta_query'     => array(
 				'relation' => 'OR',
 				array(
@@ -387,6 +393,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				),
 			),
 		) );
-		return wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+
+		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+
+		if ( $limit && count( $results ) > $limit ) {
+			$results = array_slice( $results, 0, $limit );
+		}
+
+		return $results;
 	}
 }

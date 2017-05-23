@@ -202,6 +202,7 @@ function wc_cart_totals_subtotal_html() {
  */
 function wc_cart_totals_shipping_html() {
 	$packages = WC()->shipping->get_packages();
+	$first    = true;
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
@@ -215,16 +216,19 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
-			'package'              => $package,
-			'available_methods'    => $package['rates'],
-			'show_package_details' => sizeof( $packages ) > 1,
-			'package_details'      => implode( ', ', $product_names ),
+			'package'                  => $package,
+			'available_methods'        => $package['rates'],
+			'show_package_details'     => sizeof( $packages ) > 1,
+			'show_shipping_calculator' => $first,
+			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			// @codingStandardsIgnoreEnd
-			'index'                => $i,
-			'chosen_method'        => $chosen_method,
+			'index'                    => $i,
+			'chosen_method'            => $chosen_method,
 		) );
+
+		$first = false;
 	}
 }
 
@@ -295,8 +299,9 @@ function wc_cart_totals_order_total_html() {
 		$tax_string_array = array();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
-			foreach ( WC()->cart->get_tax_totals() as $code => $tax )
+			foreach ( WC()->cart->get_tax_totals() as $code => $tax ) {
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+			}
 		} else {
 			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}

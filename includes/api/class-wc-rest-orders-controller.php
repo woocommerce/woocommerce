@@ -353,7 +353,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}

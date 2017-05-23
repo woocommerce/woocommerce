@@ -561,6 +561,33 @@ function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
 }
 
 /**
+ * Convert a date string to a WC_DateTime.
+ *
+ * @since  3.1.0
+ * @param string $time_string
+ * @return WC_DateTime
+ */
+function wc_string_to_datetime( $time_string ) {
+	// Strings are defined in local WP timezone. Convert to UTC.
+	if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $time_string, $date_bits ) ) {
+		$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
+		$timestamp = gmmktime( $date_bits[4], $date_bits[5], $date_bits[6], $date_bits[2], $date_bits[3], $date_bits[1] ) - $offset;
+	} else {
+		$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $time_string ) ) ) );
+	}
+	$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+
+	// Set local timezone or offset.
+	if ( get_option( 'timezone_string' ) ) {
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	} else {
+		$datetime->set_utc_offset( wc_timezone_offset() );
+	}
+
+	return $datetime;
+}
+
+/**
  * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
  * a WP core method exists (see https://core.trac.wordpress.org/ticket/24730).
  *
@@ -1076,4 +1103,19 @@ function wc_format_datetime( $date, $format = '' ) {
 		return '';
 	}
 	return $date->date_i18n( $format );
+}
+
+/**
+ * Process oEmbeds.
+ *
+ * @since  3.1.0
+ * @param string $content
+ * @return string
+ */
+function wc_do_oembeds( $content ) {
+	global $wp_embed;
+
+	$content = $wp_embed->autoembed( $content );
+
+	return $content;
 }

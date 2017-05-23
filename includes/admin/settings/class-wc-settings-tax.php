@@ -96,8 +96,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
-		global $current_section, $wpdb;
-
 		if ( ! $current_section ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::save_fields( $settings );
@@ -113,7 +111,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
-		global $wpdb, $current_section;
+		global $current_section;
 
 		$current_class = $this->get_current_tax_class();
 

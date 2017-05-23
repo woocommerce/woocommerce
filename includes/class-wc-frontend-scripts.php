@@ -201,7 +201,7 @@ class WC_Frontend_Scripts {
 			'jquery-payment' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1',
+				'version' => '3.0.0',
 			),
 			'photoswipe' => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
@@ -467,16 +467,23 @@ class WC_Frontend_Scripts {
 					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
-						'smoothHeight'   => false,
+						'smoothHeight'   => true,
 						'directionNav'   => false,
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
-					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
-					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
-					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
+					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+   					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
+						'shareEl'               => false,
+						'closeOnScroll'         => false,
+						'history'               => false,
+						'hideAnimationDuration' => 0,
+						'showAnimationDuration' => 0
+					) ),
+					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 			break;
 			case 'wc-checkout' :

@@ -243,8 +243,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'meta'         => array_values( $item_meta ),
 			);
 
-			if ( in_array( 'products', $expand ) ) {
-				$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+			if ( in_array( 'products', $expand ) && is_object( $product ) ) {
+				$_product_data = WC()->api->WC_API_Products->get_product( $product->get_id() );
 
 				if ( isset( $_product_data['product'] ) ) {
 					$line_item['product_data'] = $_product_data['product'];
@@ -988,10 +988,15 @@ class WC_API_Orders extends WC_API_Resource {
 			$line_item->set_variation( $item['variations'] );
 		}
 
-		$item_id = $line_item->save();
+		// Save or add to order.
+		if ( $creating ) {
+			$order->add_item( $line_item );
+		} else {
+			$item_id = $line_item->save();
 
-		if ( ! $item_id ) {
-			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+			if ( ! $item_id ) {
+				throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+			}
 		}
 	}
 
@@ -1073,11 +1078,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$item = new WC_Order_Item_Shipping();
 			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );
-			$shipping_id = $item->save();
-
-			if ( ! $shipping_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Shipping( $shipping['id'] );
@@ -1144,11 +1145,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 			}
 
-			$fee_id = $item->save();
-
-			if ( ! $fee_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Fee( $fee['id'] );
@@ -1207,11 +1204,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'discount_tax' => 0,
 				'order_id'     => $order->get_id(),
 			) );
-			$coupon_id = $item->save();
-
-			if ( ! $coupon_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Coupon( $coupon['id'] );

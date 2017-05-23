@@ -427,7 +427,7 @@ class WC_Meta_Box_Order_Data {
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
 								?>
 								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ) ?>:</label>
-								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
+								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
 								<?php
 							}
 
@@ -449,8 +449,6 @@ class WC_Meta_Box_Order_Data {
 	 * @param int $order_id Order ID.
 	 */
 	public static function save( $order_id ) {
-		global $wpdb;
-
 		self::init_address_fields();
 
 		// Ensure gateways are loaded in case they need to insert data into the emails.
@@ -467,7 +465,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		// Update customer.
-		$customer_id = absint( $_POST['customer_user'] );
+		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
 		if ( $customer_id !== $order->get_customer_id() ) {
 			$props['customer_id'] = $customer_id;
 		}

@@ -677,6 +677,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_active_plugins() {
 		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		require_once( ABSPATH . 'wp-admin/includes/update.php' );
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
 
 		// Get both site plugins and network plugins
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -686,6 +691,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		}
 
 		$active_plugins_data = array();
+		$available_updates   = get_plugin_updates();
+
 		foreach ( $active_plugins as $plugin ) {
 			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 			$dirname        = dirname( $plugin );
@@ -712,20 +719,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					}
 				}
 				$version_latest = $version_data['version'];
-			} else {
-				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-
-				$api = plugins_api( 'plugin_information', array(
-					'slug'     => $slug,
-					'fields'   => array(
-						'sections' => false,
-						'tags'     => false,
-					),
-				) );
-
-				if ( is_object( $api ) && ! is_wp_error( $api ) && ! empty( $api->version ) ) {
-					$version_latest = $api->version;
-				}
+			} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+				$version_latest = $available_updates[ $plugin ]->update->new_version;
 			}
 
 			// convert plugin data to json response format.
@@ -897,7 +892,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$pages_output = array();
 		foreach ( $check_pages as $page_name => $values ) {
-			$errors   = array();
 			$page_id  = get_option( $values['option'] );
 			$page_set = $page_exists = $page_visible = false;
 			$shortcode_present = $shortcode_required = false;

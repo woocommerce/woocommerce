@@ -135,21 +135,22 @@ class WC_Product_Variable extends WC_Product {
 		$prices = $this->get_variation_prices( true );
 
 		if ( empty( $prices['price'] ) ) {
-			return apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
-		}
-
-		$min_price     = current( $prices['price'] );
-		$max_price     = end( $prices['price'] );
-		$min_reg_price = current( $prices['regular_price'] );
-		$max_reg_price = end( $prices['regular_price'] );
-
-		if ( $min_price !== $max_price ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
-		} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
+			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		} else {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
+			$min_price     = current( $prices['price'] );
+			$max_price     = end( $prices['price'] );
+			$min_reg_price = current( $prices['regular_price'] );
+			$max_reg_price = end( $prices['regular_price'] );
+
+			if ( $min_price !== $max_price ) {
+				$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ) . $this->get_price_suffix(), $this );
+			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+				$price = apply_filters( 'woocommerce_variable_price_html', wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) ) . $this->get_price_suffix(), $this );
+			} else {
+				$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
+			}
 		}
+
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
@@ -350,6 +351,10 @@ class WC_Product_Variable extends WC_Product {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+
+		// If backorders are enabled, always in stock.
+		} elseif ( 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'instock' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {

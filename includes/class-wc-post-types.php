@@ -208,7 +208,6 @@ class WC_Post_types {
 						'show_ui'            => true,
 						'show_in_quick_edit' => false,
 						'show_in_menu'       => false,
-						'show_in_nav_menus'  => false,
 						'meta_box_cb'        => false,
 						'query_var'          => 1 === $tax->attribute_public,
 						'rewrite'            => false,
@@ -257,8 +256,9 @@ class WC_Post_types {
 					'labels'              => array(
 							'name'                  => __( 'Products', 'woocommerce' ),
 							'singular_name'         => __( 'Product', 'woocommerce' ),
+							'all_items'             => __( 'All Products', 'woocommerce' ),
 							'menu_name'             => _x( 'Products', 'Admin menu name', 'woocommerce' ),
-							'add_new'               => __( 'Add product', 'woocommerce' ),
+							'add_new'               => __( 'Add New', 'woocommerce' ),
 							'add_new_item'          => __( 'Add new product', 'woocommerce' ),
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit product', 'woocommerce' ),
@@ -290,7 +290,7 @@ class WC_Post_types {
 					'rewrite'             => $permalinks['product_rewrite_slug'] ? array( 'slug' => $permalinks['product_rewrite_slug'], 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
 					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'publicize', 'wpcom-markdown' ),
-					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
+					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop',
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 				)

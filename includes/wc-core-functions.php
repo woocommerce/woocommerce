@@ -52,6 +52,7 @@ add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
 add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
+add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 
 /**
  * Define a constant if it is not already defined.
@@ -793,13 +794,28 @@ function wc_get_page_children( $page_id ) {
 /**
  * Flushes rewrite rules when the shop page (or it's children) gets saved.
  */
-function flush_rewrite_rules_on_shop_page_save( $post_id ) {
+function flush_rewrite_rules_on_shop_page_save() {
+	$screen    = get_current_screen();
+	$screen_id = $screen ? $screen->id : '';
+
+	// Check if this is the edit page.
+	if ( 'page' !== $screen_id ) {
+		return;
+	}
+
+	// Check if page is edited.
+	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) {
+		return;
+	}
+
+	$post_id      = intval( $_GET['post'] );
 	$shop_page_id = wc_get_page_id( 'shop' );
+
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
-add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
+add_action( 'admin_footer', 'flush_rewrite_rules_on_shop_page_save' );
 
 /**
  * Various rewrite rule fixes.
@@ -854,8 +870,6 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
-	global $wp_rewrite;
-
 	$post = get_post( $post_id );
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
 		$permalinks = wc_get_permalink_structure();

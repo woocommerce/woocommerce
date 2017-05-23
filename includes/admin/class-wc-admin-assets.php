@@ -222,6 +222,8 @@ class WC_Admin_Assets {
 				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 				'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
 				'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
+				'placeholder_name'       => esc_attr__( 'Name (required)', 'woocommerce' ),
+				'placeholder_value'      => esc_attr__( 'Value (required)', 'woocommerce' ),
 			) );
 		}
 		if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
@@ -231,13 +233,12 @@ class WC_Admin_Assets {
 			$post_id  = isset( $post->ID ) ? $post->ID : '';
 			$currency = '';
 
-			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
-				$order    = wc_get_order( $post_id );
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) && ( $order = wc_get_order( $post_id ) ) ) {
 				$currency = $order->get_currency();
 			}
 
 			$params = array(
-				'remove_item_notice'            => __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
+				'remove_item_notice'            => __( "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock.", 'woocommerce' ),
 				'i18n_select_items'             => __( 'Please select some items.', 'woocommerce' ),
 				'i18n_do_refund'                => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
 				'i18n_delete_refund'            => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
@@ -254,8 +255,8 @@ class WC_Admin_Assets {
 				'new_attribute_prompt'          => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
 				'calc_totals'                   => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
 				'copy_billing'                  => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
-				'load_billing'                  => __( 'Load the customer\'s billing information? This will remove any currently entered billing information.', 'woocommerce' ),
-				'load_shipping'                 => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+				'load_billing'                  => __( "Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce' ),
+				'load_shipping'                 => __( "Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce' ),
 				'featured_label'                => __( 'Featured', 'woocommerce' ),
 				'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
 				'tax_based_on'                  => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
@@ -345,6 +346,13 @@ class WC_Admin_Assets {
 		if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
 			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'zeroclipboard' ), WC_VERSION );
 			wp_enqueue_script( 'wc-admin-system-status' );
+			wp_localize_script(
+				'wc-admin-system-status',
+				'woocommerce_admin_system_status',
+				array(
+					'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
+				)
+			);
 		}
 
 		if ( in_array( $screen_id, array( 'user-edit', 'profile' ) ) ) {
@@ -368,7 +376,9 @@ class WC_Admin_Assets {
 	 */
 	public function product_taxonomy_styles() {
 
-		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
 		?>
 		<style type="text/css">
 			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>

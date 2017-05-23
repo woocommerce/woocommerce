@@ -125,8 +125,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( $post );
 		$dp    = $request['dp'];
 
@@ -187,17 +185,15 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				$product_sku  = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
 			$item_meta = array();
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $formatted_meta->key,
+					'label' => $formatted_meta->display_key,
+					'value' => wc_clean( $formatted_meta->display_value ),
 				);
 			}
 
@@ -407,7 +403,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}

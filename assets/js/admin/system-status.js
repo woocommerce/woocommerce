@@ -1,3 +1,4 @@
+/* global jQuery, woocommerce_admin_system_status */
 jQuery( function ( $ ) {
 
 	/**
@@ -112,4 +113,9 @@ jQuery( function ( $ ) {
 	};
 
 	wcSystemStatus.init();
+
+	$( '#log-viewer-select' ).on( 'click', 'h2 a.page-title-action', function( evt ) {
+		evt.stopImmediatePropagation();
+		return window.confirm( woocommerce_admin_system_status.delete_log_confirmation );
+	});
 });

@@ -61,8 +61,9 @@ function wc_update_200_permalinks() {
 			}
 		}
 
-		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' )
+		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
 			$product_base .= trailingslashit( '%product_cat%' );
+		}
 
 		$permalinks = array(
 			'product_base' 		=> untrailingslashit( $product_base ),
@@ -101,7 +102,7 @@ function wc_update_200_taxrates() {
 	$loop = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
-	if ( $tax_rates )
+	if ( $tax_rates ) {
 		foreach ( $tax_rates as $tax_rate ) {
 
 			foreach ( $tax_rate['countries'] as $country => $states ) {
@@ -133,10 +134,11 @@ function wc_update_200_taxrates() {
 				}
 			}
 		}
+	}
 
 	$local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-	if ( $local_tax_rates )
+	if ( $local_tax_rates ) {
 		foreach ( $local_tax_rates as $tax_rate ) {
 
 			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
@@ -179,6 +181,7 @@ function wc_update_200_taxrates() {
 
 			$loop++;
 		}
+	}
 
 	update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 	update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
@@ -279,8 +282,9 @@ function wc_update_200_line_items() {
 		if ( ! empty( $order_taxes ) ) {
 			foreach ( $order_taxes as $order_tax ) {
 
-				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
+				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) ) {
 					continue;
+				}
 
 				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 			 		'order_item_name' 		=> $order_tax['label'],
@@ -612,7 +616,6 @@ function wc_update_240_options() {
 }
 
 function wc_update_240_shipping_methods() {
-	global $wpdb;
 	/**
 	 * Flat Rate Shipping.
 	 * Update legacy options to new math based options.
@@ -722,7 +725,6 @@ function wc_update_240_api_keys() {
 }
 
 function wc_update_240_webhooks() {
-	global $wpdb;
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.

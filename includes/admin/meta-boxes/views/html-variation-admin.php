@@ -161,7 +161,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'value'             => $variation_object->get_stock_quantity( 'edit' ),
 							'label'             => __( 'Stock quantity', 'woocommerce' ),
 							'desc_tip'          => true,
-							'description'       => __( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ),
+							'description'       => __( "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options.", 'woocommerce' ),
 							'type'              => 'number',
 							'custom_attributes' => array(
 								'step'          => 'any',
