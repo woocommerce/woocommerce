@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.1.0-alpha\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-05-23 15:21:28+00:00\n"
+"POT-Creation-Date: 2017-05-23 15:32:02+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -673,7 +673,7 @@ msgstr ""
 msgid "Nicaragua"
 msgstr ""
 
-#: i18n/countries.php:177 i18n/states/NG.php:40
+#: i18n/countries.php:177 i18n/states/NG.php:44
 msgid "Niger"
 msgstr ""
 
@@ -1033,4138 +1033,4138 @@ msgstr ""
 msgid "Zimbabwe"
 msgstr ""
 
-#: i18n/locale-info.php:371
+#: i18n/locale-info.php:375
 msgid "Consumption tax"
 msgstr ""
 
-#: i18n/states/AR.php:13
+#: i18n/states/AR.php:17
 msgid "Ciudad Aut&oacute;noma de Buenos Aires"
 msgstr ""
 
-#: i18n/states/AR.php:14
+#: i18n/states/AR.php:18
 msgid "Buenos Aires"
 msgstr ""
 
-#: i18n/states/AR.php:15
+#: i18n/states/AR.php:19
 msgid "Catamarca"
 msgstr ""
 
-#: i18n/states/AR.php:16
+#: i18n/states/AR.php:20
 msgid "Chaco"
 msgstr ""
 
-#: i18n/states/AR.php:17
+#: i18n/states/AR.php:21
 msgid "Chubut"
 msgstr ""
 
-#: i18n/states/AR.php:18 i18n/states/ES.php:30
+#: i18n/states/AR.php:22 i18n/states/ES.php:34
 msgid "C&oacute;rdoba"
 msgstr ""
 
-#: i18n/states/AR.php:19
+#: i18n/states/AR.php:23
 msgid "Corrientes"
 msgstr ""
 
-#: i18n/states/AR.php:20
+#: i18n/states/AR.php:24
 msgid "Entre R&iacute;os"
 msgstr ""
 
-#: i18n/states/AR.php:21
+#: i18n/states/AR.php:25
 msgid "Formosa"
 msgstr ""
 
-#: i18n/states/AR.php:22
+#: i18n/states/AR.php:26
 msgid "Jujuy"
 msgstr ""
 
-#: i18n/states/AR.php:23
+#: i18n/states/AR.php:27
 msgid "La Pampa"
 msgstr ""
 
-#: i18n/states/AR.php:24 i18n/states/ES.php:39
+#: i18n/states/AR.php:28 i18n/states/ES.php:43
 msgid "La Rioja"
 msgstr ""
 
-#: i18n/states/AR.php:25
+#: i18n/states/AR.php:29
 msgid "Mendoza"
 msgstr ""
 
-#: i18n/states/AR.php:26
+#: i18n/states/AR.php:30
 msgid "Misiones"
 msgstr ""
 
-#: i18n/states/AR.php:27
+#: i18n/states/AR.php:31
 msgid "Neuqu&eacute;n"
 msgstr ""
 
-#: i18n/states/AR.php:28
+#: i18n/states/AR.php:32
 msgid "R&iacute;o Negro"
 msgstr ""
 
-#: i18n/states/AR.php:29
+#: i18n/states/AR.php:33
 msgid "Salta"
 msgstr ""
 
-#: i18n/states/AR.php:30
+#: i18n/states/AR.php:34
 msgid "San Juan"
 msgstr ""
 
-#: i18n/states/AR.php:31
+#: i18n/states/AR.php:35
 msgid "San Luis"
 msgstr ""
 
-#: i18n/states/AR.php:32 i18n/states/BO.php:20
+#: i18n/states/AR.php:36 i18n/states/BO.php:24
 msgid "Santa Cruz"
 msgstr ""
 
-#: i18n/states/AR.php:33
+#: i18n/states/AR.php:37
 msgid "Santa Fe"
 msgstr ""
 
-#: i18n/states/AR.php:34
+#: i18n/states/AR.php:38
 msgid "Santiago del Estero"
 msgstr ""
 
-#: i18n/states/AR.php:35
+#: i18n/states/AR.php:39
 msgid "Tierra del Fuego"
 msgstr ""
 
-#: i18n/states/AR.php:36
+#: i18n/states/AR.php:40
 msgid "Tucum&aacute;n"
 msgstr ""
 
-#: i18n/states/AU.php:13
+#: i18n/states/AU.php:17
 msgid "Australian Capital Territory"
 msgstr ""
 
-#: i18n/states/AU.php:14
+#: i18n/states/AU.php:18
 msgid "New South Wales"
 msgstr ""
 
-#: i18n/states/AU.php:15
+#: i18n/states/AU.php:19
 msgid "Northern Territory"
 msgstr ""
 
-#: i18n/states/AU.php:16
+#: i18n/states/AU.php:20
 msgid "Queensland"
 msgstr ""
 
-#: i18n/states/AU.php:17
+#: i18n/states/AU.php:21
 msgid "South Australia"
 msgstr ""
 
-#: i18n/states/AU.php:18
+#: i18n/states/AU.php:22
 msgid "Tasmania"
 msgstr ""
 
-#: i18n/states/AU.php:19
+#: i18n/states/AU.php:23
 msgid "Victoria"
 msgstr ""
 
-#: i18n/states/AU.php:20
+#: i18n/states/AU.php:24
 msgid "Western Australia"
 msgstr ""
 
-#: i18n/states/BD.php:13
+#: i18n/states/BD.php:17
 msgid "Bagerhat"
 msgstr ""
 
-#: i18n/states/BD.php:14
+#: i18n/states/BD.php:18
 msgid "Bandarban"
 msgstr ""
 
-#: i18n/states/BD.php:15
+#: i18n/states/BD.php:19
 msgid "Barguna"
 msgstr ""
 
-#: i18n/states/BD.php:16
+#: i18n/states/BD.php:20
 msgid "Barisal"
 msgstr ""
 
-#: i18n/states/BD.php:17
+#: i18n/states/BD.php:21
 msgid "Bhola"
 msgstr ""
 
-#: i18n/states/BD.php:18
+#: i18n/states/BD.php:22
 msgid "Bogra"
 msgstr ""
 
-#: i18n/states/BD.php:19
+#: i18n/states/BD.php:23
 msgid "Brahmanbaria"
 msgstr ""
 
-#: i18n/states/BD.php:20
+#: i18n/states/BD.php:24
 msgid "Chandpur"
 msgstr ""
 
-#: i18n/states/BD.php:21
+#: i18n/states/BD.php:25
 msgid "Chittagong"
 msgstr ""
 
-#: i18n/states/BD.php:22
+#: i18n/states/BD.php:26
 msgid "Chuadanga"
 msgstr ""
 
-#: i18n/states/BD.php:23
+#: i18n/states/BD.php:27
 msgid "Comilla"
 msgstr ""
 
-#: i18n/states/BD.php:24
+#: i18n/states/BD.php:28
 msgid "Cox's Bazar"
 msgstr ""
 
-#: i18n/states/BD.php:25
+#: i18n/states/BD.php:29
 msgid "Dhaka"
 msgstr ""
 
-#: i18n/states/BD.php:26
+#: i18n/states/BD.php:30
 msgid "Dinajpur"
 msgstr ""
 
-#: i18n/states/BD.php:27
+#: i18n/states/BD.php:31
 msgid "Faridpur "
 msgstr ""
 
-#: i18n/states/BD.php:28
+#: i18n/states/BD.php:32
 msgid "Feni"
 msgstr ""
 
-#: i18n/states/BD.php:29
+#: i18n/states/BD.php:33
 msgid "Gaibandha"
 msgstr ""
 
-#: i18n/states/BD.php:30
+#: i18n/states/BD.php:34
 msgid "Gazipur"
 msgstr ""
 
-#: i18n/states/BD.php:31
+#: i18n/states/BD.php:35
 msgid "Gopalganj"
 msgstr ""
 
-#: i18n/states/BD.php:32
+#: i18n/states/BD.php:36
 msgid "Habiganj"
 msgstr ""
 
-#: i18n/states/BD.php:33
+#: i18n/states/BD.php:37
 msgid "Jamalpur"
 msgstr ""
 
-#: i18n/states/BD.php:34
+#: i18n/states/BD.php:38
 msgid "Jessore"
 msgstr ""
 
-#: i18n/states/BD.php:35
+#: i18n/states/BD.php:39
 msgid "Jhalokati"
 msgstr ""
 
-#: i18n/states/BD.php:36
+#: i18n/states/BD.php:40
 msgid "Jhenaidah"
 msgstr ""
 
-#: i18n/states/BD.php:37
+#: i18n/states/BD.php:41
 msgid "Joypurhat"
 msgstr ""
 
-#: i18n/states/BD.php:38
+#: i18n/states/BD.php:42
 msgid "Khagrachhari"
 msgstr ""
 
-#: i18n/states/BD.php:39
+#: i18n/states/BD.php:43
 msgid "Khulna"
 msgstr ""
 
-#: i18n/states/BD.php:40
+#: i18n/states/BD.php:44
 msgid "Kishoreganj"
 msgstr ""
 
-#: i18n/states/BD.php:41
+#: i18n/states/BD.php:45
 msgid "Kurigram"
 msgstr ""
 
-#: i18n/states/BD.php:42
+#: i18n/states/BD.php:46
 msgid "Kushtia"
 msgstr ""
 
-#: i18n/states/BD.php:43
+#: i18n/states/BD.php:47
 msgid "Lakshmipur"
 msgstr ""
 
-#: i18n/states/BD.php:44
+#: i18n/states/BD.php:48
 msgid "Lalmonirhat"
 msgstr ""
 
-#: i18n/states/BD.php:45
+#: i18n/states/BD.php:49
 msgid "Madaripur"
 msgstr ""
 
-#: i18n/states/BD.php:46
+#: i18n/states/BD.php:50
 msgid "Magura"
 msgstr ""
 
-#: i18n/states/BD.php:47
+#: i18n/states/BD.php:51
 msgid "Manikganj "
 msgstr ""
 
-#: i18n/states/BD.php:48
+#: i18n/states/BD.php:52
 msgid "Meherpur"
 msgstr ""
 
-#: i18n/states/BD.php:49
+#: i18n/states/BD.php:53
 msgid "Moulvibazar"
 msgstr ""
 
-#: i18n/states/BD.php:50
+#: i18n/states/BD.php:54
 msgid "Munshiganj"
 msgstr ""
 
-#: i18n/states/BD.php:51
+#: i18n/states/BD.php:55
 msgid "Mymensingh"
 msgstr ""
 
-#: i18n/states/BD.php:52
+#: i18n/states/BD.php:56
 msgid "Naogaon"
 msgstr ""
 
-#: i18n/states/BD.php:53
+#: i18n/states/BD.php:57
 msgid "Narail"
 msgstr ""
 
-#: i18n/states/BD.php:54
+#: i18n/states/BD.php:58
 msgid "Narayanganj"
 msgstr ""
 
-#: i18n/states/BD.php:55
+#: i18n/states/BD.php:59
 msgid "Narsingdi"
 msgstr ""
 
-#: i18n/states/BD.php:56
+#: i18n/states/BD.php:60
 msgid "Natore"
 msgstr ""
 
-#: i18n/states/BD.php:57
+#: i18n/states/BD.php:61
 msgid "Nawabganj"
 msgstr ""
 
-#: i18n/states/BD.php:58
+#: i18n/states/BD.php:62
 msgid "Netrakona"
 msgstr ""
 
-#: i18n/states/BD.php:59
+#: i18n/states/BD.php:63
 msgid "Nilphamari"
 msgstr ""
 
-#: i18n/states/BD.php:60
+#: i18n/states/BD.php:64
 msgid "Noakhali"
 msgstr ""
 
-#: i18n/states/BD.php:61
+#: i18n/states/BD.php:65
 msgid "Pabna"
 msgstr ""
 
-#: i18n/states/BD.php:62
+#: i18n/states/BD.php:66
 msgid "Panchagarh"
 msgstr ""
 
-#: i18n/states/BD.php:63
+#: i18n/states/BD.php:67
 msgid "Patuakhali"
 msgstr ""
 
-#: i18n/states/BD.php:64
+#: i18n/states/BD.php:68
 msgid "Pirojpur"
 msgstr ""
 
-#: i18n/states/BD.php:65
+#: i18n/states/BD.php:69
 msgid "Rajbari"
 msgstr ""
 
-#: i18n/states/BD.php:66
+#: i18n/states/BD.php:70
 msgid "Rajshahi"
 msgstr ""
 
-#: i18n/states/BD.php:67
+#: i18n/states/BD.php:71
 msgid "Rangamati"
 msgstr ""
 
-#: i18n/states/BD.php:68
+#: i18n/states/BD.php:72
 msgid "Rangpur"
 msgstr ""
 
-#: i18n/states/BD.php:69
+#: i18n/states/BD.php:73
 msgid "Satkhira"
 msgstr ""
 
-#: i18n/states/BD.php:70
+#: i18n/states/BD.php:74
 msgid "Shariatpur"
 msgstr ""
 
-#: i18n/states/BD.php:71
+#: i18n/states/BD.php:75
 msgid "Sherpur"
 msgstr ""
 
-#: i18n/states/BD.php:72
+#: i18n/states/BD.php:76
 msgid "Sirajganj"
 msgstr ""
 
-#: i18n/states/BD.php:73
+#: i18n/states/BD.php:77
 msgid "Sunamganj"
 msgstr ""
 
-#: i18n/states/BD.php:74
+#: i18n/states/BD.php:78
 msgid "Sylhet"
 msgstr ""
 
-#: i18n/states/BD.php:75
+#: i18n/states/BD.php:79
 msgid "Tangail"
 msgstr ""
 
-#: i18n/states/BD.php:76
+#: i18n/states/BD.php:80
 msgid "Thakurgaon"
 msgstr ""
 
-#: i18n/states/BG.php:13
+#: i18n/states/BG.php:17
 msgid "Blagoevgrad"
 msgstr ""
 
-#: i18n/states/BG.php:14
+#: i18n/states/BG.php:18
 msgid "Burgas"
 msgstr ""
 
-#: i18n/states/BG.php:15
+#: i18n/states/BG.php:19
 msgid "Dobrich"
 msgstr ""
 
-#: i18n/states/BG.php:16
+#: i18n/states/BG.php:20
 msgid "Gabrovo"
 msgstr ""
 
-#: i18n/states/BG.php:17
+#: i18n/states/BG.php:21
 msgid "Haskovo"
 msgstr ""
 
-#: i18n/states/BG.php:18
+#: i18n/states/BG.php:22
 msgid "Kardzhali"
 msgstr ""
 
-#: i18n/states/BG.php:19
+#: i18n/states/BG.php:23
 msgid "Kyustendil"
 msgstr ""
 
-#: i18n/states/BG.php:20
+#: i18n/states/BG.php:24
 msgid "Lovech"
 msgstr ""
 
-#: i18n/states/BG.php:21 i18n/states/US.php:39
+#: i18n/states/BG.php:25 i18n/states/US.php:43
 msgid "Montana"
 msgstr ""
 
-#: i18n/states/BG.php:22
+#: i18n/states/BG.php:26
 msgid "Pazardzhik"
 msgstr ""
 
-#: i18n/states/BG.php:23
+#: i18n/states/BG.php:27
 msgid "Pernik"
 msgstr ""
 
-#: i18n/states/BG.php:24
+#: i18n/states/BG.php:28
 msgid "Pleven"
 msgstr ""
 
-#: i18n/states/BG.php:25
+#: i18n/states/BG.php:29
 msgid "Plovdiv"
 msgstr ""
 
-#: i18n/states/BG.php:26
+#: i18n/states/BG.php:30
 msgid "Razgrad"
 msgstr ""
 
-#: i18n/states/BG.php:27
+#: i18n/states/BG.php:31
 msgid "Ruse"
 msgstr ""
 
-#: i18n/states/BG.php:28
+#: i18n/states/BG.php:32
 msgid "Shumen"
 msgstr ""
 
-#: i18n/states/BG.php:29
+#: i18n/states/BG.php:33
 msgid "Silistra"
 msgstr ""
 
-#: i18n/states/BG.php:30
+#: i18n/states/BG.php:34
 msgid "Sliven"
 msgstr ""
 
-#: i18n/states/BG.php:31
+#: i18n/states/BG.php:35
 msgid "Smolyan"
 msgstr ""
 
-#: i18n/states/BG.php:32
+#: i18n/states/BG.php:36
 msgid "Sofia"
 msgstr ""
 
-#: i18n/states/BG.php:33
+#: i18n/states/BG.php:37
 msgid "Sofia-Grad"
 msgstr ""
 
-#: i18n/states/BG.php:34
+#: i18n/states/BG.php:38
 msgid "Stara Zagora"
 msgstr ""
 
-#: i18n/states/BG.php:35
+#: i18n/states/BG.php:39
 msgid "Targovishte"
 msgstr ""
 
-#: i18n/states/BG.php:36
+#: i18n/states/BG.php:40
 msgid "Varna"
 msgstr ""
 
-#: i18n/states/BG.php:37
+#: i18n/states/BG.php:41
 msgid "Veliko Tarnovo"
 msgstr ""
 
-#: i18n/states/BG.php:38
+#: i18n/states/BG.php:42
 msgid "Vidin"
 msgstr ""
 
-#: i18n/states/BG.php:39
+#: i18n/states/BG.php:43
 msgid "Vratsa"
 msgstr ""
 
-#: i18n/states/BG.php:40
+#: i18n/states/BG.php:44
 msgid "Yambol"
 msgstr ""
 
-#: i18n/states/BO.php:13
+#: i18n/states/BO.php:17
 msgid "Chuquisaca"
 msgstr ""
 
-#: i18n/states/BO.php:14
+#: i18n/states/BO.php:18
 msgid "Beni"
 msgstr ""
 
-#: i18n/states/BO.php:15
+#: i18n/states/BO.php:19
 msgid "Cochabamba"
 msgstr ""
 
-#: i18n/states/BO.php:16
+#: i18n/states/BO.php:20
 msgid "La Paz"
 msgstr ""
 
-#: i18n/states/BO.php:17
+#: i18n/states/BO.php:21
 msgid "Oruro"
 msgstr ""
 
-#: i18n/states/BO.php:18
+#: i18n/states/BO.php:22
 msgid "Pando"
 msgstr ""
 
-#: i18n/states/BO.php:19
+#: i18n/states/BO.php:23
 msgid "Potosí"
 msgstr ""
 
-#: i18n/states/BO.php:21
+#: i18n/states/BO.php:25
 msgid "Tarija"
 msgstr ""
 
-#: i18n/states/BR.php:13
+#: i18n/states/BR.php:17
 msgid "Acre"
 msgstr ""
 
-#: i18n/states/BR.php:14
+#: i18n/states/BR.php:18
 msgid "Alagoas"
 msgstr ""
 
-#: i18n/states/BR.php:15
+#: i18n/states/BR.php:19
 msgid "Amap&aacute;"
 msgstr ""
 
-#: i18n/states/BR.php:16 i18n/states/PE.php:15
+#: i18n/states/BR.php:20 i18n/states/PE.php:19
 msgid "Amazonas"
 msgstr ""
 
-#: i18n/states/BR.php:17
+#: i18n/states/BR.php:21
 msgid "Bahia"
 msgstr ""
 
-#: i18n/states/BR.php:18
+#: i18n/states/BR.php:22
 msgid "Cear&aacute;"
 msgstr ""
 
-#: i18n/states/BR.php:19 i18n/states/MX.php:13
+#: i18n/states/BR.php:23 i18n/states/MX.php:17
 msgid "Distrito Federal"
 msgstr ""
 
-#: i18n/states/BR.php:20
+#: i18n/states/BR.php:24
 msgid "Esp&iacute;rito Santo"
 msgstr ""
 
-#: i18n/states/BR.php:21
+#: i18n/states/BR.php:25
 msgid "Goi&aacute;s"
 msgstr ""
 
-#: i18n/states/BR.php:22
+#: i18n/states/BR.php:26
 msgid "Maranh&atilde;o"
 msgstr ""
 
-#: i18n/states/BR.php:23
+#: i18n/states/BR.php:27
 msgid "Mato Grosso"
 msgstr ""
 
-#: i18n/states/BR.php:24
+#: i18n/states/BR.php:28
 msgid "Mato Grosso do Sul"
 msgstr ""
 
-#: i18n/states/BR.php:25
+#: i18n/states/BR.php:29
 msgid "Minas Gerais"
 msgstr ""
 
-#: i18n/states/BR.php:26
+#: i18n/states/BR.php:30
 msgid "Par&aacute;"
 msgstr ""
 
-#: i18n/states/BR.php:27
+#: i18n/states/BR.php:31
 msgid "Para&iacute;ba"
 msgstr ""
 
-#: i18n/states/BR.php:28
+#: i18n/states/BR.php:32
 msgid "Paran&aacute;"
 msgstr ""
 
-#: i18n/states/BR.php:29
+#: i18n/states/BR.php:33
 msgid "Pernambuco"
 msgstr ""
 
-#: i18n/states/BR.php:30
+#: i18n/states/BR.php:34
 msgid "Piau&iacute;"
 msgstr ""
 
-#: i18n/states/BR.php:31
+#: i18n/states/BR.php:35
 msgid "Rio de Janeiro"
 msgstr ""
 
-#: i18n/states/BR.php:32
+#: i18n/states/BR.php:36
 msgid "Rio Grande do Norte"
 msgstr ""
 
-#: i18n/states/BR.php:33
+#: i18n/states/BR.php:37
 msgid "Rio Grande do Sul"
 msgstr ""
 
-#: i18n/states/BR.php:34
+#: i18n/states/BR.php:38
 msgid "Rond&ocirc;nia"
 msgstr ""
 
-#: i18n/states/BR.php:35
+#: i18n/states/BR.php:39
 msgid "Roraima"
 msgstr ""
 
-#: i18n/states/BR.php:36
+#: i18n/states/BR.php:40
 msgid "Santa Catarina"
 msgstr ""
 
-#: i18n/states/BR.php:37
+#: i18n/states/BR.php:41
 msgid "S&atilde;o Paulo"
 msgstr ""
 
-#: i18n/states/BR.php:38
+#: i18n/states/BR.php:42
 msgid "Sergipe"
 msgstr ""
 
-#: i18n/states/BR.php:39
+#: i18n/states/BR.php:43
 msgid "Tocantins"
 msgstr ""
 
-#: i18n/states/CA.php:13
+#: i18n/states/CA.php:17
 msgid "Alberta"
 msgstr ""
 
-#: i18n/states/CA.php:14
+#: i18n/states/CA.php:18
 msgid "British Columbia"
 msgstr ""
 
-#: i18n/states/CA.php:15
+#: i18n/states/CA.php:19
 msgid "Manitoba"
 msgstr ""
 
-#: i18n/states/CA.php:16
+#: i18n/states/CA.php:20
 msgid "New Brunswick"
 msgstr ""
 
-#: i18n/states/CA.php:17
+#: i18n/states/CA.php:21
 msgid "Newfoundland and Labrador"
 msgstr ""
 
-#: i18n/states/CA.php:18
+#: i18n/states/CA.php:22
 msgid "Northwest Territories"
 msgstr ""
 
-#: i18n/states/CA.php:19
+#: i18n/states/CA.php:23
 msgid "Nova Scotia"
 msgstr ""
 
-#: i18n/states/CA.php:20
+#: i18n/states/CA.php:24
 msgid "Nunavut"
 msgstr ""
 
-#: i18n/states/CA.php:21
+#: i18n/states/CA.php:25
 msgid "Ontario"
 msgstr ""
 
-#: i18n/states/CA.php:22
+#: i18n/states/CA.php:26
 msgid "Prince Edward Island"
 msgstr ""
 
-#: i18n/states/CA.php:23
+#: i18n/states/CA.php:27
 msgid "Quebec"
 msgstr ""
 
-#: i18n/states/CA.php:24
+#: i18n/states/CA.php:28
 msgid "Saskatchewan"
 msgstr ""
 
-#: i18n/states/CA.php:25
+#: i18n/states/CA.php:29
 msgid "Yukon Territory"
 msgstr ""
 
-#: i18n/states/CN.php:13
+#: i18n/states/CN.php:17
 msgid "Yunnan / &#20113;&#21335;"
 msgstr ""
 
-#: i18n/states/CN.php:14
+#: i18n/states/CN.php:18
 msgid "Beijing / &#21271;&#20140;"
 msgstr ""
 
-#: i18n/states/CN.php:15
+#: i18n/states/CN.php:19
 msgid "Tianjin / &#22825;&#27941;"
 msgstr ""
 
-#: i18n/states/CN.php:16
+#: i18n/states/CN.php:20
 msgid "Hebei / &#27827;&#21271;"
 msgstr ""
 
-#: i18n/states/CN.php:17
+#: i18n/states/CN.php:21
 msgid "Shanxi / &#23665;&#35199;"
 msgstr ""
 
-#: i18n/states/CN.php:18
+#: i18n/states/CN.php:22
 msgid "Inner Mongolia / &#20839;&#33945;&#21476;"
 msgstr ""
 
-#: i18n/states/CN.php:19
+#: i18n/states/CN.php:23
 msgid "Liaoning / &#36797;&#23425;"
 msgstr ""
 
-#: i18n/states/CN.php:20
+#: i18n/states/CN.php:24
 msgid "Jilin / &#21513;&#26519;"
 msgstr ""
 
-#: i18n/states/CN.php:21
+#: i18n/states/CN.php:25
 msgid "Heilongjiang / &#40657;&#40857;&#27743;"
 msgstr ""
 
-#: i18n/states/CN.php:22
+#: i18n/states/CN.php:26
 msgid "Shanghai / &#19978;&#28023;"
 msgstr ""
 
-#: i18n/states/CN.php:23
+#: i18n/states/CN.php:27
 msgid "Jiangsu / &#27743;&#33487;"
 msgstr ""
 
-#: i18n/states/CN.php:24
+#: i18n/states/CN.php:28
 msgid "Zhejiang / &#27993;&#27743;"
 msgstr ""
 
-#: i18n/states/CN.php:25
+#: i18n/states/CN.php:29
 msgid "Anhui / &#23433;&#24509;"
 msgstr ""
 
-#: i18n/states/CN.php:26
+#: i18n/states/CN.php:30
 msgid "Fujian / &#31119;&#24314;"
 msgstr ""
 
-#: i18n/states/CN.php:27
+#: i18n/states/CN.php:31
 msgid "Jiangxi / &#27743;&#35199;"
 msgstr ""
 
-#: i18n/states/CN.php:28
+#: i18n/states/CN.php:32
 msgid "Shandong / &#23665;&#19996;"
 msgstr ""
 
-#: i18n/states/CN.php:29
+#: i18n/states/CN.php:33
 msgid "Henan / &#27827;&#21335;"
 msgstr ""
 
-#: i18n/states/CN.php:30
+#: i18n/states/CN.php:34
 msgid "Hubei / &#28246;&#21271;"
 msgstr ""
 
-#: i18n/states/CN.php:31
+#: i18n/states/CN.php:35
 msgid "Hunan / &#28246;&#21335;"
 msgstr ""
 
-#: i18n/states/CN.php:32
+#: i18n/states/CN.php:36
 msgid "Guangdong / &#24191;&#19996;"
 msgstr ""
 
-#: i18n/states/CN.php:33
+#: i18n/states/CN.php:37
 msgid "Guangxi Zhuang / &#24191;&#35199;&#22766;&#26063;"
 msgstr ""
 
-#: i18n/states/CN.php:34
+#: i18n/states/CN.php:38
 msgid "Hainan / &#28023;&#21335;"
 msgstr ""
 
-#: i18n/states/CN.php:35
+#: i18n/states/CN.php:39
 msgid "Chongqing / &#37325;&#24198;"
 msgstr ""
 
-#: i18n/states/CN.php:36
+#: i18n/states/CN.php:40
 msgid "Sichuan / &#22235;&#24029;"
 msgstr ""
 
-#: i18n/states/CN.php:37
+#: i18n/states/CN.php:41
 msgid "Guizhou / &#36149;&#24030;"
 msgstr ""
 
-#: i18n/states/CN.php:38
+#: i18n/states/CN.php:42
 msgid "Shaanxi / &#38485;&#35199;"
 msgstr ""
 
-#: i18n/states/CN.php:39
+#: i18n/states/CN.php:43
 msgid "Gansu / &#29976;&#32899;"
 msgstr ""
 
-#: i18n/states/CN.php:40
+#: i18n/states/CN.php:44
 msgid "Qinghai / &#38738;&#28023;"
 msgstr ""
 
-#: i18n/states/CN.php:41
+#: i18n/states/CN.php:45
 msgid "Ningxia Hui / &#23425;&#22799;"
 msgstr ""
 
-#: i18n/states/CN.php:42
+#: i18n/states/CN.php:46
 msgid "Macau / &#28595;&#38376;"
 msgstr ""
 
-#: i18n/states/CN.php:43
+#: i18n/states/CN.php:47
 msgid "Tibet / &#35199;&#34255;"
 msgstr ""
 
-#: i18n/states/CN.php:44
+#: i18n/states/CN.php:48
 msgid "Xinjiang / &#26032;&#30086;"
 msgstr ""
 
-#: i18n/states/ES.php:13
+#: i18n/states/ES.php:17
 msgid "A Coru&ntilde;a"
 msgstr ""
 
-#: i18n/states/ES.php:14
+#: i18n/states/ES.php:18
 msgid "Araba/&Aacute;lava"
 msgstr ""
 
-#: i18n/states/ES.php:15
+#: i18n/states/ES.php:19
 msgid "Albacete"
 msgstr ""
 
-#: i18n/states/ES.php:16
+#: i18n/states/ES.php:20
 msgid "Alicante"
 msgstr ""
 
-#: i18n/states/ES.php:17
+#: i18n/states/ES.php:21
 msgid "Almer&iacute;a"
 msgstr ""
 
-#: i18n/states/ES.php:18
+#: i18n/states/ES.php:22
 msgid "Asturias"
 msgstr ""
 
-#: i18n/states/ES.php:19
+#: i18n/states/ES.php:23
 msgid "&Aacute;vila"
 msgstr ""
 
-#: i18n/states/ES.php:20
+#: i18n/states/ES.php:24
 msgid "Badajoz"
 msgstr ""
 
-#: i18n/states/ES.php:21
+#: i18n/states/ES.php:25
 msgid "Baleares"
 msgstr ""
 
-#: i18n/states/ES.php:22
+#: i18n/states/ES.php:26
 msgid "Barcelona"
 msgstr ""
 
-#: i18n/states/ES.php:23
+#: i18n/states/ES.php:27
 msgid "Burgos"
 msgstr ""
 
-#: i18n/states/ES.php:24
+#: i18n/states/ES.php:28
 msgid "C&aacute;ceres"
 msgstr ""
 
-#: i18n/states/ES.php:25
+#: i18n/states/ES.php:29
 msgid "C&aacute;diz"
 msgstr ""
 
-#: i18n/states/ES.php:26
+#: i18n/states/ES.php:30
 msgid "Cantabria"
 msgstr ""
 
-#: i18n/states/ES.php:27
+#: i18n/states/ES.php:31
 msgid "Castell&oacute;n"
 msgstr ""
 
-#: i18n/states/ES.php:28
+#: i18n/states/ES.php:32
 msgid "Ceuta"
 msgstr ""
 
-#: i18n/states/ES.php:29
+#: i18n/states/ES.php:33
 msgid "Ciudad Real"
 msgstr ""
 
-#: i18n/states/ES.php:31
+#: i18n/states/ES.php:35
 msgid "Cuenca"
 msgstr ""
 
-#: i18n/states/ES.php:32
+#: i18n/states/ES.php:36
 msgid "Girona"
 msgstr ""
 
-#: i18n/states/ES.php:33
+#: i18n/states/ES.php:37
 msgid "Granada"
 msgstr ""
 
-#: i18n/states/ES.php:34
+#: i18n/states/ES.php:38
 msgid "Guadalajara"
 msgstr ""
 
-#: i18n/states/ES.php:35
+#: i18n/states/ES.php:39
 msgid "Gipuzkoa"
 msgstr ""
 
-#: i18n/states/ES.php:36
+#: i18n/states/ES.php:40
 msgid "Huelva"
 msgstr ""
 
-#: i18n/states/ES.php:37
+#: i18n/states/ES.php:41
 msgid "Huesca"
 msgstr ""
 
-#: i18n/states/ES.php:38
+#: i18n/states/ES.php:42
 msgid "Ja&eacute;n"
 msgstr ""
 
-#: i18n/states/ES.php:40
+#: i18n/states/ES.php:44
 msgid "Las Palmas"
 msgstr ""
 
-#: i18n/states/ES.php:41
+#: i18n/states/ES.php:45
 msgid "Le&oacute;n"
 msgstr ""
 
-#: i18n/states/ES.php:42
+#: i18n/states/ES.php:46
 msgid "Lleida"
 msgstr ""
 
-#: i18n/states/ES.php:43
+#: i18n/states/ES.php:47
 msgid "Lugo"
 msgstr ""
 
-#: i18n/states/ES.php:44
+#: i18n/states/ES.php:48
 msgid "Madrid"
 msgstr ""
 
-#: i18n/states/ES.php:45
+#: i18n/states/ES.php:49
 msgid "M&aacute;laga"
 msgstr ""
 
-#: i18n/states/ES.php:46
+#: i18n/states/ES.php:50
 msgid "Melilla"
 msgstr ""
 
-#: i18n/states/ES.php:47
+#: i18n/states/ES.php:51
 msgid "Murcia"
 msgstr ""
 
-#: i18n/states/ES.php:48
+#: i18n/states/ES.php:52
 msgid "Navarra"
 msgstr ""
 
-#: i18n/states/ES.php:49
+#: i18n/states/ES.php:53
 msgid "Ourense"
 msgstr ""
 
-#: i18n/states/ES.php:50
+#: i18n/states/ES.php:54
 msgid "Palencia"
 msgstr ""
 
-#: i18n/states/ES.php:51
+#: i18n/states/ES.php:55
 msgid "Pontevedra"
 msgstr ""
 
-#: i18n/states/ES.php:52
+#: i18n/states/ES.php:56
 msgid "Salamanca"
 msgstr ""
 
-#: i18n/states/ES.php:53
+#: i18n/states/ES.php:57
 msgid "Santa Cruz de Tenerife"
 msgstr ""
 
-#: i18n/states/ES.php:54
+#: i18n/states/ES.php:58
 msgid "Segovia"
 msgstr ""
 
-#: i18n/states/ES.php:55
+#: i18n/states/ES.php:59
 msgid "Sevilla"
 msgstr ""
 
-#: i18n/states/ES.php:56
+#: i18n/states/ES.php:60
 msgid "Soria"
 msgstr ""
 
-#: i18n/states/ES.php:57
+#: i18n/states/ES.php:61
 msgid "Tarragona"
 msgstr ""
 
-#: i18n/states/ES.php:58
+#: i18n/states/ES.php:62
 msgid "Teruel"
 msgstr ""
 
-#: i18n/states/ES.php:59
+#: i18n/states/ES.php:63
 msgid "Toledo"
 msgstr ""
 
-#: i18n/states/ES.php:60
+#: i18n/states/ES.php:64
 msgid "Valencia"
 msgstr ""
 
-#: i18n/states/ES.php:61
+#: i18n/states/ES.php:65
 msgid "Valladolid"
 msgstr ""
 
-#: i18n/states/ES.php:62
+#: i18n/states/ES.php:66
 msgid "Bizkaia"
 msgstr ""
 
-#: i18n/states/ES.php:63
+#: i18n/states/ES.php:67
 msgid "Zamora"
 msgstr ""
 
-#: i18n/states/ES.php:64
+#: i18n/states/ES.php:68
 msgid "Zaragoza"
 msgstr ""
 
-#: i18n/states/GR.php:13
+#: i18n/states/GR.php:17
 msgid "Αττική"
 msgstr ""
 
-#: i18n/states/GR.php:14
+#: i18n/states/GR.php:18
 msgid "Ανατολική Μακεδονία και Θράκη"
 msgstr ""
 
-#: i18n/states/GR.php:15
+#: i18n/states/GR.php:19
 msgid "Κεντρική Μακεδονία"
 msgstr ""
 
-#: i18n/states/GR.php:16
+#: i18n/states/GR.php:20
 msgid "Δυτική Μακεδονία"
 msgstr ""
 
-#: i18n/states/GR.php:17
+#: i18n/states/GR.php:21
 msgid "Ήπειρος"
 msgstr ""
 
-#: i18n/states/GR.php:18
+#: i18n/states/GR.php:22
 msgid "Θεσσαλία"
 msgstr ""
 
-#: i18n/states/GR.php:19
+#: i18n/states/GR.php:23
 msgid "Ιόνιοι Νήσοι"
 msgstr ""
 
-#: i18n/states/GR.php:20
+#: i18n/states/GR.php:24
 msgid "Δυτική Ελλάδα"
 msgstr ""
 
-#: i18n/states/GR.php:21
+#: i18n/states/GR.php:25
 msgid "Στερεά Ελλάδα"
 msgstr ""
 
-#: i18n/states/GR.php:22
+#: i18n/states/GR.php:26
 msgid "Πελοπόννησος"
 msgstr ""
 
-#: i18n/states/GR.php:23
+#: i18n/states/GR.php:27
 msgid "Βόρειο Αιγαίο"
 msgstr ""
 
-#: i18n/states/GR.php:24
+#: i18n/states/GR.php:28
 msgid "Νότιο Αιγαίο"
 msgstr ""
 
-#: i18n/states/GR.php:25
+#: i18n/states/GR.php:29
 msgid "Κρήτη"
 msgstr ""
 
-#: i18n/states/HK.php:13
+#: i18n/states/HK.php:17
 msgid "Hong Kong Island"
 msgstr ""
 
-#: i18n/states/HK.php:14
+#: i18n/states/HK.php:18
 msgid "Kowloon"
 msgstr ""
 
-#: i18n/states/HK.php:15
+#: i18n/states/HK.php:19
 msgid "New Territories"
 msgstr ""
 
-#: i18n/states/HU.php:13
+#: i18n/states/HU.php:17
 msgid "Bács-Kiskun"
 msgstr ""
 
-#: i18n/states/HU.php:14
+#: i18n/states/HU.php:18
 msgid "Békés"
 msgstr ""
 
-#: i18n/states/HU.php:15
+#: i18n/states/HU.php:19
 msgid "Baranya"
 msgstr ""
 
-#: i18n/states/HU.php:16
+#: i18n/states/HU.php:20
 msgid "Borsod-Abaúj-Zemplén"
 msgstr ""
 
-#: i18n/states/HU.php:17
+#: i18n/states/HU.php:21
 msgid "Budapest"
 msgstr ""
 
-#: i18n/states/HU.php:18
+#: i18n/states/HU.php:22
 msgid "Csongrád"
 msgstr ""
 
-#: i18n/states/HU.php:19
+#: i18n/states/HU.php:23
 msgid "Fejér"
 msgstr ""
 
-#: i18n/states/HU.php:20
+#: i18n/states/HU.php:24
 msgid "Győr-Moson-Sopron"
 msgstr ""
 
-#: i18n/states/HU.php:21
+#: i18n/states/HU.php:25
 msgid "Hajdú-Bihar"
 msgstr ""
 
-#: i18n/states/HU.php:22
+#: i18n/states/HU.php:26
 msgid "Heves"
 msgstr ""
 
-#: i18n/states/HU.php:23
+#: i18n/states/HU.php:27
 msgid "Jász-Nagykun-Szolnok"
 msgstr ""
 
-#: i18n/states/HU.php:24
+#: i18n/states/HU.php:28
 msgid "Komárom-Esztergom"
 msgstr ""
 
-#: i18n/states/HU.php:25
+#: i18n/states/HU.php:29
 msgid "Nógrád"
 msgstr ""
 
-#: i18n/states/HU.php:26
+#: i18n/states/HU.php:30
 msgid "Pest"
 msgstr ""
 
-#: i18n/states/HU.php:27
+#: i18n/states/HU.php:31
 msgid "Somogy"
 msgstr ""
 
-#: i18n/states/HU.php:28
+#: i18n/states/HU.php:32
 msgid "Szabolcs-Szatmár-Bereg"
 msgstr ""
 
-#: i18n/states/HU.php:29
+#: i18n/states/HU.php:33
 msgid "Tolna"
 msgstr ""
 
-#: i18n/states/HU.php:30
+#: i18n/states/HU.php:34
 msgid "Vas"
 msgstr ""
 
-#: i18n/states/HU.php:31
+#: i18n/states/HU.php:35
 msgid "Veszprém"
 msgstr ""
 
-#: i18n/states/HU.php:32
+#: i18n/states/HU.php:36
 msgid "Zala"
 msgstr ""
 
-#: i18n/states/ID.php:13
+#: i18n/states/ID.php:17
 msgid "Daerah Istimewa Aceh"
 msgstr ""
 
-#: i18n/states/ID.php:14
+#: i18n/states/ID.php:18
 msgid "Sumatera Utara"
 msgstr ""
 
-#: i18n/states/ID.php:15
+#: i18n/states/ID.php:19
 msgid "Sumatera Barat"
 msgstr ""
 
-#: i18n/states/ID.php:16
+#: i18n/states/ID.php:20
 msgid "Riau"
 msgstr ""
 
-#: i18n/states/ID.php:17
+#: i18n/states/ID.php:21
 msgid "Kepulauan Riau"
 msgstr ""
 
-#: i18n/states/ID.php:18
+#: i18n/states/ID.php:22
 msgid "Jambi"
 msgstr ""
 
-#: i18n/states/ID.php:19
+#: i18n/states/ID.php:23
 msgid "Sumatera Selatan"
 msgstr ""
 
-#: i18n/states/ID.php:20
+#: i18n/states/ID.php:24
 msgid "Bangka Belitung"
 msgstr ""
 
-#: i18n/states/ID.php:21
+#: i18n/states/ID.php:25
 msgid "Bengkulu"
 msgstr ""
 
-#: i18n/states/ID.php:22
+#: i18n/states/ID.php:26
 msgid "Lampung"
 msgstr ""
 
-#: i18n/states/ID.php:23
+#: i18n/states/ID.php:27
 msgid "DKI Jakarta"
 msgstr ""
 
-#: i18n/states/ID.php:24
+#: i18n/states/ID.php:28
 msgid "Jawa Barat"
 msgstr ""
 
-#: i18n/states/ID.php:25
+#: i18n/states/ID.php:29
 msgid "Banten"
 msgstr ""
 
-#: i18n/states/ID.php:26
+#: i18n/states/ID.php:30
 msgid "Jawa Tengah"
 msgstr ""
 
-#: i18n/states/ID.php:27
+#: i18n/states/ID.php:31
 msgid "Jawa Timur"
 msgstr ""
 
-#: i18n/states/ID.php:28
+#: i18n/states/ID.php:32
 msgid "Daerah Istimewa Yogyakarta"
 msgstr ""
 
-#: i18n/states/ID.php:29
+#: i18n/states/ID.php:33
 msgid "Bali"
 msgstr ""
 
-#: i18n/states/ID.php:30
+#: i18n/states/ID.php:34
 msgid "Nusa Tenggara Barat"
 msgstr ""
 
-#: i18n/states/ID.php:31
+#: i18n/states/ID.php:35
 msgid "Nusa Tenggara Timur"
 msgstr ""
 
-#: i18n/states/ID.php:32
+#: i18n/states/ID.php:36
 msgid "Kalimantan Barat"
 msgstr ""
 
-#: i18n/states/ID.php:33
+#: i18n/states/ID.php:37
 msgid "Kalimantan Tengah"
 msgstr ""
 
-#: i18n/states/ID.php:34
+#: i18n/states/ID.php:38
 msgid "Kalimantan Timur"
 msgstr ""
 
-#: i18n/states/ID.php:35
+#: i18n/states/ID.php:39
 msgid "Kalimantan Selatan"
 msgstr ""
 
-#: i18n/states/ID.php:36
+#: i18n/states/ID.php:40
 msgid "Kalimantan Utara"
 msgstr ""
 
-#: i18n/states/ID.php:37
+#: i18n/states/ID.php:41
 msgid "Sulawesi Utara"
 msgstr ""
 
-#: i18n/states/ID.php:38
+#: i18n/states/ID.php:42
 msgid "Sulawesi Tengah"
 msgstr ""
 
-#: i18n/states/ID.php:39
+#: i18n/states/ID.php:43
 msgid "Sulawesi Tenggara"
 msgstr ""
 
-#: i18n/states/ID.php:40
+#: i18n/states/ID.php:44
 msgid "Sulawesi Barat"
 msgstr ""
 
-#: i18n/states/ID.php:41
+#: i18n/states/ID.php:45
 msgid "Sulawesi Selatan"
 msgstr ""
 
-#: i18n/states/ID.php:42
+#: i18n/states/ID.php:46
 msgid "Gorontalo"
 msgstr ""
 
-#: i18n/states/ID.php:43
+#: i18n/states/ID.php:47
 msgid "Maluku"
 msgstr ""
 
-#: i18n/states/ID.php:44
+#: i18n/states/ID.php:48
 msgid "Maluku Utara"
 msgstr ""
 
-#: i18n/states/ID.php:45
+#: i18n/states/ID.php:49
 msgid "Papua"
 msgstr ""
 
-#: i18n/states/ID.php:46
+#: i18n/states/ID.php:50
 msgid "Papua Barat"
 msgstr ""
 
-#: i18n/states/IE.php:13
+#: i18n/states/IE.php:17
 msgid "Clare"
 msgstr ""
 
-#: i18n/states/IE.php:14
+#: i18n/states/IE.php:18
 msgid "Cork"
 msgstr ""
 
-#: i18n/states/IE.php:15
+#: i18n/states/IE.php:19
 msgid "Cavan"
 msgstr ""
 
-#: i18n/states/IE.php:16
+#: i18n/states/IE.php:20
 msgid "Carlow"
 msgstr ""
 
-#: i18n/states/IE.php:17
+#: i18n/states/IE.php:21
 msgid "Donegal"
 msgstr ""
 
-#: i18n/states/IE.php:18
+#: i18n/states/IE.php:22
 msgid "Dublin"
 msgstr ""
 
-#: i18n/states/IE.php:19
+#: i18n/states/IE.php:23
 msgid "Galway"
 msgstr ""
 
-#: i18n/states/IE.php:20
+#: i18n/states/IE.php:24
 msgid "Kildare"
 msgstr ""
 
-#: i18n/states/IE.php:21
+#: i18n/states/IE.php:25
 msgid "Kilkenny"
 msgstr ""
 
-#: i18n/states/IE.php:22
+#: i18n/states/IE.php:26
 msgid "Kerry"
 msgstr ""
 
-#: i18n/states/IE.php:23
+#: i18n/states/IE.php:27
 msgid "Longford"
 msgstr ""
 
-#: i18n/states/IE.php:24
+#: i18n/states/IE.php:28
 msgid "Louth"
 msgstr ""
 
-#: i18n/states/IE.php:25
+#: i18n/states/IE.php:29
 msgid "Limerick"
 msgstr ""
 
-#: i18n/states/IE.php:26
+#: i18n/states/IE.php:30
 msgid "Leitrim"
 msgstr ""
 
-#: i18n/states/IE.php:27
+#: i18n/states/IE.php:31
 msgid "Laois"
 msgstr ""
 
-#: i18n/states/IE.php:28
+#: i18n/states/IE.php:32
 msgid "Meath"
 msgstr ""
 
-#: i18n/states/IE.php:29
+#: i18n/states/IE.php:33
 msgid "Monaghan"
 msgstr ""
 
-#: i18n/states/IE.php:30
+#: i18n/states/IE.php:34
 msgid "Mayo"
 msgstr ""
 
-#: i18n/states/IE.php:31
+#: i18n/states/IE.php:35
 msgid "Offaly"
 msgstr ""
 
-#: i18n/states/IE.php:32
+#: i18n/states/IE.php:36
 msgid "Roscommon"
 msgstr ""
 
-#: i18n/states/IE.php:33
+#: i18n/states/IE.php:37
 msgid "Sligo"
 msgstr ""
 
-#: i18n/states/IE.php:34
+#: i18n/states/IE.php:38
 msgid "Tipperary"
 msgstr ""
 
-#: i18n/states/IE.php:35
+#: i18n/states/IE.php:39
 msgid "Waterford"
 msgstr ""
 
-#: i18n/states/IE.php:36
+#: i18n/states/IE.php:40
 msgid "Westmeath"
 msgstr ""
 
-#: i18n/states/IE.php:37
+#: i18n/states/IE.php:41
 msgid "Wicklow"
 msgstr ""
 
-#: i18n/states/IE.php:38
+#: i18n/states/IE.php:42
 msgid "Wexford"
 msgstr ""
 
-#: i18n/states/IN.php:13
+#: i18n/states/IN.php:17
 msgid "Andhra Pradesh"
 msgstr ""
 
-#: i18n/states/IN.php:14
+#: i18n/states/IN.php:18
 msgid "Arunachal Pradesh"
 msgstr ""
 
-#: i18n/states/IN.php:15
+#: i18n/states/IN.php:19
 msgid "Assam"
 msgstr ""
 
-#: i18n/states/IN.php:16
+#: i18n/states/IN.php:20
 msgid "Bihar"
 msgstr ""
 
-#: i18n/states/IN.php:17
+#: i18n/states/IN.php:21
 msgid "Chhattisgarh"
 msgstr ""
 
-#: i18n/states/IN.php:18
+#: i18n/states/IN.php:22
 msgid "Goa"
 msgstr ""
 
-#: i18n/states/IN.php:19
+#: i18n/states/IN.php:23
 msgid "Gujarat"
 msgstr ""
 
-#: i18n/states/IN.php:20
+#: i18n/states/IN.php:24
 msgid "Haryana"
 msgstr ""
 
-#: i18n/states/IN.php:21
+#: i18n/states/IN.php:25
 msgid "Himachal Pradesh"
 msgstr ""
 
-#: i18n/states/IN.php:22
+#: i18n/states/IN.php:26
 msgid "Jammu and Kashmir"
 msgstr ""
 
-#: i18n/states/IN.php:23
+#: i18n/states/IN.php:27
 msgid "Jharkhand"
 msgstr ""
 
-#: i18n/states/IN.php:24
+#: i18n/states/IN.php:28
 msgid "Karnataka"
 msgstr ""
 
-#: i18n/states/IN.php:25
+#: i18n/states/IN.php:29
 msgid "Kerala"
 msgstr ""
 
-#: i18n/states/IN.php:26
+#: i18n/states/IN.php:30
 msgid "Madhya Pradesh"
 msgstr ""
 
-#: i18n/states/IN.php:27
+#: i18n/states/IN.php:31
 msgid "Maharashtra"
 msgstr ""
 
-#: i18n/states/IN.php:28
+#: i18n/states/IN.php:32
 msgid "Manipur"
 msgstr ""
 
-#: i18n/states/IN.php:29
+#: i18n/states/IN.php:33
 msgid "Meghalaya"
 msgstr ""
 
-#: i18n/states/IN.php:30
+#: i18n/states/IN.php:34
 msgid "Mizoram"
 msgstr ""
 
-#: i18n/states/IN.php:31
+#: i18n/states/IN.php:35
 msgid "Nagaland"
 msgstr ""
 
-#: i18n/states/IN.php:32
+#: i18n/states/IN.php:36
 msgid "Orissa"
 msgstr ""
 
-#: i18n/states/IN.php:33 i18n/states/PK.php:19
+#: i18n/states/IN.php:37 i18n/states/PK.php:23
 msgid "Punjab"
 msgstr ""
 
-#: i18n/states/IN.php:34
+#: i18n/states/IN.php:38
 msgid "Rajasthan"
 msgstr ""
 
-#: i18n/states/IN.php:35
+#: i18n/states/IN.php:39
 msgid "Sikkim"
 msgstr ""
 
-#: i18n/states/IN.php:36
+#: i18n/states/IN.php:40
 msgid "Tamil Nadu"
 msgstr ""
 
-#: i18n/states/IN.php:37
+#: i18n/states/IN.php:41
 msgid "Telangana"
 msgstr ""
 
-#: i18n/states/IN.php:38
+#: i18n/states/IN.php:42
 msgid "Tripura"
 msgstr ""
 
-#: i18n/states/IN.php:39
+#: i18n/states/IN.php:43
 msgid "Uttarakhand"
 msgstr ""
 
-#: i18n/states/IN.php:40
+#: i18n/states/IN.php:44
 msgid "Uttar Pradesh"
 msgstr ""
 
-#: i18n/states/IN.php:41
+#: i18n/states/IN.php:45
 msgid "West Bengal"
 msgstr ""
 
-#: i18n/states/IN.php:42
+#: i18n/states/IN.php:46
 msgid "Andaman and Nicobar Islands"
 msgstr ""
 
-#: i18n/states/IN.php:43
+#: i18n/states/IN.php:47
 msgid "Chandigarh"
 msgstr ""
 
-#: i18n/states/IN.php:44
+#: i18n/states/IN.php:48
 msgid "Dadra and Nagar Haveli"
 msgstr ""
 
-#: i18n/states/IN.php:45
+#: i18n/states/IN.php:49
 msgid "Daman and Diu"
 msgstr ""
 
-#: i18n/states/IN.php:46
+#: i18n/states/IN.php:50
 msgid "Delhi"
 msgstr ""
 
-#: i18n/states/IN.php:47
+#: i18n/states/IN.php:51
 msgid "Lakshadeep"
 msgstr ""
 
-#: i18n/states/IN.php:48
+#: i18n/states/IN.php:52
 msgid "Pondicherry (Puducherry)"
 msgstr ""
 
-#: i18n/states/IR.php:13
+#: i18n/states/IR.php:17
 msgid "Khuzestan  (خوزستان)"
 msgstr ""
 
-#: i18n/states/IR.php:14
+#: i18n/states/IR.php:18
 msgid "Tehran  (تهران)"
 msgstr ""
 
-#: i18n/states/IR.php:15
+#: i18n/states/IR.php:19
 msgid "Ilaam (ایلام)"
 msgstr ""
 
-#: i18n/states/IR.php:16
+#: i18n/states/IR.php:20
 msgid "Bushehr (بوشهر)"
 msgstr ""
 
-#: i18n/states/IR.php:17
+#: i18n/states/IR.php:21
 msgid "Ardabil (اردبیل)"
 msgstr ""
 
-#: i18n/states/IR.php:18
+#: i18n/states/IR.php:22
 msgid "Isfahan (اصفهان)"
 msgstr ""
 
-#: i18n/states/IR.php:19
+#: i18n/states/IR.php:23
 msgid "Yazd (یزد)"
 msgstr ""
 
-#: i18n/states/IR.php:20
+#: i18n/states/IR.php:24
 msgid "Kermanshah (کرمانشاه)"
 msgstr ""
 
-#: i18n/states/IR.php:21
+#: i18n/states/IR.php:25
 msgid "Kerman (کرمان)"
 msgstr ""
 
-#: i18n/states/IR.php:22
+#: i18n/states/IR.php:26
 msgid "Hamadan (همدان)"
 msgstr ""
 
-#: i18n/states/IR.php:23
+#: i18n/states/IR.php:27
 msgid "Ghazvin (قزوین)"
 msgstr ""
 
-#: i18n/states/IR.php:24
+#: i18n/states/IR.php:28
 msgid "Zanjan (زنجان)"
 msgstr ""
 
-#: i18n/states/IR.php:25
+#: i18n/states/IR.php:29
 msgid "Luristan (لرستان)"
 msgstr ""
 
-#: i18n/states/IR.php:26
+#: i18n/states/IR.php:30
 msgid "Alborz (البرز)"
 msgstr ""
 
-#: i18n/states/IR.php:27
+#: i18n/states/IR.php:31
 msgid "East Azarbaijan (آذربایجان شرقی)"
 msgstr ""
 
-#: i18n/states/IR.php:28
+#: i18n/states/IR.php:32
 msgid "West Azarbaijan (آذربایجان غربی)"
 msgstr ""
 
-#: i18n/states/IR.php:29
+#: i18n/states/IR.php:33
 msgid "Chaharmahal and Bakhtiari (چهارمحال و بختیاری)"
 msgstr ""
 
-#: i18n/states/IR.php:30
+#: i18n/states/IR.php:34
 msgid "South Khorasan (خراسان جنوبی)"
 msgstr ""
 
-#: i18n/states/IR.php:31
+#: i18n/states/IR.php:35
 msgid "Razavi Khorasan (خراسان رضوی)"
 msgstr ""
 
-#: i18n/states/IR.php:32
+#: i18n/states/IR.php:36
 msgid "North Khorasan (خراسان جنوبی)"
 msgstr ""
 
-#: i18n/states/IR.php:33
+#: i18n/states/IR.php:37
 msgid "Semnan (سمنان)"
 msgstr ""
 
-#: i18n/states/IR.php:34
+#: i18n/states/IR.php:38
 msgid "Fars (فارس)"
 msgstr ""
 
-#: i18n/states/IR.php:35
+#: i18n/states/IR.php:39
 msgid "Qom (قم)"
 msgstr ""
 
-#: i18n/states/IR.php:36
+#: i18n/states/IR.php:40
 msgid "Kurdistan / کردستان)"
 msgstr ""
 
-#: i18n/states/IR.php:37
+#: i18n/states/IR.php:41
 msgid "Kohgiluyeh and BoyerAhmad (کهگیلوییه و بویراحمد)"
 msgstr ""
 
-#: i18n/states/IR.php:38
+#: i18n/states/IR.php:42
 msgid "Golestan (گلستان)"
 msgstr ""
 
-#: i18n/states/IR.php:39
+#: i18n/states/IR.php:43
 msgid "Gilan (گیلان)"
 msgstr ""
 
-#: i18n/states/IR.php:40
+#: i18n/states/IR.php:44
 msgid "Mazandaran (مازندران)"
 msgstr ""
 
-#: i18n/states/IR.php:41
+#: i18n/states/IR.php:45
 msgid "Markazi (مرکزی)"
 msgstr ""
 
-#: i18n/states/IR.php:42
+#: i18n/states/IR.php:46
 msgid "Hormozgan (هرمزگان)"
 msgstr ""
 
-#: i18n/states/IR.php:43
+#: i18n/states/IR.php:47
 msgid "Sistan and Baluchestan (سیستان و بلوچستان)"
 msgstr ""
 
-#: i18n/states/IT.php:13
+#: i18n/states/IT.php:17
 msgid "Agrigento"
 msgstr ""
 
-#: i18n/states/IT.php:14
+#: i18n/states/IT.php:18
 msgid "Alessandria"
 msgstr ""
 
-#: i18n/states/IT.php:15
+#: i18n/states/IT.php:19
 msgid "Ancona"
 msgstr ""
 
-#: i18n/states/IT.php:16
+#: i18n/states/IT.php:20
 msgid "Aosta"
 msgstr ""
 
-#: i18n/states/IT.php:17
+#: i18n/states/IT.php:21
 msgid "Arezzo"
 msgstr ""
 
-#: i18n/states/IT.php:18
+#: i18n/states/IT.php:22
 msgid "Ascoli Piceno"
 msgstr ""
 
-#: i18n/states/IT.php:19
+#: i18n/states/IT.php:23
 msgid "Asti"
 msgstr ""
 
-#: i18n/states/IT.php:20
+#: i18n/states/IT.php:24
 msgid "Avellino"
 msgstr ""
 
-#: i18n/states/IT.php:21
+#: i18n/states/IT.php:25
 msgid "Bari"
 msgstr ""
 
-#: i18n/states/IT.php:22
+#: i18n/states/IT.php:26
 msgid "Barletta-Andria-Trani"
 msgstr ""
 
-#: i18n/states/IT.php:23
+#: i18n/states/IT.php:27
 msgid "Belluno"
 msgstr ""
 
-#: i18n/states/IT.php:24
+#: i18n/states/IT.php:28
 msgid "Benevento"
 msgstr ""
 
-#: i18n/states/IT.php:25
+#: i18n/states/IT.php:29
 msgid "Bergamo"
 msgstr ""
 
-#: i18n/states/IT.php:26
+#: i18n/states/IT.php:30
 msgid "Biella"
 msgstr ""
 
-#: i18n/states/IT.php:27
+#: i18n/states/IT.php:31
 msgid "Bologna"
 msgstr ""
 
-#: i18n/states/IT.php:28
+#: i18n/states/IT.php:32
 msgid "Bolzano"
 msgstr ""
 
-#: i18n/states/IT.php:29
+#: i18n/states/IT.php:33
 msgid "Brescia"
 msgstr ""
 
-#: i18n/states/IT.php:30
+#: i18n/states/IT.php:34
 msgid "Brindisi"
 msgstr ""
 
-#: i18n/states/IT.php:31
+#: i18n/states/IT.php:35
 msgid "Cagliari"
 msgstr ""
 
-#: i18n/states/IT.php:32
+#: i18n/states/IT.php:36
 msgid "Caltanissetta"
 msgstr ""
 
-#: i18n/states/IT.php:33
+#: i18n/states/IT.php:37
 msgid "Campobasso"
 msgstr ""
 
-#: i18n/states/IT.php:34
+#: i18n/states/IT.php:38
 msgid "Carbonia-Iglesias"
 msgstr ""
 
-#: i18n/states/IT.php:35
+#: i18n/states/IT.php:39
 msgid "Caserta"
 msgstr ""
 
-#: i18n/states/IT.php:36
+#: i18n/states/IT.php:40
 msgid "Catania"
 msgstr ""
 
-#: i18n/states/IT.php:37
+#: i18n/states/IT.php:41
 msgid "Catanzaro"
 msgstr ""
 
-#: i18n/states/IT.php:38
+#: i18n/states/IT.php:42
 msgid "Chieti"
 msgstr ""
 
-#: i18n/states/IT.php:39
+#: i18n/states/IT.php:43
 msgid "Como"
 msgstr ""
 
-#: i18n/states/IT.php:40
+#: i18n/states/IT.php:44
 msgid "Cosenza"
 msgstr ""
 
-#: i18n/states/IT.php:41
+#: i18n/states/IT.php:45
 msgid "Cremona"
 msgstr ""
 
-#: i18n/states/IT.php:42
+#: i18n/states/IT.php:46
 msgid "Crotone"
 msgstr ""
 
-#: i18n/states/IT.php:43
+#: i18n/states/IT.php:47
 msgid "Cuneo"
 msgstr ""
 
-#: i18n/states/IT.php:44
+#: i18n/states/IT.php:48
 msgid "Enna"
 msgstr ""
 
-#: i18n/states/IT.php:45
+#: i18n/states/IT.php:49
 msgid "Fermo"
 msgstr ""
 
-#: i18n/states/IT.php:46
+#: i18n/states/IT.php:50
 msgid "Ferrara"
 msgstr ""
 
-#: i18n/states/IT.php:47
+#: i18n/states/IT.php:51
 msgid "Firenze"
 msgstr ""
 
-#: i18n/states/IT.php:48
+#: i18n/states/IT.php:52
 msgid "Foggia"
 msgstr ""
 
-#: i18n/states/IT.php:49
+#: i18n/states/IT.php:53
 msgid "Forlì-Cesena"
 msgstr ""
 
-#: i18n/states/IT.php:50
+#: i18n/states/IT.php:54
 msgid "Frosinone"
 msgstr ""
 
-#: i18n/states/IT.php:51
+#: i18n/states/IT.php:55
 msgid "Genova"
 msgstr ""
 
-#: i18n/states/IT.php:52
+#: i18n/states/IT.php:56
 msgid "Gorizia"
 msgstr ""
 
-#: i18n/states/IT.php:53
+#: i18n/states/IT.php:57
 msgid "Grosseto"
 msgstr ""
 
-#: i18n/states/IT.php:54
+#: i18n/states/IT.php:58
 msgid "Imperia"
 msgstr ""
 
-#: i18n/states/IT.php:55
+#: i18n/states/IT.php:59
 msgid "Isernia"
 msgstr ""
 
-#: i18n/states/IT.php:56
+#: i18n/states/IT.php:60
 msgid "La Spezia"
 msgstr ""
 
-#: i18n/states/IT.php:57
+#: i18n/states/IT.php:61
 msgid "L'Aquila"
 msgstr ""
 
-#: i18n/states/IT.php:58
+#: i18n/states/IT.php:62
 msgid "Latina"
 msgstr ""
 
-#: i18n/states/IT.php:59
+#: i18n/states/IT.php:63
 msgid "Lecce"
 msgstr ""
 
-#: i18n/states/IT.php:60
+#: i18n/states/IT.php:64
 msgid "Lecco"
 msgstr ""
 
-#: i18n/states/IT.php:61
+#: i18n/states/IT.php:65
 msgid "Livorno"
 msgstr ""
 
-#: i18n/states/IT.php:62
+#: i18n/states/IT.php:66
 msgid "Lodi"
 msgstr ""
 
-#: i18n/states/IT.php:63
+#: i18n/states/IT.php:67
 msgid "Lucca"
 msgstr ""
 
-#: i18n/states/IT.php:64
+#: i18n/states/IT.php:68
 msgid "Macerata"
 msgstr ""
 
-#: i18n/states/IT.php:65
+#: i18n/states/IT.php:69
 msgid "Mantova"
 msgstr ""
 
-#: i18n/states/IT.php:66
+#: i18n/states/IT.php:70
 msgid "Massa-Carrara"
 msgstr ""
 
-#: i18n/states/IT.php:67
+#: i18n/states/IT.php:71
 msgid "Matera"
 msgstr ""
 
-#: i18n/states/IT.php:68
+#: i18n/states/IT.php:72
 msgid "Messina"
 msgstr ""
 
-#: i18n/states/IT.php:69
+#: i18n/states/IT.php:73
 msgid "Milano"
 msgstr ""
 
-#: i18n/states/IT.php:70
+#: i18n/states/IT.php:74
 msgid "Modena"
 msgstr ""
 
-#: i18n/states/IT.php:71
+#: i18n/states/IT.php:75
 msgid "Monza e della Brianza"
 msgstr ""
 
-#: i18n/states/IT.php:72
+#: i18n/states/IT.php:76
 msgid "Napoli"
 msgstr ""
 
-#: i18n/states/IT.php:73
+#: i18n/states/IT.php:77
 msgid "Novara"
 msgstr ""
 
-#: i18n/states/IT.php:74
+#: i18n/states/IT.php:78
 msgid "Nuoro"
 msgstr ""
 
-#: i18n/states/IT.php:75
+#: i18n/states/IT.php:79
 msgid "Olbia-Tempio"
 msgstr ""
 
-#: i18n/states/IT.php:76
+#: i18n/states/IT.php:80
 msgid "Oristano"
 msgstr ""
 
-#: i18n/states/IT.php:77
+#: i18n/states/IT.php:81
 msgid "Padova"
 msgstr ""
 
-#: i18n/states/IT.php:78
+#: i18n/states/IT.php:82
 msgid "Palermo"
 msgstr ""
 
-#: i18n/states/IT.php:79
+#: i18n/states/IT.php:83
 msgid "Parma"
 msgstr ""
 
-#: i18n/states/IT.php:80
+#: i18n/states/IT.php:84
 msgid "Pavia"
 msgstr ""
 
-#: i18n/states/IT.php:81
+#: i18n/states/IT.php:85
 msgid "Perugia"
 msgstr ""
 
-#: i18n/states/IT.php:82
+#: i18n/states/IT.php:86
 msgid "Pesaro e Urbino"
 msgstr ""
 
-#: i18n/states/IT.php:83
+#: i18n/states/IT.php:87
 msgid "Pescara"
 msgstr ""
 
-#: i18n/states/IT.php:84
+#: i18n/states/IT.php:88
 msgid "Piacenza"
 msgstr ""
 
-#: i18n/states/IT.php:85
+#: i18n/states/IT.php:89
 msgid "Pisa"
 msgstr ""
 
-#: i18n/states/IT.php:86
+#: i18n/states/IT.php:90
 msgid "Pistoia"
 msgstr ""
 
-#: i18n/states/IT.php:87
+#: i18n/states/IT.php:91
 msgid "Pordenone"
 msgstr ""
 
-#: i18n/states/IT.php:88
+#: i18n/states/IT.php:92
 msgid "Potenza"
 msgstr ""
 
-#: i18n/states/IT.php:89
+#: i18n/states/IT.php:93
 msgid "Prato"
 msgstr ""
 
-#: i18n/states/IT.php:90
+#: i18n/states/IT.php:94
 msgid "Ragusa"
 msgstr ""
 
-#: i18n/states/IT.php:91
+#: i18n/states/IT.php:95
 msgid "Ravenna"
 msgstr ""
 
-#: i18n/states/IT.php:92
+#: i18n/states/IT.php:96
 msgid "Reggio Calabria"
 msgstr ""
 
-#: i18n/states/IT.php:93
+#: i18n/states/IT.php:97
 msgid "Reggio Emilia"
 msgstr ""
 
-#: i18n/states/IT.php:94
+#: i18n/states/IT.php:98
 msgid "Rieti"
 msgstr ""
 
-#: i18n/states/IT.php:95
+#: i18n/states/IT.php:99
 msgid "Rimini"
 msgstr ""
 
-#: i18n/states/IT.php:96
+#: i18n/states/IT.php:100
 msgid "Roma"
 msgstr ""
 
-#: i18n/states/IT.php:97
+#: i18n/states/IT.php:101
 msgid "Rovigo"
 msgstr ""
 
-#: i18n/states/IT.php:98
+#: i18n/states/IT.php:102
 msgid "Salerno"
 msgstr ""
 
-#: i18n/states/IT.php:99
+#: i18n/states/IT.php:103
 msgid "Medio Campidano"
 msgstr ""
 
-#: i18n/states/IT.php:100
+#: i18n/states/IT.php:104
 msgid "Sassari"
 msgstr ""
 
-#: i18n/states/IT.php:101
+#: i18n/states/IT.php:105
 msgid "Savona"
 msgstr ""
 
-#: i18n/states/IT.php:102
+#: i18n/states/IT.php:106
 msgid "Siena"
 msgstr ""
 
-#: i18n/states/IT.php:103
+#: i18n/states/IT.php:107
 msgid "Siracusa"
 msgstr ""
 
-#: i18n/states/IT.php:104
+#: i18n/states/IT.php:108
 msgid "Sondrio"
 msgstr ""
 
-#: i18n/states/IT.php:105
+#: i18n/states/IT.php:109
 msgid "Taranto"
 msgstr ""
 
-#: i18n/states/IT.php:106
+#: i18n/states/IT.php:110
 msgid "Teramo"
 msgstr ""
 
-#: i18n/states/IT.php:107
+#: i18n/states/IT.php:111
 msgid "Terni"
 msgstr ""
 
-#: i18n/states/IT.php:108
+#: i18n/states/IT.php:112
 msgid "Torino"
 msgstr ""
 
-#: i18n/states/IT.php:109
+#: i18n/states/IT.php:113
 msgid "Ogliastra"
 msgstr ""
 
-#: i18n/states/IT.php:110
+#: i18n/states/IT.php:114
 msgid "Trapani"
 msgstr ""
 
-#: i18n/states/IT.php:111
+#: i18n/states/IT.php:115
 msgid "Trento"
 msgstr ""
 
-#: i18n/states/IT.php:112
+#: i18n/states/IT.php:116
 msgid "Treviso"
 msgstr ""
 
-#: i18n/states/IT.php:113
+#: i18n/states/IT.php:117
 msgid "Trieste"
 msgstr ""
 
-#: i18n/states/IT.php:114
+#: i18n/states/IT.php:118
 msgid "Udine"
 msgstr ""
 
-#: i18n/states/IT.php:115
+#: i18n/states/IT.php:119
 msgid "Varese"
 msgstr ""
 
-#: i18n/states/IT.php:116
+#: i18n/states/IT.php:120
 msgid "Venezia"
 msgstr ""
 
-#: i18n/states/IT.php:117
+#: i18n/states/IT.php:121
 msgid "Verbano-Cusio-Ossola"
 msgstr ""
 
-#: i18n/states/IT.php:118
+#: i18n/states/IT.php:122
 msgid "Vercelli"
 msgstr ""
 
-#: i18n/states/IT.php:119
+#: i18n/states/IT.php:123
 msgid "Verona"
 msgstr ""
 
-#: i18n/states/IT.php:120
+#: i18n/states/IT.php:124
 msgid "Vibo Valentia"
 msgstr ""
 
-#: i18n/states/IT.php:121
+#: i18n/states/IT.php:125
 msgid "Vicenza"
 msgstr ""
 
-#: i18n/states/IT.php:122
+#: i18n/states/IT.php:126
 msgid "Viterbo"
 msgstr ""
 
-#: i18n/states/JP.php:13
+#: i18n/states/JP.php:17
 msgid "Hokkaido"
 msgstr ""
 
-#: i18n/states/JP.php:14
+#: i18n/states/JP.php:18
 msgid "Aomori"
 msgstr ""
 
-#: i18n/states/JP.php:15
+#: i18n/states/JP.php:19
 msgid "Iwate"
 msgstr ""
 
-#: i18n/states/JP.php:16
+#: i18n/states/JP.php:20
 msgid "Miyagi"
 msgstr ""
 
-#: i18n/states/JP.php:17
+#: i18n/states/JP.php:21
 msgid "Akita"
 msgstr ""
 
-#: i18n/states/JP.php:18
+#: i18n/states/JP.php:22
 msgid "Yamagata"
 msgstr ""
 
-#: i18n/states/JP.php:19
+#: i18n/states/JP.php:23
 msgid "Fukushima"
 msgstr ""
 
-#: i18n/states/JP.php:20
+#: i18n/states/JP.php:24
 msgid "Ibaraki"
 msgstr ""
 
-#: i18n/states/JP.php:21
+#: i18n/states/JP.php:25
 msgid "Tochigi"
 msgstr ""
 
-#: i18n/states/JP.php:22
+#: i18n/states/JP.php:26
 msgid "Gunma"
 msgstr ""
 
-#: i18n/states/JP.php:23
+#: i18n/states/JP.php:27
 msgid "Saitama"
 msgstr ""
 
-#: i18n/states/JP.php:24
+#: i18n/states/JP.php:28
 msgid "Chiba"
 msgstr ""
 
-#: i18n/states/JP.php:25
+#: i18n/states/JP.php:29
 msgid "Tokyo"
 msgstr ""
 
-#: i18n/states/JP.php:26
+#: i18n/states/JP.php:30
 msgid "Kanagawa"
 msgstr ""
 
-#: i18n/states/JP.php:27
+#: i18n/states/JP.php:31
 msgid "Niigata"
 msgstr ""
 
-#: i18n/states/JP.php:28
+#: i18n/states/JP.php:32
 msgid "Toyama"
 msgstr ""
 
-#: i18n/states/JP.php:29
+#: i18n/states/JP.php:33
 msgid "Ishikawa"
 msgstr ""
 
-#: i18n/states/JP.php:30
+#: i18n/states/JP.php:34
 msgid "Fukui"
 msgstr ""
 
-#: i18n/states/JP.php:31
+#: i18n/states/JP.php:35
 msgid "Yamanashi"
 msgstr ""
 
-#: i18n/states/JP.php:32
+#: i18n/states/JP.php:36
 msgid "Nagano"
 msgstr ""
 
-#: i18n/states/JP.php:33
+#: i18n/states/JP.php:37
 msgid "Gifu"
 msgstr ""
 
-#: i18n/states/JP.php:34
+#: i18n/states/JP.php:38
 msgid "Shizuoka"
 msgstr ""
 
-#: i18n/states/JP.php:35
+#: i18n/states/JP.php:39
 msgid "Aichi"
 msgstr ""
 
-#: i18n/states/JP.php:36
+#: i18n/states/JP.php:40
 msgid "Mie"
 msgstr ""
 
-#: i18n/states/JP.php:37
+#: i18n/states/JP.php:41
 msgid "Shiga"
 msgstr ""
 
-#: i18n/states/JP.php:38
+#: i18n/states/JP.php:42
 msgid "Kyoto"
 msgstr ""
 
-#: i18n/states/JP.php:39
+#: i18n/states/JP.php:43
 msgid "Osaka"
 msgstr ""
 
-#: i18n/states/JP.php:40
+#: i18n/states/JP.php:44
 msgid "Hyogo"
 msgstr ""
 
-#: i18n/states/JP.php:41
+#: i18n/states/JP.php:45
 msgid "Nara"
 msgstr ""
 
-#: i18n/states/JP.php:42
+#: i18n/states/JP.php:46
 msgid "Wakayama"
 msgstr ""
 
-#: i18n/states/JP.php:43
+#: i18n/states/JP.php:47
 msgid "Tottori"
 msgstr ""
 
-#: i18n/states/JP.php:44
+#: i18n/states/JP.php:48
 msgid "Shimane"
 msgstr ""
 
-#: i18n/states/JP.php:45
+#: i18n/states/JP.php:49
 msgid "Okayama"
 msgstr ""
 
-#: i18n/states/JP.php:46
+#: i18n/states/JP.php:50
 msgid "Hiroshima"
 msgstr ""
 
-#: i18n/states/JP.php:47
+#: i18n/states/JP.php:51
 msgid "Yamaguchi"
 msgstr ""
 
-#: i18n/states/JP.php:48
+#: i18n/states/JP.php:52
 msgid "Tokushima"
 msgstr ""
 
-#: i18n/states/JP.php:49
+#: i18n/states/JP.php:53
 msgid "Kagawa"
 msgstr ""
 
-#: i18n/states/JP.php:50
+#: i18n/states/JP.php:54
 msgid "Ehime"
 msgstr ""
 
-#: i18n/states/JP.php:51
+#: i18n/states/JP.php:55
 msgid "Kochi"
 msgstr ""
 
-#: i18n/states/JP.php:52
+#: i18n/states/JP.php:56
 msgid "Fukuoka"
 msgstr ""
 
-#: i18n/states/JP.php:53
+#: i18n/states/JP.php:57
 msgid "Saga"
 msgstr ""
 
-#: i18n/states/JP.php:54
+#: i18n/states/JP.php:58
 msgid "Nagasaki"
 msgstr ""
 
-#: i18n/states/JP.php:55
+#: i18n/states/JP.php:59
 msgid "Kumamoto"
 msgstr ""
 
-#: i18n/states/JP.php:56
+#: i18n/states/JP.php:60
 msgid "Oita"
 msgstr ""
 
-#: i18n/states/JP.php:57
+#: i18n/states/JP.php:61
 msgid "Miyazaki"
 msgstr ""
 
-#: i18n/states/JP.php:58
+#: i18n/states/JP.php:62
 msgid "Kagoshima"
 msgstr ""
 
-#: i18n/states/JP.php:59
+#: i18n/states/JP.php:63
 msgid "Okinawa"
 msgstr ""
 
-#: i18n/states/MX.php:14
+#: i18n/states/MX.php:18
 msgid "Jalisco"
 msgstr ""
 
-#: i18n/states/MX.php:15
+#: i18n/states/MX.php:19
 msgid "Nuevo León"
 msgstr ""
 
-#: i18n/states/MX.php:16
+#: i18n/states/MX.php:20
 msgid "Aguascalientes"
 msgstr ""
 
-#: i18n/states/MX.php:17
+#: i18n/states/MX.php:21
 msgid "Baja California"
 msgstr ""
 
-#: i18n/states/MX.php:18
+#: i18n/states/MX.php:22
 msgid "Baja California Sur"
 msgstr ""
 
-#: i18n/states/MX.php:19
+#: i18n/states/MX.php:23
 msgid "Campeche"
 msgstr ""
 
-#: i18n/states/MX.php:20
+#: i18n/states/MX.php:24
 msgid "Chiapas"
 msgstr ""
 
-#: i18n/states/MX.php:21
+#: i18n/states/MX.php:25
 msgid "Chihuahua"
 msgstr ""
 
-#: i18n/states/MX.php:22
+#: i18n/states/MX.php:26
 msgid "Coahuila"
 msgstr ""
 
-#: i18n/states/MX.php:23
+#: i18n/states/MX.php:27
 msgid "Colima"
 msgstr ""
 
-#: i18n/states/MX.php:24
+#: i18n/states/MX.php:28
 msgid "Durango"
 msgstr ""
 
-#: i18n/states/MX.php:25
+#: i18n/states/MX.php:29
 msgid "Guanajuato"
 msgstr ""
 
-#: i18n/states/MX.php:26
+#: i18n/states/MX.php:30
 msgid "Guerrero"
 msgstr ""
 
-#: i18n/states/MX.php:27
+#: i18n/states/MX.php:31
 msgid "Hidalgo"
 msgstr ""
 
-#: i18n/states/MX.php:28
+#: i18n/states/MX.php:32
 msgid "Edo. de México"
 msgstr ""
 
-#: i18n/states/MX.php:29
+#: i18n/states/MX.php:33
 msgid "Michoacán"
 msgstr ""
 
-#: i18n/states/MX.php:30
+#: i18n/states/MX.php:34
 msgid "Morelos"
 msgstr ""
 
-#: i18n/states/MX.php:31
+#: i18n/states/MX.php:35
 msgid "Nayarit"
 msgstr ""
 
-#: i18n/states/MX.php:32
+#: i18n/states/MX.php:36
 msgid "Oaxaca"
 msgstr ""
 
-#: i18n/states/MX.php:33
+#: i18n/states/MX.php:37
 msgid "Puebla"
 msgstr ""
 
-#: i18n/states/MX.php:34
+#: i18n/states/MX.php:38
 msgid "Querétaro"
 msgstr ""
 
-#: i18n/states/MX.php:35
+#: i18n/states/MX.php:39
 msgid "Quintana Roo"
 msgstr ""
 
-#: i18n/states/MX.php:36
+#: i18n/states/MX.php:40
 msgid "San Luis Potosí"
 msgstr ""
 
-#: i18n/states/MX.php:37
+#: i18n/states/MX.php:41
 msgid "Sinaloa"
 msgstr ""
 
-#: i18n/states/MX.php:38
+#: i18n/states/MX.php:42
 msgid "Sonora"
 msgstr ""
 
-#: i18n/states/MX.php:39
+#: i18n/states/MX.php:43
 msgid "Tabasco"
 msgstr ""
 
-#: i18n/states/MX.php:40
+#: i18n/states/MX.php:44
 msgid "Tamaulipas"
 msgstr ""
 
-#: i18n/states/MX.php:41
+#: i18n/states/MX.php:45
 msgid "Tlaxcala"
 msgstr ""
 
-#: i18n/states/MX.php:42
+#: i18n/states/MX.php:46
 msgid "Veracruz"
 msgstr ""
 
-#: i18n/states/MX.php:43
+#: i18n/states/MX.php:47
 msgid "Yucatán"
 msgstr ""
 
-#: i18n/states/MX.php:44
+#: i18n/states/MX.php:48
 msgid "Zacatecas"
 msgstr ""
 
-#: i18n/states/MY.php:13
+#: i18n/states/MY.php:17
 msgid "Johor"
 msgstr ""
 
-#: i18n/states/MY.php:14
+#: i18n/states/MY.php:18
 msgid "Kedah"
 msgstr ""
 
-#: i18n/states/MY.php:15
+#: i18n/states/MY.php:19
 msgid "Kelantan"
 msgstr ""
 
-#: i18n/states/MY.php:16
+#: i18n/states/MY.php:20
 msgid "Labuan"
 msgstr ""
 
-#: i18n/states/MY.php:17
+#: i18n/states/MY.php:21
 msgid "Malacca (Melaka)"
 msgstr ""
 
-#: i18n/states/MY.php:18
+#: i18n/states/MY.php:22
 msgid "Negeri Sembilan"
 msgstr ""
 
-#: i18n/states/MY.php:19
+#: i18n/states/MY.php:23
 msgid "Pahang"
 msgstr ""
 
-#: i18n/states/MY.php:20
+#: i18n/states/MY.php:24
 msgid "Penang (Pulau Pinang)"
 msgstr ""
 
-#: i18n/states/MY.php:21
+#: i18n/states/MY.php:25
 msgid "Perak"
 msgstr ""
 
-#: i18n/states/MY.php:22
+#: i18n/states/MY.php:26
 msgid "Perlis"
 msgstr ""
 
-#: i18n/states/MY.php:23
+#: i18n/states/MY.php:27
 msgid "Sabah"
 msgstr ""
 
-#: i18n/states/MY.php:24
+#: i18n/states/MY.php:28
 msgid "Sarawak"
 msgstr ""
 
-#: i18n/states/MY.php:25
+#: i18n/states/MY.php:29
 msgid "Selangor"
 msgstr ""
 
-#: i18n/states/MY.php:26
+#: i18n/states/MY.php:30
 msgid "Terengganu"
 msgstr ""
 
-#: i18n/states/MY.php:27
+#: i18n/states/MY.php:31
 msgid "Putrajaya"
 msgstr ""
 
-#: i18n/states/MY.php:28
+#: i18n/states/MY.php:32
 msgid "Kuala Lumpur"
 msgstr ""
 
-#: i18n/states/NG.php:14
+#: i18n/states/NG.php:18
 msgid "Abia"
 msgstr ""
 
-#: i18n/states/NG.php:15
+#: i18n/states/NG.php:19
 msgid "Abuja"
 msgstr ""
 
-#: i18n/states/NG.php:16
+#: i18n/states/NG.php:20
 msgid "Adamawa"
 msgstr ""
 
-#: i18n/states/NG.php:17
+#: i18n/states/NG.php:21
 msgid "Akwa Ibom"
 msgstr ""
 
-#: i18n/states/NG.php:18
+#: i18n/states/NG.php:22
 msgid "Anambra"
 msgstr ""
 
-#: i18n/states/NG.php:19
+#: i18n/states/NG.php:23
 msgid "Bauchi"
 msgstr ""
 
-#: i18n/states/NG.php:20
+#: i18n/states/NG.php:24
 msgid "Bayelsa"
 msgstr ""
 
-#: i18n/states/NG.php:21
+#: i18n/states/NG.php:25
 msgid "Benue"
 msgstr ""
 
-#: i18n/states/NG.php:22
+#: i18n/states/NG.php:26
 msgid "Borno"
 msgstr ""
 
-#: i18n/states/NG.php:23
+#: i18n/states/NG.php:27
 msgid "Cross River"
 msgstr ""
 
-#: i18n/states/NG.php:24
+#: i18n/states/NG.php:28
 msgid "Delta"
 msgstr ""
 
-#: i18n/states/NG.php:25
+#: i18n/states/NG.php:29
 msgid "Ebonyi"
 msgstr ""
 
-#: i18n/states/NG.php:26
+#: i18n/states/NG.php:30
 msgid "Edo"
 msgstr ""
 
-#: i18n/states/NG.php:27
+#: i18n/states/NG.php:31
 msgid "Ekiti"
 msgstr ""
 
-#: i18n/states/NG.php:28
+#: i18n/states/NG.php:32
 msgid "Enugu"
 msgstr ""
 
-#: i18n/states/NG.php:29
+#: i18n/states/NG.php:33
 msgid "Gombe"
 msgstr ""
 
-#: i18n/states/NG.php:30
+#: i18n/states/NG.php:34
 msgid "Imo"
 msgstr ""
 
-#: i18n/states/NG.php:31
+#: i18n/states/NG.php:35
 msgid "Jigawa"
 msgstr ""
 
-#: i18n/states/NG.php:32
+#: i18n/states/NG.php:36
 msgid "Kaduna"
 msgstr ""
 
-#: i18n/states/NG.php:33
+#: i18n/states/NG.php:37
 msgid "Kano"
 msgstr ""
 
-#: i18n/states/NG.php:34
+#: i18n/states/NG.php:38
 msgid "Katsina"
 msgstr ""
 
-#: i18n/states/NG.php:35
+#: i18n/states/NG.php:39
 msgid "Kebbi"
 msgstr ""
 
-#: i18n/states/NG.php:36
+#: i18n/states/NG.php:40
 msgid "Kogi"
 msgstr ""
 
-#: i18n/states/NG.php:37
+#: i18n/states/NG.php:41
 msgid "Kwara"
 msgstr ""
 
-#: i18n/states/NG.php:38
+#: i18n/states/NG.php:42
 msgid "Lagos"
 msgstr ""
 
-#: i18n/states/NG.php:39
+#: i18n/states/NG.php:43
 msgid "Nasarawa"
 msgstr ""
 
-#: i18n/states/NG.php:41
+#: i18n/states/NG.php:45
 msgid "Ogun"
 msgstr ""
 
-#: i18n/states/NG.php:42
+#: i18n/states/NG.php:46
 msgid "Ondo"
 msgstr ""
 
-#: i18n/states/NG.php:43
+#: i18n/states/NG.php:47
 msgid "Osun"
 msgstr ""
 
-#: i18n/states/NG.php:44
+#: i18n/states/NG.php:48
 msgid "Oyo"
 msgstr ""
 
-#: i18n/states/NG.php:45
+#: i18n/states/NG.php:49
 msgid "Plateau"
 msgstr ""
 
-#: i18n/states/NG.php:46
+#: i18n/states/NG.php:50
 msgid "Rivers"
 msgstr ""
 
-#: i18n/states/NG.php:47
+#: i18n/states/NG.php:51
 msgid "Sokoto"
 msgstr ""
 
-#: i18n/states/NG.php:48
+#: i18n/states/NG.php:52
 msgid "Taraba"
 msgstr ""
 
-#: i18n/states/NG.php:49
+#: i18n/states/NG.php:53
 msgid "Yobe"
 msgstr ""
 
-#: i18n/states/NG.php:50
+#: i18n/states/NG.php:54
 msgid "Zamfara"
 msgstr ""
 
-#: i18n/states/NP.php:13
+#: i18n/states/NP.php:17
 msgid "Bagmati"
 msgstr ""
 
-#: i18n/states/NP.php:14
+#: i18n/states/NP.php:18
 msgid "Bheri"
 msgstr ""
 
-#: i18n/states/NP.php:15
+#: i18n/states/NP.php:19
 msgid "Dhaulagiri"
 msgstr ""
 
-#: i18n/states/NP.php:16
+#: i18n/states/NP.php:20
 msgid "Gandaki"
 msgstr ""
 
-#: i18n/states/NP.php:17
+#: i18n/states/NP.php:21
 msgid "Janakpur"
 msgstr ""
 
-#: i18n/states/NP.php:18
+#: i18n/states/NP.php:22
 msgid "Karnali"
 msgstr ""
 
-#: i18n/states/NP.php:19
+#: i18n/states/NP.php:23
 msgid "Koshi"
 msgstr ""
 
-#: i18n/states/NP.php:20
+#: i18n/states/NP.php:24
 msgid "Lumbini"
 msgstr ""
 
-#: i18n/states/NP.php:21
+#: i18n/states/NP.php:25
 msgid "Mahakali"
 msgstr ""
 
-#: i18n/states/NP.php:22
+#: i18n/states/NP.php:26
 msgid "Mechi"
 msgstr ""
 
-#: i18n/states/NP.php:23
+#: i18n/states/NP.php:27
 msgid "Narayani"
 msgstr ""
 
-#: i18n/states/NP.php:24
+#: i18n/states/NP.php:28
 msgid "Rapti"
 msgstr ""
 
-#: i18n/states/NP.php:25
+#: i18n/states/NP.php:29
 msgid "Sagarmatha"
 msgstr ""
 
-#: i18n/states/NP.php:26
+#: i18n/states/NP.php:30
 msgid "Seti"
 msgstr ""
 
-#: i18n/states/NZ.php:13
+#: i18n/states/NZ.php:17
 msgid "Northland"
 msgstr ""
 
-#: i18n/states/NZ.php:14
+#: i18n/states/NZ.php:18
 msgid "Auckland"
 msgstr ""
 
-#: i18n/states/NZ.php:15
+#: i18n/states/NZ.php:19
 msgid "Waikato"
 msgstr ""
 
-#: i18n/states/NZ.php:16
+#: i18n/states/NZ.php:20
 msgid "Bay of Plenty"
 msgstr ""
 
-#: i18n/states/NZ.php:17
+#: i18n/states/NZ.php:21
 msgid "Taranaki"
 msgstr ""
 
-#: i18n/states/NZ.php:18
+#: i18n/states/NZ.php:22
 msgid "Gisborne"
 msgstr ""
 
-#: i18n/states/NZ.php:19
+#: i18n/states/NZ.php:23
 msgid "Hawke&rsquo;s Bay"
 msgstr ""
 
-#: i18n/states/NZ.php:20
+#: i18n/states/NZ.php:24
 msgid "Manawatu-Wanganui"
 msgstr ""
 
-#: i18n/states/NZ.php:21
+#: i18n/states/NZ.php:25
 msgid "Wellington"
 msgstr ""
 
-#: i18n/states/NZ.php:22
+#: i18n/states/NZ.php:26
 msgid "Nelson"
 msgstr ""
 
-#: i18n/states/NZ.php:23
+#: i18n/states/NZ.php:27
 msgid "Marlborough"
 msgstr ""
 
-#: i18n/states/NZ.php:24
+#: i18n/states/NZ.php:28
 msgid "Tasman"
 msgstr ""
 
-#: i18n/states/NZ.php:25
+#: i18n/states/NZ.php:29
 msgid "West Coast"
 msgstr ""
 
-#: i18n/states/NZ.php:26
+#: i18n/states/NZ.php:30
 msgid "Canterbury"
 msgstr ""
 
-#: i18n/states/NZ.php:27
+#: i18n/states/NZ.php:31
 msgid "Otago"
 msgstr ""
 
-#: i18n/states/NZ.php:28
+#: i18n/states/NZ.php:32
 msgid "Southland"
 msgstr ""
 
-#: i18n/states/PE.php:13
+#: i18n/states/PE.php:17
 msgid "El Callao"
 msgstr ""
 
-#: i18n/states/PE.php:14
+#: i18n/states/PE.php:18
 msgid "Municipalidad Metropolitana de Lima"
 msgstr ""
 
-#: i18n/states/PE.php:16
+#: i18n/states/PE.php:20
 msgid "Ancash"
 msgstr ""
 
-#: i18n/states/PE.php:17
+#: i18n/states/PE.php:21
 msgid "Apur&iacute;mac"
 msgstr ""
 
-#: i18n/states/PE.php:18
+#: i18n/states/PE.php:22
 msgid "Arequipa"
 msgstr ""
 
-#: i18n/states/PE.php:19
+#: i18n/states/PE.php:23
 msgid "Ayacucho"
 msgstr ""
 
-#: i18n/states/PE.php:20
+#: i18n/states/PE.php:24
 msgid "Cajamarca"
 msgstr ""
 
-#: i18n/states/PE.php:21
+#: i18n/states/PE.php:25
 msgid "Cusco"
 msgstr ""
 
-#: i18n/states/PE.php:22
+#: i18n/states/PE.php:26
 msgid "Huancavelica"
 msgstr ""
 
-#: i18n/states/PE.php:23
+#: i18n/states/PE.php:27
 msgid "Hu&aacute;nuco"
 msgstr ""
 
-#: i18n/states/PE.php:24
+#: i18n/states/PE.php:28
 msgid "Ica"
 msgstr ""
 
-#: i18n/states/PE.php:25
+#: i18n/states/PE.php:29
 msgid "Jun&iacute;n"
 msgstr ""
 
-#: i18n/states/PE.php:26
+#: i18n/states/PE.php:30
 msgid "La Libertad"
 msgstr ""
 
-#: i18n/states/PE.php:27
+#: i18n/states/PE.php:31
 msgid "Lambayeque"
 msgstr ""
 
-#: i18n/states/PE.php:28
+#: i18n/states/PE.php:32
 msgid "Lima"
 msgstr ""
 
-#: i18n/states/PE.php:29
+#: i18n/states/PE.php:33
 msgid "Loreto"
 msgstr ""
 
-#: i18n/states/PE.php:30
+#: i18n/states/PE.php:34
 msgid "Madre de Dios"
 msgstr ""
 
-#: i18n/states/PE.php:31
+#: i18n/states/PE.php:35
 msgid "Moquegua"
 msgstr ""
 
-#: i18n/states/PE.php:32
+#: i18n/states/PE.php:36
 msgid "Pasco"
 msgstr ""
 
-#: i18n/states/PE.php:33
+#: i18n/states/PE.php:37
 msgid "Piura"
 msgstr ""
 
-#: i18n/states/PE.php:34
+#: i18n/states/PE.php:38
 msgid "Puno"
 msgstr ""
 
-#: i18n/states/PE.php:35
+#: i18n/states/PE.php:39
 msgid "San Mart&iacute;n"
 msgstr ""
 
-#: i18n/states/PE.php:36
+#: i18n/states/PE.php:40
 msgid "Tacna"
 msgstr ""
 
-#: i18n/states/PE.php:37
+#: i18n/states/PE.php:41
 msgid "Tumbes"
 msgstr ""
 
-#: i18n/states/PE.php:38
+#: i18n/states/PE.php:42
 msgid "Ucayali"
 msgstr ""
 
-#: i18n/states/PH.php:12
+#: i18n/states/PH.php:16
 msgid "Abra"
 msgstr ""
 
-#: i18n/states/PH.php:13
+#: i18n/states/PH.php:17
 msgid "Agusan del Norte"
 msgstr ""
 
-#: i18n/states/PH.php:14
+#: i18n/states/PH.php:18
 msgid "Agusan del Sur"
 msgstr ""
 
-#: i18n/states/PH.php:15
+#: i18n/states/PH.php:19
 msgid "Aklan"
 msgstr ""
 
-#: i18n/states/PH.php:16
+#: i18n/states/PH.php:20
 msgid "Albay"
 msgstr ""
 
-#: i18n/states/PH.php:17
+#: i18n/states/PH.php:21
 msgid "Antique"
 msgstr ""
 
-#: i18n/states/PH.php:18
+#: i18n/states/PH.php:22
 msgid "Apayao"
 msgstr ""
 
-#: i18n/states/PH.php:19
+#: i18n/states/PH.php:23
 msgid "Aurora"
 msgstr ""
 
-#: i18n/states/PH.php:20
+#: i18n/states/PH.php:24
 msgid "Basilan"
 msgstr ""
 
-#: i18n/states/PH.php:21
+#: i18n/states/PH.php:25
 msgid "Bataan"
 msgstr ""
 
-#: i18n/states/PH.php:22
+#: i18n/states/PH.php:26
 msgid "Batanes"
 msgstr ""
 
-#: i18n/states/PH.php:23
+#: i18n/states/PH.php:27
 msgid "Batangas"
 msgstr ""
 
-#: i18n/states/PH.php:24
+#: i18n/states/PH.php:28
 msgid "Benguet"
 msgstr ""
 
-#: i18n/states/PH.php:25
+#: i18n/states/PH.php:29
 msgid "Biliran"
 msgstr ""
 
-#: i18n/states/PH.php:26
+#: i18n/states/PH.php:30
 msgid "Bohol"
 msgstr ""
 
-#: i18n/states/PH.php:27
+#: i18n/states/PH.php:31
 msgid "Bukidnon"
 msgstr ""
 
-#: i18n/states/PH.php:28
+#: i18n/states/PH.php:32
 msgid "Bulacan"
 msgstr ""
 
-#: i18n/states/PH.php:29
+#: i18n/states/PH.php:33
 msgid "Cagayan"
 msgstr ""
 
-#: i18n/states/PH.php:30
+#: i18n/states/PH.php:34
 msgid "Camarines Norte"
 msgstr ""
 
-#: i18n/states/PH.php:31
+#: i18n/states/PH.php:35
 msgid "Camarines Sur"
 msgstr ""
 
-#: i18n/states/PH.php:32
+#: i18n/states/PH.php:36
 msgid "Camiguin"
 msgstr ""
 
-#: i18n/states/PH.php:33
+#: i18n/states/PH.php:37
 msgid "Capiz"
 msgstr ""
 
-#: i18n/states/PH.php:34
+#: i18n/states/PH.php:38
 msgid "Catanduanes"
 msgstr ""
 
-#: i18n/states/PH.php:35
+#: i18n/states/PH.php:39
 msgid "Cavite"
 msgstr ""
 
-#: i18n/states/PH.php:36
+#: i18n/states/PH.php:40
 msgid "Cebu"
 msgstr ""
 
-#: i18n/states/PH.php:37
+#: i18n/states/PH.php:41
 msgid "Compostela Valley"
 msgstr ""
 
-#: i18n/states/PH.php:38
+#: i18n/states/PH.php:42
 msgid "Cotabato"
 msgstr ""
 
-#: i18n/states/PH.php:39
+#: i18n/states/PH.php:43
 msgid "Davao del Norte"
 msgstr ""
 
-#: i18n/states/PH.php:40
+#: i18n/states/PH.php:44
 msgid "Davao del Sur"
 msgstr ""
 
-#: i18n/states/PH.php:41
+#: i18n/states/PH.php:45
 msgid "Davao Occidental"
 msgstr ""
 
-#: i18n/states/PH.php:42
+#: i18n/states/PH.php:46
 msgid "Davao Oriental"
 msgstr ""
 
-#: i18n/states/PH.php:43
+#: i18n/states/PH.php:47
 msgid "Dinagat Islands"
 msgstr ""
 
-#: i18n/states/PH.php:44
+#: i18n/states/PH.php:48
 msgid "Eastern Samar"
 msgstr ""
 
-#: i18n/states/PH.php:45
+#: i18n/states/PH.php:49
 msgid "Guimaras"
 msgstr ""
 
-#: i18n/states/PH.php:46
+#: i18n/states/PH.php:50
 msgid "Ifugao"
 msgstr ""
 
-#: i18n/states/PH.php:47
+#: i18n/states/PH.php:51
 msgid "Ilocos Norte"
 msgstr ""
 
-#: i18n/states/PH.php:48
+#: i18n/states/PH.php:52
 msgid "Ilocos Sur"
 msgstr ""
 
-#: i18n/states/PH.php:49
+#: i18n/states/PH.php:53
 msgid "Iloilo"
 msgstr ""
 
-#: i18n/states/PH.php:50
+#: i18n/states/PH.php:54
 msgid "Isabela"
 msgstr ""
 
-#: i18n/states/PH.php:51
+#: i18n/states/PH.php:55
 msgid "Kalinga"
 msgstr ""
 
-#: i18n/states/PH.php:52
+#: i18n/states/PH.php:56
 msgid "La Union"
 msgstr ""
 
-#: i18n/states/PH.php:53
+#: i18n/states/PH.php:57
 msgid "Laguna"
 msgstr ""
 
-#: i18n/states/PH.php:54
+#: i18n/states/PH.php:58
 msgid "Lanao del Norte"
 msgstr ""
 
-#: i18n/states/PH.php:55
+#: i18n/states/PH.php:59
 msgid "Lanao del Sur"
 msgstr ""
 
-#: i18n/states/PH.php:56
+#: i18n/states/PH.php:60
 msgid "Leyte"
 msgstr ""
 
-#: i18n/states/PH.php:57
+#: i18n/states/PH.php:61
 msgid "Maguindanao"
 msgstr ""
 
-#: i18n/states/PH.php:58
+#: i18n/states/PH.php:62
 msgid "Marinduque"
 msgstr ""
 
-#: i18n/states/PH.php:59
+#: i18n/states/PH.php:63
 msgid "Masbate"
 msgstr ""
 
-#: i18n/states/PH.php:60
+#: i18n/states/PH.php:64
 msgid "Misamis Occidental"
 msgstr ""
 
-#: i18n/states/PH.php:61
+#: i18n/states/PH.php:65
 msgid "Misamis Oriental"
 msgstr ""
 
-#: i18n/states/PH.php:62
+#: i18n/states/PH.php:66
 msgid "Mountain Province"
 msgstr ""
 
-#: i18n/states/PH.php:63
+#: i18n/states/PH.php:67
 msgid "Negros Occidental"
 msgstr ""
 
-#: i18n/states/PH.php:64
+#: i18n/states/PH.php:68
 msgid "Negros Oriental"
 msgstr ""
 
-#: i18n/states/PH.php:65
+#: i18n/states/PH.php:69
 msgid "Northern Samar"
 msgstr ""
 
-#: i18n/states/PH.php:66
+#: i18n/states/PH.php:70
 msgid "Nueva Ecija"
 msgstr ""
 
-#: i18n/states/PH.php:67
+#: i18n/states/PH.php:71
 msgid "Nueva Vizcaya"
 msgstr ""
 
-#: i18n/states/PH.php:68
+#: i18n/states/PH.php:72
 msgid "Occidental Mindoro"
 msgstr ""
 
-#: i18n/states/PH.php:69
+#: i18n/states/PH.php:73
 msgid "Oriental Mindoro"
 msgstr ""
 
-#: i18n/states/PH.php:70
+#: i18n/states/PH.php:74
 msgid "Palawan"
 msgstr ""
 
-#: i18n/states/PH.php:71
+#: i18n/states/PH.php:75
 msgid "Pampanga"
 msgstr ""
 
-#: i18n/states/PH.php:72
+#: i18n/states/PH.php:76
 msgid "Pangasinan"
 msgstr ""
 
-#: i18n/states/PH.php:73
+#: i18n/states/PH.php:77
 msgid "Quezon"
 msgstr ""
 
-#: i18n/states/PH.php:74
+#: i18n/states/PH.php:78
 msgid "Quirino"
 msgstr ""
 
-#: i18n/states/PH.php:75
+#: i18n/states/PH.php:79
 msgid "Rizal"
 msgstr ""
 
-#: i18n/states/PH.php:76
+#: i18n/states/PH.php:80
 msgid "Romblon"
 msgstr ""
 
-#: i18n/states/PH.php:77
+#: i18n/states/PH.php:81
 msgid "Samar"
 msgstr ""
 
-#: i18n/states/PH.php:78
+#: i18n/states/PH.php:82
 msgid "Sarangani"
 msgstr ""
 
-#: i18n/states/PH.php:79
+#: i18n/states/PH.php:83
 msgid "Siquijor"
 msgstr ""
 
-#: i18n/states/PH.php:80
+#: i18n/states/PH.php:84
 msgid "Sorsogon"
 msgstr ""
 
-#: i18n/states/PH.php:81
+#: i18n/states/PH.php:85
 msgid "South Cotabato"
 msgstr ""
 
-#: i18n/states/PH.php:82
+#: i18n/states/PH.php:86
 msgid "Southern Leyte"
 msgstr ""
 
-#: i18n/states/PH.php:83
+#: i18n/states/PH.php:87
 msgid "Sultan Kudarat"
 msgstr ""
 
-#: i18n/states/PH.php:84
+#: i18n/states/PH.php:88
 msgid "Sulu"
 msgstr ""
 
-#: i18n/states/PH.php:85
+#: i18n/states/PH.php:89
 msgid "Surigao del Norte"
 msgstr ""
 
-#: i18n/states/PH.php:86
+#: i18n/states/PH.php:90
 msgid "Surigao del Sur"
 msgstr ""
 
-#: i18n/states/PH.php:87
+#: i18n/states/PH.php:91
 msgid "Tarlac"
 msgstr ""
 
-#: i18n/states/PH.php:88
+#: i18n/states/PH.php:92
 msgid "Tawi-Tawi"
 msgstr ""
 
-#: i18n/states/PH.php:89
+#: i18n/states/PH.php:93
 msgid "Zambales"
 msgstr ""
 
-#: i18n/states/PH.php:90
+#: i18n/states/PH.php:94
 msgid "Zamboanga del Norte"
 msgstr ""
 
-#: i18n/states/PH.php:91
+#: i18n/states/PH.php:95
 msgid "Zamboanga del Sur"
 msgstr ""
 
-#: i18n/states/PH.php:92
+#: i18n/states/PH.php:96
 msgid "Zamboanga Sibugay"
 msgstr ""
 
-#: i18n/states/PH.php:93
+#: i18n/states/PH.php:97
 msgid "Metro Manila"
 msgstr ""
 
-#: i18n/states/PK.php:13
+#: i18n/states/PK.php:17
 msgid "Azad Kashmir"
 msgstr ""
 
-#: i18n/states/PK.php:14
+#: i18n/states/PK.php:18
 msgid "Balochistan"
 msgstr ""
 
-#: i18n/states/PK.php:15
+#: i18n/states/PK.php:19
 msgid "FATA"
 msgstr ""
 
-#: i18n/states/PK.php:16
+#: i18n/states/PK.php:20
 msgid "Gilgit Baltistan"
 msgstr ""
 
-#: i18n/states/PK.php:17
+#: i18n/states/PK.php:21
 msgid "Islamabad Capital Territory"
 msgstr ""
 
-#: i18n/states/PK.php:18
+#: i18n/states/PK.php:22
 msgid "Khyber Pakhtunkhwa"
 msgstr ""
 
-#: i18n/states/PK.php:20
+#: i18n/states/PK.php:24
 msgid "Sindh"
 msgstr ""
 
-#: i18n/states/TH.php:13
+#: i18n/states/TH.php:17
 msgid ""
 "Amnat Charoen "
 "(&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)"
 msgstr ""
 
-#: i18n/states/TH.php:14
+#: i18n/states/TH.php:18
 msgid "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:15
+#: i18n/states/TH.php:19
 msgid ""
 "Ayutthaya "
 "(&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3629;&#361"
 "8;&#3640;&#3608;&#3618;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:16
+#: i18n/states/TH.php:20
 msgid ""
 "Bangkok "
 "(&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;&#3634;&#360"
 "9;&#3588;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:17
+#: i18n/states/TH.php:21
 msgid "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
 msgstr ""
 
-#: i18n/states/TH.php:18
+#: i18n/states/TH.php:22
 msgid "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:19
+#: i18n/states/TH.php:23
 msgid ""
 "Chachoengsao "
 "(&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:20
+#: i18n/states/TH.php:24
 msgid "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
 msgstr ""
 
-#: i18n/states/TH.php:21
+#: i18n/states/TH.php:25
 msgid "Chaiyaphum (&#3594;&#3633;&#3618;&#3616;&#3641;&#3617;&#3636;)"
 msgstr ""
 
-#: i18n/states/TH.php:22
+#: i18n/states/TH.php:26
 msgid "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:23
+#: i18n/states/TH.php:27
 msgid "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
 msgstr ""
 
-#: i18n/states/TH.php:24
+#: i18n/states/TH.php:28
 msgid "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
 msgstr ""
 
-#: i18n/states/TH.php:25
+#: i18n/states/TH.php:29
 msgid "Chonburi (&#3594;&#3621;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:26
+#: i18n/states/TH.php:30
 msgid "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:27
+#: i18n/states/TH.php:31
 msgid "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:28
+#: i18n/states/TH.php:32
 msgid ""
 "Kamphaeng Phet "
 "(&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:29
+#: i18n/states/TH.php:33
 msgid ""
 "Kanchanaburi "
 "(&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:30
+#: i18n/states/TH.php:34
 msgid "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
 msgstr ""
 
-#: i18n/states/TH.php:31
+#: i18n/states/TH.php:35
 msgid "Krabi (&#3585;&#3619;&#3632;&#3610;&#3637;&#3656;)"
 msgstr ""
 
-#: i18n/states/TH.php:32
+#: i18n/states/TH.php:36
 msgid "Lampang (&#3621;&#3635;&#3611;&#3634;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:33
+#: i18n/states/TH.php:37
 msgid "Lamphun (&#3621;&#3635;&#3614;&#3641;&#3609;)"
 msgstr ""
 
-#: i18n/states/TH.php:34
+#: i18n/states/TH.php:38
 msgid "Loei (&#3648;&#3621;&#3618;)"
 msgstr ""
 
-#: i18n/states/TH.php:35
+#: i18n/states/TH.php:39
 msgid "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:36
+#: i18n/states/TH.php:40
 msgid ""
 "Mae Hong Son "
 "(&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;&#3609;)"
 msgstr ""
 
-#: i18n/states/TH.php:37
+#: i18n/states/TH.php:41
 msgid ""
 "Maha Sarakham "
 "(&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;&#3617;)"
 msgstr ""
 
-#: i18n/states/TH.php:38
+#: i18n/states/TH.php:42
 msgid "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:39
+#: i18n/states/TH.php:43
 msgid "Nakhon Nayok (&#3609;&#3588;&#3619;&#3609;&#3634;&#3618;&#3585;)"
 msgstr ""
 
-#: i18n/states/TH.php:40
+#: i18n/states/TH.php:44
 msgid "Nakhon Pathom (&#3609;&#3588;&#3619;&#3611;&#3600;&#3617;)"
 msgstr ""
 
-#: i18n/states/TH.php:41
+#: i18n/states/TH.php:45
 msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
 msgstr ""
 
-#: i18n/states/TH.php:42
+#: i18n/states/TH.php:46
 msgid ""
 "Nakhon Ratchasima "
 "(&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;&#3617;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:43
+#: i18n/states/TH.php:47
 msgid ""
 "Nakhon Sawan "
 "(&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:44
+#: i18n/states/TH.php:48
 msgid ""
 "Nakhon Si Thammarat "
 "(&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;&#3619;&#3617;&#361"
 "9;&#3634;&#3594;)"
 msgstr ""
 
-#: i18n/states/TH.php:45
+#: i18n/states/TH.php:49
 msgid "Nan (&#3609;&#3656;&#3634;&#3609;)"
 msgstr ""
 
-#: i18n/states/TH.php:46
+#: i18n/states/TH.php:50
 msgid "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
 msgstr ""
 
-#: i18n/states/TH.php:47
+#: i18n/states/TH.php:51
 msgid ""
 "Nong Bua Lam Phu "
 "(&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#364"
 "1;)"
 msgstr ""
 
-#: i18n/states/TH.php:48
+#: i18n/states/TH.php:52
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
 msgstr ""
 
-#: i18n/states/TH.php:49
+#: i18n/states/TH.php:53
 msgid "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:50
+#: i18n/states/TH.php:54
 msgid "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:51
+#: i18n/states/TH.php:55
 msgid "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:52
+#: i18n/states/TH.php:56
 msgid "Phang Nga (&#3614;&#3633;&#3591;&#3591;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:53
+#: i18n/states/TH.php:57
 msgid "Phatthalung (&#3614;&#3633;&#3607;&#3621;&#3640;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:54
+#: i18n/states/TH.php:58
 msgid "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:55
+#: i18n/states/TH.php:59
 msgid "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:56
+#: i18n/states/TH.php:60
 msgid "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:57
+#: i18n/states/TH.php:61
 msgid "Phichit (&#3614;&#3636;&#3592;&#3636;&#3605;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:58
+#: i18n/states/TH.php:62
 msgid "Phitsanulok (&#3614;&#3636;&#3625;&#3603;&#3640;&#3650;&#3621;&#3585;)"
 msgstr ""
 
-#: i18n/states/TH.php:59
+#: i18n/states/TH.php:63
 msgid "Phrae (&#3649;&#3614;&#3619;&#3656;)"
 msgstr ""
 
-#: i18n/states/TH.php:60
+#: i18n/states/TH.php:64
 msgid "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
 msgstr ""
 
-#: i18n/states/TH.php:61
+#: i18n/states/TH.php:65
 msgid ""
 "Prachin Buri "
 "(&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:62
+#: i18n/states/TH.php:66
 msgid ""
 "Prachuap Khiri Khan "
 "(&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;&#3619;&#3637;&#358"
 "6;&#3633;&#3609;&#3608;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:63
+#: i18n/states/TH.php:67
 msgid "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:64
+#: i18n/states/TH.php:68
 msgid "Ratchaburi (&#3619;&#3634;&#3594;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:65
+#: i18n/states/TH.php:69
 msgid "Rayong (&#3619;&#3632;&#3618;&#3629;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:66
+#: i18n/states/TH.php:70
 msgid "Roi Et (&#3619;&#3657;&#3629;&#3618;&#3648;&#3629;&#3655;&#3604;)"
 msgstr ""
 
-#: i18n/states/TH.php:67
+#: i18n/states/TH.php:71
 msgid "Sa Kaeo (&#3626;&#3619;&#3632;&#3649;&#3585;&#3657;&#3623;)"
 msgstr ""
 
-#: i18n/states/TH.php:68
+#: i18n/states/TH.php:72
 msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:69
+#: i18n/states/TH.php:73
 msgid ""
 "Samut Prakan "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;&#3634;&#361"
 "9;)"
 msgstr ""
 
-#: i18n/states/TH.php:70
+#: i18n/states/TH.php:74
 msgid ""
 "Samut Sakhon "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;&#3619;)"
 msgstr ""
 
-#: i18n/states/TH.php:71
+#: i18n/states/TH.php:75
 msgid ""
 "Samut Songkhram "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;&#3619;&#3634;&#361"
 "7;)"
 msgstr ""
 
-#: i18n/states/TH.php:72
+#: i18n/states/TH.php:76
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:73
+#: i18n/states/TH.php:77
 msgid "Satun (&#3626;&#3605;&#3641;&#3621;)"
 msgstr ""
 
-#: i18n/states/TH.php:74
+#: i18n/states/TH.php:78
 msgid "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:75
+#: i18n/states/TH.php:79
 msgid "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
 msgstr ""
 
-#: i18n/states/TH.php:76
+#: i18n/states/TH.php:80
 msgid "Songkhla (&#3626;&#3591;&#3586;&#3621;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:77
+#: i18n/states/TH.php:81
 msgid "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
 msgstr ""
 
-#: i18n/states/TH.php:78
+#: i18n/states/TH.php:82
 msgid ""
 "Suphan Buri "
 "(&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:79
+#: i18n/states/TH.php:83
 msgid ""
 "Surat Thani "
 "(&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;&#3634;&#360"
 "9;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:80
+#: i18n/states/TH.php:84
 msgid "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:81
+#: i18n/states/TH.php:85
 msgid "Tak (&#3605;&#3634;&#3585;)"
 msgstr ""
 
-#: i18n/states/TH.php:82
+#: i18n/states/TH.php:86
 msgid "Trang (&#3605;&#3619;&#3633;&#3591;)"
 msgstr ""
 
-#: i18n/states/TH.php:83
+#: i18n/states/TH.php:87
 msgid "Trat (&#3605;&#3619;&#3634;&#3604;)"
 msgstr ""
 
-#: i18n/states/TH.php:84
+#: i18n/states/TH.php:88
 msgid ""
 "Ubon Ratchathani "
 "(&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;&#3634;&#3609;&#363"
 "7;)"
 msgstr ""
 
-#: i18n/states/TH.php:85
+#: i18n/states/TH.php:89
 msgid "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:86
+#: i18n/states/TH.php:90
 msgid ""
 "Uthai Thani "
 "(&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
 msgstr ""
 
-#: i18n/states/TH.php:87
+#: i18n/states/TH.php:91
 msgid "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
 msgstr ""
 
-#: i18n/states/TH.php:88
+#: i18n/states/TH.php:92
 msgid "Yala (&#3618;&#3632;&#3621;&#3634;)"
 msgstr ""
 
-#: i18n/states/TH.php:89
+#: i18n/states/TH.php:93
 msgid "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
 msgstr ""
 
-#: i18n/states/TR.php:13
+#: i18n/states/TR.php:17
 msgid "Adana"
 msgstr ""
 
-#: i18n/states/TR.php:14
+#: i18n/states/TR.php:18
 msgid "Ad&#305;yaman"
 msgstr ""
 
-#: i18n/states/TR.php:15
+#: i18n/states/TR.php:19
 msgid "Afyon"
 msgstr ""
 
-#: i18n/states/TR.php:16
+#: i18n/states/TR.php:20
 msgid "A&#287;r&#305;"
 msgstr ""
 
-#: i18n/states/TR.php:17
+#: i18n/states/TR.php:21
 msgid "Amasya"
 msgstr ""
 
-#: i18n/states/TR.php:18
+#: i18n/states/TR.php:22
 msgid "Ankara"
 msgstr ""
 
-#: i18n/states/TR.php:19
+#: i18n/states/TR.php:23
 msgid "Antalya"
 msgstr ""
 
-#: i18n/states/TR.php:20
+#: i18n/states/TR.php:24
 msgid "Artvin"
 msgstr ""
 
-#: i18n/states/TR.php:21
+#: i18n/states/TR.php:25
 msgid "Ayd&#305;n"
 msgstr ""
 
-#: i18n/states/TR.php:22
+#: i18n/states/TR.php:26
 msgid "Bal&#305;kesir"
 msgstr ""
 
-#: i18n/states/TR.php:23
+#: i18n/states/TR.php:27
 msgid "Bilecik"
 msgstr ""
 
-#: i18n/states/TR.php:24
+#: i18n/states/TR.php:28
 msgid "Bing&#246;l"
 msgstr ""
 
-#: i18n/states/TR.php:25
+#: i18n/states/TR.php:29
 msgid "Bitlis"
 msgstr ""
 
-#: i18n/states/TR.php:26
+#: i18n/states/TR.php:30
 msgid "Bolu"
 msgstr ""
 
-#: i18n/states/TR.php:27
+#: i18n/states/TR.php:31
 msgid "Burdur"
 msgstr ""
 
-#: i18n/states/TR.php:28
+#: i18n/states/TR.php:32
 msgid "Bursa"
 msgstr ""
 
-#: i18n/states/TR.php:29
+#: i18n/states/TR.php:33
 msgid "&#199;anakkale"
 msgstr ""
 
-#: i18n/states/TR.php:30
+#: i18n/states/TR.php:34
 msgid "&#199;ank&#305;r&#305;"
 msgstr ""
 
-#: i18n/states/TR.php:31
+#: i18n/states/TR.php:35
 msgid "&#199;orum"
 msgstr ""
 
-#: i18n/states/TR.php:32
+#: i18n/states/TR.php:36
 msgid "Denizli"
 msgstr ""
 
-#: i18n/states/TR.php:33
+#: i18n/states/TR.php:37
 msgid "Diyarbak&#305;r"
 msgstr ""
 
-#: i18n/states/TR.php:34
+#: i18n/states/TR.php:38
 msgid "Edirne"
 msgstr ""
 
-#: i18n/states/TR.php:35
+#: i18n/states/TR.php:39
 msgid "Elaz&#305;&#287;"
 msgstr ""
 
-#: i18n/states/TR.php:36
+#: i18n/states/TR.php:40
 msgid "Erzincan"
 msgstr ""
 
-#: i18n/states/TR.php:37
+#: i18n/states/TR.php:41
 msgid "Erzurum"
 msgstr ""
 
-#: i18n/states/TR.php:38
+#: i18n/states/TR.php:42
 msgid "Eski&#351;ehir"
 msgstr ""
 
-#: i18n/states/TR.php:39
+#: i18n/states/TR.php:43
 msgid "Gaziantep"
 msgstr ""
 
-#: i18n/states/TR.php:40
+#: i18n/states/TR.php:44
 msgid "Giresun"
 msgstr ""
 
-#: i18n/states/TR.php:41
+#: i18n/states/TR.php:45
 msgid "G&#252;m&#252;&#351;hane"
 msgstr ""
 
-#: i18n/states/TR.php:42
+#: i18n/states/TR.php:46
 msgid "Hakkari"
 msgstr ""
 
-#: i18n/states/TR.php:43
+#: i18n/states/TR.php:47
 msgid "Hatay"
 msgstr ""
 
-#: i18n/states/TR.php:44
+#: i18n/states/TR.php:48
 msgid "Isparta"
 msgstr ""
 
-#: i18n/states/TR.php:45
+#: i18n/states/TR.php:49
 msgid "&#304;&#231;el"
 msgstr ""
 
-#: i18n/states/TR.php:46
+#: i18n/states/TR.php:50
 msgid "&#304;stanbul"
 msgstr ""
 
-#: i18n/states/TR.php:47
+#: i18n/states/TR.php:51
 msgid "&#304;zmir"
 msgstr ""
 
-#: i18n/states/TR.php:48
+#: i18n/states/TR.php:52
 msgid "Kars"
 msgstr ""
 
-#: i18n/states/TR.php:49
+#: i18n/states/TR.php:53
 msgid "Kastamonu"
 msgstr ""
 
-#: i18n/states/TR.php:50
+#: i18n/states/TR.php:54
 msgid "Kayseri"
 msgstr ""
 
-#: i18n/states/TR.php:51
+#: i18n/states/TR.php:55
 msgid "K&#305;rklareli"
 msgstr ""
 
-#: i18n/states/TR.php:52
+#: i18n/states/TR.php:56
 msgid "K&#305;r&#351;ehir"
 msgstr ""
 
-#: i18n/states/TR.php:53
+#: i18n/states/TR.php:57
 msgid "Kocaeli"
 msgstr ""
 
-#: i18n/states/TR.php:54
+#: i18n/states/TR.php:58
 msgid "Konya"
 msgstr ""
 
-#: i18n/states/TR.php:55
+#: i18n/states/TR.php:59
 msgid "K&#252;tahya"
 msgstr ""
 
-#: i18n/states/TR.php:56
+#: i18n/states/TR.php:60
 msgid "Malatya"
 msgstr ""
 
-#: i18n/states/TR.php:57
+#: i18n/states/TR.php:61
 msgid "Manisa"
 msgstr ""
 
-#: i18n/states/TR.php:58
+#: i18n/states/TR.php:62
 msgid "Kahramanmara&#351;"
 msgstr ""
 
-#: i18n/states/TR.php:59
+#: i18n/states/TR.php:63
 msgid "Mardin"
 msgstr ""
 
-#: i18n/states/TR.php:60
+#: i18n/states/TR.php:64
 msgid "Mu&#287;la"
 msgstr ""
 
-#: i18n/states/TR.php:61
+#: i18n/states/TR.php:65
 msgid "Mu&#351;"
 msgstr ""
 
-#: i18n/states/TR.php:62
+#: i18n/states/TR.php:66
 msgid "Nev&#351;ehir"
 msgstr ""
 
-#: i18n/states/TR.php:63
+#: i18n/states/TR.php:67
 msgid "Ni&#287;de"
 msgstr ""
 
-#: i18n/states/TR.php:64
+#: i18n/states/TR.php:68
 msgid "Ordu"
 msgstr ""
 
-#: i18n/states/TR.php:65
+#: i18n/states/TR.php:69
 msgid "Rize"
 msgstr ""
 
-#: i18n/states/TR.php:66
+#: i18n/states/TR.php:70
 msgid "Sakarya"
 msgstr ""
 
-#: i18n/states/TR.php:67
+#: i18n/states/TR.php:71
 msgid "Samsun"
 msgstr ""
 
-#: i18n/states/TR.php:68
+#: i18n/states/TR.php:72
 msgid "Siirt"
 msgstr ""
 
-#: i18n/states/TR.php:69
+#: i18n/states/TR.php:73
 msgid "Sinop"
 msgstr ""
 
-#: i18n/states/TR.php:70
+#: i18n/states/TR.php:74
 msgid "Sivas"
 msgstr ""
 
-#: i18n/states/TR.php:71
+#: i18n/states/TR.php:75
 msgid "Tekirda&#287;"
 msgstr ""
 
-#: i18n/states/TR.php:72
+#: i18n/states/TR.php:76
 msgid "Tokat"
 msgstr ""
 
-#: i18n/states/TR.php:73
+#: i18n/states/TR.php:77
 msgid "Trabzon"
 msgstr ""
 
-#: i18n/states/TR.php:74
+#: i18n/states/TR.php:78
 msgid "Tunceli"
 msgstr ""
 
-#: i18n/states/TR.php:75
+#: i18n/states/TR.php:79
 msgid "&#350;anl&#305;urfa"
 msgstr ""
 
-#: i18n/states/TR.php:76
+#: i18n/states/TR.php:80
 msgid "U&#351;ak"
 msgstr ""
 
-#: i18n/states/TR.php:77
+#: i18n/states/TR.php:81
 msgid "Van"
 msgstr ""
 
-#: i18n/states/TR.php:78
+#: i18n/states/TR.php:82
 msgid "Yozgat"
 msgstr ""
 
-#: i18n/states/TR.php:79
+#: i18n/states/TR.php:83
 msgid "Zonguldak"
 msgstr ""
 
-#: i18n/states/TR.php:80
+#: i18n/states/TR.php:84
 msgid "Aksaray"
 msgstr ""
 
-#: i18n/states/TR.php:81
+#: i18n/states/TR.php:85
 msgid "Bayburt"
 msgstr ""
 
-#: i18n/states/TR.php:82
+#: i18n/states/TR.php:86
 msgid "Karaman"
 msgstr ""
 
-#: i18n/states/TR.php:83
+#: i18n/states/TR.php:87
 msgid "K&#305;r&#305;kkale"
 msgstr ""
 
-#: i18n/states/TR.php:84
+#: i18n/states/TR.php:88
 msgid "Batman"
 msgstr ""
 
-#: i18n/states/TR.php:85
+#: i18n/states/TR.php:89
 msgid "&#350;&#305;rnak"
 msgstr ""
 
-#: i18n/states/TR.php:86
+#: i18n/states/TR.php:90
 msgid "Bart&#305;n"
 msgstr ""
 
-#: i18n/states/TR.php:87
+#: i18n/states/TR.php:91
 msgid "Ardahan"
 msgstr ""
 
-#: i18n/states/TR.php:88
+#: i18n/states/TR.php:92
 msgid "I&#287;d&#305;r"
 msgstr ""
 
-#: i18n/states/TR.php:89
+#: i18n/states/TR.php:93
 msgid "Yalova"
 msgstr ""
 
-#: i18n/states/TR.php:90
+#: i18n/states/TR.php:94
 msgid "Karab&#252;k"
 msgstr ""
 
-#: i18n/states/TR.php:91
+#: i18n/states/TR.php:95
 msgid "Kilis"
 msgstr ""
 
-#: i18n/states/TR.php:92
+#: i18n/states/TR.php:96
 msgid "Osmaniye"
 msgstr ""
 
-#: i18n/states/TR.php:93
+#: i18n/states/TR.php:97
 msgid "D&#252;zce"
 msgstr ""
 
-#: i18n/states/US.php:13
+#: i18n/states/US.php:17
 msgid "Alabama"
 msgstr ""
 
-#: i18n/states/US.php:14
+#: i18n/states/US.php:18
 msgid "Alaska"
 msgstr ""
 
-#: i18n/states/US.php:15
+#: i18n/states/US.php:19
 msgid "Arizona"
 msgstr ""
 
-#: i18n/states/US.php:16
+#: i18n/states/US.php:20
 msgid "Arkansas"
 msgstr ""
 
-#: i18n/states/US.php:17
+#: i18n/states/US.php:21
 msgid "California"
 msgstr ""
 
-#: i18n/states/US.php:18
+#: i18n/states/US.php:22
 msgid "Colorado"
 msgstr ""
 
-#: i18n/states/US.php:19
+#: i18n/states/US.php:23
 msgid "Connecticut"
 msgstr ""
 
-#: i18n/states/US.php:20
+#: i18n/states/US.php:24
 msgid "Delaware"
 msgstr ""
 
-#: i18n/states/US.php:21
+#: i18n/states/US.php:25
 msgid "District Of Columbia"
 msgstr ""
 
-#: i18n/states/US.php:22
+#: i18n/states/US.php:26
 msgid "Florida"
 msgstr ""
 
-#: i18n/states/US.php:24
+#: i18n/states/US.php:28
 msgid "Hawaii"
 msgstr ""
 
-#: i18n/states/US.php:25
+#: i18n/states/US.php:29
 msgid "Idaho"
 msgstr ""
 
-#: i18n/states/US.php:26
+#: i18n/states/US.php:30
 msgid "Illinois"
 msgstr ""
 
-#: i18n/states/US.php:27
+#: i18n/states/US.php:31
 msgid "Indiana"
 msgstr ""
 
-#: i18n/states/US.php:28
+#: i18n/states/US.php:32
 msgid "Iowa"
 msgstr ""
 
-#: i18n/states/US.php:29
+#: i18n/states/US.php:33
 msgid "Kansas"
 msgstr ""
 
-#: i18n/states/US.php:30
+#: i18n/states/US.php:34
 msgid "Kentucky"
 msgstr ""
 
-#: i18n/states/US.php:31
+#: i18n/states/US.php:35
 msgid "Louisiana"
 msgstr ""
 
-#: i18n/states/US.php:32
+#: i18n/states/US.php:36
 msgid "Maine"
 msgstr ""
 
-#: i18n/states/US.php:33
+#: i18n/states/US.php:37
 msgid "Maryland"
 msgstr ""
 
-#: i18n/states/US.php:34
+#: i18n/states/US.php:38
 msgid "Massachusetts"
 msgstr ""
 
-#: i18n/states/US.php:35
+#: i18n/states/US.php:39
 msgid "Michigan"
 msgstr ""
 
-#: i18n/states/US.php:36
+#: i18n/states/US.php:40
 msgid "Minnesota"
 msgstr ""
 
-#: i18n/states/US.php:37
+#: i18n/states/US.php:41
 msgid "Mississippi"
 msgstr ""
 
-#: i18n/states/US.php:38
+#: i18n/states/US.php:42
 msgid "Missouri"
 msgstr ""
 
-#: i18n/states/US.php:40
+#: i18n/states/US.php:44
 msgid "Nebraska"
 msgstr ""
 
-#: i18n/states/US.php:41
+#: i18n/states/US.php:45
 msgid "Nevada"
 msgstr ""
 
-#: i18n/states/US.php:42
+#: i18n/states/US.php:46
 msgid "New Hampshire"
 msgstr ""
 
-#: i18n/states/US.php:43
+#: i18n/states/US.php:47
 msgid "New Jersey"
 msgstr ""
 
-#: i18n/states/US.php:44
+#: i18n/states/US.php:48
 msgid "New Mexico"
 msgstr ""
 
-#: i18n/states/US.php:45
+#: i18n/states/US.php:49
 msgid "New York"
 msgstr ""
 
-#: i18n/states/US.php:46
+#: i18n/states/US.php:50
 msgid "North Carolina"
 msgstr ""
 
-#: i18n/states/US.php:47
+#: i18n/states/US.php:51
 msgid "North Dakota"
 msgstr ""
 
-#: i18n/states/US.php:48
+#: i18n/states/US.php:52
 msgid "Ohio"
 msgstr ""
 
-#: i18n/states/US.php:49
+#: i18n/states/US.php:53
 msgid "Oklahoma"
 msgstr ""
 
-#: i18n/states/US.php:50
+#: i18n/states/US.php:54
 msgid "Oregon"
 msgstr ""
 
-#: i18n/states/US.php:51
+#: i18n/states/US.php:55
 msgid "Pennsylvania"
 msgstr ""
 
-#: i18n/states/US.php:52
+#: i18n/states/US.php:56
 msgid "Rhode Island"
 msgstr ""
 
-#: i18n/states/US.php:53
+#: i18n/states/US.php:57
 msgid "South Carolina"
 msgstr ""
 
-#: i18n/states/US.php:54
+#: i18n/states/US.php:58
 msgid "South Dakota"
 msgstr ""
 
-#: i18n/states/US.php:55
+#: i18n/states/US.php:59
 msgid "Tennessee"
 msgstr ""
 
-#: i18n/states/US.php:56
+#: i18n/states/US.php:60
 msgid "Texas"
 msgstr ""
 
-#: i18n/states/US.php:57
+#: i18n/states/US.php:61
 msgid "Utah"
 msgstr ""
 
-#: i18n/states/US.php:58
+#: i18n/states/US.php:62
 msgid "Vermont"
 msgstr ""
 
-#: i18n/states/US.php:59
+#: i18n/states/US.php:63
 msgid "Virginia"
 msgstr ""
 
-#: i18n/states/US.php:60
+#: i18n/states/US.php:64
 msgid "Washington"
 msgstr ""
 
-#: i18n/states/US.php:61
+#: i18n/states/US.php:65
 msgid "West Virginia"
 msgstr ""
 
-#: i18n/states/US.php:62
+#: i18n/states/US.php:66
 msgid "Wisconsin"
 msgstr ""
 
-#: i18n/states/US.php:63
+#: i18n/states/US.php:67
 msgid "Wyoming"
 msgstr ""
 
-#: i18n/states/US.php:64
+#: i18n/states/US.php:68
 msgid "Armed Forces (AA)"
 msgstr ""
 
-#: i18n/states/US.php:65
+#: i18n/states/US.php:69
 msgid "Armed Forces (AE)"
 msgstr ""
 
-#: i18n/states/US.php:66
+#: i18n/states/US.php:70
 msgid "Armed Forces (AP)"
 msgstr ""
 
-#: i18n/states/ZA.php:13
+#: i18n/states/ZA.php:17
 msgid "Eastern Cape"
 msgstr ""
 
-#: i18n/states/ZA.php:14
+#: i18n/states/ZA.php:18
 msgid "Free State"
 msgstr ""
 
-#: i18n/states/ZA.php:15
+#: i18n/states/ZA.php:19
 msgid "Gauteng"
 msgstr ""
 
-#: i18n/states/ZA.php:16
+#: i18n/states/ZA.php:20
 msgid "KwaZulu-Natal"
 msgstr ""
 
-#: i18n/states/ZA.php:17
+#: i18n/states/ZA.php:21
 msgid "Limpopo"
 msgstr ""
 
-#: i18n/states/ZA.php:18
+#: i18n/states/ZA.php:22
 msgid "Mpumalanga"
 msgstr ""
 
-#: i18n/states/ZA.php:19
+#: i18n/states/ZA.php:23
 msgid "Northern Cape"
 msgstr ""
 
-#: i18n/states/ZA.php:20
+#: i18n/states/ZA.php:24
 msgid "North West"
 msgstr ""
 
-#: i18n/states/ZA.php:21
+#: i18n/states/ZA.php:25
 msgid "Western Cape"
 msgstr ""
 
@@ -5203,7 +5203,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1541
 #: includes/admin/meta-boxes/views/html-order-item.php:97
 #: includes/admin/meta-boxes/views/html-order-item.php:143
-#: includes/shortcodes/class-wc-shortcode-checkout.php:151
+#: includes/shortcodes/class-wc-shortcode-checkout.php:156
 #: templates/checkout/thankyou.php:56
 msgid "Total:"
 msgstr ""
@@ -5680,16 +5680,16 @@ msgstr ""
 msgid "Limit result set to resources with a specific slug."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-settings-api.php:735
+#: includes/abstracts/abstract-wc-settings-api.php:740
 #: includes/admin/class-wc-admin-menus.php:279
 #: includes/admin/class-wc-admin-settings.php:618
-#: includes/admin/meta-boxes/views/html-product-attribute.php:45
+#: includes/admin/meta-boxes/views/html-product-attribute.php:50
 msgid "Select all"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-settings-api.php:735
+#: includes/abstracts/abstract-wc-settings-api.php:740
 #: includes/admin/class-wc-admin-settings.php:618
-#: includes/admin/meta-boxes/views/html-product-attribute.php:46
+#: includes/admin/meta-boxes/views/html-product-attribute.php:51
 msgid "Select none"
 msgstr ""
 
@@ -5720,7 +5720,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-api-keys-table-list.php:40
 #: includes/admin/class-wc-admin-post-types.php:286
-#: includes/admin/class-wc-admin-setup-wizard.php:248
+#: includes/admin/class-wc-admin-setup-wizard.php:258
 #: includes/admin/meta-boxes/views/html-variation-admin.php:307
 #: includes/admin/settings/class-wc-settings-shipping.php:341
 #: includes/admin/settings/views/html-admin-page-shipping-zone-methods.php:73
@@ -5954,12 +5954,12 @@ msgid "Select an option&hellip;"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:225
-#: includes/admin/meta-boxes/views/html-order-item-meta.php:41
+#: includes/admin/meta-boxes/views/html-order-item-meta.php:45
 msgid "Name (required)"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:226
-#: includes/admin/meta-boxes/views/html-order-item-meta.php:42
+#: includes/admin/meta-boxes/views/html-order-item-meta.php:46
 msgid "Value (required)"
 msgstr ""
 
@@ -6004,10 +6004,10 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:454
 #: includes/admin/class-wc-admin-attributes.php:495
 #: includes/admin/class-wc-admin-post-types.php:254
-#: includes/admin/class-wc-admin-setup-wizard.php:488
+#: includes/admin/class-wc-admin-setup-wizard.php:498
 #: includes/admin/class-wc-admin-webhooks-table-list.php:40
-#: includes/admin/meta-boxes/views/html-product-attribute.php:12
-#: includes/admin/meta-boxes/views/html-product-data-general.php:61
+#: includes/admin/meta-boxes/views/html-product-attribute.php:17
+#: includes/admin/meta-boxes/views/html-product-data-general.php:66
 #: includes/admin/meta-boxes/views/html-variation-admin.php:320
 #: includes/admin/settings/views/html-webhooks-edit.php:15
 #: includes/admin/views/html-admin-page-status-report.php:558
@@ -6017,21 +6017,21 @@ msgid "Name"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:249
-#: includes/admin/meta-boxes/views/html-product-attribute.php:3
+#: includes/admin/meta-boxes/views/html-product-attribute.php:8
 #: includes/admin/meta-boxes/views/html-variation-admin.php:16
 #: includes/admin/settings/views/html-admin-page-shipping-classes.php:48
 msgid "Remove"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:250
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:10
-#: includes/admin/meta-boxes/views/html-product-attribute.php:4
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:9
+#: includes/admin/meta-boxes/views/html-product-attribute.php:9
 #: includes/admin/meta-boxes/views/html-variation-admin.php:17
 msgid "Click to toggle"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:251
-#: includes/admin/meta-boxes/views/html-product-attribute.php:24
+#: includes/admin/meta-boxes/views/html-product-attribute.php:29
 msgid "Value(s)"
 msgstr ""
 
@@ -6040,12 +6040,12 @@ msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:253
-#: includes/admin/meta-boxes/views/html-product-attribute.php:76
+#: includes/admin/meta-boxes/views/html-product-attribute.php:81
 msgid "Visible on the product page"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:254
-#: includes/admin/meta-boxes/views/html-product-attribute.php:82
+#: includes/admin/meta-boxes/views/html-product-attribute.php:87
 msgid "Used for variations"
 msgstr ""
 
@@ -6270,8 +6270,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-log-table-list.php:159
 #: includes/admin/meta-boxes/class-wc-meta-box-product-images.php:58
 #: includes/admin/meta-boxes/class-wc-meta-box-product-images.php:78
-#: includes/admin/meta-boxes/views/html-product-download.php:9
-#: includes/admin/meta-boxes/views/html-product-variation-download.php:8
+#: includes/admin/meta-boxes/views/html-product-download.php:14
+#: includes/admin/meta-boxes/views/html-product-variation-download.php:13
 #: includes/admin/settings/views/html-admin-page-shipping-zone-methods.php:107
 #: includes/admin/settings/views/html-admin-page-shipping-zones.php:78
 #: includes/wc-account-functions.php:269
@@ -6742,14 +6742,14 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/settings/class-wc-settings-api.php:45
 #: includes/admin/views/html-admin-page-status-report.php:437
-#: includes/class-wc-install.php:893
+#: includes/class-wc-install.php:894
 msgid "Settings"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:97
 #: includes/admin/class-wc-admin-post-types.php:302
 #: includes/admin/class-wc-admin-webhooks-table-list.php:41
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:44
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:49
 #: includes/admin/settings/views/html-webhook-log.php:25
 #: includes/admin/settings/views/html-webhooks-edit.php:28
 #: includes/wc-account-functions.php:185 templates/myaccount/my-orders.php:15
@@ -6931,7 +6931,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-pointers.php:124
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:70
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:75
 #: includes/admin/settings/class-wc-settings-products.php:47
 #: includes/admin/settings/class-wc-settings-products.php:362
 msgid "Downloadable products"
@@ -7235,7 +7235,7 @@ msgid "Image"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:257
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:9
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:14
 #: includes/admin/meta-boxes/views/html-variation-admin.php:64
 #: includes/admin/views/html-quick-edit-product.php:22
 msgid "SKU"
@@ -7243,7 +7243,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:261
 #: includes/admin/class-wc-admin-reports.php:91
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:60
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:65
 msgid "Stock"
 msgstr ""
 
@@ -7575,8 +7575,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:1821
 #: includes/admin/meta-boxes/views/html-order-items.php:215
 #: includes/admin/meta-boxes/views/html-order-items.php:257
-#: includes/admin/meta-boxes/views/html-product-data-general.php:47
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:110
+#: includes/admin/meta-boxes/views/html-product-data-general.php:52
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:115
 #: templates/myaccount/my-orders.php:83 templates/myaccount/orders.php:79
 msgid "Cancel"
 msgstr ""
@@ -7604,7 +7604,7 @@ msgid "Ready to start selling something awesome?"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1933
-#: includes/admin/class-wc-admin-setup-wizard.php:806
+#: includes/admin/class-wc-admin-setup-wizard.php:855
 msgid "Create your first product!"
 msgstr ""
 
@@ -7691,7 +7691,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:132
 #: includes/admin/class-wc-admin-settings.php:585
 #: includes/admin/class-wc-admin-settings.php:610
-#: includes/admin/class-wc-admin-setup-wizard.php:485
+#: includes/admin/class-wc-admin-setup-wizard.php:495
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:71
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:120
 #: includes/class-wc-countries.php:575
@@ -7832,7 +7832,7 @@ msgid "Select a page&hellip;"
 msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:585
-#: includes/admin/class-wc-admin-setup-wizard.php:321
+#: includes/admin/class-wc-admin-setup-wizard.php:331
 msgid "Choose a country&hellip;"
 msgstr ""
 
@@ -7845,7 +7845,7 @@ msgid "Introduction"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:64
-#: includes/admin/class-wc-admin-setup-wizard.php:241
+#: includes/admin/class-wc-admin-setup-wizard.php:251
 msgid "Page setup"
 msgstr ""
 
@@ -7858,80 +7858,85 @@ msgid "Shipping &amp; tax"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:79
-#: includes/admin/class-wc-admin-setup-wizard.php:683
+#: includes/admin/class-wc-admin-setup-wizard.php:693
 msgid "Payments"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:84
+#: includes/admin/views/html-admin-page-status-report.php:553
+msgid "Theme"
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:89
 msgid "Ready!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:168
+#: includes/admin/class-wc-admin-setup-wizard.php:178
 msgid "WooCommerce &rsaquo; Setup Wizard"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:184
+#: includes/admin/class-wc-admin-setup-wizard.php:194
 msgid "Return to the WordPress Dashboard"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:226
+#: includes/admin/class-wc-admin-setup-wizard.php:236
 msgid "Welcome to the world of WooCommerce!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:227
+#: includes/admin/class-wc-admin-setup-wizard.php:237
 msgid ""
 "Thank you for choosing WooCommerce to power your online store! This quick "
 "setup wizard will help you configure the basic settings. <strong>It’s "
 "completely optional and shouldn’t take longer than five minutes.</strong>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:228
+#: includes/admin/class-wc-admin-setup-wizard.php:238
 msgid ""
 "No time right now? If you don’t want to go through the wizard, you can skip "
 "and return to the WordPress dashboard. Come back anytime if you change your "
 "mind!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:230
+#: includes/admin/class-wc-admin-setup-wizard.php:240
 msgid "Let's go!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:231
+#: includes/admin/class-wc-admin-setup-wizard.php:241
 msgid "Not right now"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:243
+#: includes/admin/class-wc-admin-setup-wizard.php:253
 msgid ""
 "Your store needs a few essential <a href=\"%s\" "
 "target=\"_blank\">pages</a>. The following will be created automatically "
 "(if they do not already exist):"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:247
+#: includes/admin/class-wc-admin-setup-wizard.php:257
 msgid "Page name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:254
+#: includes/admin/class-wc-admin-setup-wizard.php:264
 msgid "The shop page will display your products."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:258
+#: includes/admin/class-wc-admin-setup-wizard.php:268
 msgid ""
 "The cart page will be where the customers go to view their cart and begin "
 "checkout."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:263
+#: includes/admin/class-wc-admin-setup-wizard.php:273
 msgid "The checkout page will be where the customers go to pay for their items."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:269
+#: includes/admin/class-wc-admin-setup-wizard.php:279
 msgid ""
 "Registered customers will be able to manage their account details and view "
 "past orders on this page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:275
+#: includes/admin/class-wc-admin-setup-wizard.php:285
 msgid ""
 "Once created, these pages can be managed from your admin dashboard on the "
 "<a href=\"%1$s\" target=\"_blank\">Pages screen</a>. You can control which "
@@ -7939,274 +7944,275 @@ msgid ""
 "target=\"_blank\">Appearance > Menus</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:278
-#: includes/admin/class-wc-admin-setup-wizard.php:394
-#: includes/admin/class-wc-admin-setup-wizard.php:515
-#: includes/admin/class-wc-admin-setup-wizard.php:726
+#: includes/admin/class-wc-admin-setup-wizard.php:288
+#: includes/admin/class-wc-admin-setup-wizard.php:404
+#: includes/admin/class-wc-admin-setup-wizard.php:525
+#: includes/admin/class-wc-admin-setup-wizard.php:736
 msgid "Continue"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:279
-#: includes/admin/class-wc-admin-setup-wizard.php:395
-#: includes/admin/class-wc-admin-setup-wizard.php:516
-#: includes/admin/class-wc-admin-setup-wizard.php:727
+#: includes/admin/class-wc-admin-setup-wizard.php:289
+#: includes/admin/class-wc-admin-setup-wizard.php:405
+#: includes/admin/class-wc-admin-setup-wizard.php:526
+#: includes/admin/class-wc-admin-setup-wizard.php:737
+#: includes/admin/class-wc-admin-setup-wizard.php:796
 msgid "Skip this step"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:315
+#: includes/admin/class-wc-admin-setup-wizard.php:325
 msgid "Store locale setup"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:319
+#: includes/admin/class-wc-admin-setup-wizard.php:329
 msgid "Where is your store based?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:327
+#: includes/admin/class-wc-admin-setup-wizard.php:337
 msgid "Which currency will your store use?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:329
-#: includes/admin/class-wc-admin-setup-wizard.php:330
+#: includes/admin/class-wc-admin-setup-wizard.php:339
+#: includes/admin/class-wc-admin-setup-wizard.php:340
 msgid "Choose a currency&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:333
+#: includes/admin/class-wc-admin-setup-wizard.php:343
 #: includes/admin/meta-boxes/views/html-order-items.php:39
 #: includes/admin/views/html-bulk-edit-product.php:134
 msgid "%1$s (%2$s)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:337
+#: includes/admin/class-wc-admin-setup-wizard.php:347
 msgid ""
 "If your currency is not listed you can <a href=\"%s\" target=\"_blank\">add "
 "it later</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:341
+#: includes/admin/class-wc-admin-setup-wizard.php:351
 #: includes/admin/settings/class-wc-settings-general.php:179
 #: includes/admin/views/html-admin-page-status-report.php:457
 msgid "Currency position"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:344
+#: includes/admin/class-wc-admin-setup-wizard.php:354
 #: includes/admin/settings/class-wc-settings-general.php:187
 msgid "Left"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:345
+#: includes/admin/class-wc-admin-setup-wizard.php:355
 #: includes/admin/settings/class-wc-settings-general.php:188
 msgid "Right"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:346
+#: includes/admin/class-wc-admin-setup-wizard.php:356
 #: includes/admin/settings/class-wc-settings-general.php:189
 msgid "Left with space"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:347
+#: includes/admin/class-wc-admin-setup-wizard.php:357
 #: includes/admin/settings/class-wc-settings-general.php:190
 msgid "Right with space"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:352
+#: includes/admin/class-wc-admin-setup-wizard.php:362
 #: includes/admin/settings/class-wc-settings-general.php:196
 #: includes/admin/views/html-admin-page-status-report.php:462
 msgid "Thousand separator"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:358
+#: includes/admin/class-wc-admin-setup-wizard.php:368
 #: includes/admin/settings/class-wc-settings-general.php:206
 #: includes/admin/views/html-admin-page-status-report.php:467
 msgid "Decimal separator"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:364
+#: includes/admin/class-wc-admin-setup-wizard.php:374
 #: includes/admin/settings/class-wc-settings-general.php:216
 #: includes/admin/views/html-admin-page-status-report.php:472
 msgid "Number of decimals"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:370
+#: includes/admin/class-wc-admin-setup-wizard.php:380
 msgid "Which unit should be used for product weights?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:373
+#: includes/admin/class-wc-admin-setup-wizard.php:383
 #: includes/admin/settings/class-wc-settings-products.php:429
 msgid "kg"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:374
+#: includes/admin/class-wc-admin-setup-wizard.php:384
 #: includes/admin/settings/class-wc-settings-products.php:430
 msgid "g"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:375
+#: includes/admin/class-wc-admin-setup-wizard.php:385
 #: includes/admin/settings/class-wc-settings-products.php:431
 msgid "lbs"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:376
+#: includes/admin/class-wc-admin-setup-wizard.php:386
 #: includes/admin/settings/class-wc-settings-products.php:432
 msgid "oz"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:381
+#: includes/admin/class-wc-admin-setup-wizard.php:391
 msgid "Which unit should be used for product dimensions?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:384
+#: includes/admin/class-wc-admin-setup-wizard.php:394
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:216
 #: includes/admin/settings/class-wc-settings-products.php:446
 msgid "m"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:385
+#: includes/admin/class-wc-admin-setup-wizard.php:395
 #: includes/admin/settings/class-wc-settings-products.php:447
 msgid "cm"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:386
+#: includes/admin/class-wc-admin-setup-wizard.php:396
 #: includes/admin/settings/class-wc-settings-products.php:448
 msgid "mm"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:387
+#: includes/admin/class-wc-admin-setup-wizard.php:397
 #: includes/admin/settings/class-wc-settings-products.php:449
 msgid "in"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:388
+#: includes/admin/class-wc-admin-setup-wizard.php:398
 #: includes/admin/settings/class-wc-settings-products.php:450
 msgid "yd"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:435
+#: includes/admin/class-wc-admin-setup-wizard.php:445
 msgid "Shipping &amp; Tax setup"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:437
+#: includes/admin/class-wc-admin-setup-wizard.php:447
 msgid ""
 "If you will be charging sales tax, or shipping physical goods to customers, "
 "you can enable these below. This is optional and can be changed later."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:440
+#: includes/admin/class-wc-admin-setup-wizard.php:450
 msgid "Will you be shipping products?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:443
+#: includes/admin/class-wc-admin-setup-wizard.php:453
 msgid "Yes, I will be shipping physical goods to customers"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:447
+#: includes/admin/class-wc-admin-setup-wizard.php:457
 msgid "Will you be charging sales tax?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:450
+#: includes/admin/class-wc-admin-setup-wizard.php:460
 msgid "Yes, I will be charging sales tax"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:454
+#: includes/admin/class-wc-admin-setup-wizard.php:464
 msgid "How will you enter product prices?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:456
+#: includes/admin/class-wc-admin-setup-wizard.php:466
 msgid "I will enter prices inclusive of tax"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:457
+#: includes/admin/class-wc-admin-setup-wizard.php:467
 msgid "I will enter prices exclusive of tax"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:480
+#: includes/admin/class-wc-admin-setup-wizard.php:490
 msgid ""
 "The following tax rates will be imported automatically for you. You can "
 "read more about taxes in <a href=\"%s\" target=\"_blank\">our "
 "documentation</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:486
+#: includes/admin/class-wc-admin-setup-wizard.php:496
 #: includes/class-wc-countries.php:681 includes/class-wc-countries.php:1021
 msgid "State"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:487
+#: includes/admin/class-wc-admin-setup-wizard.php:497
 msgid "Rate (%)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:507
+#: includes/admin/class-wc-admin-setup-wizard.php:517
 msgid ""
 "You may need to add/edit rates based on your products or business location "
 "which can be done from the <a href=\"%s\" target=\"_blank\">tax "
 "settings</a> screen. If in doubt, speak to an accountant."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:606
+#: includes/admin/class-wc-admin-setup-wizard.php:616
 msgid "PayPal by Braintree"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:608
-#: includes/admin/class-wc-admin-setup-wizard.php:615
+#: includes/admin/class-wc-admin-setup-wizard.php:618
+#: includes/admin/class-wc-admin-setup-wizard.php:625
 msgid ""
 "Safe and secure payments using credit cards or your customer's PayPal "
 "account."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:608
-#: includes/admin/class-wc-admin-setup-wizard.php:615
+#: includes/admin/class-wc-admin-setup-wizard.php:618
+#: includes/admin/class-wc-admin-setup-wizard.php:625
 msgid "Learn more about PayPal"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:613
+#: includes/admin/class-wc-admin-setup-wizard.php:623
 msgid "PayPal Express Checkout"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:620
+#: includes/admin/class-wc-admin-setup-wizard.php:630
 msgid "Stripe"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:622
+#: includes/admin/class-wc-admin-setup-wizard.php:632
 msgid ""
 "A modern and robust way to accept credit card payments on your store. <a "
 "href=\"%s\" target=\"_blank\">Learn more about Stripe</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:627
+#: includes/admin/class-wc-admin-setup-wizard.php:637
 msgid "PayPal Standard"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:628
+#: includes/admin/class-wc-admin-setup-wizard.php:638
 msgid "Accept payments via PayPal using account balance or credit card."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:633
-#: includes/admin/class-wc-admin-setup-wizard.php:636
+#: includes/admin/class-wc-admin-setup-wizard.php:643
+#: includes/admin/class-wc-admin-setup-wizard.php:646
 msgid "PayPal email address"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:642
+#: includes/admin/class-wc-admin-setup-wizard.php:652
 msgid "A simple offline gateway that lets you accept a check as method of payment."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:647
+#: includes/admin/class-wc-admin-setup-wizard.php:657
 msgid "Bank transfer (BACS) payments"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:648
+#: includes/admin/class-wc-admin-setup-wizard.php:658
 msgid "A simple offline gateway that lets you accept BACS payment."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:653
+#: includes/admin/class-wc-admin-setup-wizard.php:663
 #: includes/gateways/cod/class-wc-gateway-cod.php:51
 #: includes/gateways/cod/class-wc-gateway-cod.php:78
 msgid "Cash on delivery"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:654
+#: includes/admin/class-wc-admin-setup-wizard.php:664
 msgid "A simple offline gateway that lets you accept cash on delivery."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:685
+#: includes/admin/class-wc-admin-setup-wizard.php:695
 msgid ""
 "WooCommerce can accept both online and offline payments. <a href=\"%1$s\" "
 "target=\"_blank\">Additional payment methods</a> can be installed later and "
@@ -8214,46 +8220,96 @@ msgid ""
 "screen."
 msgstr ""
 
+#: includes/admin/class-wc-admin-setup-wizard.php:782
+msgid ""
+"<strong>Storefront</strong> is the free WordPress theme built and "
+"maintained by the makers of WooCommerce."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:787
+msgid ""
+"<strong>Bulletproof WooCommerce integration:</strong> Rest assured the "
+"integration between WooCommerce, WooCommerce extensions and Storefront is "
+"water-tight."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:788
+msgid ""
+"<strong>Built with accessibility in mind:</strong> Storefront adheres to "
+"the strict wordpress.org accessibility guidelines making your store "
+"accessible to the widest audience possible."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:789
+msgid ""
+"<strong>Child themes and extensions available:</strong> Like WooCommerce, "
+"you can extend Storefront with an extension or child theme to make your "
+"store truly your own."
+msgstr ""
+
 #: includes/admin/class-wc-admin-setup-wizard.php:790
+msgid ""
+"<strong>No Shortcodes, sliders or page builders:</strong> Bring your "
+"favorite sliders or page builders, Storefront is built to work with the "
+"most popular options."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:791
+msgid ""
+"<strong>Clean, simple mobile-first design:</strong> The perfect place to "
+"start when customizing your store, looks beautiful on any device."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:792
+msgid ""
+"<strong>Optimized for search:</strong> Valid schema markup for improved SEO "
+"performance."
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:795
+msgid "Install &amp; activate Storefront"
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:839
 msgid "Your store is ready!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:794
+#: includes/admin/class-wc-admin-setup-wizard.php:843
 msgid ""
 "Want to help make WooCommerce even more awesome? Allow WooCommerce to "
 "collect non-sensitive diagnostic data and usage information. %1$sFind out "
 "more%2$s."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:796
+#: includes/admin/class-wc-admin-setup-wizard.php:845
 #: includes/admin/views/html-notice-tracking.php:13
 #: includes/wc-product-functions.php:829
 msgid "Allow"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:797
+#: includes/admin/class-wc-admin-setup-wizard.php:846
 msgid "No thanks"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:804
+#: includes/admin/class-wc-admin-setup-wizard.php:853
 msgid "Next steps"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:810
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:8
+#: includes/admin/class-wc-admin-setup-wizard.php:859
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:13
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:98
 msgid "Learn more"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:812
+#: includes/admin/class-wc-admin-setup-wizard.php:861
 msgid "Watch the Guided Tour videos"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:813
+#: includes/admin/class-wc-admin-setup-wizard.php:862
 msgid "Get eCommerce advice in your inbox"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:814
+#: includes/admin/class-wc-admin-setup-wizard.php:863
 msgid "Learn more about getting started"
 msgstr ""
 
@@ -8674,9 +8730,9 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:154
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:171
 #: includes/admin/meta-boxes/views/html-order-items.php:275
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:6
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:22
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:38
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:11
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:27
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:43
 #: includes/admin/reports/class-wc-report-sales-by-product.php:206
 msgid "Search for a product&hellip;"
 msgstr ""
@@ -8873,7 +8929,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:328
 #: includes/class-wc-order.php:1763
-#: includes/shortcodes/class-wc-shortcode-checkout.php:156
+#: includes/shortcodes/class-wc-shortcode-checkout.php:161
 #: templates/checkout/thankyou.php:63
 msgid "Payment method:"
 msgstr ""
@@ -8998,7 +9054,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:87
 #: includes/admin/meta-boxes/views/html-order-items.php:280
 #: includes/admin/meta-boxes/views/html-order-items.php:337
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:23
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:28
 msgid "Add"
 msgstr ""
 
@@ -9011,7 +9067,7 @@ msgid "Downloadable products give access to a file upon purchase."
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:86
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:58
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:63
 #: includes/admin/settings/class-wc-settings-products.php:46
 #: includes/admin/settings/class-wc-settings-products.php:235
 msgid "Inventory"
@@ -9019,7 +9075,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:92
 #: includes/admin/meta-boxes/views/html-order-shipping.php:17
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:64
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:69
 #: includes/admin/settings/class-wc-settings-shipping.php:27
 #: includes/admin/settings/class-wc-settings-tax.php:176
 #: includes/admin/settings/views/html-settings-tax.php:32
@@ -9058,39 +9114,39 @@ msgstr ""
 msgid "Add product gallery images"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:9
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:8
 msgid "Revoke access"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:19
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:18
 msgid "Downloaded %s time"
 msgid_plural "Downloaded %s times"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:26
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:25
 #: includes/wc-account-functions.php:203
 msgid "Downloads remaining"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:28
-#: includes/admin/meta-boxes/views/html-product-data-general.php:98
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:27
+#: includes/admin/meta-boxes/views/html-product-data-general.php:103
 #: includes/admin/meta-boxes/views/html-variation-admin.php:360
 msgid "Unlimited"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:31
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:30
 msgid "Access expires"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:32
-#: includes/admin/meta-boxes/views/html-product-data-general.php:111
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:31
+#: includes/admin/meta-boxes/views/html-product-data-general.php:116
 #: includes/admin/meta-boxes/views/html-variation-admin.php:376
 #: templates/myaccount/downloads.php:68
 msgid "Never"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-download-permission.php:35
+#: includes/admin/meta-boxes/views/html-order-download-permission.php:34
 msgid "Customer download link"
 msgstr ""
 
@@ -9103,7 +9159,7 @@ msgstr ""
 msgid "Fee name"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-item-meta.php:51
+#: includes/admin/meta-boxes/views/html-order-item-meta.php:55
 msgid "Add&nbsp;meta"
 msgstr ""
 
@@ -9298,7 +9354,7 @@ msgid "Rate name"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-items.php:306
-#: includes/admin/meta-boxes/views/html-product-data-general.php:143
+#: includes/admin/meta-boxes/views/html-product-data-general.php:148
 #: includes/admin/meta-boxes/views/html-variation-admin.php:281
 #: includes/admin/settings/class-wc-settings-tax.php:177
 #: includes/admin/views/html-bulk-edit-product.php:89
@@ -9341,153 +9397,153 @@ msgstr ""
 msgid "Shipping method"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-attribute.php:29
+#: includes/admin/meta-boxes/views/html-product-attribute.php:34
 msgid "Select terms"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-attribute.php:47
+#: includes/admin/meta-boxes/views/html-product-attribute.php:52
 msgid "Add new"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-attribute.php:59
+#: includes/admin/meta-boxes/views/html-product-attribute.php:64
 #. translators: %s: WC_DELIMITER
 msgid "\"%s\" separate terms"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-attribute.php:69
+#: includes/admin/meta-boxes/views/html-product-attribute.php:74
 msgid "Enter some text, or some attributes by \"%s\" separating values."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-advanced.php:8
+#: includes/admin/meta-boxes/views/html-product-data-advanced.php:13
 msgid "Purchase note"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-advanced.php:10
+#: includes/admin/meta-boxes/views/html-product-data-advanced.php:15
 msgid "Enter an optional note to send the customer after purchase."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-advanced.php:20
+#: includes/admin/meta-boxes/views/html-product-data-advanced.php:25
 msgid "Menu order"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-advanced.php:22
+#: includes/admin/meta-boxes/views/html-product-data-advanced.php:27
 msgid "Custom ordering position."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-advanced.php:36
+#: includes/admin/meta-boxes/views/html-product-data-advanced.php:41
 msgid "Enable reviews"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:4
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:46
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:81
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:115
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:9
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:51
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:86
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:120
 msgid "Expand"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:4
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:46
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:81
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:115
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:9
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:51
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:86
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:120
 msgid "Close"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:7
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:12
 msgid "Custom product attribute"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-attributes.php:48
+#: includes/admin/meta-boxes/views/html-product-data-attributes.php:53
 msgid "Save attributes"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:8
+#: includes/admin/meta-boxes/views/html-product-data-general.php:13
 msgid "Product URL"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:10
+#: includes/admin/meta-boxes/views/html-product-data-general.php:15
 msgid "Enter the external URL to the product."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:16
+#: includes/admin/meta-boxes/views/html-product-data-general.php:21
 msgid "Button text"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:18
+#: includes/admin/meta-boxes/views/html-product-data-general.php:23
 msgid "This text will be shown on the button linking to the external product."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:28
+#: includes/admin/meta-boxes/views/html-product-data-general.php:33
 #: includes/admin/views/html-quick-edit-product.php:35
 msgid "Regular price"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:36
+#: includes/admin/meta-boxes/views/html-product-data-general.php:41
 #: includes/admin/views/html-quick-edit-product.php:42
 msgid "Sale price"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:37
+#: includes/admin/meta-boxes/views/html-product-data-general.php:42
 #: includes/admin/meta-boxes/views/html-variation-admin.php:124
 msgid "Schedule"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:44
+#: includes/admin/meta-boxes/views/html-product-data-general.php:49
 msgid "Sale price dates"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:47
+#: includes/admin/meta-boxes/views/html-product-data-general.php:52
 msgid "The sale will end at the beginning of the set date."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:56
+#: includes/admin/meta-boxes/views/html-product-data-general.php:61
 #: includes/admin/meta-boxes/views/html-variation-admin.php:316
 msgid "Downloadable files"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:61
+#: includes/admin/meta-boxes/views/html-product-data-general.php:66
 #: includes/admin/meta-boxes/views/html-variation-admin.php:320
 msgid "This is the name of the download shown to the customer."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:62
+#: includes/admin/meta-boxes/views/html-product-data-general.php:67
 #: includes/admin/meta-boxes/views/html-variation-admin.php:321
 msgid "File URL"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:62
+#: includes/admin/meta-boxes/views/html-product-data-general.php:67
 #: includes/admin/meta-boxes/views/html-variation-admin.php:321
 msgid ""
 "This is the URL or absolute path to the file which customers will get "
 "access to. URLs entered here should already be encoded."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:87
+#: includes/admin/meta-boxes/views/html-product-data-general.php:92
 msgid "Add File"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:97
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:71
+#: includes/admin/meta-boxes/views/html-product-data-general.php:102
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:76
 #: includes/admin/meta-boxes/views/html-variation-admin.php:359
 msgid "Download limit"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:99
+#: includes/admin/meta-boxes/views/html-product-data-general.php:104
 #: includes/admin/meta-boxes/views/html-variation-admin.php:361
 msgid "Leave blank for unlimited re-downloads."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:110
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:72
+#: includes/admin/meta-boxes/views/html-product-data-general.php:115
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:77
 #: includes/admin/meta-boxes/views/html-variation-admin.php:375
 msgid "Download expiry"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:112
+#: includes/admin/meta-boxes/views/html-product-data-general.php:117
 #: includes/admin/meta-boxes/views/html-variation-admin.php:377
 msgid "Enter the number of days before a download link expires, or leave blank."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:130
+#: includes/admin/meta-boxes/views/html-product-data-general.php:135
 #: includes/admin/views/html-bulk-edit-product.php:70
 #: includes/admin/views/html-quick-edit-product.php:50
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:21
@@ -9496,7 +9552,7 @@ msgstr ""
 msgid "Tax status"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:132
+#: includes/admin/meta-boxes/views/html-product-data-general.php:137
 #: includes/admin/views/html-bulk-edit-product.php:76
 #: includes/admin/views/html-quick-edit-product.php:55
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:26
@@ -9505,79 +9561,79 @@ msgstr ""
 msgid "Taxable"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:133
+#: includes/admin/meta-boxes/views/html-product-data-general.php:138
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Shipping only"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:137
+#: includes/admin/meta-boxes/views/html-product-data-general.php:142
 msgid ""
 "Define whether or not the entire product is taxable, or just the cost of "
 "shipping it."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:146
+#: includes/admin/meta-boxes/views/html-product-data-general.php:151
 #: includes/admin/meta-boxes/views/html-variation-admin.php:284
 msgid ""
 "Choose a tax class for this product. Tax classes are used to apply "
 "different tax rates specific to certain types of product."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:9
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:14
 #: includes/admin/meta-boxes/views/html-variation-admin.php:64
 msgid "Stock Keeping Unit"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:11
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:16
 #: includes/admin/meta-boxes/views/html-variation-admin.php:66
 msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:23
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:28
 #: includes/admin/meta-boxes/views/html-variation-admin.php:87
 #: includes/admin/views/html-bulk-edit-product.php:234
 #: includes/admin/views/html-quick-edit-product.php:179
 msgid "Manage stock?"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:24
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:29
 msgid "Enable stock management at product level"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:34
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:39
 #: includes/admin/meta-boxes/views/html-variation-admin.php:162
 msgid "Stock quantity"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:36
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:41
 msgid ""
 "Stock quantity. If this is a variable product this value will be used to "
 "control stock for all variations, unless you define stock at variation "
 "level."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:47
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:52
 #: includes/admin/meta-boxes/views/html-variation-admin.php:177
 msgid "Allow backorders?"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:50
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:55
 #: includes/admin/meta-boxes/views/html-variation-admin.php:180
 msgid ""
 "If managing stock, this controls whether or not backorders are allowed. If "
 "enabled, stock quantity can go below 0."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:62
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:67
 #: includes/admin/meta-boxes/views/html-variation-admin.php:204
 #: includes/admin/reports/class-wc-report-stock.php:171
 msgid "Stock status"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:65
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:70
 #: includes/admin/meta-boxes/views/html-variation-admin.php:207
 #: includes/api/class-wc-rest-products-controller.php:1596
 #: includes/api/v1/class-wc-rest-products-controller.php:1954
@@ -9586,96 +9642,96 @@ msgid ""
 "stock\" on the frontend."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:78
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:83
 msgid "Sold individually"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-inventory.php:79
+#: includes/admin/meta-boxes/views/html-product-data-inventory.php:84
 msgid "Enable this to only allow one of this item to be bought in a single order"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:5
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:10
 msgid "Up-sells"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:17
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:22
 msgid ""
 "Up-sells are products which you recommend instead of the currently viewed "
 "product, for example, products that are more profitable or better quality "
 "or more expensive."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:21
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:26
 msgid "Cross-sells"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:33
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:38
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the "
 "current product."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:37
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:42
 msgid "Grouped products"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:49
+#: includes/admin/meta-boxes/views/html-product-data-linked-products.php:54
 msgid "This lets you choose which products are part of this group."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-panel.php:6
+#: includes/admin/meta-boxes/views/html-product-data-panel.php:11
 msgid "Product Type"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:8
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:68
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:13
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:73
 #: includes/admin/views/html-bulk-edit-product.php:118
 #: includes/admin/views/html-quick-edit-product.php:99
 #: templates/single-product/product-attributes.php:28
 msgid "Weight"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:11
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:16
 #: includes/admin/meta-boxes/views/html-variation-admin.php:225
 msgid "Weight in decimal form"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:19
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:24
 msgid "Dimensions (%s)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:21
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:65
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:26
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:70
 #: includes/admin/meta-boxes/views/html-variation-admin.php:243
 #: includes/admin/views/html-quick-edit-product.php:112
 msgid "Length"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:22
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:66
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:27
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:71
 #: includes/admin/meta-boxes/views/html-variation-admin.php:244
 #: includes/admin/views/html-quick-edit-product.php:113
 msgid "Width"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:23
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:67
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:28
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:72
 #: includes/admin/meta-boxes/views/html-variation-admin.php:245
 #: includes/admin/views/html-quick-edit-product.php:114
 msgid "Height"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:25
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:30
 msgid "LxWxH in decimal form"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:38
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:43
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:127
 msgid "No shipping class"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:45
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:50
 #: includes/admin/meta-boxes/views/html-variation-admin.php:264
 #: includes/admin/settings/class-wc-settings-shipping.php:339
 #: includes/admin/views/html-bulk-edit-product.php:166
@@ -9684,142 +9740,142 @@ msgstr ""
 msgid "Shipping class"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-shipping.php:47
+#: includes/admin/meta-boxes/views/html-product-data-shipping.php:52
 msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:7
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:12
 msgid ""
 "Before you can add a variation you need to add some variation attributes on "
 "the <strong>Attributes</strong> tab."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:15
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:20
 msgid "Default Form Values"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:15
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:20
 msgid "These are the attributes that will be pre-selected on the frontend."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:21
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:26
 msgid "No default %s&hellip;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:41
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:46
 msgid "Add variation"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:42
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:47
 msgid "Create variations from all attributes"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:43
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:48
 msgid "Delete all variations"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:45
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:50
 msgid "Toggle &quot;Enabled&quot;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:46
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:51
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:47
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:52
 msgid "Toggle &quot;Virtual&quot;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:49
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:54
 msgid "Pricing"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:50
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:55
 msgid "Set regular prices"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:51
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:56
 msgid "Increase regular prices (fixed amount or percentage)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:52
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:57
 msgid "Decrease regular prices (fixed amount or percentage)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:53
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:58
 msgid "Set sale prices"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:54
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:59
 msgid "Increase sale prices (fixed amount or percentage)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:55
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:60
 msgid "Decrease sale prices (fixed amount or percentage)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:56
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:61
 msgid "Set scheduled sale dates"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:59
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:64
 msgid "Toggle &quot;Manage stock&quot;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:61
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:66
 msgid "Set Status - In stock"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:62
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:67
 msgid "Set Status - Out of stock"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:76
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:81
 #: includes/admin/views/html-report-by-date.php:56
 msgid "Go"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:79
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:113
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:84
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:118
 msgid "%s item"
 msgid_plural "%s items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:84
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:118
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:89
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:123
 msgid "Go to the first page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:85
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:119
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:90
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:124
 msgid "Go to the previous page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:87
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:121
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:92
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:126
 msgid "Select Page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:88
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:122
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:93
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:127
 #: includes/admin/settings/views/html-settings-tax.php:120
 msgid "Current page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:95
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:129
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:100
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:134
 msgid "Go to the next page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:96
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:130
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:101
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:135
 msgid "Go to the last page"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:109
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:114
 #: includes/admin/settings/views/html-admin-page-shipping-zone-methods.php:90
 #: includes/admin/settings/views/html-admin-page-shipping-zone-methods.php:142
 #: includes/admin/settings/views/html-keys-edit.php:105
@@ -9829,23 +9885,23 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-download.php:4
-#: includes/admin/meta-boxes/views/html-product-variation-download.php:3
+#: includes/admin/meta-boxes/views/html-product-download.php:9
+#: includes/admin/meta-boxes/views/html-product-variation-download.php:8
 msgid "File name"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-download.php:7
-#: includes/admin/meta-boxes/views/html-product-variation-download.php:6
+#: includes/admin/meta-boxes/views/html-product-download.php:12
+#: includes/admin/meta-boxes/views/html-product-variation-download.php:11
 msgid "http://"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-download.php:8
-#: includes/admin/meta-boxes/views/html-product-variation-download.php:7
+#: includes/admin/meta-boxes/views/html-product-download.php:13
+#: includes/admin/meta-boxes/views/html-product-variation-download.php:12
 msgid "Choose file"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-download.php:8
-#: includes/admin/meta-boxes/views/html-product-variation-download.php:7
+#: includes/admin/meta-boxes/views/html-product-download.php:13
+#: includes/admin/meta-boxes/views/html-product-variation-download.php:12
 msgid "Insert file URL"
 msgstr ""
 
@@ -10861,7 +10917,7 @@ msgid "Recipient(s)"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:265
-#: includes/class-wc-install.php:653
+#: includes/class-wc-install.php:654
 msgid "Customer"
 msgstr ""
 
@@ -12727,10 +12783,6 @@ msgstr ""
 msgid "Page does not contain the shortcode."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:553
-msgid "Theme"
-msgstr ""
-
 #: includes/admin/views/html-admin-page-status-report.php:559
 msgid "The name of the current active theme."
 msgstr ""
@@ -13486,7 +13538,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-customer-downloads-controller.php:115
 #: includes/api/v1/class-wc-rest-customer-downloads-controller.php:193
-#: includes/cli/class-wc-cli-runner.php:98
+#: includes/cli/class-wc-cli-runner.php:103
 msgid "Order ID."
 msgstr ""
 
@@ -13817,7 +13869,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:391
 #: includes/api/v1/class-wc-rest-orders-controller.php:1214
 #: includes/api/v1/class-wc-rest-report-top-sellers-controller.php:158
-#: includes/cli/class-wc-cli-runner.php:96
+#: includes/cli/class-wc-cli-runner.php:101
 msgid "Product ID."
 msgstr ""
 
@@ -14228,7 +14280,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:1579
 #: includes/api/v1/class-wc-rest-orders-controller.php:1546
-#: includes/cli/class-wc-cli-runner.php:99
+#: includes/cli/class-wc-cli-runner.php:104
 msgid "Refund ID."
 msgstr ""
 
@@ -14754,7 +14806,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-products-controller.php:2201
 #: includes/api/v1/class-wc-rest-products-controller.php:2243
 #: includes/api/v1/class-wc-rest-products-controller.php:2533
-#: includes/cli/class-wc-cli-runner.php:100
+#: includes/cli/class-wc-cli-runner.php:105
 msgid "Attribute ID."
 msgstr ""
 
@@ -17438,7 +17490,7 @@ msgid "Billing %s"
 msgstr ""
 
 #: includes/class-wc-checkout.php:616 includes/class-wc-form-handler.php:114
-#: includes/shortcodes/class-wc-shortcode-cart.php:27
+#: includes/shortcodes/class-wc-shortcode-cart.php:32
 msgid "Please enter a valid postcode / ZIP."
 msgstr ""
 
@@ -17735,8 +17787,8 @@ msgstr ""
 #: includes/class-wc-download-handler.php:93
 #: includes/class-wc-form-handler.php:661
 #: includes/data-stores/abstract-wc-order-data-store-cpt.php:86
-#: includes/shortcodes/class-wc-shortcode-checkout.php:176
-#: includes/shortcodes/class-wc-shortcode-my-account.php:118
+#: includes/shortcodes/class-wc-shortcode-checkout.php:181
+#: includes/shortcodes/class-wc-shortcode-my-account.php:123
 #: includes/wc-order-functions.php:599
 msgid "Invalid order."
 msgstr ""
@@ -17989,49 +18041,49 @@ msgstr ""
 msgid "Please enter a stronger password."
 msgstr ""
 
-#: includes/class-wc-install.php:281
+#: includes/class-wc-install.php:282
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:658
+#: includes/class-wc-install.php:659
 msgid "Shop manager"
 msgstr ""
 
-#: includes/class-wc-install.php:893
+#: includes/class-wc-install.php:894
 msgid "View WooCommerce settings"
 msgstr ""
 
-#: includes/class-wc-install.php:909
+#: includes/class-wc-install.php:910
 msgid "View WooCommerce documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:909
+#: includes/class-wc-install.php:910
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:910
+#: includes/class-wc-install.php:911
 msgid "View WooCommerce API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:910
+#: includes/class-wc-install.php:911
 msgid "API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:911
+#: includes/class-wc-install.php:912
 msgid "Visit premium customer support"
 msgstr ""
 
-#: includes/class-wc-install.php:911
+#: includes/class-wc-install.php:912
 msgid "Premium support"
 msgstr ""
 
-#: includes/class-wc-install.php:1053
+#: includes/class-wc-install.php:1054 includes/class-wc-install.php:1136
 msgid ""
 "%1$s could not be installed (%2$s). <a href=\"%3$s\">Please install it "
 "manually by clicking here.</a>"
 msgstr ""
 
-#: includes/class-wc-install.php:1079
+#: includes/class-wc-install.php:1080
 msgid ""
 "%1$s was installed but could not be activated. <a href=\"%2$s\">Please "
 "activate it manually by clicking here.</a>"
@@ -18531,7 +18583,7 @@ msgid "Select options"
 msgstr ""
 
 #: includes/class-wc-query.php:91
-#: includes/shortcodes/class-wc-shortcode-checkout.php:127
+#: includes/shortcodes/class-wc-shortcode-checkout.php:132
 msgid "Pay for order"
 msgstr ""
 
@@ -18572,69 +18624,69 @@ msgstr ""
 msgid "Error: Delivery URL returned response code: %s"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:126
+#: includes/cli/class-wc-cli-rest-command.php:131
 msgid "Trashed"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:128
+#: includes/cli/class-wc-cli-rest-command.php:133
 msgid "Deleted"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:217
+#: includes/cli/class-wc-cli-rest-command.php:222
 msgid "Updated"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:291
+#: includes/cli/class-wc-cli-rest-command.php:296
 msgid ""
 "Make sure to include the --user flag with an account that has permissions "
 "for this action."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:64
+#: includes/cli/class-wc-cli-runner.php:69
 msgid "No schema title found for %s, skipping REST command registration."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:95
+#: includes/cli/class-wc-cli-runner.php:100
 msgid "ID."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:97
+#: includes/cli/class-wc-cli-runner.php:102
 msgid "Customer ID."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:101
+#: includes/cli/class-wc-cli-runner.php:106
 msgid "Zone ID."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:157
-#: includes/cli/class-wc-cli-tool-command.php:36
+#: includes/cli/class-wc-cli-runner.php:162
+#: includes/cli/class-wc-cli-tool-command.php:41
 msgid "The id for the resource."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:181
-#: includes/cli/class-wc-cli-tool-command.php:45
+#: includes/cli/class-wc-cli-runner.php:186
+#: includes/cli/class-wc-cli-tool-command.php:50
 msgid "Limit response to specific fields. Defaults to all fields."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:187
-#: includes/cli/class-wc-cli-tool-command.php:51
+#: includes/cli/class-wc-cli-runner.php:192
+#: includes/cli/class-wc-cli-tool-command.php:56
 msgid "Get the value of an individual field."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:193
-#: includes/cli/class-wc-cli-tool-command.php:57
+#: includes/cli/class-wc-cli-runner.php:198
+#: includes/cli/class-wc-cli-tool-command.php:62
 msgid "Render response in a particular format."
 msgstr ""
 
-#: includes/cli/class-wc-cli-runner.php:214
+#: includes/cli/class-wc-cli-runner.php:219
 msgid "Output just the id when the operation is successful."
 msgstr ""
 
-#: includes/cli/class-wc-cli-update-command.php:34
+#: includes/cli/class-wc-cli-update-command.php:39
 msgid "Calling update function: %s"
 msgstr ""
 
-#: includes/cli/class-wc-cli-update-command.php:42
+#: includes/cli/class-wc-cli-update-command.php:47
 msgid "%1$d updates complete. Database version is %2$s"
 msgstr ""
 
@@ -20278,77 +20330,77 @@ msgstr ""
 msgid "Optional cost for local pickup."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-cart.php:43
+#: includes/shortcodes/class-wc-shortcode-cart.php:48
 msgid "Shipping costs updated."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:90
-#: includes/shortcodes/class-wc-shortcode-checkout.php:173
+#: includes/shortcodes/class-wc-shortcode-checkout.php:95
+#: includes/shortcodes/class-wc-shortcode-checkout.php:178
 msgid "Sorry, this order is invalid and cannot be paid for."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:94
+#: includes/shortcodes/class-wc-shortcode-checkout.php:99
 msgid "Please login to your account below to continue to the payment form."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:102
+#: includes/shortcodes/class-wc-shortcode-checkout.php:107
 msgid "This order cannot be paid for. Please contact us if you need assistance."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:106
-#: includes/shortcodes/class-wc-shortcode-checkout.php:170
+#: includes/shortcodes/class-wc-shortcode-checkout.php:111
+#: includes/shortcodes/class-wc-shortcode-checkout.php:175
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:143
+#: includes/shortcodes/class-wc-shortcode-checkout.php:148
 #: templates/checkout/thankyou.php:46
 msgid "Order number:"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:147
+#: includes/shortcodes/class-wc-shortcode-checkout.php:152
 #: templates/checkout/thankyou.php:51
 msgid "Date:"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:246
+#: includes/shortcodes/class-wc-shortcode-checkout.php:251
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the \"Place order\" button at the bottom of the page."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:46
+#: includes/shortcodes/class-wc-shortcode-my-account.php:51
 msgid "Your password has been reset successfully."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:118
+#: includes/shortcodes/class-wc-shortcode-my-account.php:123
 #: templates/checkout/thankyou.php:35
 msgid "My account"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:235
+#: includes/shortcodes/class-wc-shortcode-my-account.php:240
 msgid "Enter a username or email address."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:258
 #: includes/shortcodes/class-wc-shortcode-my-account.php:263
+#: includes/shortcodes/class-wc-shortcode-my-account.php:268
 msgid "Invalid username or email."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:276
+#: includes/shortcodes/class-wc-shortcode-my-account.php:281
 msgid "Password reset is not allowed for this user"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:46
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:51
 msgid "Please enter a valid order ID"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:48
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:53
 msgid "Please enter a valid order email"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:62
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:67
 msgid "Sorry, we could not find that order ID in our database."
 msgstr ""
 
@@ -22366,99 +22418,99 @@ msgstr ""
 msgid "https://woocommerce.com"
 msgstr ""
 
-#: i18n/locale-info.php:87 i18n/locale-info.php:97 i18n/locale-info.php:107
+#: i18n/locale-info.php:91 i18n/locale-info.php:101 i18n/locale-info.php:111
 msgctxt "Canadian Tax Rates"
 msgid "PST"
 msgstr ""
 
-#: i18n/locale-info.php:117
+#: i18n/locale-info.php:121
 msgctxt "Canadian Tax Rates"
 msgid "QST"
 msgstr ""
 
-#: i18n/locale-info.php:127 i18n/locale-info.php:134 i18n/locale-info.php:141
-#: i18n/locale-info.php:148 i18n/locale-info.php:155
+#: i18n/locale-info.php:131 i18n/locale-info.php:138 i18n/locale-info.php:145
+#: i18n/locale-info.php:152 i18n/locale-info.php:159
 msgctxt "Canadian Tax Rates"
 msgid "HST"
 msgstr ""
 
-#: i18n/locale-info.php:162 i18n/locale-info.php:169 i18n/locale-info.php:176
-#: i18n/locale-info.php:183 i18n/locale-info.php:190 i18n/locale-info.php:197
-#: i18n/locale-info.php:204 i18n/locale-info.php:211
+#: i18n/locale-info.php:166 i18n/locale-info.php:173 i18n/locale-info.php:180
+#: i18n/locale-info.php:187 i18n/locale-info.php:194 i18n/locale-info.php:201
+#: i18n/locale-info.php:208 i18n/locale-info.php:215
 msgctxt "Canadian Tax Rates"
 msgid "GST"
 msgstr ""
 
-#: i18n/states/US.php:23
+#: i18n/states/US.php:27
 msgctxt "US state of Georgia"
 msgid "Georgia"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:118
-#: includes/admin/class-wc-admin-setup-wizard.php:98
+#: includes/admin/class-wc-admin-setup-wizard.php:108
 #: includes/class-wc-frontend-scripts.php:551
 msgctxt "enhanced select"
 msgid "No matches found"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:119
-#: includes/admin/class-wc-admin-setup-wizard.php:99
+#: includes/admin/class-wc-admin-setup-wizard.php:109
 #: includes/class-wc-frontend-scripts.php:552
 msgctxt "enhanced select"
 msgid "Loading failed"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:120
-#: includes/admin/class-wc-admin-setup-wizard.php:100
+#: includes/admin/class-wc-admin-setup-wizard.php:110
 #: includes/class-wc-frontend-scripts.php:553
 msgctxt "enhanced select"
 msgid "Please enter 1 or more characters"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:121
-#: includes/admin/class-wc-admin-setup-wizard.php:101
+#: includes/admin/class-wc-admin-setup-wizard.php:111
 #: includes/class-wc-frontend-scripts.php:554
 msgctxt "enhanced select"
 msgid "Please enter %qty% or more characters"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:122
-#: includes/admin/class-wc-admin-setup-wizard.php:102
+#: includes/admin/class-wc-admin-setup-wizard.php:112
 #: includes/class-wc-frontend-scripts.php:555
 msgctxt "enhanced select"
 msgid "Please delete 1 character"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:123
-#: includes/admin/class-wc-admin-setup-wizard.php:103
+#: includes/admin/class-wc-admin-setup-wizard.php:113
 #: includes/class-wc-frontend-scripts.php:556
 msgctxt "enhanced select"
 msgid "Please delete %qty% characters"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:124
-#: includes/admin/class-wc-admin-setup-wizard.php:104
+#: includes/admin/class-wc-admin-setup-wizard.php:114
 #: includes/class-wc-frontend-scripts.php:557
 msgctxt "enhanced select"
 msgid "You can only select 1 item"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:125
-#: includes/admin/class-wc-admin-setup-wizard.php:105
+#: includes/admin/class-wc-admin-setup-wizard.php:115
 #: includes/class-wc-frontend-scripts.php:558
 msgctxt "enhanced select"
 msgid "You can only select %qty% items"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:126
-#: includes/admin/class-wc-admin-setup-wizard.php:106
+#: includes/admin/class-wc-admin-setup-wizard.php:116
 #: includes/class-wc-frontend-scripts.php:559
 msgctxt "enhanced select"
 msgid "Loading more results&hellip;"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:127
-#: includes/admin/class-wc-admin-setup-wizard.php:107
+#: includes/admin/class-wc-admin-setup-wizard.php:117
 #: includes/class-wc-frontend-scripts.php:560
 msgctxt "enhanced select"
 msgid "Searching&hellip;"
@@ -22541,31 +22593,31 @@ msgctxt "full name"
 msgid "%1$s %2$s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:253
-#: includes/class-wc-install.php:320
+#: includes/admin/class-wc-admin-setup-wizard.php:263
+#: includes/class-wc-install.php:321
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:257
-#: includes/class-wc-install.php:325
+#: includes/admin/class-wc-admin-setup-wizard.php:267
+#: includes/class-wc-install.php:326
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:261
-#: includes/class-wc-install.php:330
+#: includes/admin/class-wc-admin-setup-wizard.php:271
+#: includes/class-wc-install.php:331
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:267
-#: includes/class-wc-install.php:335
+#: includes/admin/class-wc-admin-setup-wizard.php:277
+#: includes/class-wc-install.php:336
 msgctxt "Page title"
 msgid "My account"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:641
+#: includes/admin/class-wc-admin-setup-wizard.php:651
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:27
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:63
 msgctxt "Check payment method"
@@ -22600,26 +22652,26 @@ msgctxt "Ex: Refund - $date >by< $username"
 msgid "by"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:17
+#: includes/admin/meta-boxes/views/html-product-data-general.php:22
 #: includes/class-wc-product-external.php:170
 #: includes/class-wc-product-external.php:180
 msgctxt "placeholder"
 msgid "Buy product"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:45
+#: includes/admin/meta-boxes/views/html-product-data-general.php:50
 #: includes/admin/meta-boxes/views/html-variation-admin.php:134
 msgctxt "placeholder"
 msgid "From&hellip;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:46
+#: includes/admin/meta-boxes/views/html-product-data-general.php:51
 #: includes/admin/meta-boxes/views/html-variation-admin.php:138
 msgctxt "placeholder"
 msgid "To&hellip;"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-general.php:134
+#: includes/admin/meta-boxes/views/html-product-data-general.php:139
 #: includes/admin/views/html-bulk-edit-product.php:78
 #: includes/admin/views/html-quick-edit-product.php:57
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:27
@@ -22629,8 +22681,8 @@ msgctxt "Tax status"
 msgid "None"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:93
-#: includes/admin/meta-boxes/views/html-product-data-variations.php:127
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:98
+#: includes/admin/meta-boxes/views/html-product-data-variations.php:132
 msgctxt "number of pages"
 msgid "of"
 msgstr ""
@@ -22677,22 +22729,22 @@ msgctxt "Item name in quotes"
 msgid "&ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/class-wc-install.php:319
+#: includes/class-wc-install.php:320
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:324
+#: includes/class-wc-install.php:325
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:329
+#: includes/class-wc-install.php:330
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:334
+#: includes/class-wc-install.php:335
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
