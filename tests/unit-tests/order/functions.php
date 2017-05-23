@@ -240,4 +240,180 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order2->delete();
 		$order3->delete();
 	}
+
+	public function test_wc_get_order_status_param() {
+		$order1 = WC_Helper_Order::create_order();
+		$order1->set_status( 'pending' );
+		$order1->save();
+		$order2 = WC_Helper_Order::create_order();
+		$order2->set_status( 'completed' );
+		$order2->save();
+
+		$orders   = wc_get_orders( array( 'status' => 'wc-pending', 'return' => 'ids' ) );
+		$expected = array( $order1->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		$orders   = wc_get_orders( array( 'status' => 'wc-completed', 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_type_param() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$refund = new WC_Order_Refund();
+		$refund->save();
+
+		$orders = wc_get_orders( array( 'type' => 'shop_order_refund', 'return' => 'ids' ) );
+		$expected = array( $refund->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		$orders = wc_get_orders( array( 'type' => 'shop_order', 'return' => 'ids' ) );
+		$expected = array( $order->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_version_param() {
+		$order  = WC_Helper_Order::create_order();
+		$order->save();
+
+		$orders = wc_get_orders( array( 'version' => WC_VERSION, 'return' => 'ids' ) );
+		$expected = array( $order->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_created_via_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->set_created_via( 'rest-api' );
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->set_created_via( 'checkout' );
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'created_via' => 'rest-api', 'return' => 'ids' ) );
+		$expected = array( $order1->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		$orders = wc_get_orders( array( 'created_via' => 'checkout', 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_parent_param() {
+		$parent  = WC_Helper_Order::create_order();
+		$parent->save();
+
+		$order1  = WC_Helper_Order::create_order();
+		$order1->set_parent_id( $parent->get_id() );
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'parent' => $parent->get_id(), 'return' => 'ids' ) );
+		$expected = array( $order1->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_parent_exclude_param() {
+		$parent  = WC_Helper_Order::create_order();
+		$parent->save();
+
+		$order1  = WC_Helper_Order::create_order();
+		$order1->set_parent_id( $parent->get_id() );
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'parent_exclude' => array( $parent->get_id() ), 'return' => 'ids' ) );
+		sort( $orders );
+		$expected = array( $parent->get_id(), $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_exclude_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'exclude' => array( $order1->get_id() ), 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_limit_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'limit' => 1 ) );
+		$this->assertEquals( 1, count( $orders ) );
+	}
+
+	public function test_wc_get_order_paged_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'paged' => 1, 'limit' => 1, 'return' => 'ids' ) );
+		$expected = array( $order1->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		$orders = wc_get_orders( array( 'paged' => 2, 'limit' => 1, 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_offset_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'offset' => 1, 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	public function test_wc_get_order_paginate_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'paginate' => true ) );
+		$this->assertEquals( 2, $orders->total );
+		$this->assertEquals( 2, count( $orders->orders ) );
+		$this->assertEquals( 1, $orders->max_num_pages );
+	}
+
+	public function test_wc_get_order_order_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'orderby' => 'id', 'return' => 'ids' ) );
+		$expected = array( $order2->get_id(), $order1->get_id() );
+
+		$orders = wc_get_orders( array( 'orderby' => 'id', 'order' => 'ASC', 'return' => 'ids' ) );
+		$expected = array( $order1->get_id(), $order2->get_id() );
+	}
+
+	public function test_wc_get_order_currency_param() {
+		$order1  = WC_Helper_Order::create_order();
+		$order1->set_currency( 'BRL' );
+		$order1->save();
+		$order2  = WC_Helper_Order::create_order();
+		$order2->set_currency( 'USD' );
+		$order2->save();
+
+		$orders = wc_get_orders( array( 'currency' => 'BRL', 'return' => 'ids' ) );
+		$expected = array( $order1->get_id() );
+
+		$orders = wc_get_orders( array( 'currency' => 'USD', 'return' => 'ids' ) );
+		$expected = array( $order2->get_id() );
+	}
 }
