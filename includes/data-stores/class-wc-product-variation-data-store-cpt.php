@@ -33,6 +33,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product $product
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();

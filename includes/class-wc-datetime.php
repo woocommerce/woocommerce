@@ -53,6 +53,7 @@ class WC_DateTime extends DateTime {
 
 	/**
 	 * Set timezone.
+	 *
 	 * @param DateTimeZone $timezone
 	 *
 	 * @return DateTime

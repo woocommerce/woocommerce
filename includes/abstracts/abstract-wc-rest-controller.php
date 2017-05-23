@@ -35,6 +35,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * The type of object is inferred from the passed schema.
 	 *
 	 * @param array $schema Schema array.
+	 *
+	 * @return array
 	 */
 	protected function add_additional_fields_schema( $schema ) {
 		if ( empty( $schema['title'] ) ) {

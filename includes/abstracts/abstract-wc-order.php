@@ -630,6 +630,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 *
+	 * @return bool|void
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value, $deprecated = '' ) {
@@ -817,6 +819,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Remove item from the order.
 	 *
 	 * @param int $item_id
+	 *
+	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
 		$item = $this->get_item( $item_id );
@@ -835,6 +839,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
+	 *
+	 * * @return false|void
 	 */
 	public function add_item( $item ) {
 		if ( ! $items_key = $this->get_items_key( $item ) ) {

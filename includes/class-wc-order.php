@@ -218,10 +218,13 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order status.
 	 * @since 3.0.0
+	 *
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual_update is this a manual order status change?
 	 * @param array details of change
+	 *
+	 * @return array
 	 */
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );

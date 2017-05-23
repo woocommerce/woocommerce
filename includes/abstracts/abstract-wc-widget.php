@@ -195,6 +195,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * Outputs the settings update form.
 	 *
 	 * @see   WP_Widget->form
+	 *
 	 * @param array $instance
 	 */
 	public function form( $instance ) {

@@ -58,6 +58,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 *
 	 * @since 3.0.0
 	 * @param WC_Shipping_Zone $zone
+	 * @throws Exception
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
@@ -266,7 +267,10 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Shipping_Zone
+	 *
+	 * @return bool|void
 	 */
 	private function save_locations( &$zone ) {
 		$changed_props = array_keys( $zone->get_changes() );

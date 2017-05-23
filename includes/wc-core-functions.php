@@ -210,6 +210,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 /**
  * Like wc_get_template, but returns the HTML instead of outputting.
+ *
  * @see wc_get_template
  * @since 2.5.0
  * @param string $template_name

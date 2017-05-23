@@ -125,6 +125,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to read a product from the database.
 	 * @param WC_Product $product
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
