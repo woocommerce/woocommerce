@@ -128,7 +128,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return 0;
 		}
 
-		return min( round( ( $this->file_position / $size ) * 100 ), 100 );
+		return absint( min( round( ( $this->file_position / $size ) * 100 ), 100 ) );
 	}
 
 	/**
@@ -196,7 +196,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				} elseif ( in_array( $type, array_keys( wc_get_product_types() ), true ) || 'variation' === $type ) {
 					$product_type = $type;
 				} else {
-					return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
+					return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', sprintf( __( 'Invalid product type %s.', 'woocommerce' ), $type ), array( 'type' => $type, 'status' => 401 ) );
 				}
 			}
 
@@ -209,6 +209,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = new $classname( $id );
 		} elseif ( isset( $data['id'] ) ) {
 			$product = wc_get_product( $id );
+
+			if ( ! $product ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_invalid_id', sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ), array( 'id' => $id, 'status' => 401 ) );
+			}
 		} else {
 			$product = new WC_Product_Simple();
 		}

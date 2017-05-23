@@ -201,26 +201,38 @@ class WC_Admin_Importers {
 		include_once( WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php' );
 		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
 
-		$file = wc_clean( $_POST['file'] );
+		$file   = wc_clean( $_POST['file'] );
 		$params = array(
 			'start_pos'     => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0,
 			'mapping'       => isset( $_POST['mapping'] ) ? (array) $_POST['mapping'] : array(),
-			'skip_existing' => isset( $_POST['skip_existing'] ) ? (bool) $_POST['skip_existing'] : false,
+			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false,
 			'lines'         => apply_filters( 'woocommerce_product_import_batch_size', 10 ),
 			'parse'         => true,
 		);
 
-		$importer = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
-		$results = $importer->import();
-		$percent_complete = $importer->get_percent_complete();
+		// Log failures.
+		if ( 0 !== $params['start_pos'] ) {
+			$error_log = array_filter( (array) get_user_option( 'product_import_error_log' ) );
+		} else {
+			$error_log = array();
+		}
 
-		if ( 100 == $percent_complete ) {
+		$importer         = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
+		$results          = $importer->import();
+		$percent_complete = $importer->get_percent_complete();
+		$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
+
+		update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
+
+		if ( 100 === $percent_complete ) {
 			wp_send_json_success( array(
 				'position'   => 'done',
 				'percentage' => 100,
 				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
 				'imported'   => count( $results['imported'] ),
 				'failed'     => count( $results['failed'] ),
+				'updated'    => count( $results['updated'] ),
+				'skipped'    => count( $results['skipped'] ),
 			) );
 		} else {
 			wp_send_json_success( array(
@@ -228,6 +240,8 @@ class WC_Admin_Importers {
 				'percentage' => $percent_complete,
 				'imported'   => count( $results['imported'] ),
 				'failed'     => count( $results['failed'] ),
+				'updated'    => count( $results['updated'] ),
+				'skipped'    => count( $results['skipped'] ),
 			) );
 		}
 	}

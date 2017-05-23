@@ -5,24 +5,26 @@
 	 * productImportForm handles the import process.
 	 */
 	var productImportForm = function( $form ) {
-		this.$form         = $form;
-		this.xhr           = false;
-		this.mapping       = wc_product_import_params.mapping;
-		this.position      = 0;
-		this.file          = wc_product_import_params.file;
-		this.skip_existing = wc_product_import_params.skip_existing;
-		this.security      = wc_product_import_params.import_nonce;
+		this.$form           = $form;
+		this.xhr             = false;
+		this.mapping         = wc_product_import_params.mapping;
+		this.position        = 0;
+		this.file            = wc_product_import_params.file;
+		this.update_existing = wc_product_import_params.update_existing;
+		this.security        = wc_product_import_params.import_nonce;
 
 		// Number of import successes/failures.
 		this.imported = 0;
 		this.failed   = 0;
+		this.updated  = 0;
+		this.skipped  = 0;
 
 		// Initial state.
 		this.$form.find('.woocommerce-importer-progress').val( 0 );
 
 		this.run_import = this.run_import.bind( this );
 
-		//Start importing.
+		// Start importing.
 		this.run_import();
 	};
 
@@ -36,12 +38,12 @@
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				action        : 'woocommerce_do_ajax_product_import',
-				position      : $this.position,
-				mapping       : $this.mapping,
-				file          : $this.file,
-				skip_existing : $this.skip_existing,
-				security      : $this.security
+				action          : 'woocommerce_do_ajax_product_import',
+				position        : $this.position,
+				mapping         : $this.mapping,
+				file            : $this.file,
+				update_existing : $this.update_existing,
+				security        : $this.security
 			},
 			dataType: 'json',
 			success: function( response ) {
@@ -49,10 +51,12 @@
 					$this.position  = response.data.position;
 					$this.imported += response.data.imported;
 					$this.failed   += response.data.failed;
+					$this.updated  += response.data.updated;
+					$this.skipped  += response.data.skipped;
 					$this.$form.find('.woocommerce-importer-progress').val( response.data.percentage );
 
 					if ( 'done' === response.data.position ) {
-						window.location = response.data.url + '&imported=' + parseInt( $this.imported, 10 ) + '&failed=' + parseInt( $this.failed, 10 );
+						window.location = response.data.url + '&products-imported=' + parseInt( $this.imported, 10 ) + '&products-failed=' + parseInt( $this.failed, 10 ) + '&products-updated=' + parseInt( $this.updated, 10 ) + '&products-skipped=' + parseInt( $this.skipped, 10 );
 					} else {
 						$this.run_import();
 					}

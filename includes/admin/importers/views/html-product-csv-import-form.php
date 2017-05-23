@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<th scope="row">
 						<label for="upload">
-							<?php _e( 'Choose a file from your computer:', 'woocommerce' ); ?>
+							<?php _e( 'Choose a CSV file from your computer:', 'woocommerce' ); ?>
 						</label>
 					</th>
 					<td>
@@ -45,28 +45,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 				</tr>
 				<tr>
+					<th><label for="woocommerce-importer-update-existing"><?php _e( 'Update existing products', 'woocommerce' ); ?></label><br/></th>
+					<td>
+						<input type="hidden" name="update_existing" value="0" />
+						<input type="checkbox" id="woocommerce-importer-update-existing" name="update_existing" value="1" />
+						<label for="woocommerce-importer-update-existing"><?php esc_html_e( 'If a product being imported matches an existing product ID or SKU, update the existing product data.', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr class="woocommerce-importer-advanced hidden">
 					<th>
-						<label for="file_url"><?php _e( 'OR enter the path to file on your server:', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-file-url"><?php _e( '<em>or</em> enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
-						<code><?php echo esc_html( ABSPATH ) . ' '; ?></code><input type="text" id="file_url" name="file_url" size="25" />
+						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
+							<code><?php echo esc_html( ABSPATH ) . ' '; ?></code><input type="text" id="woocommerce-importer-file-url" name="file_url" />
+						</label>
 					</td>
 				</tr>
-				<tr>
+				<tr class="woocommerce-importer-advanced hidden">
 					<th><label><?php _e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
-				</tr>
-				<tr>
-					<th><label><?php _e( 'Skip existing products', 'woocommerce' ); ?></label><br/></th>
-					<td>
-						<input type="hidden" name="skip_existing" value="0" />
-						<input type="checkbox" name="skip_existing" value="1" />
-					</td>
 				</tr>
 			</tbody>
 		</table>
 	</section>
+	<script type="text/javascript">
+		jQuery(function() {
+			jQuery( '.woocommerce-importer-toggle-advanced-options' ).on( 'click', function() {
+				var elements = jQuery( '.woocommerce-importer-advanced' );
+				if ( elements.is( '.hidden' ) ) {
+					elements.removeClass( 'hidden' );
+					jQuery( this ).text( jQuery( this ).data( 'hidetext' ) );
+				} else {
+					elements.addClass( 'hidden' );
+					jQuery( this ).text( jQuery( this ).data( 'showtext' ) );
+				}
+				return false;
+			} );
+		});
+	</script>
 	<div class="wc-actions">
+		<a href="#" class="woocommerce-importer-toggle-advanced-options" data-hidetext="<?php esc_html_e( 'Hide advanced options', 'woocommerce' ); ?>" data-showtext="<?php esc_html_e( 'Hide advanced options', 'woocommerce' ); ?>"><?php esc_html_e( 'Show advanced options', 'woocommerce' ); ?></a>
 		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>
