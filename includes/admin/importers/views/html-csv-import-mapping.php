@@ -32,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<td class="wc-importer-mapping-table-field">
 							<select name="map_to[<?php echo esc_attr( $name ); ?>]">
 								<option value=""><?php esc_html_e( 'Do not import', 'woocommerce' ); ?></option>
+								<option value=""><?php echo '--------------'; ?></option>
 								<?php foreach ( $this->get_mapping_options( $mapped_value ) as $key => $value ) : ?>
 									<?php if ( is_array( $value ) ) : ?>
 										<optgroup label="<?php echo esc_attr( $value['name'] ); ?>">
@@ -54,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Run the importer', 'woocommerce' ); ?>" name="save_step" />
 		<input type="hidden" name="file" value="<?php echo esc_attr( $this->file ); ?>" />
 		<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
-		<input type="hidden" name="skip_existing" value="<?php echo (int) $this->skip_existing; ?>" />
+		<input type="hidden" name="update_existing" value="<?php echo (int) $this->update_existing; ?>" />
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>
 </form>

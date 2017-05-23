@@ -5487,6 +5487,7 @@ table.bar_chart {
 		border-top: 1px solid #eee;
 		margin: 0;
 		padding: 23px 24px 24px;
+		line-height: 3em;
 
 		.button {
 			float: right;
@@ -5511,6 +5512,10 @@ table.bar_chart {
 				-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			}
+		}
+
+		.woocommerce-importer-toggle-advanced-options {
+			color: #999;
 		}
 	}
 
@@ -5583,11 +5588,42 @@ table.bar_chart {
 				height: auto;
 				margin: 0;
 			}
+
+			.woocommerce-importer-file-url-field-wrapper {
+				border: 1px solid #ddd;
+				-webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+				box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+				background-color: #fff;
+				color: #32373c;
+				outline: 0;
+				line-height: 1;
+				display: block;
+
+				code {
+					background: none;
+					font-size: smaller;
+					padding: 0;
+					margin: 0;
+					color: #999;
+					padding: 7px 0 0 7px;
+					display: inline-block;
+				}
+				input {
+					font-family: Consolas,Monaco,monospace;
+					border: 0;
+					margin: 0;
+					outline: 0;
+					box-shadow: none;
+					display: inline-block;
+					min-width: 25%;
+					box-sizing: borde
+				}
+			}
 		}
 
 		.woocommerce-exporter-options th,
 		.woocommerce-importer-options th {
-			width: 40%;
+			width: 35%;
 			padding-right: 20px;
 		}
 
@@ -5634,11 +5670,13 @@ table.bar_chart {
 			}
 		}
 
-		.wc-importer-mapping-table-wrapper {
+		.wc-importer-mapping-table-wrapper,
+		.wc-importer-error-log {
 			padding: 0;
 		}
 
-		.wc-importer-mapping-table {
+		.wc-importer-mapping-table,
+		.wc-importer-error-log-table {
 			margin: 0;
 			border: 0;
 			box-shadow: none;
@@ -5653,7 +5691,8 @@ table.bar_chart {
 				}
 			}
 
-			tr:nth-child(odd) td {
+			tbody tr:nth-child(odd) td,
+			tbody tr:nth-child(odd) th {
 				background: #fbfbfb;
 			}
 
@@ -5689,6 +5728,7 @@ table.bar_chart {
 			text-align: center;
 			padding: 48px 24px;
 			font-size: 1.5em;
+			line-height: 1.75em;
 
 			&::before {
 				@include icon( '\e015' );

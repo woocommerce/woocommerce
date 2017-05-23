@@ -57,7 +57,7 @@ class WC_Product_CSV_Importer_Controller {
 	 *
 	 * @var bool
 	 */
-	protected $skip_existing = false;
+	protected $update_existing = false;
 
 	/**
 	 * Get importer instance.
@@ -99,7 +99,7 @@ class WC_Product_CSV_Importer_Controller {
 		);
 		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
-		$this->skip_existing = isset( $_REQUEST['skip_existing'] ) ? (bool) $_REQUEST['skip_existing'] : false;
+		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
 	}
 
 	/**
@@ -130,7 +130,7 @@ class WC_Product_CSV_Importer_Controller {
 			'step'          => $keys[ $step_index + 1 ],
 			'file'          => $this->file,
 			'delimiter'     => $this->delimiter,
-			'skip_existing' => $this->skip_existing,
+			'update_existing' => $this->update_existing,
 			'_wpnonce'      => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
@@ -312,7 +312,7 @@ class WC_Product_CSV_Importer_Controller {
 			'import_nonce'  => wp_create_nonce( 'wc-product-import' ),
 			'mapping'       => $mapping,
 			'file'          => $this->file,
-			'skip_existing' => $this->skip_existing,
+			'update_existing' => $this->update_existing,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
 
@@ -324,8 +324,11 @@ class WC_Product_CSV_Importer_Controller {
 	 * @todo Make this better.
 	 */
 	protected function done() {
-		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
-		$failed   = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
+		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
+		$updated  = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
+		$failed   = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
+		$skipped  = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
+		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-done.php' );
 	}
