@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Wraps an array (meta data for now) and tells if there was any changes.
  *
@@ -12,13 +16,21 @@
  * @author crodas
  */
 class WC_Meta_Data {
-	public $id;
-	public $key;
-	public $value;
+	/**
+	 * Current data for metadata
+	 *
+	 * @since 3.1.0
+	 * @var arrray
+	 */
+	protected $current_data;
 
-	protected $previous_value = array();
-
-	protected $properties = array( 'id', 'key', 'value' );
+	/**
+	 * Metadata data
+	 *
+	 * @since 3.1.0
+	 * @var arrray
+	 */
+	protected $data;
 
 	/**
 	 * Default constructor
@@ -26,11 +38,7 @@ class WC_Meta_Data {
 	 * @param Array	meta data to wrap behind this function
 	 */
 	public function __construct( Array $meta ) {
-		foreach ( $meta as $key => $value ) {
-			if ( in_array( $key, $this->properties ) ) {
-				$this->$key = $value;
-			}
-		}
+		$this->current_data = $meta;
 		$this->apply_changes();
 	}
 
@@ -38,9 +46,22 @@ class WC_Meta_Data {
 	 * Merge changes with data and clear.
 	 */
 	public function apply_changes() {
-		foreach ( $this->properties as $property ) {
-			$this->previous_value[ $property ] = $this->$property;
+		$this->data = $this->current_data;
+	}
+
+	public function __set( $key, $value ) {
+		$this->current_data[ $key ] = $value;
+	}
+
+	public function __isset( $key ) {
+		return array_key_exists( $key, $this->current_data );
+	}
+
+	public function __get( $key ) {
+		if ( array_key_exists( $key, $this->current_data )) {
+			return $this->current_data[ $key ];
 		}
+		return null;
 	}
 
 	/**
@@ -49,11 +70,11 @@ class WC_Meta_Data {
 	 * @return array
 	 */
 	public function get_changes() {
+
 		$changes = array();
-		foreach ( array( 'id', 'key', 'value' ) as $property ) {
-			if ( array_key_exists( $property, $this->previous_value ) && 
-					$this->previous_value[ $property ] !== $this->$property ) {
-				$changes[ $property ] = $this->$property;
+		foreach ( $this->current_data as $id => $value) {
+			if ( ! array_key_exists( $id, $this->data ) || $value !== $this->data[ $id ] ) {
+				$changes[ $id ] = $value;
 			}
 		}
 
