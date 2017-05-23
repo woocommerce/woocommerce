@@ -310,7 +310,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * of objects.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param id $token_id
+	 * @param bool $status
+	 *
 	 * @return string
 	 */
 	public function set_default_status( $token_id, $status = true ) {

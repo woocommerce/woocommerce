@@ -333,7 +333,8 @@ class WC_Shipping {
 	 *
 	 * @param array $package cart items
 	 * @param int   $package_key Index of the package being calculated. Used to cache multiple package rates.
-	 * @return array
+	 *
+	 * @return array|bool
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
 		if ( ! $this->enabled || empty( $package ) || ! $this->is_package_shippable( $package ) ) {

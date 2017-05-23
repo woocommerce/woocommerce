@@ -40,6 +40,10 @@ class Simplify_Object {
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $key
+	 *
+	 * @return mixed
 	 */
 	public function __get($key) {
 		if (array_key_exists($key, $this->properties)) {
@@ -51,6 +55,9 @@ class Simplify_Object {
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $key
+	 * @param mixed $value
 	 */
 	public function __set($key, $value) {
 		$this->properties[$key] = $value;

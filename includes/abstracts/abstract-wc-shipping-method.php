@@ -137,6 +137,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
+	 *
+	 * @param array $package
 	 */
 	public function calculate_shipping( $package = array() ) {}
 

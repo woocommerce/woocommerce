@@ -22,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param  int|WC_Product $product
  * @param  int|null $stock_quantity
  * @param  string $operation set, increase and decrease.
+ *
+ * @return int
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
 	if ( ! $product = wc_get_product( $product ) ) {

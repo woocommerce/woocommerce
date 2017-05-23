@@ -207,18 +207,23 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
 }
 
+
 /**
  * Like wc_get_template, but returns the HTML instead of outputting.
  * @see wc_get_template
  * @since 2.5.0
  * @param string $template_name
+ * @param array $args
+ * @param string $template_path
+ * @param string $default_path
+ *
+ * @return string
  */
 function wc_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	ob_start();
 	wc_get_template( $template_name, $args, $template_path, $default_path );
 	return ob_get_clean();
 }
-
 /**
  * Locate a template and return the path for inclusion.
  *
@@ -645,7 +650,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  *
  * Variable is filtered by woocommerce_get_image_size_{image_size}.
  *
- * @param mixed $image_size
+ * @param array|string $image_size
  * @return array
  */
 function wc_get_image_size( $image_size ) {
@@ -726,7 +731,7 @@ function wc_print_js() {
  * @param  string  $name   Name of the cookie being set.
  * @param  string  $value  Value of the cookie.
  * @param  integer $expire Expiry of the cookie.
- * @param  string  $secure Whether the cookie should be served only over https.
+ * @param  bool    $secure Whether the cookie should be served only over https.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
@@ -1380,6 +1385,8 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 /**
  * Wrapper for set_time_limit to see if it is enabled.
  * @since 2.6.0
+ *
+ * @param int $limit
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
@@ -1390,6 +1397,11 @@ function wc_set_time_limit( $limit = 0 ) {
 /**
  * Used to sort products attributes with uasort.
  * @since 2.6.0
+ *
+ * @param array $a
+ * @param array $b
+ *
+ * @return int
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
 	if ( $a['position'] === $b['position'] ) {
@@ -1401,6 +1413,11 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 /**
  * Used to sort shipping zone methods with uasort.
  * @since 3.0.0
+ *
+ * @param array $a
+ * @param array $b
+ *
+ * @return int
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 	if ( $a->method_order === $b->method_order ) {
@@ -1526,6 +1543,9 @@ add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handle
 /**
  * Store user agents. Used for tracker.
  * @since 3.0.0
+ *
+ * @param string     $user_login
+ * @param int|object $user
  */
 function wc_maybe_store_user_agent( $user_login, $user ) {
 	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {

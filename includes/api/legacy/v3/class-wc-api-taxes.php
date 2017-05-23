@@ -176,7 +176,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_tax( $data ) {
 		try {
@@ -246,7 +246,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @param int $id The tax ID
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_tax( $id, $data ) {
 		try {
@@ -332,7 +332,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param int $id The tax ID
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_tax( $id ) {
 		global $wpdb;
@@ -365,7 +365,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @param string $class
 	 * @param array $filter
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_taxes_count( $class = null, $filter = array() ) {
 		try {
@@ -449,7 +449,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 		try {
@@ -517,7 +517,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param string $fields
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_tax_classes( $fields = null ) {
 		try {
@@ -556,7 +556,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_tax_class( $data ) {
 		try {
@@ -620,7 +620,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param int $slug The tax class slug
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_tax_class( $slug ) {
 		global $wpdb;
@@ -673,7 +673,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_tax_classes_count() {
 		try {

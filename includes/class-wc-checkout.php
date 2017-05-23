@@ -119,7 +119,8 @@ class WC_Checkout {
 	 * Gets the legacy public variables for backwards compatibility.
 	 *
 	 * @param string $key
-	 * @return string
+	 *
+	 * @return array|string
 	 */
 	public function __get( $key ) {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && empty( $this->legacy_posted_data ) ) {
@@ -345,6 +346,7 @@ class WC_Checkout {
 	 * Add line items to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
@@ -386,6 +388,7 @@ class WC_Checkout {
 	 * Add fees to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_fee_lines( &$order, $cart ) {
 		foreach ( $cart->get_fees() as $fee_key => $fee ) {
@@ -417,6 +420,8 @@ class WC_Checkout {
 	 * Add shipping lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param array $chosen_shipping_methods
+	 * @param array $packages
 	 */
 	public function create_order_shipping_lines( &$order, $chosen_shipping_methods, $packages ) {
 		foreach ( $packages as $package_key => $package ) {
@@ -454,6 +459,7 @@ class WC_Checkout {
 	 * Add tax lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
 		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
@@ -484,6 +490,7 @@ class WC_Checkout {
 	 * Add coupon lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
 		foreach ( $cart->get_coupons() as $code => $coupon ) {

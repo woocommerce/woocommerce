@@ -826,6 +826,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
+	 *
+	 * @param array $args
 	 */
 	public static function in_plugin_update_message( $args ) {
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];

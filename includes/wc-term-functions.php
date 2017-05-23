@@ -179,7 +179,11 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
  * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
  * We use a custom walker, just like WordPress does.
  *
+ * @param array $args
+ * @param int $deprecated_hierarchical
  * @param int $deprecated_show_uncategorized (default: 1)
+ * @param string $deprecated_orderby
+ *
  * @return string
  */
 function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {

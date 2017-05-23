@@ -46,7 +46,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function create( &$customer ) {
 		$this->save_to_session( $customer );
@@ -55,7 +55,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function update( &$customer ) {
 		$this->save_to_session( $customer );
@@ -64,7 +64,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Saves all customer data to the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function save_to_session( $customer ) {
 		$data = array();
@@ -84,7 +84,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Read customer data from the session.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function read( &$customer ) {
 		$data = (array) WC()->session->get( 'customer' );
@@ -109,7 +109,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Load default values if props are unset.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	protected function set_defaults( &$customer ) {
 		try {
@@ -142,7 +142,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {

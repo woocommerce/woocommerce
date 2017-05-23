@@ -173,6 +173,11 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare downloads for save.
+	 *
+	 * @param array $file_names
+	 * @param array $file_urls
+	 * @param array $file_hashes
+	 *
 	 * @return array
 	 */
 	private static function prepare_downloads( $file_names, $file_urls, $file_hashes ) {
@@ -204,6 +209,9 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare attributes for save.
+	 *
+	 * @param array $data
+	 *
 	 * @return array
 	 */
 	public static function prepare_attributes( $data = false ) {
@@ -292,6 +300,9 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param $post
 	 */
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.

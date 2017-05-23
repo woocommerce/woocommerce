@@ -221,7 +221,10 @@ class WC_Query {
 
 	/**
 	 * Are we currently on the front page?
-	 * @return boolean
+	 *
+	 * @param object $q
+	 *
+	 * @return bool
 	 */
 	private function is_showing_page_on_front( $q ) {
 		return $q->is_home() && 'page' === get_option( 'show_on_front' );
@@ -229,7 +232,10 @@ class WC_Query {
 
 	/**
 	 * Is the front page a page we define?
-	 * @return boolean
+	 *
+	 * @param int $page_id
+	 *
+	 * @return bool
 	 */
 	private function page_on_front_is( $page_id ) {
 		return absint( get_option( 'page_on_front' ) ) === absint( $page_id );
@@ -238,7 +244,7 @@ class WC_Query {
 	/**
 	 * Hook into pre_get_posts to do the main product query.
 	 *
-	 * @param mixed $q query object
+	 * @param object $q query object
 	 */
 	public function pre_get_posts( $q ) {
 		// We only want to affect the main query
@@ -435,6 +441,10 @@ class WC_Query {
 	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
 	 * @access public
+	 *
+	 * @param string $orderby
+	 * @param string $order
+	 *
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
@@ -790,6 +800,8 @@ class WC_Query {
 	/**
 	 * Layered Nav post filter.
 	 * @deprecated 2.6.0 due to performance concerns
+	 *
+	 * @param $filtered_posts
 	 */
 	public function layered_nav_query( $filtered_posts ) {
 		wc_deprecated_function( 'layered_nav_query', '2.6' );
