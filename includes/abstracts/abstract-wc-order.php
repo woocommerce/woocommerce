@@ -808,9 +808,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return 'tax_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
-		} else {
-			return apply_filters( 'woocommerce_items_type_key', '', $item );
 		}
+		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
 
 	/**

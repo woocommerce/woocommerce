@@ -348,8 +348,12 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			/**
+			 * Filter hook to get inital item object.
+			 * @since 3.1.0
+			 */
+			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
 			$product                    = $values['data'];
-			$item                       = apply_filters( 'woocommerce_order_line_item_object', new WC_Order_Item_Product(), $values );
 			$item->legacy_values        = $values; // @deprecated For legacy actions.
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
