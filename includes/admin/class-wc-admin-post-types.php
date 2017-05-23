@@ -1779,7 +1779,7 @@ class WC_Admin_Post_Types {
 	public function product_data_visibility() {
 		global $post, $thepostid, $product_object;
 
-		if ( 'product' !== $post->post_type ) {
+		if ( 'product' !== $post->post_type || ! $product_object ) {
 			return;
 		}
 

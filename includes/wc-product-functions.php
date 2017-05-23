@@ -95,7 +95,7 @@ function wc_get_products( $args ) {
  *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
- * @return WC_Product|null
+ * @return WC_Product|false
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -105,6 +105,7 @@ function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! empty( $deprecated ) ) {
 		wc_deprecated_argument( 'args', '3.0', 'Passing args to wc_get_product is deprecated. If you need to force a type, construct the product class directly.' );
 	}
+
 	return WC()->product_factory->get_product( $the_product, $deprecated );
 }
 
