@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
 
