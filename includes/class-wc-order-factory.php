@@ -89,10 +89,9 @@ class WC_Order_Factory {
 				case 'tax' :
 					$classname = 'WC_Order_Item_Tax';
 				break;
-				default :
-					$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
-				break;
 			}
+
+			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
 
 			if ( $classname && class_exists( $classname ) ) {
 				try {
