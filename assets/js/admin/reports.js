@@ -117,7 +117,7 @@ jQuery(function( $ ) {
 		buttonImageOnly: true,
 		onSelect: function() {
 			var option = $( this ).is( '.from' ) ? 'minDate' : 'maxDate',
-                date   = $( this ).datepicker( 'getDate' );
+				date   = $( this ).datepicker( 'getDate' );
 
 			dates.not( this ).datepicker( 'option', option, date );
 		}

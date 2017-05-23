@@ -126,7 +126,7 @@ jQuery( function( $ ) {
 				onSelect:        function() {
 					var option = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
 						dates  = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
-                        date   = $( this ).datepicker( 'getDate' );
+						date   = $( this ).datepicker( 'getDate' );
 
 					dates.not( this ).datepicker( 'option', option, date );
 					$( this ).change();
