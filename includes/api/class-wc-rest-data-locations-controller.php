@@ -57,7 +57,7 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args' => array(
 					'continent' => array(
-						'description' => __( 'ISO3166 alpha-2 country or continent code', 'woocommerce' ),
+						'description' => __( 'ISO3166 alpha-2 country or continent code.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -174,19 +174,19 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 			'properties' => array(
 				'code' => array(
 					'type'        => 'string',
-					'description' => __( 'ISO3166 alpha-2 continent or country code', 'woocommerce' ),
+					'description' => __( 'ISO3166 alpha-2 continent or country code.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name' => array(
 					'type'        => 'string',
-					'description' => __( 'Full name of continent or country', 'woocommerce' ),
+					'description' => __( 'Full name of continent or country.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'locations' => array(
 					'type'        => 'array',
-					'description' => __( 'List of locations in this continent or country', 'woocommerce' ),
+					'description' => __( 'List of locations in this continent or country.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
@@ -196,19 +196,19 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 						'properties' => array(
 							'code' => array(
 								'type'        => 'string',
-								'description' => __( 'ISO3166 alpha-2 country code, or unique code for state', 'woocommerce' ),
+								'description' => __( 'ISO3166 alpha-2 country code, or unique code for state.', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 							),
 							'name' => array(
 								'type'        => 'string',
-								'description' => __( 'Full name of country or state', 'woocommerce' ),
+								'description' => __( 'Full name of country or state.', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 							),
 							'locations' => array(
 								'type'        => 'array',
-								'description' => __( 'List of locations in this country (absent if state)', 'woocommerce' ),
+								'description' => __( 'List of locations in this country (absent if state).', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 								'items'       => array(
@@ -218,13 +218,13 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 									'properties' => array(
 										'code' => array(
 											'type'        => 'string',
-											'description' => __( 'State code', 'woocommerce' ),
+											'description' => __( 'State code.', 'woocommerce' ),
 											'context'     => array( 'view' ),
 											'readonly'    => true,
 										),
 										'name' => array(
 											'type'        => 'string',
-											'description' => __( 'Full name of state', 'woocommerce' ),
+											'description' => __( 'Full name of state.', 'woocommerce' ),
 											'context'     => array( 'view' ),
 											'readonly'    => true,
 										),
