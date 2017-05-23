@@ -350,7 +350,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				AND     posts.post_type     = 'shop_order'
 				AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
 				AND     meta2.meta_key      = '_order_total'
-			" ), $customer );
+			", $customer ) );
 
 			if ( ! $spent ) {
 				$spent = 0;
