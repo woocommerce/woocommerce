@@ -772,7 +772,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
 
-		return $product->get_image( $image_size );
+		return $product ? $product->get_image( $image_size ) : '';
 	}
 }
 
