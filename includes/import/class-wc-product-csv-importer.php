@@ -36,7 +36,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'lines'           => -1, // Max lines to read.
 			'mapping'         => array(), // Column mapping. csv_heading => schema_heading.
 			'parse'           => false, // Whether to sanitize and format data.
-			'update_existing' => false, // Whether to skip existing items.
+			'update_existing' => false, // Whether to update existing items.
 			'delimiter'       => ',', // CSV delimiter.
 		);
 

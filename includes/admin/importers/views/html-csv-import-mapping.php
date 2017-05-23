@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<td class="wc-importer-mapping-table-field">
 							<select name="map_to[<?php echo esc_attr( $name ); ?>]">
 								<option value=""><?php esc_html_e( 'Do not import', 'woocommerce' ); ?></option>
-								<option value=""><?php echo '--------------'; ?></option>
+								<option value="">--------------</option>
 								<?php foreach ( $this->get_mapping_options( $mapped_value ) as $key => $value ) : ?>
 									<?php if ( is_array( $value ) ) : ?>
 										<optgroup label="<?php echo esc_attr( $value['name'] ); ?>">

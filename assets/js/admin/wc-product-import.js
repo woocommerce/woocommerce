@@ -5,13 +5,13 @@
 	 * productImportForm handles the import process.
 	 */
 	var productImportForm = function( $form ) {
-		this.$form         = $form;
-		this.xhr           = false;
-		this.mapping       = wc_product_import_params.mapping;
-		this.position      = 0;
-		this.file          = wc_product_import_params.file;
+		this.$form           = $form;
+		this.xhr             = false;
+		this.mapping         = wc_product_import_params.mapping;
+		this.position        = 0;
+		this.file            = wc_product_import_params.file;
 		this.update_existing = wc_product_import_params.update_existing;
-		this.security      = wc_product_import_params.import_nonce;
+		this.security        = wc_product_import_params.import_nonce;
 
 		// Number of import successes/failures.
 		this.imported = 0;
@@ -38,12 +38,12 @@
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				action        : 'woocommerce_do_ajax_product_import',
-				position      : $this.position,
-				mapping       : $this.mapping,
-				file          : $this.file,
+				action          : 'woocommerce_do_ajax_product_import',
+				position        : $this.position,
+				mapping         : $this.mapping,
+				file            : $this.file,
 				update_existing : $this.update_existing,
-				security      : $this.security
+				security        : $this.security
 			},
 			dataType: 'json',
 			success: function( response ) {
