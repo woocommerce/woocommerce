@@ -509,8 +509,11 @@ class WC_Checkout {
 	 * See if a fieldset should be skipped.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param string $fieldset_key
 	 * @param array $data
+	 *
+	 * @return bool
 	 */
 	protected function maybe_skip_fieldset( $fieldset_key, $data ) {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {

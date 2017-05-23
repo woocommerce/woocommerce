@@ -32,7 +32,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 *
+	 * @param WC_Data $product
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();

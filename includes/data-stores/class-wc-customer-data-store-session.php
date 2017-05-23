@@ -142,6 +142,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */

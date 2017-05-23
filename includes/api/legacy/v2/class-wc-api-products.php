@@ -1613,8 +1613,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Save product images
 	 *
 	 * @since  2.2
+	 *
 	 * @param WC_Product $product
-	 * @param  array $images
+	 * @param array      $images
+	 *
+	 * @return WC_Product
 	 * @throws WC_API_Exception
 	 */
 	protected function save_product_images( $product, $images ) {

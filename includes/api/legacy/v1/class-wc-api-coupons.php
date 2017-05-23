@@ -91,9 +91,12 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given ID
 	 *
 	 * @since 2.1
+	 *
 	 * @param int $id the coupon ID
 	 * @param string $fields fields to include in response
+	 *
 	 * @return array|WP_Error
+	 * @throws WC_API_Exception
 	 */
 	public function get_coupon( $id, $fields = null ) {
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );

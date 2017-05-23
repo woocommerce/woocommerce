@@ -286,8 +286,11 @@ function wc_get_loop_class() {
  * Get the classes for the product cat div.
  *
  * @since 2.4.0
+ *
  * @param string|array $class One or more classes to add to the class list.
  * @param object $category object Optional.
+ *
+ * @return array
  */
 function wc_get_product_cat_class( $class = '', $category = null ) {
 	$classes   = is_array( $class ) ? $class : array_map( 'trim', explode( ' ', $class ) );
@@ -367,9 +370,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 /**
  * Outputs hidden form inputs for each query string variable.
  * @since 3.0.0
+ *
  * @param array $values Name value pairs.
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
+ *
+ * @return string
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
@@ -1056,6 +1062,8 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * @param  array $args Args for the input
 	 * @param  WC_Product|null $product
 	 * @param  boolean $echo Whether to return or echo|string
+	 *
+	 * @return string
 	 */
 	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
 		if ( is_null( $product ) ) {
@@ -1876,10 +1884,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	/**
 	 * Outputs a checkout/address form field.
 	 *
-	 * @subpackage	Forms
+	 * @subpackage    Forms
+	 *
 	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
+	 *
+	 * @return string
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -2377,9 +2388,12 @@ if ( ! function_exists( 'wc_no_products_found' ) ) {
 if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 	/**
 	 * Get HTML for the order items to be shown in emails.
+	 *
 	 * @param WC_Order $order
 	 * @param array $args
+	 *
 	 * @since 3.0.0
+	 * @return string
 	 */
 	function wc_get_email_order_items( $order, $args = array() ) {
 		ob_start();

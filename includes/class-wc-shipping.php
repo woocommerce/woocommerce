@@ -160,6 +160,8 @@ class WC_Shipping {
 	 * Register a shipping method.
 	 *
 	 * @param object|string $method Either the name of the method's class, or an instance of the method's class.
+	 *
+	 * @return bool|void
 	 */
 	public function register_shipping_method( $method ) {
 		if ( ! is_object( $method ) ) {
