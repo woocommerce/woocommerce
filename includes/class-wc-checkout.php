@@ -525,7 +525,7 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  3.0.0
+	 * @since  3.1.0
 	 * @return array of data.
 	 */
 	public function get_posted_data() {
