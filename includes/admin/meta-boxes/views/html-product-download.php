@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <tr>
 	<td class="sort"></td>
 	<td class="file_name">

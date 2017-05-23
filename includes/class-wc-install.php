@@ -1136,7 +1136,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 						$theme_slug,
 						$e->getMessage(),
-						esc_url( admin_url( 'http://local.wordpress.dev/wp-admin/update.php?action=install-theme&theme=' . $theme_slug . '&_wpnonce=' . wp_create_nonce( 'install-theme_' . $theme_slug ) ) )
+						esc_url( admin_url( 'update.php?action=install-theme&theme=' . $theme_slug . '&_wpnonce=' . wp_create_nonce( 'install-theme_' . $theme_slug ) ) )
 					)
 				);
 			}

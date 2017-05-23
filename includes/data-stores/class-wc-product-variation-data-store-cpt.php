@@ -72,9 +72,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
-		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && ( $parent_title = get_post_field( 'post_title', $product->get_parent_id() ) ) && 0 !== strpos( $post_object->post_title, $parent_title ) ) {
-			global $wpdb;
+		$parent_title = get_post_field( 'post_title', $product->get_parent_id() );
 
+		if ( 0 !== strpos( $post_object->post_title, $parent_title ) ) {
+			global $wpdb;
 			$new_title = $this->generate_product_title( $product );
 			$product->set_name( $new_title );
 			$wpdb->update( $wpdb->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
@@ -202,11 +203,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function generate_product_title( $product ) {
 		$attributes = (array) $product->get_attributes();
 
-		// Don't include attributes if the product has 3+ attributes.
+		// Do not include attributes if the product has 3+ attributes.
 		$should_include_attributes = count( $attributes ) < 3;
 
-		// Don't include attributes if an attribute name has 2+ words.
-		if ( $should_include_attributes ) {
+		// Do not include attributes if an attribute name has 2+ words and the
+		// product has multiple attributes.
+		if ( $should_include_attributes && 1 < count( $attributes ) ) {
 			foreach ( $attributes as $name => $value ) {
 				if ( false !== strpos( $name, '-' ) ) {
 					$should_include_attributes = false;
@@ -286,6 +288,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'tax_class'         => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
 			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
 			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
+			'purchase_note'     => get_post_meta( $product->get_parent_id(), '_purchase_note', true ),
 		) );
 
 		// Pull data from the parent when there is no user-facing way to set props.
