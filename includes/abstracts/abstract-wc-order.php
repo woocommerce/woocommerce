@@ -802,12 +802,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// The item was not found in memory, we load in memory all the items related to this order
 		$types = $this->data_store->get_order_item_types( $this );
 		foreach ( $types as $type ) {
-			if ( !( $group = $this->type_to_group( $type ) )  || ! empty( $this->items[ $group ] ) ) {
+			if ( ! ( $group = $this->type_to_group( $type ) )  || ! empty( $this->items[ $group ] ) ) {
 				continue;
 			}
 			$this->items[ $group ] = $this->data_store->read_items( $this, $type );
-			if ( ! empty( $this->items[$group][ $item_id ] ) ) {
-				return $this->items[$group][ $item_id ];
+			if ( ! empty( $this->items[ $group ][ $item_id ] ) ) {
+				return $this->items[ $group ][ $item_id ];
 			}
 		}
 

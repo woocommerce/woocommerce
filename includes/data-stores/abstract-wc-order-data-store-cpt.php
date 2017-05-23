@@ -362,7 +362,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function get_order_item_types( WC_Order $order ) {
 		global $wpdb;
-		$query   = $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() );
+		$query = $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() );
 		return wp_list_pluck( $wpdb->get_results( $query ), 'order_item_type' );
 	}
 }
