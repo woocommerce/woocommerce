@@ -728,19 +728,25 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		while ( $single_product->have_posts() ) :
-			$single_product->the_post();
-			wp_enqueue_script( 'wc-single-product' );
+		global $wp_query;
+
+		// Backup query object so following loops think this is a product page.
+		$previous_wp_query = $wp_query;
+		$wp_query          = $single_product;
+
+		wp_enqueue_script( 'wc-single-product' );
+
+		while ( $single_product->have_posts() ) {
+			$single_product->the_post()
 			?>
-
 			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
-
 				<?php wc_get_template_part( 'content', 'single-product' ); ?>
-
 			</div>
+			<?php
+		}
 
-		<?php endwhile; // end of the loop.
-
+		// restore $previous_wp_query and reset post data.
+		$wp_query = $previous_wp_query;
 		wp_reset_postdata();
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';

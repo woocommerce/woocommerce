@@ -38,7 +38,7 @@ class WC_Session_Handler extends WC_Session {
 	public function __construct() {
 		global $wpdb;
 
-		$this->_cookie = 'wp_woocommerce_session_' . COOKIEHASH;
+		$this->_cookie = apply_filters( 'woocommerce_cookie', 'wp_woocommerce_session_' . COOKIEHASH );
 		$this->_table  = $wpdb->prefix . 'woocommerce_sessions';
 
 		if ( $cookie = $this->get_session_cookie() ) {
