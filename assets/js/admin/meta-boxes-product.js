@@ -244,7 +244,7 @@ jQuery( function( $ ) {
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
 			showButtonPanel: true,
-			onSelect: function( selectedDate ) {
+			onSelect: function() {
 				var option = $( this ).is( '#_sale_price_dates_from, .sale_price_dates_from' ) ? 'minDate' : 'maxDate',
 					date   = $( this ).datepicker( 'getDate' );
 
