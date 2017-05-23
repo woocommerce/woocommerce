@@ -111,7 +111,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name       = str_replace( 'pa_', '', sanitize_title( $name ) );
+	$name       = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $name ) );
 	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
 
 	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
@@ -125,8 +125,6 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  * @return string
  */
 function wc_attribute_label( $name, $product = '' ) {
-	global $wpdb;
-
 	if ( taxonomy_is_product_attribute( $name ) ) {
 		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );

@@ -36,7 +36,7 @@ interface WC_Logger_Interface {
 	 *     'error': Error conditions.
 	 *     'warning': Warning conditions.
 	 *     'notice': Normal but significant condition.
-	 *     'informational': Informational messages.
+	 *     'info': Informational messages.
 	 *     'debug': Debug-level messages.
 	 * @param string $message Log message.
 	 * @param array $context Optional. Additional information for log handlers.

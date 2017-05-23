@@ -12,7 +12,7 @@ global $states;
 $states['NP'] = array(
 	'BAG' => __( 'Bagmati', 'woocommerce' ),
 	'BHE' => __( 'Bheri', 'woocommerce' ),
-	'DHA' => __( 'Dhawalagiri', 'woocommerce' ),
+	'DHA' => __( 'Dhaulagiri', 'woocommerce' ),
 	'GAN' => __( 'Gandaki', 'woocommerce' ),
 	'JAN' => __( 'Janakpur', 'woocommerce' ),
 	'KAR' => __( 'Karnali', 'woocommerce' ),

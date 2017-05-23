@@ -616,7 +616,6 @@ function wc_update_240_options() {
 }
 
 function wc_update_240_shipping_methods() {
-	global $wpdb;
 	/**
 	 * Flat Rate Shipping.
 	 * Update legacy options to new math based options.
@@ -726,7 +725,6 @@ function wc_update_240_api_keys() {
 }
 
 function wc_update_240_webhooks() {
-	global $wpdb;
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.

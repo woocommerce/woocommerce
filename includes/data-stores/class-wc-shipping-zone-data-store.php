@@ -269,7 +269,6 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * @param WC_Shipping_Zone
 	 */
 	private function save_locations( &$zone ) {
-		$updated_props = array();
 		$changed_props = array_keys( $zone->get_changes() );
 		if ( ! in_array( 'zone_locations', $changed_props ) ) {
 			return false;

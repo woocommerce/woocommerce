@@ -280,6 +280,7 @@ final class WooCommerce {
 		 * Abstract classes.
 		 */
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php' ); // WC_Object_Query for CRUD
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders
@@ -307,6 +308,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-query.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory
+		include_once( WC_ABSPATH . 'includes/class-wc-order-query.php' ); // Order query
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );

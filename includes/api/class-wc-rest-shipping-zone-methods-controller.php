@@ -155,8 +155,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function create_item( $request ) {
-		global $wpdb;
-
 		$method_id = $request['method_id'];
 		$zone      = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
@@ -193,8 +191,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		global $wpdb;
-
 		$zone = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
@@ -251,8 +247,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		global $wpdb;
-
 		$zone = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;

@@ -117,10 +117,6 @@ class WC_Admin_Help {
 				'title' => __( 'API Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq.jsonp?',
 			),
-			'wc-settings-api' => array(
-				'title' => __( 'API Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq.jsonp?',
-			),
 			'product' => array(
 				'title' => __( 'Creating Products', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/fw0477t6wr.jsonp?',

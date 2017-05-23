@@ -789,7 +789,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$user_id = get_current_user_id();
 		}
 		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->get_id() && $this->data_store ) {
-			global $wpdb;
 			$usage_count = $this->data_store->get_usage_by_user_id( $this, $user_id );
 			if ( $usage_count >= $this->get_usage_limit_per_user() ) {
 				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );

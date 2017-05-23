@@ -233,8 +233,7 @@ class WC_Admin_Assets {
 			$post_id  = isset( $post->ID ) ? $post->ID : '';
 			$currency = '';
 
-			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
-				$order    = wc_get_order( $post_id );
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) && ( $order = wc_get_order( $post_id ) ) ) {
 				$currency = $order->get_currency();
 			}
 

@@ -125,8 +125,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( $post );
 		$dp    = $request['dp'];
 

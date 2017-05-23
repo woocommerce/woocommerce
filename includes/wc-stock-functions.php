@@ -69,10 +69,9 @@ function wc_update_product_stock_status( $product_id, $status ) {
  * @param int $order_id
  */
 function wc_maybe_reduce_stock_levels( $order_id ) {
-	$data_store = WC_Data_Store::load( 'order' );
-	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! $data_store->get_stock_reduced( $order_id ), $order_id ) ) {
-		wc_reduce_stock_levels( $order_id );
-		$data_store->set_stock_reduced( $order_id, true );
+	$order = wc_get_order( $order_id );
+	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', $order && ! $order->get_data_store()->get_stock_reduced( $order_id ), $order_id ) ) {
+		wc_reduce_stock_levels( $order );
 	}
 }
 add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
@@ -80,11 +79,15 @@ add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 /**
  * Reduce stock levels for items within an order.
  * @since 3.0.0
- * @param int $order_id
+ * @param int|WC_Order $order_id
  */
 function wc_reduce_stock_levels( $order_id ) {
-	$order = wc_get_order( $order_id );
-
+	if ( is_a( $order_id, 'WC_Order' ) ) {
+		$order    = $order_id;
+		$order_id = $order->get_id();
+	} else {
+		$order = wc_get_order( $order_id );
+	}
 	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
 			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
@@ -111,6 +114,9 @@ function wc_reduce_stock_levels( $order_id ) {
 				}
 			}
 		}
+
+		// ensure stock is marked as "reduced" in case payment complete or other stock actions are called
+		$order->get_data_store()->set_stock_reduced( $order_id, true );
 
 		do_action( 'woocommerce_reduce_order_stock', $order );
 	}

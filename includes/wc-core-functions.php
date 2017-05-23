@@ -870,8 +870,6 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
-	global $wp_rewrite;
-
 	$post = get_post( $post_id );
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
 		$permalinks = wc_get_permalink_structure();
