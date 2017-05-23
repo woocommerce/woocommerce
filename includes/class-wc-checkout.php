@@ -119,7 +119,8 @@ class WC_Checkout {
 	 * Gets the legacy public variables for backwards compatibility.
 	 *
 	 * @param string $key
-	 * @return string
+	 *
+	 * @return array|string
 	 */
 	public function __get( $key ) {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && empty( $this->legacy_posted_data ) ) {
@@ -345,11 +346,16 @@ class WC_Checkout {
 	 * Add line items to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			/**
+			 * Filter hook to get inital item object.
+			 * @since 3.1.0
+			 */
+			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
 			$product                    = $values['data'];
-			$item                       = new WC_Order_Item_Product();
 			$item->legacy_values        = $values; // @deprecated For legacy actions.
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
@@ -386,6 +392,7 @@ class WC_Checkout {
 	 * Add fees to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_fee_lines( &$order, $cart ) {
 		foreach ( $cart->get_fees() as $fee_key => $fee ) {
@@ -417,6 +424,8 @@ class WC_Checkout {
 	 * Add shipping lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param array $chosen_shipping_methods
+	 * @param array $packages
 	 */
 	public function create_order_shipping_lines( &$order, $chosen_shipping_methods, $packages ) {
 		foreach ( $packages as $package_key => $package ) {
@@ -454,6 +463,7 @@ class WC_Checkout {
 	 * Add tax lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
 		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
@@ -484,6 +494,7 @@ class WC_Checkout {
 	 * Add coupon lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
 		foreach ( $cart->get_coupons() as $code => $coupon ) {
@@ -509,8 +520,11 @@ class WC_Checkout {
 	 * See if a fieldset should be skipped.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param string $fieldset_key
 	 * @param array $data
+	 *
+	 * @return bool
 	 */
 	protected function maybe_skip_fieldset( $fieldset_key, $data ) {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
@@ -525,10 +539,10 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  3.0.0
+	 * @since  3.1.0
 	 * @return array of data.
 	 */
-	protected function get_posted_data() {
+	public function get_posted_data() {
 		$skipped = array();
 		$data    = array(
 			'terms'                              => (int) isset( $_POST['terms'] ),
@@ -710,33 +724,41 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Set address field for customer.
+	 *
+	 * @since 3.0.7
+	 * @param $field string to update
+	 * @param $key
+	 * @param $data array of data to get the value from
+	 */
+	protected function set_customer_address_fields( $field, $key, $data ) {
+		if ( isset( $data[ "billing_{$field}" ] ) ) {
+			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
+		}
+		if ( isset( $data[ "shipping_{$field}" ] ) ) {
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
+		}
+	}
+
+	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
 	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
-		if ( isset( $data['billing_country'] ) ) {
-			WC()->customer->set_billing_country( $data['billing_country'] );
-			WC()->customer->set_shipping_country( $data['billing_country'] );
-		}
-		if ( isset( $data['billing_state'] ) ) {
-			WC()->customer->set_billing_state( $data['billing_state'] );
-			WC()->customer->set_shipping_state( $data['billing_state'] );
-		}
-		if ( isset( $data['billing_postcode'] ) ) {
-			WC()->customer->set_billing_postcode( $data['billing_postcode'] );
-			WC()->customer->set_shipping_postcode( $data['billing_postcode'] );
-		}
-		if ( isset( $data['shipping_country'] ) ) {
-			WC()->customer->set_shipping_country( $data['shipping_country'] );
-		}
-		if ( isset( $data['shipping_state'] ) ) {
-			WC()->customer->set_shipping_state( $data['shipping_state'] );
-		}
-		if ( isset( $data['shipping_postcode'] ) ) {
-			WC()->customer->set_shipping_postcode( $data['shipping_postcode'] );
-		}
+		// Update both shipping and billing to the passed billing address first if set.
+		$address_fields = array(
+			'address_1',
+			'address_2',
+			'city',
+			'postcode',
+			'state',
+			'country',
+		);
+
+		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
 		// Update customer shipping and payment method to posted method
@@ -838,6 +860,11 @@ class WC_Checkout {
 
 			// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
 			WC()->cart->calculate_totals();
+		}
+
+		// On multisite, ensure user exists on current site, if not add them before allowing login.
+		if ( $customer_id && is_multisite() && is_user_logged_in() && ! is_user_member_of_blog() ) {
+			add_user_to_blog( get_current_blog_id(), $customer_id, 'customer' );
 		}
 
 		// Add customer info from other fields.

@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WC API to WC CLI Bridge.
  *
@@ -92,29 +97,26 @@ class WC_CLI_Runner {
 		// Define IDs that we are looking for in the routes (in addition to id)
 		// so that we can pass it to the rest command, and use it here to generate documentation.
 		$supported_ids = array(
+				'id'           => __( 'ID.', 'woocommerce' ),
 				'product_id'   => __( 'Product ID.', 'woocommerce' ),
 				'customer_id'  => __( 'Customer ID.', 'woocommerce' ),
 				'order_id'     => __( 'Order ID.', 'woocommerce' ),
 				'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
 				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
+				'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
-		$positional_args = array_merge( array( 'id' ), array_keys( $supported_ids ) );
+		$positional_args = array_keys( $supported_ids );
 
 		$parent			 = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
 		// Get a list of supported commands for each route.
 		foreach ( $route_data['endpoints'] as $endpoint ) {
-			$parsed_args   = preg_match_all( '#\([^\)]+\)#', $route, $matches );
-			$first_match   = $matches[0];
+			preg_match_all( '#\([^\)]+\)#', $route, $matches );
 			$resource_id   = ! empty( $matches[0] ) ? array_pop( $matches[0] ) : null;
 			$trimmed_route = rtrim( $route );
 			$is_singular   = substr( $trimmed_route, - strlen( $resource_id ) ) === $resource_id;
-			if ( ! $is_singular ) {
-				$resource_id = $first_match;
-			}
-			$command = '';
 
 			// List a collection
 			if ( array( 'GET' ) == $endpoint['methods'] && ! $is_singular ) {

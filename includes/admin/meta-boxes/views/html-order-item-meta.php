@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', array(
 	'_qty',
 	'_tax_class',

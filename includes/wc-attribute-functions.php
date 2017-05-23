@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Gets text attributes from a string.
  *
  * @since  2.4
+ *
+ * @param string $raw_attributes
+ *
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
@@ -72,8 +75,8 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 /**
  * Get the attribute name used when storing values in post meta.
  *
- * @param string $attribute_name Attribute name.
  * @since 2.6.0
+ * @param string $attribute_name Attribute name.
  * @return string
  */
 function wc_variation_attribute_name( $attribute_name ) {
@@ -111,7 +114,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name       = str_replace( 'pa_', '', $name );
+	$name       = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $name ) );
 	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
 
 	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
@@ -121,12 +124,10 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  * Get a product attributes label.
  *
  * @param string $name
- * @param  object $product object Optional
+ * @param object $product object Optional
  * @return string
  */
 function wc_attribute_label( $name, $product = '' ) {
-	global $wpdb;
-
 	if ( taxonomy_is_product_attribute( $name ) ) {
 		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
@@ -304,7 +305,7 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
  * Callback for array filter to get visible only.
  *
  * @since  3.0.0
- * @param  WC_Product $product
+ * @param  WC_Product_Attribute $attribute
  * @return bool
  */
 function wc_attributes_array_filter_visible( $attribute ) {
@@ -315,7 +316,7 @@ function wc_attributes_array_filter_visible( $attribute ) {
  * Callback for array filter to get variation attributes only.
  *
  * @since  3.0.0
- * @param  WC_Product $product
+ * @param  WC_Product_Attribute $attribute
  * @return bool
  */
 function wc_attributes_array_filter_variation( $attribute ) {
@@ -333,4 +334,16 @@ function wc_attributes_array_filter_variation( $attribute ) {
 function wc_is_attribute_in_product_name( $attribute, $name ) {
 	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
 	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
+}
+
+/**
+ * Callback for array filter to get default attributes.  Will allow for '0' string values, but regard all other
+ * class PHP FALSE equivalents normally.
+ *
+ * @since 3.1.0
+ * @param mixed $attribute  Attribute being considered for exclusion from parent array.
+ * @return bool
+ */
+function wc_array_filter_default_attributes( $attribute ) {
+	return ( ! empty( $attribute ) || $attribute === '0' );
 }

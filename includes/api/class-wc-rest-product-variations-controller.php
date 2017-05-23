@@ -450,10 +450,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * Delete a variation.
 	 *
 	 * @param WP_REST_Request $request Full details about the request
-	 * @return WP_Error|boolean
+	 *
+	 * @return bool|WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		$id     = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;

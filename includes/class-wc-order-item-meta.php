@@ -146,6 +146,9 @@ class WC_Order_Item_Meta {
 	/**
 	 * Return an array of formatted item meta in format e.g.
 	 * Handles @deprecated args.
+	 *
+	 * @param string $hideprefix
+	 *
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {

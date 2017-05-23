@@ -140,6 +140,7 @@ abstract class WC_Data {
 		$this->maybe_read_meta_data();
 		if ( ! empty( $this->meta_data ) ) {
 			foreach ( $this->meta_data as $array_key => $meta ) {
+				$this->meta_data[ $array_key ] = clone $meta;
 				if ( ! empty( $meta->id ) ) {
 					unset( $this->meta_data[ $array_key ]->id );
 				}
@@ -247,6 +248,9 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
+	 *
+	 * @param mixed $meta
+	 *
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -351,8 +355,8 @@ abstract class WC_Data {
 
 	/**
 	 * Update meta data by key or ID, if provided.
-	 *
 	 * @since  2.6.0
+	 *
 	 * @param  string $key
 	 * @param  string $value
 	 * @param  int $meta_id
@@ -533,8 +537,11 @@ abstract class WC_Data {
 	 * Only sets using public methods.
 	 *
 	 * @since  3.0.0
+	 *
 	 * @param  array $props Key value pairs to set. Key is the prop and should map to a setter function name.
-	 * @return WP_Error|bool
+	 * @param string $context
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function set_props( $props, $context = 'set' ) {
 		$errors = new WP_Error();

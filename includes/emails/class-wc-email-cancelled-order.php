@@ -32,7 +32,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor

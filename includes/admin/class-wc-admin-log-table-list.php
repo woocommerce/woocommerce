@@ -311,7 +311,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$order = 'DESC';
 		}
 
-		return "ORDER BY {$by} {$order}";
+		return "ORDER BY {$by} {$order}, log_id {$order}";
 	}
 
 	/**

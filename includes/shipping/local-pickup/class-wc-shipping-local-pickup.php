@@ -17,6 +17,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param int $instance_id
 	 */
 	public function __construct( $instance_id = 0 ) {
 		$this->id                    = 'local_pickup';
@@ -52,6 +54,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	/**
 	 * calculate_shipping function.
 	 * Calculate local pickup shipping.
+	 *
+	 * @param array $package
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$this->add_rate( array(

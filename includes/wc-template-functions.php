@@ -107,6 +107,18 @@ function wc_prevent_adjacent_posts_rel_link_wp_head() {
 add_action( 'template_redirect', 'wc_prevent_adjacent_posts_rel_link_wp_head' );
 
 /**
+ * Show the gallery if JS is disabled.
+ *
+ * @since 3.0.6
+ */
+function wc_gallery_noscript() {
+	?>
+	<noscript><style>.woocommerce-product-gallery{ opacity: 1 !important; }</style></noscript>
+	<?php
+}
+add_action( 'wp_head', 'wc_gallery_noscript' );
+
+/**
  * When the_post is called, put product data into a global.
  *
  * @param mixed $post
@@ -181,6 +193,11 @@ function wc_products_rss_feed() {
  * Output generator tag to aid debugging.
  *
  * @access public
+ *
+ * @param string $gen
+ * @param string $type
+ *
+ * @return string
  */
 function wc_generator_tag( $gen, $type ) {
 	switch ( $type ) {
@@ -274,8 +291,11 @@ function wc_get_loop_class() {
  * Get the classes for the product cat div.
  *
  * @since 2.4.0
+ *
  * @param string|array $class One or more classes to add to the class list.
  * @param object $category object Optional.
+ *
+ * @return array
  */
 function wc_get_product_cat_class( $class = '', $category = null ) {
 	$classes   = is_array( $class ) ? $class : array_map( 'trim', explode( ' ', $class ) );
@@ -355,9 +375,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 /**
  * Outputs hidden form inputs for each query string variable.
  * @since 3.0.0
+ *
  * @param array $values Name value pairs.
  * @param array $exclude Keys to exclude.
  * @param string $current_key Current key we are outputting.
+ * @param bool $return
+ * @return string
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
@@ -592,6 +615,8 @@ if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 
 	/**
 	 * Show the subcategory title in the product loop.
+	 *
+	 * @param object $category
 	 */
 	function woocommerce_template_loop_category_title( $category ) {
 		?>
@@ -619,8 +644,11 @@ function woocommerce_template_loop_product_link_open() {
 function woocommerce_template_loop_product_link_close() {
 	echo '</a>';
 }
+
 /**
  * Insert the opening anchor tag for categories in the loop.
+ *
+ * @param int|object|string $category
  */
 function woocommerce_template_loop_category_link_open( $category ) {
 	echo '<a href="' . get_term_link( $category, 'product_cat' ) . '">';
@@ -677,7 +705,9 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	/**
 	 * Get the add to cart template for the loop.
 	 *
-	 * @subpackage	Loop
+	 * @subpackage    Loop
+	 *
+	 * @param array $args
 	 */
 	function woocommerce_template_loop_add_to_cart( $args = array() ) {
 		global $product;
@@ -756,18 +786,11 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * @return string
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
-		global $post;
+		global $product;
+
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
 
-		if ( has_post_thumbnail() ) {
-			$props = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
-			return get_the_post_thumbnail( $post->ID, $image_size, array(
-				'title'	 => $props['title'],
-				'alt'    => $props['alt'],
-			) );
-		} elseif ( wc_placeholder_img_src() ) {
-			return wc_placeholder_img( $image_size );
-		}
+		return $product ? $product->get_image( $image_size ) : '';
 	}
 }
 
@@ -793,7 +816,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
 
-		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() || $wp_query->is_search() ) {
 			return;
 		}
 
@@ -1044,6 +1067,8 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * @param  array $args Args for the input
 	 * @param  WC_Product|null $product
 	 * @param  boolean $echo Whether to return or echo|string
+	 *
+	 * @return string
 	 */
 	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
 		if ( is_null( $product ) ) {
@@ -1551,7 +1576,9 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	/**
 	 * Output the Order review table for the checkout.
 	 *
-	 * @subpackage	Checkout
+	 * @subpackage    Checkout
+	 *
+	 * @param $deprecated
 	 */
 	function woocommerce_order_review( $deprecated = false ) {
 		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
@@ -1864,10 +1891,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	/**
 	 * Outputs a checkout/address form field.
 	 *
-	 * @subpackage	Forms
+	 * @subpackage    Forms
+	 *
 	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
+	 *
+	 * @return string
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -1981,7 +2011,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
 
-				} elseif ( is_array( $states ) ) {
+				} elseif ( ! is_null( $current_cc ) && is_array( $states ) ) {
 
 					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 						<option value="">' . esc_html__( 'Select a state&hellip;', 'woocommerce' ) . '</option>';
@@ -2365,9 +2395,12 @@ if ( ! function_exists( 'wc_no_products_found' ) ) {
 if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 	/**
 	 * Get HTML for the order items to be shown in emails.
+	 *
 	 * @param WC_Order $order
 	 * @param array $args
+	 *
 	 * @since 3.0.0
+	 * @return string
 	 */
 	function wc_get_email_order_items( $order, $args = array() ) {
 		ob_start();
@@ -2419,7 +2452,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
-			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
+			$value = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( strip_tags( $meta->display_value ) ) ) );
 			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
 
@@ -2546,17 +2579,43 @@ function wc_get_stock_html( $product ) {
  *
  * @since  3.0.0
  * @param  float $rating Rating being shown.
+ * @param  int   $count  Total number of ratings.
  * @return string
  */
-function wc_get_rating_html( $rating ) {
-	if ( $rating > 0 ) {
-		$rating_html  = '<div class="star-rating" title="' . sprintf( esc_attr__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
-		$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . esc_html__( 'out of 5', 'woocommerce' ) . '</span>';
-		$rating_html .= '</div>';
+function wc_get_rating_html( $rating, $count = 0 ) {
+	if ( 0 < $rating ) {
+		$html  = '<div class="star-rating">';
+		$html .= wc_get_star_rating_html( $rating, $count );
+		$html .= '</div>';
 	} else {
-		$rating_html  = '';
+		$html  = '';
 	}
-	return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+
+	return apply_filters( 'woocommerce_product_get_rating_html', $html, $rating, $count );
+}
+
+/**
+ * Get HTML for star rating.
+ *
+ * @since  3.1.0
+ * @param  float $rating Rating being shown.
+ * @param  int   $count  Total number of ratings.
+ * @return string
+ */
+function wc_get_star_rating_html( $rating, $count = 0 ) {
+	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
+
+	if ( 0 < $count ) {
+		/* translators: 1: rating 2: rating count */
+		$html .= sprintf( _n( 'Rated %1$s out of 5 based on %2$s customer rating', 'Rated %1$s out of 5 based on %2$s customer ratings', $count, 'woocommerce' ), '<strong class="rating">' . esc_html( $rating ) . '</strong>', '<span class="rating">' . esc_html( $count ) . '</span>' );
+	} else {
+		/* translators: %s: rating */
+		$html .= sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), '<strong class="rating">' . esc_html( $rating ) . '</strong>' );
+	}
+
+	$html .= '</span>';
+
+	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count  );
 }
 
 /**
@@ -2573,6 +2632,9 @@ function wc_get_price_html_from_text() {
  * Get logout endpoint.
  *
  * @since  2.6.9
+ *
+ * @param string $redirect
+ *
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {

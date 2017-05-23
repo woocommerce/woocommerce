@@ -436,7 +436,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns formatted dimensions.
 	 *
-	 * @param  $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @param  $formatted bool True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
 	 * @return string|array
 	 */
 	public function get_dimensions( $formatted = true ) {
@@ -1066,7 +1066,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes', array_filter( (array) $default_attributes ) );
+		$this->set_prop( 'default_attributes',
+			array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) );
 	}
 
 	/**
@@ -1332,7 +1333,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * Backwards compat with downloadable/virtual.
 	 *
-	 * @param string $type Array or string of types
+	 * @param string|array $type Array or string of types
 	 * @return bool
 	 */
 	public function is_type( $type ) {
@@ -1413,11 +1414,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
 			$on_sale = true;
 
-			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > time() ) {
+			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > current_time( 'timestamp', true ) ) {
 				$on_sale = false;
 			}
 
-			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < time() ) {
+			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < current_time( 'timestamp', true ) ) {
 				$on_sale = false;
 			}
 		} else {
@@ -1639,6 +1640,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the price in html format.
+	 *
+	 * @param string $deprecated
+	 *
 	 * @return string
 	 */
 	public function get_price_html( $deprecated = '' ) {
@@ -1719,7 +1723,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
 	 * @param array $attr
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param bool $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {

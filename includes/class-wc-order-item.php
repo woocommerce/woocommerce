@@ -113,7 +113,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Get parent order object.
-	 * @return int
+	 * @return WC_Order
 	 */
 	public function get_order() {
 		return wc_get_order( $this->get_order_id() );
@@ -153,7 +153,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Type checking
-	 * @param  string|array  $Type
+	 * @param  string|array  $type
 	 * @return boolean
 	 */
 	public function is_type( $type ) {
@@ -181,7 +181,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( empty( $meta->id ) || '' === $meta->value || is_array( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 

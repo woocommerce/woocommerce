@@ -331,7 +331,7 @@ jQuery( function( $ ) {
 						$( '#terms' ).prop( 'checked', true );
 					}
 
-					// Fill in the payment details if possible
+					// Fill in the payment details if possible without overwriting data if set.
 					if ( ! $.isEmptyObject( paymentDetails ) ) {
 						$( '.payment_box input' ).each( function() {
 							var ID = $( this ).attr( 'id' );
@@ -339,7 +339,7 @@ jQuery( function( $ ) {
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
-								} else {
+								} else if ( 0 === $( this ).val().length ) {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
 							}

@@ -85,6 +85,8 @@ function wc_get_raw_referer() {
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
+ *
+ * @return mixed|void
  */
 function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
@@ -202,6 +204,7 @@ function wc_cart_totals_subtotal_html() {
  */
 function wc_cart_totals_shipping_html() {
 	$packages = WC()->shipping->get_packages();
+	$first    = true;
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
@@ -215,16 +218,19 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
-			'package'              => $package,
-			'available_methods'    => $package['rates'],
-			'show_package_details' => sizeof( $packages ) > 1,
-			'package_details'      => implode( ', ', $product_names ),
+			'package'                  => $package,
+			'available_methods'        => $package['rates'],
+			'show_package_details'     => sizeof( $packages ) > 1,
+			'show_shipping_calculator' => $first,
+			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			// @codingStandardsIgnoreEnd
-			'index'                => $i,
-			'chosen_method'        => $chosen_method,
+			'index'                    => $i,
+			'chosen_method'            => $chosen_method,
 		) );
+
+		$first = false;
 	}
 }
 
@@ -241,8 +247,11 @@ function wc_cart_totals_taxes_total_html() {
  * Get a coupon label.
  *
  * @access public
+ *
  * @param string $coupon
  * @param bool $echo or return
+ *
+ * @return string
  */
 function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 	if ( is_string( $coupon ) ) {

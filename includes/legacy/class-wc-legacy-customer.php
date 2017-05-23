@@ -58,8 +58,9 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * __set function.
-	 * @param mixed $property
-	 * @param mixed $key
+	 *
+	 * @param string $key
+	 * @param mixed $value
 	 */
 	public function __set( $key, $value ) {
 		wc_doing_it_wrong( $key, 'Customer properties should not be set directly.', '3.0' );
@@ -162,6 +163,9 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Is the user a paying customer?
+	 *
+	 * @param int $user_id
+	 *
 	 * @return bool
 	 */
 	function is_paying_customer( $user_id = '' ) {
@@ -222,6 +226,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set country.
+	 *
+	 * @param string $country
 	 */
 	function set_country( $country ) {
 		wc_deprecated_function( 'WC_Customer::set_country', '3.0', 'WC_Customer::set_billing_country' );
@@ -230,6 +236,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set state.
+	 *
+	 * @param string $state
 	 */
 	function set_state( $state ) {
 		wc_deprecated_function( 'WC_Customer::set_state', '3.0', 'WC_Customer::set_billing_state' );
@@ -238,6 +246,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set postcode.
+	 *
+	 * @param string $postcode
 	 */
 	function set_postcode( $postcode ) {
 		wc_deprecated_function( 'WC_Customer::set_postcode', '3.0', 'WC_Customer::set_billing_postcode' );
@@ -246,6 +256,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set city.
+	 *
+	 * @param string $city
 	 */
 	function set_city( $city ) {
 		wc_deprecated_function( 'WC_Customer::set_city', '3.0', 'WC_Customer::set_billing_city' );
@@ -254,6 +266,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set address.
+	 *
+	 * @param string $address
 	 */
 	function set_address( $address ) {
 		wc_deprecated_function( 'WC_Customer::set_address', '3.0', 'WC_Customer::set_billing_address' );
@@ -262,6 +276,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Legacy set address.
+	 *
+	 * @param string $address
 	 */
 	function set_address_2( $address ) {
 		wc_deprecated_function( 'WC_Customer::set_address_2', '3.0', 'WC_Customer::set_billing_address_2' );

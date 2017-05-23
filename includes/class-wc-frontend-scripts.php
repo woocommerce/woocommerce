@@ -92,7 +92,10 @@ class WC_Frontend_Scripts {
 
 	/**
 	 * Return protocol relative asset URL.
+	 *
 	 * @param string $path
+	 *
+	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
 		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
@@ -201,7 +204,7 @@ class WC_Frontend_Scripts {
 			'jquery-payment' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1',
+				'version' => '3.0.0',
 			),
 			'photoswipe' => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
@@ -474,16 +477,16 @@ class WC_Frontend_Scripts {
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
-					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
-					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
-					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
+					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+   					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
 						'shareEl'               => false,
 						'closeOnScroll'         => false,
 						'history'               => false,
 						'hideAnimationDuration' => 0,
 						'showAnimationDuration' => 0
 					) ),
-					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
+					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 			break;
 			case 'wc-checkout' :

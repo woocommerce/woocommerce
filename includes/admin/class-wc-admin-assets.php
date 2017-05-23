@@ -233,8 +233,7 @@ class WC_Admin_Assets {
 			$post_id  = isset( $post->ID ) ? $post->ID : '';
 			$currency = '';
 
-			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
-				$order    = wc_get_order( $post_id );
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) && ( $order = wc_get_order( $post_id ) ) ) {
 				$currency = $order->get_currency();
 			}
 
@@ -347,6 +346,13 @@ class WC_Admin_Assets {
 		if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
 			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'zeroclipboard' ), WC_VERSION );
 			wp_enqueue_script( 'wc-admin-system-status' );
+			wp_localize_script(
+				'wc-admin-system-status',
+				'woocommerce_admin_system_status',
+				array(
+					'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
+				)
+			);
 		}
 
 		if ( in_array( $screen_id, array( 'user-edit', 'profile' ) ) ) {

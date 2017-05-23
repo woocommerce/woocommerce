@@ -95,7 +95,7 @@ function wc_get_products( $args ) {
  *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
- * @return WC_Product|null
+ * @return WC_Product|null|false
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -317,6 +317,9 @@ function wc_placeholder_img_src() {
  * Get the placeholder image.
  *
  * @access public
+ *
+ * @param string $size
+ *
  * @return string
  */
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
@@ -420,6 +423,7 @@ function wc_scheduled_sales() {
 
 			if ( $sale_price ) {
 				$product->set_price( $sale_price );
+				$product->set_date_on_sale_from( '' );
 			} else {
 				$product->set_date_on_sale_to( '' );
 				$product->set_date_on_sale_from( '' );
@@ -600,8 +604,6 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
  * @return int
  */
 function wc_get_product_id_by_sku( $sku ) {
-	global $wpdb;
-
 	$data_store = WC_Data_Store::load( 'product' );
 	$product_id = $data_store->get_product_id_by_sku( $sku );
 
@@ -686,7 +688,10 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param object|bool $product
+ *
+ * @param int $attachment_id
+ * @param object $product
+ *
  * @return array
  */
 function wc_get_product_attachment_props( $attachment_id = null, $product = false ) {
@@ -706,7 +711,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 
 		// Large version.
-		$src                 = wp_get_attachment_image_src( $attachment_id, 'large' );
+		$src                 = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$props['full_src']   = $src[0];
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
@@ -781,7 +786,7 @@ function wc_get_min_max_price_meta_query( $args ) {
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
-		'type'    => 'DECIMAL',
+		'type'    => 'NUMERIC',
 	);
 }
 
@@ -841,8 +846,6 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
-	global $wpdb;
-
 	$product_id     = absint( $product_id );
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
@@ -1044,8 +1047,11 @@ function wc_products_array_filter_editable( $product ) {
 /**
  * Sort an array of products by a value.
  * @since  3.0.0
- * @param  array $products
- * @param  string $orderby
+ *
+ * @param array $products
+ * @param string $orderby
+ * @param string $order
+ *
  * @return array
  */
 function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc' ) {
