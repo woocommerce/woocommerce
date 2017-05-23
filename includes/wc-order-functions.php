@@ -543,6 +543,12 @@ function wc_create_refund( $args = array() ) {
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
 
+		// this should remain after update_taxes(), as this will save the order, and write the current date to the db
+		// so we must wait until the order is persisted to set the date
+		if ( isset( $args['date_created'] ) ) {
+			$refund->set_date_created( $args['date_created'] );
+		}
+
 		/**
 		 * Action hook to adjust refund before save.
 		 * @since 3.0.0
