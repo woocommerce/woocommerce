@@ -7,7 +7,6 @@
 /**
  * Imports
  */
-@import 'bourbon';
 @import 'mixins';
 @import 'variables';
 @import 'animation';
@@ -394,7 +393,6 @@
 	button.button-primary {
 		background: #bb77ae;
 		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		color: #fff;
 		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
@@ -403,7 +401,6 @@
 		&:hover, &:focus, &:active {
 			background: #a36597;
 			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
 	}
@@ -431,7 +428,6 @@
 			position: absolute;
 			top: 8px;
 			left: 0;
-			-webkit-transition: all 0.1s ease-in-out;
 			transition: all 0.1s ease-in-out;
 		}
 	}
@@ -567,8 +563,6 @@ table.wc_status_table {
 		margin: 0;
 		height: 300px;
 		padding: 20px;
-		-moz-border-radius: 0;
-		-webkit-border-radius: 0;
 		border-radius: 0;
 		resize: none;
 		font-size: 12px;
@@ -656,7 +650,6 @@ table.wc_status_table {
 #log-viewer {
 	background: #fff;
 	border: 1px solid #e5e5e5;
-	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 	padding: 5px 20px;
 
@@ -2655,7 +2648,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		.button-primary {
 			background-color: #804877;
 			border-color: #804877;
-			-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			margin: 0;
 			opacity: 1;
@@ -4494,7 +4486,6 @@ img.ui-datepicker-trigger {
 
 					&.active {
 						background: #fff;
-						-webkit-box-shadow: 0 4px 0 0 #fff;
 						box-shadow: 0 4px 0 0 #fff;
 
 						a {
@@ -4518,7 +4509,6 @@ img.ui-datepicker-trigger {
 								border: 0;
 								color: #777;
 								text-align: center;
-								-webkit-box-shadow: none;
 								box-shadow: none;
 
 								&.from {
@@ -4568,10 +4558,6 @@ img.ui-datepicker-trigger {
 					margin: 0;
 					color: $blue;
 					border-top-width: 0;
-					background-image: -webkit-gradient(linear, left bottom, left top, from(#ececec), to(#f9f9f9));
-					background-image: -webkit-linear-gradient(bottom, #ececec, #f9f9f9);
-					background-image: -moz-linear-gradient(bottom, #ececec, #f9f9f9);
-					background-image: -o-linear-gradient(bottom, #ececec, #f9f9f9);
 					background-image: linear-gradient(to top, #ececec, #f9f9f9);
 
 					&.section_title:hover {
@@ -4695,7 +4681,7 @@ img.ui-datepicker-trigger {
 				padding: 1em;
 				display: block;
 				margin: 0;
-				-webkit-transition: all ease 0.5s;
+				transition: all ease 0.5s;
 				box-shadow:
 					inset 0 -1px 0 0 #dfdfdf;
 
@@ -4916,10 +4902,6 @@ table.bar_chart {
 				display: block;
 				line-height: 24px;
 				height: 24px;
-				-moz-border-radius: 3px;
-				-webkit-border-radius: 3px;
-				-o-border-radius: 3px;
-				-khtml-border-radius: 3px;
 				border-radius: 3px;
 			}
 
@@ -5289,7 +5271,6 @@ table.bar_chart {
 			border: 0;
 			border-left: 1px solid #ddd;
 			background-color: transparent;
-			-webkit-transition: color 0.1s ease-in-out, background 0.1s ease-in-out;
 			transition: color 0.1s ease-in-out, background 0.1s ease-in-out;
 
 			&::before {
