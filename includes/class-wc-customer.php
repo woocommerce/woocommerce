@@ -27,6 +27,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		'email'              => '',
 		'first_name'         => '',
 		'last_name'          => '',
+		'display_name'       => '',
 		'role'               => 'customer',
 		'username'           => '',
 		'billing'            => array(
@@ -382,6 +383,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Return customer's display name.
+	 *
+	 * @since  3.1.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_display_name( $context = 'view' ) {
+		return $this->get_prop( 'display_name', $context );
+	}
+
+	/**
 	 * Return customer's user role.
 	 *
 	 * @since  3.0.0
@@ -718,6 +730,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_last_name( $last_name ) {
 		$this->set_prop( 'last_name', $last_name );
+	}
+
+	/**
+	 * Set customer's display name.
+	 *
+	 * @since 3.0.0
+	 * @param string $display_name
+	 * @throws WC_Data_Exception
+	 */
+	public function set_display_name( $display_name ) {
+		$this->set_prop( 'display_name', $display_name );
 	}
 
 	/**
