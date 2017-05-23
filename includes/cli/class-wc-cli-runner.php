@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WC API to WC CLI Bridge.
  *
@@ -108,15 +113,10 @@ class WC_CLI_Runner {
 
 		// Get a list of supported commands for each route.
 		foreach ( $route_data['endpoints'] as $endpoint ) {
-			$parsed_args   = preg_match_all( '#\([^\)]+\)#', $route, $matches );
-			$first_match   = $matches[0];
+			preg_match_all( '#\([^\)]+\)#', $route, $matches );
 			$resource_id   = ! empty( $matches[0] ) ? array_pop( $matches[0] ) : null;
 			$trimmed_route = rtrim( $route );
 			$is_singular   = substr( $trimmed_route, - strlen( $resource_id ) ) === $resource_id;
-			if ( ! $is_singular ) {
-				$resource_id = $first_match;
-			}
-			$command = '';
 
 			// List a collection
 			if ( array( 'GET' ) == $endpoint['methods'] && ! $is_singular ) {

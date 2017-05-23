@@ -354,74 +354,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get all orders matching the passed in args.
 	 *
+	 * @deprecated 3.1.0 - Use wc_get_orders instead.
 	 * @see    wc_get_orders()
 	 * @param  array $args
 	 * @return array of orders
 	 */
 	public function get_orders( $args = array() ) {
-		/**
-		 * Generate WP_Query args. This logic will change if orders are moved to
-		 * custom tables in the future.
-		 */
-		$wp_query_args = array(
-			'post_type'      => $args['type'] ? $args['type'] : 'shop_order',
-			'post_status'    => $args['status'],
-			'posts_per_page' => $args['limit'],
-			'meta_query'     => array(),
-			'fields'         => 'ids',
-			'orderby'        => $args['orderby'],
-			'order'          => $args['order'],
-		);
-
-		if ( ! is_null( $args['parent'] ) ) {
-			$wp_query_args['post_parent'] = absint( $args['parent'] );
-		}
-
-		if ( ! is_null( $args['offset'] ) ) {
-			$wp_query_args['offset'] = absint( $args['offset'] );
-		} else {
-			$wp_query_args['paged'] = absint( $args['page'] );
-		}
-
-		if ( isset( $args['customer'] ) && '' !== $args['customer'] ) {
-			$values = is_array( $args['customer'] ) ? $args['customer'] : array( $args['customer'] );
-			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
-		}
-
-		if ( ! empty( $args['exclude'] ) ) {
-			$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
-		}
-
-		if ( ! $args['paginate'] ) {
-			$wp_query_args['no_found_rows'] = true;
-		}
-
-		if ( ! empty( $args['date_before'] ) ) {
-			$wp_query_args['date_query']['before'] = $args['date_before'];
-		}
-
-		if ( ! empty( $args['date_after'] ) ) {
-			$wp_query_args['date_query']['after'] = $args['date_after'];
-		}
-
-		// Get results.
-		$orders = new WP_Query( apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $args, $this ) );
-
-		if ( 'objects' === $args['return'] ) {
-			$return = array_map( 'wc_get_order', $orders->posts );
-		} else {
-			$return = $orders->posts;
-		}
-
-		if ( $args['paginate'] ) {
-			return (object) array(
-				'orders'        => $return,
-				'total'         => $orders->found_posts,
-				'max_num_pages' => $orders->max_num_pages,
-			);
-		} else {
-			return $return;
-		}
+		wc_deprecated_function( 'WC_Order_Data_Store_CPT::get_orders', '3.1.0', 'Use wc_get_orders instead.' );
+		return wc_get_orders( $args );
 	}
 
 	/**
@@ -649,7 +589,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'status' => 'post_status',
 		);
 
-		foreach( $key_mapping as $query_key => $db_key ) {
+		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
 				unset( $query_vars[ $query_key ] );
@@ -665,71 +605,35 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['meta_query'] = array();
 		}
 
-		if ( isset( $query_vars[ 'date_created_before'] ) && '' !== $query_vars['date_created_before'] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_date',
-				'before' => $this->get_date_for_wp_query( $query_vars['date_created_before'] )
-			);
+		$date_queries = array(
+			'date_created'   => 'post_date',
+			'date_modified'  => 'post_modified',
+			'date_completed' => '_date_completed',
+			'date_paid'      => '_date_paid',
+		);
+		foreach ( $date_queries as $query_var_key => $db_key ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+
+				// Remove any existing meta queries for the same keys to prevent conflicts.
+				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
+				foreach ( $existing_queries as $query_index => $query_contents ) {
+					unset( $wp_query_args['meta_query'][ $query_index ] );
+				}
+
+				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );
+			}
 		}
 
-		if ( isset( $query_vars[ 'date_created_after'] ) && '' !== $query_vars[ 'date_created_after' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_date',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_created_after'] )
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_modified_before'] ) && '' !== $query_vars[ 'date_modified_before' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_modified',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_before'] )
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_modified_after'] ) && '' !== $query_vars[ 'date_modified_after' ] ) {
-			$wp_query_args['date_query'][] = array(
-				'column' => 'post_modified',
-				'after' => $this->get_date_for_wp_query( $query_vars['date_modified_after'] )
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_completed_before' ] ) && '' !== $query_vars[ 'date_completed_before' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_completed',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_before' ], true ),
-				'compare' => '<',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_completed_after' ] ) && '' !== $query_vars[ 'date_completed_after' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_completed',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_completed_after' ], true ),
-				'compare' => '>',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_paid_before' ] ) && '' !== $query_vars[ 'date_paid_before' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_paid',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_before' ], true ),
-				'compare' => '<',
-			);
-		}
-
-		if ( isset( $query_vars[ 'date_paid_after' ] ) && '' !== $query_vars[ 'date_paid_after' ] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_date_paid',
-				'value'   => $this->get_date_for_wp_query( $query_vars[ 'date_paid_after' ], true ),
-				'compare' => '>',
-			);
+		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
+			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
 		}
 
-		return apply_filters( 'woocommerce_get_order_wp_query_args', $wp_query_args, $query_vars );
+		return apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
 	}
 
 	/**

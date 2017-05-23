@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.1.0 - 2017-xx-xx =
+* Feature - On the pay for order page, if logged out show a login form rather than an error message.
 * Included WooCommerce endpoints as options nav menu settings on Customize.
 * Dev - Updated Emogrifier to version 1.2.
 * Dev - Sort product data tabs by priority in admin screen.

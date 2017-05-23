@@ -86,7 +86,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$id = $order->get_id();
 		$order->set_props( array(
 			'parent_id'     => $post_object->post_parent,
 			'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,

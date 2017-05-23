@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * My Account Shortcodes
  *
@@ -228,8 +233,6 @@ class WC_Shortcode_My_Account {
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		global $wpdb, $wp_hasher;
-
 		$login = trim( $_POST['user_login'] );
 
 		if ( empty( $login ) ) {

@@ -125,8 +125,6 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  * @return string
  */
 function wc_attribute_label( $name, $product = '' ) {
-	global $wpdb;
-
 	if ( taxonomy_is_product_attribute( $name ) ) {
 		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );

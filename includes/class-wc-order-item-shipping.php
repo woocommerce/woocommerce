@@ -97,7 +97,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$tax_data     = array(
 			'total'    => array(),
 		);
-		if ( ! empty( $raw_tax_data['total'] ) ) {
+		if ( isset( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
 			// Older versions just used an array.

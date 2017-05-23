@@ -39,6 +39,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		'tax_class'         => '',
 		'shipping_class_id' => '',
 		'image_id'          => '',
+		'purchase_note'     => '',
 	);
 
 	/**
@@ -320,6 +321,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Get purchase note.
+	 *
+	 * @since 3.0.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_purchase_note( $context = 'view' ) {
+		$value = $this->get_prop( 'purchase_note', $context );
+
+		// Inherit value from parent.
+		if ( 'view' === $context && empty( $value ) ) {
+			$value = apply_filters( $this->get_hook_prefix() . 'purchase_note', $this->parent_data['purchase_note'], $this );
+		}
+		return $value;
+	}
+
+	/**
 	 * Get shipping class ID.
 	 *
 	 * @since 3.0.0
@@ -389,6 +407,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_attributes( $context = 'view' ) {
 		return $this->get_prop( 'attributes', $context );
+	}
+
+	/**
+	 * Returns whether or not the product has any visible attributes.
+	 *
+	 * Variations are mapped to specific attributes unlike products, and the return
+	 * value of ->get_attributes differs. Therefore this returns false.
+	 *
+	 * @return boolean
+	 */
+	public function has_attributes() {
+		return false;
 	}
 
 	/*

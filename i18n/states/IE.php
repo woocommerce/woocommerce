@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['IE'] = array(
 	'CE' => __( 'Clare', 'woocommerce' ),
 	'CK' => __( 'Cork', 'woocommerce' ),

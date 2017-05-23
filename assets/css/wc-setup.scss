@@ -240,7 +240,6 @@ body {
 				a {
 					background-color: #bb77ae;
 					border-color: #a36597;
-					-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 					box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 					text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
 					font-size: 1em;
@@ -254,7 +253,6 @@ body {
 					&:hover, &:focus, &:active {
 						background: #a36597;
 						border-color: #a36597;
-						-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 						box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 					}
 				}
@@ -304,8 +302,6 @@ body {
 	overflow: hidden;
 	color: #ccc;
 	width:100%;
-	display: -webkit-inline-flex;
-	display: -ms-inline-flexbox;
 	display: inline-flex;
 	li {
 		width: 20%;
@@ -361,7 +357,6 @@ body {
 	.button-primary {
 		background-color: #bb77ae;
 		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
 		float: right;
@@ -371,7 +366,6 @@ body {
 		&:hover, &:focus, &:active {
 			background: #a36597;
 			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
 	}
@@ -382,6 +376,62 @@ body {
 	margin: 1.18em 0;
 	display: block;
 	text-align: center;
+}
+
+.wc-wizard-storefront {
+	.wc-wizard-storefront-intro {
+		padding: 40px 40px 0;
+		background: #F5F5F5;
+		text-align: center;
+
+		img {
+			margin: 40px 0 0 0;
+			width: 100%;
+			display: block;
+		}
+	}
+	.wc-wizard-storefront-features {
+		list-style: none outside;
+		margin: 0 0 20px;
+		padding: 0 0 0 30px;
+		overflow: hidden;
+	}
+	.wc-wizard-storefront-feature {
+		margin: 0;
+		padding: 20px 30px 20px 2em;
+		width: 50%;
+		box-sizing: border-box;
+
+		&::before {
+			margin-left: -2em;
+			position: absolute;
+		}
+		&.first {
+			clear: both;
+			float: left;
+		}
+		&.last {
+			float: right;
+		}
+	}
+	.wc-wizard-storefront-feature__bulletproof::before {
+		content: '🔒';
+	}
+	.wc-wizard-storefront-feature__mobile::before {
+		content: '📱';
+	}
+	.wc-wizard-storefront-feature__accessibility::before {
+		content: '👓';
+	}
+	.wc-wizard-storefront-feature__search::before {
+		content: '🔍';
+	}
+	.wc-wizard-storefront-feature__compatibility::before {
+		content: '🔧';
+	}
+	.wc-wizard-storefront-feature__extendable::before {
+		content: '🎨';
+	}
 }
 
 ul.wc-wizard-payment-gateways {

@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Main Command for WooCommere CLI.
  *
@@ -63,7 +68,8 @@ class WC_CLI_REST_Command {
 	 */
 	public function __construct( $name, $route, $schema ) {
 		$this->name   = $name;
-		$parsed_args  = preg_match_all( '#\([^\)]+\)#', $route, $matches );
+
+		preg_match_all( '#\([^\)]+\)#', $route, $matches );
 		$first_match  = $matches[0];
 		$resource_id  = ! empty( $matches[0] ) ? array_pop( $matches[0] ) : null;
 		$this->route  = rtrim( $route );

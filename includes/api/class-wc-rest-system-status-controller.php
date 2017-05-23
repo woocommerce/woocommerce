@@ -677,6 +677,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_active_plugins() {
 		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		require_once( ABSPATH . 'wp-admin/includes/update.php' );
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
 
 		// Get both site plugins and network plugins
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -887,7 +892,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$pages_output = array();
 		foreach ( $check_pages as $page_name => $values ) {
-			$errors   = array();
 			$page_id  = get_option( $values['option'] );
 			$page_set = $page_exists = $page_visible = false;
 			$shortcode_present = $shortcode_required = false;

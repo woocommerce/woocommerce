@@ -13,33 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Wrapper for get_posts specific to orders.
+ * Standard way of retrieving orders based on certain parameters.
  *
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args:
- *      status array|string List of order statuses to find
- *      type array|string Order type, e.g. shop_order or shop_order_refund
- *      parent int post/order parent
- *      customer int|string|array User ID or billing email to limit orders to a
- *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
- *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
- *      limit int Maximum of orders to retrieve.
- *      offset int Offset of orders to retrieve.
- *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
- *      date_before string Get orders before a certain date ( strtotime() compatibile string )
- *      date_after string Get orders after a certain date ( strtotime() compatibile string )
- *      exclude array Order IDs to exclude from the query.
- *      orderby string Order by date, title, id, modified, rand etc
- *      order string ASC or DESC
- *      return string Type of data to return. Allowed values:
- *          ids array of order ids
- *          objects array of order objects (default)
- *      paginate bool If true, the return value will be an array with values:
- *          'orders'        => array of data (return value above),
- *          'total'         => total number of orders matching the query
- *          'max_num_pages' => max number of pages found
+ * Args and usage: @todo link to wiki page.
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -47,31 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
-	$args = wp_parse_args( $args, array(
-		'status'      => array_keys( wc_get_order_statuses() ),
-		'type'        => wc_get_order_types( 'view-orders' ),
-		'parent'      => null,
-		'customer'    => null,
-		'email'       => '',
-		'limit'       => get_option( 'posts_per_page' ),
-		'offset'      => null,
-		'page'        => 1,
-		'exclude'     => array(),
-		'orderby'     => 'date',
-		'order'       => 'DESC',
-		'return'      => 'objects',
-		'paginate'    => false,
-		'date_before' => '',
-		'date_after'  => '',
-	) );
-
-	// Handle some BW compatibility arg names where wp_query args differ in naming.
 	$map_legacy = array(
 		'numberposts'    => 'limit',
 		'post_type'      => 'type',
 		'post_status'    => 'status',
 		'post_parent'    => 'parent',
 		'author'         => 'customer',
+		'email'          => 'billing_email',
 		'posts_per_page' => 'limit',
 		'paged'          => 'page',
 	);
@@ -82,7 +43,29 @@ function wc_get_orders( $args ) {
 		}
 	}
 
-	return WC_Data_Store::load( 'order' )->get_orders( $args );
+	// Map legacy date args to modern date args.
+	$date_before = false;
+	$date_after  = false;
+
+	if ( ! empty( $args['date_before'] ) ) {
+		$datetime    = wc_string_to_datetime( $args['date_before'] );
+		$date_before = strpos( $args['date_before'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
+	}
+	if ( ! empty( $args['date_after'] ) ) {
+		$datetime   = wc_string_to_datetime( $args['date_after'] );
+		$date_after = strpos( $args['date_after'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
+	}
+
+	if ( $date_before && $date_after ) {
+		$args['date_created'] = $date_before . '...' . $date_after;
+	} elseif ( $date_before ) {
+		$args['date_created'] = '<' . $date_before;
+	} elseif ( $date_after ) {
+		$args['date_created'] = '>' . $date_after;
+	}
+
+	$query = new WC_Order_Query( $args );
+	return $query->get_orders();
 }
 
 /**
@@ -704,7 +687,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
+	return is_a( $order, 'WC_Order' ) && isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**

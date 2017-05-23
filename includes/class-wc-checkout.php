@@ -710,33 +710,41 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Set address field for customer.
+	 *
+	 * @since 3.0.7
+	 * @param $field string to update
+	 * @param $key
+	 * @param $data array of data to get the value from
+	 */
+	protected function set_customer_address_fields( $field, $key, $data ) {
+		if ( isset( $data[ "billing_{$field}" ] ) ) {
+			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
+		}
+		if ( isset( $data[ "shipping_{$field}" ] ) ) {
+			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
+		}
+	}
+
+	/**
 	 * Update customer and session data from the posted checkout data.
 	 *
 	 * @since  3.0.0
 	 * @param  array $data
 	 */
 	protected function update_session( $data ) {
-		if ( isset( $data['billing_country'] ) ) {
-			WC()->customer->set_billing_country( $data['billing_country'] );
-			WC()->customer->set_shipping_country( $data['billing_country'] );
-		}
-		if ( isset( $data['billing_state'] ) ) {
-			WC()->customer->set_billing_state( $data['billing_state'] );
-			WC()->customer->set_shipping_state( $data['billing_state'] );
-		}
-		if ( isset( $data['billing_postcode'] ) ) {
-			WC()->customer->set_billing_postcode( $data['billing_postcode'] );
-			WC()->customer->set_shipping_postcode( $data['billing_postcode'] );
-		}
-		if ( isset( $data['shipping_country'] ) ) {
-			WC()->customer->set_shipping_country( $data['shipping_country'] );
-		}
-		if ( isset( $data['shipping_state'] ) ) {
-			WC()->customer->set_shipping_state( $data['shipping_state'] );
-		}
-		if ( isset( $data['shipping_postcode'] ) ) {
-			WC()->customer->set_shipping_postcode( $data['shipping_postcode'] );
-		}
+		// Update both shipping and billing to the passed billing address first if set.
+		$address_fields = array(
+			'address_1',
+			'address_2',
+			'city',
+			'postcode',
+			'state',
+			'country',
+		);
+
+		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
 		// Update customer shipping and payment method to posted method

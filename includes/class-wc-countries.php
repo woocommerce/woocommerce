@@ -347,7 +347,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -357,7 +357,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -367,7 +367,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
@@ -1107,7 +1107,6 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
-			$keys = array_keys( $fields );
 			$address_fields[ $type . $key ] = $value;
 		}
 

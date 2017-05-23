@@ -218,17 +218,19 @@ class WC_Structured_Data {
 			if ( $product->is_type( 'variable' ) ) {
 				$prices = $product->get_variation_prices();
 
-				$markup_offer['priceSpecification'] = array(
-					'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-					'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
-					'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
-					'priceCurrency' => $currency,
-				);
+				if ( current( $prices['price'] ) === end( $prices['price'] ) ) {
+					$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+				} else {
+					$markup_offer['priceSpecification'] = array(
+						'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
+						'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+						'priceCurrency' => $currency,
+					);
+				}
 			} else {
-				$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+				$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
 			}
-
-			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
 		if ( $product->get_rating_count() ) {

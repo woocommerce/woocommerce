@@ -502,7 +502,7 @@ function wc_review_is_from_verified_owner( $comment_id ) {
  * @since 2.5.0
  */
 function wc_disable_author_archives_for_customers() {
-	global $wp_query, $author;
+	global $author;
 
 	if ( is_author() ) {
 		$user = get_user_by( 'id', $author );

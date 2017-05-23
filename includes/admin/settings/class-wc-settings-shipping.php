@@ -259,8 +259,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show zones
 	 */
 	protected function zones_screen() {
-		global $wpdb;
-
 		$allowed_countries = WC()->countries->get_allowed_countries();
 		$continents        = WC()->countries->get_continents();
 		$method_count      = wc_get_shipping_method_count();
