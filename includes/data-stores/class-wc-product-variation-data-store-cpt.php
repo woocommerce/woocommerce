@@ -203,11 +203,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function generate_product_title( $product ) {
 		$attributes = (array) $product->get_attributes();
 
-		// Don't include attributes if the product has 3+ attributes.
+		// Do not include attributes if the product has 3+ attributes.
 		$should_include_attributes = count( $attributes ) < 3;
 
-		// Don't include attributes if an attribute name has 2+ words.
-		if ( $should_include_attributes ) {
+		// Do not include attributes if an attribute name has 2+ words and the
+		// product has multiple attributes.
+		if ( $should_include_attributes && 1 < count( $attributes ) ) {
 			foreach ( $attributes as $name => $value ) {
 				if ( false !== strpos( $name, '-' ) ) {
 					$should_include_attributes = false;
