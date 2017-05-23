@@ -335,3 +335,15 @@ function wc_is_attribute_in_product_name( $attribute, $name ) {
 	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
 	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
 }
+
+/**
+ * Callback for array filter to get default attributes.  Will allow for '0' string values, but regard all other
+ * class PHP FALSE equivalents normally.
+ *
+ * @since 3.1.0
+ * @param mixed $attribute  Attribute being considered for exclusion from parent array.
+ * @return bool
+ */
+function wc_array_filter_default_attributes( $attribute ) {
+	return ( ! empty( $attribute ) || $attribute === '0' );
+}
