@@ -106,13 +106,13 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 							);
 						}
 					}
-					$country['locations'] = $local_states;
+					$country['states'] = $local_states;
 					$local_countries[] = $country;
 				}
 			}
 
 			if ( ! empty( $local_countries ) ) {
-				$continent['locations'] = $local_countries;
+				$continent['countries'] = $local_countries;
 				$data[] = $continent;
 			}
 		}
@@ -129,15 +129,15 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		$response = $this->prepare_item_for_response( $data, $request );
 
 		/**
-		 * Filter the locations list returned from the API.
+		 * Filter the location list returned from the API.
 		 *
 		 * Allows modification of the loction data right before it is returned.
 		 *
 		 * @param WP_REST_Response $response The response object.
-		 * @param array            $data     The original location list.
+		 * @param array            $data     The original list of continent(s), countries, and states.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_locations', $response, $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_data_continents', $response, $data, $request );
 	}
 
 	/**
@@ -160,7 +160,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param object $item Data object.
-	 * @return array Links for the given country.
+	 * @return array Links for the given continent.
 	 */
 	protected function prepare_links( $item ) {
 		$links = array();
@@ -190,7 +190,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'data_locations',
+			'title'   => 'data_continents',
 			'type'       => 'object',
 			'properties' => array(
 				'code' => array(

@@ -56,7 +56,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertGreaterThan( 1, count( $locations ) );
 		$this->assertNotEmpty( $locations[0]['code'] );
 		$this->assertNotEmpty( $locations[0]['name'] );
-		$this->assertNotEmpty( $locations[0]['locations'] );
+		$this->assertNotEmpty( $locations[0]['countries'] );
 
 		$links = $response->get_links();
 		$this->assertNotEmpty( $links );
@@ -76,7 +76,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( is_array( $locations ) );
 		$this->assertEquals( 'NA', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
-		$this->assertNotEmpty( $locations['locations'] );
+		$this->assertNotEmpty( $locations['countries'] );
 
 		$links = $response->get_links();
 		$this->assertNotEmpty( $links );

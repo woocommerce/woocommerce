@@ -108,15 +108,15 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		$response = $this->prepare_item_for_response( $data, $request );
 
 		/**
-		 * Filter the locations list returned from the API.
+		 * Filter the states list for a country returned from the API.
 		 *
 		 * Allows modification of the loction data right before it is returned.
 		 *
 		 * @param WP_REST_Response $response The response object.
-		 * @param array            $data     The original location list.
+		 * @param array            $data     The original country's states list.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_locations', $response, $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_data_country_states', $response, $data, $request );
 	}
 
 	/**
@@ -162,7 +162,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'data_locations',
+			'title'   => 'data_countries',
 			'type'       => 'object',
 			'properties' => array(
 				'code' => array(
