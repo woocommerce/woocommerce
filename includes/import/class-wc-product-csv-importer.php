@@ -226,14 +226,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$names = array_map( 'wc_clean', array_map( 'trim', explode( ',', $field ) ) );
+		$names = array_map( 'trim', explode( ',', $field ) );
 		$tags  = array();
 
 		foreach ( $names as $name ) {
 			$term = get_term_by( 'name', $name, 'product_tag' );
 
 			if ( ! $term ) {
-				$term = wp_insert_term( $name, 'product_tag' );
+				$term = (object) wp_insert_term( $name, 'product_tag' );
 			}
 
 			$tags[] = $term->term_id;
@@ -252,7 +252,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$term = get_term_by( 'name', $field, 'product_shipping_class' );
 
 		if ( ! $term ) {
-			$term = wp_insert_term( $name, 'product_shipping_class' );
+			$term = (object) wp_insert_term( $name, 'product_shipping_class' );
 		}
 
 		return $term->term_id;
