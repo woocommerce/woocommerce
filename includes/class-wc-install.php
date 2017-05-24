@@ -838,7 +838,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			}
 		}
 
-		echo wp_kses_post( $upgrade_notice );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $upgrade_notice ) );
 	}
 
 	/**

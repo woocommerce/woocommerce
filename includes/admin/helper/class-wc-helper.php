@@ -41,6 +41,10 @@ class WC_Helper {
 
 		// Stop the nagging about WooThemes Updater
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
+
+		// Add some nags about extension updates
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
 	}
 
 	/**
@@ -905,6 +909,95 @@ class WC_Helper {
 			self::log( sprintf( 'Auto-deactivated %d subscripton(s) for %s', $deactivated, $filename ) );
 			self::_flush_subscriptions_cache();
 		}
+	}
+
+	/**
+	 * Add a note about available extension updates if Woo core has an update available.
+	 */
+	public static function admin_notices() {
+		$screen = get_current_screen();
+		if ( 'update-core' !== $screen->id ) {
+			return;
+		}
+
+		// Don't nag if Woo doesn't have an update available.
+		if ( ! self::_woo_core_update_available() ) {
+			return;
+		}
+
+		$notice = self::_get_extensions_update_notice();
+		if ( ! empty( $notice ) ) {
+			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>';
+		}
+	}
+
+	/**
+	 * Add an upgrade notice if there are extensions with updates.
+	 *
+	 * @param string $message An existing update notice or an empty string.
+	 *
+	 * @return string The resulting message.
+	 */
+	public static function in_plugin_update_message( $message ) {
+		$notice = self::_get_extensions_update_notice();
+		if ( ! empty( $notice ) ) {
+			$message .= '</p><p class="wc_plugin_upgrade_notice">' . $notice;
+		}
+
+		return $message;
+	}
+
+	/**
+	 * Get an update notice if one or more Woo extensions has an update available.
+	 *
+	 * @return string|null The update notice or null if everything is up to date.
+	 */
+	private static function _get_extensions_update_notice() {
+		$plugins = self::get_local_woo_plugins();
+		$updates = WC_Helper_Updater::get_update_data();
+		$available = 0;
+
+		foreach ( $plugins as $data ) {
+			if ( empty( $updates[ $data['_product_id'] ] ) ) {
+				continue;
+			}
+
+			$product_id = $data['_product_id'];
+			if ( version_compare( $updates[ $product_id ]['version'], $data['Version'], '>' ) ) {
+				$available++;
+			}
+		}
+
+		if ( ! $available ) {
+			return;
+		}
+
+		/* translators: %1$s: helper url, %2$d: number of extensions */
+		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
+			admin_url( 'admin.php?page=wc-helper' ), $available );
+	}
+
+	/**
+	 * Whether WooCommerce has an update available.
+	 *
+	 * @return bool True if a Woo core update is available.
+	 */
+	private static function _woo_core_update_available() {
+		$updates = get_site_transient( 'update_plugins' );
+		if ( empty( $updates->response ) ) {
+			return false;
+		}
+
+		if ( empty( $updates->response['woocommerce/woocommerce.php'] ) ) {
+			return false;
+		}
+
+		$data = $updates->response['woocommerce/woocommerce.php'];
+		if ( version_compare( WC_VERSION, $data->new_version, '>=' ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
