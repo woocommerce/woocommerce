@@ -438,6 +438,7 @@ class WC_Product_CSV_Importer_Controller {
 				array(
 					'attributes:name'    => __( 'Attribute %d Name', 'woocommerce' ),
 					'attributes:value'   => __( 'Attribute %d Value(s)', 'woocommerce' ),
+					'attributes:visible' => __( 'Attribute %d Visible', 'woocommerce' ),
 					'attributes:default' => __( 'Attribute %d Default', 'woocommerce' ),
 					'downloads:name'     => __( 'Download %d Name', 'woocommerce' ),
 					'downloads:url'      => __( 'Download %d URL', 'woocommerce' ),
@@ -555,8 +556,9 @@ class WC_Product_CSV_Importer_Controller {
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
-					'attributes:name' . $index    => __( 'Attributes name', 'woocommerce' ),
-					'attributes:value' . $index   => __( 'Attributes value', 'woocommerce' ),
+					'attributes:name' . $index    => __( 'Attribute name', 'woocommerce' ),
+					'attributes:value' . $index   => __( 'Attribute value(s)', 'woocommerce' ),
+					'attributes:visible' . $index => __( 'Attribute visibility', 'woocommerce' ),
 					'attributes:default' . $index => __( 'Default attribute', 'woocommerce' ),
 				),
 			),

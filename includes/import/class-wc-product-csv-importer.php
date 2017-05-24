@@ -323,9 +323,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 * Match special column names.
 		 */
 		$regex_match_data_formatting = array(
-			'/attributes:value*/' => array( $this, 'parse_comma_field' ),
-			'/downloads:url*/'    => 'esc_url',
-			'/meta:*/'            => 'wp_kses_post', // Allow some HTML in meta fields.
+			'/attributes:value*/'   => array( $this, 'parse_comma_field' ),
+			'/attributes:visible*/' => array( $this, 'parse_bool_field' ),
+			'/downloads:url*/'      => 'esc_url',
+			'/meta:*/'              => 'wp_kses_post', // Allow some HTML in meta fields.
 		);
 
 		$callbacks = array();
@@ -415,6 +416,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $this->starts_with( $key, 'attributes:value' ) ) {
 				if ( ! empty( $value ) ) {
 					$data['attributes'][ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+				}
+
+				unset( $data[ $key ] );
+			}
+			if ( $this->starts_with( $key, 'attributes:visible' ) ) {
+				if ( ! empty( $value ) ) {
+					$data['attributes'][ str_replace( 'attributes:visible', '', $key ) ]['visible'] = $value;
 				}
 
 				unset( $data[ $key ] );
