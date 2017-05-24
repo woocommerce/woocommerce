@@ -584,10 +584,10 @@
 		}
 
 		window.setTimeout( function() {
-			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
-			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
-		}, 10 );
+			$form.wc_maybe_trigger_slide_position_reset( variation );
+			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
+		}, 20 );
 	};
 
 	$(function() {
