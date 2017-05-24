@@ -253,10 +253,12 @@ function wc_format_refund_total( $amount ) {
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+	$thousands = array( wc_get_price_thousand_separator(), $locale['thousands_sep'], $locale['thousands_sep'] );
 
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = wc_clean( str_replace( $thousands, '', $number ) );
+		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
 	}
 
