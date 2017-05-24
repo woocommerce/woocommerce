@@ -657,12 +657,12 @@ class WC_Checkout {
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
 						$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
 
-						// Convert value to key if set
 						if ( isset( $valid_state_values[ strtolower( $data[ $key ] ) ] ) ) {
+							// With this part we consider state value to be valid as well, convert it to the state key for the valid_states check below.
 							$data[ $key ] = $valid_state_values[ strtolower( $data[ $key ] ) ];
 						}
 
-						if ( ! in_array( $data[ $key ], array_keys( $valid_states ) ) ) {
+						if ( ! in_array( strtoupper( $data[ $key ] ), array_keys( $valid_states ) ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
 						}
