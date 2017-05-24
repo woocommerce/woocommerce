@@ -221,7 +221,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Handles the CSV upload and initial parsing of the file to prepare for.
+	 * Handles the CSV upload and initial parsing of the file to prepare for
 	 * displaying author import options.
 	 *
 	 * @return string|WP_Error
@@ -240,7 +240,7 @@ class WC_Product_CSV_Importer_Controller {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
 			}
 
-			// Construct the object array
+			// Construct the object array.
 			$object = array(
 				'post_title'     => basename( $upload['file'] ),
 				'post_content'   => $upload['url'],
@@ -250,7 +250,7 @@ class WC_Product_CSV_Importer_Controller {
 				'post_status'    => 'private',
 			);
 
-			// Save the data
+			// Save the data.
 			$id = wp_insert_attachment( $object, $upload['file'] );
 
 			/*
@@ -268,10 +268,10 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Mapping step @todo
+	 * Mapping step.
 	 */
 	protected function mapping_form() {
-		$importer     = $this::get_importer( $this->file, array( 'lines' => 1 ) );
+		$importer     = self::get_importer( $this->file, array( 'lines' => 1 ) );
 		$headers      = $importer->get_raw_keys();
 		$mapped_items = $this->auto_map_columns( $headers );
 		$sample       = current( $importer->get_raw_data() );
@@ -283,7 +283,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Check if all fields matches.
 		if ( 0 === count( array_diff( $mapped_items, $this->get_default_fields() ) ) ) {
-			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			wp_redirect( esc_url_raw( add_query_arg( array( 'auto_map' => 1 ), $this->get_next_step_link() ) ) );
 			exit;
 		}
 
@@ -299,10 +299,12 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		$mapping = array();
-
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping = wp_unslash( $_POST['map_to'] );
+		} elseif ( ! empty( $_GET['auto_map'] ) ) {
+			// Auto mapping.
+			$importer = self::get_importer( $this->file, array( 'lines' => 1 ) );
+			$mapping  = $this->auto_map_columns( $importer->get_raw_keys(), false );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -384,10 +386,11 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Auto map column names.
 	 *
-	 * @param  array $fields Header columns.
+	 * @param  array $raw_headers Raw header columns.
+	 * @param  bool  $num_indexes If should use numbers or raw header columns as indexes.
 	 * @return array
 	 */
-	protected function auto_map_columns( $fields ) {
+	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
 		$weight_unit     = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit  = get_option( 'woocommerce_dimension_unit' );
 		$default_columns = array_flip( apply_filters( 'woocommerce_csv_product_import_mapping_default_columns', array(
@@ -424,6 +427,8 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'external_url'       => __( 'External URL', 'woocommerce' ),
+			'button_text'        => __( 'Button text', 'woocommerce' ),
 		) ) );
 
 		$special_columns = array_map(
@@ -432,6 +437,7 @@ class WC_Product_CSV_Importer_Controller {
 				array(
 					'attributes:name'    => __( 'Attribute %d Name', 'woocommerce' ),
 					'attributes:value'   => __( 'Attribute %d Value(s)', 'woocommerce' ),
+					'attributes:visible' => __( 'Attribute %d Visible', 'woocommerce' ),
 					'attributes:default' => __( 'Attribute %d Default', 'woocommerce' ),
 					'downloads:name'     => __( 'Download %d Name', 'woocommerce' ),
 					'downloads:url'      => __( 'Download %d URL', 'woocommerce' ),
@@ -440,23 +446,24 @@ class WC_Product_CSV_Importer_Controller {
 			)
 		);
 
-		$new_fields = array();
-		foreach ( $fields as $index => $field ) {
-			$new_fields[ $index ] = $field;
+		$headers = array();
+		foreach ( $raw_headers as $key => $field ) {
+			$index             = $num_indexes ? $key : $field;
+			$headers[ $index ] = $field;
 
 			if ( isset( $default_columns[ $field ] ) ) {
-				$new_fields[ $index ] = $default_columns[ $field ];
+				$headers[ $index ] = $default_columns[ $field ];
 			} else {
 				foreach ( $special_columns as $special_key => $regex ) {
 					if ( preg_match( $regex, $field, $matches ) ) {
-						$new_fields[ $index ] = $special_key . $matches[1];
+						$headers[ $index ] = $special_key . $matches[1];
 						break;
 					}
 				}
 			}
 		}
 
-		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $new_fields, $fields );
+		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $headers, $raw_headers );
 	}
 
 	/**
@@ -531,6 +538,13 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'external'           => array(
+				'name'    => __( 'External product', 'woocommerce' ),
+				'options' => array(
+					'external_url' => __( 'External URL', 'woocommerce' ),
+					'button_text'  => __( 'Button text', 'woocommerce' ),
+				),
+			),
 			'downloads'          => array(
 				'name'    => __( 'Downloads', 'woocommerce' ),
 				'options' => array(
@@ -543,8 +557,9 @@ class WC_Product_CSV_Importer_Controller {
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
-					'attributes:name' . $index    => __( 'Attributes name', 'woocommerce' ),
-					'attributes:value' . $index   => __( 'Attributes value', 'woocommerce' ),
+					'attributes:name' . $index    => __( 'Attribute name', 'woocommerce' ),
+					'attributes:value' . $index   => __( 'Attribute value(s)', 'woocommerce' ),
+					'attributes:visible' . $index => __( 'Attribute visibility', 'woocommerce' ),
 					'attributes:default' . $index => __( 'Default attribute', 'woocommerce' ),
 				),
 			),

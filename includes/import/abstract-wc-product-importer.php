@@ -87,7 +87,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_mapped_keys() {
-		return $this->mapped_keys;
+		return ! empty( $this->mapped_keys ) ? $this->mapped_keys : $this->raw_keys;
 	}
 
 	/**
@@ -105,7 +105,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_parsed_data() {
-		return apply_filters( 'woocommerce_product_parsed_data', $this->parsed_data, $this->get_raw_data() );
+		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this->get_raw_data() );
 	}
 
 	/**
@@ -154,7 +154,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_product_csv_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -185,19 +185,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			$product_type = 'simple';
-			$types        = array_filter( array_map( 'trim', explode( ',', $data['type'] ) ) );
+			$types   = array_keys( wc_get_product_types() );
+			$types[] = 'variation';
 
-			foreach ( $types as $key => $type ) {
-				if ( 'downloadable' === $type ) {
-					$data['downloadable'] = true;
-				} elseif ( 'virtual' === $type ) {
-					$data['virtual'] = true;
-				} elseif ( in_array( $type, array_keys( wc_get_product_types() ), true ) || 'variation' === $type ) {
-					$product_type = $type;
-				} else {
-					return new WP_Error( 'woocommerce_product_csv_importer_invalid_type', sprintf( __( 'Invalid product type %s.', 'woocommerce' ), $type ), array( 'type' => $type, 'status' => 401 ) );
-				}
+			if ( ! in_array( $data['type'], $types, true ) ) {
+				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
 			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
@@ -217,14 +209,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = new WC_Product_Simple();
 		}
 
-		// @todo need to check first how we'll handle variations.
 		if ( 'variation' === $product->get_type() ) {
 			$product = $this->save_variation_data( $product, $data );
 		} else {
 			$product = $this->save_product_data( $product, $data );
 		}
 
-		return apply_filters( 'woocommerce_product_csv_import_pre_insert_product_object', $product, $data );
+		return apply_filters( 'woocommerce_product_import_pre_insert_product_object', $product, $data );
 	}
 
 	/**
@@ -237,34 +228,29 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function save_product_data( $product, $data ) {
 
-		// Post title.
+		// Name.
 		if ( isset( $data['name'] ) ) {
 			$product->set_name( wp_filter_post_kses( $data['name'] ) );
 		}
 
-		// Post content.
+		// Description.
 		if ( isset( $data['description'] ) ) {
 			$product->set_description( wp_filter_post_kses( $data['description'] ) );
 		}
 
-		// Post excerpt.
+		// Short description.
 		if ( isset( $data['short_description'] ) ) {
 			$product->set_short_description( wp_filter_post_kses( $data['short_description'] ) );
 		}
 
-		// Post status.
-		if ( isset( $data['status'] ) ) {
-			$product->set_status( $data['status'] ? 'publish' : 'draft' );
+		// Status.
+		if ( isset( $data['published'] ) ) {
+			$product->set_status( $data['published'] ? 'publish' : 'draft' );
 		}
 
-		// Post slug.
+		// Slug.
 		if ( isset( $data['slug'] ) ) {
 			$product->set_slug( $data['slug'] );
-		}
-
-		// Menu order.
-		if ( isset( $data['menu_order'] ) ) {
-			$product->set_menu_order( $data['menu_order'] );
 		}
 
 		// Comment status.
@@ -294,7 +280,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Purchase Note.
 		if ( isset( $data['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $data['purchase_note'] ) );
+			$product->set_purchase_note( $data['purchase_note'] );
 		}
 
 		// Featured Product.
@@ -307,73 +293,85 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// SKU.
 		if ( isset( $data['sku'] ) ) {
-			$product->set_sku( wc_clean( $data['sku'] ) );
+			$product->set_sku( $data['sku'] );
 		}
 
 		// Attributes.
 		if ( isset( $data['attributes'] ) ) {
-			$attributes = array();
+			$attributes         = array();
+			$default_attributes = array();
 
-			foreach ( $data['attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
+			foreach ( $data['attributes'] as $position => $attribute ) {
+				// Get ID if is a global attribute.
+				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = wc_clean( $attribute['name'] );
+				// Set attribute visibility.
+				if ( isset( $attribute['visible'] ) ) {
+					$is_visible = $attribute['visible'];
+				} else {
+					$is_visible = 1;
 				}
 
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
-				}
+				// Set if is a variation attribute.
+				$is_variation = 0;
 
 				if ( $attribute_id ) {
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
-					if ( isset( $attribute['options'] ) ) {
-						$options = $attribute['options'];
-
-						if ( ! is_array( $attribute['options'] ) ) {
-							// Text based attributes - Posted values are term names.
-							$options = explode( WC_DELIMITER, $options );
-						}
-
-						$values = array_map( 'wc_sanitize_term_text_based', $options );
-						$values = array_filter( $values, 'strlen' );
+					if ( isset( $attribute['value'] ) ) {
+						$options = array_map( 'wc_sanitize_term_text_based', $attribute['value'] );
+						$options = array_filter( $options, 'strlen' );
 					} else {
-						$values = array();
+						$options = array();
 					}
 
-					if ( ! empty( $values ) ) {
-						// Add attribute to array, but don't set values.
+					// Check for default attributes and set "is_variation".
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options ) ) {
+						$default_term = get_term_by( 'name', $attribute['default'], $attribute_name );
+
+						if ( $default_term && ! is_wp_error( $default_term ) ) {
+							$default = $default_term->slug;
+						} else {
+							$default = sanitize_title( $attribute['default'] );
+						}
+
+						$default_attributes[ $attribute_name ] = $default;
+						$is_variation = 1;
+					}
+
+					if ( ! empty( $options ) ) {
 						$attribute_object = new WC_Product_Attribute();
 						$attribute_object->set_id( $attribute_id );
 						$attribute_object->set_name( $attribute_name );
-						$attribute_object->set_options( $values );
-						$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
-						$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
-						$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+						$attribute_object->set_options( $options );
+						$attribute_object->set_position( $position );
+						$attribute_object->set_visible( $is_visible );
+						$attribute_object->set_variation( $is_variation );
 						$attributes[] = $attribute_object;
 					}
-				} elseif ( isset( $attribute['options'] ) ) {
-					// Custom attribute - Add attribute to array and set the values.
-					if ( is_array( $attribute['options'] ) ) {
-						$values = $attribute['options'];
-					} else {
-						$values = explode( WC_DELIMITER, $attribute['options'] );
+				} elseif ( isset( $attribute['value'] ) ) {
+					// Check for default attributes and set "is_variation".
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'] ) ) {
+						$default_attributes[ sanitize_title( $attribute['name'] ) ] = $attribute['default'];
+						$is_variation = 1;
 					}
+
 					$attribute_object = new WC_Product_Attribute();
-					$attribute_object->set_name( $attribute_name );
-					$attribute_object->set_options( $values );
-					$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
-					$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
-					$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+					$attribute_object->set_name( $attribute['name'] );
+					$attribute_object->set_options( $attribute['value'] );
+					$attribute_object->set_position( $position );
+					$attribute_object->set_visible( $is_visible );
+					$attribute_object->set_variation( $is_variation );
 					$attributes[] = $attribute_object;
 				}
 			}
+
 			$product->set_attributes( $attributes );
+
+			// Set variable default attributes.
+			if ( $product->is_type( 'variable' ) ) {
+				$product->set_default_attributes( $default_attributes );
+			}
 		}
 
 		// Sales and prices.
@@ -398,16 +396,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$product->set_date_on_sale_from( $data['date_on_sale_from'] );
 			}
 
-			if ( isset( $data['date_on_sale_from_gmt'] ) ) {
-				$product->set_date_on_sale_from( $data['date_on_sale_from_gmt'] ? strtotime( $data['date_on_sale_from_gmt'] ) : null );
-			}
-
 			if ( isset( $data['date_on_sale_to'] ) ) {
 				$product->set_date_on_sale_to( $data['date_on_sale_to'] );
-			}
-
-			if ( isset( $data['date_on_sale_to_gmt'] ) ) {
-				$product->set_date_on_sale_to( $data['date_on_sale_to_gmt'] ? strtotime( $data['date_on_sale_to_gmt'] ) : null );
 			}
 		}
 
@@ -422,8 +412,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Stock status.
-		if ( isset( $data['in_stock'] ) ) {
-			$stock_status = true === $data['in_stock'] ? 'instock' : 'outofstock';
+		if ( isset( $data['stock_status'] ) ) {
+			$stock_status = $data['stock_status'] ? 'instock' : 'outofstock';
 		} else {
 			$stock_status = $product->get_stock_status();
 		}
@@ -441,13 +431,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			} elseif ( $product->is_type( 'external' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
 			} elseif ( $product->get_manage_stock() ) {
@@ -459,14 +449,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
 					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
-				} elseif ( isset( $data['inventory_delta'] ) ) {
-					$stock_quantity  = wc_stock_amount( $product->get_stock_quantity() );
-					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				// Don't manage stock.
-				$product->set_manage_stock( 'no' );
+				$product->set_manage_stock( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
@@ -476,44 +462,22 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Upsells.
 		if ( isset( $data['upsell_ids'] ) ) {
-			$upsells = array();
-			$ids     = $data['upsell_ids'];
-
-			if ( ! empty( $ids ) ) {
-				foreach ( $ids as $id ) {
-					if ( $id && $id > 0 ) {
-						$upsells[] = $id;
-					}
-				}
-			}
-
-			$product->set_upsell_ids( $upsells );
+			$product->set_upsell_ids( $data['upsell_ids'] );
 		}
 
 		// Cross sells.
 		if ( isset( $data['cross_sell_ids'] ) ) {
-			$crosssells = array();
-			$ids        = $data['cross_sell_ids'];
-
-			if ( ! empty( $ids ) ) {
-				foreach ( $ids as $id ) {
-					if ( $id && $id > 0 ) {
-						$crosssells[] = $id;
-					}
-				}
-			}
-
-			$product->set_cross_sell_ids( $crosssells );
+			$product->set_cross_sell_ids( $data['cross_sell_ids'] );
 		}
 
 		// Product categories.
-		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $data['categories'] );
+		if ( isset( $data['category_ids'] ) ) {
+			$product->set_category_ids( $data['category_ids'] );
 		}
 
 		// Product tags.
-		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $data['tags'], 'tag' );
+		if ( isset( $data['tag_ids'] ) ) {
+			$product->set_tag_ids( $data['tag_ids'] );
 		}
 
 		// Downloadable.
@@ -525,7 +489,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( $product->get_downloadable() ) {
 
 			// Downloadable files.
-			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+			if ( isset( $data['downloads'] ) ) {
 				$product = $this->save_downloadable_files( $product, $data['downloads'] );
 			}
 
@@ -551,20 +515,31 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 		}
 
-		// Save default attributes for variable products.
-		if ( $product->is_type( 'variable' ) ) {
-			$product = $this->save_default_attributes( $product, $data );
+		// Featured image.
+		if ( isset( $data['image_id'] ) ) {
+			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $product->get_id() ) : '';
+			$product->set_image_id( $image_id );
 		}
 
-		// Check for featured/gallery images, upload it and set it.
-		if ( isset( $data['images'] ) ) {
-			$product = $this->save_product_images( $product, $data['images'] );
+		// Gallery.
+		if ( isset( $data['gallery_image_ids'] ) ) {
+			$gallery_image_ids = array();
+
+			foreach ( $data['gallery_image_ids'] as $url ) {
+				if ( empty( $url ) ) {
+					continue;
+				}
+
+				$gallery_image_ids[] = $this->get_attachment_id( $url, $product->get_id() );
+			}
+
+			$product->set_gallery_image_ids( array_filter( $gallery_image_ids ) );
 		}
 
 		// Allow set meta_data.
-		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+		if ( isset( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				$product->update_meta_data( $meta['key'], $meta['value'] );
 			}
 		}
 
@@ -577,13 +552,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Row data.
 	 *
-	 * @return WC_Product
+	 * @return WC_Product|WP_Error
 	 */
 	protected function save_variation_data( $variation, $data ) {
-		if ( isset( $data['product_id'] ) ) {
-			$variation->set_parent_id( absint( $data['product_id'] ) );
-		} else {
-			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing variation product parent ID', 'woocommerce' ), array( 'status' => 401 ) );
+		$parent = false;
+
+		// Check if parent exist.
+		if ( isset( $data['parent_id'] ) ) {
+			$parent = wc_get_product( $data['parent_id'] );
+
+			if ( $parent ) {
+				$variation->set_parent_id( $parent->get_id() );
+			}
+		}
+
+		// Stop if parent does not exists.
+		if ( ! $parent ) {
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		// Status.
@@ -596,18 +581,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$variation->set_sku( wc_clean( $data['sku'] ) );
 		}
 
-		// Thumbnail.
-		if ( isset( $data['image'] ) ) {
-			if ( is_array( $data['image'] ) ) {
-				$image = $data['image'];
-				if ( is_array( $image ) ) {
-					$image['position'] = 0;
-				}
-
-				$variation = $this->save_product_images( $variation, array( $image ) );
-			} else {
-				$variation->set_image_id( '' );
-			}
+		// Featured image.
+		if ( isset( $data['image_id'] ) ) {
+			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $variation->get_id() ) : '';
+			$variation->set_image_id( $image_id );
 		}
 
 		// Virtual variation.
@@ -623,7 +600,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Downloads.
 		if ( $variation->get_downloadable() ) {
 			// Downloadable files.
-			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+			if ( isset( $data['downloads'] ) ) {
 				$variation = $this->save_downloadable_files( $variation, $data['downloads'] );
 			}
 
@@ -642,29 +619,27 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$variation = $this->save_product_shipping_data( $variation, $data );
 
 		// Stock handling.
-		if ( isset( $data['manage_stock'] ) ) {
-			$variation->set_manage_stock( $data['manage_stock'] );
+		if ( isset( $data['stock_status'] ) ) {
+			$variation->set_stock_status( $data['stock_status'] ? 'instock' : 'outofstock' );
 		}
 
-		if ( isset( $data['in_stock'] ) ) {
-			$variation->set_stock_status( true === $data['in_stock'] ? 'instock' : 'outofstock' );
-		}
-
-		if ( isset( $data['backorders'] ) ) {
-			$variation->set_backorders( $data['backorders'] );
-		}
-
-		if ( $variation->get_manage_stock() ) {
-			if ( isset( $data['stock_quantity'] ) ) {
-				$variation->set_stock_quantity( $data['stock_quantity'] );
-			} elseif ( isset( $data['inventory_delta'] ) ) {
-				$stock_quantity  = wc_stock_amount( $variation->get_stock_quantity() );
-				$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-				$variation->set_stock_quantity( $stock_quantity );
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			if ( isset( $data['manage_stock'] ) ) {
+				$variation->set_manage_stock( $data['manage_stock'] );
 			}
-		} else {
-			$variation->set_backorders( 'no' );
-			$variation->set_stock_quantity( '' );
+
+			if ( isset( $data['backorders'] ) ) {
+				$variation->set_backorders( $data['backorders'] );
+			}
+
+			if ( $variation->get_manage_stock() ) {
+				if ( isset( $data['stock_quantity'] ) ) {
+					$variation->set_stock_quantity( $data['stock_quantity'] );
+				}
+			} else {
+				$variation->set_backorders( 'no' );
+				$variation->set_stock_quantity( '' );
+			}
 		}
 
 		// Regular Price.
@@ -706,23 +681,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Update taxonomies.
 		if ( isset( $data['attributes'] ) ) {
 			$attributes        = array();
-			$parent            = wc_get_product( $variation->get_parent_id() );
-			$parent_attributes = $parent->get_attributes();
+			$parent_attributes = $this->get_variation_parent_attributes( $data['attributes'], $parent );
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
+				// Get ID if is a global attribute.
+				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
+				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
+				} else {
+					$attribute_name = sanitize_title( $attribute['name']);
 				}
 
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -730,7 +698,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 
 				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
-				$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+				$attribute_value = isset( $attribute['value'] ) ? current( $attribute['value'] ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
@@ -749,15 +717,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$variation->set_attributes( $attributes );
 		}
 
-		// Menu order.
-		if ( isset( $data['menu_order'] ) ) {
-			$variation->set_menu_order( $data['menu_order'] );
-		}
-
 		// Meta data.
-		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+		if ( isset( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
-				$variation->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				$variation->update_meta_data( $meta['key'], $meta['value'] );
 			}
 		}
 
@@ -765,63 +728,118 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Set product images.
+	 * Get variation parent attributes and set "is_variation".
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $images  Images data.
-	 * @return WC_Product
+	 * @param  array      $attributes Attributes list.
+	 * @param  WC_Product $parent     Parent product data.
+	 * @return array
 	 */
-	protected function save_product_images( $product, $images ) {
-		if ( is_array( $images ) ) {
-			$gallery = array();
+	protected function get_variation_parent_attributes( $attributes, $parent ) {
+		$parent_attributes = $parent->get_attributes();
+		$require_save      = false;
 
-			foreach ( $images as $image ) {
-				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+		foreach ( $attributes as $attribute ) {
+			// Get ID if is a global attribute.
+			$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
-				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-					if ( is_wp_error( $upload ) ) {
-						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
-							throw new Exception( $upload->get_error_message(), 400 );
-						} else {
-							continue;
-						}
-					}
-
-					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
-				}
-
-				if ( ! wp_attachment_is_image( $attachment_id ) ) {
-					throw new Exception( sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
-				}
-
-				if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
-					$product->set_image_id( $attachment_id );
-				} else {
-					$gallery[] = $attachment_id;
-				}
-
-				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) ) {
-					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
-				}
-
-				// Set the image name if present.
-				if ( ! empty( $image['name'] ) ) {
-					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
-				}
+			if ( $attribute_id ) {
+				$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+			} else {
+				$attribute_name = sanitize_title( $attribute['name']);
 			}
 
-			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_image_ids( $gallery );
+			// Check if attribute handle variations.
+			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
+				// Re-create the attribute to CRUD save and genarate again.
+				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
+				$parent_attributes[ $attribute_name ]->set_variation( 1 );
+
+				$require_save = true;
 			}
-		} else {
-			$product->set_image_id( '' );
-			$product->set_gallery_image_ids( array() );
 		}
 
-		return $product;
+		// Save variation attributes.
+		if ( $require_save ) {
+			$parent->set_attributes( array_values( $parent_attributes ) );
+			$parent->save();
+		}
+
+		return $parent_attributes;
+	}
+
+	/**
+	 * Get attachment ID.
+	 *
+	 * @param  string $url        Attachment URL.
+	 * @param  int    $product_id Product ID.
+	 * @return int
+	 */
+	protected function get_attachment_id( $url, $product_id ) {
+		if ( empty( $url ) ) {
+			return 0;
+		}
+
+		$id         = 0;
+		$upload_dir = wp_upload_dir();
+		$base_url   = $upload_dir['baseurl'] . '/';
+
+		// Check first if attachment is on WordPress uploads directory.
+		if ( false !== strpos( $url, $base_url ) ) {
+			// Search for yyyy/mm/slug.extension
+			$file = str_replace( $base_url, '', $url );
+			$args = array(
+				'post_type'   => 'attachment',
+				'post_status' => 'any',
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'value'   => $file,
+						'compare' => 'LIKE',
+						'key'     => '_wp_attachment_metadata',
+					),
+				),
+			);
+
+			if ( $ids = get_posts( $args ) ) {
+				$id = current( $ids );
+			}
+		} else {
+			$args = array(
+				'post_type'   => 'attachment',
+				'post_status' => 'any',
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'value' => $url,
+						'key'   => '_wc_attachment_source',
+					),
+				),
+			);
+
+			if ( $ids = get_posts( $args ) ) {
+				$id = current( $ids );
+			}
+		}
+
+		// Upload if attachment does not exists.
+		if ( ! $id ) {
+			$upload = wc_rest_upload_image_from_url( $url );
+
+			if ( is_wp_error( $upload ) ) {
+				throw new Exception( $upload->get_error_message(), 400 );
+			}
+
+			$id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
+
+			if ( ! wp_attachment_is_image( $id ) ) {
+				throw new Exception( sprintf( __( 'Not able to attach "%s".', 'woocommerce' ), $url ), 400 );
+			}
+
+			// Save attachment source for future reference.
+			update_post_meta( $id, '_wc_attachment_source', $url );
+		}
+
+		return $id;
 	}
 
 	/**
@@ -833,7 +851,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function save_product_shipping_data( $product, $data ) {
 		// Virtual.
-		if ( isset( $data['virtual'] ) && true === $data['virtual'] ) {
+		if ( $product->is_virtual() ) {
 			$product->set_weight( '' );
 			$product->set_height( '' );
 			$product->set_length( '' );
@@ -861,11 +879,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class_id'] ) ) {
-			$shipping_class_term = get_term_by( 'id', wc_clean( $data['shipping_class_id'] ), 'product_shipping_class' );
-
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
-			}
+			$product->set_shipping_class_id( $data['shipping_class_id'] );
 		}
 
 		return $product;
@@ -874,106 +888,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Save downloadable files.
 	 *
-	 * @param WC_Product $product    Product instance.
-	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 3.0.
+	 * @param WC_Product $product   Product instance.
+	 * @param array      $downloads Downloads data.
 	 * @return WC_Product
 	 */
-	protected function save_downloadable_files( $product, $downloads ) {
-		$files = array();
-		foreach ( $downloads as $key => $file ) {
-			if ( empty( $file['file'] ) ) {
+	protected function save_downloadable_files( $product, $data ) {
+		$downloads = array();
+		foreach ( $data as $key => $file ) {
+			if ( empty( $file['url'] ) ) {
 				continue;
 			}
 
-			$download = new WC_Product_Download();
-			$download->set_id( $key );
-			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
-			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
-			$files[]  = $download;
+			$downloads[] = array(
+				'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
+				'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
+			);
 		}
-		$product->set_downloads( $files );
-
-		return $product;
-	}
-
-	/**
-	 * Save taxonomy terms.
-	 *
-	 * @param WC_Product $product  Product instance.
-	 * @param array      $terms    Terms data.
-	 * @param string     $taxonomy Taxonomy name.
-	 * @return WC_Product
-	 */
-	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
-		$term_ids = wp_list_pluck( $terms, 'id' );
-
-		if ( 'cat' === $taxonomy ) {
-			$product->set_category_ids( $term_ids );
-		} elseif ( 'tag' === $taxonomy ) {
-			$product->set_tag_ids( $term_ids );
-		}
-
-		return $product;
-	}
-
-	/**
-	 * Save default attributes.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param WC_Product      $product Product instance.
-	 * @param array $data    Row data.
-	 * @return WC_Product
-	 */
-	protected function save_default_attributes( $product, $data ) {
-		if ( isset( $data['default_attributes'] ) && is_array( $data['default_attributes'] ) ) {
-
-			$attributes         = $product->get_attributes();
-			$default_attributes = array();
-
-			foreach ( $data['default_attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
-
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
-				}
-
-				if ( isset( $attributes[ $attribute_name ] ) ) {
-					$_attribute = $attributes[ $attribute_name ];
-
-					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
-
-						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
-							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $value, $attribute_name );
-
-							if ( $term && ! is_wp_error( $term ) ) {
-								$value = $term->slug;
-							} else {
-								$value = sanitize_title( $value );
-							}
-						}
-
-						if ( $value ) {
-							$default_attributes[ $attribute_name ] = $value;
-						}
-					}
-				}
-			}
-
-			$product->set_default_attributes( $default_attributes );
-		}
+		$product->set_downloads( $downloads );
 
 		return $product;
 	}
