@@ -656,7 +656,7 @@ class WC_Checkout {
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
 						$valid_state_values = array_flip( array_map( 'strtoupper', $valid_states ) );
-						$data[ $key ] = strtoupper( $data[ $key ] );
+						$data[ $key ] = mb_strtoupper( $data[ $key ] );
 
 						if ( isset( $valid_state_values[ $data[ $key ] ] ) ) {
 							// With this part we consider state value to be valid as well, convert it to the state key for the valid_states check below.
