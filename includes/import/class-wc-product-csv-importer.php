@@ -234,7 +234,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		foreach ( $names as $name ) {
 			$term = get_term_by( 'name', $name, 'product_tag' );
 
-			if ( ! $term ) {
+			if ( ! $term || is_wp_error( $term ) ) {
 				$term = (object) wp_insert_term( $name, 'product_tag' );
 			}
 
@@ -253,7 +253,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function parse_shipping_class_field( $field ) {
 		$term = get_term_by( 'name', $field, 'product_shipping_class' );
 
-		if ( ! $term ) {
+		if ( ! $term || is_wp_error( $term ) ) {
 			$term = (object) wp_insert_term( $name, 'product_shipping_class' );
 		}
 
