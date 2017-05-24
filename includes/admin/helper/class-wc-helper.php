@@ -137,6 +137,8 @@ class WC_Helper {
 				'version' => null,
 			);
 
+			$subscription['update_url'] = admin_url( 'update-core.php' );
+
 			$local = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
 
 			if ( ! empty( $local ) ) {
@@ -150,6 +152,10 @@ class WC_Helper {
 					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					}
+
+					// A magic update_url.
+					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' ) . $local['_filename'], 'upgrade-plugin_' . $local['_filename'] );
+
 				} elseif ( 'theme' == $local['_type'] ) {
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
 						$subscription['local']['active'] = true;

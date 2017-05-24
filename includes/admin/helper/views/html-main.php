@@ -109,7 +109,7 @@
 						<?php if ( ! $subscription['expired'] ) : ?>
 							<?php if ( $connected ) : ?>
 								<?php if ( $update_available ) : ?>
-									<a class="button" href="<?php echo admin_url( 'update-core.php' ); ?>"><?php _e( 'Update', 'woocommerce' ); ?></a>
+									<a class="button" href="<?php echo esc_url( $subscription['update_url'] ); ?>"><?php _e( 'Update', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 								<?php if ( $subscription['expiring'] ) : ?>
 									<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/"><?php _e( 'Renew', 'woocommerce' ); ?></a>
