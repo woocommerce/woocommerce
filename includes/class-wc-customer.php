@@ -735,7 +735,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set customer's display name.
 	 *
-	 * @since 3.0.0
+	 * @since 3.1.0
 	 * @param string $display_name
 	 * @throws WC_Data_Exception
 	 */
