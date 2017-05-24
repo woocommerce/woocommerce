@@ -421,7 +421,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 			}
 			if ( $this->starts_with( $key, 'attributes:visible' ) ) {
-				if ( ! empty( $value ) ) {
+				if ( '' !== $value ) {
 					$data['attributes'][ str_replace( 'attributes:visible', '', $key ) ]['visible'] = $value;
 				}
 

@@ -300,32 +300,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Attributes.
-		// @todo
 		if ( isset( $data['attributes'] ) ) {
 			$attributes = array();
 
-			foreach ( $data['attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
-
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = wc_clean( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
-				}
+			foreach ( $data['attributes'] as $position => $attribute ) {
+				// Get ID if is a global attribute.
+				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
 				if ( $attribute_id ) {
+					if ( isset( $attribute['value'] ) ) {
+						$options = $attribute['value'];
 
-					if ( isset( $attribute['options'] ) ) {
-						$options = $attribute['options'];
-
-						if ( ! is_array( $attribute['options'] ) ) {
+						if ( ! is_array( $attribute['value'] ) ) {
 							// Text based attributes - Posted values are term names.
 							$options = explode( WC_DELIMITER, $options );
 						}
@@ -340,29 +326,31 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						// Add attribute to array, but don't set values.
 						$attribute_object = new WC_Product_Attribute();
 						$attribute_object->set_id( $attribute_id );
-						$attribute_object->set_name( $attribute_name );
+						$attribute_object->set_name( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 						$attribute_object->set_options( $values );
-						$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
-						$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
-						$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+						$attribute_object->set_position( $position );
+						$attribute_object->set_visible( isset( $attribute['visible'] ) && $attribute['visible'] ? 1 : 0 );
+						// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 						$attributes[] = $attribute_object;
 					}
-				} elseif ( isset( $attribute['options'] ) ) {
+				} elseif ( isset( $attribute['value'] ) ) {
 					// Custom attribute - Add attribute to array and set the values.
-					if ( is_array( $attribute['options'] ) ) {
-						$values = $attribute['options'];
+					if ( is_array( $attribute['value'] ) ) {
+						$values = $attribute['value'];
 					} else {
-						$values = explode( WC_DELIMITER, $attribute['options'] );
+						$values = explode( WC_DELIMITER, $attribute['value'] );
 					}
+
 					$attribute_object = new WC_Product_Attribute();
-					$attribute_object->set_name( $attribute_name );
+					$attribute_object->set_name( $attribute['name'] );
 					$attribute_object->set_options( $values );
-					$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
+					$attribute_object->set_position( $position );
 					$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
-					$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+					// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 					$attributes[] = $attribute_object;
 				}
 			}
+
 			$product->set_attributes( $attributes );
 		}
 
