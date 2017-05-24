@@ -129,7 +129,27 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$response = rest_ensure_response( $item );
+		if ( ! is_wp_error( $item ) ) {
+			$response->add_links( $this->prepare_links( $item ) );
+		}
 		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param object $item Data object.
+	 * @return array Links for the given country.
+	 */
+	protected function prepare_links( $item ) {
+		$country_code = strtolower( $item['code'] );
+		$links = array(
+			'self' => array(
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $country_code ) ),
+			),
+		);
+
+		return $links;
 	}
 
 

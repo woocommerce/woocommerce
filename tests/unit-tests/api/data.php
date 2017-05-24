@@ -57,6 +57,11 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( $locations[0]['code'] );
 		$this->assertNotEmpty( $locations[0]['name'] );
 		$this->assertNotEmpty( $locations[0]['locations'] );
+
+		$links = $response->get_links();
+		$this->assertNotEmpty( $links );
+		$this->assertArrayHasKey( 'self', $links );
+		$this->assertArrayNotHasKey( 'collection', $links );
 	}
 
 	/**
@@ -72,6 +77,11 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'NA', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertNotEmpty( $locations['locations'] );
+
+		$links = $response->get_links();
+		$this->assertNotEmpty( $links );
+		$this->assertArrayHasKey( 'self', $links );
+		$this->assertArrayHasKey( 'collection', $links );
 	}
 
 	/**
@@ -87,6 +97,11 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'US', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertCount( 54, $locations['states'] );
+
+		$links = $response->get_links();
+		$this->assertNotEmpty( $links );
+		$this->assertArrayHasKey( 'self', $links );
+		$this->assertArrayNotHasKey( 'collection', $links );
 	}
 
 	/**
