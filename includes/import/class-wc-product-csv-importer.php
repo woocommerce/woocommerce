@@ -193,7 +193,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			foreach ( $_terms as $index => $_term ) {
 				// Check if category exists. Parent must be empty string or null if doesn't exists.
+				// @codingStandardsIgnoreStart
 				$term = term_exists( $_term, 'product_cat', $parent );
+				// @codingStandardsIgnoreEnd
 
 				if ( is_array( $term ) ) {
 					$term_id = $term['term_id'];
@@ -203,7 +205,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 
 				// Only requires assign the last category.
-				if ( $total === ( 1 + $index ) ) {
+				if ( ( 1 + $index ) === $total ) {
 					$categories[] = $term_id;
 				} else {
 					// Store parent to be able to insert or query categories based in parent ID.
@@ -357,7 +359,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return bool
 	 */
 	protected function starts_with( $haystack, $needle ) {
-		return $needle === substr( $haystack, 0, strlen( $needle ) );
+		return substr( $haystack, 0, strlen( $needle ) ) === $needle;
 	}
 
 	/**

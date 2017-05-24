@@ -754,7 +754,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						'compare' => 'LIKE',
 						'key'     => '_wp_attachment_metadata',
 					),
-				)
+				),
 			);
 
 			if ( $ids = get_posts( $args ) ) {
@@ -767,10 +767,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				'fields'      => 'ids',
 				'meta_query'  => array(
 					array(
-						'value'   => $url,
-						'key'     => '_wc_attachment_source',
+						'value' => $url,
+						'key'   => '_wc_attachment_source',
 					),
-				)
+				),
 			);
 
 			if ( $ids = get_posts( $args ) ) {
@@ -836,7 +836,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class_id'] ) ) {
-			$product->set_shipping_class_id($data['shipping_class_id'] );
+			$product->set_shipping_class_id( $data['shipping_class_id'] );
 		}
 
 		return $product;
