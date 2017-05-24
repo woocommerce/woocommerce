@@ -195,7 +195,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			if ( ! in_array( $data['type'], array_keys( wc_get_product_types() ), true ) ) {
+			$types   = array_keys( wc_get_product_types() );
+			$types[] = 'variation';
+
+			if ( ! in_array( $data['type'], $types, true ) ) {
 				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
@@ -547,10 +550,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return WC_Product|WP_Error
 	 */
 	protected function save_variation_data( $variation, $data ) {
+		$parent = false;
+
 		// Check if parent exist.
-		if ( isset( $data['parent_id'] ) && ! wc_get_product( $data['parent_id'] ) ) {
-			$variation->set_parent_id( $data['parent_id'] );
-		} else {
+		if ( isset( $data['parent_id'] ) ) {
+			$parent = wc_get_product( $data['parent_id'] );
+
+			if ( $parent ) {
+				$variation->set_parent_id( $parent->get_id() );
+			}
+		}
+
+		// Stop if parent does not exists.
+		if ( ! $parent ) {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
@@ -662,26 +674,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Update taxonomies.
-		// @todo
 		if ( isset( $data['attributes'] ) ) {
 			$attributes        = array();
-			$parent            = wc_get_product( $variation->get_parent_id() );
-			$parent_attributes = $parent->get_attributes();
+			$parent_attributes = $this->get_variation_parent_attributes( $data['attributes'], $parent );
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
+				// Get ID if is a global attribute.
+				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
+				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
+				} else {
+					$attribute_name = sanitize_title( $attribute['name']);
 				}
 
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -689,7 +693,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 
 				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
-				$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+				$attribute_value = isset( $attribute['value'] ) ? current( $attribute['value'] ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
@@ -716,6 +720,46 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return $variation;
+	}
+
+	/**
+	 * Get variation parent attributes and set "is_variation".
+	 *
+	 * @param  array      $attributes Attributes list.
+	 * @param  WC_Product $parent     Parent product data.
+	 * @return array
+	 */
+	protected function get_variation_parent_attributes( $attributes, $parent ) {
+		$parent_attributes = $parent->get_attributes();
+		$require_save      = false;
+
+		foreach ( $attributes as $attribute ) {
+			// Get ID if is a global attribute.
+			$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
+
+			if ( $attribute_id ) {
+				$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+			} else {
+				$attribute_name = sanitize_title( $attribute['name']);
+			}
+
+			// Check if attribute handle variations.
+			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
+				// Re-create the attribute to CRUD save and genarate again.
+				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
+				$parent_attributes[ $attribute_name ]->set_variation( 1 );
+
+				$require_save = true;
+			}
+		}
+
+		// Save variation attributes.
+		if ( $require_save ) {
+			$parent->set_attributes( array_values( $parent_attributes ) );
+			$parent->save();
+		}
+
+		return $parent_attributes;
 	}
 
 	/**
