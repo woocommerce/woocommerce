@@ -791,7 +791,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_item( $item_id ) {
 		foreach ( $this->items as $items ) {
 			if ( ! empty( $items[ $item_id ] ) ) {
-				return $items[ $item_id ];
+				$items = apply_filters( 'woocommerce_order_get_items', array( $item_id => $items[ $item_id ] ), $this );
+				return empty( $items[ $item_id ] ) ? false : $items[ $item_id ];
 			}
 		}
 
@@ -805,7 +806,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $group ) {
 			$this->items[ $group ] = $this->data_store->read_items( $this, $type );
 			if ( ! empty( $this->items[ $group ][ $item_id ] ) ) {
-				return $this->items[ $group ][ $item_id ];
+				$items = apply_filters( 'woocommerce_order_get_items', array( $item_id => $this->items[ $group ][ $item_id ] ), $this );
+				return empty( $items[ $item_id ] ) ? false : $items[ $item_id ];
 			}
 		}
 
