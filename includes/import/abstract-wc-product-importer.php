@@ -535,7 +535,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Allow set meta_data.
-		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+		if ( isset( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
 				$product->update_meta_data( $meta['key'], $meta['value'] );
 			}
@@ -715,7 +715,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Meta data.
-		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+		if ( isset( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
 				$variation->update_meta_data( $meta['key'], $meta['value'] );
 			}
