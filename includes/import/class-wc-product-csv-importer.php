@@ -178,7 +178,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array of arrays with "parent" and "name" keys.
 	 */
-	protected function parse_categories( $field ) {
+	protected function parse_categories_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -221,7 +221,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return array
 	 */
-	protected function parse_tags( $field ) {
+	protected function parse_tags_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -248,7 +248,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return int
 	 */
-	protected function parse_shipping_class( $field ) {
+	protected function parse_shipping_class_field( $field ) {
 		$term = get_term_by( 'name', $field, 'product_shipping_class' );
 
 		if ( ! $term ) {
@@ -256,6 +256,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return $term->term_id;
+	}
+
+	/**
+	 * Parse images list from a CSV.
+	 *
+	 * @param  string $field Field value.
+	 * @return array
+	 */
+	protected function parse_images_field( $field ) {
+		if ( empty( $field ) ) {
+			return array();
+		}
+
+		return array_map( 'esc_url_raw', array_map( 'trim', explode( ',', $field ) ) );
 	}
 
 	/**
@@ -291,10 +305,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
 			'stock_quantity'    => 'absint',
-			'category_ids'      => array( $this, 'parse_categories' ),
-			'tag_ids'           => array( $this, 'parse_tags' ),
-			'shipping_class_id' => array( $this, 'parse_shipping_class' ),
-			'image_id'          => array( $this, 'parse_comma_field' ),
+			'category_ids'      => array( $this, 'parse_categories_field' ),
+			'tag_ids'           => array( $this, 'parse_tags_field' ),
+			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
+			'image_id'          => array( $this, 'parse_images_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
@@ -360,10 +374,21 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data['attributes']         = array();
 		$data['default_attributes'] = array();
 		$data['downloads']          = array();
+		$data['gallery_image_ids']  = array();
 
 		// Manage stock.
 		if ( isset( $data['stock_quantity'] ) ) {
 			$data['manage_stock'] = 0 < $data['stock_quantity'];
+		}
+
+		// Images.
+		if ( isset( $data['image_id'] ) ) {
+			$images           = $data['image_id'];
+			$data['image_id'] = array_shift( $images );
+
+			if ( ! empty( $images ) ) {
+				$data['gallery_image_ids'] = $images;
+			}
 		}
 
 		// Type, virtual and downlodable.

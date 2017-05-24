@@ -513,10 +513,25 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = $this->save_default_attributes( $product, $data );
 		}
 
-		// Check for featured/gallery images, upload it and set it.
-		// @todo
-		if ( isset( $data['images'] ) ) {
-			$product = $this->save_product_images( $product, $data['images'] );
+		// Featured image.
+		if ( isset( $data['image_id'] ) ) {
+			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $product->get_id() ) : '';
+			$product->set_image_id( $image_id );
+		}
+
+		// Gallery.
+		if ( isset( $data['gallery_image_ids'] ) ) {
+			$gallery_image_ids = array();
+
+			foreach ( $data['gallery_image_ids'] as $url ) {
+				if ( empty( $url ) ) {
+					continue;
+				}
+
+				$gallery_image_ids[] = $this->get_attachment_id( $url, $product->get_id() );
+			}
+
+			$product->set_gallery_image_ids( array_filter( $gallery_image_ids ) );
 		}
 
 		// Allow set meta_data.
@@ -555,19 +570,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$variation->set_sku( wc_clean( $data['sku'] ) );
 		}
 
-		// Thumbnail.
-		// @todo
-		if ( isset( $data['image'] ) ) {
-			if ( is_array( $data['image'] ) ) {
-				$image = $data['image'];
-				if ( is_array( $image ) ) {
-					$image['position'] = 0;
-				}
-
-				$variation = $this->save_product_images( $variation, array( $image ) );
-			} else {
-				$variation->set_image_id( '' );
-			}
+		// Featured image.
+		if ( isset( $data['image_id'] ) ) {
+			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $variation->get_id() ) : '';
+			$variation->set_image_id( $image_id );
 		}
 
 		// Virtual variation.
@@ -719,65 +725,78 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Set product images.
+	 * Get attachment ID.
 	 *
-	 * @todo
-	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $images  Images data.
-	 * @return WC_Product
+	 * @param  string $url        Attachment URL.
+	 * @param  int    $product_id Product ID.
+	 * @return int
 	 */
-	protected function save_product_images( $product, $images ) {
-		if ( is_array( $images ) ) {
-			$gallery = array();
-
-			foreach ( $images as $image ) {
-				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-
-				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-					if ( is_wp_error( $upload ) ) {
-						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
-							throw new Exception( $upload->get_error_message(), 400 );
-						} else {
-							continue;
-						}
-					}
-
-					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
-				}
-
-				if ( ! wp_attachment_is_image( $attachment_id ) ) {
-					throw new Exception( sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
-				}
-
-				if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
-					$product->set_image_id( $attachment_id );
-				} else {
-					$gallery[] = $attachment_id;
-				}
-
-				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) ) {
-					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
-				}
-
-				// Set the image name if present.
-				if ( ! empty( $image['name'] ) ) {
-					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
-				}
-			}
-
-			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_image_ids( $gallery );
-			}
-		} else {
-			$product->set_image_id( '' );
-			$product->set_gallery_image_ids( array() );
+	protected function get_attachment_id( $url, $product_id ) {
+		if ( empty( $url ) ) {
+			return 0;
 		}
 
-		return $product;
+		$id         = 0;
+		$upload_dir = wp_upload_dir();
+		$base_url   = $upload_dir['baseurl'] . '/';
+
+		// Check first if attachment is on WordPress uploads directory.
+		if ( false !== strpos( $url, $base_url ) ) {
+			// Search for yyyy/mm/slug.extension
+			$file = str_replace( $base_url, '', $url );
+			$args = array(
+				'post_type'   => 'attachment',
+				'post_status' => 'any',
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'value'   => $file,
+						'compare' => 'LIKE',
+						'key'     => '_wp_attachment_metadata',
+					),
+				)
+			);
+
+			if ( $ids = get_posts( $args ) ) {
+				$id = current( $ids );
+			}
+		} else {
+			$args = array(
+				'post_type'   => 'attachment',
+				'post_status' => 'any',
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'value'   => $url,
+						'key'     => '_wc_attachment_source',
+					),
+				)
+			);
+
+			if ( $ids = get_posts( $args ) ) {
+				$id = current( $ids );
+			}
+		}
+
+		// Upload if attachment does not exists.
+		if ( ! $id ) {
+			$upload = wc_rest_upload_image_from_url( $url );
+
+			if ( is_wp_error( $upload ) ) {
+				throw new Exception( $upload->get_error_message(), 400 );
+			}
+
+			$id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
+
+			if ( ! wp_attachment_is_image( $id ) ) {
+				throw new Exception( sprintf( __( 'Not able to attach "%s".', 'woocommerce' ), $url ), 400 );
+			}
+
+			// Save attachment source for future reference.
+			update_post_meta( $id, '_wc_attachment_source', $url );
+		}
+
+		return $id;
 	}
 
 	/**
