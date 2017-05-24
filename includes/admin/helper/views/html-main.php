@@ -169,7 +169,7 @@
 				<tr>
 					<td>
 						<?php /* translators: %1$s: product name, %2$s: product version */ ?>
-						<?php printf( __( '%1$s<br>%1$s installed', 'woocommerce' ), esc_html( $data['Name'] ), esc_html( $data['Version'] ) ); ?>
+						<?php printf( __( '%1$s<br>%2$s installed', 'woocommerce' ), esc_html( $data['Name'] ), esc_html( $data['Version'] ) ); ?>
 						<?php if ( ! $update_available ) : ?>
 							<?php _e( '(latest)', 'woocommerce' ); ?>
 						<?php endif; ?>
