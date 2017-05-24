@@ -478,11 +478,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Downloadable options.
-		// @todo
 		if ( $product->get_downloadable() ) {
 
 			// Downloadable files.
-			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+			if ( isset( $data['downloads'] ) ) {
 				$product = $this->save_downloadable_files( $product, $data['downloads'] );
 			}
 
@@ -582,10 +581,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Downloads.
-		// @todo
 		if ( $variation->get_downloadable() ) {
 			// Downloadable files.
-			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+			if ( isset( $data['downloads'] ) ) {
 				$variation = $this->save_downloadable_files( $variation, $data['downloads'] );
 			}
 
@@ -828,27 +826,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Save downloadable files.
 	 *
-	 * @todo
-	 *
-	 * @param WC_Product $product    Product instance.
-	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 3.0.
+	 * @param WC_Product $product   Product instance.
+	 * @param array      $downloads Downloads data.
 	 * @return WC_Product
 	 */
-	protected function save_downloadable_files( $product, $downloads ) {
-		$files = array();
-		foreach ( $downloads as $key => $file ) {
-			if ( empty( $file['file'] ) ) {
+	protected function save_downloadable_files( $product, $data ) {
+		$downloads = array();
+		foreach ( $data as $key => $file ) {
+			if ( empty( $file['url'] ) ) {
 				continue;
 			}
 
-			$download = new WC_Product_Download();
-			$download->set_id( $key );
-			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
-			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
-			$files[]  = $download;
+			$downloads[] = array(
+				'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
+				'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
+			);
 		}
-		$product->set_downloads( $files );
+		$product->set_downloads( $downloads );
 
 		return $product;
 	}
@@ -860,8 +854,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Product      $product Product instance.
-	 * @param array $data    Row data.
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Row data.
 	 * @return WC_Product
 	 */
 	protected function save_default_attributes( $product, $data ) {

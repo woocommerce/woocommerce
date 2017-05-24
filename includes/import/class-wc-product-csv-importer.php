@@ -405,14 +405,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			// Downloads.
 			if ( $this->starts_with( $key, 'downloads:name' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['attributes'][ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
+					$data['downloads'][ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
 				}
 
 				unset( $data[ $key ] );
 			}
 			if ( $this->starts_with( $key, 'downloads:url' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['attributes'][ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
+					$data['downloads'][ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
 				}
 
 				unset( $data[ $key ] );
