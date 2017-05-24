@@ -387,7 +387,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Auto map column names.
 	 *
 	 * @param  array $raw_headers Raw header columns.
-	 * @param  bool  $raw_indexes If should use numbers or raw header columns as indexes.
+	 * @param  bool  $num_indexes If should use numbers or raw header columns as indexes.
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
