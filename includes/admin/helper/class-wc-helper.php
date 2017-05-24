@@ -160,6 +160,9 @@ class WC_Helper {
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
 						$subscription['local']['active'] = true;
 					}
+
+					// Another magic update_url.
+					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . $local['_stylesheet'] ), 'upgrade-theme_' . $local['_stylesheet'] );
 				}
 			}
 		}
