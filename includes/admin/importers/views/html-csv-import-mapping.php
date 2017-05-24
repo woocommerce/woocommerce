@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php $mapped_value = $mapped_items[ $index ]; ?>
 				<tr>
 					<td width="20%"><?php echo esc_html( $name ); ?></td>
-					<td width="30%"><code><?php echo ! empty( $sample[ $index ] ) ? esc_html( $sample[ $index ] ) : '-'; ?></code></td>
+					<td width="30%"><code><?php echo '' !== ( $sample[ $index ] ) ? esc_html( $sample[ $index ] ) : '-'; ?></code></td>
 					<td>
 						<select name="map_to[<?php echo esc_attr( $name ); ?>]">
 							<option value=""><?php esc_html_e( 'Do not import', 'woocommerce' ); ?></option>
