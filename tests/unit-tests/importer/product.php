@@ -158,6 +158,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloads'          => array(),
 				'virtual'            => false,
 				'downloadable'       => false,
+				'gallery_image_ids'  => array(),
 			),
 			array(
 				'type'               => 'simple',
@@ -171,6 +172,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloads'          => array(),
 				'virtual'            => false,
 				'downloadable'       => false,
+				'gallery_image_ids'  => array(),
 			),
 			array(
 				'type'               => 'simple',
@@ -184,6 +186,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloads'          => array(),
 				'virtual'            => false,
 				'downloadable'       => false,
+				'gallery_image_ids'  => array(),
 			),
 		);
 
