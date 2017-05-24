@@ -307,6 +307,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				// Get ID if is a global attribute.
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
+				if ( isset( $attribute['visible'] ) ) {
+					$visible = $attribute['visible'];
+				} else {
+					$visible = 1;
+				}
+
 				if ( $attribute_id ) {
 					if ( isset( $attribute['value'] ) ) {
 						$options = $attribute['value'];
@@ -329,7 +335,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						$attribute_object->set_name( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 						$attribute_object->set_options( $values );
 						$attribute_object->set_position( $position );
-						$attribute_object->set_visible( isset( $attribute['visible'] ) && $attribute['visible'] ? 1 : 0 );
+						$attribute_object->set_visible( $visible );
 						// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 						$attributes[] = $attribute_object;
 					}
@@ -345,7 +351,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$attribute_object->set_name( $attribute['name'] );
 					$attribute_object->set_options( $values );
 					$attribute_object->set_position( $position );
-					$attribute_object->set_visible( ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0 );
+					$attribute_object->set_visible( $visible );
 					// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 					$attributes[] = $attribute_object;
 				}
