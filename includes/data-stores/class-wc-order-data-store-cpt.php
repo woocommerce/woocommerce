@@ -584,15 +584,35 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function get_wp_query_args( $query_vars ) {
 
+		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
 		$key_mapping = array(
-			'customer_id' => 'customer_user',
-			'status' => 'post_status',
+			'customer_id'    => 'customer_user',
+			'status'         => 'post_status',
+			'currency'       => 'order_currency',
+			'version'        => 'order_version',
+			'discount_total' => 'cart_discount',
+			'discount_tax'   => 'cart_discount_tax',
+			'shipping_total' => 'order_shipping',
+			'shipping_tax'   => 'order_shipping_tax',
+			'cart_tax'       => 'order_tax',
+			'total'          => 'order_total',
 		);
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
 				unset( $query_vars[ $query_key ] );
+			}
+		}
+
+		// Add the 'wc-' prefix to status if needed.
+		if ( ! empty( $query_vars['post_status'] ) ) {
+			if ( is_array( $query_vars['post_status'] ) ) {
+				foreach ( $query_vars['post_status'] as &$status ) {
+					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+				}
+			} else {
+				$query_vars['post_status'] = ( ! wc_is_order_status( $query_vars['post_status'] ) && wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
 			}
 		}
 
