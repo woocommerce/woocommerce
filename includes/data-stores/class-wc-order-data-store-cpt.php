@@ -612,7 +612,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 				}
 			} else {
-				$query_vars['post_status'] = ( ! wc_is_order_status( $query_vars['post_status'] ) && wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
+				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
 			}
 		}
 
