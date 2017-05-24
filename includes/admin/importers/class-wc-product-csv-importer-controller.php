@@ -263,7 +263,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step @todo
 	 */
 	protected function mapping_form() {
-		$importer     = $this::get_importer( $this->file, array( 'lines' => 1 ) );
+		$importer     = self::get_importer( $this->file, array( 'lines' => 1 ) );
 		$headers      = $importer->get_raw_keys();
 		$mapped_items = $this->auto_map_columns( $headers );
 		$sample       = current( $importer->get_raw_data() );
@@ -291,10 +291,12 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		$mapping = array();
-
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping = wp_unslash( $_POST['map_to'] );
+		} else {
+			// Auto mapping.
+			$importer = self::get_importer( $this->file, array( 'lines' => 1 ) );
+			$mapping  = $this->auto_map_columns( $importer->get_raw_keys(), false );
 		}
 
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
@@ -387,10 +389,11 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Auto map column names.
 	 *
-	 * @param  array $fields Header columns.
+	 * @param  array $raw_headers Raw header columns.
+	 * @param  bool  $raw_indexes If should use numbers or raw header columns as indexes.
 	 * @return array
 	 */
-	protected function auto_map_columns( $fields ) {
+	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
 		$weight_unit     = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit  = get_option( 'woocommerce_dimension_unit' );
 		$default_columns = array_flip( apply_filters( 'woocommerce_csv_product_import_mapping_default_columns', array(
@@ -444,23 +447,24 @@ class WC_Product_CSV_Importer_Controller {
 			)
 		);
 
-		$new_fields = array();
-		foreach ( $fields as $index => $field ) {
-			$new_fields[ $index ] = $field;
+		$headers = array();
+		foreach ( $raw_headers as $key => $field ) {
+			$index             = $num_indexes ? $key : $field;
+			$headers[ $index ] = $field;
 
 			if ( isset( $default_columns[ $field ] ) ) {
-				$new_fields[ $index ] = $default_columns[ $field ];
+				$headers[ $index ] = $default_columns[ $field ];
 			} else {
 				foreach ( $special_columns as $special_key => $regex ) {
 					if ( preg_match( $regex, $field, $matches ) ) {
-						$new_fields[ $index ] = $special_key . $matches[1];
+						$headers[ $index ] = $special_key . $matches[1];
 						break;
 					}
 				}
 			}
 		}
 
-		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $new_fields, $fields );
+		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $headers, $raw_headers );
 	}
 
 	/**
