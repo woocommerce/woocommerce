@@ -413,8 +413,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Stock data.
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			// Manage stock.
-			if ( isset( $data['stock_quantity'] ) ) {
-				$product->set_manage_stock( '' !== $data['stock_quantity'] );
+			if ( isset( $data['manage_stock'] ) ) {
+				$product->set_manage_stock( $data['manage_stock'] );
 			}
 
 			// Backorders.
@@ -473,7 +473,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Downloadable.
-		// @todo
 		if ( isset( $data['downloadable'] ) ) {
 			$product->set_downloadable( $data['downloadable'] );
 		}
@@ -534,8 +533,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Set variation data.
 	 *
-	 * @todo
-	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Row data.
 	 *
@@ -543,8 +540,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function save_variation_data( $variation, $data ) {
 		// Check if parent exist.
-		if ( isset( $data['product_id'] ) && ! wc_get_product( $data['product_id'] ) ) {
-			$variation->set_parent_id( $data['product_id'] );
+		if ( isset( $data['parent_id'] ) && ! wc_get_product( $data['parent_id'] ) ) {
+			$variation->set_parent_id( $data['parent_id'] );
 		} else {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
@@ -560,6 +557,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Thumbnail.
+		// @todo
 		if ( isset( $data['image'] ) ) {
 			if ( is_array( $data['image'] ) ) {
 				$image = $data['image'];
@@ -584,6 +582,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Downloads.
+		// @todo
 		if ( $variation->get_downloadable() ) {
 			// Downloadable files.
 			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
@@ -605,29 +604,27 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$variation = $this->save_product_shipping_data( $variation, $data );
 
 		// Stock handling.
-		if ( isset( $data['manage_stock'] ) ) {
-			$variation->set_manage_stock( $data['manage_stock'] );
+		if ( isset( $data['stock_status'] ) ) {
+			$variation->set_stock_status( $data['stock_status'] ? 'instock' : 'outofstock' );
 		}
 
-		if ( isset( $data['in_stock'] ) ) {
-			$variation->set_stock_status( true === $data['in_stock'] ? 'instock' : 'outofstock' );
-		}
-
-		if ( isset( $data['backorders'] ) ) {
-			$variation->set_backorders( $data['backorders'] );
-		}
-
-		if ( $variation->get_manage_stock() ) {
-			if ( isset( $data['stock_quantity'] ) ) {
-				$variation->set_stock_quantity( $data['stock_quantity'] );
-			} elseif ( isset( $data['inventory_delta'] ) ) {
-				$stock_quantity  = wc_stock_amount( $variation->get_stock_quantity() );
-				$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
-				$variation->set_stock_quantity( $stock_quantity );
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			if ( isset( $data['manage_stock'] ) ) {
+				$variation->set_manage_stock( $data['manage_stock'] );
 			}
-		} else {
-			$variation->set_backorders( 'no' );
-			$variation->set_stock_quantity( '' );
+
+			if ( isset( $data['backorders'] ) ) {
+				$variation->set_backorders( $data['backorders'] );
+			}
+
+			if ( $variation->get_manage_stock() ) {
+				if ( isset( $data['stock_quantity'] ) ) {
+					$variation->set_stock_quantity( $data['stock_quantity'] );
+				}
+			} else {
+				$variation->set_backorders( 'no' );
+				$variation->set_stock_quantity( '' );
+			}
 		}
 
 		// Regular Price.
@@ -667,6 +664,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Update taxonomies.
+		// @todo
 		if ( isset( $data['attributes'] ) ) {
 			$attributes        = array();
 			$parent            = wc_get_product( $variation->get_parent_id() );
@@ -712,18 +710,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$variation->set_attributes( $attributes );
 		}
 
-		// Menu order.
-		if ( isset( $data['menu_order'] ) ) {
-			$variation->set_menu_order( $data['menu_order'] );
-		}
-
 		// Meta data.
 		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
 				$variation->update_meta_data( $meta['key'], $meta['value'] );
 			}
 		}
-
 
 		return $variation;
 	}
