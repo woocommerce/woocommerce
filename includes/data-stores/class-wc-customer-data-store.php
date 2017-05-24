@@ -36,6 +36,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'last_update',
 		'first_name',
 		'last_name',
+		'display_name',
 		'show_admin_bar_front',
 		'use_ssl',
 		'admin_color',
@@ -148,6 +149,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'is_paying_customer' => get_user_meta( $customer_id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
 			'username'           => $user_object->user_login,
+			'display_name'       => $user_object->display_name,
 			'date_created'       => $user_object->user_registered, // Mysql string in local format.
 			'date_modified'      => get_user_meta( $customer_id, 'last_update', true ),
 			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
@@ -167,7 +169,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'user_email'   => $customer->get_email(),
-			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+			'display_name' => $customer->get_display_name(),
 		), $customer ) );
 		// Only update password if a new one was set with set_password.
 		if ( $customer->get_password() ) {
