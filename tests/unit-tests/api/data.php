@@ -25,7 +25,8 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/data', $routes );
-		$this->assertArrayHasKey( '/wc/v2/data/locations', $routes );
+		$this->assertArrayHasKey( '/wc/v2/data/continents', $routes );
+		$this->assertArrayHasKey( '/wc/v2/data/countries', $routes );
 	}
 
 	/**
@@ -37,8 +38,9 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data' ) );
 		$index = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $index );
-		$this->assertEquals( 'locations', $index[0]['slug'] );
+		$this->assertCount( 2, $index );
+		$this->assertEquals( 'continents', $index[0]['slug'] );
+		$this->assertEquals( 'countries', $index[1]['slug'] );
 	}
 
 	/**
@@ -47,7 +49,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents' ) );
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
@@ -63,7 +65,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations_from_continent() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/na' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents/na' ) );
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
@@ -78,13 +80,13 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations_from_country() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/us' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries/us' ) );
 		$locations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( is_array( $locations ) );
 		$this->assertEquals( 'US', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
-		$this->assertCount( 54, $locations['locations'] );
+		$this->assertCount( 54, $locations['states'] );
 	}
 
 	/**
@@ -93,7 +95,27 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations_from_invalid_continent() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations/xx' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents/xx' ) );
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting locations with no country specified
+	 * @since 3.1.0
+	 */
+	public function test_get_locations_from_no_country() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries' ) );
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting locations from an invalid code.
+	 * @since 3.1.0
+	 */
+	public function test_get_locations_from_invalid_country() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries/xx' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
@@ -103,7 +125,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_locations_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/locations' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 }

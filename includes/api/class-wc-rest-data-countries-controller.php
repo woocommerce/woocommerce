@@ -2,7 +2,7 @@
 /**
  * REST API Data controller.
  *
- * Handles requests to the /data/locations endpoint.
+ * Handles requests to the /data/countries endpoint.
  *
  * @author   Automattic
  * @category API
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
+class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -34,7 +34,7 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'data/locations';
+	protected $rest_base = 'data/countries';
 
 	/**
 	 * Register routes.
@@ -56,8 +56,8 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args' => array(
-					'continent' => array(
-						'description' => __( 'ISO3166 alpha-2 country or continent code.', 'woocommerce' ),
+					'location' => array(
+						'description' => __( 'ISO3166 alpha-2 country code.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -67,65 +67,38 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Return the list of continents, countries, and states, possibly restricted by args in $request.
+	 * Return the list of states for a given country.
 	 *
 	 * @since  3.1.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$continents          = WC()->countries->get_continents();
 		$countries           = WC()->countries->get_countries();
 		$states              = WC()->countries->get_states();
 		$location_filter     = strtoupper( $request['location'] );
-		$is_continent_filter = in_array( $location_filter, array_map( 'strtoupper', array_keys( $continents ) ) );
+		$data                = array();
 
-		$data = array();
-		foreach ( $continents as $continent_code => $continent_list ) {
-			if ( $is_continent_filter && ( strtoupper( $continent_code ) !== $location_filter ) ) {
-				continue;
-			}
-
-			$continent = array(
-				'code' => $continent_code,
-				'name' => $continent_list['name'],
+		if ( isset( $countries[ $location_filter ] ) ) {
+			$country = array(
+				'code' => $location_filter,
+				'name' => $countries[ $location_filter ],
 			);
-			$local_countries = array();
-			foreach ( $continent_list['countries'] as $country_code ) {
-				if ( ! $is_continent_filter && $location_filter && ( strtoupper( $country_code ) !== $location_filter ) ) {
-					continue;
-				}
-				if ( isset( $countries[ $country_code ] ) ) {
-					$country = array(
-						'code' => $country_code,
-						'name' => $countries[ $country_code ],
+
+			$local_states = array();
+			if ( isset( $states[ $location_filter ] ) ) {
+				foreach ( $states[ $location_filter ] as $state_code => $state_name ) {
+					$local_states[] = array(
+						'code' => $state_code,
+						'name' => $state_name,
 					);
-
-					$local_states = array();
-					if ( isset( $states[ $country_code ] ) ) {
-						foreach ( $states[ $country_code ] as $state_code => $state_name ) {
-							$local_states[] = array(
-								'code' => $state_code,
-								'name' => $state_name,
-							);
-						}
-					}
-					$country['locations'] = $local_states;
-					$local_countries[] = $country;
 				}
 			}
-
-			if ( ! empty( $local_countries ) ) {
-				$continent['locations'] = $local_countries;
-				$data[] = $continent;
-			}
+			$country['states'] = $local_states;
 		}
 
-		// If the data is filtered by continent or country, we don't need the entire continent wrapper
-		if ( $location_filter && ! $is_continent_filter && isset( $country ) ) {
+		if ( ! empty( $country ) ) {
 			$data = $country;
-		} elseif ( $location_filter && $is_continent_filter ) {
-			$data = $continent;
 		}
 
 		if ( empty( $data ) ) {
@@ -174,19 +147,19 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 			'properties' => array(
 				'code' => array(
 					'type'        => 'string',
-					'description' => __( 'ISO3166 alpha-2 continent or country code.', 'woocommerce' ),
+					'description' => __( 'ISO3166 alpha-2 country code.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name' => array(
 					'type'        => 'string',
-					'description' => __( 'Full name of continent or country.', 'woocommerce' ),
+					'description' => __( 'Full name of country.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'locations' => array(
+				'states' => array(
 					'type'        => 'array',
-					'description' => __( 'List of locations in this continent or country.', 'woocommerce' ),
+					'description' => __( 'List of states in this country.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
@@ -196,40 +169,15 @@ class WC_REST_Data_Locations_Controller extends WC_REST_Data_Controller {
 						'properties' => array(
 							'code' => array(
 								'type'        => 'string',
-								'description' => __( 'ISO3166 alpha-2 country code, or unique code for state.', 'woocommerce' ),
+								'description' => __( 'State code.', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
 							),
 							'name' => array(
 								'type'        => 'string',
-								'description' => __( 'Full name of country or state.', 'woocommerce' ),
+								'description' => __( 'Full name of state.', 'woocommerce' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
-							),
-							'locations' => array(
-								'type'        => 'array',
-								'description' => __( 'List of locations in this country (absent if state).', 'woocommerce' ),
-								'context'     => array( 'view' ),
-								'readonly'    => true,
-								'items'       => array(
-									'type'       => 'object',
-									'context'    => array( 'view' ),
-									'readonly'   => true,
-									'properties' => array(
-										'code' => array(
-											'type'        => 'string',
-											'description' => __( 'State code.', 'woocommerce' ),
-											'context'     => array( 'view' ),
-											'readonly'    => true,
-										),
-										'name' => array(
-											'type'        => 'string',
-											'description' => __( 'Full name of state.', 'woocommerce' ),
-											'context'     => array( 'view' ),
-											'readonly'    => true,
-										),
-									),
-								),
 							),
 						),
 					),
