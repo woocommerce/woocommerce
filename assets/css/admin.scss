@@ -5428,6 +5428,10 @@ table.bar_chart {
 	max-width: 700px;
 	margin: 40px auto;
 
+	.error {
+		text-align: left;
+	}
+
 	.wc-progress-steps {
 		padding: 0 0 24px;
 		margin: 0;
@@ -5480,8 +5484,11 @@ table.bar_chart {
 
 	.wc-actions {
 		overflow: hidden;
-		padding: 0 0 2px;
-		margin: 0 0 24px;
+		border-top: 1px solid #eee;
+		margin: 0;
+		padding: 23px 24px 24px;
+		line-height: 3em;
+
 		.button {
 			float: right;
 			font-size: 1.25em;
@@ -5506,6 +5513,10 @@ table.bar_chart {
 				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			}
 		}
+
+		.woocommerce-importer-toggle-advanced-options {
+			color: #999;
+		}
 	}
 
 	.woocommerce-exporter,
@@ -5513,7 +5524,7 @@ table.bar_chart {
 	.wc-progress-form-content {
 		background: #fff;
 		overflow: hidden;
-		padding: 24px 24px 0;
+		padding: 0;
 		margin: 0 0 16px;
 		box-shadow: 0 1px 3px rgba(0,0,0,.13);
 		color: #555;
@@ -5521,8 +5532,12 @@ table.bar_chart {
 
 		header {
 			border-bottom: 1px solid #eee;
-			padding: 0;
 			margin: 0;
+			padding: 24px 24px 0;
+		}
+
+		section {
+			padding: 24px 24px 0;
 		}
 
 		h2 {
@@ -5549,25 +5564,73 @@ table.bar_chart {
 			display: none;
 		}
 
-		.woocommerce-exporter-options th,
-		.woocommerce-importer-options th {
-			width: 30%;
-		}
-
+		.woocommerce-importer-options th,
+		.woocommerce-importer-options td,
 		.woocommerce-exporter-options th,
 		.woocommerce-exporter-options td {
 			vertical-align: top;
+			line-height: 1.75em;
+			padding: 0 0 24px 0;
 
 			label {
 				color: #555;
 				font-weight: normal;
 			}
+
+			input[type="checkbox"] {
+				margin: 0 4px 0 0;
+				padding: 7px;
+			}
+
+			input[type="text"],
+			input[type="number"] {
+				padding: 7px;
+				height: auto;
+				margin: 0;
+			}
+
+			.woocommerce-importer-file-url-field-wrapper {
+				border: 1px solid #ddd;
+				-webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+				box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+				background-color: #fff;
+				color: #32373c;
+				outline: 0;
+				line-height: 1;
+				display: block;
+
+				code {
+					background: none;
+					font-size: smaller;
+					padding: 0;
+					margin: 0;
+					color: #999;
+					padding: 7px 0 0 7px;
+					display: inline-block;
+				}
+				input {
+					font-family: Consolas,Monaco,monospace;
+					border: 0;
+					margin: 0;
+					outline: 0;
+					box-shadow: none;
+					display: inline-block;
+					min-width: 25%;
+					box-sizing: borde
+				}
+			}
+		}
+
+		.woocommerce-exporter-options th,
+		.woocommerce-importer-options th {
+			width: 35%;
+			padding-right: 20px;
 		}
 
 		progress {
 			width: 100%;
 			height: 42px;
-			margin: 24px auto 24px;
+			margin: 0 auto 24px;
 			display: block;
 			-webkit-appearance: none;
 			border: none;
@@ -5604,6 +5667,77 @@ table.bar_chart {
 			.wc-actions,
 			.woocommerce-exporter-options {
 				display: none;
+			}
+		}
+
+		.wc-importer-mapping-table-wrapper,
+		.wc-importer-error-log {
+			padding: 0;
+		}
+
+		.wc-importer-mapping-table,
+		.wc-importer-error-log-table {
+			margin: 0;
+			border: 0;
+			box-shadow: none;
+
+			td, th {
+				border: 0;
+				padding: 12px;
+				vertical-align: middle;
+
+				select {
+					width: 100%;
+				}
+			}
+
+			tbody tr:nth-child(odd) td,
+			tbody tr:nth-child(odd) th {
+				background: #fbfbfb;
+			}
+
+			th {
+				font-weight: bold;
+			}
+
+			td:first-child,
+			th:first-child {
+				padding-left: 24px;
+			}
+
+			td:last-child,
+			th:last-child {
+				padding-right: 24px;
+			}
+
+			.wc-importer-mapping-table-name {
+				width: 50%;
+				.description {
+					color: #999;
+					margin-top: 4px;
+					display: block;
+					code {
+						background: none;
+						padding: 0;
+					}
+				}
+			}
+		}
+
+		.woocommerce-importer-done {
+			text-align: center;
+			padding: 48px 24px;
+			font-size: 1.5em;
+			line-height: 1.75em;
+
+			&::before {
+				@include icon( '\e015' );
+				color: #A16696;
+				position: static;
+				font-size: 100px;
+				display: block;
+				float: none;
+				margin: 0 0 24px;
 			}
 		}
 	}

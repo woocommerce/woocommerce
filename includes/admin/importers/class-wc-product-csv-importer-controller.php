@@ -53,6 +53,13 @@ class WC_Product_CSV_Importer_Controller {
 	protected $delimiter = ',';
 
 	/**
+	 * Whether to skip existing products.
+	 *
+	 * @var bool
+	 */
+	protected $update_existing = false;
+
+	/**
 	 * Get importer instance.
 	 *
 	 * @param  string $file File to import.
@@ -92,6 +99,7 @@ class WC_Product_CSV_Importer_Controller {
 		);
 		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
 	}
 
 	/**
@@ -119,10 +127,11 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$params = array(
-			'step'      => $keys[ $step_index + 1 ],
-			'file'      => $this->file,
-			'delimiter' => $this->delimiter,
-			'_wpnonce'  => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			'step'          => $keys[ $step_index + 1 ],
+			'file'          => $this->file,
+			'delimiter'     => $this->delimiter,
+			'update_existing' => $this->update_existing,
+			'_wpnonce'      => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
 		return add_query_arg( $params );
@@ -162,7 +171,7 @@ class WC_Product_CSV_Importer_Controller {
 	protected function output_errors() {
 		if ( $this->errors ) {
 			foreach ( $this->errors as $error ) {
-				echo '<p class="error inline">' . esc_html( $error ) . '</p>';
+				echo '<div class="error inline"><p>' . esc_html( $error ) . '</p></div>';
 			}
 		}
 	}
@@ -274,7 +283,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Check if all fields matches.
 		if ( 0 === count( array_diff( $mapped_items, $this->get_default_fields() ) ) ) {
-			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			wp_redirect( esc_url_raw( add_query_arg( array( 'auto_map' => 1 ), $this->get_next_step_link() ) ) );
 			exit;
 		}
 
@@ -292,19 +301,24 @@ class WC_Product_CSV_Importer_Controller {
 
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping = wp_unslash( $_POST['map_to'] );
-		} else {
+		} elseif ( ! empty( $_GET['auto_map'] ) ) {
 			// Auto mapping.
 			$importer = self::get_importer( $this->file, array( 'lines' => 1 ) );
 			$mapping  = $this->auto_map_columns( $importer->get_raw_keys(), false );
+		} else {
+			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
+			exit;
 		}
 
-		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
-			'import_nonce' => wp_create_nonce( 'wc-product-import' ),
-			'mapping'      => $mapping,
-			'file'         => $this->file,
+			'import_nonce'  => wp_create_nonce( 'wc-product-import' ),
+			'mapping'       => $mapping,
+			'file'          => $this->file,
+			'update_existing' => $this->update_existing,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
+
+		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
 	}
 
 	/**
@@ -312,29 +326,13 @@ class WC_Product_CSV_Importer_Controller {
 	 * @todo Make this better.
 	 */
 	protected function done() {
-		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
-		$failed = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
+		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
+		$updated  = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
+		$failed   = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
+		$skipped  = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
+		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 
-		$results = sprintf(
-			/* translators: %d: products count */
-			_n( 'Imported %s product.', 'Imported %s products.', $imported, 'woocommerce' ),
-			'<strong>' . number_format_i18n( $imported ) . '</strong>'
-		);
-
-		// @todo create a view to display errors or log with WC_Logger.
-		if ( 0 < $failed ) {
-			$results .= ' ' . sprintf(
-				/* translators: %d: products count */
-				_n( 'Failed %s product.', 'Failed %s products.', $failed, 'woocommerce' ),
-				'<strong>' . number_format_i18n( $failed ) . '</strong>'
-			);
-		}
-
-		// Show result.
-		echo '<div class="updated settings-error"><p>';
-		/* translators: %d: import results */
-		printf( __( 'Import complete: %s', 'woocommerce' ), $results );
-		echo '</p></div>';
+		include_once( dirname( __FILE__ ) . '/views/html-csv-import-done.php' );
 	}
 
 	/**
@@ -432,6 +430,7 @@ class WC_Product_CSV_Importer_Controller {
 			'external_url'       => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
 		) ) );
+
 		$special_columns = array_map(
 			array( $this, 'sanitize_special_column_name_regex' ),
 			apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
@@ -486,9 +485,11 @@ class WC_Product_CSV_Importer_Controller {
 	protected function get_mapping_options( $item = '' ) {
 		// Get index for special column names.
 		$index = $item;
+
 		if ( preg_match( '/\d+$/', $item, $matches ) ) {
 			$index = $matches[0];
 		}
+
 		// Properly format for meta field.
 		$meta = str_replace( 'meta:', '', $item );
 

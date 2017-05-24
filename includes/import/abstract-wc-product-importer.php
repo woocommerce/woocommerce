@@ -128,7 +128,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return 0;
 		}
 
-		return min( round( ( $this->file_position / $size ) * 100 ), 100 );
+		return absint( min( round( ( $this->file_position / $size ) * 100 ), 100 ) );
 	}
 
 	/**
@@ -138,12 +138,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return WC_Product|WC_Error
 	 */
 	protected function process_item( $data ) {
-		// Only update.
-		// @todo
-		$update_only = false;
-
 		try {
-			$object = $this->prepare_product( $data, $update_only );
+			$object = $this->prepare_product( $data );
 
 			if ( is_wp_error( $object ) ) {
 				return $object;
@@ -182,16 +178,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  array $data     Row data.
-	 * @param  bool  $creating If should force create a new product.
 	 * @return WC_Product|WP_Error
 	 */
-	protected function prepare_product( $data, $update_only = false ) {
+	protected function prepare_product( $data ) {
 		$id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
-
-		// @todo
-		if ( $update_only && ! $id ) {
-			return new WP_Error( 'woocommerce_product_importer_product_does_not_exists', __( 'Product does not exists, to create new products disable "Update only" option.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
@@ -211,6 +201,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = new $classname( $id );
 		} elseif ( isset( $data['id'] ) ) {
 			$product = wc_get_product( $id );
+
+			if ( ! $product ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_invalid_id', sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ), array( 'id' => $id, 'status' => 401 ) );
+			}
 		} else {
 			$product = new WC_Product_Simple();
 		}

@@ -31,12 +31,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function __construct( $file, $params = array() ) {
 		$default_args = array(
-			'start_pos' => 0,       // File pointer start.
-			'end_pos'   => -1,      // File pointer end.
-			'lines'     => -1,      // Max lines to read.
-			'mapping'   => array(), // Column mapping. csv_heading => schema_heading.
-			'parse'     => false,   // Whether to sanitize and format data.
-			'delimiter' => ',',     // CSV delimiter.
+			'start_pos'       => 0, // File pointer start.
+			'end_pos'         => -1, // File pointer end.
+			'lines'           => -1, // Max lines to read.
+			'mapping'         => array(), // Column mapping. csv_heading => schema_heading.
+			'parse'           => false, // Whether to sanitize and format data.
+			'update_existing' => false, // Whether to update existing items.
+			'delimiter'       => ',', // CSV delimiter.
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -61,8 +62,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'] ) ) ) {
 				$this->raw_data[] = $row;
 
-	            if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
-	            	break;
+				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
+					break;
 				}
 			}
 
@@ -494,6 +495,31 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Get a string to identify the row from parsed data.
+	 *
+	 * @param  array $parsed_data
+	 * @return string
+	 */
+	protected function get_row_id( $parsed_data ) {
+		$id       = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+		$sku      = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+		$name     = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
+		$row_data = array();
+
+		if ( $name ) {
+			$row_data[] = $name;
+		}
+		if ( $id ) {
+			$row_data[] = __( 'ID: ', 'woocommerce' ) . $id;
+		}
+		if ( $sku ) {
+			$row_data[] = __( 'SKU: ', 'woocommerce' ) . $sku;
+		}
+
+		return implode( ', ', $row_data );
+	}
+
+	/**
 	 * Process importer.
 	 *
 	 * @return array
@@ -502,13 +528,33 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data = array(
 			'imported' => array(),
 			'failed'   => array(),
+			'updated'  => array(),
+			'skipped'  => array(),
 		);
 
-		foreach ( $this->parsed_data as $parsed_data ) {
+		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+
+			// Don't import products with IDs or SKUs that already exist if option is true.
+			if ( ! $this->params['update_existing'] ) {
+				$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] )     : 0;
+				$sku = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+
+				if ( $id && wc_get_product( $id ) ) {
+					$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
+					continue;
+				} elseif ( $sku && wc_get_product_id_by_sku( $sku ) ) {
+					$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+					continue;
+				}
+			}
+
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
-				$data['failed'][] = $result;
+				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
+				$data['failed'][]   = $result;
+			} elseif ( ! empty( $parsed_data['id'] ) ) {
+				$data['updated'][]  = $result;
 			} else {
 				$data['imported'][] = $result;
 			}
