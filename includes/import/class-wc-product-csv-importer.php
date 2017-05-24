@@ -428,10 +428,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 			}
 
-			// Default attributes
+			// Default attributes.
 			if ( $this->starts_with( $key, 'attributes:default' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['default_attributes'][] = $value;
+					$data['attributes'][ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
 				}
 
 				unset( $data[ $key ] );

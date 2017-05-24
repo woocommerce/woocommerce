@@ -259,7 +259,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Mapping step @todo
+	 * Mapping step.
 	 */
 	protected function mapping_form() {
 		$importer     = self::get_importer( $this->file, array( 'lines' => 1 ) );

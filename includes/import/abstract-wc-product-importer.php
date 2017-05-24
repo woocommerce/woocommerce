@@ -304,63 +304,80 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Attributes.
 		if ( isset( $data['attributes'] ) ) {
-			$attributes = array();
+			$attributes         = array();
+			$default_attributes = array();
 
 			foreach ( $data['attributes'] as $position => $attribute ) {
 				// Get ID if is a global attribute.
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
+				// Set attribute visibility.
 				if ( isset( $attribute['visible'] ) ) {
-					$visible = $attribute['visible'];
+					$is_visible = $attribute['visible'];
 				} else {
-					$visible = 1;
+					$is_visible = 1;
 				}
 
+				// Set if is a variation attribute.
+				$is_variation = 0;
+
 				if ( $attribute_id ) {
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
 					if ( isset( $attribute['value'] ) ) {
-						$options = $attribute['value'];
-
-						if ( ! is_array( $attribute['value'] ) ) {
-							// Text based attributes - Posted values are term names.
-							$options = explode( WC_DELIMITER, $options );
-						}
-
-						$values = array_map( 'wc_sanitize_term_text_based', $options );
-						$values = array_filter( $values, 'strlen' );
+						$options = array_map( 'wc_sanitize_term_text_based', $attribute['value'] );
+						$options = array_filter( $options, 'strlen' );
 					} else {
-						$values = array();
+						$options = array();
 					}
 
-					if ( ! empty( $values ) ) {
-						// Add attribute to array, but don't set values.
+					// Check for default attributes and set "is_variation".
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options ) ) {
+						$default_term = get_term_by( 'name', $attribute['default'], $attribute_name );
+
+						if ( $default_term && ! is_wp_error( $default_term ) ) {
+							$default = $default_term->slug;
+						} else {
+							$default = sanitize_title( $attribute['default'] );
+						}
+
+						$default_attributes[ $attribute_name ] = $default;
+						$is_variation = 1;
+					}
+
+					if ( ! empty( $options ) ) {
 						$attribute_object = new WC_Product_Attribute();
 						$attribute_object->set_id( $attribute_id );
-						$attribute_object->set_name( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
-						$attribute_object->set_options( $values );
+						$attribute_object->set_name( $attribute_name );
+						$attribute_object->set_options( $options );
 						$attribute_object->set_position( $position );
-						$attribute_object->set_visible( $visible );
-						// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+						$attribute_object->set_visible( $is_visible );
+						$attribute_object->set_variation( $is_variation );
 						$attributes[] = $attribute_object;
 					}
 				} elseif ( isset( $attribute['value'] ) ) {
-					// Custom attribute - Add attribute to array and set the values.
-					if ( is_array( $attribute['value'] ) ) {
-						$values = $attribute['value'];
-					} else {
-						$values = explode( WC_DELIMITER, $attribute['value'] );
+					// Check for default attributes and set "is_variation".
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'] ) ) {
+						$default_attributes[ sanitize_title( $attribute['name'] ) ] = $attribute['default'];
+						$is_variation = 1;
 					}
 
 					$attribute_object = new WC_Product_Attribute();
 					$attribute_object->set_name( $attribute['name'] );
-					$attribute_object->set_options( $values );
+					$attribute_object->set_options( $attribute['value'] );
 					$attribute_object->set_position( $position );
-					$attribute_object->set_visible( $visible );
-					// $attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
+					$attribute_object->set_visible( $is_visible );
+					$attribute_object->set_variation( $is_variation );
 					$attributes[] = $attribute_object;
 				}
 			}
 
 			$product->set_attributes( $attributes );
+
+			// Set variable default attributes.
+			if ( $product->is_type( 'variable' ) ) {
+				$product->set_default_attributes( $default_attributes );
+			}
 		}
 
 		// Sales and prices.
@@ -502,12 +519,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( isset( $data['button_text'] ) ) {
 				$product->set_button_text( $data['button_text'] );
 			}
-		}
-
-		// Save default attributes for variable products.
-		// @todo
-		if ( $product->is_type( 'variable' ) ) {
-			$product = $this->save_default_attributes( $product, $data );
 		}
 
 		// Featured image.
@@ -900,69 +911,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			);
 		}
 		$product->set_downloads( $downloads );
-
-		return $product;
-	}
-
-	/**
-	 * Save default attributes.
-	 *
-	 * @todo
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Row data.
-	 * @return WC_Product
-	 */
-	protected function save_default_attributes( $product, $data ) {
-		if ( isset( $data['default_attributes'] ) && is_array( $data['default_attributes'] ) ) {
-
-			$attributes         = $product->get_attributes();
-			$default_attributes = array();
-
-			foreach ( $data['default_attributes'] as $attribute ) {
-				$attribute_id   = 0;
-				$attribute_name = '';
-
-				// Check ID for global attributes or name for product attributes.
-				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
-				}
-
-				if ( ! $attribute_id && ! $attribute_name ) {
-					continue;
-				}
-
-				if ( isset( $attributes[ $attribute_name ] ) ) {
-					$_attribute = $attributes[ $attribute_name ];
-
-					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
-
-						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
-							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-							$term = get_term_by( 'name', $value, $attribute_name );
-
-							if ( $term && ! is_wp_error( $term ) ) {
-								$value = $term->slug;
-							} else {
-								$value = sanitize_title( $value );
-							}
-						}
-
-						if ( $value ) {
-							$default_attributes[ $attribute_name ] = $value;
-						}
-					}
-				}
-			}
-
-			$product->set_default_attributes( $default_attributes );
-		}
 
 		return $product;
 	}
