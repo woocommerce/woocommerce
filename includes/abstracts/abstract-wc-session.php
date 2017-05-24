@@ -51,6 +51,8 @@ abstract class WC_Session {
 	  * @return bool
 	  */
 	public function __isset( $key ) {
+		$key = apply_filters( 'woocommerce_session_isset', $key );
+
 		return isset( $this->_data[ sanitize_key( $key ) ] );
 	}
 
@@ -60,6 +62,8 @@ abstract class WC_Session {
 	 * @param mixed $key
 	 */
 	public function __unset( $key ) {
+		$key = apply_filters( 'woocommerce_session_unset', $key );
+
 		if ( isset( $this->_data[ $key ] ) ) {
 			unset( $this->_data[ $key ] );
 			$this->_dirty = true;
