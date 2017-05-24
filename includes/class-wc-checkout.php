@@ -879,9 +879,8 @@ class WC_Checkout {
 				$customer->set_last_name( $data['billing_last_name'] );
 			}
 
-			$current_user = get_user_by( 'id', $customer_id );
 			// If the display name is an email, update to the user's full name.
-			if ( $current_user && is_email( $current_user->display_name ) ) {
+			if ( is_email( $customer->get_display_name() ) ) {
 				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
 			}
 
