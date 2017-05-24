@@ -183,25 +183,32 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$sections = array_map( 'trim', explode( ',', $field ) );
+		$row_terms  = array_map( 'trim', explode( ',', $field ) );
 		$categories = array();
 
-		foreach ( $sections as $section ) {
+		foreach ( $row_terms as $row_term ) {
+			$parent = null;
+			$_terms = array_map( 'trim', explode( '>', $row_term ) );
+			$total  = count( $_terms );
 
-			// Top level category.
-			if ( false === strpos( $section, '>' ) ) {
-				$categories[] = array(
-					'parent' => false,
-					'name'   => wc_clean( $section ),
-				);
+			foreach ( $_terms as $index => $_term ) {
+				// Check if category exists. Parent must be empty string or null if doesn't exists.
+				$term = term_exists( $_term, 'product_cat', $parent );
 
-			// Subcategory.
-			} else {
-				$chunks = array_map( 'trim', explode( '>', $section ) );
-				$categories[] = array(
-					'parent' => wc_clean( reset( $chunks ) ),
-					'name'   => wc_clean( end( $chunks ) ),
-				);
+				if ( is_array( $term ) ) {
+					$term_id = $term['term_id'];
+				} else {
+					$term    = wp_insert_term( $_term, 'product_cat', array( 'parent' => intval( $parent ) ) );
+					$term_id = $term['term_id'];
+				}
+
+				// Only requires assign the last category.
+				if ( $total === ( 1 + $index ) ) {
+					$categories[] = $term_id;
+				} else {
+					// Store parent to be able to insert or query categories based in parent ID.
+					$parent = $term_id;
+				}
 			}
 		}
 
