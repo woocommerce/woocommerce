@@ -172,11 +172,7 @@ jQuery( function( $ ) {
 			try {
 				var json = $.parseJSON( raw_json );
 
-				if ( json && 'object' === typeof json ) {
-					return true;
-				} else {
-					return false;
-				}
+				return ( json && 'object' === typeof json );
 			} catch ( e ) {
 				return false;
 			}
