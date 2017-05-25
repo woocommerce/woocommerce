@@ -343,13 +343,14 @@ abstract class WC_CSV_Exporter {
 	public function format_data( $data ) {
 		if ( ! is_scalar( $data ) ) {
 			if ( is_a( $data, 'WC_Datetime' ) ) {
-				$data = $data->date( DATE_ATOM );
-			} elseif ( is_bool( $data ) ) {
-				$data = $data ? 1 : 0;
+				$data = $data->date( 'Y-m-d G:i:s' );
 			} else {
 				$data = ''; // Not supported.
 			}
+		} elseif ( is_bool( $data ) ) {
+			$data = $data ? 1 : 0;
 		}
+
 		$data     = (string) urldecode( $data );
 		$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
 		$data     = 'UTF-8' === $encoding ? $data : utf8_encode( $data );
