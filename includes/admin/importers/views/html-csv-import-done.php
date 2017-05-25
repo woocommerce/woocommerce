@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( 0 < $failed ) {
 				$results [] = sprintf(
 					/* translators: %d: products count */
-					_n( 'Failed to import %s product.', 'Failed to import %s products.', $failed, 'woocommerce' ),
+					_n( 'Failed to import %s product', 'Failed to import %s products', $failed, 'woocommerce' ),
 					'<strong>' . number_format_i18n( $failed ) . '</strong>'
 				);
 			}
