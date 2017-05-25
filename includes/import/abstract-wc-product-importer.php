@@ -684,7 +684,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 				} else {
-					$attribute_name = sanitize_title( $attribute['name']);
+					$attribute_name = sanitize_title( $attribute['name'] );
 				}
 
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
@@ -739,7 +739,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( $attribute_id ) {
 				$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 			} else {
-				$attribute_name = sanitize_title( $attribute['name']);
+				$attribute_name = sanitize_title( $attribute['name'] );
 			}
 
 			// Check if attribute handle variations.
