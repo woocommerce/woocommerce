@@ -127,11 +127,11 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$params = array(
-			'step'          => $keys[ $step_index + 1 ],
-			'file'          => $this->file,
-			'delimiter'     => $this->delimiter,
+			'step'            => $keys[ $step_index + 1 ],
+			'file'            => $this->file,
+			'delimiter'       => $this->delimiter,
 			'update_existing' => $this->update_existing,
-			'_wpnonce'      => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
 		return add_query_arg( $params );
@@ -311,9 +311,9 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
-			'import_nonce'  => wp_create_nonce( 'wc-product-import' ),
-			'mapping'       => $mapping,
-			'file'          => $this->file,
+			'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
+			'mapping'         => $mapping,
+			'file'            => $this->file,
 			'update_existing' => $this->update_existing,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
@@ -323,7 +323,6 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Done step.
-	 * @todo Make this better.
 	 */
 	protected function done() {
 		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
