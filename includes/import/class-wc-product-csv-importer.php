@@ -94,7 +94,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Parse relative field and return product ID.
-	 * Handle `id:xx` and SKUs.
+	 *
+	 * Handles `id:xx` and SKUs.
+	 *
+	 * If mapping to an id: and the product ID does not exist, this link is not
+	 * valid.
+	 *
+	 * If mapping to a SKU and the product ID does not exist, a temporary object
+	 * will be created so it can be updated later.
 	 *
 	 * @param  string $field Field value.
 	 * @return int|string
@@ -108,7 +115,25 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return intval( $matches[1] );
 		}
 
-		return wc_get_product_id_by_sku( $field );
+		if ( $id = wc_get_product_id_by_sku( $field ) ) {
+			return $id;
+		}
+
+		try {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Import placeholder for ' . $field );
+			$product->set_status( 'importing' );
+			$product->set_sku( $field );
+			$id = $product->save();
+
+			if ( $id && ! is_wp_error( $id ) ) {
+				return $id;
+			}
+		} catch ( Exception $e ) {
+			return '';
+		}
+
+		return '';
 	}
 
 	/**
@@ -373,6 +398,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function expand_data( $data ) {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
+		// Product ID and SKU mapping.
+		if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
+			$data['id'] = $id;
+		}
+
 		// Meta data.
 		$data['meta_data']          = array();
 		$data['attributes']         = array();
@@ -397,6 +427,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Type, virtual and downlodable.
 		if ( isset( $data['type'] ) ) {
+			$data['type']         = array_map( 'strtolower', $data['type'] );
 			$data['virtual']      = in_array( 'virtual', $data['type'], true );
 			$data['downloadable'] = in_array( 'downloadable', $data['type'], true );
 
@@ -479,6 +510,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row ) {
+			// Skip empty rows.
+			if ( ! count( array_filter( $row ) ) ) {
+				continue;
+			}
 			$data = array();
 
 			foreach ( $row as $id => $value ) {
@@ -533,18 +568,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-
-			// Don't import products with IDs or SKUs that already exist if option is true.
+			// Do not import products with IDs or SKUs that already exist if option
+			// is true UNLESS this is a dummy product created during this import.
 			if ( ! $this->params['update_existing'] ) {
-				$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] )     : 0;
-				$sku = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+				$id      = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+				$sku     = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 
-				if ( $id && wc_get_product( $id ) ) {
-					$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
-					continue;
-				} elseif ( $sku && wc_get_product_id_by_sku( $sku ) ) {
-					$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
-					continue;
+				if ( $id ) {
+					$product = wc_get_product( $id );
+
+					if ( $product && 'importing' !== $product->get_status() ) {
+						$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
+						continue;
+					}
+				} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
+					$product = wc_get_product( $id_from_sku );
+
+					if ( $product && 'importing' !== $product->get_status() ) {
+						$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+						continue;
+					}
 				}
 			}
 
@@ -553,7 +596,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( is_wp_error( $result ) ) {
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][]   = $result;
-			} elseif ( ! empty( $parsed_data['id'] ) ) {
+			} elseif ( $result['updated'] ) {
 				$data['updated'][]  = $result;
 			} else {
 				$data['imported'][] = $result;
