@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     3.0.2
+ * @version     3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,10 +28,9 @@ if ( $attachment_ids && has_post_thumbnail() ) {
 	foreach ( $attachment_ids as $attachment_id ) {
 		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
-		$image_title     = get_post_field( 'post_excerpt', $attachment_id );
-
-		$attributes = array(
-			'title'                   => $image_title,
+		$attributes      = array(
+			'title'                   => get_post_field( 'post_title', $attachment_id ),
+			'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
 			'data-src'                => $full_size_image[0],
 			'data-large_image'        => $full_size_image[0],
 			'data-large_image_width'  => $full_size_image[1],

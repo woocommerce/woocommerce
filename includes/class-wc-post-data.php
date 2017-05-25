@@ -57,6 +57,9 @@ class WC_Post_Data {
 	/**
 	 * Link to parent products when getting permalink for variation.
 	 *
+	 * @param string $permalink
+	 * @param object $post
+	 *
 	 * @return string
 	 */
 	public static function variation_post_link( $permalink, $post ) {
@@ -92,6 +95,13 @@ class WC_Post_Data {
 
 	/**
 	 * Delete transients when terms are set.
+	 *
+	 * @param int $object_id
+	 * @param mixed $terms
+	 * @param array $tt_ids
+	 * @param string $taxonomy
+	 * @param mixed $append
+	 * @param array $old_tt_ids
 	 */
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
@@ -101,6 +111,10 @@ class WC_Post_Data {
 
 	/**
 	 * When a post status changes.
+	 *
+	 * @param string $new_status
+	 * @param string $old_status
+	 * @param object $post
 	 */
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) {
@@ -375,6 +389,8 @@ class WC_Post_Data {
 
 	/**
 	 * Remove item meta on permanent deletion.
+	 *
+	 * @param int $postid
 	 */
 	public static function delete_order_items( $postid ) {
 		global $wpdb;
@@ -395,6 +411,8 @@ class WC_Post_Data {
 
 	/**
 	 * Remove downloadable permissions on permanent order deletion.
+	 *
+	 * @param int $postid
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
 		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {

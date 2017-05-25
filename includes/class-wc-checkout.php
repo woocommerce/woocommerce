@@ -119,7 +119,8 @@ class WC_Checkout {
 	 * Gets the legacy public variables for backwards compatibility.
 	 *
 	 * @param string $key
-	 * @return string
+	 *
+	 * @return array|string
 	 */
 	public function __get( $key ) {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ) ) && empty( $this->legacy_posted_data ) ) {
@@ -345,11 +346,16 @@ class WC_Checkout {
 	 * Add line items to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			/**
+			 * Filter hook to get inital item object.
+			 * @since 3.1.0
+			 */
+			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
 			$product                    = $values['data'];
-			$item                       = new WC_Order_Item_Product();
 			$item->legacy_values        = $values; // @deprecated For legacy actions.
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
 			$item->set_props( array(
@@ -386,6 +392,7 @@ class WC_Checkout {
 	 * Add fees to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_fee_lines( &$order, $cart ) {
 		foreach ( $cart->get_fees() as $fee_key => $fee ) {
@@ -417,6 +424,8 @@ class WC_Checkout {
 	 * Add shipping lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param array $chosen_shipping_methods
+	 * @param array $packages
 	 */
 	public function create_order_shipping_lines( &$order, $chosen_shipping_methods, $packages ) {
 		foreach ( $packages as $package_key => $package ) {
@@ -454,6 +463,7 @@ class WC_Checkout {
 	 * Add tax lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
 		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
@@ -484,6 +494,7 @@ class WC_Checkout {
 	 * Add coupon lines to the order.
 	 *
 	 * @param  WC_Order $order
+	 * @param WC_Cart $cart
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
 		foreach ( $cart->get_coupons() as $code => $coupon ) {
@@ -509,8 +520,11 @@ class WC_Checkout {
 	 * See if a fieldset should be skipped.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param string $fieldset_key
 	 * @param array $data
+	 *
+	 * @return bool
 	 */
 	protected function maybe_skip_fieldset( $fieldset_key, $data ) {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
@@ -525,10 +539,10 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  3.0.0
+	 * @since  3.1.0
 	 * @return array of data.
 	 */
-	protected function get_posted_data() {
+	public function get_posted_data() {
 		$skipped = array();
 		$data    = array(
 			'terms'                              => (int) isset( $_POST['terms'] ),
@@ -863,6 +877,11 @@ class WC_Checkout {
 
 			if ( ! empty( $data['billing_last_name'] ) ) {
 				$customer->set_last_name( $data['billing_last_name'] );
+			}
+
+			// If the display name is an email, update to the user's full name.
+			if ( is_email( $customer->get_display_name() ) ) {
+				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
 			}
 
 			foreach ( $data as $key => $value ) {

@@ -1018,8 +1018,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Check if a coupon is valid for a product.
 	 *
-	 * @param  WC_Product  $product
-	 * @return boolean
+	 * @param  WC_Product $product
+	 * @param array $values
+	 *
+	 * @return bool
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {

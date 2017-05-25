@@ -22,6 +22,8 @@ interface WC_Logger_Interface {
 	 *
 	 * @param string $handle
 	 * @param string $message
+	 * @param string $level
+	 *
 	 * @return bool True if log was added, otherwise false.
 	 */
 	public function add( $handle, $message, $level = WC_Log_Levels::NOTICE );

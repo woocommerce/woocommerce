@@ -92,7 +92,10 @@ class WC_Frontend_Scripts {
 
 	/**
 	 * Return protocol relative asset URL.
+	 *
 	 * @param string $path
+	 *
+	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
 		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
@@ -201,7 +204,7 @@ class WC_Frontend_Scripts {
 			'jquery-payment' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1',
+				'version' => '3.0.0',
 			),
 			'photoswipe' => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
