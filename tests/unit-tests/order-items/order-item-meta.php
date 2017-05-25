@@ -31,7 +31,8 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 			$expected[ $metadata->id ] = array(
 				'key' => $metadata->key,
 				'label' => wc_attribute_label( $metadata->key, null ),
-				'value' => $metadata->value );
+				'value' => $metadata->value
+			);
 		}
 
 		$result = $meta->get_formatted();
