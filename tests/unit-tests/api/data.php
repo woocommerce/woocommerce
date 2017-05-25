@@ -57,11 +57,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( $locations[0]['code'] );
 		$this->assertNotEmpty( $locations[0]['name'] );
 		$this->assertNotEmpty( $locations[0]['countries'] );
-
-		$links = $response->get_links();
-		$this->assertNotEmpty( $links );
-		$this->assertArrayHasKey( 'self', $links );
-		$this->assertArrayNotHasKey( 'collection', $links );
+		$this->assertNotEmpty( $locations[0]['_links'] );
 	}
 
 	/**
@@ -77,11 +73,23 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'NA', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertNotEmpty( $locations['countries'] );
+		$this->assertNotEmpty( $locations['_links'] );
+	}
 
-		$links = $response->get_links();
-		$this->assertNotEmpty( $links );
-		$this->assertArrayHasKey( 'self', $links );
-		$this->assertArrayHasKey( 'collection', $links );
+	/**
+	 * Test getting locations with no country specified
+	 * @since 3.1.0
+	 */
+	public function test_get_locations_all_countries() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries' ) );
+		$locations = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertGreaterThan( 1, count( $locations ) );
+		$this->assertNotEmpty( $locations[0]['code'] );
+		$this->assertNotEmpty( $locations[0]['name'] );
+		$this->assertArrayHasKey( 'states', $locations[0] );
+		$this->assertNotEmpty( $locations[0]['_links'] );
 	}
 
 	/**
@@ -97,11 +105,7 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'US', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertCount( 54, $locations['states'] );
-
-		$links = $response->get_links();
-		$this->assertNotEmpty( $links );
-		$this->assertArrayHasKey( 'self', $links );
-		$this->assertArrayNotHasKey( 'collection', $links );
+		$this->assertNotEmpty( $locations['_links'] );
 	}
 
 	/**
@@ -111,16 +115,6 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	public function test_get_locations_from_invalid_continent() {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents/xx' ) );
-		$this->assertEquals( 404, $response->get_status() );
-	}
-
-	/**
-	 * Test getting locations with no country specified
-	 * @since 3.1.0
-	 */
-	public function test_get_locations_from_no_country() {
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
@@ -138,9 +132,19 @@ class Data_API extends WC_REST_Unit_Test_Case {
 	 * Test getting locations without permissions.
 	 * @since 3.1.0
 	 */
-	public function test_get_locations_without_permission() {
+	public function test_get_continents_without_permission() {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/continents' ) );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test getting locations without permissions.
+	 * @since 3.1.0
+	 */
+	public function test_get_countries_without_permission() {
+		wp_set_current_user( 0 );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/data/countries' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 }

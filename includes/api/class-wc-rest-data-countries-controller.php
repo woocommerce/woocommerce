@@ -53,7 +53,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
+				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args' => array(
 					'location' => array(
@@ -67,45 +67,38 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Return the list of states for a given country.
+	 * Get a list of countries and states.
 	 *
-	 * @since  3.1.0
+	 * @param  string          $country_code
 	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
+	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_items( $request ) {
-		$countries           = WC()->countries->get_countries();
-		$states              = WC()->countries->get_states();
-		$location_filter     = strtoupper( $request['location'] );
-		$data                = array();
+	public function get_country( $country_code = false, $request ) {
+		$countries = WC()->countries->get_countries();
+		$states    = WC()->countries->get_states();
+		$data      = array();
 
-		if ( isset( $countries[ $location_filter ] ) ) {
-			$country = array(
-				'code' => $location_filter,
-				'name' => $countries[ $location_filter ],
-			);
+		if ( ! array_key_exists( $country_code, $countries ) ) {
+			return false;
+		}
 
-			$local_states = array();
-			if ( isset( $states[ $location_filter ] ) ) {
-				foreach ( $states[ $location_filter ] as $state_code => $state_name ) {
-					$local_states[] = array(
-						'code' => $state_code,
-						'name' => $state_name,
-					);
-				}
+		$country = array(
+			'code' => $country_code,
+			'name' => $countries[ $country_code ],
+		);
+
+		$local_states = array();
+		if ( isset( $states[ $country_code ] ) ) {
+			foreach ( $states[ $country_code ] as $state_code => $state_name ) {
+				$local_states[] = array(
+					'code' => $state_code,
+					'name' => $state_name,
+				);
 			}
-			$country['states'] = $local_states;
 		}
-
-		if ( ! empty( $country ) ) {
-			$data = $country;
-		}
-
-		if ( empty( $data ) ) {
-			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$response = $this->prepare_item_for_response( $data, $request );
+		$country['states'] = $local_states;
+		$response = $this->prepare_item_for_response( $country, $request );
+		$response = $this->prepare_response_for_collection( $response );
 
 		/**
 		 * Filter the states list for a country returned from the API.
@@ -116,7 +109,40 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		 * @param array            $data     The original country's states list.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_country_states', $response, $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_data_country', $response, $country, $request );
+	}
+
+	/**
+	 * Return the list of states for all countries.
+	 *
+	 * @since  3.1.0
+	 * @param  WP_REST_Request $request
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$countries = WC()->countries->get_countries();
+		$data      = array();
+
+		foreach ( array_keys( $countries ) as $country_code ) {
+			$data[] = $this->get_country( $country_code, $request );
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Return the list of states for a given country.
+	 *
+	 * @since  3.1.0
+	 * @param  WP_REST_Request $request
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$data = $this->get_country( strtoupper( $request['location'] ), $request );
+		if ( empty( $data ) ) {
+			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -129,9 +155,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$response = rest_ensure_response( $item );
-		if ( ! is_wp_error( $item ) ) {
-			$response->add_links( $this->prepare_links( $item ) );
-		}
+		$response->add_links( $this->prepare_links( $item ) );
 		return $response;
 	}
 
@@ -146,6 +170,9 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		$links = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $country_code ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
 

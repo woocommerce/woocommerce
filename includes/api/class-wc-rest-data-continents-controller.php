@@ -53,7 +53,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
+				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args' => array(
 					'continent' => array(
@@ -67,66 +67,55 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Return the list of continents, countries, and states, possibly restricted by args in $request.
+	 * Return the list of countries and states for a given continent.
 	 *
 	 * @since  3.1.0
+	 * @param  string          $continent_code
 	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
+	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_items( $request ) {
-		$continents          = WC()->countries->get_continents();
-		$countries           = WC()->countries->get_countries();
-		$states              = WC()->countries->get_states();
-		$location_filter     = strtoupper( $request['location'] );
+	public function get_continent( $continent_code = false, $request ) {
+		$continents = WC()->countries->get_continents();
+		$countries  = WC()->countries->get_countries();
+		$states     = WC()->countries->get_states();
+		$data       = array();
 
-		$data = array();
-		foreach ( $continents as $continent_code => $continent_list ) {
-			if ( $location_filter && strtoupper( $continent_code ) !== $location_filter ) {
-				continue;
-			}
+		if ( ! array_key_exists( $continent_code, $continents ) ) {
+			return false;
+		}
 
-			$continent = array(
-				'code' => $continent_code,
-				'name' => $continent_list['name'],
-			);
-			$local_countries = array();
-			foreach ( $continent_list['countries'] as $country_code ) {
-				if ( isset( $countries[ $country_code ] ) ) {
-					$country = array(
-						'code' => $country_code,
-						'name' => $countries[ $country_code ],
-					);
+		$continent_list = $continents[ $continent_code ];
 
-					$local_states = array();
-					if ( isset( $states[ $country_code ] ) ) {
-						foreach ( $states[ $country_code ] as $state_code => $state_name ) {
-							$local_states[] = array(
-								'code' => $state_code,
-								'name' => $state_name,
-							);
-						}
+		$continent = array(
+			'code' => $continent_code,
+			'name' => $continent_list['name'],
+		);
+
+		$local_countries = array();
+		foreach ( $continent_list['countries'] as $country_code ) {
+			if ( isset( $countries[ $country_code ] ) ) {
+				$country = array(
+					'code' => $country_code,
+					'name' => $countries[ $country_code ],
+				);
+
+				$local_states = array();
+				if ( isset( $states[ $country_code ] ) ) {
+					foreach ( $states[ $country_code ] as $state_code => $state_name ) {
+						$local_states[] = array(
+							'code' => $state_code,
+							'name' => $state_name,
+						);
 					}
-					$country['states'] = $local_states;
-					$local_countries[] = $country;
 				}
-			}
-
-			if ( ! empty( $local_countries ) ) {
-				$continent['countries'] = $local_countries;
-				$data[] = $continent;
+				$country['states'] = $local_states;
+				$local_countries[] = $country;
 			}
 		}
 
-		// If the data is filtered by continent, we don't need the array wrapper
-		if ( $location_filter && ! empty( $data ) ) {
-			$data = $data[0];
-		}
-
-		if ( empty( $data ) ) {
-			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$response = $this->prepare_item_for_response( $data, $request );
+		$continent['countries'] = $local_countries;
+		$response = $this->prepare_item_for_response( $continent, $request );
+		$response = $this->prepare_response_for_collection( $response );
 
 		/**
 		 * Filter the location list returned from the API.
@@ -137,7 +126,40 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		 * @param array            $data     The original list of continent(s), countries, and states.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_continents', $response, $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $continent, $request );
+	}
+
+	/**
+	 * Return the list of states for all continents.
+	 *
+	 * @since  3.1.0
+	 * @param  WP_REST_Request $request
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$continents = WC()->countries->get_continents();
+		$data       = array();
+
+		foreach ( array_keys( $continents ) as $continent_code ) {
+			$data[] = $this->get_continent( $continent_code, $request );
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Return the list of locations for a given continent.
+	 *
+	 * @since  3.1.0
+	 * @param  WP_REST_Request $request
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$data = $this->get_continent( strtoupper( $request['location'] ), $request );
+		if ( empty( $data ) ) {
+			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+		return rest_ensure_response( $data );
 	}
 
 	/**
