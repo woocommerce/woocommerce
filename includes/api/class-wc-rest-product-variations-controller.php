@@ -169,7 +169,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'date_on_sale_to'       => wc_rest_prepare_date_response( $object->get_date_on_sale_to(), false ),
 			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $object->get_date_on_sale_to() ),
 			'on_sale'               => $object->is_on_sale(),
-			'visible'               => $object->is_visible(),
 			'purchasable'           => $object->is_purchasable(),
 			'virtual'               => $object->is_virtual(),
 			'downloadable'          => $object->is_downloadable(),
@@ -248,12 +247,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		}
 
 		$variation->set_parent_id( absint( $request['product_id'] ) );
-
-		// TODO Fix/Remove in future API version bump. This controls the wrong thing.
-		// https://github.com/woocommerce/woocommerce/issues/15215
-		if ( isset( $request['visible'] ) ) {
-			$variation->set_status( false === $request['visible'] ? 'private' : 'publish' );
-		}
 
 		// Status.
 		if ( isset( $request['status'] ) ) {
@@ -676,12 +669,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-				),
-				'visible' => array(
-					'description' => __( 'Variation status. True for published and false for private.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => true,
-					'context'     => array( 'view', 'edit' ),
 				),
 				'purchasable' => array(
 					'description' => __( 'Shows if the variation can be bought.', 'woocommerce' ),
