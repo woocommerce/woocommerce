@@ -831,8 +831,18 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	$postcode = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $postcode ) : strtoupper( $postcode );
-	return preg_replace( '/[\s\-]/', '', trim( $postcode ) );
+	return preg_replace( '/[\s\-]/', '', trim( wc_strtoupper( $postcode ) ) );
+}
+
+/**
+ * Wrapper for mb_strtoupper which see's if supported first.
+ *
+ * @since  3.1.0
+ * @param  string $string
+ * @return string
+ */
+function wc_strtoupper( $string ) {
+	return function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $string ) : strtoupper( $string );
 }
 
 /**
