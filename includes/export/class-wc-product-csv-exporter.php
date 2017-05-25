@@ -374,7 +374,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Get download_expiry value.
+	 * Get type value.
 	 *
 	 * @since 3.1.0
 	 * @param WC_Product $product
