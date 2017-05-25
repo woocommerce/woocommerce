@@ -258,7 +258,7 @@ class WC_Structured_Data {
 		$markup['description']   = get_comment_text( $comment->comment_ID );
 		$markup['itemReviewed']  = array(
 			'@type' => 'Product',
-			'name'  => get_the_title( $comment->post_ID ),
+			'name'  => get_the_title( $comment->comment_post_ID ),
 		);
 		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
 			$markup['reviewRating']  = array(
