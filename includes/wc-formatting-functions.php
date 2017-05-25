@@ -259,8 +259,9 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
+		$number = str_replace( wc_get_price_thousand_separator(), '', $number );
+		$number = str_replace( $decimals, '.', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
