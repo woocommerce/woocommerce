@@ -135,22 +135,34 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Process a single item and save.
 	 *
 	 * @param  array $data Raw CSV data.
-	 * @return WC_Product|WC_Error
+	 * @return array|WC_Error
 	 */
 	protected function process_item( $data ) {
 		try {
-			$object = $this->prepare_product( $data );
+			$object   = $this->get_product_object( $data );
+			$updating = false;
 
 			if ( is_wp_error( $object ) ) {
 				return $object;
 			}
 
+			if ( $object->get_id() && 'importing' !== $object->get_status() ) {
+				$updating = true;
+			}
+
+			if ( 'variation' === $object->get_type() ) {
+				$object = $this->save_variation_data( $object, $data );
+			} else {
+				$object = $this->save_product_data( $object, $data );
+			}
+
+			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
 			$object->save();
 
-			// Clean cache for updated products.
-			$this->clear_cache( $object );
-
-			return $object->get_id();
+			return array(
+				'id'      => $object->get_id(),
+				'updated' => $updating,
+			);
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( Exception $e ) {
@@ -159,28 +171,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Clear product cache.
-	 *
-	 * @param WC_Product $object Product instance.
-	 */
-	protected function clear_cache( $object ) {
-		$id = $object->get_id();
-
-		if ( 'variation' === $object->get_type() ) {
-			$id = $object->get_parent_id();
-		}
-
-		wc_delete_product_transients( $id );
-		wp_cache_delete( 'product-' . $id, 'products' );
-	}
-
-	/**
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  array $data     Row data.
 	 * @return WC_Product|WP_Error
 	 */
-	protected function prepare_product( $data ) {
+	protected function get_product_object( $data ) {
 		$id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
 
 		// Type is the most important part here because we need to be using the correct class and methods.
@@ -206,16 +202,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				return new WP_Error( 'woocommerce_product_csv_importer_invalid_id', sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ), array( 'id' => $id, 'status' => 401 ) );
 			}
 		} else {
-			$product = new WC_Product_Simple();
+			$product = new WC_Product_Simple( $id );
 		}
 
-		if ( 'variation' === $product->get_type() ) {
-			$product = $this->save_variation_data( $product, $data );
-		} else {
-			$product = $this->save_product_data( $product, $data );
-		}
-
-		return apply_filters( 'woocommerce_product_import_pre_insert_product_object', $product, $data );
+		return apply_filters( 'woocommerce_product_import_get_product_object', $product, $data );
 	}
 
 	/**
@@ -246,6 +236,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Status.
 		if ( isset( $data['published'] ) ) {
 			$product->set_status( $data['published'] ? 'publish' : 'draft' );
+		} elseif ( 'importing' === $product->get_status() ) {
+			$product->set_status( 'publish' );
 		}
 
 		// Slug.
@@ -572,8 +564,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// Status.
-		if ( isset( $data['status'] ) ) {
-			$variation->set_status( false === $data['status'] ? 'private' : 'publish' );
+		if ( isset( $data['published'] ) ) {
+			$variation->set_status( $data['published'] ? 'publish' : 'draft' );
+		} elseif ( 'importing' === $variation->get_status() ) {
+			$variation->set_status( 'publish' );
 		}
 
 		// SKU.
