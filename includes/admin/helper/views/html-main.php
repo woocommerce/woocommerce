@@ -71,7 +71,7 @@
 							<a href="#">[?]</a><!-- Subscription must be active to receive updates -->
 						<?php endif; ?>
 
-						<?php if ( ! $installed ) : ?>
+						<?php if ( ! $installed && $update_available ) : ?>
 							<?php /* translators: %s: version number */ ?>
 							<strong><?php printf( __( '%s available', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?></strong>
 						<?php endif; ?>
