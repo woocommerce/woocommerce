@@ -182,17 +182,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Get featured value.
-	 *
-	 * @since 3.1.0
-	 * @param WC_Product $product
-	 * @return int
-	 */
-	protected function get_column_value_featured( $product ) {
-		return (int) $product->get_featured( 'edit' );
-	}
-
-	/**
 	 * Get product_cat value.
 	 *
 	 * @since 3.1.0
