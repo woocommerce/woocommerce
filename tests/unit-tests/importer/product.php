@@ -50,7 +50,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Exclude imported products.
 		foreach ( $results['imported'] as $id ) {
-			wp_delete_post( $id );
+			wp_delete_post( $id, true );
 		}
 	}
 
@@ -150,7 +150,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'type'               => 'simple',
 				'sku'                => 'PRODUCT-01',
 				'name'               => 'Imported Product 1',
-				'published'          => 1,
+				'published'          => true,
 				'regular_price'      => '40',
 				'meta_data'          => array(),
 				'attributes'         => array(),
@@ -164,7 +164,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'type'               => 'simple',
 				'sku'                => 'PRODUCT-02',
 				'name'               => 'Imported Product 2',
-				'published'          => 1,
+				'published'          => true,
 				'regular_price'      => '41',
 				'meta_data'          => array(),
 				'attributes'         => array(),
@@ -178,7 +178,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'type'               => 'simple',
 				'sku'                => 'PRODUCT-03',
 				'name'               => 'Imported Product 3',
-				'published'          => 1,
+				'published'          => true,
 				'regular_price'      => '42',
 				'meta_data'          => array(),
 				'attributes'         => array(),

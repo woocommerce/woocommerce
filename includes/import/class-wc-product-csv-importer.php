@@ -595,11 +595,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( is_wp_error( $result ) ) {
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
-				$data['failed'][]   = $result;
+				$data['failed'][]   = $result['id'];
 			} elseif ( $result['updated'] ) {
-				$data['updated'][]  = $result;
+				$data['updated'][]  = $result['id'];
 			} else {
-				$data['imported'][] = $result;
+				$data['imported'][] = $result['id'];
 			}
 		}
 
