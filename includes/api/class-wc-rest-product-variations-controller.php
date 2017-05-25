@@ -169,13 +169,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'date_on_sale_to'       => wc_rest_prepare_date_response( $object->get_date_on_sale_to(), false ),
 			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $object->get_date_on_sale_to() ),
 			'on_sale'               => $object->is_on_sale(),
-			'visible'               => $object->is_visible(),
 			'purchasable'           => $object->is_purchasable(),
 			'virtual'               => $object->is_virtual(),
 			'downloadable'          => $object->is_downloadable(),
 			'downloads'             => $this->get_downloads( $object ),
 			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
 			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
+			'status'                => $object->get_status(),
 			'tax_status'            => $object->get_tax_status(),
 			'tax_class'             => $object->get_tax_class(),
 			'manage_stock'          => $object->managing_stock(),
@@ -249,8 +249,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		$variation->set_parent_id( absint( $request['product_id'] ) );
 
 		// Status.
-		if ( isset( $request['visible'] ) ) {
-			$variation->set_status( false === $request['visible'] ? 'private' : 'publish' );
+		if ( isset( $request['status'] ) ) {
+			$variation->set_status( get_post_status_object( $request['status'] ) ? $request['status'] : 'draft' );
 		}
 
 		// SKU.
@@ -670,12 +670,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'visible' => array(
-					'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => true,
-					'context'     => array( 'view', 'edit' ),
-				),
 				'purchasable' => array(
 					'description' => __( 'Shows if the variation can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
@@ -730,6 +724,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'status' => array(
+					'description' => __( 'Variation status.', 'woocommerce' ),
+					'type'        => 'string',
+					'default'     => 'publish',
+					'enum'        => array_keys( get_post_statuses() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_status' => array(
