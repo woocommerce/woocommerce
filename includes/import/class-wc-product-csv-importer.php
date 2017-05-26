@@ -444,11 +444,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function expand_data( $data ) {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
-		// Product ID and SKU mapping.
-		if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
-			$data['id'] = $product_id;
-		}
-
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
 			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
