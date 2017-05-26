@@ -322,8 +322,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => 'strtotime',
 			'date_on_sale_to'   => 'strtotime',
-			'short_description' => 'wp_kses_post',
-			'description'       => 'wp_kses_post',
+			'name'              => 'wp_filter_post_kses',
+			'short_description' => 'wp_filter_post_kses',
+			'description'       => 'wp_filter_post_kses',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_bool_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
@@ -333,20 +334,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'height'            => array( $this, 'parse_float_field' ),
 			'weight'            => array( $this, 'parse_float_field' ),
 			'reviews_allowed'   => array( $this, 'parse_bool_field' ),
-			'purchase_note'     => 'wp_kses_post',
+			'purchase_note'     => 'wp_filter_post_kses',
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
 			'stock_quantity'    => 'absint',
 			'category_ids'      => array( $this, 'parse_categories_field' ),
 			'tag_ids'           => array( $this, 'parse_tags_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
-			'image_id'          => array( $this, 'parse_images_field' ),
+			'images'            => array( $this, 'parse_images_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
-			'external_url'      => 'esc_url',
+			'external_url'      => 'esc_url_raw',
 		);
 
 		/**
@@ -394,7 +395,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Expand special and internal data.
+	 * Expand special and internal data into the correct formats for the product CRUD.
 	 *
 	 * @param  array $data Data to import.
 	 * @return array
@@ -403,33 +404,33 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
 		// Product ID and SKU mapping.
-		if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
-			$data['id'] = $id;
+		if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
+			$data['id'] = $product_id;
 		}
 
-		// Meta data.
-		$data['meta_data']          = array();
-		$data['attributes']         = array();
-		$data['default_attributes'] = array();
-		$data['downloads']          = array();
-		$data['gallery_image_ids']  = array();
-
-		// Manage stock.
+		// Manage stock is mapped from the stock_quantity field.
 		if ( isset( $data['stock_quantity'] ) ) {
 			$data['manage_stock'] = 0 < $data['stock_quantity'];
 		}
 
-		// Images.
-		if ( isset( $data['image_id'] ) ) {
-			$images           = $data['image_id'];
-			$data['image_id'] = array_shift( $images );
-
-			if ( ! empty( $images ) ) {
-				$data['gallery_image_ids'] = $images;
-			}
+		// Status is mapped from a special published field.
+		if ( isset( $data['published'] ) ) {
+			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
+			unset( $data['published'] );
 		}
 
-		// Type, virtual and downlodable.
+		// Images field maps to image and gallery id fields.
+		if ( isset( $data['images'] ) ) {
+			$images               = $data['images'];
+			$data['raw_image_id'] = array_shift( $images );
+
+			if ( ! empty( $images ) ) {
+				$data['raw_gallery_image_ids'] = $images;
+			}
+			unset( $data['images'] );
+		}
+
+		// Type, virtual and downloadable are all stored in the same column.
 		if ( isset( $data['type'] ) ) {
 			$data['type']         = array_map( 'strtolower', $data['type'] );
 			$data['virtual']      = in_array( 'virtual', $data['type'], true );
@@ -439,65 +440,86 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
 		}
 
-		// Handle special column names.
+		// Stock is bool.
+		if ( isset( $data['stock_status'] ) ) {
+			$stock_status = $data['stock_status'] ? 'instock' : 'outofstock';
+		}
+
+		// Handle special column names which span multiple columns.
+		$attributes = array();
+		$downloads  = array();
+		$meta_data  = array();
+
 		foreach ( $data as $key => $value ) {
 			// Attributes.
 			if ( $this->starts_with( $key, 'attributes:name' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['attributes'][ str_replace( 'attributes:name', '', $key ) ]['name'] = $value;
+					$attributes[ str_replace( 'attributes:name', '', $key ) ]['name'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
 			if ( $this->starts_with( $key, 'attributes:value' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['attributes'][ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+					$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
 			if ( $this->starts_with( $key, 'attributes:visible' ) ) {
 				if ( '' !== $value ) {
-					$data['attributes'][ str_replace( 'attributes:visible', '', $key ) ]['visible'] = $value;
+					$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
-
-			// Default attributes.
 			if ( $this->starts_with( $key, 'attributes:default' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['attributes'][ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
+					$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
 
 			// Downloads.
 			if ( $this->starts_with( $key, 'downloads:name' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['downloads'][ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
+					$downloads[ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
 			if ( $this->starts_with( $key, 'downloads:url' ) ) {
 				if ( ! empty( $value ) ) {
-					$data['downloads'][ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
+					$downloads[ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
 				}
-
 				unset( $data[ $key ] );
 			}
 
 			// Meta data.
 			if ( $this->starts_with( $key, 'meta:' ) ) {
-				$data['meta_data'][] = array(
+				$meta_data[] = array(
 					'key'   => str_replace( 'meta:', '', $key ),
 					'value' => $value,
 				);
-
 				unset( $data[ $key ] );
 			}
+		}
+
+		if ( ! empty( $attributes ) ) {
+			$data['raw_attributes'] = $attributes;
+		}
+		if ( ! empty( $downloads ) ) {
+			$data['downloads'] = array();
+
+			foreach ( $downloads as $key => $file ) {
+				if ( empty( $file['url'] ) ) {
+					continue;
+				}
+
+				$data['downloads'][] = array(
+					'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
+					'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
+				);
+			}
+		}
+		if ( ! empty( $meta_data ) ) {
+			$data['meta_data'] = $meta_data;
 		}
 
 		return $data;
@@ -582,14 +604,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$product = wc_get_product( $id );
 
 					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
+						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
 						continue;
 					}
 				} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
 					$product = wc_get_product( $id_from_sku );
 
 					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_csv_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
 						continue;
 					}
 				}
