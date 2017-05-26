@@ -343,6 +343,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
 			'images'            => array( $this, 'parse_images_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
+			'children'          => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',

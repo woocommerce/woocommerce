@@ -108,6 +108,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
 			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'children'           => __( 'Children', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'product_url'        => __( 'External URL', 'woocommerce' ),
@@ -293,14 +294,38 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected function get_column_value_parent_id( $product ) {
 		if ( $product->get_parent_id( 'edit' ) ) {
 			$parent = wc_get_product( $product->get_parent_id( 'edit' ) );
-
-			if ( $parent && $parent->get_sku() ) {
-				return $parent->get_sku();
-			} else {
-				return 'id:' . $parent->get_id();
+			if ( ! $parent ) {
+				return '';
 			}
+
+			return $parent->get_sku( 'edit' ) ? $parent->get_sku( 'edit' ) : 'id:' . $parent->get_id();
 		}
 		return '';
+	}
+
+	/**
+	 * Get children value.
+	 *
+	 * @since 3.1.0
+	 * @param WC_Product $product
+	 * @return string
+	 */
+	protected function get_column_value_children( $product ) {
+		if ( 'grouped' !== $product->get_type() ) {
+			return '';
+		}
+
+		$value = array();
+		$child_ids = $product->get_children( 'edit' );
+		foreach ( $child_ids as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( ! $child ) {
+				continue;
+			}
+
+			$value[] = $child->get_sku( 'edit' ) ? $child->get_sku( 'edit' ) : 'id:' . $child_id;
+		}
+		return implode( ',', $value );
 	}
 
 	/**
