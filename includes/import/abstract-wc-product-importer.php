@@ -192,7 +192,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
 			}
 
-			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes', 'stock_quantity' ) ) ) );
+			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
@@ -205,7 +205,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			$this->set_image_data( $object, $data );
-			$this->set_stock_quantity( $object, $data );
 			$this->set_meta_data( $object, $data );
 
 			if ( 'importing' === $object->get_status() ) {
@@ -244,18 +243,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$gallery_image_ids[] = $this->get_attachment_id_from_url( $image_id, $product->get_id() );
 			}
 			$product->set_gallery_image_ids( $gallery_image_ids );
-		}
-	}
-
-	/**
-	 * Set stock quantity.
-	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Item data.
-	 */
-	protected function set_stock_quantity( &$product, $data ) {
-		if ( isset( $data['stock_quantity'] ) && $product->get_manage_stock() ) {
-			wc_update_product_stock( $product, $data['stock_quantity'] );
 		}
 	}
 

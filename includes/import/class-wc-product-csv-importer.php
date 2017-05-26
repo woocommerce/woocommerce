@@ -337,7 +337,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'purchase_note'     => 'wp_filter_post_kses',
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
-			'stock_quantity'    => 'absint',
+			'stock_quantity'    => 'wc_stock_amount',
 			'category_ids'      => array( $this, 'parse_categories_field' ),
 			'tag_ids'           => array( $this, 'parse_tags_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
