@@ -375,6 +375,11 @@ class WC_API_Customers extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_customer', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
 			}
 
+			// Set customer meta
+			if ( isset( $data['customer_meta'] ) && is_array( $data['customer_meta'] ) ) {
+				$this->set_customer_meta( $id, $data['customer_meta'] );
+			}
+
 			// Added customer data.
 			$this->update_customer_data( $customer->get_id(), $data, $customer );
 			$customer->save();
@@ -429,6 +434,11 @@ class WC_API_Customers extends WC_API_Resource {
 				$customer->set_password( $data['password'] );
 			}
 
+			// Set customer meta
+			if ( isset( $data['customer_meta'] ) && is_array( $data['customer_meta'] ) ) {
+				$this->set_customer_meta( $id, $data['customer_meta'] );
+			}
+
 			// Update customer data.
 			$this->update_customer_data( $customer->get_id(), $data, $customer );
 
@@ -462,6 +472,25 @@ class WC_API_Customers extends WC_API_Resource {
 		do_action( 'woocommerce_api_delete_customer', $id, $this );
 
 		return $this->delete( $id, 'customer' );
+	}
+
+	/**
+	 * Helper method to add/update customer meta meta, with two restrictions:
+	 *
+	 * 1) Only non-protected meta (no leading underscore) can be set
+	 * 2) Meta values must be scalar (int, string, bool)
+	 *
+	 * @param int $customer_id valid customer ID
+	 * @param array $customer_meta customer meta in array( 'meta_key' => 'meta_value' ) format
+	 */
+	protected function set_customer_meta( $customer_id, $customer_meta ) {
+
+		foreach ( $customer_meta as $meta_key => $meta_value ) {
+
+			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+				update_user_meta( $customer_id, $meta_key, $meta_value );
+			}
+		}
 	}
 
 	/**
