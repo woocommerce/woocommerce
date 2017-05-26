@@ -463,15 +463,21 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:value' ) ) {
-				$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+				if ( ! empty( $value ) ) {
+					$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+				}
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
-				$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
+				if ( ! empty( $value ) ) {
+					$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
+				}
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {
-				$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
+				if ( ! empty( $value ) ) {
+					$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
+				}
 				unset( $data[ $key ] );
 
 			// Downloads.
