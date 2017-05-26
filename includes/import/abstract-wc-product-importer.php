@@ -134,7 +134,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Prepare a single product for create or update.
 	 *
-	 * @param  array $data     Row data.
+	 * @param  array $data     Item data.
 	 * @return WC_Product|WP_Error
 	 */
 	protected function get_product_object( $data ) {
@@ -192,7 +192,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
 			}
 
-			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
+			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes', 'stock_quantity' ) ) ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
@@ -205,6 +205,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			$this->set_image_data( $object, $data );
+			$this->set_stock_quantity( $object, $data );
 			$this->set_meta_data( $object, $data );
 
 			if ( 'importing' === $object->get_status() ) {
@@ -226,8 +227,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Convert raw image URLs to IDs and set.
 	 *
-	 * @param WC_Product $product
-	 * @param array $data
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Item data.
 	 */
 	protected function set_image_data( &$product, $data ) {
 		// Image URLs need converting to IDs before inserting.
@@ -247,10 +248,22 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Set stock quantity.
+	 *
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Item data.
+	 */
+	protected function set_stock_quantity( &$product, $data ) {
+		if ( isset( $data['stock_quantity'] ) && $product->get_manage_stock() ) {
+			wc_update_product_stock( $product, $data['stock_quantity'] );
+		}
+	}
+
+	/**
 	 * Append meta data.
 	 *
-	 * @param WC_Product $product
-	 * @param array $data
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Item data.
 	 */
 	protected function set_meta_data( &$product, $data ) {
 		if ( isset( $data['meta_data'] ) ) {
@@ -264,7 +277,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Set product data.
 	 *
 	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Row data.
+	 * @param array      $data    Item data.
 	 *
 	 * @return WC_Product|WP_Error
 	 * @throws Exception
@@ -352,7 +365,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Set variation data.
 	 *
 	 * @param WC_Product $variation Product instance.
-	 * @param array      $data    Row data.
+	 * @param array      $data    Item data.
 	 *
 	 * @return WC_Product|WP_Error
 	 * @throws Exception
