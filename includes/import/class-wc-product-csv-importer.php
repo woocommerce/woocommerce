@@ -457,42 +457,34 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$attributes[ str_replace( 'attributes:name', '', $key ) ]['name'] = $value;
 				}
 				unset( $data[ $key ] );
-			}
-			if ( $this->starts_with( $key, 'attributes:value' ) ) {
-				if ( ! empty( $value ) ) {
-					$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
-				}
+
+			} elseif ( $this->starts_with( $key, 'attributes:value' ) ) {
+				$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
 				unset( $data[ $key ] );
-			}
-			if ( $this->starts_with( $key, 'attributes:visible' ) ) {
-				if ( '' !== $value ) {
-					$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = $value;
-				}
+
+			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
+				$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
 				unset( $data[ $key ] );
-			}
-			if ( $this->starts_with( $key, 'attributes:default' ) ) {
-				if ( ! empty( $value ) ) {
-					$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
-				}
+
+			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {
+				$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
 				unset( $data[ $key ] );
-			}
 
 			// Downloads.
-			if ( $this->starts_with( $key, 'downloads:name' ) ) {
+			} elseif ( $this->starts_with( $key, 'downloads:name' ) ) {
 				if ( ! empty( $value ) ) {
 					$downloads[ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
 				}
 				unset( $data[ $key ] );
-			}
-			if ( $this->starts_with( $key, 'downloads:url' ) ) {
+
+			} elseif ( $this->starts_with( $key, 'downloads:url' ) ) {
 				if ( ! empty( $value ) ) {
 					$downloads[ str_replace( 'downloads:url', '', $key ) ]['url'] = $value;
 				}
 				unset( $data[ $key ] );
-			}
 
 			// Meta data.
-			if ( $this->starts_with( $key, 'meta:' ) ) {
+			} elseif ( $this->starts_with( $key, 'meta:' ) ) {
 				$meta_data[] = array(
 					'key'   => str_replace( 'meta:', '', $key ),
 					'value' => $value,
@@ -504,6 +496,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( ! empty( $attributes ) ) {
 			$data['raw_attributes'] = $attributes;
 		}
+
 		if ( ! empty( $downloads ) ) {
 			$data['downloads'] = array();
 
@@ -518,6 +511,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				);
 			}
 		}
+
 		if ( ! empty( $meta_data ) ) {
 			$data['meta_data'] = $meta_data;
 		}
@@ -571,10 +565,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$row_data[] = $name;
 		}
 		if ( $id ) {
-			$row_data[] = __( 'ID: ', 'woocommerce' ) . $id;
+			$row_data[] = sprintf( __( 'ID %d', 'woocommerce' ), $id );
 		}
 		if ( $sku ) {
-			$row_data[] = __( 'SKU: ', 'woocommerce' ) . $sku;
+			$row_data[] = sprintf( __( 'SKU %s', 'woocommerce' ), $sku );
 		}
 
 		return implode( ', ', $row_data );
