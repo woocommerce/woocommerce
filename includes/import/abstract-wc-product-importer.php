@@ -189,9 +189,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( 'external' === $object->get_type() ) {
-				unset( $data['manage_stock'] );
-				unset( $data['stock_status'] );
-				unset( $data['backorders'] );
+				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
 			}
 
 			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
