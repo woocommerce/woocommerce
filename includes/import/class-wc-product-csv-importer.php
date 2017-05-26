@@ -347,7 +347,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
-			'external_url'      => 'esc_url_raw',
+			'product_url'       => 'esc_url_raw',
 		);
 
 		/**
@@ -408,11 +408,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['id'] = $product_id;
 		}
 
-		// Manage stock is mapped from the stock_quantity field.
-		if ( isset( $data['stock_quantity'] ) ) {
-			$data['manage_stock'] = 0 < $data['stock_quantity'];
-		}
-
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
 			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
@@ -440,9 +435,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
 		}
 
+		if ( isset( $data['stock_quantity'] ) ) {
+			$data['manage_stock'] = 0 < $data['stock_quantity'];
+		}
+
 		// Stock is bool.
 		if ( isset( $data['stock_status'] ) ) {
-			$stock_status = $data['stock_status'] ? 'instock' : 'outofstock';
+			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
+		}
+
+		// Backorders is bool.
+		if ( isset( $data['backorders'] ) ) {
+			$data['backorders'] = $data['backorders'] ? 'yes' : 'no';
 		}
 
 		// Handle special column names which span multiple columns.
@@ -615,7 +619,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( is_wp_error( $result ) ) {
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
-				$data['failed'][]   = $result['id'];
+				$data['failed'][]   = $result;
 			} elseif ( $result['updated'] ) {
 				$data['updated'][]  = $result['id'];
 			} else {

@@ -377,6 +377,8 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id',
 			'upsell_ids',
 			'cross_sell_ids',
+			'product_url',
+			'button_text',
 		);
 
 		return apply_filters( 'woocommerce_csv_product_default_fields', $fields );
@@ -426,7 +428,7 @@ class WC_Product_CSV_Importer_Controller {
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
-			'external_url'       => __( 'External URL', 'woocommerce' ),
+			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
 		) ) );
 
@@ -540,7 +542,7 @@ class WC_Product_CSV_Importer_Controller {
 			'external'           => array(
 				'name'    => __( 'External product', 'woocommerce' ),
 				'options' => array(
-					'external_url' => __( 'External URL', 'woocommerce' ),
+					'product_url'  => __( 'External URL', 'woocommerce' ),
 					'button_text'  => __( 'Button text', 'woocommerce' ),
 				),
 			),
