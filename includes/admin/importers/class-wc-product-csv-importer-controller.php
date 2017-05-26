@@ -534,13 +534,10 @@ class WC_Product_CSV_Importer_Controller {
 			'stock_quantity'     => __( 'Stock', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
-<<<<<<< HEAD
 			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
 			'images'             => __( 'Images', 'woocommerce' ),
-=======
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
-			'image_id'           => __( 'Images', 'woocommerce' ),
->>>>>>> feature/product-csv-import-export
+			'images'           => __( 'Images', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
