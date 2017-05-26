@@ -324,6 +324,28 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse backorders from a CSV.
+	 *
+	 * @param  string $field Field value.
+	 * @return string
+	 */
+	protected function parse_backorders_field( $field ) {
+		if ( empty( $field ) ) {
+			return '';
+		}
+
+		$field = $this->parse_bool_field( $field );
+
+		if ( 'notify' === $field ) {
+			return 'notify';
+		} elseif ( is_bool( $field ) ) {
+			return $field ? 'yes' : 'no';
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -345,7 +367,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'short_description' => 'wp_filter_post_kses',
 			'description'       => 'wp_filter_post_kses',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
-			'backorders'        => array( $this, 'parse_bool_field' ),
+			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
 			'sold_individually' => array( $this, 'parse_bool_field' ),
 			'width'             => array( $this, 'parse_float_field' ),
@@ -461,11 +483,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Stock is bool.
 		if ( isset( $data['stock_status'] ) ) {
 			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
-		}
-
-		// Backorders is bool.
-		if ( isset( $data['backorders'] ) ) {
-			$data['backorders'] = $data['backorders'] ? 'yes' : 'no';
 		}
 
 		// Handle special column names which span multiple columns.
