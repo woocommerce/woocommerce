@@ -233,15 +233,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function set_image_data( &$product, $data ) {
 		// Image URLs need converting to IDs before inserting.
-		if ( isset( $data['image_id'] ) ) {
-			$product->set_image_id( $this->get_attachment_id_from_url( $data['image_id'], $product->get_id() ) );
+		if ( isset( $data['raw_image_id'] ) ) {
+			$product->set_image_id( $this->get_attachment_id_from_url( $data['raw_image_id'], $product->get_id() ) );
 		}
 
 		// Gallery image URLs need converting to IDs before inserting.
-		if ( isset( $data['gallery_image_ids'] ) ) {
+		if ( isset( $data['raw_gallery_image_ids'] ) ) {
 			$gallery_image_ids = array();
 
-			foreach ( $data['gallery_image_ids'] as $image_id ) {
+			foreach ( $data['raw_gallery_image_ids'] as $image_id ) {
 				$gallery_image_ids[] = $this->get_attachment_id_from_url( $image_id, $product->get_id() );
 			}
 			$product->set_gallery_image_ids( $gallery_image_ids );
