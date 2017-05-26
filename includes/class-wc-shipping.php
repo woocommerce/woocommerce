@@ -160,6 +160,8 @@ class WC_Shipping {
 	 * Register a shipping method.
 	 *
 	 * @param object|string $method Either the name of the method's class, or an instance of the method's class.
+	 *
+	 * @return bool|void
 	 */
 	public function register_shipping_method( $method ) {
 		if ( ! is_object( $method ) ) {
@@ -333,7 +335,8 @@ class WC_Shipping {
 	 *
 	 * @param array $package cart items
 	 * @param int   $package_key Index of the package being calculated. Used to cache multiple package rates.
-	 * @return array
+	 *
+	 * @return array|bool
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
 		if ( ! $this->enabled || empty( $package ) || ! $this->is_package_shippable( $package ) ) {

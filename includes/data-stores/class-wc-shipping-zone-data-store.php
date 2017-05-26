@@ -16,7 +16,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Method to create a new shipping zone.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function create( &$zone ) {
 		global $wpdb;
@@ -36,7 +36,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Update zone in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function update( &$zone ) {
 		global $wpdb;
@@ -57,7 +57,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Method to read a shipping zone from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
+	 * @throws Exception
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
@@ -83,7 +84,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Deletes a shipping zone from the database.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Shipping_Zone
+	 * @param  WC_Shipping_Zone $zone
 	 * @param  array $args Array of args to pass to the delete method.
 	 * @return bool result
 	 */
@@ -266,10 +267,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Shipping_Zone
+	 *
+	 * @return bool|void
 	 */
 	private function save_locations( &$zone ) {
-		$updated_props = array();
 		$changed_props = array_keys( $zone->get_changes() );
 		if ( ! in_array( 'zone_locations', $changed_props ) ) {
 			return false;

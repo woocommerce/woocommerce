@@ -428,9 +428,6 @@ class WC_Admin_Webhooks {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-
-		global $wpdb;
-
 		echo '<h2>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count
@@ -491,6 +488,8 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the webhook topic data.
 	 *
+	 * @param WC_Webhook $webhook
+	 *
 	 * @return array
 	 */
 	public static function get_topic_data( $webhook ) {
@@ -519,6 +518,7 @@ class WC_Admin_Webhooks {
 	 * Get the logs navigation.
 	 *
 	 * @param  int $total
+	 * @param  WC_Webhook $webhook
 	 *
 	 * @return string
 	 */

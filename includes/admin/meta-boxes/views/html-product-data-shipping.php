@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="shipping_product_data" class="panel woocommerce_options_panel hidden">
 	<div class="options_group">
 		<?php

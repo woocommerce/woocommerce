@@ -33,6 +33,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Add this page to settings.
+	 *
+	 * @param array $pages
+	 *
+	 * @return array|mixed
 	 */
 	public function add_settings_page( $pages ) {
 		return wc_shipping_enabled() ? parent::add_settings_page( $pages ) : $pages;
@@ -68,6 +72,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Get settings array.
+	 *
+	 * @param string $current_section
 	 *
 	 * @return array
 	 */
@@ -259,8 +265,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show zones
 	 */
 	protected function zones_screen() {
-		global $wpdb;
-
 		$allowed_countries = WC()->countries->get_allowed_countries();
 		$continents        = WC()->countries->get_continents();
 		$method_count      = wc_get_shipping_method_count();

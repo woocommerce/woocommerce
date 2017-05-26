@@ -80,7 +80,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to create a new product in the database.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
@@ -124,7 +124,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to read a product from the database.
-	 * @param WC_Product
+	 * @param WC_Product $product
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -159,7 +160,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to update a product in the database.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -222,7 +223,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to delete a product from the database.
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$product, $args = array() ) {
@@ -589,8 +590,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update visibility terms based on props.
 	 *
 	 * @since 3.0.0
-	 * @param bool Force update. Used during create.
-	 * @param WC_Product
+	 *
+	 * @param WC_Product $product
+	 * @param bool $force Force update. Used during create.
 	 */
 	protected function update_visibility( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -606,8 +608,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$terms[] = 'outofstock';
 			}
 
-			$rating  = max( array( 5, min( array( 1, round( $product->get_average_rating(), 0 ) ) ) ) );
-			$terms[] = 'rated-' . $rating;
+			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+
+			if ( $rating > 0 ) {
+				$terms[] = 'rated-' . $rating;
+			}
 
 			switch ( $product->get_catalog_visibility() ) {
 				case 'hidden' :
@@ -988,59 +993,57 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Builds the related posts query.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
 	 * @param int   $limit       Limit of results.
-	 * @return string
+	 *
+	 * @return array
 	 */
 	public function get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
 		global $wpdb;
 
-		// Arrays to string.
-		$exclude_ids = implode( ',', array_map( 'absint', $exclude_ids ) );
-		$cats_array  = implode( ',', array_map( 'absint', $cats_array ) );
-		$tags_array  = implode( ',', array_map( 'absint', $tags_array ) );
-
-		$limit           = absint( $limit );
-		$query           = array();
-		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-		$query['join']   = " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-		$query['where']  = ' WHERE 1=1';
-		$query['where'] .= " AND p.post_status = 'publish'";
-		$query['where'] .= " AND p.post_type = 'product'";
-		$query['where'] .= " AND p.ID NOT IN ( {$exclude_ids} )";
-
+		$include_term_ids            = array_merge( $cats_array, $tags_array );
+		$exclude_term_ids            = array();
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
-			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['exclude-from-catalog'];
+			$exclude_term_ids[] = $product_visibility_term_ids['exclude-from-catalog'];
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
-			$query['where'] .= " AND t.term_id !=" . $product_visibility_term_ids['outofstock'];
+			$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
 		}
 
-		if ( $cats_array || $tags_array ) {
-			$query['where'] .= ' AND (';
+		$query = array(
+			'fields' => "
+				SELECT DISTINCT ID FROM {$wpdb->posts} p
+			",
+			'join'   => '',
+			'where'  => "
+				WHERE 1=1
+				AND p.post_status = 'publish'
+				AND p.post_type = 'product'
 
-			if ( $cats_array ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( {$cats_array} ) ) ";
-				if ( $tags_array ) {
-					$query['where'] .= ' OR ';
-				}
-			}
+			",
+			'limits' => "
+				LIMIT " . absint( $limit ) . "
+			",
+		);
 
-			if ( $tags_array ) {
-				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( {$tags_array} ) ) ";
-			}
-
-			$query['where'] .= ')';
+		if ( count( $exclude_term_ids ) ) {
+			$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . " ) ) AS exclude_join ON exclude_join.object_id = p.ID";
+			$query['where'] .= " AND exclude_join.object_id IS NULL";
 		}
 
-		$query['limits'] = " LIMIT {$limit} ";
+		if ( count( $include_term_ids ) ) {
+			$query['join']  .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN {$wpdb->term_taxonomy} using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $include_term_ids ) ) . " ) ) AS include_join ON include_join.object_id = p.ID";
+		}
+
+		if ( count( $exclude_ids ) ) {
+			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', array_map( 'absint', $exclude_ids ) ) . " )";
+		}
 
 		return $query;
 	}
@@ -1155,7 +1158,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Returns an array of products.
 	 *
 	 * @param  array $args @see wc_get_products
-	 * @return array
+	 *
+	 * @return array|object
 	 */
 	public function get_products( $args = array() ) {
 		/**

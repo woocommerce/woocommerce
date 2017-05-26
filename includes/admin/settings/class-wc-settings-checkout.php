@@ -59,6 +59,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section
+	 *
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {

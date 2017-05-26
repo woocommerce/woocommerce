@@ -97,7 +97,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$tax_data     = array(
 			'total'    => array(),
 		);
-		if ( ! empty( $raw_tax_data['total'] ) ) {
+		if ( isset( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
 			// Older versions just used an array.
@@ -110,8 +110,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in shipping rate object.
 	 *
-	 * @param WC_Shipping_Rate $tax_rate_id
-	 * @throws WC_Data_Exception
+	 * @param WC_Shipping_Rate $shipping_rate
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
 		$this->set_method_title( $shipping_rate->label );

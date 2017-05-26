@@ -255,6 +255,8 @@ class WC_Emails {
 	 *
 	 * @param mixed $email_heading
 	 * @param string $message
+	 * @param bool $plain_text
+	 *
 	 * @return string
 	 */
 	public function wrap_message( $email_heading, $message, $plain_text = false ) {
@@ -291,6 +293,8 @@ class WC_Emails {
 
 	/**
 	 * Prepare and send the customer invoice email on demand.
+	 *
+	 * @param int|WC_Order $order
 	 */
 	public function customer_invoice( $order ) {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
@@ -307,6 +311,7 @@ class WC_Emails {
 	 *
 	 * @param int $customer_id
 	 * @param array $new_customer_data
+	 * @param bool $password_generated
 	 */
 	public function customer_new_account( $customer_id, $new_customer_data = array(), $password_generated = false ) {
 		if ( ! $customer_id ) {
@@ -321,6 +326,11 @@ class WC_Emails {
 
 	/**
 	 * Show the order details table
+	 *
+	 * @param WC_Order $order
+	 * @param bool $sent_to_admin
+	 * @param bool $plain_text
+	 * @param string $email
 	 */
 	public function order_details( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
 		if ( $plain_text ) {
@@ -436,6 +446,10 @@ class WC_Emails {
 
 	/**
 	 * Get the email addresses.
+	 *
+	 * @param WC_Order $order
+	 * @param bool $sent_to_admin
+	 * @param bool $plain_text
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( ! is_a( $order, 'WC_Order' ) ) {

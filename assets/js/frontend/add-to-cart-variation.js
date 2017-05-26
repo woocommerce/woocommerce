@@ -16,9 +16,7 @@
 
 		// Initial state.
 		this.$singleVariationWrap.show();
-		this.$form.unbind( 'check_variations update_variation_values found_variation' );
-		this.$resetVariations.unbind( 'click' );
-		this.$attributeFields.unbind( 'change ' );
+		this.$form.off( '.wc-variation-form' );
 
 		// Methods.
 		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
@@ -27,17 +25,17 @@
 		this.toggleResetLink        = this.toggleResetLink.bind( this );
 
 		// Events.
-		$form.on( 'click', '.reset_variations', { variationForm: this }, this.onReset );
+		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: this }, this.onReset );
 		$form.on( 'reload_product_variations', { variationForm: this }, this.onReload );
 		$form.on( 'hide_variation', { variationForm: this }, this.onHide );
 		$form.on( 'show_variation', { variationForm: this }, this.onShow );
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
 		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
 		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
-		$form.on( 'change', '.variations select', { variationForm: this }, this.onChange );
-		$form.on( 'found_variation', { variationForm: this }, this.onFoundVariation );
-		$form.on( 'check_variations', { variationForm: this }, this.onFindVariation );
-		$form.on( 'update_variation_values', { variationForm: this }, this.onUpdateAttributes );
+		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: this }, this.onChange );
+		$form.on( 'found_variation.wc-variation-form', { variationForm: this }, this.onFoundVariation );
+		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
+		$form.on( 'update_variation_values.wc-variation-form', { variationForm: this }, this.onUpdateAttributes );
 
 		// Check variations once init.
 		$form.trigger( 'check_variations' );
@@ -586,10 +584,10 @@
 		}
 
 		window.setTimeout( function() {
-			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
-			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
-		}, 10 );
+			$form.wc_maybe_trigger_slide_position_reset( variation );
+			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
+		}, 20 );
 	};
 
 	$(function() {
