@@ -260,7 +260,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string.
 	if ( ! is_float( $number ) && $number !== strval( floatval( $number ) ) ) {
 		// Only remove thousands if separator is not same as decimal separator.
-		if( ! in_array( wc_get_price_thousand_separator(), $decimals ) ) {
+		if( wc_get_price_thousand_separator() !== wc_get_price_decimal_separator() ) {
 			$number = str_replace( wc_get_price_thousand_separator(), '', $number );
 		}
 
