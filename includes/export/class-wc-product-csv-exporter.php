@@ -84,11 +84,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
 			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
-			'short_description'  => __( 'Short Description', 'woocommerce' ),
+			'short_description'  => __( 'Short description', 'woocommerce' ),
 			'description'        => __( 'Description', 'woocommerce' ),
 			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
 			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
-			'tax_status'         => __( 'Tax Class', 'woocommerce' ),
+			'tax_status'         => __( 'Tax class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
 			'stock'              => __( 'Stock', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
@@ -98,15 +98,15 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
 			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
-			'purchase_note'      => __( 'Purchase Note', 'woocommerce' ),
-			'sale_price'         => __( 'Sale Price', 'woocommerce' ),
-			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
+			'sale_price'         => __( 'Sale price', 'woocommerce' ),
+			'regular_price'      => __( 'Regular price', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
-			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
+			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
 			'images'             => __( 'Images', 'woocommerce' ),
-			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
-			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
+			'download_limit'     => __( 'Download limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download expiry days', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
@@ -411,7 +411,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( $downloads ) {
 				$i = 1;
 				foreach ( $downloads as $download ) {
-					$this->column_names[ 'downloads:name' . $i ] = sprintf( __( 'Download %d Name', 'woocommerce' ), $i );
+					$this->column_names[ 'downloads:name' . $i ] = sprintf( __( 'Download %d name', 'woocommerce' ), $i );
 					$this->column_names[ 'downloads:url' . $i ]  = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
 					$row[ 'downloads:name' . $i ] = $download->get_name();
 					$row[ 'downloads:url' . $i ]  = $download->get_file();
@@ -436,8 +436,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( count( $attributes ) ) {
 				$i = 1;
 				foreach ( $attributes as $attribute_name => $attribute ) {
-					$this->column_names[ 'attributes:name' . $i ]  = sprintf( __( 'Attribute %d Name', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d Value(s)', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:name' . $i ]  = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
@@ -466,7 +466,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					}
 
 					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
-						$this->column_names[ 'attributes:default' . $i ] = sprintf( __( 'Attribute %d Default', 'woocommerce' ), $i );
+						$this->column_names[ 'attributes:default' . $i ] = sprintf( __( 'Attribute %d default', 'woocommerce' ), $i );
 						$default_value                                   = $default_attributes[ sanitize_title( $attribute_name ) ];
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
