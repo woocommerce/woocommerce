@@ -98,7 +98,7 @@ abstract class WC_Settings_Page {
 	public function output_sections() {
 		global $current_section;
 
-		$sections = $this->get_sections();
+		$sections = apply_filters( 'woocommerce_sections_' . $this->id . '_array', $this->get_sections() );
 
 		if ( empty( $sections ) || 1 === sizeof( $sections ) ) {
 			return;
