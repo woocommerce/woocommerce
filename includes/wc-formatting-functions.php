@@ -254,12 +254,17 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
-	$locale   = localeconv();
-	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+	$locale    = localeconv();
+	$decimals  = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+	$thousands = array( wc_get_price_thousand_separator(), $locale['thousands_sep'], $locale['thousands_sep'] );
 
 	// Remove locale from string.
-	if ( ! is_float( $number ) ) {
-		$number = str_replace( wc_get_price_thousand_separator(), '', $number );
+	if ( ! is_float( $number ) && $number !== strval( floatval( $number ) ) ) {
+		// Only remove thousands if separator is not same as decimal separator.
+		if( $thousands !== $decimals ) {
+			$number = str_replace( $thousands, '', $number );
+		}
+
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
