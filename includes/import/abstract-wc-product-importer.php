@@ -132,45 +132,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Process a single item and save.
-	 *
-	 * @param  array $data Raw CSV data.
-	 * @return array|WC_Error
-	 */
-	protected function process_item( $data ) {
-		try {
-			$object   = $this->get_product_object( $data );
-			$updating = false;
-
-			if ( is_wp_error( $object ) ) {
-				return $object;
-			}
-
-			if ( $object->get_id() && 'importing' !== $object->get_status() ) {
-				$updating = true;
-			}
-
-			if ( 'variation' === $object->get_type() ) {
-				$object = $this->save_variation_data( $object, $data );
-			} else {
-				$object = $this->save_product_data( $object, $data );
-			}
-
-			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
-			$object->save();
-
-			return array(
-				'id'      => $object->get_id(),
-				'updated' => $updating,
-			);
-		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  array $data     Row data.
@@ -209,91 +170,107 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Process a single item and save.
+	 *
+	 * @param  array $data Raw CSV data.
+	 * @return array|WC_Error
+	 */
+	protected function process_item( $data ) {
+		try {
+			$object   = $this->get_product_object( $data );
+			$updating = false;
+
+			if ( is_wp_error( $object ) ) {
+				return $object;
+			}
+
+			if ( $object->get_id() && 'importing' !== $object->get_status() ) {
+				$updating = true;
+			}
+
+			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
+
+			if ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			}
+
+			if ( 'variation' === $object->get_type() ) {
+				$this->set_variation_data( $object, $data );
+			} else {
+				$this->set_product_data( $object, $data );
+			}
+
+			$this->set_image_data( $object, $data );
+			$this->set_meta_data( $object, $data );
+
+			if ( 'importing' === $object->get_status() ) {
+				$object->set_status( 'publish' );
+			}
+
+			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
+			$object->save();
+
+			return array(
+				'id'      => $object->get_id(),
+				'updated' => $updating,
+			);
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Convert raw image URLs to IDs and set.
+	 *
+	 * @param WC_Product $product
+	 * @param array $data
+	 */
+	protected function set_image_data( &$product, $data ) {
+		// Image URLs need converting to IDs before inserting.
+		if ( isset( $data['image_id'] ) ) {
+			$product->set_image_id( $this->get_attachment_id_from_url( $data['image_id'], $product->get_id() ) );
+		}
+
+		// Gallery image URLs need converting to IDs before inserting.
+		if ( isset( $data['gallery_image_ids'] ) ) {
+			$gallery_image_ids = array();
+
+			foreach ( $data['gallery_image_ids'] as $image_id ) {
+				$gallery_image_ids[] = $this->get_attachment_id_from_url( $image_id, $product->get_id() );
+			}
+			$product->set_gallery_image_ids( $gallery_image_ids );
+		}
+	}
+
+	/**
+	 * Append meta data.
+	 *
+	 * @param WC_Product $product
+	 * @param array $data
+	 */
+	protected function set_meta_data( &$product, $data ) {
+		if ( isset( $data['meta_data'] ) ) {
+			foreach ( $data['meta_data'] as $meta ) {
+				$product->update_meta_data( $meta['key'], $meta['value'] );
+			}
+		}
+	}
+
+	/**
 	 * Set product data.
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Row data.
 	 *
-	 * @return WC_Product
+	 * @return WC_Product|WP_Error
+	 * @throws Exception
 	 */
-	protected function save_product_data( $product, $data ) {
-
-		// Name.
-		if ( isset( $data['name'] ) ) {
-			$product->set_name( wp_filter_post_kses( $data['name'] ) );
-		}
-
-		// Description.
-		if ( isset( $data['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $data['description'] ) );
-		}
-
-		// Short description.
-		if ( isset( $data['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $data['short_description'] ) );
-		}
-
-		// Status.
-		if ( isset( $data['published'] ) ) {
-			$product->set_status( $data['published'] ? 'publish' : 'draft' );
-		} elseif ( 'importing' === $product->get_status() ) {
-			$product->set_status( 'publish' );
-		}
-
-		// Slug.
-		if ( isset( $data['slug'] ) ) {
-			$product->set_slug( $data['slug'] );
-		}
-
-		// Comment status.
-		if ( isset( $data['reviews_allowed'] ) ) {
-			$product->set_reviews_allowed( $data['reviews_allowed'] );
-		}
-
-		// Virtual.
-		if ( isset( $data['virtual'] ) ) {
-			$product->set_virtual( $data['virtual'] );
-		}
-
-		// Tax status.
-		if ( isset( $data['tax_status'] ) ) {
-			$product->set_tax_status( $data['tax_status'] );
-		}
-
-		// Tax Class.
-		if ( isset( $data['tax_class'] ) ) {
-			$product->set_tax_class( $data['tax_class'] );
-		}
-
-		// Catalog Visibility.
-		if ( isset( $data['catalog_visibility'] ) ) {
-			$product->set_catalog_visibility( $data['catalog_visibility'] );
-		}
-
-		// Purchase Note.
-		if ( isset( $data['purchase_note'] ) ) {
-			$product->set_purchase_note( $data['purchase_note'] );
-		}
-
-		// Featured Product.
-		if ( isset( $data['featured'] ) ) {
-			$product->set_featured( $data['featured'] );
-		}
-
-		// Shipping data.
-		$product = $this->save_product_shipping_data( $product, $data );
-
-		// SKU.
-		if ( isset( $data['sku'] ) ) {
-			$product->set_sku( $data['sku'] );
-		}
-
-		// Attributes.
-		if ( isset( $data['attributes'] ) ) {
+	protected function set_product_data( &$product, $data ) {
+		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes         = array();
 			$default_attributes = array();
 
-			foreach ( $data['attributes'] as $position => $attribute ) {
+			foreach ( $data['raw_attributes'] as $position => $attribute ) {
 				// Get ID if is a global attribute.
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
@@ -365,177 +342,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				$product->set_default_attributes( $default_attributes );
 			}
 		}
-
-		// Sales and prices.
-		if ( in_array( $product->get_type(), array( 'variable', 'grouped' ), true ) ) {
-			$product->set_regular_price( '' );
-			$product->set_sale_price( '' );
-			$product->set_date_on_sale_to( '' );
-			$product->set_date_on_sale_from( '' );
-			$product->set_price( '' );
-		} else {
-			// Regular Price.
-			if ( isset( $data['regular_price'] ) ) {
-				$product->set_regular_price( $data['regular_price'] );
-			}
-
-			// Sale Price.
-			if ( isset( $data['sale_price'] ) ) {
-				$product->set_sale_price( $data['sale_price'] );
-			}
-
-			if ( isset( $data['date_on_sale_from'] ) ) {
-				$product->set_date_on_sale_from( $data['date_on_sale_from'] );
-			}
-
-			if ( isset( $data['date_on_sale_to'] ) ) {
-				$product->set_date_on_sale_to( $data['date_on_sale_to'] );
-			}
-		}
-
-		// Product parent ID for groups.
-		if ( isset( $data['parent_id'] ) ) {
-			$product->set_parent_id( $data['parent_id'] );
-		}
-
-		// Sold individually.
-		if ( isset( $data['sold_individually'] ) ) {
-			$product->set_sold_individually( $data['sold_individually'] );
-		}
-
-		// Stock status.
-		if ( isset( $data['stock_status'] ) ) {
-			$stock_status = $data['stock_status'] ? 'instock' : 'outofstock';
-		} else {
-			$stock_status = $product->get_stock_status();
-		}
-
-		// Stock data.
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			// Manage stock.
-			if ( isset( $data['manage_stock'] ) ) {
-				$product->set_manage_stock( $data['manage_stock'] );
-			}
-
-			// Backorders.
-			if ( isset( $data['backorders'] ) ) {
-				$product->set_backorders( $data['backorders'] );
-			}
-
-			if ( $product->is_type( 'grouped' ) ) {
-				$product->set_manage_stock( false );
-				$product->set_backorders( false );
-				$product->set_stock_quantity( '' );
-				$product->set_stock_status( $stock_status );
-			} elseif ( $product->is_type( 'external' ) ) {
-				$product->set_manage_stock( false );
-				$product->set_backorders( false );
-				$product->set_stock_quantity( '' );
-				$product->set_stock_status( 'instock' );
-			} elseif ( $product->get_manage_stock() ) {
-				// Stock status is always determined by children so sync later.
-				if ( ! $product->is_type( 'variable' ) ) {
-					$product->set_stock_status( $stock_status );
-				}
-
-				// Stock quantity.
-				if ( isset( $data['stock_quantity'] ) ) {
-					$product->set_stock_quantity( wc_stock_amount( $data['stock_quantity'] ) );
-				}
-			} else {
-				// Don't manage stock.
-				$product->set_manage_stock( false );
-				$product->set_stock_quantity( '' );
-				$product->set_stock_status( $stock_status );
-			}
-		} elseif ( ! $product->is_type( 'variable' ) ) {
-			$product->set_stock_status( $stock_status );
-		}
-
-		// Upsells.
-		if ( isset( $data['upsell_ids'] ) ) {
-			$product->set_upsell_ids( $data['upsell_ids'] );
-		}
-
-		// Cross sells.
-		if ( isset( $data['cross_sell_ids'] ) ) {
-			$product->set_cross_sell_ids( $data['cross_sell_ids'] );
-		}
-
-		// Product categories.
-		if ( isset( $data['category_ids'] ) ) {
-			$product->set_category_ids( $data['category_ids'] );
-		}
-
-		// Product tags.
-		if ( isset( $data['tag_ids'] ) ) {
-			$product->set_tag_ids( $data['tag_ids'] );
-		}
-
-		// Downloadable.
-		if ( isset( $data['downloadable'] ) ) {
-			$product->set_downloadable( $data['downloadable'] );
-		}
-
-		// Downloadable options.
-		if ( $product->get_downloadable() ) {
-
-			// Downloadable files.
-			if ( isset( $data['downloads'] ) ) {
-				$product = $this->save_downloadable_files( $product, $data['downloads'] );
-			}
-
-			// Download limit.
-			if ( isset( $data['download_limit'] ) ) {
-				$product->set_download_limit( $data['download_limit'] );
-			}
-
-			// Download expiry.
-			if ( isset( $data['download_expiry'] ) ) {
-				$product->set_download_expiry( $data['download_expiry'] );
-			}
-		}
-
-		// Product url and button text for external products.
-		if ( $product->is_type( 'external' ) ) {
-			if ( isset( $data['external_url'] ) ) {
-				$product->set_product_url( $data['external_url'] );
-			}
-
-			if ( isset( $data['button_text'] ) ) {
-				$product->set_button_text( $data['button_text'] );
-			}
-		}
-
-		// Featured image.
-		if ( isset( $data['image_id'] ) ) {
-			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $product->get_id() ) : '';
-			$product->set_image_id( $image_id );
-		}
-
-		// Gallery.
-		if ( isset( $data['gallery_image_ids'] ) ) {
-			$gallery_image_ids = array();
-
-			foreach ( $data['gallery_image_ids'] as $url ) {
-				if ( empty( $url ) ) {
-					continue;
-				}
-
-				$gallery_image_ids[] = $this->get_attachment_id( $url, $product->get_id() );
-			}
-
-			$product->set_gallery_image_ids( array_filter( $gallery_image_ids ) );
-		}
-
-		// Allow set meta_data.
-		if ( isset( $data['meta_data'] ) ) {
-			foreach ( $data['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'] );
-			}
-		}
-
-		return $product;
 	}
 
 	/**
@@ -545,8 +351,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param array      $data    Row data.
 	 *
 	 * @return WC_Product|WP_Error
+	 * @throws Exception
 	 */
-	protected function save_variation_data( $variation, $data ) {
+	protected function set_variation_data( &$variation, $data ) {
 		$parent = false;
 
 		// Check if parent exist.
@@ -560,124 +367,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
-			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
-		// Status.
-		if ( isset( $data['published'] ) ) {
-			$variation->set_status( $data['published'] ? 'publish' : 'draft' );
-		} elseif ( 'importing' === $variation->get_status() ) {
-			$variation->set_status( 'publish' );
-		}
-
-		// SKU.
-		if ( isset( $data['sku'] ) ) {
-			$variation->set_sku( wc_clean( $data['sku'] ) );
-		}
-
-		// Featured image.
-		if ( isset( $data['image_id'] ) ) {
-			$image_id = $data['image_id'] ? $this->get_attachment_id( $data['image_id'], $variation->get_id() ) : '';
-			$variation->set_image_id( $image_id );
-		}
-
-		// Virtual variation.
-		if ( isset( $data['virtual'] ) ) {
-			$variation->set_virtual( $data['virtual'] );
-		}
-
-		// Downloadable variation.
-		if ( isset( $data['downloadable'] ) ) {
-			$variation->set_downloadable( $data['downloadable'] );
-		}
-
-		// Downloads.
-		if ( $variation->get_downloadable() ) {
-			// Downloadable files.
-			if ( isset( $data['downloads'] ) ) {
-				$variation = $this->save_downloadable_files( $variation, $data['downloads'] );
-			}
-
-			// Download limit.
-			if ( isset( $data['download_limit'] ) ) {
-				$variation->set_download_limit( $data['download_limit'] );
-			}
-
-			// Download expiry.
-			if ( isset( $data['download_expiry'] ) ) {
-				$variation->set_download_expiry( $data['download_expiry'] );
-			}
-		}
-
-		// Shipping data.
-		$variation = $this->save_product_shipping_data( $variation, $data );
-
-		// Stock handling.
-		if ( isset( $data['stock_status'] ) ) {
-			$variation->set_stock_status( $data['stock_status'] ? 'instock' : 'outofstock' );
-		}
-
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			if ( isset( $data['manage_stock'] ) ) {
-				$variation->set_manage_stock( $data['manage_stock'] );
-			}
-
-			if ( isset( $data['backorders'] ) ) {
-				$variation->set_backorders( $data['backorders'] );
-			}
-
-			if ( $variation->get_manage_stock() ) {
-				if ( isset( $data['stock_quantity'] ) ) {
-					$variation->set_stock_quantity( $data['stock_quantity'] );
-				}
-			} else {
-				$variation->set_backorders( 'no' );
-				$variation->set_stock_quantity( '' );
-			}
-		}
-
-		// Regular Price.
-		if ( isset( $data['regular_price'] ) ) {
-			$variation->set_regular_price( $data['regular_price'] );
-		}
-
-		// Sale Price.
-		if ( isset( $data['sale_price'] ) ) {
-			$variation->set_sale_price( $data['sale_price'] );
-		}
-
-		if ( isset( $data['date_on_sale_from'] ) ) {
-			$variation->set_date_on_sale_from( $data['date_on_sale_from'] );
-		}
-
-		if ( isset( $data['date_on_sale_from_gmt'] ) ) {
-			$variation->set_date_on_sale_from( $data['date_on_sale_from_gmt'] ? strtotime( $data['date_on_sale_from_gmt'] ) : null );
-		}
-
-		if ( isset( $data['date_on_sale_to'] ) ) {
-			$variation->set_date_on_sale_to( $data['date_on_sale_to'] );
-		}
-
-		if ( isset( $data['date_on_sale_to_gmt'] ) ) {
-			$variation->set_date_on_sale_to( $data['date_on_sale_to_gmt'] ? strtotime( $data['date_on_sale_to_gmt'] ) : null );
-		}
-
-		// Tax class.
-		if ( isset( $data['tax_class'] ) ) {
-			$variation->set_tax_class( $data['tax_class'] );
-		}
-
-		// Description.
-		if ( isset( $data['description'] ) ) {
-			$variation->set_description( wp_kses_post( $data['description'] ) );
-		}
-
-		// Update taxonomies.
-		if ( isset( $data['attributes'] ) ) {
+		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes        = array();
-			$parent_attributes = $this->get_variation_parent_attributes( $data['attributes'], $parent );
+			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
-			foreach ( $data['attributes'] as $attribute ) {
+			foreach ( $data['raw_attributes'] as $attribute ) {
 				// Get ID if is a global attribute.
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
 
@@ -710,15 +407,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			$variation->set_attributes( $attributes );
 		}
-
-		// Meta data.
-		if ( isset( $data['meta_data'] ) ) {
-			foreach ( $data['meta_data'] as $meta ) {
-				$variation->update_meta_data( $meta['key'], $meta['value'] );
-			}
-		}
-
-		return $variation;
 	}
 
 	/**
@@ -768,7 +456,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  int    $product_id Product ID.
 	 * @return int
 	 */
-	protected function get_attachment_id( $url, $product_id ) {
+	protected function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
 		}
@@ -834,72 +522,5 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return $id;
-	}
-
-	/**
-	 * Save product shipping data.
-	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Shipping data.
-	 * @return WC_Product
-	 */
-	protected function save_product_shipping_data( $product, $data ) {
-		// Virtual.
-		if ( $product->is_virtual() ) {
-			$product->set_weight( '' );
-			$product->set_height( '' );
-			$product->set_length( '' );
-			$product->set_width( '' );
-		} else {
-			if ( isset( $data['weight'] ) ) {
-				$product->set_weight( $data['weight'] );
-			}
-
-			// Height.
-			if ( isset( $data['height'] ) ) {
-				$product->set_height( $data['height'] );
-			}
-
-			// Width.
-			if ( isset( $data['width'] ) ) {
-				$product->set_width( $data['width'] );
-			}
-
-			// Length.
-			if ( isset( $data['length'] ) ) {
-				$product->set_length( $data['length'] );
-			}
-		}
-
-		// Shipping class.
-		if ( isset( $data['shipping_class_id'] ) ) {
-			$product->set_shipping_class_id( $data['shipping_class_id'] );
-		}
-
-		return $product;
-	}
-
-	/**
-	 * Save downloadable files.
-	 *
-	 * @param WC_Product $product   Product instance.
-	 * @param array      $downloads Downloads data.
-	 * @return WC_Product
-	 */
-	protected function save_downloadable_files( $product, $data ) {
-		$downloads = array();
-		foreach ( $data as $key => $file ) {
-			if ( empty( $file['url'] ) ) {
-				continue;
-			}
-
-			$downloads[] = array(
-				'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
-				'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
-			);
-		}
-		$product->set_downloads( $downloads );
-
-		return $product;
 	}
 }

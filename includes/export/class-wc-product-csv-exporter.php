@@ -104,12 +104,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping Class', 'woocommerce' ),
-			'image_id'           => __( 'Images', 'woocommerce' ),
+			'images'             => __( 'Images', 'woocommerce' ),
 			'download_limit'     => __( 'Download Limit', 'woocommerce' ),
 			'download_expiry'    => __( 'Download Expiry Days', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			// @todo product_url button_text
 		);
 	}
 
@@ -218,13 +219,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Get image_id value.
+	 * Get images value.
 	 *
 	 * @since 3.1.0
 	 * @param WC_Product $product
 	 * @return string
 	 */
-	protected function get_column_value_image_id( $product ) {
+	protected function get_column_value_images( $product ) {
 		$image_ids = array_merge( array( $product->get_image_id( 'edit' ) ), $product->get_gallery_image_ids( 'edit' ) );
 		$images    = array();
 
