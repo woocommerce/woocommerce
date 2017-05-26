@@ -66,12 +66,12 @@ class WC_Admin_Setup_Wizard {
 				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
 			'locale' => array(
-				'name'    => __( 'Store locale', 'woocommerce' ),
+				'name'    => __( 'Store location', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
 				'handler' => array( $this, 'wc_setup_locale_save' ),
 			),
 			'shipping_taxes' => array(
-				'name'    => __( 'Shipping &amp; tax', 'woocommerce' ),
+				'name'    => __( 'Shipping', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
@@ -322,7 +322,7 @@ class WC_Admin_Setup_Wizard {
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
-		<h1><?php esc_html_e( 'Store locale setup', 'woocommerce' ); ?></h1>
+		<h1><?php esc_html_e( 'Store location setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<table class="form-table">
 				<tr>
@@ -399,6 +399,73 @@ class WC_Admin_Setup_Wizard {
 						</select>
 					</td>
 				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_calc_taxes"><?php esc_html_e( 'Will you be charging sales tax?', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="checkbox" <?php checked( get_option( 'woocommerce_calc_taxes', 'no' ), 'yes' ); ?> id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
+						<label for="woocommerce_calc_taxes"><?php esc_html_e( 'Yes, I will be charging sales tax', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_prices_include_tax"><?php esc_html_e( 'How will you enter product prices?', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'yes' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php esc_html_e( 'I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php esc_html_e( 'I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<?php
+				$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+				$tax_rates   = array();
+				$country     = WC()->countries->get_base_country();
+				$state       = WC()->countries->get_base_state();
+
+				if ( isset( $locale_info[ $country ] ) ) {
+					if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
+						$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
+					} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
+						$tax_rates = $locale_info[ $country ]['tax_rates'][''];
+					}
+					if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
+						$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
+					}
+				}
+				if ( $tax_rates ) {
+					?>
+					<tr class="tax-rates">
+						<td colspan="2">
+							<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
+							<div class="importing-tax-rates">
+								<table class="tax-rates">
+									<thead>
+									<tr>
+										<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
+										<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
+										<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
+										<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
+									</tr>
+									</thead>
+									<tbody>
+									<?php
+									foreach ( $tax_rates as $rate ) {
+										?>
+										<tr>
+											<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
+											<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
+											<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
+											<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
+										</tr>
+										<?php
+									}
+									?>
+									</tbody>
+								</table>
+							</div>
+							<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
 			</table>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -433,137 +500,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
-		exit;
-	}
-
-	/**
-	 * Shipping and taxes.
-	 */
-	public function wc_setup_shipping_taxes() {
-		?>
-		<h1><?php esc_html_e( 'Shipping &amp; Tax setup', 'woocommerce' ); ?></h1>
-		<form method="post">
-			<p><?php esc_html_e( 'If you will be charging sales tax, or shipping physical goods to customers, you can enable these below. This is optional and can be changed later.', 'woocommerce' ); ?></p>
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="woocommerce_calc_shipping"><?php esc_html_e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_ship_to_countries', '' ) !== 'disabled', true ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
-						<label for="woocommerce_calc_shipping"><?php esc_html_e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_calc_taxes"><?php esc_html_e( 'Will you be charging sales tax?', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="checkbox" <?php checked( get_option( 'woocommerce_calc_taxes', 'no' ), 'yes' ); ?> id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
-						<label for="woocommerce_calc_taxes"><?php esc_html_e( 'Yes, I will be charging sales tax', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_prices_include_tax"><?php esc_html_e( 'How will you enter product prices?', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'yes' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php esc_html_e( 'I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
-						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php esc_html_e( 'I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<?php
-					$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-					$tax_rates   = array();
-					$country     = WC()->countries->get_base_country();
-					$state       = WC()->countries->get_base_state();
-
-					if ( isset( $locale_info[ $country ] ) ) {
-						if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
-						} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][''];
-						}
-						if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
-							$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
-						}
-					}
-					if ( $tax_rates ) {
-						?>
-						<tr class="tax-rates">
-							<td colspan="2">
-								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
-								<div class="importing-tax-rates">
-									<table class="tax-rates">
-										<thead>
-											<tr>
-												<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
-											</tr>
-										</thead>
-										<tbody>
-											<?php
-												foreach ( $tax_rates as $rate ) {
-													?>
-													<tr>
-														<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
-													</tr>
-													<?php
-												}
-											?>
-										</tbody>
-									</table>
-								</div>
-								<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
-							</td>
-						</tr>
-						<?php
-					}
-				?>
-			</table>
-			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
-				<?php wp_nonce_field( 'wc-setup' ); ?>
-			</p>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Save shipping and tax options.
-	 */
-	public function wc_setup_shipping_taxes_save() {
-		check_admin_referer( 'wc-setup' );
-
-		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
 		$enable_taxes     = isset( $_POST['woocommerce_calc_taxes'] );
-		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
-
-		if ( $enable_shipping ) {
-			update_option( 'woocommerce_ship_to_countries', '' );
-			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
-
-			/*
-			 * If this is the initial shipping setup, create a shipping
-			 * zone containing the country the store is located in, with
-			 * a "free shipping" method preconfigured.
-			 */
-			if ( false === $current_shipping ) {
-				$default_country = get_option( 'woocommerce_default_country' );
-				$location        = wc_format_country_state_string( $default_country );
-
-				$zone = new WC_Shipping_Zone( null );
-				$zone->set_zone_order( 0 );
-				$zone->add_location( $location['country'], 'country' );
-				$zone->set_zone_name( $zone->get_formatted_location() );
-				$zone->add_shipping_method( 'free_shipping' );
-				$zone->save();
-			}
-		} else {
-			update_option( 'woocommerce_ship_to_countries', 'disabled' );
-		}
-
 		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
 
@@ -600,6 +537,86 @@ class WC_Admin_Setup_Wizard {
 					WC_Tax::_insert_tax_rate( $tax_rate );
 				}
 			}
+		}
+
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		exit;
+	}
+
+	/**
+	 * Shipping and taxes.
+	 */
+	public function wc_setup_shipping_taxes() {
+		?>
+		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<p>
+				<?php esc_html_e( 'Complete your online store with shipping preferences that enable you to fulfill your orders in minutes.' ); ?>
+			</p>
+			<ul class="wc-wizard-shipping-settings">
+				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">
+					<div class="wc-wizard-shipping-enable">
+						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-radio" value="shipping-enabled" checked />
+						<label>
+							<?php echo esc_html( 'I will be shipping physical goods to customers' ); ?>
+						</label>
+					</div>
+					<div class="wc-wizard-shipping-description">
+						<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
+						<?php echo esc_html( 'Use WooCommerce Services' ); ?>
+						<?php echo wp_kses_post( wpautop( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.' ) ); ?>
+					</div>
+					<div class="wc-wizard-shipping-description">
+						<?php echo wp_kses_post( wpautop( 'Select this option if you are shipping physical goods to your customers.' ) ); ?>
+					</div>
+				</li>
+				<li class="wc-wizard-shipping wc-wizard-shipping-disabled">
+					<div class="wc-wizard-shipping-enable">
+						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-enabled" />
+						<label>
+							<?php echo esc_html( 'I will not be shipping physical goods to customers' ); ?>
+						</label>
+					</div>
+					<div class="wc-wizard-shipping-description">
+						<?php echo wp_kses_post( wpautop( 'Select this option if you are selling digital products or other non-physical goods.' ) ); ?>
+					</div>
+				</li>
+			</ul>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Save shipping and tax options.
+	 */
+	public function wc_setup_shipping_taxes_save() {
+		check_admin_referer( 'wc-setup' );
+
+		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
+		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
+
+		if ( $enable_shipping ) {
+			update_option( 'woocommerce_ship_to_countries', '' );
+			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+
+			/*
+			 * If this is the initial shipping setup, create a shipping
+			 * zone containing the country the store is located in, with
+			 * a "free shipping" method preconfigured.
+			 */
+			if ( false === $current_shipping ) {
+				$default_country = get_option( 'woocommerce_default_country' );
+				$location        = wc_format_country_state_string( $default_country );
+
+				$zone = new WC_Shipping_Zone( null );
+				$zone->set_zone_order( 0 );
+				$zone->add_location( $location['country'], 'country' );
+				$zone->set_zone_name( $zone->get_formatted_location() );
+				$zone->add_shipping_method( 'free_shipping' );
+				$zone->save();
+			}
+		} else {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );

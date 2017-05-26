@@ -46,6 +46,19 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
+	$( '.wc-wizard-shipping-settings' ).on( 'change', '.wc-wizard-shipping-enabled input', function() {
+		if ( $( this ).is( ':checked' ) ) {
+			$( this ).closest( 'li' ).addClass( 'checked' );
+		} else {
+			$( this ).closest( 'li' ).removeClass( 'checked' );
+		}
+	} );
+
+	$( '.wc-wizard-shipping-settings' ).on( 'click', 'li.wc-wizard-shipping-enabled', function() {
+		var $enabled = $( this ).find( '.wc-wizard-shipping-enabled input' );
+		$enabled.prop( 'checked', ! $enabled.prop( 'checked' ) ).change();
+	} );
+
 	$( '.wc-wizard-payment-gateways' ).on( 'change', '.wc-wizard-gateway-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( 'li' ).addClass( 'checked' );
