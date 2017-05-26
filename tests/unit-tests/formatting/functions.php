@@ -11,7 +11,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @param string $value
 	 * @return string
 	 */
-	function replace_decimal_thousand_separators( $value ) {
+	function interchange_decimal_thousand_separators( $value ) {
 		if( '.' === $value ) {
 			return ',';
 		}
@@ -265,11 +265,11 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '99999.99', wc_format_decimal( '99,999.99' ) );
 
 		// given string with thousands in german format
-		add_filter( 'wc_get_price_decimal_separator', array( $this, 'replace_decimal_thousand_separators' ) );
-		add_filter( 'wc_get_price_thousand_separator', array( $this, 'replace_decimal_thousand_separators' ) );
+		add_filter( 'wc_get_price_decimal_separator', array( $this, 'interchange_decimal_thousand_separators' ) );
+		add_filter( 'wc_get_price_thousand_separator', array( $this, 'interchange_decimal_thousand_separators' ) );
 		$this->assertEquals( '99999.99', wc_format_decimal( '99.999,99' ) );
-		remove_filter( 'wc_get_price_decimal_separator', array( $this, 'replace_decimal_thousand_separators' ) );
-		remove_filter( 'wc_get_price_thousand_separator', array( $this, 'replace_decimal_thousand_separators' ) );
+		remove_filter( 'wc_get_price_decimal_separator', array( $this, 'interchange_decimal_thousand_separators' ) );
+		remove_filter( 'wc_get_price_thousand_separator', array( $this, 'interchange_decimal_thousand_separators' ) );
 	}
 
 	/**
