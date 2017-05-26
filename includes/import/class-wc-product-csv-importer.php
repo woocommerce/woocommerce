@@ -277,10 +277,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int
 	 */
 	protected function parse_shipping_class_field( $field ) {
+		if ( empty( $field ) ) {
+			return 0;
+		}
+
 		$term = get_term_by( 'name', $field, 'product_shipping_class' );
 
 		if ( ! $term || is_wp_error( $term ) ) {
-			$term = (object) wp_insert_term( $name, 'product_shipping_class' );
+			$term = (object) wp_insert_term( $field, 'product_shipping_class' );
 		}
 
 		return $term->term_id;
