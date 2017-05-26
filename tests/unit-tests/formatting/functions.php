@@ -7,12 +7,20 @@
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	/**
-	 * Change decimal separator to german style for testing.
+	 * Replace the decimal separators with thousand and thousand seperators with decimal separator for testing.
 	 * @param string $value
 	 * @return string
 	 */
-	function change_decimal_separator_de( $value ) {
-		return ',';
+	function replace_decimal_thousand_separators( $value ) {
+		if( '.' === $value ) {
+			return ',';
+		}
+
+		if( ',' === $value ) {
+			return '.';
+		}
+
+		return $value;
 	}
 
 	/**
@@ -257,11 +265,11 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '99999.99', wc_format_decimal( '99,999.99' ) );
 
 		// given string with thousands in german format
-		add_filter( 'wc_get_price_decimal_separator', array( $this, 'change_decimal_separator_de' ) );
-		add_filter( 'wc_get_price_thousand_separator', array( $this, 'change_thousand_separator_de' ) );
+		add_filter( 'wc_get_price_decimal_separator', array( $this, 'replace_decimal_thousand_separators' ) );
+		add_filter( 'wc_get_price_thousand_separator', array( $this, 'replace_decimal_thousand_separators' ) );
 		$this->assertEquals( '99999.99', wc_format_decimal( '99.999,99' ) );
-		remove_filter( 'wc_get_price_decimal_separator', array( $this, 'change_decimal_separator_de' ) );
-		remove_filter( 'woocommerce_price_trim_zeros', array( $this, 'change_thousand_separator_de' ) );
+		remove_filter( 'wc_get_price_decimal_separator', array( $this, 'replace_decimal_thousand_separators' ) );
+		remove_filter( 'wc_get_price_thousand_separator', array( $this, 'replace_decimal_thousand_separators' ) );
 	}
 
 	/**
