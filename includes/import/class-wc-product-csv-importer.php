@@ -435,7 +435,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
 		}
 
-		if ( isset( $data['stock_quantity'] ) && isset( $data['stock_quantity'] ) ) {
+		if ( isset( $data['stock_quantity'] ) ) {
 			$data['manage_stock'] = 0 < $data['stock_quantity'];
 		}
 
