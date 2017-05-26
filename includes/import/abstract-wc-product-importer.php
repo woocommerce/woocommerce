@@ -367,7 +367,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
-			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Missing parent ID or parent does not exist.', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
