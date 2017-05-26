@@ -305,6 +305,25 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse dates from a CSV.
+	 * Dates requires the format YYYY-MM-DD.
+	 *
+	 * @param  string $field Field value.
+	 * @return string|null
+	 */
+	protected function parse_date_field( $field ) {
+		if ( empty( $field ) ) {
+			return null;
+		}
+
+		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/', $field ) ) {
+			return $field;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -320,8 +339,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'type'              => array( $this, 'parse_comma_field' ),
 			'published'         => array( $this, 'parse_bool_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
-			'date_on_sale_from' => 'strtotime',
-			'date_on_sale_to'   => 'strtotime',
+			'date_on_sale_from' => array( $this, 'parse_date_field' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
 			'name'              => 'wp_filter_post_kses',
 			'short_description' => 'wp_filter_post_kses',
 			'description'       => 'wp_filter_post_kses',
