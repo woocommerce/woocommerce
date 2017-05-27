@@ -293,9 +293,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 			break;
 			case 'download_file' :
-				$user_id  = $args[1];
-				$download = $args[2];
-
+			    list( $user_id, $download ) = $args;
 				if ( $download && $user_id == $download->get_user_id() ) {
 					$allcaps['download_file'] = true;
 				}
