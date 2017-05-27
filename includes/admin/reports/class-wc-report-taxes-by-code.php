@@ -136,7 +136,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_orders' => 0 );
 
 			if ( 'shop_order_refund' !== get_post_type( $tax_row->post_id ) ) {
-				$tax_rows[ $key ]->total_orders        += 1;
+				++$tax_rows[ $key ]->total_orders;
 			}
 
 			$tax_rows[ $key ]->tax_rate            = $tax_row->tax_rate;

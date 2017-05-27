@@ -390,9 +390,9 @@ class Simplify_HTTP
 
 		switch (strlen($s) % 4) {
 			case 0: break;
-			case 2: $s = $s . "==";
+			case 2: $s .= '==';
 					break;
-			case 3: $s = $s . "=";
+			case 3: $s .= '=';
 					break;
 			default: throw new InvalidArgumentException('incorrecly formatted JWS payload');
 		}

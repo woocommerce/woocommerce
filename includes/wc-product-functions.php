@@ -972,7 +972,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 		$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 	} else {
-		$price = $price * $qty;
+		$price *= $qty;
 	}
 
 	return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $product );

@@ -290,7 +290,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate['label'] = $this_option[0];
 				$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $rate['package'] );
 				if ( is_array( $extra_rate['cost'] ) ) {
-					$extra_rate['cost']['order'] = $extra_rate['cost']['order'] + $extra_cost;
+					$extra_rate['cost']['order'] += $extra_cost;
 				} else {
 					$extra_rate['cost'] += $extra_cost;
 				}
@@ -348,10 +348,10 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		}
 		switch ( $type ) {
 			case 'class' :
-				$cost = $cost * sizeof( $this->find_shipping_classes( $package ) );
+				$cost *= count( $this->find_shipping_classes( $package ) );
 			break;
 			case 'item' :
-				$cost = $cost * $this->get_package_item_qty( $package );
+				$cost *= $this->get_package_item_qty( $package );
 			break;
 		}
 		if ( $cost_percent ) {

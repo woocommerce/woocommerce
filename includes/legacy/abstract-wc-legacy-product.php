@@ -357,7 +357,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function adjust_price( $price ) {
 		wc_deprecated_function( 'WC_Product::adjust_price', '3.0', 'WC_Product::set_price / WC_Product::get_price' );
-		$this->data['price'] = $this->data['price'] + $price;
+		$this->data['price'] += $price;
 	}
 
 	/**
