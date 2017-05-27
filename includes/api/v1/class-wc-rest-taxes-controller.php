@@ -401,9 +401,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		}
 
 		$tax      = $this->prepare_item_for_response( $tax_obj, $request );
-		$response = rest_ensure_response( $tax );
 
-		return $response;
+        return rest_ensure_response( $tax );
 	}
 
 	/**

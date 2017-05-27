@@ -275,9 +275,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
-		$response   = rest_ensure_response( $order_note );
-
-		return $response;
+		return rest_ensure_response( $order_note );
 	}
 
 	/**

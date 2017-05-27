@@ -401,9 +401,7 @@ class WC_Webhook {
 			'comment_approved'     => 1,
 		), $this->id );
 
-		$comment_id = wp_insert_comment( $comment_data );
-
-		return $comment_id;
+        return wp_insert_comment( $comment_data );
 	}
 
 

@@ -336,9 +336,7 @@ class WC_Admin_Report {
 			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
 		}
 
-		$result = $cached_results[ $query_hash ];
-
-		return $result;
+		return $cached_results[ $query_hash ];
 	}
 
 	/**

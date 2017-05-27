@@ -196,8 +196,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			), $request ) );
 		}
 
-		$response = rest_ensure_response( $tools );
-		return $response;
+		return rest_ensure_response( $tools );
 	}
 
 	/**
