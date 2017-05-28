@@ -79,11 +79,10 @@ class WC_Product_Grouped extends WC_Product {
 
 		foreach ( $this->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-                        if ( is_object( $child_id ) ) {
-                            if ( '' !== $child->get_price() ) {
-                                    $child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
-                            }
-                        }
+			if ( '' !== $child->get_price() ) {
+                            $child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
+			}
+                        
 		}
 
 		if ( ! empty( $child_prices ) ) {
@@ -142,6 +141,11 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param array $children
 	 */
 	public function set_children( $children ) {
+		foreach ($children as $k => $child) {
+                    if ( false === get_post_status( $child ) ) {
+                            unset($children[$k]);
+                    }
+		}
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
 	}
 
