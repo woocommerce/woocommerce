@@ -79,9 +79,11 @@ class WC_Product_Grouped extends WC_Product {
 
 		foreach ( $this->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( '' !== $child->get_price() ) {
-				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
-			}
+                        if ( is_object( $child_id ) ) {
+                            if ( '' !== $child->get_price() ) {
+                                    $child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
+                            }
+                        }
 		}
 
 		if ( ! empty( $child_prices ) ) {
