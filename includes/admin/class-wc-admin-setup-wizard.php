@@ -543,18 +543,18 @@ class WC_Admin_Setup_Wizard {
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<p>
-				<?php esc_html_e( 'Complete your online store with shipping preferences that enable you to fulfill your orders in minutes.' ); ?>
+				<?php esc_html_e( 'Complete your online store with shipping preferences that enable you to fulfill your orders in minutes.', 'woocommerce' ); ?>
 			</p>
 			<ul class="wc-wizard-shipping-settings">
 				<li class="wc-wizard-shipping wc-wizard-shipping-enabled checked">
 					<div class="wc-wizard-shipping-enable">
 						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-enabled" checked />
 						<label>
-							<?php echo esc_html( 'I will be shipping physical goods to customers' ); ?>
+							<?php esc_html_e( 'I will be shipping physical goods to customers', 'woocommerce' ); ?>
 						</label>
 					</div>
 					<div class="wc-wizard-shipping-description">
-						<?php echo wp_kses_post( wpautop( 'Select this option if you are shipping physical goods to your customers.' ) ); ?>
+						<?php esc_html_e( 'Select this option if you are shipping physical goods to your customers.', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-shipping-settings">
 						<?php $this->wc_setup_wcs_tout(); ?>
@@ -589,11 +589,11 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-shipping-enable">
 						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-disabled" />
 						<label>
-							<?php echo esc_html( 'I will not be shipping physical goods to customers' ); ?>
+							<?php esc_html_e( 'I will not be shipping physical goods to customers', 'woocommerce' ); ?>
 						</label>
 					</div>
 					<div class="wc-wizard-shipping-description">
-						<?php echo wp_kses_post( wpautop( 'Select this option if you are selling digital products or other non-physical goods.' ) ); ?>
+						<?php esc_html_e( 'Select this option if you are selling digital products or other non-physical goods.', 'woocommerce' ); ?>
 					</div>
 				</li>
 			</ul>
