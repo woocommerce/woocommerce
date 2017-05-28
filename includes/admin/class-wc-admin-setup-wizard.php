@@ -519,6 +519,21 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Tout WooCommerce Services for North American stores.
+	 */
+	protected function wc_setup_wcs_tout() {
+		$base_location = wc_get_base_location();
+
+		if ( in_array( $base_location['country'], array( 'US', 'CA' ) ) ) : ?>
+		<div class="wc-wizard-shipping-description">
+			<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
+			<?php esc_html_e( 'Use WooCommerce Services', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.', 'woocommerce' ); ?>
+		</div>
+		<?php endif;
+	}
+
+	/**
 	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
@@ -542,11 +557,7 @@ class WC_Admin_Setup_Wizard {
 						<?php echo wp_kses_post( wpautop( 'Select this option if you are shipping physical goods to your customers.' ) ); ?>
 					</div>
 					<div class="wc-wizard-shipping-settings">
-						<div class="wc-wizard-shipping-description">
-							<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
-							<?php echo esc_html( 'Use WooCommerce Services' ); ?>
-							<?php echo wp_kses_post( wpautop( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.' ) ); ?>
-						</div>
+						<?php $this->wc_setup_wcs_tout(); ?>
 						<table class="form-table">
 							<tr>
 								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
