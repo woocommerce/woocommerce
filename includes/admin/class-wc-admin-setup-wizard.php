@@ -319,8 +319,6 @@ class WC_Admin_Setup_Wizard {
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
 		$num_decimals   = get_option( 'woocommerce_price_num_decimals', '2' );
 		$thousand_sep   = get_option( 'woocommerce_price_thousand_sep', ',' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
-		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
 		<h1><?php esc_html_e( 'Store location setup', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -374,29 +372,6 @@ class WC_Admin_Setup_Wizard {
 					<th scope="row"><label for="num_decimals"><?php esc_html_e( 'Number of decimals', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ); ?>" />
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-						</select>
 					</td>
 				</tr>
 				<tr>
@@ -547,6 +522,8 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
+		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
+		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -554,25 +531,52 @@ class WC_Admin_Setup_Wizard {
 				<?php esc_html_e( 'Complete your online store with shipping preferences that enable you to fulfill your orders in minutes.' ); ?>
 			</p>
 			<ul class="wc-wizard-shipping-settings">
-				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">
+				<li class="wc-wizard-shipping wc-wizard-shipping-enabled checked">
 					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-radio" value="shipping-enabled" checked />
+						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-enabled" checked />
 						<label>
 							<?php echo esc_html( 'I will be shipping physical goods to customers' ); ?>
 						</label>
 					</div>
 					<div class="wc-wizard-shipping-description">
-						<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
-						<?php echo esc_html( 'Use WooCommerce Services' ); ?>
-						<?php echo wp_kses_post( wpautop( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.' ) ); ?>
-					</div>
-					<div class="wc-wizard-shipping-description">
 						<?php echo wp_kses_post( wpautop( 'Select this option if you are shipping physical goods to your customers.' ) ); ?>
 					</div>
+					<div class="wc-wizard-shipping-settings">
+						<div class="wc-wizard-shipping-description">
+							<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
+							<?php echo esc_html( 'Use WooCommerce Services' ); ?>
+							<?php echo wp_kses_post( wpautop( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.' ) ); ?>
+						</div>
+						<table class="form-table">
+							<tr>
+								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
+								<td>
+									<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+										<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+										<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+										<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+										<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
+								<td>
+									<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+										<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+										<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+										<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+										<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+										<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</div>
 				</li>
-				<li class="wc-wizard-shipping wc-wizard-shipping-disabled">
+				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">
 					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-enabled" />
+						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-disabled" />
 						<label>
 							<?php echo esc_html( 'I will not be shipping physical goods to customers' ); ?>
 						</label>
