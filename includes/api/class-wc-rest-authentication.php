@@ -51,8 +51,31 @@ class WC_REST_Authentication {
 	 * @return int|false
 	 */
 	public function authenticate( $user_id ) {
-		// Do not authenticate twice and check if is a request to our endpoint in the WP REST API.
-		if ( ! empty( $user_id ) || ! $this->is_request_to_rest_api() ) {
+		if ( ! $this->is_request_to_rest_api() ) {
+			return $user_id;
+		}
+
+		/**
+		 * Workaround for cookie auth combined with query string keys.
+		 *
+		 * - Cookie auth runs at priority 10 and sets the user ID.
+		 * - Then this code runs and usually does nothing because the user ID is set.
+		 * - Finally, cookie auth (later) runs validation and because there is no nonce, the user ID reverts to 0 and the request fails.
+		 *
+		 * To prevent this occurring when using query string based authentication, we must run basic auth here again and unset the $wp_rest_auth_cookie global.
+		 *
+		 * @todo In future versions, basic auth over query string will be removed and this will no longer be an issue. However for now, to maintain compatibility with
+		 * some hosts we need to keep it around. Note: This is only supported over SSL.
+		 */
+		global $wp_rest_auth_cookie;
+
+		if ( is_ssl() && $wp_rest_auth_cookie && ! empty( $_GET['consumer_key'] ) && ! empty( $_GET['consumer_secret'] ) ) {
+			$user_id = 0;
+			$wp_rest_auth_cookie = null;
+		}
+
+		// Do not authenticate twice.
+		if ( ! empty( $user_id ) ) {
 			return $user_id;
 		}
 
