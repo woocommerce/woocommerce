@@ -388,59 +388,25 @@ class WC_Admin_Setup_Wizard {
 						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php esc_html_e( 'I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
-				<?php
-				$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-				$tax_rates   = array();
-				$country     = WC()->countries->get_base_country();
-				$state       = WC()->countries->get_base_state();
-
-				if ( isset( $locale_info[ $country ] ) ) {
-					if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
-						$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
-					} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
-						$tax_rates = $locale_info[ $country ]['tax_rates'][''];
-					}
-					if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
-						$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
-					}
-				}
-				if ( $tax_rates ) {
-					?>
-					<tr class="tax-rates">
-						<td colspan="2">
-							<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
-							<div class="importing-tax-rates">
-								<table class="tax-rates">
-									<thead>
-									<tr>
-										<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
-										<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
-										<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
-										<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
-									</tr>
-									</thead>
-									<tbody>
-									<?php
-									foreach ( $tax_rates as $rate ) {
-										?>
-										<tr>
-											<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
-											<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-											<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
-											<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
-										</tr>
-										<?php
-									}
-									?>
-									</tbody>
-								</table>
-							</div>
-							<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
-						</td>
-					</tr>
-					<?php
-				}
-				?>
+				<tr class="tax-rates" style="display: none;">
+					<td colspan="2">
+						<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
+						<div class="importing-tax-rates">
+							<table class="tax-rates">
+								<thead>
+								<tr>
+									<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
+								</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+						<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
+					</td>
+				</tr>
 			</table>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
