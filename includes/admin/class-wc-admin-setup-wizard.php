@@ -548,7 +548,7 @@ class WC_Admin_Setup_Wizard {
 			<ul class="wc-wizard-shipping-settings">
 				<li class="wc-wizard-shipping wc-wizard-shipping-enabled checked">
 					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-enabled" checked />
+						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="yes" checked />
 						<label>
 							<?php esc_html_e( 'I will be shipping physical goods to customers', 'woocommerce' ); ?>
 						</label>
@@ -587,7 +587,7 @@ class WC_Admin_Setup_Wizard {
 				</li>
 				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">
 					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="wc-wizard-shipping-enabled" class="wc-wizard-shipping-enabled input-checkbox" value="shipping-disabled" />
+						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="no" />
 						<label>
 							<?php esc_html_e( 'I will not be shipping physical goods to customers', 'woocommerce' ); ?>
 						</label>
@@ -612,7 +612,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
+		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] ) && ( 'yes' === $_POST['woocommerce_calc_shipping'] );
 		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 
 		if ( $enable_shipping ) {
