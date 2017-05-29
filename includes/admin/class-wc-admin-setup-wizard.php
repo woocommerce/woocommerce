@@ -607,6 +607,7 @@ class WC_Admin_Setup_Wizard {
 			if ( $install_services ) {
 				$services_plugin_id = 'woocommerce-services';
 				$services_plugin    = array(
+					'name'      => __( 'WooCommerce Services', 'woocommerce' ),
 					'repo-slug' => 'woocommerce-services',
 				);
 
