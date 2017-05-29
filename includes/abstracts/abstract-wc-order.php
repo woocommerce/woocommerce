@@ -789,29 +789,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return WC_Order_Item
 	 */
 	public function get_item( $item_id ) {
-		foreach ( $this->items as $items ) {
-			if ( ! empty( $items[ $item_id ] ) ) {
-				$items = apply_filters( 'woocommerce_order_get_items', array( $item_id => $items[ $item_id ] ), $this );
-				return empty( $items[ $item_id ] ) ? false : $items[ $item_id ];
-			}
-		}
-
-		if ( ! $this->get_id() ) {
+		$type = $this->data_store->get_order_item_type( $this, $item_id );
+		if ( ! $type ) {
 			return false;
 		}
 
-		// The item was not found in memory, we load in memory all the items related to this order
-		$type  = $this->data_store->get_order_item_type( $this, $item_id );
-		$group = $type ? $this->type_to_group( $type ) : false;
-		if ( $group ) {
-			$this->items[ $group ] = $this->data_store->read_items( $this, $type );
-			if ( ! empty( $this->items[ $group ][ $item_id ] ) ) {
-				$items = apply_filters( 'woocommerce_order_get_items', array( $item_id => $this->items[ $group ][ $item_id ] ), $this );
-				return empty( $items[ $item_id ] ) ? false : $items[ $item_id ];
-			}
-		}
-
-		return false;
+		$items = $this->get_items( $type );
+		return ! empty( $items[ $item_id ] ) ? $items[ $item_id ] : false;
 	}
 
 	/**
