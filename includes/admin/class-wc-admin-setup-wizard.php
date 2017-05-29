@@ -525,10 +525,17 @@ class WC_Admin_Setup_Wizard {
 		$base_location = wc_get_base_location();
 
 		if ( in_array( $base_location['country'], array( 'US', 'CA' ) ) ) : ?>
-		<div class="wc-wizard-shipping-description">
+		<div class="wc-wizard-shipping-services-description">
 			<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
-			<?php esc_html_e( 'Use WooCommerce Services', 'woocommerce' ); ?>
-			<?php esc_html_e( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.', 'woocommerce' ); ?>
+			<label>
+				<?php esc_html_e( 'Ship with WooCommerce Services', 'woocommerce' ); ?>
+			</label>
+			<p>
+				<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' ); ?>
+			</p>
+			<p class="wc-wizard-shipping-services-powered-by">
+				<?php esc_html_e( 'Powered by Jetpack, and WooCommerce Services.', 'woocommerce' ); ?>
+			</p>
 		</div>
 		<?php endif;
 	}
@@ -550,17 +557,14 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-shipping-enable">
 						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="yes" checked />
 						<label>
-							<?php esc_html_e( 'I will be shipping physical goods to customers', 'woocommerce' ); ?>
+							<?php esc_html_e( 'I will be shipping products to customers', 'woocommerce' ); ?>
 						</label>
-					</div>
-					<div class="wc-wizard-shipping-description">
-						<?php esc_html_e( 'Select this option if you are shipping physical goods to your customers.', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-shipping-settings">
 						<?php $this->wc_setup_wcs_tout(); ?>
 						<table class="form-table">
 							<tr>
-								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
+								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Default weight unit', 'woocommerce' ); ?></label></th>
 								<td>
 									<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
 										<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
@@ -571,7 +575,7 @@ class WC_Admin_Setup_Wizard {
 								</td>
 							</tr>
 							<tr>
-								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
+								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Default dimension unit', 'woocommerce' ); ?></label></th>
 								<td>
 									<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
 										<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
@@ -589,11 +593,8 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-shipping-enable">
 						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="no" />
 						<label>
-							<?php esc_html_e( 'I will not be shipping physical goods to customers', 'woocommerce' ); ?>
+							<?php esc_html_e( 'I will not be shipping products to customers', 'woocommerce' ); ?>
 						</label>
-					</div>
-					<div class="wc-wizard-shipping-description">
-						<?php esc_html_e( 'Select this option if you are selling digital products or other non-physical goods.', 'woocommerce' ); ?>
 					</div>
 				</li>
 			</ul>
