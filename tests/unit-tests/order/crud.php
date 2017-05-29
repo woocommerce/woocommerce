@@ -509,6 +509,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$item->set_props( array(
 			'product'  => WC_Helper_Product::create_simple_product(),
 			'quantity' => 4,
+			'order_id' => 999,
 		) );
 		$item->save();
 		$this->assertFalse( $object->get_item( $item->get_id() ) );
