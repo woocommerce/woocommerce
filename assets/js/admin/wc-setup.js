@@ -36,10 +36,10 @@ jQuery( function( $ ) {
 					$.each( tax_rates, function( index, rate ) {
 						$( '<tr>', {
 							html: [
-								$( '<td>', { class: 'readonly', text: rate.country || ''  } ),
-								$( '<td>', { class: 'readonly', text: rate.state   || '*' } ),
-								$( '<td>', { class: 'readonly', text: rate.rate    || ''  } ),
-								$( '<td>', { class: 'readonly', text: rate.name    || ''  } )
+								$( '<td>', { 'class': 'readonly', text: rate.country || ''  } ),
+								$( '<td>', { 'class': 'readonly', text: rate.state   || '*' } ),
+								$( '<td>', { 'class': 'readonly', text: rate.rate    || ''  } ),
+								$( '<td>', { 'class': 'readonly', text: rate.name    || ''  } )
 							]
 						} ).appendTo( $rate_table );
 					} );
