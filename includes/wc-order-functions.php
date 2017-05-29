@@ -72,8 +72,10 @@ function wc_get_orders( $args ) {
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @since  2.2
+ *
  * @param  mixed $the_order Post object or post ID of the order.
- * @return WC_Order|WC_Refund
+ *
+ * @return bool|WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
@@ -369,9 +371,10 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 }
 
 /**
- * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER.
+ * Order Status completed - give downloadable product access to customer.
  *
  * @param int $order_id
+ * @param bool $force
  */
 function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
@@ -539,6 +542,12 @@ function wc_create_refund( $args = array() ) {
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
+
+		// this should remain after update_taxes(), as this will save the order, and write the current date to the db
+		// so we must wait until the order is persisted to set the date
+		if ( isset( $args['date_created'] ) ) {
+			$refund->set_date_created( $args['date_created'] );
+		}
 
 		/**
 		 * Action hook to adjust refund before save.

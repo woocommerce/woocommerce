@@ -275,6 +275,10 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 	/**
 	 * Return settings associated with this payment gateway.
+	 *
+	 * @param WC_Payment_Gateway $gateway
+	 *
+	 * @return array
 	 */
 	public function get_settings( $gateway ) {
 		$settings = array();

@@ -80,7 +80,9 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $cat
 	 * @param int $depth Depth of category in reference to parents.
+	 * @param array $args
 	 * @param integer $current_object_id
 	 */
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
@@ -112,6 +114,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $cat
 	 * @param int $depth Depth of category. Not used.
 	 * @param array $args Only uses 'list' for whether should append to output.
 	 */

@@ -91,9 +91,12 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given ID
 	 *
 	 * @since 2.1
+	 *
 	 * @param int $id the coupon ID
 	 * @param string $fields fields to include in response
+	 *
 	 * @return array|WP_Error
+	 * @throws WC_API_Exception
 	 */
 	public function get_coupon( $id, $fields = null ) {
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
@@ -138,8 +141,10 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the total number of coupons
 	 *
 	 * @since 2.1
+	 *
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_coupons_count( $filter = array() ) {
 
@@ -188,7 +193,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @param int $id the coupon ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_coupon( $id, $data ) {
 
@@ -206,7 +211,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_coupon( $id, $force = false ) {
 

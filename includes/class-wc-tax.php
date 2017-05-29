@@ -131,7 +131,10 @@ class WC_Tax {
 	 *      return round( $in / 5, 2 ) * 5;
 	 * }
 	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
-	 * @return double
+	 *
+	 * @param float|int $in
+	 *
+	 * @return float
 	 */
 	public static function round( $in ) {
 		return apply_filters( 'woocommerce_tax_round', round( $in, self::$precision ), $in );
@@ -299,6 +302,11 @@ class WC_Tax {
 
 	/**
 	 * Does the sort comparison.
+	 *
+	 * @param object $rate1
+	 * @param object $rate2
+	 *
+	 * @return int
 	 */
 	private static function sort_rates_callback( $rate1, $rate2 ) {
 		if ( $rate1->tax_rate_priority !== $rate2->tax_rate_priority ) {
@@ -836,7 +844,7 @@ class WC_Tax {
 	 * @param int $tax_rate_id
 	 * @param string $output_type
 	 *
-	 * @return array
+	 * @return array|object
 	 */
 	public static function _get_tax_rate( $tax_rate_id, $output_type = ARRAY_A ) {
 		global $wpdb;
@@ -950,8 +958,10 @@ class WC_Tax {
 	 * @since 2.3.0
 	 * @access private
 	 *
-	 * @param  int $tax_rate_id
+	 * @param int $tax_rate_id
+	 * @param array $values
 	 * @param string $type
+	 *
 	 * @return string
 	 */
 	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {

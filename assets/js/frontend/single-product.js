@@ -214,10 +214,10 @@ jQuery( function( $ ) {
 					large_image_w   = img.attr( 'data-large_image_width' ),
 					large_image_h   = img.attr( 'data-large_image_height' ),
 					item            = {
-						src: large_image_src,
-						w:   large_image_w,
-						h:   large_image_h,
-						title: img.attr( 'title' )
+						src  : large_image_src,
+						w    : large_image_w,
+						h    : large_image_h,
+						title: img.attr( 'data-caption' ) ? img.attr( 'data-caption' ) : img.attr( 'title' )
 					};
 				items.push( item );
 			} );

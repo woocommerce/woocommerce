@@ -630,6 +630,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 *
+	 * @return bool|void
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value, $deprecated = '' ) {
@@ -808,15 +810,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return 'tax_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
-		} else {
-			return '';
 		}
+		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
 
 	/**
 	 * Remove item from the order.
 	 *
 	 * @param int $item_id
+	 *
+	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
 		$item = $this->get_item( $item_id );
@@ -835,6 +838,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
+	 *
+	 * * @return false|void
 	 */
 	public function add_item( $item ) {
 		if ( ! $items_key = $this->get_items_key( $item ) ) {
@@ -1393,6 +1398,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets shipping (formatted).
 	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
@@ -1433,6 +1440,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 * @since  2.3.0
+	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
@@ -1574,6 +1584,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Checks the order status against a passed in status.
+	 *
+	 * @param array|string $status
 	 *
 	 * @return bool
 	 */

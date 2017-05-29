@@ -170,7 +170,7 @@ class WC_Admin_Duplicate_Product {
 	 *
 	 * @deprecated 3.0.0
 	 * @param mixed $id
-	 * @return WP_Post|bool
+	 * @return object|bool
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {
