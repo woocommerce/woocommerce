@@ -429,8 +429,6 @@ class WC_Admin_Setup_Wizard {
 		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
 		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
 		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
-		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
-		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
 
 		update_option( 'woocommerce_default_country', $store_location );
 		update_option( 'woocommerce_currency', $currency_code );
@@ -438,10 +436,8 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
 		update_option( 'woocommerce_price_num_decimals', $num_decimals );
 		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
-		update_option( 'woocommerce_weight_unit', $weight_unit );
-		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		$enable_taxes     = isset( $_POST['woocommerce_calc_taxes'] );
+		$enable_taxes   = isset( $_POST['woocommerce_calc_taxes'] );
 		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
 
@@ -582,9 +578,13 @@ class WC_Admin_Setup_Wizard {
 		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] ) && ( 'yes' === $_POST['woocommerce_calc_shipping'] );
 		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 		$install_services = isset( $_POST['woocommerce_install_services'] );
+		$weight_unit      = sanitize_text_field( $_POST['weight_unit'] );
+		$dimension_unit   = sanitize_text_field( $_POST['dimension_unit'] );
 
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
+			update_option( 'woocommerce_weight_unit', $weight_unit );
+			update_option( 'woocommerce_dimension_unit', $dimension_unit );
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 
 			/*
