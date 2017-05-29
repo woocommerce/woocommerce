@@ -61,7 +61,7 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
 
 	$notices = WC()->session->get( 'wc_notices', array() );
 	$notices = isset( $notices[ $notice_type ] ) ? $notices[ $notice_type ] : array();
-	return array_search( $message, $notices ) !== false;
+	return in_array( $message, $notices );
 }
 
 /**
