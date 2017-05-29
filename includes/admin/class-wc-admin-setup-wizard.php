@@ -526,7 +526,7 @@ class WC_Admin_Setup_Wizard {
 
 		if ( in_array( $base_location['country'], array( 'US', 'CA' ) ) ) : ?>
 		<div class="wc-wizard-shipping-description">
-			<input type="checkbox" name="wc-wizard-shipping-woo-services" class="input-checkbox" value="woo-services-enabled" checked />
+			<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
 			<?php esc_html_e( 'Use WooCommerce Services', 'woocommerce' ); ?>
 			<?php esc_html_e( 'Provide your customers with accurate shipping prices, and help cover your shipping costs with live shipping rates, discounted label purchasing and printing services. All powered by Jetpack and WordPress.com.', 'woocommerce' ); ?>
 		</div>
@@ -614,6 +614,7 @@ class WC_Admin_Setup_Wizard {
 
 		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] ) && ( 'yes' === $_POST['woocommerce_calc_shipping'] );
 		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
+		$install_services = isset( $_POST['woocommerce_install_services'] );
 
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
@@ -634,6 +635,15 @@ class WC_Admin_Setup_Wizard {
 				$zone->set_zone_name( $zone->get_formatted_location() );
 				$zone->add_shipping_method( 'free_shipping' );
 				$zone->save();
+			}
+
+			if ( $install_services ) {
+				$services_plugin_id = 'woocommerce-services';
+				$services_plugin    = array(
+					'repo-slug' => 'woocommerce-services',
+				);
+
+				wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
 			}
 		} else {
 			update_option( 'woocommerce_ship_to_countries', 'disabled' );
