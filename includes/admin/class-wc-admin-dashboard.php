@@ -254,6 +254,7 @@ class WC_Admin_Dashboard {
 			AND comments.comment_type = ''
 			AND posts.post_password = ''
 			AND posts.post_type = 'product'
+			AND comments.comment_parent = 0
 			ORDER BY comments.comment_date_gmt DESC
 			LIMIT 5
 		" );
