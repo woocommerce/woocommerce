@@ -70,10 +70,10 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_locale' ),
 				'handler' => array( $this, 'wc_setup_locale_save' ),
 			),
-			'shipping_taxes' => array(
+			'shipping' => array(
 				'name'    => __( 'Shipping', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
-				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
+				'view'    => array( $this, 'wc_setup_shipping' ),
+				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
 			'payments' => array(
 				'name'    => __( 'Payments', 'woocommerce' ),
@@ -305,7 +305,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale settings.
+	 * Locale and Tax settings.
 	 */
 	public function wc_setup_locale() {
 		$user_location  = WC_Geolocation::geolocate_ip();
@@ -418,7 +418,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save Locale Settings.
+	 * Save Locale and Tax settings.
 	 */
 	public function wc_setup_locale_save() {
 		check_admin_referer( 'wc-setup' );
@@ -503,9 +503,9 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Shipping and taxes.
+	 * Shipping.
 	 */
-	public function wc_setup_shipping_taxes() {
+	public function wc_setup_shipping() {
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
@@ -570,9 +570,9 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save shipping and tax options.
+	 * Save shipping options.
 	 */
-	public function wc_setup_shipping_taxes_save() {
+	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
 		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] ) && ( 'yes' === $_POST['woocommerce_calc_shipping'] );
