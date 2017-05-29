@@ -683,7 +683,14 @@ class WC_Cart {
 		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
 			$this->get_cart_from_session();
 		}
-		return array_filter( (array) $this->cart_contents );
+
+        /**
+         * Filter Cart Contents
+         *
+         * @param array   $cart_contents The content of the cart.
+         * @param WC_Cart $this          The cart instance.
+         */
+		return apply_filters('woocommerce_get_cart_contents', array_filter( (array) $this->cart_contents ), $this);
 	}
 
 	/**
