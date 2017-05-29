@@ -343,6 +343,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
 			'images'            => array( $this, 'parse_images_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
+			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
 			'download_limit'    => 'absint',
@@ -447,6 +448,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Backorders is bool.
 		if ( isset( $data['backorders'] ) ) {
 			$data['backorders'] = $data['backorders'] ? 'yes' : 'no';
+		}
+
+		// Prepare grouped products.
+		if ( isset( $data['grouped_products'] ) ) {
+			$data['children'] = $data['grouped_products'];
+			unset( $data['grouped_products'] );
 		}
 
 		// Handle special column names which span multiple columns.
