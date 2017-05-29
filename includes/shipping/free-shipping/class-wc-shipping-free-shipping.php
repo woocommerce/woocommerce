@@ -148,15 +148,13 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 
-		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
-			if ( $coupons = WC()->cart->get_coupons() ) {
-				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
-						$has_coupon = true;
-						break;
-					}
-				}
-			}
+		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) && $coupons = WC()->cart->get_coupons() ) {
+            foreach ( $coupons as $code => $coupon ) {
+                if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
+                    $has_coupon = true;
+                    break;
+                }
+            }
 		}
 
 		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {

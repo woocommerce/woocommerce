@@ -104,12 +104,10 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 		parent::update_customer_meta_fields( $customer, $request );
 
 		// Meta data.
-		if ( isset( $request['meta_data'] ) ) {
-			if ( is_array( $request['meta_data'] ) ) {
-				foreach ( $request['meta_data'] as $meta ) {
-					$customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
+		if ( isset( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
+            foreach ( $request['meta_data'] as $meta ) {
+                $customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+            }
 		}
 	}
 
