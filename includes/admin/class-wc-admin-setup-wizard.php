@@ -486,6 +486,10 @@ class WC_Admin_Setup_Wizard {
 	protected function wc_setup_wcs_tout() {
 		$base_location = wc_get_base_location();
 
+		if ( false === $base_location['country'] ) {
+			$base_location = WC_Geolocation::geolocate_ip();
+		}
+
 		if ( in_array( $base_location['country'], array( 'US', 'CA' ) ) ) : ?>
 		<div class="wc-wizard-shipping-services-description">
 			<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
