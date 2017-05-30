@@ -30,7 +30,7 @@ class WC_Helper {
 	 */
 	public static function load() {
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 80 );
+		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
 		add_filter( 'extra_plugin_headers', array( __CLASS__, 'extra_headers' ) );
 		add_filter( 'extra_theme_headers', array( __CLASS__, 'extra_headers' ) );
@@ -58,22 +58,9 @@ class WC_Helper {
 	}
 
 	/**
-	 * Add a submenu in wp-admin
-	 */
-	public static function admin_menu() {
-		add_submenu_page( 'woocommerce',
-			__( 'Helper', 'woocommerce' ),
-			__( 'Helper', 'woocommerce' ),
-			'manage_woocommerce',
-			'wc-helper',
-			array( __CLASS__, 'admin_menu_render_helper' )
-		);
-	}
-
-	/**
 	 * Render the helper section content based on context.
 	 */
-	public static function admin_menu_render_helper() {
+	public static function render_helper_output() {
 		$auth = WC_Helper_Options::get( 'auth' );
 		$auth_user_data = WC_Helper_Options::get( 'auth_user_data' );
 
@@ -83,7 +70,8 @@ class WC_Helper {
 		// No active connection.
 		if ( empty( $auth['access_token'] ) ) {
 			$connect_url = add_query_arg( array(
-				'page' => 'wc-helper',
+				'page' => 'wc-addons',
+				'section' => 'helper',
 				'wc-helper-connect' => 1,
 				'wc-helper-nonce' => wp_create_nonce( 'connect' ),
 			), admin_url( 'admin.php' ) );
@@ -92,13 +80,15 @@ class WC_Helper {
 			return;
 		}
 		$disconnect_url = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-disconnect' => 1,
 			'wc-helper-nonce' => wp_create_nonce( 'disconnect' ),
 		), admin_url( 'admin.php' ) );
 
 		$refresh_url = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-refresh' => 1,
 			'wc-helper-nonce' => wp_create_nonce( 'refresh' ),
 		), admin_url( 'admin.php' ) );
@@ -116,7 +106,8 @@ class WC_Helper {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
 
 			$subscription['activate_url'] = add_query_arg( array(
-				'page' => 'wc-helper',
+				'page' => 'wc-addons',
+				'section' => 'helper',
 				'wc-helper-activate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -124,7 +115,8 @@ class WC_Helper {
 			), admin_url( 'admin.php' ) );
 
 			$subscription['deactivate_url'] = add_query_arg( array(
-				'page' => 'wc-helper',
+				'page' => 'wc-addons',
+				'section' => 'helper',
 				'wc-helper-deactivate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -190,7 +182,8 @@ class WC_Helper {
 	 */
 	public static function admin_enqueue_scripts() {
 		$screen = get_current_screen();
-		if ( 'woocommerce_page_wc-helper' == $screen->id ) {
+
+		if ( 'woocommerce_page_wc-addons' == $screen->id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
 		}
 	}
@@ -237,7 +230,8 @@ class WC_Helper {
 
 				if ( $local && is_plugin_active( $local['_filename'] ) && current_user_can( 'activate_plugins' ) ) {
 					$deactivate_plugin_url = add_query_arg( array(
-						'page' => 'wc-helper',
+						'page' => 'wc-addons',
+						'section' => 'helper',
 						'wc-helper-deactivate-plugin' => 1,
 						'wc-helper-product-id' => $subscription['product_id'],
 						'wc-helper-nonce' => wp_create_nonce( 'deactivate-plugin:' . $subscription['product_id'] ),
@@ -313,7 +307,11 @@ class WC_Helper {
 	 * Various early-phase actions with possible redirects.
 	 */
 	public static function current_screen( $screen ) {
-		if ( 'woocommerce_page_wc-helper' != $screen->id ) {
+		if ( 'woocommerce_page_wc-addons' != $screen->id ) {
+			return;
+		}
+
+		if ( empty( $_GET['section'] ) || 'helper' !== $_GET['section'] ) {
 			return;
 		}
 
@@ -356,7 +354,8 @@ class WC_Helper {
 		}
 
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-return' => 1,
 			'wc-helper-nonce' => wp_create_nonce( 'connect' ),
 		), admin_url( 'admin.php' ) );
@@ -402,7 +401,7 @@ class WC_Helper {
 
 		// Bail if the user clicked deny.
 		if ( ! empty( $_GET['deny'] ) ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-helper' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-addons&section=helper' ) );
 			die();
 		}
 
@@ -451,7 +450,8 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 
 		wp_safe_redirect( add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => 'helper-connected',
 		), admin_url( 'admin.php' ) ) );
 		die();
@@ -467,7 +467,8 @@ class WC_Helper {
 		}
 
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => 'helper-disconnected',
 		), admin_url( 'admin.php' ) );
 
@@ -495,7 +496,8 @@ class WC_Helper {
 		}
 
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => 'helper-refreshed',
 		), admin_url( 'admin.php' ) );
 
@@ -540,7 +542,8 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => $activated ? 'activate-success' : 'activate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -576,7 +579,8 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => $deactivated ? 'deactivate-success' : 'deactivate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -615,7 +619,8 @@ class WC_Helper {
 		}
 
 		$redirect_uri = add_query_arg( array(
-			'page' => 'wc-helper',
+			'page' => 'wc-addons',
+			'section' => 'helper',
 			'wc-helper-status' => $deactivated ? 'deactivate-plugin-success' : 'deactivate-plugin-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -993,7 +998,7 @@ class WC_Helper {
 
 		/* translators: %1$s: helper url, %2$d: number of extensions */
 		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
-			admin_url( 'admin.php?page=wc-helper' ), $available );
+			admin_url( 'admin.php?page=wc-addons&section=helper' ), $available );
 	}
 
 	/**

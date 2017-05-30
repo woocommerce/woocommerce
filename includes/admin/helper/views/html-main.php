@@ -1,9 +1,10 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
-<div class="wrap wc-helper">
-	<h1><?php _e( 'WooCommerce Helper', 'woocommerce' ); ?></h1>
+<div class="wrap woocommerce wc_addons_wrap wc-helper">
+	<h1><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php include( WC_Helper::get_view_filename( 'html-section-notices.php' ) ); ?>
+	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
 	<?php include( WC_Helper::get_view_filename( 'html-section-account.php' ) ); ?>
 
 	<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
