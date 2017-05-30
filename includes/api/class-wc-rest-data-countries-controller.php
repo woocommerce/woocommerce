@@ -97,19 +97,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 			}
 		}
 		$country['states'] = $local_states;
-		$response = $this->prepare_item_for_response( $country, $request );
-		$response = $this->prepare_response_for_collection( $response );
-
-		/**
-		 * Filter the states list for a country returned from the API.
-		 *
-		 * Allows modification of the loction data right before it is returned.
-		 *
-		 * @param WP_REST_Response $response The response object.
-		 * @param array            $data     The original country's states list.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_country', $response, $country, $request );
+		return $country;
 	}
 
 	/**
@@ -124,7 +112,9 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		$data      = array();
 
 		foreach ( array_keys( $countries ) as $country_code ) {
-			$data[] = $this->get_country( $country_code, $request );
+			$country  = $this->get_country( $country_code, $request );
+			$response = $this->prepare_item_for_response( $country, $request );
+			$data[]   = $this->prepare_response_for_collection( $response );
 		}
 
 		return rest_ensure_response( $data );
@@ -142,7 +132,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		if ( empty( $data ) ) {
 			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-		return rest_ensure_response( $data );
+		return $this->prepare_item_for_response( $data, $request );
 	}
 
 	/**
@@ -155,8 +145,20 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$response = rest_ensure_response( $item );
-		$response->add_links( $this->prepare_links( $item ) );
-		return $response;
+		if ( ! is_wp_error( $item ) ) {
+			$response->add_links( $this->prepare_links( $item ) );
+		}
+
+		/**
+		 * Filter the states list for a country returned from the API.
+		 *
+		 * Allows modification of the loction data right before it is returned.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param array            $data     The original country's states list.
+		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_data_country', $response, $item, $request );
 	}
 
 	/**

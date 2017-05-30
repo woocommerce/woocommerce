@@ -112,16 +112,28 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-		$response->add_links( array(
+		$response->add_links( $this->prepare_links( $resource ) );
+
+		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param object $item Data object.
+	 * @return array Links for the given country.
+	 */
+	protected function prepare_links( $item ) {
+		$links = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $resource->slug ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $item->slug ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
 			),
-		) );
+		);
 
-		return $response;
+		return $links;
 	}
 
 	/**

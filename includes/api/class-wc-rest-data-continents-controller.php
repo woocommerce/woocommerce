@@ -114,19 +114,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		}
 
 		$continent['countries'] = $local_countries;
-		$response = $this->prepare_item_for_response( $continent, $request );
-		$response = $this->prepare_response_for_collection( $response );
-
-		/**
-		 * Filter the location list returned from the API.
-		 *
-		 * Allows modification of the loction data right before it is returned.
-		 *
-		 * @param WP_REST_Response $response The response object.
-		 * @param array            $data     The original list of continent(s), countries, and states.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $continent, $request );
+		return $continent;
 	}
 
 	/**
@@ -141,7 +129,9 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		$data       = array();
 
 		foreach ( array_keys( $continents ) as $continent_code ) {
-			$data[] = $this->get_continent( $continent_code, $request );
+			$continent = $this->get_continent( $continent_code, $request );
+			$response  = $this->prepare_item_for_response( $continent, $request );
+			$data[]    = $this->prepare_response_for_collection( $response );
 		}
 
 		return rest_ensure_response( $data );
@@ -159,7 +149,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		if ( empty( $data ) ) {
 			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-		return rest_ensure_response( $data );
+		return $this->prepare_item_for_response( $data, $request );
 	}
 
 	/**
@@ -175,7 +165,17 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		if ( ! is_wp_error( $item ) ) {
 			$response->add_links( $this->prepare_links( $item ) );
 		}
-		return $response;
+
+		/**
+		 * Filter the location list returned from the API.
+		 *
+		 * Allows modification of the loction data right before it is returned.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param array            $item     The original list of continent(s), countries, and states.
+		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $item, $request );
 	}
 
 	/**
@@ -185,21 +185,15 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	 * @return array Links for the given continent.
 	 */
 	protected function prepare_links( $item ) {
-		$links = array();
-		if ( array_key_exists( 'code', $item ) ) {
-			$continent_code = strtolower( $item['code'] );
-			$links['self'] = array(
+		$continent_code = strtolower( $item['code'] );
+		$links = array(
+			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $continent_code ) ),
-			);
-			$links['collection'] = array(
+			),
+			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
-			);
-		} else {
-			$links['self'] = array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
-			);
-		}
-
+			),
+		);
 		return $links;
 	}
 

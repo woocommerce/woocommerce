@@ -73,7 +73,8 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'NA', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertNotEmpty( $locations['countries'] );
-		$this->assertNotEmpty( $locations['_links'] );
+		$links = $response->get_links();
+		$this->assertCount( 2, $links );
 	}
 
 	/**
@@ -105,7 +106,8 @@ class Data_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'US', $locations['code'] );
 		$this->assertNotEmpty( $locations['name'] );
 		$this->assertCount( 54, $locations['states'] );
-		$this->assertNotEmpty( $locations['_links'] );
+		$links = $response->get_links();
+		$this->assertCount( 2, $links );
 	}
 
 	/**
