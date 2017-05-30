@@ -107,7 +107,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 									$product_quantity = woocommerce_quantity_input( array(
 										'input_name'  => "cart[{$cart_item_key}][qty]",
 										'input_value' => $cart_item['quantity'],
-										'max_value'   => $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(),
+										'max_value'   => $_product->get_max_purchase_quantity(),
 										'min_value'   => '0',
 									), $_product, false );
 								}
