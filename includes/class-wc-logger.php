@@ -129,6 +129,7 @@ class WC_Logger implements WC_Logger_Interface {
 
 		if ( $this->should_handle( $level ) ) {
 			$timestamp = current_time( 'timestamp' );
+			$message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context );
 
 			foreach ( $this->handlers as $handler ) {
 				$handler->handle( $timestamp, $level, $message, $context );
