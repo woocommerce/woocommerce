@@ -432,7 +432,8 @@ abstract class WC_Data {
 		}
 
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
+			// Prefix by group allows invalidation by group until https://core.trac.wordpress.org/ticket/4476 is implemented.
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
 		}
 
 		if ( ! $force_read ) {
@@ -480,9 +481,9 @@ abstract class WC_Data {
 				$this->data_store->update_meta( $this, $meta );
 			}
 		}
-
 		if ( ! empty( $this->cache_group ) ) {
-			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			wp_cache_delete( $cache_key, $this->cache_group );
 		}
 	}
 
