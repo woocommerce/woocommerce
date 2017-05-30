@@ -462,8 +462,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( count( $attributes ) ) {
 				$i = 1;
 				foreach ( $attributes as $attribute_name => $attribute ) {
-					$this->column_names[ 'attributes:name' . $i ]  = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:name' . $i ]    = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:value' . $i ]   = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:visible' . $i ] = sprintf( __( 'Attribute %d visible', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
@@ -480,6 +481,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						} else {
 							$row[ 'attributes:value' . $i ] = implode( ', ', $attribute->get_options() );
 						}
+
+						$row[ 'attributes:visible' . $i ] = $attribute->get_visible();
 					} else {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
 
@@ -489,6 +492,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						} else {
 							$row[ 'attributes:value' . $i ] = $attribute;
 						}
+
+						$row[ 'attributes:visible' . $i ] = '';
 					}
 
 					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
