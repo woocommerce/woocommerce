@@ -232,12 +232,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$images    = array();
 
 		foreach ( $image_ids as $image_id ) {
-			$image  = wp_get_attachment_image_src( $product->get_image_id( 'edit' ), 'full' );
+			$image  = wp_get_attachment_image_src( $image_id, 'full' );
 
 			if ( $image ) {
 				$images[] = $image[0];
 			}
 		}
+
 		return implode( ', ', $images );
 	}
 
