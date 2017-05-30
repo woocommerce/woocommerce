@@ -307,6 +307,35 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the outputting of an image banner block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_image_banner_block( $block ) {
+		?>
+		<div class="addons-image-banner-block">
+			<h1><?php echo esc_html( $block->title ); ?></h1>
+			<div class="addons-image-banner-block-content">
+				<div class="addons-image-banner-block-image">
+					<img class="addons-img" src="<?php echo esc_url( $block->image ) ?>" />
+				</div>
+				<div class="addons-image-banner-block-text">
+					<h2><?php echo esc_html( $block->subtitle ); ?></h2>
+					<p><?php echo esc_html( $block->description ); ?></p>
+					<?php
+						self::output_button(
+							$block->href,
+							$block->button,
+							'addons-button-solid-grey addons-button-large'
+						);
+					?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections
