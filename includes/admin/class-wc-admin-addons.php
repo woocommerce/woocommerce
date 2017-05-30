@@ -361,6 +361,9 @@ class WC_Admin_Addons {
 				case 'small_dark_block':
 					self::output_small_dark_block( $section );
 					break;
+				case 'image_banner_block':
+					self::output_image_banner_block( $section );
+					break;
 			}
 		}
 	}
