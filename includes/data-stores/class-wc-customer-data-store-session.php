@@ -17,6 +17,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @var array
 	 */
 	protected $session_keys = array(
+		'id',
 		'billing_postcode',
 		'billing_city',
 		'billing_address_1',
@@ -81,14 +82,15 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Read customer data from the session.
+	 * Read customer data from the session unless the user has logged in, in
+	 * which case the stored ID will differ from the actual ID.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer
 	 */
 	public function read( &$customer ) {
 		$data = (array) WC()->session->get( 'customer' );
-		if ( ! empty( $data ) ) {
+		if ( ! empty( $data ) && isset( $data['id'] ) && $data['id'] === $customer->get_id() ) {
 			foreach ( $this->session_keys as $session_key ) {
 				$function_key = $session_key;
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
