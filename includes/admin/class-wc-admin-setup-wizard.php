@@ -510,8 +510,18 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
-		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
-		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit', false );
+		$weight_unit    = get_option( 'woocommerce_weight_unit', false );
+		if ( false === $dimension_unit || false === $weight_unit ) {
+			$country = get_option( 'woocommerce_default_country', '' );
+			if ( 0 === strpos( $country, 'US:' ) ) {
+				$dimension_unit = 'in';
+				$weight_unit = 'oz';
+			} else {
+				$dimension_unit = 'cm';
+				$weight_unit = 'kg';
+			}
+		}
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
