@@ -10,15 +10,18 @@
 	<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
 	<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
 
-	<table class="wp-list-table widefat fixed striped ">
-		<thead>
-			<tr>
-				<th><?php _e( 'Product', 'woocommerce' ); ?></th>
-				<th><?php _e( 'Subscription', 'woocommerce' ); ?></th>
-				<th><?php _e( 'Site Usage', 'woocommerce' ); ?></th>
-				<th><?php _e( 'Action', 'woocommerce' ); ?></th>
-			</tr>
-		</thead>
+	<!--<div class="subscription-filter">
+		<label>Sort by: <span class="chevron dashicons dashicons-arrow-up-alt2"></span></label>
+		<span >All (10)</span>
+		<a href="#">Active (4)</a>
+		<a href="#">Inactive (6)</a>
+		<a href="#">Update Available (4)</a>
+		<a href="#">Expiring Soon (4)</a>
+		<a href="#">Expired (1)</a>
+		<a href="#">Download (1)</a>
+	</div>-->
+
+	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>
 			<?php foreach ( $subscriptions as $subscription ) : ?>
 				<?php
@@ -51,104 +54,140 @@
 
 					$classes = array_keys( $classes );
 				?>
-				<tr>
-					<td class="<?php echo implode( ' ', $classes ); ?>">
-						<a class="product-name" href="<?php echo esc_url( $subscription['product_url'] ); ?>" target="_blank"><?php
-							echo esc_html( $subscription['product_name'] ); ?></a><br>
-						<?php if ( $update_available && $connected && ! $subscription['expired'] ) : ?>
-							<?php /* translators: %s: version number */ ?>
-							<a href="<?php echo admin_url( 'update-core.php' ); ?>"><?php printf( __( 'Update to %s', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?></a>
-						<?php endif; ?>
+				<tbody>
+				<tr class="wp-list-table__row is-ext-header">
+					<td class="wp-list-table__ext-details <?php echo implode( ' ', $classes ); ?>">
+						<div class="wp-list-table__ext-title">
+							<a href="<?php echo esc_url( $subscription['product_url'] ); ?>" target="_blank"><?php
+								echo esc_html( $subscription['product_name'] ); ?></a>
+						</div>
 
-						<?php if ( $update_available && $connected && $subscription['expired'] ) : ?>
-							<?php /* translators: %s: version number */ ?>
-							<?php printf( __( '%s available', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
-							<a href="#">[?]</a><!-- Sub is active but expired -->
-						<?php endif; ?>
-
-						<?php if ( $update_available && ! $connected ) : ?>
-							<?php /* translators: %s: version number */ ?>
-							<?php printf( __( '%s available', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
-							<a href="#">[?]</a><!-- Subscription must be active to receive updates -->
-						<?php endif; ?>
-
-						<?php if ( ! $installed && $update_available ) : ?>
-							<?php /* translators: %s: version number */ ?>
-							<strong><?php printf( __( '%s available', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?></strong>
-						<?php endif; ?>
-					</td>
-					<td>
-						<?php if ( $subscription['expired'] ) : ?>
-							<strong><span class="expired" style="color: #B81C23;"><?php _e( 'Expired :(', 'woocommerce' ); ?></span></strong><br>
-							<strong><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></strong>
-						<?php elseif ( $subscription['autorenew'] ) : ?>
-							<span class="renews" style="color: black;"><?php _e( 'Auto renews on:', 'woocommerce' ); ?></span><br>
-							<span><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></span>
-						<?php elseif ( $subscription['expiring'] ) : ?>
-							<strong><span class="expiring" style="color: orange;"><?php _e( 'Expiring soon!', 'woocommerce' ); ?></span></strong><br>
-							<strong><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></strong>
-						<?php else : ?>
-							<span class="renews" style="color: black;"><?php _e( 'Expires on:', 'woocommerce' ); ?></span><br>
-							<span><?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?></span>
-						<?php endif; ?>
-					</td>
-					<td>
-						<?php echo esc_html( $subscription['key_type_label'] ); ?>
-						<?php
-							if ( $subscription['sites_max'] > 0 ) {
-								/* translators: %1$d: sites active, %2$d max sites active */
-								printf( __( '(%1$d of %2$d used)', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
-							}
-						?><br>
-						<?php if ( ! $installed ) : ?>
-							<?php _e( 'Not installed', 'woocommerce' ); ?><br>
-						<?php elseif ( $installed ) : ?>
-							<?php _e( 'Installed on this site', 'woocommerce' ); ?><br>
-						<?php endif; ?>
-					</td>
-					<td>
-						<?php if ( ! $subscription['expired'] ) : ?>
-							<?php if ( $connected ) : ?>
-								<?php if ( $update_available ) : ?>
-									<a class="button" href="<?php echo esc_url( $subscription['update_url'] ); ?>"><?php _e( 'Update', 'woocommerce' ); ?></a>
-								<?php endif; ?>
-								<?php if ( $subscription['expiring'] ) : ?>
-									<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/"><?php _e( 'Renew', 'woocommerce' ); ?></a>
-								<?php endif; ?>
-								<a class="button" href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>"><?php _e( 'Deactivate', 'woocommerce' ); ?></a>
+						<div class="wp-list-table__ext-description">
+							<?php if ( $subscription['expired'] ) : ?>
+								<span class="renews">
+									<strong><?php _e( 'Expired :(', 'woocommerce' ); ?></strong>
+									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
+								</span>
+							<?php elseif ( $subscription['autorenew'] ) : ?>
+								<span class="renews">
+									<?php _e( 'Auto renews on:', 'woocommerce' ); ?>
+									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
+								</span>
 							<?php elseif ( $subscription['expiring'] ) : ?>
-								<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/"><?php _e( 'Renew', 'woocommerce' ); ?></a>
-							<?php elseif ( $installed ) : ?>
-								<a class="button" href="<?php echo esc_url( $subscription['activate_url'] ); ?>"><?php _e( 'Activate', 'woocommerce' ); ?></a>
+								<span class="renews">
+									<strong><?php _e( 'Expiring soon!', 'woocommerce' ); ?></strong>
+									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
+								</span>
 							<?php else : ?>
-								<a class="button" href="<?php echo esc_url( $download_url ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
+								<span class="renews">
+									<?php _e( 'Expires on:', 'woocommerce' ); ?>
+									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
+								</span>
 							<?php endif; ?>
+
+							<br/>
+							<span class="subscription">
+							<?php
+								if ( $subscription['sites_max'] > 0 ) {
+									/* translators: %1$d: sites active, %2$d max sites active */
+									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
+								} else {
+									_e( 'Subscription: Unlimited', 'woocommerce' );
+								}
+							?>
+							</span>
+						</div>
+					</td>
+					<td class="wp-list-table__ext-actions">
+						<?php if ( ! $installed && ! $subscription['expired'] ) : ?>
+							<a class="button" href="<?php echo esc_url( $download_url ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
+						<?php elseif ( $connected ) : ?>
+							<!-- TODO: Replace with a toggle -->
+							<a class="button" href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>"><?php _e( 'Deactivate', 'woocommerce' ); ?></a>
+						<?php elseif ( ! $subscription['expired'] ) : ?>
+							<a class="button" href="<?php echo esc_url( $subscription['activate_url'] ); ?>"><?php _e( 'Activate', 'woocommerce' ); ?></a>
 						<?php else : ?>
-							<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Renew', 'woocommerce' ); ?></a>
+							<a class="button disabled" href="#"><?php _e( 'Activate', 'woocommerce' ); ?></a>
 						<?php endif; ?>
 					</td>
 				</tr>
 
+				<?php if ( $update_available && ! $subscription['expired'] ) : ?>
+				<tr class="wp-list-table__row wp-list-table__ext-updates">
+					<td class="wp-list-table__ext-status update-available">
+						<p><span class="dashicons dashicons-update"></span>
+							<?php /* translators: %s: version number */ ?>
+							<?php printf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
+							<?php if ( ! $connected ) : ?>
+								<?php _e( 'To enable this update you need to <strong>activate</strong> this subscription.', 'woocommerce' ); ?>
+							<?php endif; ?>
+						</p>
+					</td>
+					<td class="wp-list-table__ext-actions">
+						<?php if ( $connected ) : ?>
+							<a class="button" href="<?php echo esc_url( $subscription['update_url'] ); ?>"><?php _e( 'Update', 'woocommerce' ); ?></a>
+							<!-- TODO: Activate & Update -->
+						<?php endif; ?>
+					</td>
+				</tr>
+				<?php endif; ?>
+
+				<?php if ( $update_available && $subscription['expired'] ) : ?>
+				<tr class="wp-list-table__row wp-list-table__ext-updates">
+					<td class="wp-list-table__ext-status expired">
+						<p><span class="dashicons dashicons-info"></span>
+							<?php /* translators: %s: version number */ ?>
+							<?php printf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
+							<?php _e( 'To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ); ?>
+						</p>
+					</td>
+					<td class="wp-list-table__ext-actions">
+						<a class="button" href="<?php echo esc_url( $subscription['product_url'] ); ?>" target="_blank"><?php _e( 'Purchase', 'woocommerce' ); ?></a>
+					</td>
+				</tr>
+				<?php endif; ?>
+
+				<?php if ( $subscription['expiring'] && ! $subscription['autorenew'] ) : ?>
+				<tr class="wp-list-table__row wp-list-table__ext-updates">
+					<td class="wp-list-table__ext-status expired">
+						<p><span class="dashicons dashicons-info"></span>
+							<?php _e( 'Subscription is <strong>expiring</strong> soon.', 'woocommerce' ); ?>
+						</p>
+					</td>
+					<td class="wp-list-table__ext-actions">
+						<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Enable auto-renew', 'woocommerce' ); ?></a>
+					</td>
+				</tr>
+				<?php endif; ?>
+
+				<?php if ( ! $connected && $subscription['sites_max'] > 0 && $subscription['sites_active'] >= $subscription['sites_max'] ) : ?>
+				<tr class="wp-list-table__row wp-list-table__ext-updates">
+					<td class="wp-list-table__ext-status expired">
+						<p><span class="dashicons dashicons-info"></span>
+							<?php _e( 'You are already using the <strong>maximum number of sites available</strong> with your current subscription.', 'woocommerce' ); ?>
+						</p>
+					</td>
+					<td class="wp-list-table__ext-actions">
+						<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Upgrade', 'woocommerce' ); ?></a>
+					</td>
+				</tr>
+				<?php endif; ?>
+
+				</tbody>
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
 				<td colspan="3"><em><?php _e( 'Could not find any subscriptions on your WooCommerce.com account', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
+		</tbody>
 	</table>
 
 	<?php if ( ! empty( $no_subscriptions ) ) : ?>
-		<h2><?php _e( 'Installed Extensions Without a Subscription', 'woocommerce' ); ?></h2>
-		<table class="wp-list-table widefat fixed striped ">
-			<thead>
-				<tr>
-					<th><?php _e( 'Product', 'woocommerce' ); ?></th>
-					<th><?php _e( 'Subscription', 'woocommerce' ); ?></th>
-					<th></th>
-					<th><?php _e( 'Action', 'woocommerce' ); ?></th>
-				</tr>
-			</thead>
+		<h2><?php _e( 'Installed Extensions without a Subscription', 'woocommerce' ); ?></h2>
+		<p>Below is a list of WooCommerce.com products available on your site - but are either out-dated or do not have a valid subscription.</p>
 
+		<table class="wp-list-table widefat fixed striped">
 			<?php /* Extensions without a subscription. */ ?>
 			<?php foreach ( $no_subscriptions as $filename => $data ) : ?>
 				<?php
@@ -167,28 +206,43 @@
 					$product_url = $data['PluginURI'];
 				}
 				?>
-				<tr>
-					<td>
-						<?php /* translators: %1$s: product name, %2$s: product version */ ?>
-						<?php printf( __( '%1$s<br>%2$s installed', 'woocommerce' ), esc_html( $data['Name'] ), esc_html( $data['Version'] ) ); ?>
-						<?php if ( ! $update_available ) : ?>
-							<?php _e( '(latest)', 'woocommerce' ); ?>
-						<?php endif; ?>
-						<br>
+				<tbody>
+					<tr class="wp-list-table__row is-ext-header">
+						<td class="wp-list-table__ext-details color-bar autorenews">
+							<div class="wp-list-table__ext-title">
+								<a href="<?php echo esc_url( $product_url ); ?>" target="_blank"><?php echo esc_html( $data['Name'] ); ?></a>
+							</div>
+							<div class="wp-list-table__ext-description">
+							</div>
+						</td>
+						<td class="wp-list-table__ext-actions">
+							<span class="form-toggle__wrapper">
+								<input type="checkbox" class="form-toggle is-compact" readonly="" value="on">
+								<label class="form-toggle__label" for="activate-akismet-undefined">
+									<span class="form-toggle__label-content">
+										<label class="plugin-action__label" for="activate-akismet-undefined">Inactive</label>
+									</span>
+									<span class="form-toggle__switch" id="activate-akismet-undefined" role="checkbox" aria-checked="false" tabindex="0"></span>
+								</label>
+							</span>
+						</td>
+					</tr>
 
-						<?php if ( $update_available ) : ?>
-						<?php /* translators: %s: version number */ ?>
-						<strong><?php printf( __( '%s available', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?></strong>
-						<a href="#">[?]</a><!-- There must be an active subscription to receive updates -->
-						<?php endif; ?>
+					<?php if ( $update_available ) : ?>
+					<tr class="wp-list-table__row wp-list-table__ext-updates">
+						<td class="wp-list-table__ext-status update-available">
+							<p><span class="dashicons dashicons-update"></span>
+								<?php printf( __( 'Version %s is available. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
+							</p>
+						</td>
+						<td class="wp-list-table__ext-actions">
+							<a class="button" href="<?php echo esc_url( $product_url ); ?>" target="_blank"><?php _e( 'Purchase', 'woocommerce' ); ?></a>
+						</td>
+					</tr>
+					<?php endif; ?>
 
-					</td>
-					<td><?php _e( 'No/Invalid subscription', 'woocommerce' ); ?></td>
-					<td></td>
-					<td>
-						<a class="button" href="<?php echo esc_url( $product_url ); ?>" target="_blank"><?php _e( 'Purchase Subscription', 'woocommerce' ); ?></a>
-					</td>
-				</tr>
+				</tbody>
+
 			<?php endforeach; ?>
 		</table>
 	<?php endif; ?>
