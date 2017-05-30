@@ -52,6 +52,10 @@ class WC_Post_Data {
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
+
+		// Meta cache flushing.
+		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
+		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 	}
 
 	/**
@@ -432,6 +436,17 @@ class WC_Post_Data {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Flush meta cache for CRUD objects on direct update.
+	 * @param  int $meta_id
+	 * @param  int $object_id
+	 * @param  string $meta_key
+	 * @param  string $meta_value
+	 */
+	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
+		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
 	}
 }
 
