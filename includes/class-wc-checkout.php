@@ -562,9 +562,6 @@ class WC_Checkout {
 				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
-
-				// BW compatibility.
-				$this->legacy_posted_data[ $key ] = $data[ $key ];
 			}
 		}
 
@@ -573,6 +570,9 @@ class WC_Checkout {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
 			}
 		}
+
+		// BW compatibility.
+		$this->legacy_posted_data = $data;
 
 		return $data;
 	}
