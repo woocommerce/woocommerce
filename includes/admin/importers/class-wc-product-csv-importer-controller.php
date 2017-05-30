@@ -435,9 +435,9 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Download limit', 'woocommerce' )                          => 'download_limit',
 			__( 'Download expiry days', 'woocommerce' )                    => 'download_expiry',
 			__( 'Parent', 'woocommerce' )                                  => 'parent_id',
-			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'Upsells', 'woocommerce' )                                 => 'upsell_ids',
 			__( 'Cross-sells', 'woocommerce' )                             => 'cross_sell_ids',
+			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'External URL', 'woocommerce' )                            => 'product_url',
 			__( 'Button text', 'woocommerce' )                             => 'button_text',
 		) );
@@ -547,9 +547,9 @@ class WC_Product_CSV_Importer_Controller {
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
 			'images'             => __( 'Images', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
-			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
 			'external'           => array(
 				'name'    => __( 'External product', 'woocommerce' ),
 				'options' => array(
