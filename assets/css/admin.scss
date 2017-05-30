@@ -33,7 +33,8 @@
 		justify-content: center;
 	}
 
-	.addons-banner-block {
+	.addons-banner-block,
+	.addons-wcs-banner-block {
 		background: #ffffff;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
 		margin: 2% 1% 0;
@@ -86,6 +87,23 @@
 
 	.addons-banner-block-item-content p {
 		margin: 0 0 auto;
+	}
+
+	.addons-wcs-banner-block {
+		display: flex;
+		align-items: center;
+
+		.addons-img {
+			margin-right: 2em;
+			margin-left: 1em;
+			max-height: 200px;
+			max-width: 200px;
+		}
+	}
+
+	.addons-wcs-banner-block-content {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.addons-column-section {

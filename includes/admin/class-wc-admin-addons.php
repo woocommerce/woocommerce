@@ -307,6 +307,60 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the outputting of the WooCommerce Services banner block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_wcs_banner_block( $block = null ) {
+		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
+
+		if (
+			'US' !== wc_get_base_location()['country'] ||
+			$is_active ||
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$image = empty( $block->image )
+			? WC()->plugin_url() . '/assets/images/wcs-extensions-banner.png'
+			: $block->image;
+		$image_alt = __( 'WooCommerce Services', 'woocommerce' );
+		$title = empty( $block->title )
+			? __( 'Transform your store into a shipping and fulfillment machine', 'woocommerce' )
+			: $block->title;
+		$description = empty( $block->description )
+			? __( 'WooCommerce Services makes shipping a breeze. Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' )
+			: $block->description;
+		$button = __( 'Free - Install now', 'woocommerce' );
+		$url = wp_nonce_url(
+			self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce-services' ),
+			'install-plugin_woocommerce-services'
+		);
+		?>
+		<div class="addons-wcs-banner-block">
+			<img
+				class="addons-img"
+				src="<?php echo esc_url( $image ); ?>"
+				alt="<?php echo esc_attr( $image_alt ); ?>"
+			/>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $title ); ?></h1>
+				<p><?php echo esc_html( $description ); ?></p>
+				<?php
+					self::output_button(
+						$url,
+						$button,
+						'addons-button-solid'
+					);
+				?>
+			</div>
+		</div>
+	<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections
