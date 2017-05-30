@@ -530,7 +530,7 @@ class WC_Admin_Setup_Wizard {
 						<?php $this->wc_setup_wcs_tout(); ?>
 						<table class="form-table">
 							<tr>
-								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Default weight unit', 'woocommerce' ); ?></label></th>
+								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
 								<td>
 									<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
 										<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
@@ -541,7 +541,7 @@ class WC_Admin_Setup_Wizard {
 								</td>
 							</tr>
 							<tr>
-								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Default dimension unit', 'woocommerce' ); ?></label></th>
+								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label></th>
 								<td>
 									<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
 										<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
