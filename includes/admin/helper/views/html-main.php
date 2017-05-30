@@ -1,25 +1,14 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
 <div class="wrap woocommerce wc_addons_wrap wc-helper">
-	<h1><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
+	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
+	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php include( WC_Helper::get_view_filename( 'html-section-notices.php' ) ); ?>
-	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
 	<?php include( WC_Helper::get_view_filename( 'html-section-account.php' ) ); ?>
 
 	<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
 	<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
-
-	<!--<div class="subscription-filter">
-		<label>Sort by: <span class="chevron dashicons dashicons-arrow-up-alt2"></span></label>
-		<span >All (10)</span>
-		<a href="#">Active (4)</a>
-		<a href="#">Inactive (6)</a>
-		<a href="#">Update Available (4)</a>
-		<a href="#">Expiring Soon (4)</a>
-		<a href="#">Expired (1)</a>
-		<a href="#">Download (1)</a>
-	</div>-->
 
 	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>
