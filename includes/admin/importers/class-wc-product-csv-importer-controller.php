@@ -445,13 +445,14 @@ class WC_Product_CSV_Importer_Controller {
 			array( $this, 'sanitize_special_column_name_regex' ),
 			apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
 				array(
-					'attributes:name'    => __( 'Attribute %d name', 'woocommerce' ),
-					'attributes:value'   => __( 'Attribute %d value(s)', 'woocommerce' ),
-					'attributes:visible' => __( 'Attribute %d visible', 'woocommerce' ),
-					'attributes:default' => __( 'Attribute %d default', 'woocommerce' ),
-					'downloads:name'     => __( 'Download %d name', 'woocommerce' ),
-					'downloads:url'      => __( 'Download %d URL', 'woocommerce' ),
-					'meta:'              => __( 'Meta: %s', 'woocommerce' ),
+					'attributes:name'     => __( 'Attribute %d name', 'woocommerce' ),
+					'attributes:value'    => __( 'Attribute %d value(s)', 'woocommerce' ),
+					'attributes:visible'  => __( 'Attribute %d visible', 'woocommerce' ),
+					'attributes:taxonomy' => __( 'Is attribute %d global?', 'woocommerce' ),
+					'attributes:default'  => __( 'Attribute %d default', 'woocommerce' ),
+					'downloads:name'      => __( 'Download %d name', 'woocommerce' ),
+					'downloads:url'       => __( 'Download %d URL', 'woocommerce' ),
+					'meta:'               => __( 'Meta: %s', 'woocommerce' ),
 				)
 			)
 		);
@@ -568,10 +569,11 @@ class WC_Product_CSV_Importer_Controller {
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
-					'attributes:name' . $index    => __( 'Attribute name', 'woocommerce' ),
-					'attributes:value' . $index   => __( 'Attribute value(s)', 'woocommerce' ),
-					'attributes:visible' . $index => __( 'Attribute visibility', 'woocommerce' ),
-					'attributes:default' . $index => __( 'Default attribute', 'woocommerce' ),
+					'attributes:name' . $index     => __( 'Attribute name', 'woocommerce' ),
+					'attributes:value' . $index    => __( 'Attribute value(s)', 'woocommerce' ),
+					'attributes:taxonomy' . $index => __( 'Is a global attribute?', 'woocommerce' ),
+					'attributes:visible' . $index  => __( 'Attribute visibility', 'woocommerce' ),
+					'attributes:default' . $index  => __( 'Default attribute', 'woocommerce' ),
 				),
 			),
 			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
