@@ -258,8 +258,11 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
 	// Remove locale from string.
-	if ( ! is_float( $number ) ) {
-		$number = str_replace( wc_get_price_thousand_separator(), '', $number );
+	if ( ! is_float( $number ) && strval( floatval( $number ) ) !== $number ) {
+		// Only remove thousands if separator is not same as decimal separator.
+		if ( wc_get_price_thousand_separator() !== wc_get_price_decimal_separator() ) {
+			$number = str_replace( wc_get_price_thousand_separator(), '', $number );
+		}
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
