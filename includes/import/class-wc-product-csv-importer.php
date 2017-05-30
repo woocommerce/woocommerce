@@ -555,7 +555,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 				$data['downloads'][] = array(
 					'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
-					'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
+					'file' => $file['url'],
 				);
 			}
 		}
