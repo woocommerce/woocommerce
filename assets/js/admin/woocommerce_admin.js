@@ -210,7 +210,49 @@ jQuery( function ( $ ) {
 
 	// Show order items on orders page
 	$( document.body ).on( 'click', '.show_order_items', function() {
-		$( this ).closest( 'td' ).find( 'table' ).toggle();
+		var $this       = $( this ),
+			$this_td    = $this.closest( 'td' ),
+			$this_items = $this_td.find( 'table' );
+		
+		if ( $this_items.length > 0 ) {
+			$this_items.toggle();
+			return false;
+		}
+		
+		if ( $this_td.hasClass( 'loading' ) ) {
+			return false;
+		}
+		
+		var id       = $this.closest( 'tr' ).attr( 'id' ),
+			matches  = id.match( /post-(\d+)/ ),
+			order_id = matches[1] || false;
+			
+		if ( order_id !== false ) {
+			$this_td.addClass( 'loading' );
+			
+			$.get( ajaxurl, {
+				'order_id': order_id,
+				'action':   'woocommerce_get_order_items',
+				'nonce':    woocommerce_admin.get_order_items_nonce,
+			}, function( response ) {
+				if ( response.success ) {
+					var html        = $( response.data.html ),
+						tiptip_args = {
+							'attribute': 'data-tip',
+							'fadeIn': 50,
+							'fadeOut': 50,
+							'delay': 200
+						};
+
+					html.find( '.woocommerce-help-tip' ).tipTip( tiptip_args );
+
+					$this_td.append( html );
+				}
+			} ).always( function() {
+				$this_td.removeClass( 'loading' );
+			} );
+		}
+
 		return false;
 	});
 

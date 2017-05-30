@@ -142,6 +142,7 @@ class WC_AJAX {
 			'shipping_zone_methods_save_changes'               => false,
 			'shipping_zone_methods_save_settings'              => false,
 			'shipping_classes_save_changes'                    => false,
+			'get_order_items'                                  => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -2373,6 +2374,44 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'shipping_classes' => $wc_shipping->get_shipping_classes(),
+		) );
+	}
+
+	/**
+	 * Get order items table
+	 */
+	public static function get_order_items() {
+		if ( ! isset( $_GET['order_id'], $_GET['nonce'] ) ) {
+			wp_send_json_error( 'missing fields' );
+			exit;
+		}
+		
+		if ( ! wp_verify_nonce( $_GET['nonce'], 'get-order-items' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$order_id = absint( $_GET['order_id'] );
+		$order    = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			wp_send_json_error( 'wrong order_id' );
+			exit;
+		}
+
+		$items = $order->get_items();
+		
+		if ( empty( $items ) ) {
+			wp_send_json_error( 'no items in order' );
+			exit;
+		}
+
+		ob_start();
+
+		include 'admin/views/html-order-items.php';
+
+		wp_send_json_success( array(
+			'html' => ob_get_clean(),
 		) );
 	}
 }
