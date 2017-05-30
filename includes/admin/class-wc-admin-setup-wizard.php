@@ -65,10 +65,10 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
-			'locale' => array(
+			'location' => array(
 				'name'    => __( 'Store location', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_locale' ),
-				'handler' => array( $this, 'wc_setup_locale_save' ),
+				'view'    => array( $this, 'wc_setup_location' ),
+				'handler' => array( $this, 'wc_setup_location_save' ),
 			),
 			'shipping' => array(
 				'name'    => __( 'Shipping', 'woocommerce' ),
@@ -305,9 +305,9 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale and Tax settings.
+	 * Location and Tax settings.
 	 */
-	public function wc_setup_locale() {
+	public function wc_setup_location() {
 		$user_location  = WC_Geolocation::geolocate_ip();
 		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
 		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
@@ -420,7 +420,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save Locale and Tax settings.
 	 */
-	public function wc_setup_locale_save() {
+	public function wc_setup_location_save() {
 		check_admin_referer( 'wc-setup' );
 
 		$store_location = sanitize_text_field( $_POST['store_location'] );
@@ -538,6 +538,7 @@ class WC_Admin_Setup_Wizard {
 					</div>
 					<div class="wc-wizard-shipping-settings">
 						<?php $this->wc_setup_wcs_tout(); ?>
+						<div class="wc-wizard-shipping-units">
 						<table class="form-table">
 							<tr>
 								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
@@ -563,6 +564,7 @@ class WC_Admin_Setup_Wizard {
 								</td>
 							</tr>
 						</table>
+						</div>
 					</div>
 				</li>
 				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">

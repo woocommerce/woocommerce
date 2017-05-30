@@ -479,6 +479,7 @@ ul.wc-wizard-shipping-settings {
 			display: none;
 			margin-bottom: 0;
 			cursor: default;
+			width: 100%
 		}
 
 		&.checked {
@@ -492,6 +493,12 @@ ul.wc-wizard-shipping-settings {
 		.wc-wizard-shipping-description {
 			font-style: italic;
 
+			p {
+				margin: 0 0 0.5em;
+			}
+		}
+
+		.wc-wizard-shipping-units {
 			p {
 				margin: 0 0 0.5em;
 			}
