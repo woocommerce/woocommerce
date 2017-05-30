@@ -501,15 +501,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:value' ) ) {
-				if ( ! empty( $value ) ) {
-					$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
-				}
+				$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
-				if ( ! empty( $value ) ) {
-					$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
-				}
+				$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {
@@ -542,7 +538,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		if ( ! empty( $attributes ) ) {
-			$data['raw_attributes'] = $attributes;
+			// Remove empty attributes and clear indexes.
+			foreach ( $attributes as $attribute ) {
+				if ( empty( $attribute['name'] ) ) {
+					continue;
+				}
+
+				$data['raw_attributes'][] = $attribute;
+			}
 		}
 
 		if ( ! empty( $downloads ) ) {

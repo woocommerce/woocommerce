@@ -281,7 +281,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'manage_stock'          => true,
 				'virtual'               => false,
 				'downloadable'          => false,
-				'raw_attributes'        => array( 1 => array( 'name' => 'Color' ) ),
+				'raw_attributes'        => array(
+					array(
+						'name' => 'Color',
+					),
+				),
 			),
 			array(
 				'type'                  => 'simple',
@@ -319,10 +323,10 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloadable'          => true,
 				'manage_stock'          => false,
 				'raw_attributes'        => array(
-					1 => array(
+					array(
 						'name' => 'Label',
 					),
-					2 => array(
+					array(
 						'value' => array( '180-Gram' ),
 						'name'  => 'Vinyl',
 					),
@@ -409,11 +413,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloadable'          => false,
 				'manage_stock'          => false,
 				'raw_attributes'        => array(
-					1 => array(
+					array(
 						'name'    => 'Color',
 						'default' => 'Green',
 					),
-					2 => array(
+					array(
 						'value'   => array( 'M', 'L' ),
 						'name'    => 'Size',
 						'default' => 'L'
@@ -455,10 +459,10 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloadable'          => false,
 				'manage_stock'          => true,
 				'raw_attributes'        => array(
-					1 => array(
+					array(
 						'name' => 'Color',
 					),
-					2 => array(
+					array(
 						'value' => array( 'M' ),
 						'name'  => 'Size',
 					),
@@ -499,10 +503,10 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'downloadable'       => false,
 				'manage_stock'       => true,
 				'raw_attributes'     => array(
-					1 => array(
+					array(
 						'name' => 'Color',
 					),
-					2 => array(
+					array(
 						'value' => array( 'L' ),
 						'name'  => 'Size'
 					)
