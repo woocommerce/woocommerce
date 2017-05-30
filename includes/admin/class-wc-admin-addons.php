@@ -34,7 +34,7 @@ class WC_Admin_Addons {
 		}
 
 		if ( is_object( $featured ) ) {
-			self::output_featured_sections( $featured->sections );
+			self::output_sections( $featured->sections );
 			return $featured;
 		}
 	}
@@ -112,7 +112,22 @@ class WC_Admin_Addons {
 			}
 		}
 
-		return apply_filters( 'woocommerce_addons_section_data', $section_data->products, $section_id );
+		return array(
+				"blocks" => ! empty( $section_data->blocks )
+					? apply_filters(
+						'woocommerce_addons_section_blocks_data',
+						$section_data->blocks,
+						$section_id
+					)
+					: array(),
+				"products" => ! empty(  $section_data->products )
+					? apply_filters(
+						'woocommerce_addons_section_data',
+						$section_data->products,
+						$section_id
+					)
+					: array(),
+		);
 	}
 
 	/**
@@ -340,7 +355,7 @@ class WC_Admin_Addons {
 	 *
 	 * @param array $sections
 	 */
-	public static function output_featured_sections( $sections ) {
+	public static function output_sections( $sections ) {
 		foreach ( $sections as $section ) {
 			switch ( $section->module ) {
 				case 'banner_block':
