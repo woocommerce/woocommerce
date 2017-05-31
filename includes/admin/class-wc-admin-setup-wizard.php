@@ -588,7 +588,6 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_ship_to_countries', '' );
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
-		WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 
 		/*
 		 * If this is the initial shipping setup, create a shipping
@@ -614,6 +613,8 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug' => 'woocommerce-services',
 			);
 			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
+		} else {
+			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
