@@ -850,3 +850,12 @@ function wc_cancel_unpaid_orders() {
 	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
+
+/**
+ * Fix wrong locale e-mail's
+ * https://wordpress.org/support/topic/l10n-problem/
+*/
+function woocommerce_mark_order_status_switch_locale(){
+	$GLOBALS['wp_locale_switcher']->switch_to_locale( get_locale() );
+}
+add_action( 'wp_ajax_woocommerce_mark_order_status', 'woocommerce_mark_order_status_switch_locale', 1 );
