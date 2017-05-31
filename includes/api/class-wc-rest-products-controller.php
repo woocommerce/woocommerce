@@ -1069,9 +1069,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				}
 			}
 
-			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_image_ids( $gallery );
-			}
+			$product->set_gallery_image_ids( $gallery );
 		} else {
 			$product->set_image_id( '' );
 			$product->set_gallery_image_ids( array() );

@@ -409,8 +409,8 @@ class WC_Meta_Box_Product_Data {
 						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
 					),
 					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
-					'stock_quantity'    => isset( $_POST['variable_stock'][ $i ] ) ? wc_clean( $_POST['variable_stock'][ $i ] ) : null,
-					'backorders'        => isset( $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
+					'stock_quantity'    => isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ? wc_clean( $_POST['variable_stock'][ $i ] ) : null,
+					'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
 					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),

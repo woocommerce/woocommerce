@@ -168,6 +168,15 @@ jQuery( function( $ ) {
 		reset_update_checkout_timer: function() {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
+		is_valid_json: function( raw_json ) {
+			try {
+				var json = $.parseJSON( raw_json );
+
+				return ( json && 'object' === typeof json );
+			} catch ( e ) {
+				return false;
+			}
+		},
 		validate_field: function( e ) {
 			var $this             = $( this ),
 				$parent           = $this.closest( '.form-row' ),
@@ -413,27 +422,20 @@ jQuery( function( $ ) {
 							return raw_response;
 						}
 
-						try {
-							// Check for valid JSON
-							var data = $.parseJSON( raw_response );
-
-							if ( data && 'object' === typeof data ) {
-
-								// Valid - return it so it can be parsed by Ajax handler
-								return raw_response;
-							}
-
-						} catch ( e ) {
-
+						if ( wc_checkout_form.is_valid_json( raw_response ) ) {
+							return raw_response;
+						} else {
 							// Attempt to fix the malformed JSON
-							var valid_json = raw_response.match( /{"result.*"}/ );
+							var maybe_valid_json = raw_response.match( /{"result.*}/ );
 
-							if ( null === valid_json ) {
+							if ( null === maybe_valid_json ) {
 								console.log( 'Unable to fix malformed JSON' );
-							} else {
+							} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
 								console.log( 'Fixed malformed JSON. Original:' );
 								console.log( raw_response );
-								raw_response = valid_json[0];
+								raw_response = maybe_valid_json[0];
+							} else {
+								console.log( 'Unable to fix malformed JSON' );
 							}
 						}
 

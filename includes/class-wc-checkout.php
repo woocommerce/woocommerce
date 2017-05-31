@@ -655,11 +655,12 @@ class WC_Checkout {
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
-						$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
+						$valid_state_values = array_flip( array_map( 'wc_strtoupper', $valid_states ) );
+						$data[ $key ]       = wc_strtoupper( $data[ $key ] );
 
-						// Convert value to key if set
-						if ( isset( $valid_state_values[ strtolower( $data[ $key ] ) ] ) ) {
-							$data[ $key ] = $valid_state_values[ strtolower( $data[ $key ] ) ];
+						if ( isset( $valid_state_values[ $data[ $key ] ] ) ) {
+							// With this part we consider state value to be valid as well, convert it to the state key for the valid_states check below.
+							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
 						if ( ! in_array( $data[ $key ], array_keys( $valid_states ) ) ) {
@@ -877,6 +878,11 @@ class WC_Checkout {
 
 			if ( ! empty( $data['billing_last_name'] ) ) {
 				$customer->set_last_name( $data['billing_last_name'] );
+			}
+
+			// If the display name is an email, update to the user's full name.
+			if ( is_email( $customer->get_display_name() ) ) {
+				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
 			}
 
 			foreach ( $data as $key => $value ) {

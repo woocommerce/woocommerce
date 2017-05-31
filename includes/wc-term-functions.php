@@ -151,12 +151,13 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
  * @return int
  */
 function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
-    $a_name = (int) $a->name;
-    $b_name = (int) $b->name;
+	$a_name = (float) $a->name;
+	$b_name = (float) $b->name;
 
-	if ( $a_name === $b_name ) {
+	if ( abs( $a_name - $b_name ) < 0.001 ) {
 		return 0;
 	}
+
 	return ( $a_name < $b_name ) ? -1 : 1;
 }
 

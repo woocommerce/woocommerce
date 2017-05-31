@@ -100,6 +100,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
+		global $current_section;
+
 		if ( ! $current_section ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::save_fields( $settings );
