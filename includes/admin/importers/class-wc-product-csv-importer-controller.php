@@ -281,12 +281,6 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		// Check if all fields matches.
-		if ( 0 === count( array_diff( $mapped_items, $this->get_default_fields() ) ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( array( 'auto_map' => 1 ), $this->get_next_step_link() ) ) );
-			exit;
-		}
-
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-mapping.php' );
 	}
 
