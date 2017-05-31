@@ -612,7 +612,7 @@ class WC_Admin_Setup_Wizard {
 			$zone->save();
 		}
 
-		if ( $install_services ) {
+		if ( $install_services && ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
 			$services_plugin_id = 'woocommerce-services';
 			$services_plugin    = array(
 				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
