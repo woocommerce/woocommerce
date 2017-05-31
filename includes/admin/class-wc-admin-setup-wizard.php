@@ -580,46 +580,40 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] ) && ( 'yes' === $_POST['woocommerce_calc_shipping'] );
 		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 		$install_services = isset( $_POST['woocommerce_install_services'] );
 		$weight_unit      = sanitize_text_field( $_POST['weight_unit'] );
 		$dimension_unit   = sanitize_text_field( $_POST['dimension_unit'] );
 
-		if ( $enable_shipping ) {
-			update_option( 'woocommerce_ship_to_countries', '' );
-			update_option( 'woocommerce_weight_unit', $weight_unit );
-			update_option( 'woocommerce_dimension_unit', $dimension_unit );
-			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+		update_option( 'woocommerce_ship_to_countries', '' );
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+		WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 
-			/*
-			 * If this is the initial shipping setup, create a shipping
-			 * zone containing the country the store is located in, with
-			 * a "free shipping" method preconfigured.
-			 */
-			if ( false === $current_shipping ) {
-				$default_country = get_option( 'woocommerce_default_country' );
-				$location        = wc_format_country_state_string( $default_country );
+		/*
+		 * If this is the initial shipping setup, create a shipping
+		 * zone containing the country the store is located in, with
+		 * a "free shipping" method preconfigured.
+		 */
+		if ( false === $current_shipping ) {
+			$default_country = get_option( 'woocommerce_default_country' );
+			$location        = wc_format_country_state_string( $default_country );
 
-				$zone = new WC_Shipping_Zone( null );
-				$zone->set_zone_order( 0 );
-				$zone->add_location( $location['country'], 'country' );
-				$zone->set_zone_name( $zone->get_formatted_location() );
-				$zone->add_shipping_method( 'free_shipping' );
-				$zone->save();
-			}
+			$zone = new WC_Shipping_Zone( null );
+			$zone->set_zone_order( 0 );
+			$zone->add_location( $location['country'], 'country' );
+			$zone->set_zone_name( $zone->get_formatted_location() );
+			$zone->add_shipping_method( 'free_shipping' );
+			$zone->save();
+		}
 
-			if ( $install_services ) {
-				$services_plugin_id = 'woocommerce-services';
-				$services_plugin    = array(
-					'name'      => __( 'WooCommerce Services', 'woocommerce' ),
-					'repo-slug' => 'woocommerce-services',
-				);
-
-				wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
-			}
-		} else {
-			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		if ( $install_services ) {
+			$services_plugin_id = 'woocommerce-services';
+			$services_plugin    = array(
+				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+				'repo-slug' => 'woocommerce-services',
+			);
+			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
