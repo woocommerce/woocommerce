@@ -324,35 +324,35 @@ class WC_Admin_Addons {
 			return;
 		}
 
-		$image = empty( $block->image )
-			? WC()->plugin_url() . '/assets/images/wcs-extensions-banner.png'
-			: $block->image;
-		$image_alt = __( 'WooCommerce Services', 'woocommerce' );
-		$title = empty( $block->title )
-			? __( 'Transform your store into a shipping and fulfillment machine', 'woocommerce' )
-			: $block->title;
-		$description = empty( $block->description )
-			? __( 'WooCommerce Services makes shipping a breeze. Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' )
-			: $block->description;
-		$button = __( 'Free - Install now', 'woocommerce' );
-		$url = wp_nonce_url(
+		$button_url = $url = wp_nonce_url(
 			self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce-services' ),
 			'install-plugin_woocommerce-services'
 		);
+
+		$defaults = array(
+			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner.png',
+			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
+			'title'       => __( 'Transform your store into a shipping and fulfillment machine', 'woocommerce' ),
+			'description' => __( 'WooCommerce Services makes shipping a breeze. Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' ),
+			'button'      => __( 'Free - Install now', 'woocommerce' ),
+			'href'        => $button_url,
+		);
+
+		$block_data = wp_parse_args( $block, $defaults );
 		?>
 		<div class="addons-wcs-banner-block">
 			<img
 				class="addons-img"
-				src="<?php echo esc_url( $image ); ?>"
-				alt="<?php echo esc_attr( $image_alt ); ?>"
+				src="<?php echo esc_url( $block_data['image'] ); ?>"
+				alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
 			/>
 			<div class="addons-wcs-banner-block-content">
-				<h1><?php echo esc_html( $title ); ?></h1>
-				<p><?php echo esc_html( $description ); ?></p>
+				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
+				<p><?php echo esc_html( $block_data['description'] ); ?></p>
 				<?php
 					self::output_button(
-						$url,
-						$button,
+						$block_data['href'],
+						$block_data['button'],
 						'addons-button-solid'
 					);
 				?>
