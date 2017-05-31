@@ -34,6 +34,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		$this->set_email_strings();
 
 		// Triggers for this email
+		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_on-hold_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 
