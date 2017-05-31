@@ -311,12 +311,8 @@ class WC_Gateway_Paypal_Request {
 			}
 		}
 
-		// Check for mismatched totals.
-		if ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_shipping_total(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) ) {
-			return false;
-		}
-
-		return true;
+        // Check for mismatched totals.
+        return ! ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_shipping_total(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) );
 	}
 
 	/**

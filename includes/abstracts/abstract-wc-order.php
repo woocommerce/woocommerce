@@ -1396,7 +1396,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			// Remove discounts.
-			$subtotal = $subtotal - $this->get_total_discount();
+			$subtotal -= $this->get_total_discount();
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 		}
 

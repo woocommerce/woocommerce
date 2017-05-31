@@ -1680,7 +1680,7 @@ class WC_Cart {
 						}
 
 						foreach ( $check_emails as $check_email ) {
-							$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
+							$usage_count += count( array_keys( $used_by, $check_email ) );
 						}
 
 						if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {

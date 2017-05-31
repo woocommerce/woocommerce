@@ -154,9 +154,9 @@ class WC_Tax {
 
 		foreach ( $rates as $key => $rate ) {
 			if ( 'yes' === $rate['compound'] ) {
-				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
+				$compound_tax_rates += $rate['rate'];
 			} else {
-				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
+				$regular_tax_rates += $rate['rate'];
 			}
 		}
 
@@ -173,10 +173,10 @@ class WC_Tax {
 
 			if ( 'yes' === $rate['compound'] ) {
 				$the_price = $price;
-				$the_rate  = $the_rate / $compound_tax_rate;
+				$the_rate  /= $compound_tax_rate;
 			} else {
 				$the_price = $non_compound_price;
-				$the_rate  = $the_rate / $regular_tax_rate;
+				$the_rate  /= $regular_tax_rate;
 			}
 
 			$net_price       = $price - ( $the_rate * $the_price );

@@ -717,9 +717,7 @@ class WC_Query {
 		global $wp_the_query;
 
 		$args       = $wp_the_query->query_vars;
-		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
-
-		return $meta_query;
+		return isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 	}
 
 	/**

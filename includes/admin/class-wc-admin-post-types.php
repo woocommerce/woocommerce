@@ -769,10 +769,8 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
-			if ( isset( $actions['inline hide-if-no-js'] ) ) {
-				unset( $actions['inline hide-if-no-js'] );
-			}
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) && isset( $actions['inline hide-if-no-js'] ) ) {
+            unset( $actions['inline hide-if-no-js'] );
 		}
 
 		return $actions;
@@ -1842,8 +1840,8 @@ class WC_Admin_Post_Types {
 		if ( isset( $_POST['type'] ) && 'downloadable_product' == $_POST['type'] ) {
 
 			if ( empty( $pathdata['subdir'] ) ) {
-				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
+				$pathdata['path']   .= '/woocommerce_uploads';
+				$pathdata['url']    .= '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
 				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];

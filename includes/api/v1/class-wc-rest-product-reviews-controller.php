@@ -241,9 +241,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		}
 
 		$delivery = $this->prepare_item_for_response( $review, $request );
-		$response = rest_ensure_response( $delivery );
-
-		return $response;
+		return rest_ensure_response( $delivery );
 	}
 
 

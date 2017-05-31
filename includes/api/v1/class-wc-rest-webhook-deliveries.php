@@ -156,9 +156,7 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 		}
 
 		$delivery = $this->prepare_item_for_response( (object) $log, $request );
-		$response = rest_ensure_response( $delivery );
-
-		return $response;
+		return rest_ensure_response( $delivery );
 	}
 
 	/**

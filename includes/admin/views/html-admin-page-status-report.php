@@ -530,11 +530,9 @@ $pages          = $system_status->get_pages();
 					$error = true;
 				} else {
 					// Shortcode check
-					if ( $page['shortcode_required'] ) {
-						if ( ! $page['shortcode_present'] ) {
-							echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page does not contain the shortcode.', 'woocommerce' ), $page['shortcode'] ) . '</mark>';
-							$error = true;
-						}
+					if ( $page['shortcode_required'] && ! $page['shortcode_present'] ) {
+                        echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page does not contain the shortcode.', 'woocommerce' ), $page['shortcode'] ) . '</mark>';
+                        $error = true;
 					}
 				}
 

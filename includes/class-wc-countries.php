@@ -72,7 +72,7 @@ class WC_Countries {
 		$continents         = $this->get_continents();
 		$continents_and_ccs = wp_list_pluck( $continents, 'countries' );
 		foreach ( $continents_and_ccs as $continent_code => $countries ) {
-			if ( false !== array_search( $cc, $countries ) ) {
+			if ( in_array( $cc, $countries ) ) {
 				return $continent_code;
 			}
 		}

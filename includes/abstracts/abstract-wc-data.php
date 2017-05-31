@@ -438,11 +438,9 @@ abstract class WC_Data {
 			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
 		}
 
-		if ( ! $force_read ) {
-			if ( ! empty( $this->cache_group ) ) {
-				$cached_meta  = wp_cache_get( $cache_key, $this->cache_group );
-				$cache_loaded = ! empty( $cached_meta );
-			}
+		if ( ! $force_read && ! empty( $this->cache_group ) ) {
+            $cached_meta  = wp_cache_get( $cache_key, $this->cache_group );
+            $cache_loaded = ! empty( $cached_meta );
 		}
 
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
