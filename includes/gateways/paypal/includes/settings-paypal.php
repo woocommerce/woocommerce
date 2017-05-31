@@ -57,8 +57,8 @@ return array(
 	),
 	'receiver_email' => array(
 		'title'       => __( 'Receiver email', 'woocommerce' ),
-		'type'        => 'email',
-		'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests. If you have more than one possible receiver emails, please add them separated by spaces.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => 'you@youremail.com',
