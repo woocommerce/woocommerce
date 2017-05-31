@@ -147,7 +147,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	public function get_item( $request ) {
 		$data = $this->get_continent( strtoupper( $request['location'] ), $request );
 		if ( empty( $data ) ) {
-			$data = new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		return $this->prepare_item_for_response( $data, $request );
 	}
@@ -161,10 +161,11 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$response = rest_ensure_response( $item );
-		if ( ! is_wp_error( $item ) ) {
-			$response->add_links( $this->prepare_links( $item ) );
-		}
+		$data     = $this->add_additional_fields_to_object( $item, $request );
+		$data     = $this->filter_response_by_context( $data, 'view' );
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $item ) );
 
 		/**
 		 * Filter the location list returned from the API.
