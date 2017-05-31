@@ -313,9 +313,10 @@ class WC_Admin_Addons {
 	 */
 	public static function output_wcs_banner_block( $block = null ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
+		$location  = wc_get_base_location();
 
 		if (
-			'US' !== wc_get_base_location()['country'] ||
+			'US' !== $location['country'] ||
 			$is_active ||
 			! current_user_can( 'install_plugins' ) ||
 			! current_user_can( 'activate_plugins' )
