@@ -232,12 +232,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$images    = array();
 
 		foreach ( $image_ids as $image_id ) {
-			$image  = wp_get_attachment_image_src( $product->get_image_id( 'edit' ), 'full' );
+			$image  = wp_get_attachment_image_src( $image_id, 'full' );
 
 			if ( $image ) {
 				$images[] = $image[0];
 			}
 		}
+
 		return implode( ', ', $images );
 	}
 
@@ -461,8 +462,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( count( $attributes ) ) {
 				$i = 1;
 				foreach ( $attributes as $attribute_name => $attribute ) {
-					$this->column_names[ 'attributes:name' . $i ]  = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:name' . $i ]     = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:value' . $i ]    = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:visible' . $i ]  = sprintf( __( 'Attribute %d visible', 'woocommerce' ), $i );
+					$this->column_names[ 'attributes:taxonomy' . $i ] = sprintf( __( 'Attribute %d global', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
@@ -475,19 +478,27 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 								$values[] = $term->name;
 							}
 
-							$row[ 'attributes:value' . $i ] = implode( ', ', $values );
+							$row[ 'attributes:value' . $i ]    = implode( ', ', $values );
+							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
-							$row[ 'attributes:value' . $i ] = implode( ', ', $attribute->get_options() );
+							$row[ 'attributes:value' . $i ]    = implode( ', ', $attribute->get_options() );
+							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
+
+						$row[ 'attributes:visible' . $i ] = $attribute->get_visible();
 					} else {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
 							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
-							$row[ 'attributes:value' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
+							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
+							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
-							$row[ 'attributes:value' . $i ] = $attribute;
+							$row[ 'attributes:value' . $i ]    = $attribute;
+							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
+
+						$row[ 'attributes:visible' . $i ] = '';
 					}
 
 					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {

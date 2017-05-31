@@ -396,10 +396,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 * Match special column names.
 		 */
 		$regex_match_data_formatting = array(
-			'/attributes:value*/'   => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'      => 'esc_url',
-			'/meta:*/'              => 'wp_kses_post', // Allow some HTML in meta fields.
+			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
+			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
+			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
+			'/downloads:url*/'       => 'esc_url',
+			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
 		);
 
 		$callbacks = array();
@@ -502,6 +503,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			} elseif ( $this->starts_with( $key, 'attributes:value' ) ) {
 				$attributes[ str_replace( 'attributes:value', '', $key ) ]['value'] = $value;
+				unset( $data[ $key ] );
+
+			} elseif ( $this->starts_with( $key, 'attributes:taxonomy' ) ) {
+				$attributes[ str_replace( 'attributes:taxonomy', '', $key ) ]['taxonomy'] = wc_string_to_bool( $value );
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
