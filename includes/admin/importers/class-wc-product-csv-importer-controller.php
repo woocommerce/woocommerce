@@ -399,9 +399,9 @@ class WC_Product_CSV_Importer_Controller {
 		include( dirname( __FILE__ ) . '/mappings/mappings.php' );
 
 		/**
-		* @hooked wc_importer_generic_mappings - 10
-		* @hooked wc_importer_wordpress_mappings - 10
-		*/
+		 * @hooked wc_importer_generic_mappings - 10
+		 * @hooked wc_importer_wordpress_mappings - 10
+		 */
 		$default_columns = apply_filters( 'woocommerce_csv_product_import_mapping_default_columns', array(
 			__( 'ID', 'woocommerce' )                                      => 'id',
 			__( 'Type', 'woocommerce' )                                    => 'type',
@@ -414,9 +414,10 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Description', 'woocommerce' )                             => 'description',
 			__( 'Date sale price starts', 'woocommerce' )                  => 'date_on_sale_from',
 			__( 'Date sale price ends', 'woocommerce' )                    => 'date_on_sale_to',
-			__( 'Tax class', 'woocommerce' )                               => 'tax_status',
+			__( 'Tax status', 'woocommerce' )                              => 'tax_status',
+			__( 'Tax class', 'woocommerce' )                               => 'tax_class',
 			__( 'In stock?', 'woocommerce' )                               => 'stock_status',
-			__( 'Stock', 'woocommerce' )                                   => 'stock',
+			__( 'Stock', 'woocommerce' )                                   => 'stock_quantity',
 			__( 'Backorders allowed?', 'woocommerce' )                     => 'backorders',
 			__( 'Sold individually?', 'woocommerce' )                      => 'sold_individually',
 			sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit )    => 'weight',
@@ -430,13 +431,13 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Categories', 'woocommerce' )                              => 'category_ids',
 			__( 'Tags', 'woocommerce' )                                    => 'tag_ids',
 			__( 'Shipping class', 'woocommerce' )                          => 'shipping_class_id',
-			__( 'Images', 'woocommerce' )                                  => 'image_id',
+			__( 'Images', 'woocommerce' )                                  => 'images',
 			__( 'Download limit', 'woocommerce' )                          => 'download_limit',
 			__( 'Download expiry days', 'woocommerce' )                    => 'download_expiry',
 			__( 'Parent', 'woocommerce' )                                  => 'parent_id',
-			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'Upsells', 'woocommerce' )                                 => 'upsell_ids',
 			__( 'Cross-sells', 'woocommerce' )                             => 'cross_sell_ids',
+			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'External URL', 'woocommerce' )                            => 'product_url',
 			__( 'Button text', 'woocommerce' )                             => 'button_text',
 		) );
@@ -541,15 +542,15 @@ class WC_Product_CSV_Importer_Controller {
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
 			'sale_price'         => __( 'Sale price', 'woocommerce' ),
 			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
-			'stock'              => __( 'Stock', 'woocommerce' ),
+			'stock_quantity'     => __( 'Stock', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
-			'image_id'           => __( 'Images', 'woocommerce' ),
+			'images'             => __( 'Images', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
-			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
 			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
 			'external'           => array(
 				'name'    => __( 'External product', 'woocommerce' ),
 				'options' => array(

@@ -134,7 +134,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Prepare a single product for create or update.
 	 *
-	 * @param  array $data     Row data.
+	 * @param  array $data     Item data.
 	 * @return WC_Product|WP_Error
 	 */
 	protected function get_product_object( $data ) {
@@ -177,6 +177,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function process_item( $data ) {
 		try {
+			// Get product ID from SKU if created during the importation.
+			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
+				$data['id'] = $product_id;
+			}
+
 			$object   = $this->get_product_object( $data );
 			$updating = false;
 
@@ -226,8 +231,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Convert raw image URLs to IDs and set.
 	 *
-	 * @param WC_Product $product
-	 * @param array $data
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Item data.
 	 */
 	protected function set_image_data( &$product, $data ) {
 		// Image URLs need converting to IDs before inserting.
@@ -249,8 +254,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Append meta data.
 	 *
-	 * @param WC_Product $product
-	 * @param array $data
+	 * @param WC_Product $product Product instance.
+	 * @param array      $data    Item data.
 	 */
 	protected function set_meta_data( &$product, $data ) {
 		if ( isset( $data['meta_data'] ) ) {
@@ -264,7 +269,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Set product data.
 	 *
 	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Row data.
+	 * @param array      $data    Item data.
 	 *
 	 * @return WC_Product|WP_Error
 	 * @throws Exception
@@ -356,7 +361,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Set variation data.
 	 *
 	 * @param WC_Product $variation Product instance.
-	 * @param array      $data    Row data.
+	 * @param array      $data    Item data.
 	 *
 	 * @return WC_Product|WP_Error
 	 * @throws Exception

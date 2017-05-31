@@ -305,6 +305,47 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse dates from a CSV.
+	 * Dates requires the format YYYY-MM-DD.
+	 *
+	 * @param  string $field Field value.
+	 * @return string|null
+	 */
+	protected function parse_date_field( $field ) {
+		if ( empty( $field ) ) {
+			return null;
+		}
+
+		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/', $field ) ) {
+			return $field;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse backorders from a CSV.
+	 *
+	 * @param  string $field Field value.
+	 * @return string
+	 */
+	protected function parse_backorders_field( $field ) {
+		if ( empty( $field ) ) {
+			return '';
+		}
+
+		$field = $this->parse_bool_field( $field );
+
+		if ( 'notify' === $field ) {
+			return 'notify';
+		} elseif ( is_bool( $field ) ) {
+			return $field ? 'yes' : 'no';
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -320,13 +361,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'type'              => array( $this, 'parse_comma_field' ),
 			'published'         => array( $this, 'parse_bool_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
-			'date_on_sale_from' => 'strtotime',
-			'date_on_sale_to'   => 'strtotime',
+			'date_on_sale_from' => array( $this, 'parse_date_field' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
 			'name'              => 'wp_filter_post_kses',
 			'short_description' => 'wp_filter_post_kses',
 			'description'       => 'wp_filter_post_kses',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
-			'backorders'        => array( $this, 'parse_bool_field' ),
+			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
 			'sold_individually' => array( $this, 'parse_bool_field' ),
 			'width'             => array( $this, 'parse_float_field' ),
@@ -337,7 +378,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'purchase_note'     => 'wp_filter_post_kses',
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
-			'stock_quantity'    => 'absint',
+			'stock_quantity'    => 'wc_stock_amount',
 			'category_ids'      => array( $this, 'parse_categories_field' ),
 			'tag_ids'           => array( $this, 'parse_tags_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
@@ -405,11 +446,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function expand_data( $data ) {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
-		// Product ID and SKU mapping.
-		if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
-			$data['id'] = $product_id;
-		}
-
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
 			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
@@ -446,11 +482,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
 		}
 
-		// Backorders is bool.
-		if ( isset( $data['backorders'] ) ) {
-			$data['backorders'] = $data['backorders'] ? 'yes' : 'no';
-		}
-
 		// Prepare grouped products.
 		if ( isset( $data['grouped_products'] ) ) {
 			$data['children'] = $data['grouped_products'];
@@ -483,7 +514,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {
-				$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
+				if ( ! empty( $value ) ) {
+					$attributes[ str_replace( 'attributes:default', '', $key ) ]['default'] = $value;
+				}
 				unset( $data[ $key ] );
 
 			// Downloads.
@@ -510,7 +543,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		if ( ! empty( $attributes ) ) {
-			$data['raw_attributes'] = $attributes;
+			// Remove empty attributes and clear indexes.
+			foreach ( $attributes as $attribute ) {
+				if ( empty( $attribute['name'] ) ) {
+					continue;
+				}
+
+				$data['raw_attributes'][] = $attribute;
+			}
 		}
 
 		if ( ! empty( $downloads ) ) {
@@ -523,7 +563,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 				$data['downloads'][] = array(
 					'name' => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
-					'file' => apply_filters( 'woocommerce_file_download_path', $file['url'], $product, $key ),
+					'file' => $file['url'],
 				);
 			}
 		}
