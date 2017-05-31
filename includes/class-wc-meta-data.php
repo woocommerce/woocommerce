@@ -49,14 +49,34 @@ class WC_Meta_Data {
 		$this->data = $this->current_data;
 	}
 
+	/**
+	 * Creates or updates a property in the metadata object.
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 *
+	 */
 	public function __set( $key, $value ) {
 		$this->current_data[ $key ] = $value;
 	}
 
+	/**
+	 * Checks if a given key exists in our data. This is called internally
+	 * by `empty` and `isset`.
+	 *
+	 * @param string $key
+	 */
 	public function __isset( $key ) {
 		return array_key_exists( $key, $this->current_data );
 	}
 
+	/**
+	 * Returns the value of any property.
+	 *
+	 * @param string $key
+	 *
+	 * @return mixed Property value or NULL if it does not exists
+	 */
 	public function __get( $key ) {
 		if ( array_key_exists( $key, $this->current_data )) {
 			return $this->current_data[ $key ];
@@ -70,7 +90,6 @@ class WC_Meta_Data {
 	 * @return array
 	 */
 	public function get_changes() {
-
 		$changes = array();
 		foreach ( $this->current_data as $id => $value) {
 			if ( ! array_key_exists( $id, $this->data ) || $value !== $this->data[ $id ] ) {
