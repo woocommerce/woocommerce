@@ -143,12 +143,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
-		$changes   = $product->get_changes();
 		$new_title = $this->generate_product_title( $product );
 
 		if ( $product->get_name( 'edit' ) !== $new_title ) {
 			$product->set_name( $new_title );
 		}
+
+		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
