@@ -853,6 +853,7 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php esc_html_e( 'Next steps', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="setup-product"><a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php esc_html_e( 'Create your first product!', 'woocommerce' ); ?></a></li>
+					<li class="setup-product"><a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>"><?php esc_html_e( 'Import products from a CSV file', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 			<div class="wc-setup-next-steps-last">

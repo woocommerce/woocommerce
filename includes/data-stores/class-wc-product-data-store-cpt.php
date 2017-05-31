@@ -177,6 +177,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'     => $product->get_menu_order( 'edit' ),
 				'post_name'      => $product->get_slug( 'edit' ),
+				'post_type'      => 'product',
 			);
 			if ( $product->get_date_created( 'edit' ) ) {
 				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() );
@@ -1170,7 +1171,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * Generate WP_Query args.
 		 */
 		$wp_query_args = array(
-			'post_type'      => 'variation' === $args['type'] ? 'product_variation' : 'product',
 			'post_status'    => $args['status'],
 			'posts_per_page' => $args['limit'],
 			'meta_query'     => array(),
@@ -1178,17 +1178,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'order'          => $args['order'],
 			'tax_query'      => array(),
 		);
-		// Do not load unnecessary post data if the user only wants IDs.
-		if ( 'ids' === $args['return'] ) {
-			$wp_query_args['fields'] = 'ids';
-		}
 
-		if ( 'variation' !== $args['type'] ) {
+		if ( 'variation' === $args['type'] ) {
+			$wp_query_args['post_type'] = 'product_variation';
+		} elseif ( is_array( $args['type'] ) && in_array( 'variation', $args['type'] ) ) {
+			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
+			$wp_query_args['tax_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => $args['type'],
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'id',
+					'operator' => 'NOT EXISTS',
+				),
+			);
+		} else {
+			$wp_query_args['post_type']   = 'product';
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
 				'terms'    => $args['type'],
 			);
+		}
+
+		// Do not load unnecessary post data if the user only wants IDs.
+		if ( 'ids' === $args['return'] ) {
+			$wp_query_args['fields'] = 'ids';
 		}
 
 		if ( ! empty( $args['sku'] ) ) {
