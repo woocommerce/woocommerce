@@ -362,6 +362,11 @@ class WC_Admin_Addons {
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
+		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+			do_action( 'woocommerce_helper_output' );
+			return;
+		}
+
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
 		$section_keys    = array_keys( $sections );

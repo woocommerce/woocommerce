@@ -209,6 +209,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		'orderby'            => 'name',
 		'selected'           => $current_product_cat,
 		'menu_order'         => false,
+		'option_select_text' => __( 'Select a category', 'woocommerce' ),
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -225,7 +226,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	}
 
 	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
-	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . esc_html__( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . esc_html( $args['option_select_text'] ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
 	if ( $args['show_uncategorized'] ) {
 		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . esc_html__( 'Uncategorized', 'woocommerce' ) . '</option>';
