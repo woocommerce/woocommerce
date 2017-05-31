@@ -498,7 +498,7 @@ class WC_Admin_Setup_Wizard {
 		<ul class="wc-wizard-shipping-methods">
 			<li class="wc-wizard-shipping">
 				<div class="wc-wizard-shipping-enable">
-					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" />
+					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
 					<label>
 						<?php esc_html_e( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ); ?>
 					</label>
@@ -567,7 +567,7 @@ class WC_Admin_Setup_Wizard {
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<input type="submit" class="button button-large button-next" value="<?php esc_attr_e( 'Skip this step', 'woocommerce' ); ?>" name="save_step" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -579,6 +579,12 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
+
+		if ( isset( $_POST['save_step'] ) && esc_attr( 'Skip this step', 'woocommerce' ) === $_POST['save_step'] ) {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			exit;
+		}
 
 		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
 		$install_services = isset( $_POST['woocommerce_install_services'] );
