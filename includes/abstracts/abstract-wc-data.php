@@ -378,7 +378,7 @@ abstract class WC_Data {
 	 * Delete meta data.
 	 *
 	 * @since 2.6.0
-	 * @param array $key Meta key
+	 * @param string $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
