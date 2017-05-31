@@ -244,7 +244,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			return;
 		}
 
-		$this->update_meta_data( $offset, $value );
+		$this->update_meta_data( $offset, $value, $this->get_id() );
 	}
 
 	/**

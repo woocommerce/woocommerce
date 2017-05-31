@@ -7,6 +7,33 @@
 class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * test_wc_order_item_set_offset
+	 *
+	 * tests WC_Order_Item::setOffset that assigns meta data properly with the
+	 * corresponding id.
+	 *
+	 * @since 2.7.0
+	 */
+	function test_wc_order_item_set_offset() {
+		$items = array();
+
+		$item = new WC_Order_Item_Product();
+
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+
+		$item_id = $item->save();
+
+		$items[ $item_id ] = $item;
+		$items[ $item_id ]['line_subtotal_tax'] = 123;
+
+		$formatted_data = $item->get_formatted_meta_data();
+		$this->assertArrayHasKey( $item_id, $formatted_data );
+	}
+
+	/**
 	 * test_wc_order_item_meta_functions
 	 *
 	 * wc_add_order_item_meta, wc_update_order_item_meta, and
