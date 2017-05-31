@@ -73,13 +73,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
-		$parent_title = get_post_field( 'post_title', $product->get_parent_id() );
+		$new_title = $this->generate_product_title( $product );
 
-		if ( 0 !== strpos( $post_object->post_title, $parent_title ) ) {
-			global $wpdb;
-			$new_title = $this->generate_product_title( $product );
+		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$wpdb->update( $wpdb->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
 			clean_post_cache( $product->get_id() );
 		}
 
@@ -98,11 +96,17 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
+
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->generate_product_title( $product ),
+			'post_title'     => $product->get_name( 'edit' ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -139,13 +143,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
+
 		$changes = $product->get_changes();
-		$title   = $this->generate_product_title( $product );
 
 		// Only update the post when the post data changes.
-		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			$post_data = array(
-				'post_title'        => $title,
+				'post_title'        => $product->get_name( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
