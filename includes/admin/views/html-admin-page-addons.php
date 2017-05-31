@@ -33,6 +33,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		<?php endif; ?>
 		<?php if ( 'featured' !== $current_section && $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+			<?php if ( 'shipping_methods' === $current_section ) : ?>
+				<div class="addons-shipping-methods">
+					<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
+				</div>
+			<?php endif; ?>
 			<ul class="products">
 			<?php foreach ( $addons as $addon ) : ?>
 				<li class="product">
