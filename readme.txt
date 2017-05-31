@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.0
+Stable tag: 3.0.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.1.0 - 2017-06-28 =
 * Feature - Built-in product CSV importer and exporter for products.
 * Feature - Display (toggle-able) terms inline on the checkout rather than showing a link.
 * Feature - On the "pay for order" page, if logged out show a login form rather than an error message.
@@ -169,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Feature - On customer profiles: added a button to copy billing address to shipping address.
 * Feature - Setup Wizard - Automatic Shipping Zone Creation In Setup Wizard for the base location.
 * Feature - Setup Wizard - Added a new optional Storefront Theme step if you're using a non-WooCommerce compatible theme.
+* Feature - Made it possible to manage extension licenses purchased from WooCommerce.com on the extensions screen.
 * Tweak - Gallery - Added a data-caption for captions to support both captions and titles for SEO.
 * Tweak - Gallery - Used smoothHeight setting to better support images of different heights.
 * Tweak - UI - Added blank states for API keys & webhooks.
@@ -189,6 +191,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Adapt variable product price used in sorting based on direction of sort.
 * Tweak - Made state validation less strict for keys.
 * Tweak - For COD orders, force payment complete status to be completed.
+* Fix - Use get_max_purchase_quantity in cart template and fix logic when stock management is off.
 * Fix - Added log_id as the secondary sorting column to log list so log entries sort correctly.
 * Fix - Fix shop page when using shop base and UTF8 shop page slug.
 * Fix - Added handles so drag and drop does not break edit on mobile when sorting categories.
@@ -198,6 +201,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Set and restore wp_query so product page functions think it's a real product page.
 * Fix - Variation default value of '0' fails to save on product.
 * Fix - Prevent locations being added to the "Rest Of The World" shipping zone via the API.
+* Dev - Made WC_Order get_item() method use caching, and fixed it to only return items from the actual order object being used.
 * Dev - Allow date created to be set in wc_create_refund.
 * Dev - Introduced a [WC_Order_Query class](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query) for finding/searching orders.
 * Dev - Added "restored" webhook.
@@ -224,5 +228,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.2 =
+= 3.0 =
 3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
