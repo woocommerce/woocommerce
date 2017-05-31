@@ -101,7 +101,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order( $id, $fields = null ) {
 
@@ -237,9 +237,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get the total number of orders
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $status
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_orders_count( $status = null, $filter = array() ) {
 
@@ -264,7 +266,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_order( $id, $data ) {
 
@@ -304,7 +306,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order_notes( $id, $fields = null ) {
 

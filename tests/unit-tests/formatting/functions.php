@@ -6,7 +6,6 @@
  * @since 2.2
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
-
 	/**
 	 * Test wc_sanitize_taxonomy_name().
 	 *
@@ -235,6 +234,18 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// trim zeros and round
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
+
+		// given string with thousands
+		$this->assertEquals( '99999.99', wc_format_decimal( '99,999.99' ) );
+
+		// given string with thousands in german format
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+
+		$this->assertEquals( '99999.99', wc_format_decimal( '99.999,99' ) );
+
+		update_option( 'woocommerce_price_decimal_sep', '.' );
+		update_option( 'woocommerce_price_thousand_sep', ',' );
 	}
 
 	/**

@@ -52,7 +52,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 * @param WC_Coupon $coupon
 	 */
 	public function create( &$coupon ) {
 		$coupon->set_date_created( current_time( 'timestamp', true ) );
@@ -81,7 +81,10 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Method to read a coupon.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 *
+	 * @param WC_Data $coupon
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$coupon ) {
 		$coupon->set_defaults();
@@ -124,7 +127,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Updates a coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
+	 * @param WC_Coupon $coupon
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
@@ -165,8 +168,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Deletes a coupon from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param array $args Array of args to pass to the delete method.
+	 *
+	 * @param WC_Coupon $coupon
+	 * @param array     $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$coupon, $args = array() ) {
 		$args = wp_parse_args( $args, array(
@@ -175,12 +179,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		$id = $coupon->get_id();
 
+		if ( ! $id ) {
+			return;
+		}
+
 		if ( $args['force_delete'] ) {
-			wp_delete_post( $coupon->get_id() );
+			wp_delete_post( $id );
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
-			wp_trash_post( $coupon->get_id() );
+			wp_trash_post( $id );
 			do_action( 'woocommerce_trash_coupon', $id );
 		}
 	}

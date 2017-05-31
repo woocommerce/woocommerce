@@ -436,7 +436,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns formatted dimensions.
 	 *
-	 * @param  $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @param  $formatted bool True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
 	 * @return string|array
 	 */
 	public function get_dimensions( $formatted = true ) {
@@ -1066,7 +1066,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes', array_filter( (array) $default_attributes ) );
+		$this->set_prop( 'default_attributes',
+			array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) );
 	}
 
 	/**
@@ -1639,6 +1640,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Returns the price in html format.
+	 *
+	 * @param string $deprecated
+	 *
 	 * @return string
 	 */
 	public function get_price_html( $deprecated = '' ) {
@@ -1684,7 +1688,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return int Quantity or -1 if unlimited.
 	 */
 	public function get_max_purchase_quantity() {
-		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->get_manage_stock() ? -1 : $this->get_stock_quantity() );
+		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() );
 	}
 
 	/**
@@ -1719,7 +1723,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
 	 * @param array $attr
-	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param bool $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {

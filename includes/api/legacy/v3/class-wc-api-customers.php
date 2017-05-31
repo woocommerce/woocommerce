@@ -135,7 +135,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param array $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer( $id, $fields = null ) {
 		global $wpdb;
@@ -195,9 +195,11 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Get the customer for the given email
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $email the customer email
 	 * @param array $fields
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_customer_by_email( $email, $fields = null ) {
 		try {
@@ -220,8 +222,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Get the total number of customers
 	 *
 	 * @since 2.1
+	 *
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_customers_count( $filter = array() ) {
 		try {
@@ -336,8 +340,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Create a customer
 	 *
 	 * @since 2.2
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function create_customer( $data ) {
 		try {
@@ -388,9 +394,11 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Edit a customer
 	 *
 	 * @since 2.2
+	 *
 	 * @param int $id the customer ID
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function edit_customer( $id, $data ) {
 		try {
@@ -440,7 +448,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param int $id the customer ID
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_customer( $id ) {
 
@@ -464,7 +472,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
 	 * @param array $filter filters
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer_orders( $id, $fields = null, $filter = array() ) {
 		$id = $this->validate_request( $id, 'customer', 'read' );
@@ -485,7 +493,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer_downloads( $id, $fields = null ) {
 		$id = $this->validate_request( $id, 'customer', 'read' );
@@ -755,8 +763,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * WC_API_Customers->create_customer() and WC_API_Customers->edit_customer()
 	 *
 	 * @since 2.4.0
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 

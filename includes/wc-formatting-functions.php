@@ -234,6 +234,9 @@ function wc_round_tax_total( $tax ) {
 
 /**
  * Make a refund total negative.
+ *
+ * @param float $amount
+ *
  * @return float
  */
 function wc_format_refund_total( $amount ) {
@@ -255,9 +258,13 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
 	// Remove locale from string.
-	if ( ! is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
+	if ( ! is_float( $number ) && strval( floatval( $number ) ) !== $number ) {
+		// Only remove thousands if separator is not same as decimal separator.
+		if ( wc_get_price_thousand_separator() !== wc_get_price_decimal_separator() ) {
+			$number = str_replace( wc_get_price_thousand_separator(), '', $number );
+		}
+		$number = str_replace( $decimals, '.', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
@@ -540,6 +547,10 @@ function wc_time_format() {
  * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
  *
  * @since  3.0.0
+ *
+ * @param string $time_string
+ * @param int|null $from_timestamp
+ *
  * @return int
  */
 function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
@@ -661,7 +672,8 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
-	 * @return string
+	 *
+	 * @return array
 	 */
 	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
@@ -823,8 +835,18 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	$postcode = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $postcode ) : strtoupper( $postcode );
-	return preg_replace( '/[\s\-]/', '', trim( $postcode ) );
+	return preg_replace( '/[\s\-]/', '', trim( wc_strtoupper( $postcode ) ) );
+}
+
+/**
+ * Wrapper for mb_strtoupper which see's if supported first.
+ *
+ * @since  3.1.0
+ * @param  string $string
+ * @return string
+ */
+function wc_strtoupper( $string ) {
+	return function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $string ) : strtoupper( $string );
 }
 
 /**

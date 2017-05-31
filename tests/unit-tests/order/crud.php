@@ -479,10 +479,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'product'  => WC_Helper_Product::create_simple_product(),
 			'quantity' => 4,
 		) );
-		$item->save();
-		$object->add_item( $item->get_id() );
+		$object->add_item( $item );
 		$object->save();
 		$this->assertTrue( $object->get_item( $item->get_id() ) instanceOf WC_Order_Item_Product );
+		$this->assertEquals( spl_object_hash( $item ), spl_object_hash( $object->get_item( $item->get_id() ) ) );
 
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
@@ -495,6 +495,51 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->add_item( $item );
 		$object->save();
 		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+
+		$object = new WC_Order( $object->get_id() );
+		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+	}
+
+	/**
+	 *	Make sure that items returned by get_item is tied to the order,
+	 *  and that is saved when the order is saved.
+	 */
+	public function test_get_item_object_is_updated_with_order_save() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+		$object->add_item( $item );
+		$object->save();
+
+		$object = new WC_Order( $object->get_id() );
+		$item = $object->get_item( $item->get_id() );
+		$item->set_quantity( 6 );
+		$object->save();
+
+		$object = new WC_Order( $object->get_id() );
+		$this->assertEquals(6, $object->get_item( $item->get_id() )->get_quantity() );
+	}
+
+	/**
+	 * Makes sure that get_item only returns items related to the order
+	 */
+	public function test_get_item_from_another_order() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+			'order_id' => 999,
+		) );
+		$item->save();
+		$this->assertFalse( $object->get_item( $item->get_id() ) );
+
+		$object->save();
+		$this->assertFalse( $object->get_item( $item->get_id() ) );
+
 	}
 
 	/**

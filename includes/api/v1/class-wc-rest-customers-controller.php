@@ -142,7 +142,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access create customers.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'create' ) ) {
@@ -172,7 +173,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access update a customer.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
@@ -188,7 +190,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access delete a customer.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
@@ -204,7 +207,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {

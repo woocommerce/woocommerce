@@ -77,7 +77,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 	/**
 	 * Method to read an order from the database.
-	 * @param WC_Order
+	 *
+	 * @param WC_Data $order
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$order ) {
 		$order->set_defaults();
@@ -86,7 +89,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$id = $order->get_id();
 		$order->set_props( array(
 			'parent_id'     => $post_object->post_parent,
 			'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
@@ -153,7 +155,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 	/**
 	 * Method to delete an order from the database.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
@@ -161,6 +163,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$args = wp_parse_args( $args, array(
 			'force_delete' => false,
 		) );
+
+		if ( ! $id ) {
+			return;
+		}
 
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
@@ -351,5 +357,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
+	}
+
+	/**
+	 * Return the order type of a given item which belongs to WC_Order
+	 *
+	 * @param WC_Order $order	Order Object
+	 * @param int	$order_id
+	 *
+	 * @return string Order Item type
+	 */
+	public function get_order_item_type( WC_Order $order, $order_item_id ) {
+		global $wpdb;
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d and order_item_id = %d",
+			$order->get_id(),
+			$order_item_id
+		);
+		return $wpdb->get_var( $query );
 	}
 }

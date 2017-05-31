@@ -316,7 +316,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->delete();
 	}
 
-	function test_varation_save_attributes() {
+	function test_variation_save_attributes() {
 		// Create a variable product with a color attribute.
 		$product = new WC_Product_Variable;
 
@@ -348,6 +348,44 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'publish', $loaded_variation->get_status( 'edit' ) );
 		$_attribute = $loaded_variation->get_attributes( 'edit' );
 		$this->assertEquals( 'green', $_attribute['color'] );
+	}
+
+	public function test_save_default_attributes() {
+
+		// Create a variable product with sold individually.
+		$product = new WC_Product_Variable;
+		$product->save();
+		$product_id = $product->get_id();
+
+		// Save with a set of FALSE equivalents and some values we expect to come through as true.  We should see
+		// string types with a value of '0' making it through filtration.
+		$test_object = new stdClass();
+		$test_object->property = '12345';
+		$product->set_default_attributes( array(
+			'sample-attribute-false-0' => 0,
+			'sample-attribute-false-1' => false,
+			'sample-attribute-false-2' => '',
+			'sample-attribute-false-3' => null,
+			'sample-attribute-true-0' => '0',
+			'sample-attribute-true-1' => 1,
+			'sample-attribute-true-2' => 'true',
+			'sample-attribute-true-3' => 'false',
+			'sample-attribute-true-4' => array( 'exists' => 'false' ),
+			'sample-attribute-false-4' => $test_object,
+		));
+		$product->save();
+
+		// Revive the product from the database and analyze results
+		$product = wc_get_product( $product_id );
+		$default_attributes = $product->get_default_attributes();
+		$this->assertEquals( $default_attributes, array(
+			'sample-attribute-true-0' => '0',
+			'sample-attribute-true-1' => 1,
+			'sample-attribute-true-2' => 'true',
+			'sample-attribute-true-3' => 'false',
+			'sample-attribute-true-4' => array( 'exists' => 'false' ),
+			'sample-attribute-false-4' => $test_object,
+		));
 	}
 
 	function test_variable_child_has_dimensions() {

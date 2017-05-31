@@ -121,7 +121,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access create taxes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
@@ -149,7 +150,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access update a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
@@ -163,7 +165,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access delete a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
@@ -177,7 +180,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'batch' ) ) {
@@ -284,7 +288,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param stdClass|null $current Existing tax object.
-	 * @return stdClass
+	 * @return object
 	 */
 	protected function create_or_update_tax( $request, $current = null ) {
 		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );

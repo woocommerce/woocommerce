@@ -46,6 +46,12 @@ function wc_get_screen_ids() {
 		$screen_ids[] = 'edit-' . $type;
 	}
 
+	if ( $attributes = wc_get_attribute_taxonomies() ) {
+		foreach ( $attributes as $attribute ) {
+			$screen_ids[] = 'edit-' . wc_attribute_taxonomy_name( $attribute->attribute_name );
+		}
+	}
+
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
 }
 

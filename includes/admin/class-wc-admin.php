@@ -70,6 +70,18 @@ class WC_Admin {
 				break;
 			}
 		}
+
+		// Importers
+		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
+			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
+		}
+
+		// Helper
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-options.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-api.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper.php' );
 	}
 
 	/**

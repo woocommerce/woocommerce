@@ -178,6 +178,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return a products child ids.
 	 *
+	 * @param bool|string $visible_only
+	 *
 	 * @return array Children ids
 	 */
 	public function get_children( $visible_only = '' ) {
@@ -221,6 +223,10 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Variable products themselves cannot be downloadable.
+	 *
+	 * @param string $context
+	 *
+	 * @return bool
 	 */
 	public function get_downloadable( $context = 'view' ) {
 		return false;
@@ -228,6 +234,10 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Variable products themselves cannot be virtual.
+	 *
+	 * @param string $context
+	 *
+	 * @return bool
 	 */
 	public function get_virtual( $context = 'view' ) {
 		return false;
@@ -351,6 +361,10 @@ class WC_Product_Variable extends WC_Product {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+
+		// If backorders are enabled, always in stock.
+		} elseif ( 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'instock' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {

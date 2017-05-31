@@ -151,12 +151,13 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
  * @return int
  */
 function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
-    $a_name = (int) $a->name;
-    $b_name = (int) $b->name;
+	$a_name = (float) $a->name;
+	$b_name = (float) $b->name;
 
-	if ( $a_name === $b_name ) {
+	if ( abs( $a_name - $b_name ) < 0.001 ) {
 		return 0;
 	}
+
 	return ( $a_name < $b_name ) ? -1 : 1;
 }
 
@@ -179,7 +180,11 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
  * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
  * We use a custom walker, just like WordPress does.
  *
+ * @param array $args
+ * @param int $deprecated_hierarchical
  * @param int $deprecated_show_uncategorized (default: 1)
+ * @param string $deprecated_orderby
+ *
  * @return string
  */
 function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
@@ -520,7 +525,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Query fields.
-	$clauses['fields'] = 'DISTINCT ' . $clauses['fields'] . ', tm.meta_value';
+	$clauses['fields'] = $clauses['fields'] . ', tm.meta_value';
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
@@ -528,6 +533,9 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	} else {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	}
+
+	// Grouping.
+	$clauses['where'] .= ' GROUP BY t.term_id ';
 
 	// Default to ASC.
 	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) {

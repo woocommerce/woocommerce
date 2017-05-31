@@ -79,7 +79,10 @@ class WC_Shipping_Zones {
 	/**
 	 * Get shipping zone using it's ID
 	 * @since 2.6.0
-	 * @return WC_Shipping_Meethod|bool
+	 *
+	 * @param $instance_id
+	 *
+	 * @return bool|WC_Shipping_Meethod
 	 */
 	public static function get_shipping_method( $instance_id ) {
 		$data_store          = WC_Data_Store::load( 'shipping-zone' );
@@ -117,7 +120,6 @@ class WC_Shipping_Zones {
 	public static function get_zone_matching_package( $package ) {
 		$country          = strtoupper( wc_clean( $package['destination']['country'] ) );
 		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
-		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
 		$postcode         = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
 		$cache_key        = WC_Cache_Helper::get_cache_prefix( 'shipping_zones' ) . 'wc_shipping_zone_' . md5( sprintf( '%s+%s+%s', $country, $state, $postcode ) );
 		$matching_zone_id = wp_cache_get( $cache_key, 'shipping_zones' );

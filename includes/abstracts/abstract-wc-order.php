@@ -630,6 +630,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 *
+	 * @return bool|void
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value, $deprecated = '' ) {
@@ -780,14 +782,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's type.
+	 * Get an order item object, based on it's ID. The item must belong to the current
+	 * order. If the item cannot be found or it doens't belong to current order
+	 * FALSE will be returned.
 	 *
 	 * @since  3.0.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
 	 */
 	public function get_item( $item_id ) {
-		return WC_Order_Factory::get_order_item( $item_id );
+		$type = $this->data_store->get_order_item_type( $this, $item_id );
+		if ( ! $type ) {
+			return false;
+		}
+
+		$items = $this->get_items( $type );
+		return ! empty( $items[ $item_id ] ) ? $items[ $item_id ] : false;
 	}
 
 	/**
@@ -808,15 +818,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return 'tax_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
-		} else {
-			return '';
 		}
+		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
 
 	/**
 	 * Remove item from the order.
 	 *
 	 * @param int $item_id
+	 *
+	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
 		$item = $this->get_item( $item_id );
@@ -835,6 +846,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
+	 *
+	 * * @return false|void
 	 */
 	public function add_item( $item ) {
 		if ( ! $items_key = $this->get_items_key( $item ) ) {
@@ -1024,7 +1037,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_class           = $item->get_tax_class();
 			$tax_status          = $item->get_tax_status();
 
-			if ( '0' !== $tax_class && 'taxable' === $tax_status ) {
+			if ( '0' !== $tax_class && 'taxable' === $tax_status && wc_tax_enabled() ) {
 				$tax_rates = WC_Tax::find_rates( array(
 					'country'   => $args['country'],
 					'state'     => $args['state'],
@@ -1043,43 +1056,49 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				} else {
 					$item->set_taxes( array( 'total' => $taxes ) );
 				}
-				$item->save();
+			} else {
+				$item->set_taxes( false );
 			}
+			$item->save();
 		}
 
 		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
-			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+			if ( wc_tax_enabled() ) {
+				$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-			// Inherit tax class from items
-			if ( 'inherit' === $shipping_tax_class ) {
-				$tax_rates         = array();
-				$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
-				$found_tax_classes = $this->get_items_tax_classes();
+				// Inherit tax class from items
+				if ( 'inherit' === $shipping_tax_class ) {
+					$tax_rates         = array();
+					$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
+					$found_tax_classes = $this->get_items_tax_classes();
 
-				foreach ( $tax_classes as $tax_class ) {
-					if ( in_array( $tax_class, $found_tax_classes ) ) {
-						$tax_rates = WC_Tax::find_shipping_rates( array(
-							'country'   => $args['country'],
-							'state'     => $args['state'],
-							'postcode'  => $args['postcode'],
-							'city'      => $args['city'],
-							'tax_class' => $tax_class,
-						) );
-						break;
+					foreach ( $tax_classes as $tax_class ) {
+						if ( in_array( $tax_class, $found_tax_classes ) ) {
+							$tax_rates = WC_Tax::find_shipping_rates( array(
+								'country'   => $args['country'],
+								'state'     => $args['state'],
+								'postcode'  => $args['postcode'],
+								'city'      => $args['city'],
+								'tax_class' => $tax_class,
+							) );
+							break;
+						}
 					}
+				} else {
+					$tax_rates = WC_Tax::find_shipping_rates( array(
+						'country'   => $args['country'],
+						'state'     => $args['state'],
+						'postcode'  => $args['postcode'],
+						'city'      => $args['city'],
+						'tax_class' => $shipping_tax_class,
+					) );
 				}
-			} else {
-				$tax_rates = WC_Tax::find_shipping_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
-					'tax_class' => $shipping_tax_class,
-				) );
-			}
 
-			$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
+				$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
+			} else {
+				$item->set_taxes( false );
+			}
 			$item->save();
 		}
 		$this->update_taxes();
@@ -1151,7 +1170,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		if ( $and_taxes && wc_tax_enabled() ) {
+		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
 
@@ -1387,6 +1406,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets shipping (formatted).
 	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
@@ -1427,6 +1448,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 * @since  2.3.0
+	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
@@ -1568,6 +1592,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Checks the order status against a passed in status.
+	 *
+	 * @param array|string $status
 	 *
 	 * @return bool
 	 */

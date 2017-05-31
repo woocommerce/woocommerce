@@ -590,8 +590,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Round our totals correctly.
-	 * @param  string $amount
-	 * @return string
+	 *
+	 * @param array|string $amount
+	 *
+	 * @return array|string
 	 */
 	private function round_chart_totals( $amount ) {
 		if ( is_array( $amount ) ) {

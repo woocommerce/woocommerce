@@ -110,7 +110,8 @@ class WC_Product_External extends WC_Product {
 	 * External products cannot be stock managed.
 	 *
 	 * @since 3.0.0
-	 * @param bool
+	 *
+	 * @param string $stock_status
 	 */
 	public function set_stock_status( $stock_status = '' ) {
 		$this->set_prop( 'stock_status', 'instock' );

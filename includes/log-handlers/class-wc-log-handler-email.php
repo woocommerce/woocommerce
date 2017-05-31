@@ -196,6 +196,11 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 
 	/**
 	 * Add log message.
+	 *
+	 * @param int $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $message Log message.
+	 * @param array $context Additional information for log handlers.
 	 */
 	protected function add_log( $timestamp, $level, $message, $context ) {
 		$this->logs[] = $this->format_entry( $timestamp, $level, $message, $context );

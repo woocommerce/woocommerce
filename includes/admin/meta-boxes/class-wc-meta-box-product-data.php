@@ -25,7 +25,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-		global $post, $thepostid, $product_object;
+		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
@@ -173,6 +173,11 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare downloads for save.
+	 *
+	 * @param array $file_names
+	 * @param array $file_urls
+	 * @param array $file_hashes
+	 *
 	 * @return array
 	 */
 	private static function prepare_downloads( $file_names, $file_urls, $file_hashes ) {
@@ -204,6 +209,9 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare attributes for save.
+	 *
+	 * @param array $data
+	 *
 	 * @return array
 	 */
 	public static function prepare_attributes( $data = false ) {
@@ -292,6 +300,9 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param $post
 	 */
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.
@@ -321,9 +332,9 @@ class WC_Meta_Box_Product_Data {
 			'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
 			'date_on_sale_to'    => wc_clean( $_POST['_sale_price_dates_to'] ),
 			'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
-			'backorders'         => wc_clean( $_POST['_backorders'] ),
+			'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( $_POST['_backorders'] ) : null,
 			'stock_status'       => wc_clean( $_POST['_stock_status'] ),
-			'stock_quantity'     => wc_stock_amount( $_POST['_stock'] ),
+			'stock_quantity'     => isset( $_POST['_stock'] ) ? wc_stock_amount( $_POST['_stock'] ) : null,
 			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
 			'downloads'          => self::prepare_downloads(
@@ -398,8 +409,8 @@ class WC_Meta_Box_Product_Data {
 						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
 					),
 					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
-					'stock_quantity'    => wc_clean( $_POST['variable_stock'][ $i ] ),
-					'backorders'        => wc_clean( $_POST['variable_backorders'][ $i ] ),
+					'stock_quantity'    => isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ? wc_clean( $_POST['variable_stock'][ $i ] ) : null,
+					'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
 					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),

@@ -31,8 +31,6 @@ class WC_Meta_Box_Order_Actions {
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
-
-		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -99,8 +97,6 @@ class WC_Meta_Box_Order_Actions {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
 

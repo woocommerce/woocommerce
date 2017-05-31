@@ -449,8 +449,6 @@ class WC_Meta_Box_Order_Data {
 	 * @param int $order_id Order ID.
 	 */
 	public static function save( $order_id ) {
-		global $wpdb;
-
 		self::init_address_fields();
 
 		// Ensure gateways are loaded in case they need to insert data into the emails.

@@ -161,10 +161,64 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.1.0 - 2017-xx-xx =
-* Included WooCommerce endpoints as options nav menu settings on Customize.
+* Feature - Built-in product CSV importer and exporter for products.
+* Feature - Display (toggle-able) terms inline on the checkout rather than showing a link.
+* Feature - On the "pay for order" page, if logged out show a login form rather than an error message.
+* Feature - Enabled oembed support for product short descriptions.
+* Feature - Added bulk variation update for stock status.
+* Feature - On customer profiles: added a button to copy billing address to shipping address.
+* Feature - Setup Wizard - Automatic Shipping Zone Creation In Setup Wizard for the base location.
+* Feature - Setup Wizard - Added a new optional Storefront Theme step if you're using a non-WooCommerce compatible theme.
+* Tweak - Gallery - Added a data-caption for captions to support both captions and titles for SEO.
+* Tweak - Gallery - Used smoothHeight setting to better support images of different heights.
+* Tweak - UI - Added blank states for API keys & webhooks.
+* Tweak - UI - Made Product submenu labels consistent in admin.
+* Tweak - UI - Changed street address field label and placeholder to minimize user error on checkout.
+* Tweak - UI - Added a confirmation before deleting log files.
+* Tweak - If prices are the same for all variations, use price not priceSpecification in structured data.
+* Tweak - Added variable so shipping calculator is shown on first row only when showing multiple shipping packages.
+* Tweak - Updated mini-cart HTML to use a list.
+* Tweak - Allow linking to single product additional_information tab from url hash.
+* Tweak - Re-included WooCommerce endpoints on the appearance > menus screens.
+* Tweak - Always sync incorrect titles on variation read regardless of version.
+* Tweak - Standardize rating HTML in all templates.
+* Tweak - When searching, disable WC sort order so results are sorted by relevance.
+* Tweak - Update price sorting code to use min or max for variable products depending on sorting direction.
+* Tweak - Utilize $product method to get thumbnail in loops.
+* Tweak - Check for an existing display name before updating a user on checkout. Adds display_name prop to the CRUD.
+* Tweak - Adapt variable product price used in sorting based on direction of sort.
+* Tweak - Made state validation less strict for keys.
+* Tweak - For COD orders, force payment complete status to be completed.
+* Fix - Added log_id as the secondary sorting column to log list so log entries sort correctly.
+* Fix - Fix shop page when using shop base and UTF8 shop page slug.
+* Fix - Added handles so drag and drop does not break edit on mobile when sorting categories.
+* Fix - Added ABSPATH checks to all files.
+* Fix - Fixed how to flush rewrite rules after saving the shop main page.
+* Fix - Emails sent via admin should switch to global locale.
+* Fix - Set and restore wp_query so product page functions think it's a real product page.
+* Fix - Variation default value of '0' fails to save on product.
+* Fix - Prevent locations being added to the "Rest Of The World" shipping zone via the API.
+* Dev - Allow date created to be set in wc_create_refund.
+* Dev - Introduced a [WC_Order_Query class](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query) for finding/searching orders.
+* Dev - Added "restored" webhook.
+* Dev - Support floats for the custom attribute name sorting function.
 * Dev - Updated Emogrifier to version 1.2.
 * Dev - Sort product data tabs by priority in admin screen.
+* Dev - Added new hooks for: dashboard reviews widget, product and category sorting events, woocommerce_add_to_cart_sold_individually_found_in_cart, cart empty messages.
+* Dev - Added filters for zoom / flexslider / photoswipe enabling.
+* Dev - Added filter for cookie name.
+* Dev - Added ability to filter Photoswipe lightbox options.
+* Dev - Added new filter for product thumbnail size.
+* Dev - Added action for displaying custom data for fees in admin.
+* Dev - Changed build_payload from private to public in webhook system.
+* Dev - Added deprecated notice to WC_Order_Item_Meta (deprecated in 3.0).
+* Dev - Added namespace to jQuery events that are removed in VariationForm.
+* Dev - Made WC_Checkout::get_posted_data() public.
+* Dev - Add custom message for custom system status tools.
+* Dev - Added filters to change which order items are created and loaded to support custom item types.
+* Dev - Updated jQuery payment and serializejson libraries.
+* Localization - Added Bolivian states.
+* Localization - Use VAT for Norway instead of Tax.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

@@ -113,7 +113,8 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 	 * Get all webhook deliveries.
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
 		$webhook = new WC_Webhook( (int) $request['webhook_id'] );
@@ -249,13 +250,6 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'request_url' => array(
-					'description' => __( 'The URL where the webhook was delivered.', 'woocommerce' ),
-					'type'        => 'string',
-					'format'      => 'uri',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'request_headers' => array(
 					'description' => __( 'The URL where the webhook was delivered.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
