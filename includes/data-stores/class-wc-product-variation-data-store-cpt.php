@@ -96,11 +96,17 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
+
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->generate_product_title( $product ),
+			'post_title'     => $product->get_name( 'edit' ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -137,21 +143,25 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
-		$changes = $product->get_changes();
-		$title   = $this->generate_product_title( $product );
+		$changes   = $product->get_changes();
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
 
 		// Only update the post when the post data changes.
-		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
 			$post_data = array(
-				'post_title'        => $title,
+				'post_title'        => $product->get_name( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
+				'post_date'         => gmdate( 'Y-m-d H                                                :i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => gmdate( 'Y-m-d H                                                :i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H           :i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H           :i:s', $product->get_date_modified( 'edit' )->getTimestamp() )       : current_time( 'mysql', 1 ),
 			);
 
 			/**
