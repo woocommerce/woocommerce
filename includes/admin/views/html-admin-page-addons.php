@@ -33,8 +33,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		<?php endif; ?>
 		<?php if ( 'featured' !== $current_section && $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+			<div class="addons-section-blocks">
+				<?php
+					if( $addons['blocks'] ) {
+						WC_Admin_Addons::output_sections( $addons['blocks'] );
+					}
+				?>
+			</div>
 			<ul class="products">
-			<?php foreach ( $addons as $addon ) : ?>
+			<?php foreach ( $addons['products'] as $addon ) : ?>
 				<li class="product">
 					<a href="<?php echo esc_attr( $addon->link ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>

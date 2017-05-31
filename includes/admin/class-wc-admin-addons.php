@@ -34,7 +34,7 @@ class WC_Admin_Addons {
 		}
 
 		if ( is_object( $featured ) ) {
-			self::output_featured_sections( $featured->sections );
+			self::output_sections( $featured->sections );
 			return $featured;
 		}
 	}
@@ -112,7 +112,22 @@ class WC_Admin_Addons {
 			}
 		}
 
-		return apply_filters( 'woocommerce_addons_section_data', $section_data->products, $section_id );
+		return array(
+				"blocks" => ! empty( $section_data->blocks )
+					? apply_filters(
+						'woocommerce_addons_section_blocks_data',
+						$section_data->blocks,
+						$section_id
+					)
+					: array(),
+				"products" => ! empty(  $section_data->products )
+					? apply_filters(
+						'woocommerce_addons_section_data',
+						$section_data->products,
+						$section_id
+					)
+					: array(),
+		);
 	}
 
 	/**
@@ -307,11 +322,40 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the outputting of an image banner block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_image_banner_block( $block ) {
+		?>
+		<div class="addons-image-banner-block">
+			<h1><?php echo esc_html( $block->title ); ?></h1>
+			<div class="addons-image-banner-block-content">
+				<div class="addons-image-banner-block-image">
+					<img class="addons-img" src="<?php echo esc_url( $block->image ) ?>" />
+				</div>
+				<div class="addons-image-banner-block-text">
+					<h2><?php echo esc_html( $block->subtitle ); ?></h2>
+					<p><?php echo esc_html( $block->description ); ?></p>
+					<?php
+						self::output_button(
+							$block->href,
+							$block->button,
+							'addons-button-solid-grey addons-button-large'
+						);
+					?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections
 	 */
-	public static function output_featured_sections( $sections ) {
+	public static function output_sections( $sections ) {
 		foreach ( $sections as $section ) {
 			switch ( $section->module ) {
 				case 'banner_block':
@@ -331,6 +375,9 @@ class WC_Admin_Addons {
 					break;
 				case 'small_dark_block':
 					self::output_small_dark_block( $section );
+					break;
+				case 'image_banner_block':
+					self::output_image_banner_block( $section );
 					break;
 			}
 		}

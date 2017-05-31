@@ -33,12 +33,20 @@
 		justify-content: center;
 	}
 
-	.addons-banner-block {
+	.addons-banner-block,
+	.addons-image-banner-block {
 		background: #ffffff;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
 		margin: 2% 1% 0;
 		max-width: 1140px;
 		padding: 20px;
+	}
+
+	.addons-section-blocks .addons-banner-block,
+	.addons-section-blocks .addons-image-banner-block {
+		margin-left: 0;
+		margin-right: 0;
+		margin-top: 1em;
 	}
 
 	.addons-banner-block img {
@@ -86,6 +94,45 @@
 
 	.addons-banner-block-item-content p {
 		margin: 0 0 auto;
+	}
+
+	.addons-image-banner-block h1 {
+		margin-bottom: 1em;
+	}
+
+	.addons-image-banner-block-content {
+		align-items: center;
+		border: 1px solid #dbdcdd;
+		display: flex;
+		justify-content: flex-start;
+		padding: 24px;
+	}
+
+	.addons-image-banner-block-image {
+		margin: 0 4em 0 2em;
+
+		img {
+			height: 100px;
+			width: 100px;
+		}
+	}
+
+	.addons-image-banner-block-text {
+		align-items: flex-start;
+		display: flex;
+		flex-flow: column wrap;
+		justify-content: center;
+
+		h2 {
+			margin-bottom: 0.5em;
+			font-size: 23px;
+			font-weight: 400;
+		}
+
+		p {
+			font-size: 1.3em;
+			margin-bottom: 1.5em;
+		}
 	}
 
 	.addons-column-section {
@@ -282,6 +329,19 @@
 	.addons-button-installed:hover {
 		color: #3c3c3c;
 		opacity: 0.8;
+	}
+
+	.addons-button-solid-grey {
+		background-color: #636465;
+		color: #fff;
+	}
+
+	.addons-button-large {
+		height: 55px;
+		width: 200px;
+		line-height: 55px;
+		font-weight: bold;
+		font-size: 1.2em;
 	}
 
 	@media only screen and (max-width : 400px) {
