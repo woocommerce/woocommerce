@@ -242,9 +242,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->set_meta_data( $metadata );
 
 		foreach ( $object->get_meta_data() as $id => $meta ) {
-			$this->assertEquals( $metadata[ $id ]->id, $meta->id);
-			$this->assertEquals( $metadata[ $id ]->key, $meta->key);
-			$this->assertEquals( $metadata[ $id ]->value, $meta->value);
+			$this->assertEquals( $metadata[ $id ]->id, $meta->id );
+			$this->assertEquals( $metadata[ $id ]->key, $meta->key );
+			$this->assertEquals( $metadata[ $id ]->value, $meta->value );
 		}
 
 	}
