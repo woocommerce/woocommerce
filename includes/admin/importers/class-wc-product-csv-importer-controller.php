@@ -448,7 +448,7 @@ class WC_Product_CSV_Importer_Controller {
 					'attributes:name'     => __( 'Attribute %d name', 'woocommerce' ),
 					'attributes:value'    => __( 'Attribute %d value(s)', 'woocommerce' ),
 					'attributes:visible'  => __( 'Attribute %d visible', 'woocommerce' ),
-					'attributes:taxonomy' => __( 'Is attribute %d global?', 'woocommerce' ),
+					'attributes:taxonomy' => __( 'Attribute %d global', 'woocommerce' ),
 					'attributes:default'  => __( 'Attribute %d default', 'woocommerce' ),
 					'downloads:name'      => __( 'Download %d name', 'woocommerce' ),
 					'downloads:url'       => __( 'Download %d URL', 'woocommerce' ),
