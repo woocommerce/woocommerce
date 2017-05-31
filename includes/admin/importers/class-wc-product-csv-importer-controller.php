@@ -295,10 +295,6 @@ class WC_Product_CSV_Importer_Controller {
 
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping = wp_unslash( $_POST['map_to'] );
-		} elseif ( ! empty( $_GET['auto_map'] ) ) {
-			// Auto mapping.
-			$importer = self::get_importer( $this->file, array( 'lines' => 1 ) );
-			$mapping  = $this->auto_map_columns( $importer->get_raw_keys(), false );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -326,57 +322,6 @@ class WC_Product_CSV_Importer_Controller {
 		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 
 		include_once( dirname( __FILE__ ) . '/views/html-csv-import-done.php' );
-	}
-
-	/**
-	 * Get default fields.
-	 *
-	 * @return array
-	 */
-	protected function get_default_fields() {
-		$fields = array(
-			'id',
-			'type',
-			'sku',
-			'name',
-			'status',
-			'featured',
-			'catalog_visibility',
-			'short_description',
-			'description',
-			'date_on_sale_from',
-			'date_on_sale_to',
-			'tax_status',
-			'tax_class',
-			'stock_status',
-			'backorders',
-			'sold_individually',
-			'weight',
-			'length',
-			'width',
-			'height',
-			'reviews_allowed',
-			'purchase_note',
-			'price',
-			'regular_price',
-			'manage_stock',
-			'stock_quantity',
-			'category_ids',
-			'tag_ids',
-			'shipping_class_id',
-			'images',
-			'downloads',
-			'download_limit',
-			'download_expiry',
-			'parent_id',
-			'grouped_products',
-			'upsell_ids',
-			'cross_sell_ids',
-			'product_url',
-			'button_text',
-		);
-
-		return apply_filters( 'woocommerce_csv_product_default_fields', $fields );
 	}
 
 	/**
