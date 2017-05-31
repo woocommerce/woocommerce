@@ -490,20 +490,30 @@ class WC_Admin_Setup_Wizard {
 			$base_location = WC_Geolocation::geolocate_ip();
 		}
 
-		if ( in_array( $base_location['country'], array( 'US', 'CA' ) ) ) : ?>
-		<div class="wc-wizard-shipping-services-description">
-			<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
-			<label>
-				<?php esc_html_e( 'Ship with WooCommerce Services', 'woocommerce' ); ?>
-			</label>
-			<p>
-				<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' ); ?>
-			</p>
-			<p class="wc-wizard-shipping-services-powered-by">
-				<?php esc_html_e( 'Powered by Jetpack, and WooCommerce Services.', 'woocommerce' ); ?>
-			</p>
-		</div>
-		<?php endif;
+		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ) ) ) {
+			return;
+		}
+
+		?>
+		<ul class="wc-wizard-shipping-methods">
+			<li class="wc-wizard-shipping">
+				<div class="wc-wizard-shipping-enable">
+					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" />
+					<label>
+						<?php esc_html_e( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ); ?>
+					</label>
+				</div>
+				<div class="wc-wizard-shipping-description">
+					<p>
+						<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer easily as you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ); ?>
+					</p>
+					<p>
+						<a href="https://en-gb.wordpress.org/plugins/woocommerce-services/" target="_blank"><?php _e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?></a>
+					</p>
+				</div>
+			</li>
+		</ul>
+		<?php
 	}
 
 	/**
@@ -525,57 +535,36 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p>
-				<?php esc_html_e( 'Complete your online store with shipping preferences that enable you to fulfill your orders in minutes.', 'woocommerce' ); ?>
-			</p>
-			<ul class="wc-wizard-shipping-settings">
-				<li class="wc-wizard-shipping wc-wizard-shipping-enabled checked">
-					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="yes" checked />
-						<label>
-							<?php esc_html_e( 'I will be shipping products to customers', 'woocommerce' ); ?>
-						</label>
-					</div>
-					<div class="wc-wizard-shipping-settings">
-						<?php $this->wc_setup_wcs_tout(); ?>
-						<div class="wc-wizard-shipping-units">
-						<table class="form-table">
-							<tr>
-								<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
-								<td>
-									<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-										<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-										<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-										<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-										<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-									</select>
-								</td>
-							</tr>
-							<tr>
-								<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label></th>
-								<td>
-									<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-										<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-										<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-										<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-										<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-										<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-									</select>
-								</td>
-							</tr>
-						</table>
-						</div>
-					</div>
-				</li>
-				<li class="wc-wizard-shipping wc-wizard-shipping-enabled">
-					<div class="wc-wizard-shipping-enable">
-						<input type="radio" name="woocommerce_calc_shipping" class="wc-wizard-shipping-enabled input-checkbox" value="no" />
-						<label>
-							<?php esc_html_e( 'I will not be shipping products to customers', 'woocommerce' ); ?>
-						</label>
-					</div>
-				</li>
-			</ul>
+			<p><?php printf( __( 'WooCommerce can help you fulfill orders using various shipping options. <a href="%1$s" target="_blank">Additional shipping methods</a> can be installed later and managed from <a href="%2$s" target="_blank">shipping settings</a>.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=shipping_methods' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) ); ?></p>
+
+			<?php $this->wc_setup_wcs_tout(); ?>
+
+			<table class="form-table">
+				<tr>
+					<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+			</table>
+
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -723,7 +712,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
-			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
+			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment_gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
 
 			<ul class="wc-wizard-payment-gateways">
 				<?php foreach ( $gateways as $gateway_id => $gateway ) : ?>

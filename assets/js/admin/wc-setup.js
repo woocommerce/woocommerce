@@ -79,17 +79,7 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
-	$( '.wc-wizard-shipping-settings' ).on( 'click', 'li.wc-wizard-shipping-enabled', function() {
-		var $enabled = $( this ).find( '.wc-wizard-shipping-enable input' );
-
-		if ( ! $enabled.prop( 'checked' ) ) {
-			$( 'li.wc-wizard-shipping-enabled' ).removeClass( 'checked' );
-			$enabled.prop( 'checked', true );
-			$enabled.closest( 'li' ).addClass( 'checked' );
-		}
-	} );
-
-	$( '.wc-wizard-payment-gateways' ).on( 'change', '.wc-wizard-gateway-enable input', function() {
+	$( '.wc-wizard-payment-gateways, .wc-wizard-shipping-methods' ).on( 'change', '.wc-wizard-gateway-enable input, .wc-wizard-shipping-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( 'li' ).addClass( 'checked' );
 		} else {
@@ -97,13 +87,13 @@ jQuery( function( $ ) {
 		}
 	} );
 
-	$( '.wc-wizard-payment-gateways' ).on( 'click', 'li.wc-wizard-gateway', function() {
-		var $enabled = $( this ).find( '.wc-wizard-gateway-enable input' );
+	$( '.wc-wizard-payment-gateways, .wc-wizard-shipping-methods' ).on( 'click', 'li.wc-wizard-gateway, li.wc-wizard-shipping', function() {
+		var $enabled = $( this ).find( '.wc-wizard-gateway-enable input, .wc-wizard-shipping-enable input' );
 
 		$enabled.prop( 'checked', ! $enabled.prop( 'checked' ) ).change();
 	} );
 
-	$( '.wc-wizard-payment-gateways' ).on( 'click', 'li.wc-wizard-gateway table, li.wc-wizard-gateway a', function( e ) {
+	$( '.wc-wizard-payment-gateways li, .wc-wizard-shipping-methods li' ).on( 'click', 'table, a', function( e ) {
 		e.stopPropagation();
 	} );
 } );
