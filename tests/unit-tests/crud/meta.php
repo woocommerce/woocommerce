@@ -112,4 +112,24 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 	}
+
+	/**
+	 * Tests that the meta data cache gets flushed when update_post_meta updates the object's meta.
+	 * @see https://github.com/woocommerce/woocommerce/issues/15274
+	 */
+	function test_get_meta_data_after_update_post_meta() {
+		// Create an object.
+		$object  = new WC_Product;
+		$object->save();
+
+		// Update a meta value.
+		update_post_meta( $object->get_id(), '_some_meta_key', 'val1' );
+		$product = wc_get_product( $object->get_id() );
+		$this->assertEquals( 'val1', $product->get_meta( '_some_meta_key', true ) );
+
+		// Update meta to diff value.
+		update_post_meta( $object->get_id(), '_some_meta_key', 'val2' );
+		$product = wc_get_product( $object->get_id() );
+		$this->assertEquals( 'val2', $product->get_meta( '_some_meta_key', true ) );
+	}
 }
