@@ -345,13 +345,7 @@ class WC_REST_Authentication {
 		$params           = $this->normalize_parameters( $params );
 		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
-			if ( is_array( $param_value ) ) {
-				foreach ( $param_value as $param_key_inner => $param_value_inner ) {
-					$query_parameters[] = $param_key . '%255B' . $param_key_inner . '%255D%3D' . $param_value_inner;
-				}
-			} else {
-				$query_parameters[] = $param_key . '%3D' . $param_value; // Join with equals sign.
-			}
+			$query_parameters = array_merge($query_parameters, $this->percent_encode_parameters($param_key, $param_value));
 		}
 		$query_string   = implode( '%26', $query_parameters ); // Join with ampersand.
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
@@ -369,6 +363,35 @@ class WC_REST_Authentication {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Percent encode parameters, supporting multidimensional arrays.
+	 *
+	 *
+	 * 'update[0][menu_order]' => '5'
+	 *
+	 * is encoded to:
+	 *
+	 * 'update%255B0%255D%255Bmenu_order%255D%3D5'
+	 *
+	 * This is not defined by the OAuth 1.0a spec, but multidimensional array is supported by the woocoommerce rest api,
+	 * so it should also be supported in query strings.
+	 *
+	 * @param array $parent_key Un-normalized parameters.
+	 * @param array $param_value Un-normalized parameters.
+	 * @param array [$array] Array to merge with Query parameters.
+	 * @return array $array Query parameters.
+	 */
+	function percent_encode_parameters( $parent_key, $param_value, $array = array() ) {
+		if ( is_array( $param_value ) ) {
+			foreach ( $param_value as $param_key_inner => $param_value_inner ) {
+				$array = $this->percent_encode_parameters( $parent_key . '%255B' . $param_key_inner . '%255D', $param_value_inner, $array );
+			}
+		} else {
+			$array[] = $parent_key . '%3D' . $param_value; // Join with equals sign.
+		}
+		return $array;
 	}
 
 	/**
