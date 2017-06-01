@@ -378,8 +378,8 @@ class WC_REST_Authentication {
 	 * This is not defined by the OAuth 1.0a spec, but multidimensional array is supported by the woocoommerce rest api,
 	 * so it should also be supported in query strings.
 	 *
-	 * @param array $parent_key Un-normalized parameters.
-	 * @param array $param_value Un-normalized parameters.
+	 * @param array $parent_key Normalized key parameter.
+	 * @param array $param_value Normalized value parameter.
 	 * @param array [$array] Array to merge with Query parameters.
 	 * @return array $array Query parameters.
 	 */
@@ -410,7 +410,7 @@ class WC_REST_Authentication {
 	 * should be URL encoded.
 	 *
 	 * @see rawurlencode()
-	 * @param array $parameters Un-normalized pararmeters.
+	 * @param array $parameters Un-normalized parameters.
 	 * @return array Normalized parameters.
 	 */
 	private function normalize_parameters( $parameters ) {
