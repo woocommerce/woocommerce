@@ -129,7 +129,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
 			'orderby'  => array(
-				'ID'   => 'DESC',
+				'ID'   => 'ASC',
 			),
 			'return'   => 'objects',
 			'paginate' => true,
