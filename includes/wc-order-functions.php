@@ -851,18 +851,16 @@ function wc_cancel_unpaid_orders() {
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 
-if( ! function_exists('wc_sanitize_order_id') ){
-
-	/**
-	 * Sanitizes order id removing unwanted characters. 	 	 
-	 * 
-	 * E.g Users can sometimes try to track an order id using # with no success. This function can fix this.
-	 *
-	 * @since 3.0.8
-	 * @param int $order_id
-	 */
-	function wc_sanitize_order_id( $order_id ){
-		return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
-	}
+/**
+ * Sanitize order id removing unwanted characters.
+ *
+ * E.g Users can sometimes try to track an order id using # with no success.
+ * This function will fix this.
+ *
+ * @since 3.1.0
+ * @param int $order_id
+ */
+function wc_sanitize_order_id( $order_id ) {
+	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
 }
-add_filter('woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
+add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
