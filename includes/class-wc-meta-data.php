@@ -78,7 +78,7 @@ class WC_Meta_Data {
 	 * @return mixed Property value or NULL if it does not exists
 	 */
 	public function __get( $key ) {
-		if ( array_key_exists( $key, $this->current_data )) {
+		if ( array_key_exists( $key, $this->current_data ) ) {
 			return $this->current_data[ $key ];
 		}
 		return null;

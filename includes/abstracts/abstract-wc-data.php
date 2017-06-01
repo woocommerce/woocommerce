@@ -475,8 +475,7 @@ abstract class WC_Data {
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
-				$this->meta_data[ $array_key ]->id = $new_meta_id;
+				$meta->id = $this->data_store->add_meta( $this, $meta );
 				$meta->apply_changes();
 			} else {
 				if ( $meta->get_changes() ) {
