@@ -534,9 +534,6 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	}
 
-	// Grouping.
-	$clauses['where'] .= ' GROUP BY t.term_id ';
-
 	// Default to ASC.
 	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) {
 		$args['menu_order'] = 'ASC';
@@ -549,6 +546,9 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	} else {
 		$clauses['orderby'] = $order;
 	}
+
+	// Grouping.
+	$clauses['orderby'] = ' GROUP BY t.term_id ' . $clauses['orderby'];
 
 	return $clauses;
 }
