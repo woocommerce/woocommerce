@@ -91,7 +91,7 @@ class WC_Meta_Data {
 	 */
 	public function get_changes() {
 		$changes = array();
-		foreach ( $this->current_data as $id => $value) {
+		foreach ( $this->current_data as $id => $value ) {
 			if ( ! array_key_exists( $id, $this->data ) || $value !== $this->data[ $id ] ) {
 				$changes[ $id ] = $value;
 			}
