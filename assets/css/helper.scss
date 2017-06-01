@@ -295,9 +295,11 @@ $color_button_secondary: $woo_pink2;
 	}
 	.wp-list-table__ext-description {
 		color: #333;
+		padding-left: 12px;
 		width: 40%;
 
 		@media only screen and (max-width : 782px) {
+			padding-left: 0;
 			width: 100%;
 		}
 	}
@@ -600,8 +602,25 @@ $color_button_secondary: $woo_pink2;
 // FormToggle
 // ==========================================================================
 
-.form-toggle[type="checkbox"] {
-	display: none;
+.form-toggle__wrapper{
+	position: relative;
+}
+
+.form-toggle{
+	cursor: pointer;
+	display: block;
+	position: absolute;
+		top: 0;
+		bottom: -1px;
+		left: 0;
+		right: 0;
+	text-align: left;
+	text-indent: -100000px;
+	z-index: 2;
+
+	&:focus{
+		box-shadow: none;
+	}
 }
 
 .form-toggle__switch {
@@ -615,8 +634,9 @@ $color_button_secondary: $woo_pink2;
 	vertical-align: middle;
 	align-self: flex-start;
 	outline: 0;
-	cursor: pointer;
 	transition: all .4s ease, box-shadow 0s;
+
+	background: lighten( $gray, 20% );
 
 	&:before,
 	&:after {
@@ -638,14 +658,13 @@ $color_button_secondary: $woo_pink2;
 	.accessible-focus &:focus{
 		box-shadow: 0 0 0 2px $woo_pink1;
 	}
+
+
 }
 
 .form-toggle__label {
-	cursor: pointer;
-
-	.is-disabled & {
-		cursor: default;
-	}
+	vertical-align: bottom;
+	z-index: 1;
 
 	.form-toggle__label-content {
 		flex: 0 1 100%;
@@ -657,7 +676,6 @@ $color_button_secondary: $woo_pink2;
     margin-right: 8px;
     vertical-align: top;
     text-transform: uppercase;
-    cursor: pointer;
 
 		@media only screen and (max-width : 480px) {
 			display: none;
@@ -685,26 +703,23 @@ $color_button_secondary: $woo_pink2;
 		}
 	}
 
-	&:checked{
+	&.active{
 		+ .form-toggle__label .form-toggle__switch {
 			background: $woo_pink1;
 
 			&:after {
-				left: 16px;
+				left: 8px;
 			}
 		}
-	}
 
-	&:checked:not( :disabled ) {
 		+ .form-toggle__label:hover .form-toggle__switch {
 			background: $woo_pink2;
 		}
 	}
 
-	&:disabled {
+	&.disabled {
 		+ label.form-toggle__label span.form-toggle__switch {
 			opacity: 0.25;
-			cursor: default;
 		}
 	}
 }
