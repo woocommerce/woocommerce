@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: @todo link to wiki page.
+ * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
