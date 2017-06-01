@@ -91,12 +91,35 @@
 						<?php if ( ! $installed && ! $subscription['expired'] ) : ?>
 							<a class="button" href="<?php echo esc_url( $download_url ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $connected ) : ?>
-							<!-- TODO: Replace with a toggle -->
-							<a class="button" href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>"><?php _e( 'Deactivate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<a href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>" class="form-toggle active  is-compact" role="link" aria-checked="true"><?php _e( 'Active', 'woocommerce' ); ?></a>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Active', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php elseif ( ! $subscription['expired'] ) : ?>
-							<a class="button" href="<?php echo esc_url( $subscription['activate_url'] ); ?>"><?php _e( 'Activate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<a href="<?php echo esc_url( $subscription['activate_url'] ); ?>" class="form-toggle is-compact" role="link" aria-checked="false"><?php _e( 'Inactive', 'woocommerce' ); ?></a>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php else : ?>
-							<a class="button disabled" href="#"><?php _e( 'Activate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<a href="#" class="form-toggle is-compact" role="link" aria-checked="false"><?php _e( 'Inactive', 'woocommerce' ); ?></a>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php endif; ?>
 					</td>
 				</tr>
