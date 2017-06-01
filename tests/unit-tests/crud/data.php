@@ -139,6 +139,23 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 */
 	function test_get_meta_data_cache_invalidation() {
 		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'updated value';
+		$order->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertEquals( 'updated value', $metas[0]->value );
+	}
+
+	function test_get_meta_data_cache_invalidation_array_to_scalar() {
+		$object  = new WC_Order;
 		$object->add_meta_data( 'test_meta_key', array( 'val1' ), true );
 		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
 		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
