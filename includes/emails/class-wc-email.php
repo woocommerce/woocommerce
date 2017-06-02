@@ -293,7 +293,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->get_option( 'subject', $this->get_default_subject() ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object );
 	}
 
 	/**
@@ -302,7 +302,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->get_option( 'heading', $this->get_default_heading() ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object );
 	}
 
 	/**
@@ -432,7 +432,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
-		$this->setup_locale();
 		$this->sending = true;
 
 		if ( 'plain' === $this->get_email_type() ) {
@@ -440,7 +439,6 @@ class WC_Email extends WC_Settings_API {
 		} else {
 			$email_content = $this->get_content_html();
 		}
-		$this->restore_locale();
 
 		return wordwrap( $email_content, 70 );
 	}
