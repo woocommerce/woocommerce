@@ -888,6 +888,9 @@ class WC_Cart {
 			// Get the product
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 
+			// Filter quantity being added to the cart before stock checks
+			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
+
 			// Sanity check
 			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
 				return false;
