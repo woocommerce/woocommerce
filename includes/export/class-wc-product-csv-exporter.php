@@ -76,7 +76,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return array
 	 */
 	public function get_default_column_names() {
-		return array(
+		return apply_filters( "woocommerce_product_export_{$this->export_type}_default_columns", array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
@@ -113,7 +113,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
-		);
+		) );
 	}
 
 	/**
