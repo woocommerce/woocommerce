@@ -516,10 +516,6 @@ $color_button_secondary: $woo_pink2;
 
 				&.active{
 					display: block;
-
-					.chevron{
-
-					}
 				}
 
 			}
@@ -604,6 +600,10 @@ $color_button_secondary: $woo_pink2;
 
 .form-toggle__wrapper{
 	position: relative;
+
+	label{
+		cursor: default;
+	}
 }
 
 .form-toggle{
@@ -620,6 +620,10 @@ $color_button_secondary: $woo_pink2;
 
 	&:focus{
 		box-shadow: none;
+	}
+
+	&.disabled{
+		cursor: default;
 	}
 }
 
