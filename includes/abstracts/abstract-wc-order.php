@@ -1011,11 +1011,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
+	 * If by default the taxes are based on the shipping address and the current order doesn't
+	 * have any, it would use the billing address rather than using the Shopping base location.
+	 *
 	 * Will use the base country unless customer addresses are set.
 	 * @param $args array Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+
+		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = 'billing';
+		}
+
 		$args         = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
 			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),
