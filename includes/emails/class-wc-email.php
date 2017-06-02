@@ -46,6 +46,26 @@ class WC_Email extends WC_Settings_API {
 	public $description;
 
 	/**
+	 * Default heading.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localication can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $heading = '';
+
+	/**
+	 * Default subject.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localication can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $subject = '';
+
+	/**
 	 * Plain text template path.
 	 * @var string
 	 */
@@ -68,18 +88,6 @@ class WC_Email extends WC_Settings_API {
 	 * @var string
 	 */
 	public $recipient;
-
-	/**
-	 * Heading for the email content.
-	 * @var string
-	 */
-	public $heading;
-
-	/**
-	 * Subject for the email.
-	 * @var string
-	 */
-	public $subject;
 
 	/**
 	 * Object this email is for, for example a customer, product, or email.
@@ -204,8 +212,6 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		// Settings
-		$this->heading     = $this->get_option( 'heading', $this->heading );
-		$this->subject     = $this->get_option( 'subject', $this->subject );
 		$this->email_type  = $this->get_option( 'email_type' );
 		$this->enabled     = $this->get_option( 'enabled' );
 
@@ -264,10 +270,30 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email subject.
 	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return $this->subject;
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return $this->heading;
+	}
+
+	/**
+	 * Get email subject.
+	 *
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->subject ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->get_option( 'subject', $this->get_default_subject() ), $this->object );
 	}
 
 	/**
@@ -276,7 +302,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->heading ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->get_option( 'heading', $this->get_default_heading() ), $this->object );
 	}
 
 	/**
@@ -513,7 +539,7 @@ class WC_Email extends WC_Settings_API {
 				'title'       => __( 'Email subject', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,
@@ -522,7 +548,7 @@ class WC_Email extends WC_Settings_API {
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
+				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
 				'placeholder' => '',
 				'default'     => '',
 				'desc_tip'    => true,

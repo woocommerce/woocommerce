@@ -33,27 +33,11 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		$this->template_html  = 'emails/customer-completed-order.php';
 		$this->template_plain = 'emails/plain/customer-completed-order.php';
 
-		$this->set_email_strings();
-
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ), 10, 2 );
 
-		// Other settings
-		$this->heading_downloadable = $this->get_option( 'heading_downloadable', __( 'Your order is complete - download your files', 'woocommerce' ) );
-		$this->subject_downloadable = $this->get_option( 'subject_downloadable', __( 'Your {site_title} order from {order_date} is complete - download your files', 'woocommerce' ) );
-
 		// Call parent constuctor
 		parent::__construct();
-	}
-
-	/**
-	 * Set email strings.
-	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->heading = __( 'Your order is complete', 'woocommerce' );
-		$this->subject = __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
-		$this->restore_locale();
 	}
 
 	/**
@@ -82,35 +66,29 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**
 	 * Get email subject.
 	 *
-	 * @access public
+	 * @since  3.1.0
 	 * @return string
 	 */
-	public function get_subject() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() ) {
-			return apply_filters( 'woocommerce_email_subject_customer_completed_order', $this->format_string( $this->subject_downloadable ), $this->object );
-		} else {
-			return apply_filters( 'woocommerce_email_subject_customer_completed_order', $this->format_string( $this->subject ), $this->object );
-		}
+	public function get_default_subject() {
+		return __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
 	}
 
 	/**
 	 * Get email heading.
 	 *
-	 * @access public
+	 * @since  3.1.0
 	 * @return string
 	 */
-	public function get_heading() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() ) {
-			return apply_filters( 'woocommerce_email_heading_customer_completed_order', $this->format_string( $this->heading_downloadable ), $this->object );
-		} else {
-			return apply_filters( 'woocommerce_email_heading_customer_completed_order', $this->format_string( $this->heading ), $this->object );
-		}
+	public function get_default_heading() {
+		return __( 'Your order is complete', 'woocommerce' );
 	}
 
 	/**
@@ -159,7 +137,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
 				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,
@@ -168,25 +146,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
 				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true,
-			),
-			'subject_downloadable' => array(
-				'title'         => __( 'Subject (downloadable)', 'woocommerce' ),
-				'type'          => 'text',
-				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_downloadable . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
-				'desc_tip'      => true,
-			),
-			'heading_downloadable' => array(
-				'title'         => __( 'Email heading (downloadable)', 'woocommerce' ),
-				'type'          => 'text',
-				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_downloadable . '</code>' ),
+				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
 				'desc_tip'      => true,

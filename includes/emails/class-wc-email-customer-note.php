@@ -40,8 +40,6 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->template_html  = 'emails/customer-note.php';
 		$this->template_plain = 'emails/plain/customer-note.php';
 
-		$this->set_email_strings();
-
 		// Triggers
 		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
 
@@ -50,13 +48,23 @@ class WC_Email_Customer_Note extends WC_Email {
 	}
 
 	/**
-	 * Set email strings.
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->subject = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
-		$this->heading = __( 'A note has been added to your order', 'woocommerce' );
-		$this->restore_locale();
+	public function get_default_subject() {
+		return __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'A note has been added to your order', 'woocommerce' );
 	}
 
 	/**
@@ -65,9 +73,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @param array $args
 	 */
 	public function trigger( $args ) {
-
 		if ( ! empty( $args ) ) {
-
 			$defaults = array(
 				'order_id'      => '',
 				'customer_note' => '',
@@ -95,7 +101,9 @@ class WC_Email_Customer_Note extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**
