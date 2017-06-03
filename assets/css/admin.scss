@@ -1357,7 +1357,7 @@ ul.wc_coupon_list_block {
 			.line_cost,
 			.line_tax,
 			.tax_class,
-			.item_cost {
+			.item_price {
 				text-align: right;
 
 				label {
@@ -2365,7 +2365,7 @@ table.wc_input_table {
 		background-color: #fefbcc;
 	}
 
-	.item_cost,
+	.item_price,
 	.cost {
 		text-align: right;
 
