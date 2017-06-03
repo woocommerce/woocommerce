@@ -112,6 +112,10 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+		
+		if ( 'yes' === get_option( 'woocommerce_registration_notify_admin' )){
+			wp_new_user_notification( $customer_id, null, 'admin' );
+		}
 
 		return $customer_id;
 	}
