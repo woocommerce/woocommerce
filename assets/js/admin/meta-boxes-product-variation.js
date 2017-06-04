@@ -834,8 +834,6 @@ jQuery( function( $ ) {
 			if ( 1 === qty ) {
 				var page_nav = $( '.variations-pagenav' );
 
-				wc_meta_boxes_product_variations_pagenav.update_variations_count( qty );
-
 				if ( page_nav.is( ':hidden' ) ) {
 					$( 'option, optgroup', '.variation_actions' ).show();
 					$( '.variation_actions' ).val( 'add_variation' );
