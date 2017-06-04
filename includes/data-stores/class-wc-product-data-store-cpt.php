@@ -419,7 +419,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_downloads( &$product ) {
 		$meta_values = array_filter( (array) get_post_meta( $product->get_id(), '_downloadable_files', true ) );
 
-		if ( $meta_values ) {
+		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
 			$downloads = array();
 			foreach ( $meta_values as $key => $value ) {
 				if ( ! isset( $value['name'], $value['file'] ) ) {
