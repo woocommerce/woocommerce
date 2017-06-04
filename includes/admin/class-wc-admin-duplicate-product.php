@@ -115,6 +115,7 @@ class WC_Admin_Duplicate_Product {
 		// Filter to allow us to unset/remove data we don't want to copy to the duplicate. @since 2.6
 		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
 
+		$product->get_meta_data();
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
 		$duplicate->set_name( sprintf( __( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
@@ -128,6 +129,10 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_rating_counts( 0 );
 		$duplicate->set_average_rating( 0 );
 		$duplicate->set_review_count( 0 );
+
+		foreach ( $duplicate->get_meta_data() as $key => $value ) {
+			unset( $value->id );
+		}
 
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
@@ -143,12 +148,17 @@ class WC_Admin_Duplicate_Product {
 		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );
+				$child->get_meta_data();
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
+				}
+
+				foreach ( $child_duplicate->get_meta_data() as $key => $value ) {
+					unset( $value->id );
 				}
 
 				foreach ( $meta_to_exclude as $meta_key ) {
