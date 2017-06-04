@@ -22,6 +22,7 @@ class WC_Helper_Coupon {
 		) );
 
 		// Update meta
+        update_post_meta( $coupon_id, 'enabled', 'yes' );
 		update_post_meta( $coupon_id, 'discount_type', 'fixed_cart' );
 		update_post_meta( $coupon_id, 'coupon_amount', '1' );
 		update_post_meta( $coupon_id, 'individual_use', 'no' );

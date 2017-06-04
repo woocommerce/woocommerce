@@ -48,7 +48,8 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $coupons ) );
 		$this->assertContains( array(
-			'id'             => $coupon_1->get_id(),
+            'enabled'        => false,
+		    'id'             => $coupon_1->get_id(),
 			'code'           => 'dummycoupon-1',
 			'amount'         => '1.00',
 			'date_created'   => wc_rest_prepare_date_response( $post_1->post_date_gmt, false ),
@@ -113,6 +114,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array(
+            'enabled'        => false,
 			'id'             => $coupon->get_id(),
 			'code'           => 'dummycoupon-1',
 			'amount'         => '1.00',
@@ -183,6 +185,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( array(
+            'enabled'        => false,
 			'id'             => $data['id'],
 			'code'           => 'test',
 			'amount'         => '5.00',
@@ -417,6 +420,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 27, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
+        $this->assertArrayHasKey( 'enabled', $properties );
 		$this->assertArrayHasKey( 'code', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );

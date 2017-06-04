@@ -331,7 +331,11 @@ class WC_API_Coupons extends WC_API_Resource {
 
 			$data = apply_filters( 'woocommerce_api_edit_coupon_data', $data, $id, $this );
 
-			if ( isset( $data['code'] ) ) {
+            if ( isset( $data['enabled'] ) ) {
+                update_post_meta( $id, 'enabled', ( true === $data['enabled'] ) ? 'yes' : 'no' );
+            }
+
+            if ( isset( $data['code'] ) ) {
 				global $wpdb;
 
 				$coupon_code  = wc_format_coupon_code( $data['code'] );
