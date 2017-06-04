@@ -129,6 +129,9 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_average_rating( 0 );
 		$duplicate->set_review_count( 0 );
 
+		// Get and set reviews for duplicate product.
+		WC_Comments::get_review_count_for_product( $duplicate );
+
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
 		}
