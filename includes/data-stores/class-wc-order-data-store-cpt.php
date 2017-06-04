@@ -473,6 +473,40 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					)
 				)
 			) );
+			// If billing first name and billing last name search fields have been added with the woocommerce_shop_order_search_fields filter then allow them to be searched together, for orders created before the address index fields.
+			if ( in_array( '_billing_first_name', $search_fields ) && in_array( '_billing_last_name',  $search_fields ) ) {
+				$order_ids = array_unique( array_merge(
+					$order_ids,
+					$wpdb->get_col(
+						$wpdb->prepare( "
+							SELECT DISTINCT p1.post_id
+							FROM {$wpdb->postmeta} p1
+							INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
+							WHERE
+								( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+							",
+							$wpdb->esc_like( wc_clean( $term ) )
+						)
+					)
+				) );
+			}
+			// If shipping first name and shipping last name search fields have been added with the woocommerce_shop_order_search_fields filter then allow them to be searched together, for orders created before the address index fields.
+			if ( in_array( '_shipping_first_name', $search_fields ) && in_array( '_shipping_last_name',  $search_fields ) ) {
+				$order_ids = array_unique( array_merge(
+					$order_ids,
+					$wpdb->get_col(
+						$wpdb->prepare( "
+							SELECT DISTINCT p1.post_id
+							FROM {$wpdb->postmeta} p1
+							INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
+							WHERE
+								( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+							",
+							$wpdb->esc_like( wc_clean( $term ) )
+						)
+					)
+				) );
+			}
 		}
 
 		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
