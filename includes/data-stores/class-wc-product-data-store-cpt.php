@@ -265,12 +265,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
 
-		if ( '' === ( $review_count = get_post_meta( $id, '_wc_review_count', true ) ) ) {
-			WC_Comments::get_review_count_for_product( $product );
-		} else {
-			$product->set_review_count( $review_count );
-		}
-
 		if ( '' === ( $rating_counts = get_post_meta( $id, '_wc_rating_count', true ) ) ) {
 			WC_Comments::get_rating_counts_for_product( $product );
 		} else {
