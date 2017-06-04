@@ -39,8 +39,12 @@
 				display: block;
 				text-align: right !important; // Important to overwrite order status inline styling
 
-				&.order-actions {
+				&.woocommerce-orders-table__cell-order-actions {
 					text-align: left !important; // This must always align left on handheld
+
+					&::before {
+						display: none;
+					}
 				}
 
 				&::before {
