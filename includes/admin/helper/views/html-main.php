@@ -91,12 +91,35 @@
 						<?php if ( ! $installed && ! $subscription['expired'] ) : ?>
 							<a class="button" href="<?php echo esc_url( $download_url ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $connected ) : ?>
-							<!-- TODO: Replace with a toggle -->
-							<a class="button" href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>"><?php _e( 'Deactivate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<a href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>" class="form-toggle active is-compact" role="link" aria-checked="true"><?php _e( 'Active', 'woocommerce' ); ?></a>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Active', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php elseif ( ! $subscription['expired'] ) : ?>
-							<a class="button" href="<?php echo esc_url( $subscription['activate_url'] ); ?>"><?php _e( 'Activate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<a href="<?php echo esc_url( $subscription['activate_url'] ); ?>" class="form-toggle is-compact" role="link" aria-checked="false"><?php _e( 'Inactive', 'woocommerce' ); ?></a>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php else : ?>
-							<a class="button disabled" href="#"><?php _e( 'Activate', 'woocommerce' ); ?></a>
+							<span class="form-toggle__wrapper">
+								<span class="form-toggle disabled is-compact"><?php _e( 'Inactive', 'woocommerce' ); ?></span>
+								<label class="form-toggle__label" for="activate-extension">
+									<span class="form-toggle__label-content">
+										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
+									</span>
+									<span class="form-toggle__switch"></span>
+								</label>
+							</span>
 						<?php endif; ?>
 					</td>
 				</tr>
@@ -206,12 +229,12 @@
 						</td>
 						<td class="wp-list-table__ext-actions">
 							<span class="form-toggle__wrapper">
-								<input type="checkbox" class="form-toggle is-compact" readonly="" value="on">
-								<label class="form-toggle__label" for="activate-akismet-undefined">
+								<span class="form-toggle disabled is-compact" ><?php _e( 'Inactive', 'woocommerce' ); ?></span>
+								<label class="form-toggle__label" for="activate-extension">
 									<span class="form-toggle__label-content">
-										<label class="plugin-action__label" for="activate-akismet-undefined">Inactive</label>
+										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
 									</span>
-									<span class="form-toggle__switch" id="activate-akismet-undefined" role="checkbox" aria-checked="false" tabindex="0"></span>
+									<span class="form-toggle__switch"></span>
 								</label>
 							</span>
 						</td>
