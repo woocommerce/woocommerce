@@ -22,7 +22,7 @@ class WC_Data_Store {
 	 * Contains an array of default WC supported data stores.
 	 * Format of object name => class name.
 	 * Example: 'product' => 'WC_Product_Data_Store_CPT'
-	 * You can aso pass something like product_<type> for product stores and
+	 * You can also pass something like product_<type> for product stores and
 	 * that type will be used first when avaiable, if a store is requested like
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
