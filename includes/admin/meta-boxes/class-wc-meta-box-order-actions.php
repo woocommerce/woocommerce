@@ -108,9 +108,7 @@ class WC_Meta_Box_Order_Actions {
 			if ( strstr( $action, 'send_email_' ) ) {
 
 				// Switch back to the site locale.
-				if ( function_exists( 'switch_to_locale' ) ) {
-					switch_to_locale( get_locale() );
-				}
+				wc_switch_to_site_locale();
 
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
@@ -136,9 +134,7 @@ class WC_Meta_Box_Order_Actions {
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
 				// Restore user locale.
-				if ( function_exists( 'restore_current_locale' ) ) {
-					restore_current_locale();
-				}
+				wc_restore_locale();
 
 				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
