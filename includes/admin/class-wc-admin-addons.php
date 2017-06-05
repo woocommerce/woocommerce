@@ -343,11 +343,13 @@ class WC_Admin_Addons {
 		$block_data = wp_parse_args( $block, $defaults );
 		?>
 		<div class="addons-wcs-banner-block">
-			<img
-				class="addons-img"
-				src="<?php echo esc_url( $block_data['image'] ); ?>"
-				alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
-			/>
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
 			<div class="addons-wcs-banner-block-content">
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
@@ -355,7 +357,7 @@ class WC_Admin_Addons {
 					self::output_button(
 						$block_data['href'],
 						$block_data['button'],
-						'addons-button-solid'
+						'addons-button-outline-green'
 					);
 				?>
 			</div>
