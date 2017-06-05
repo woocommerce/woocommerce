@@ -299,16 +299,13 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
-                                    switch ( $field_name ) {
-                                        case 'billing_phone' :
-                                            $field_value = wc_make_phone_clickable( esc_html( $field_value ) );
-                                            break;
-                                        default :
-                                            $field_value = make_clickable( esc_html( $field_value ) );
-                                            break;
-                                    }
+									if ( 'billing_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
+									} else {
+										$field_value = make_clickable( esc_html( $field_value ) );
+									}
 
-                                    echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . $field_value . '</p>';
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
 								}
 
 							echo '</div>';

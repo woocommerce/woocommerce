@@ -1633,12 +1633,16 @@ function wc_get_permalink_structure() {
 /**
  * Convert plaintext phone number to clickable phone number.
  *
- * @since 3.0.0
+ * Remove formatting and allow "+".
+ * Example and specs: https://developer.mozilla.org/en/docs/Web/HTML/Element/a#Creating_a_phone_link
  *
- * @param string $text Content to convert phone number.
+ * @since 3.1.0
+ *
+ * @param string $phone Content to convert phone number.
  * @return string Content with converted phone number.
  */
-function wc_make_phone_clickable( $text ) {
-    $phone = trim ( preg_replace( '/[\s\-\+\(\)]/', '', $text ) );
-    return "<a href=\"tel:$phone\">$text</a>";
+function wc_make_phone_clickable( $phone ) {
+	$number = trim( preg_replace( '/[^\d|\+]/', '', $phone ) );
+
+	return '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>';
 }
