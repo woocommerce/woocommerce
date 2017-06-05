@@ -2193,6 +2193,7 @@ table.wp-list-table {
 		@include ir();
 		font-size: 1.6em;
 		margin: 0 auto;
+		-moz-osx-font-smoothing: grayscale;
 
 		&::before {
 			@include icon( '\e006' );
