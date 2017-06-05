@@ -1629,3 +1629,16 @@ function wc_get_permalink_structure() {
 	}
 	return $permalinks;
 }
+
+/**
+ * Convert plaintext phone number to clickable phone number.
+ *
+ * @since 3.0.0
+ *
+ * @param string $text Content to convert phone number.
+ * @return string Content with converted phone number.
+ */
+function wc_make_phone_clickable( $text ) {
+    $phone = trim ( preg_replace( '/[\s\-\+\(\)]/', '', $text ) );
+    return "<a href=\"tel:$phone\">$text</a>";
+}
