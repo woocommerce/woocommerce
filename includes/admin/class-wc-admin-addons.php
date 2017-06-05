@@ -332,10 +332,10 @@ class WC_Admin_Addons {
 		);
 
 		$defaults = array(
-			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner.png',
+			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
 			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
-			'title'       => __( 'Transform your store into a shipping and fulfillment machine', 'woocommerce' ),
-			'description' => __( 'WooCommerce Services makes shipping a breeze. Print a label, take advantage of discounted shipping rates, and send tracking information to your customer right as you process your order, all from the convenience of your WordPress dashboard.', 'woocommerce' ),
+			'title'       => __( 'Buy discounted shipping labels, print them from your dashboard.', 'woocommerce' ),
+			'description' => __( 'WooCommerce Services makes shipping a breeze. Get discounted rates and print labels – all from the convenience of your WordPress dashboard.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 		);
@@ -343,11 +343,13 @@ class WC_Admin_Addons {
 		$block_data = wp_parse_args( $block, $defaults );
 		?>
 		<div class="addons-wcs-banner-block">
-			<img
-				class="addons-img"
-				src="<?php echo esc_url( $block_data['image'] ); ?>"
-				alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
-			/>
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
 			<div class="addons-wcs-banner-block-content">
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
@@ -355,7 +357,7 @@ class WC_Admin_Addons {
 					self::output_button(
 						$block_data['href'],
 						$block_data['button'],
-						'addons-button-solid'
+						'addons-button-outline-green'
 					);
 				?>
 			</div>
