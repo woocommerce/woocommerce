@@ -966,15 +966,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
 	 *
-	 * 	@param int $parent_id
+	 * @param int $parent_id
 	 */
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
-		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type='product_variation' AND post_parent=%d AND post_status='publish' ORDER BY menu_order ASC, ID ASC", $parent_id ) );
-		$index = 0;
+		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status = 'publish' ORDER BY menu_order ASC, ID ASC", $parent_id ) );
+		$index = 1;
 
 		foreach ( $ids as $id ) {
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index ++ ) ), array( 'ID' => absint( $id ) ) );
+			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
 		}
 	}
 
