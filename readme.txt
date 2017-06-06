@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.0.8 - 2017-05-07 =
+* Fix - Include multi-dimensional array support in oAuth1.0.
 * Fix - Stock/backorder notice when stock management is disabled.
 * Fix - Handle shipping item taxes if set to avoid the legacy fallback.
 * Fix - Variations should inherit purchase_note from parent.

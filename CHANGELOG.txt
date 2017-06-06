@@ -1,7 +1,6 @@
 == Changelog ==
 
 = 3.0.5 - 2017-04-27 =
-* Fix - Include multi-dimensional array support in oAuth1.0.
 * Fix - Tooltip display within shipping zone modals.
 * Fix - Prevent password change notification when creating a customer via the API.
 * Fix - Fix missing title for actions column on mobile.
