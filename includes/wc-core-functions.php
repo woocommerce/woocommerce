@@ -1653,11 +1653,13 @@ function wc_switch_to_site_locale() {
  * @since 3.1.0
  */
 function wc_restore_locale() {
-	restore_previous_locale();
+	if ( function_exists( 'restore_previous_locale' ) ) {
+		restore_previous_locale();
 
-	// Remove filter.
-	remove_filter( 'plugin_locale', 'get_locale' );
+		// Remove filter.
+		remove_filter( 'plugin_locale', 'get_locale' );
 
-	// Init WC locale.
-	WC()->load_plugin_textdomain();
+		// Init WC locale.
+		WC()->load_plugin_textdomain();
+	}
 }
