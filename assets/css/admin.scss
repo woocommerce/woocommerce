@@ -92,12 +92,17 @@
 	.addons-wcs-banner-block {
 		display: flex;
 		align-items: center;
+	}
+
+	.addons-wcs-banner-block-image {
+		background: #f7f7f7;
+		border: 1px solid #e6e6e6;
+		margin-right: 2em;
+		padding: 4em;
 
 		.addons-img {
-			margin-right: 2em;
-			margin-left: 1em;
-			max-height: 200px;
-			max-width: 200px;
+			max-height: 86px;
+			max-width: 97px;
 		}
 	}
 
@@ -110,6 +115,13 @@
 	.addons-wcs-banner-block-content {
 		display: flex;
 		flex-direction: column;
+		justify-content: space-around;
+		align-self: stretch;
+		padding: 1em 0;
+
+		p {
+			margin-top: 0;
+		}
 	}
 
 	.addons-column-section {
@@ -2193,6 +2205,7 @@ table.wp-list-table {
 		@include ir();
 		font-size: 1.6em;
 		margin: 0 auto;
+		-moz-osx-font-smoothing: grayscale;
 
 		&::before {
 			@include icon( '\e006' );
@@ -5215,6 +5228,28 @@ table.bar_chart {
 	.woocommerce_options_panel fieldset.form-field,
 	.woocommerce_options_panel p.form-field {
 		padding: 5px 20px !important;
+	}
+
+	.addons-wcs-banner-block {
+		flex-direction: column;
+	}
+
+	.wc_addons_wrap {
+		.addons-wcs-banner-block {
+			padding: 40px;
+		}
+
+		.addons-wcs-banner-block-image {
+			padding: 1em;
+			text-align: center;
+			width: 100%;
+			padding: 2em 0;
+			margin: 0;
+
+			.addons-img {
+				margin: 0;
+			}
+		}
 	}
 }
 

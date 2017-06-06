@@ -79,6 +79,10 @@ class WC_Install {
 			'wc_update_300_product_visibility',
 			'wc_update_300_db_version',
 		),
+		'3.1.0' => array(
+			'wc_update_310_downloadable_products',
+			'wc_update_310_db_version',
+		),
 	);
 
 	/** @var object Background update class */
@@ -517,7 +521,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   download_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
-  KEY download_order_product (download_id,order_id,product_id)
+  KEY download_order_product (download_id,order_id,product_id),
+  KEY order_id (order_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,

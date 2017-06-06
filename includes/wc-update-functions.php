@@ -1098,3 +1098,23 @@ function wc_update_300_product_visibility() {
 function wc_update_300_db_version() {
 	WC_Install::update_db_version( '3.0.0' );
 }
+
+/**
+ * Add an index to the downloadable product permissions table to improve performance of update_user_by_order_id.
+ */
+function wc_update_310_downloadable_products() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE column_name = 'order_id' and key_name = 'order_id'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX order_id (order_id)" );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_310_db_version() {
+	WC_Install::update_db_version( '3.1.0' );
+}
