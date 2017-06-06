@@ -354,6 +354,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return $shipping_class_id;
 	}
 
+	/**
+	 * Get catalog visibility.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_catalog_visibility( $context = 'view' ) {
+		return apply_filters( $this->get_hook_prefix() . 'catalog_visibility', $this->parent_data['catalog_visibility'], $this );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
