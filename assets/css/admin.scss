@@ -2696,14 +2696,30 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			z-index: 1;
 		}
 	}
-	tbody.wc-shipping-zone-rows, .wc-shipping-zone-method-rows {
-		tr:nth-child( odd ) td {
+	.wc-shipping-zone-method-rows {
+		tr:nth-child( even ) td {
 			background: #f9f9f9;
 		}
 	}
 	tr.odd, .wc-shipping-class-rows tr:nth-child( odd ) {
 		td {
 			background: #f9f9f9;
+		}
+	}
+	tbody.wc-shipping-zone-rows {
+		td {
+			border-top: 2px solid #f9f9f9;
+		}
+		tr:first-child {
+			td {
+				border-top: 0;
+			}
+		}
+	}
+	tr.wc-shipping-zone-worldwide {
+		td {
+			background: #f9f9f9;
+			border-top: 2px solid #e1e1e1;
 		}
 	}
 	ul, p {
