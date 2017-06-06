@@ -395,7 +395,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts, null ) );
 
 		if ( $products->have_posts() ) : ?>
 
