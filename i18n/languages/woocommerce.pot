@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.0.8\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-06-06 14:28:24+00:00\n"
+"POT-Creation-Date: 2017-06-06 21:23:44+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13049,76 +13049,80 @@ msgstr ""
 msgid "Custom:"
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:124
+#: includes/api/class-wc-rest-authentication.php:164
 #: includes/api/legacy/v1/class-wc-api-authentication.php:115
 #: includes/api/legacy/v2/class-wc-api-authentication.php:115
 #: includes/api/legacy/v3/class-wc-api-authentication.php:83
 msgid "Consumer secret is invalid."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:251
+#: includes/api/class-wc-rest-authentication.php:281
 msgid "Missing OAuth parameter %s"
 msgid_plural "Missing OAuth parameters %s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/api/class-wc-rest-authentication.php:291
+#: includes/api/class-wc-rest-authentication.php:321
 #: includes/api/legacy/v1/class-wc-api-authentication.php:184
 #: includes/api/legacy/v2/class-wc-api-authentication.php:183
 #: includes/api/legacy/v3/class-wc-api-authentication.php:179
 msgid "Consumer key is invalid."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:341
+#: includes/api/class-wc-rest-authentication.php:365
 #: includes/api/legacy/v1/class-wc-api-authentication.php:252
 #: includes/api/legacy/v2/class-wc-api-authentication.php:251
 #: includes/api/legacy/v3/class-wc-api-authentication.php:241
 msgid "Invalid signature - failed to sort parameters."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:360
+#: includes/api/class-wc-rest-authentication.php:374
 #: includes/api/legacy/v1/class-wc-api-authentication.php:266
 #: includes/api/legacy/v2/class-wc-api-authentication.php:265
 #: includes/api/legacy/v3/class-wc-api-authentication.php:261
 msgid "Invalid signature - signature method is invalid."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:368
+#: includes/api/class-wc-rest-authentication.php:382
 #: includes/api/legacy/v1/class-wc-api-authentication.php:274
 #: includes/api/legacy/v2/class-wc-api-authentication.php:273
 #: includes/api/legacy/v3/class-wc-api-authentication.php:270
 msgid "Invalid signature - provided signature does not match."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:419
+#: includes/api/class-wc-rest-authentication.php:458
 #: includes/api/legacy/v1/class-wc-api-authentication.php:332
 #: includes/api/legacy/v2/class-wc-api-authentication.php:331
 #: includes/api/legacy/v3/class-wc-api-authentication.php:335
 msgid "Invalid timestamp."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:429
+#: includes/api/class-wc-rest-authentication.php:468
 #: includes/api/legacy/v1/class-wc-api-authentication.php:342
 #: includes/api/legacy/v2/class-wc-api-authentication.php:341
 #: includes/api/legacy/v3/class-wc-api-authentication.php:345
 msgid "Invalid nonce - nonce has already been used."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:493
+#: includes/api/class-wc-rest-authentication.php:525
 #: includes/api/legacy/v1/class-wc-api-authentication.php:377
 #: includes/api/legacy/v2/class-wc-api-authentication.php:376
 #: includes/api/legacy/v3/class-wc-api-authentication.php:380
 msgid "The API key provided does not have read permissions."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:503
+#: includes/api/class-wc-rest-authentication.php:533
 #: includes/api/legacy/v1/class-wc-api-authentication.php:386
 #: includes/api/legacy/v2/class-wc-api-authentication.php:385
 #: includes/api/legacy/v3/class-wc-api-authentication.php:389
 msgid "The API key provided does not have write permissions."
 msgstr ""
 
-#: includes/api/class-wc-rest-authentication.php:541
+#: includes/api/class-wc-rest-authentication.php:538
+msgid "Unknown request method."
+msgstr ""
+
+#: includes/api/class-wc-rest-authentication.php:569
 #: includes/api/legacy/v3/class-wc-api-authentication.php:111
 msgid ""
 "WooCommerce API. Use a consumer key in the username field and a consumer "
