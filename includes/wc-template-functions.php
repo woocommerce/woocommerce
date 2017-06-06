@@ -316,7 +316,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @param int $post_id
  * @return array
  */
-function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
+function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ) ) ) {
 		return $classes;
 	}
@@ -1344,7 +1344,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * @param string $orderby Supported values - rand, title, ID, date, modified, menu_order, price.
 	 * @param string $order Sort direction.
 	 */
-	function woocommerce_upsell_display( $limit = '-1', $columns = 4, $orderby = 'rand', $order = 'desc' ) {
+	function woocommerce_upsell_display( $limit = -1, $columns = 4, $orderby = 'rand', $order = 'desc' ) {
 		global $product, $woocommerce_loop;
 
 		if ( ! $product ) {

@@ -214,7 +214,7 @@ class WC_Meta_Box_Product_Data {
 	 *
 	 * @return array
 	 */
-	public static function prepare_attributes( $data = false ) {
+	public static function prepare_attributes( $data = array() ) {
 		$attributes = array();
 
 		if ( ! $data ) {

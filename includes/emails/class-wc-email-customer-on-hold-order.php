@@ -57,7 +57,7 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 	 * @param int $order_id The order ID.
 	 * @param WC_Order $order Order object.
 	 */
-	public function trigger( $order_id, $order = false ) {
+	public function trigger( $order_id, $order = null ) {
 		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
 			$order = wc_get_order( $order_id );
 		}

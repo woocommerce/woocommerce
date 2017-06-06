@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_notice_count( $notice_type = '' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
-		return;
+		return 0;
 	}
 
 	$notice_count = 0;
