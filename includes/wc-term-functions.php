@@ -781,6 +781,10 @@ add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
  * @return int[]
  */
 function wc_get_product_visibility_term_ids() {
+	if ( ! taxonomy_exists( 'product_visibility' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, 'wc_get_product_visibility_term_ids should not be called before taxonomies are registered (woocommerce_after_register_post_type action).', '3.1' );
+		return array();
+	}
 	return array_map( 'absint', wp_parse_args(
 		wp_list_pluck(
 			get_terms( array(
