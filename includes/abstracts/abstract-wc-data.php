@@ -269,6 +269,18 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Validate meta key.
+	 *
+	 * @since 3.x
+	 * @param string $key
+	 */
+	private function validate_meta_key( $key ) {
+		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
+			throw new Exception( __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ) );
+		}
+	}
+
+	/**
 	 * Get Meta Data by Key.
 	 *
 	 * @since  2.6.0
@@ -278,6 +290,7 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
+		$this->validate_meta_key( $key );
 		$this->maybe_read_meta_data();
 		$meta_data  = $this->get_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $meta_data, 'key' ), $key );
@@ -307,6 +320,7 @@ abstract class WC_Data {
 	 * @return boolean
 	 */
 	public function meta_exists( $key = '' ) {
+		$this->validate_meta_key( $key );
 		$this->maybe_read_meta_data();
 		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
 		return in_array( $key, $array_keys );
@@ -343,6 +357,7 @@ abstract class WC_Data {
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
+		$this->validate_meta_key( $key );
 		$this->maybe_read_meta_data();
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
@@ -362,6 +377,7 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
+		$this->validate_meta_key( $key );
 		$this->maybe_read_meta_data();
 		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
 			$this->meta_data[ current( $array_key ) ] = (object) array(
@@ -381,6 +397,7 @@ abstract class WC_Data {
 	 * @param string $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
+		$this->validate_meta_key( $key );
 		$this->maybe_read_meta_data();
 		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key ) ) {
 			foreach ( $array_keys as $array_key ) {
