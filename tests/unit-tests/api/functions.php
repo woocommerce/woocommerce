@@ -64,7 +64,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_urlencode_rfc3986() {
-		$this->assertEquals( 'https%253A%252F%252Fwoocommerce.com%252F', wc_rest_urlencode_rfc3986( 'https://woocommerce.com/' ) );
+		$this->assertEquals( 'https%3A%2F%2Fwoocommerce.com%2F', wc_rest_urlencode_rfc3986( 'https://woocommerce.com/' ) );
 	}
 
 	/**
