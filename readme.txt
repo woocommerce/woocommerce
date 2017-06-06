@@ -181,7 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Ensure we have child before getting price to fix a notice in grouped products.
 * Fix - Fixed unicode characters when saving webhook delivery logs.
 * Fix - Avoid deprecated ID in legacy API.
-* Fix - Add correct args to woocommerce_shipping_zone_method_deleted.
+* Fix - Add correct args to woocommerce_shipping_zone_method_deleted and woocommerce_shortcode_products_query hooks.
 * Fix - Correctly append cache in product widget.
 * Fix - Add ability to invalidate cache by object ID.
 * Fix - Notice in structured data class.
