@@ -54,8 +54,6 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		$this->template_html    = 'emails/customer-reset-password.php';
 		$this->template_plain   = 'emails/plain/customer-reset-password.php';
 
-		$this->set_email_strings();
-
 		// Trigger
 		add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
 
@@ -64,13 +62,23 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	}
 
 	/**
-	 * Set email strings.
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->subject = __( 'Password reset for {site_title}', 'woocommerce' );
-		$this->heading = __( 'Password reset instructions', 'woocommerce' );
-		$this->restore_locale();
+	public function get_default_subject() {
+		return __( 'Password reset for {site_title}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Password reset instructions', 'woocommerce' );
 	}
 
 	/**
@@ -93,8 +101,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
+		$this->restore_locale();
 	}
 
 	/**

@@ -1606,8 +1606,8 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( function_exists( 'switch_to_locale' ) && did_action( 'admin_init' ) ) {
-		switch_to_locale( get_locale() );
+	if ( did_action( 'admin_init' ) ) {
+		wc_switch_to_site_locale();
 	}
 
 	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
@@ -1624,10 +1624,44 @@ function wc_get_permalink_structure() {
 	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
 	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
 
-	if ( function_exists( 'restore_current_locale' ) && did_action( 'admin_init' ) ) {
-		restore_current_locale();
+	if ( did_action( 'admin_init' ) ) {
+		wc_restore_locale();
 	}
 	return $permalinks;
+}
+
+/**
+ * Switch WooCommerce to site language.
+ *
+ * @since 3.1.0
+ */
+function wc_switch_to_site_locale() {
+	if ( function_exists( 'switch_to_locale' ) ) {
+		switch_to_locale( $switch_to_locale );
+
+		// Filter on plugin_locale so load_plugin_textdomain loads the correct locale.
+		add_filter( 'plugin_locale', 'get_locale' );
+
+		// Init WC locale.
+		WC()->load_plugin_textdomain();
+	}
+}
+
+/**
+ * Switch WooCommerce language to original.
+ *
+ * @since 3.1.0
+ */
+function wc_restore_locale() {
+	if ( function_exists( 'restore_previous_locale' ) ) {
+		restore_previous_locale();
+
+		// Remove filter.
+		remove_filter( 'plugin_locale', 'get_locale' );
+
+		// Init WC locale.
+		WC()->load_plugin_textdomain();
+	}
 }
 
 /**
