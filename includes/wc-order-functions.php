@@ -79,7 +79,7 @@ function wc_get_orders( $args ) {
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
+		wc_doing_it_wrong( __FUNCTION__, 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action)', '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
