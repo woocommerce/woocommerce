@@ -218,8 +218,7 @@ function wc_rest_urlencode_rfc3986( $value ) {
 	if ( is_array( $value ) ) {
 		return array_map( 'wc_rest_urlencode_rfc3986', $value );
 	} else {
-		// Percent symbols (%) must be double-encoded.
-		return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+		return str_replace( array( '+', '%7E' ), array( ' ', '~' ), rawurlencode( $value ) );
 	}
 }
 
