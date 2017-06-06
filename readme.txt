@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.7
-Stable tag: 3.0.7
+Stable tag: 3.0.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -187,6 +187,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Notice in structured data class.
 * Fix - Only delete if an object has an ID in CRUD to avoid wp_delete_post using global ID.
 * Fix - Avoid notices on checkout by ensuring all legacy data is correctly set.
+* Fix - Add failed to processing event for the processing email.
+* Fix - Store user ID and use that to determine if the session should be loaded or not. Ensures user data is correct and shipping calculator data is stored.
 
 = 3.0.7 - 2017-05-16 =
 * Fix - Display of grouped product permalinks + names.
@@ -456,5 +458,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0.7 =
+= 3.0.8 =
 3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
