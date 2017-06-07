@@ -419,7 +419,7 @@ EOT;
 		$spaces = ( $this->output_nesting_level * 2 ) + 2;
 		if ( $label ) {
 			$line = $label . $line;
-			$spaces = $spaces - 2;
+			$spaces -= 2;
 		}
 		WP_CLI::line( str_pad( ' ', $spaces ) . $line );
 	}
