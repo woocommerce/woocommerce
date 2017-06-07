@@ -403,7 +403,9 @@ abstract class WC_Data {
 		}
 
 		$this->maybe_read_meta_data();
-		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
+		$array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '';
+
+		if ( $array_key ) {
 			$this->meta_data[ current( $array_key ) ] = (object) array(
 				'id'    => $meta_id,
 				'key'   => $key,
@@ -422,7 +424,9 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
-		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key ) ) {
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key );
+
+		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -437,7 +441,9 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
 		$this->maybe_read_meta_data();
-		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid ) ) {
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
+
+		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -549,7 +555,7 @@ abstract class WC_Data {
 		$this->data        = $this->default_data;
 		$this->changes     = array();
 		$this->set_object_read( false );
- 	}
+	}
 
 	/**
 	 * Set object read property.
