@@ -266,7 +266,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 		// Trim left zeros.
 		$number = ltrim( $number, '0' );
-		if( substr( $number, 0, 1 ) ) {
+		if( substr( $number, 0, 1 ) === '.' ) {
 			$number = '0' . $number;
 		}
 	}
