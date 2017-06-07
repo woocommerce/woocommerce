@@ -72,7 +72,7 @@ class WC_Emails {
 			'woocommerce_product_on_backorder',
 			'woocommerce_order_status_pending_to_processing',
 			'woocommerce_order_status_pending_to_completed',
-			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_processing_to_cancelled',
 			'woocommerce_order_status_pending_to_failed',
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
