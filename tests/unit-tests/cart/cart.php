@@ -141,6 +141,80 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product_id );
 		}
 
+
+		# Test case 4
+		update_post_meta( $coupon->get_id(), 'discount_type', 'fixed_cart' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '15' );
+
+		$product_ids   = array();
+		$products_data = array(
+			'6.25', '5.50', '3.44'
+		);
+
+		foreach ( $products_data as $price ) {
+			$loop_product  = WC_Helper_Product::create_simple_product();
+			$product_ids[] = $loop_product->id;
+			update_post_meta( $loop_product->id, '_regular_price', $price );
+			update_post_meta( $loop_product->id, '_price', $price );
+			WC()->cart->add_to_cart( $loop_product->id, 1 );
+		}
+
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '0.19', WC()->cart->total );
+
+		// Hence this coupon is smaller than the subtotal, it is used up, so
+		// sum of discount total and discount tax total should be 15
+		$this->assertEquals( '15', WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total());
+		$this->assertEquals( '2.4', WC()->cart->get_cart_discount_tax_total() );
+		$this->assertEquals( '12.6', WC()->cart->get_cart_discount_total());
+
+		// Cleanup
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		foreach ( $product_ids as $product_id ) {
+			WC_Helper_Product::delete_product( $product_id );
+		}
+
+
+		# Test case 5
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '100' );
+
+		$product_ids   = array();
+		$products_data = array(
+			'8.34', '14.99'
+		);
+
+		foreach ( $products_data as $price ) {
+			$loop_product  = WC_Helper_Product::create_simple_product();
+			$product_ids[] = $loop_product->id;
+			update_post_meta( $loop_product->id, '_regular_price', $price );
+			update_post_meta( $loop_product->id, '_price', $price );
+			WC()->cart->add_to_cart( $loop_product->id, 1 );
+		}
+
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '0', WC()->cart->total );
+
+		// Hence this is a 100% coupon, the sum of
+		// discount total and discount tax total should be 100% of the cart
+		$this->assertEquals( WC()->cart->subtotal, WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total());
+		$this->assertEquals( '3.72', WC()->cart->get_cart_discount_tax_total() );
+		$this->assertEquals( '19.61', WC()->cart->get_cart_discount_total());
+
+		// Cleanup
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		foreach ( $product_ids as $product_id ) {
+			WC_Helper_Product::delete_product( $product_id );
+		}
+
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
