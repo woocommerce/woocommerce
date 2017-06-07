@@ -232,8 +232,11 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '9', wc_format_decimal( '09.00', false, true ) );
 
 		// trim left zeros
+		$this->assertEquals( '0', wc_format_decimal( '' ) );
+		$this->assertEquals( '0', wc_format_decimal( '00' ) );
 		$this->assertEquals( '9.00', wc_format_decimal( '09.00' ) );
 		$this->assertEquals( '0.90', wc_format_decimal( '0.90' ) );
+		$this->assertEquals( '10203.45', wc_format_decimal( '010203.45' ) );
 
 		// trim zeros and round
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
@@ -269,10 +272,14 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '9', wc_format_decimal( '09,00', false, true ) );
 
 		// trim left zeros
+		$this->assertEquals( '0', wc_format_decimal( '' ) );
+		$this->assertEquals( '0', wc_format_decimal( '00' ) );
 		$this->assertEquals( '9.00', wc_format_decimal( '09.00' ) );
 		$this->assertEquals( '9.00', wc_format_decimal( '09,00' ) );
 		$this->assertEquals( '0.90', wc_format_decimal( '0.90' ) );
 		$this->assertEquals( '0.90', wc_format_decimal( '0,90' ) );
+		$this->assertEquals( '10203.45', wc_format_decimal( '010203.45' ) );
+		$this->assertEquals( '10203.45', wc_format_decimal( '010203,45' ) );
 
 		// trim zeros and round
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );

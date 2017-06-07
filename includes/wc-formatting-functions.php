@@ -263,10 +263,12 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	if (  gettype( $number ) === 'string' && ! is_numeric( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
+	}
 
-		// Trim left zeros.
+	// Trim left zeros.
+	if (  gettype( $number ) === 'string' && '' !== $number ) {
 		$number = ltrim( $number, '0' );
-		if( substr( $number, 0, 1 ) === '.' ) {
+		if ( '' === $number || substr( $number, 0, 1 ) === '.' ) {
 			$number = '0' . $number;
 		}
 	}
