@@ -260,7 +260,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
 	// Remove locale from string.
-	if ( ! is_float( $number ) ) {
+	if (  gettype( $number ) === 'string' && ! is_numeric( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
@@ -271,11 +271,11 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// DP is false - don't use number format, just return a string in our format
 	} elseif ( is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
+		$number = strval( $number );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
-		$number = rtrim( rtrim( $number, '0' ), '.' );
+		$number = rtrim( trim( $number, '0' ), '.' );
 	}
 
 	return $number;
