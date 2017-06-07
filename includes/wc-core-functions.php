@@ -1637,7 +1637,7 @@ function wc_get_permalink_structure() {
  */
 function wc_switch_to_site_locale() {
 	if ( function_exists( 'switch_to_locale' ) ) {
-		switch_to_locale( $switch_to_locale );
+		switch_to_locale( get_locale() );
 
 		// Filter on plugin_locale so load_plugin_textdomain loads the correct locale.
 		add_filter( 'plugin_locale', 'get_locale' );
