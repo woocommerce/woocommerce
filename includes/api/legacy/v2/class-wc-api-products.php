@@ -1044,14 +1044,14 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Regular Price
 			if ( isset( $data['regular_price'] ) ) {
-				$regular_price = ( '' === $data['regular_price'] ) ? '' : $data['regular_price'];
+				$regular_price = $data['regular_price'];
 			} else {
 				$regular_price = $product->get_regular_price();
 			}
 
 			// Sale Price
 			if ( isset( $data['sale_price'] ) ) {
-				$sale_price = ( '' === $data['sale_price'] ) ? '' : $data['sale_price'];
+				$sale_price = $data['sale_price'];
 			} else {
 				$sale_price = $product->get_sale_price();
 			}
