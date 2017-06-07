@@ -826,7 +826,10 @@ class WC_Form_Handler {
 					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
-					if ( '' === $valid_value || $valid_value === $value ) {
+					if ( $valid_value === $value ) {
+						$variations[ $taxonomy ] = $value;
+					// If valid values are empty, this is an 'any' variation so get all possible values.
+					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs() ) ) {
 						$variations[ $taxonomy ] = $value;
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
