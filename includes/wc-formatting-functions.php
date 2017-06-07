@@ -271,7 +271,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// DP is false - don't use number format, just return a string in our format
 	} elseif ( is_float( $number ) ) {
-		$number = strval( $number );
+		$number = wc_float_to_string( $number );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
