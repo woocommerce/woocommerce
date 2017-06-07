@@ -271,9 +271,9 @@ abstract class WC_Data {
 	/**
 	 * Validate meta key.
 	 *
-	 * @since 3.x
-	 * @param string $key
-	 * @return bool  True if validation is successful, false otherwise
+	 * @since  3.x
+	 * @param  string $key
+	 * @return bool   true if validation is successful, false otherwise
 	 */
 	private function validate_meta_key( $key ) {
 		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
@@ -294,7 +294,7 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
-		if ( ! $this->validate_meta_key() ) {
+		if ( ! $this->validate_meta_key( $key ) ) {
 			$function = 'get_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
@@ -367,7 +367,7 @@ abstract class WC_Data {
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
-		if ( ! $this->validate_meta_key() ) {
+		if ( ! $this->validate_meta_key( $key ) ) {
 			$function = 'set_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
@@ -394,7 +394,7 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
-		if ( ! $this->validate_meta_key() ) {
+		if ( ! $this->validate_meta_key( $key ) ) {
 			$function = 'set_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
