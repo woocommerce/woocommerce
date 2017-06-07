@@ -180,7 +180,7 @@ class WC_API_XML_Handler implements WC_API_Handler {
 				if ( false !== strpos( $element_value, '<' ) || false !== strpos( $element_value, '>' ) ) {
 
 					$this->xml->startElement( $element_key );
-					$this->xml->writeCdata( $element_value );
+					$this->xml->writeCData( $element_value );
 					$this->xml->endElement();
 
 				} else {
