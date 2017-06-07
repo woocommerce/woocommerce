@@ -421,7 +421,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Return list of internal meta keys.
 	 *
-	 * @since 3.x
+	 * @since 3.2.0
 	 * @return array
 	 */
 	public function get_internal_meta_keys() {

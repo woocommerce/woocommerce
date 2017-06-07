@@ -271,13 +271,13 @@ abstract class WC_Data {
 	/**
 	 * Validate meta key.
 	 *
-	 * @since  3.x
+	 * @since  3.2.0
 	 * @param  string $key
 	 * @return bool   true if validation is successful, false otherwise
 	 */
 	private function validate_meta_key( $key ) {
 		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.x' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.2.0' );
 			return false;
 		}
 
