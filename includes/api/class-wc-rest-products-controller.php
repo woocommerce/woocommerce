@@ -220,14 +220,12 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		}
 
 		// Filter by attribute and term.
-		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
-				$tax_query[] = array(
-					'taxonomy' => $request['attribute'],
-					'field'    => 'term_id',
-					'terms'    => $request['attribute_term'],
-				);
-			}
+		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) && in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
+			$tax_query[] = array(
+				'taxonomy' => $request['attribute'],
+				'field'    => 'term_id',
+				'terms'    => $request['attribute_term'],
+			);
 		}
 
 		if ( ! empty( $tax_query ) ) {

@@ -770,10 +770,8 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
-			if ( isset( $actions['inline hide-if-no-js'] ) ) {
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) && isset( $actions['inline hide-if-no-js'] ) ) {
 				unset( $actions['inline hide-if-no-js'] );
-			}
 		}
 
 		return $actions;

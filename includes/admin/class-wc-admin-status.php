@@ -210,10 +210,8 @@ class WC_Admin_Status {
 
 			foreach ( $files as $key => $value ) {
 
-				if ( ! in_array( $value, array( '.', '..' ) ) ) {
-					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
-						$result[ sanitize_title( $value ) ] = $value;
-					}
+				if ( ! in_array( $value, array( '.', '..' ) ) && ! is_dir( $value ) && strstr( $value, '.log' ) ) {
+					$result[ sanitize_title( $value ) ] = $value;
 				}
 			}
 		}

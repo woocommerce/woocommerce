@@ -152,35 +152,33 @@ class WC_Admin_Importers {
 			foreach ( $import_data['posts'] as $post ) {
 				if ( 'product' === $post['post_type'] && ! empty( $post['terms'] ) ) {
 					foreach ( $post['terms'] as $term ) {
-						if ( strstr( $term['domain'], 'pa_' ) ) {
-							if ( ! taxonomy_exists( $term['domain'] ) ) {
-								$attribute_name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $term['domain'] ) );
+						if ( strstr( $term['domain'], 'pa_' ) && ! taxonomy_exists( $term['domain'] ) ) {
+							$attribute_name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $term['domain'] ) );
 
-								// Create the taxonomy
-								if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies() ) ) {
-									$attribute = array(
-										'attribute_label'   => $attribute_name,
-										'attribute_name'    => $attribute_name,
-										'attribute_type'    => 'select',
-										'attribute_orderby' => 'menu_order',
-										'attribute_public'  => 0,
-									);
-									$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
-									delete_transient( 'wc_attribute_taxonomies' );
-								}
-
-								// Register the taxonomy now so that the import works!
-								register_taxonomy(
-									$term['domain'],
-									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
-									apply_filters( 'woocommerce_taxonomy_args_' . $term['domain'], array(
-										'hierarchical' => true,
-										'show_ui'      => false,
-										'query_var'    => true,
-										'rewrite'      => false,
-									) )
+							// Create the taxonomy
+							if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies() ) ) {
+								$attribute = array(
+									'attribute_label'   => $attribute_name,
+									'attribute_name'    => $attribute_name,
+									'attribute_type'    => 'select',
+									'attribute_orderby' => 'menu_order',
+									'attribute_public'  => 0,
 								);
+								$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
+								delete_transient( 'wc_attribute_taxonomies' );
 							}
+
+							// Register the taxonomy now so that the import works!
+							register_taxonomy(
+								$term['domain'],
+								apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
+								apply_filters( 'woocommerce_taxonomy_args_' . $term['domain'], array(
+									'hierarchical' => true,
+									'show_ui'      => false,
+									'query_var'    => true,
+									'rewrite'      => false,
+								) )
+							);
 						}
 					}
 				}

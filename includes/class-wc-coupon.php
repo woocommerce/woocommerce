@@ -386,20 +386,18 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$discount = (float) min( $discount, $discounting_amount );
 
 		// Handle the limit_usage_to_x_items option
-		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {
-			if ( $discounting_amount ) {
-				if ( null === $this->get_limit_usage_to_x_items() ) {
-					$limit_usage_qty = $cart_item_qty;
-				} else {
-					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
+		if ( ! $this->is_type( array( 'fixed_cart' ) ) && $discounting_amount ) {
+			if ( null === $this->get_limit_usage_to_x_items() ) {
+				$limit_usage_qty = $cart_item_qty;
+			} else {
+				$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
 
-					$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
-				}
-				if ( $single ) {
-					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-				} else {
-					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
-				}
+				$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
+			}
+			if ( $single ) {
+				$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
+			} else {
+				$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
 			}
 		}
 

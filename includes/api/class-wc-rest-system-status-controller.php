@@ -785,11 +785,10 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			if ( ! empty( $theme_file ) ) {
 				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
 				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
-				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
-					if ( ! $outdated_templates ) {
-						$outdated_templates = true;
-					}
+				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) && ! $outdated_templates ) {
+					$outdated_templates = true;
 				}
+
 				$override_files[] = array(
 					'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
 					'version'      => $theme_version,

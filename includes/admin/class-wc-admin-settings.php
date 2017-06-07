@@ -820,11 +820,9 @@ class WC_Admin_Settings {
 		} else {
 
 			// Force method - protect, add rules to the htaccess file
-			if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
-				if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
-					fwrite( $file_handle, 'deny from all' );
-					fclose( $file_handle );
-				}
+			if ( ! file_exists( $downloads_url . '/.htaccess' ) && $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
+                fwrite( $file_handle, 'deny from all' );
+                fclose( $file_handle );
 			}
 		}
 	}
