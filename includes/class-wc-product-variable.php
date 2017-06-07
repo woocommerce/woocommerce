@@ -286,29 +286,31 @@ class WC_Product_Variable extends WC_Product {
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
-		return apply_filters( 'woocommerce_available_variation', array_merge( $variation->get_data(), array(
+		return apply_filters( 'woocommerce_available_variation', array(
 			'attributes'            => $variation->get_variation_attributes(),
-			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-			'weight_html'           => wc_format_weight( $variation->get_weight() ),
-			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => wc_get_stock_html( $variation ),
-			'variation_id'          => $variation->get_id(),
-			'variation_is_visible'  => $variation->variation_is_visible(),
-			'variation_is_active'   => $variation->variation_is_active(),
-			'is_purchasable'        => $variation->is_purchasable(),
+			'backorders_allowed'    => $variation->backorders_allowed(),
+			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
+			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'min_qty'               => $variation->get_min_purchase_quantity(),
-			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
-			'backorders_allowed'    => $variation->backorders_allowed(),
-			'is_in_stock'           => $variation->is_in_stock(),
+			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
 			'is_downloadable'       => $variation->is_downloadable(),
-			'is_virtual'            => $variation->is_virtual(),
+			'is_in_stock'           => $variation->is_in_stock(),
+			'is_purchasable'        => $variation->is_purchasable(),
 			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
+			'is_virtual'            => $variation->is_virtual(),
+			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
+			'min_qty'               => $variation->get_min_purchase_quantity(),
+			'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'sku'                   => $variation->get_sku(),
 			'variation_description' => wc_format_content( $variation->get_description() ),
-		) ), $this, $variation );
+			'variation_id'          => $variation->get_id(),
+			'variation_is_active'   => $variation->variation_is_active(),
+			'variation_is_visible'  => $variation->variation_is_visible(),
+			'weight'                => wc_format_weight( $variation->get_weight() ),
+			'weight_html'           => wc_format_weight( $variation->get_weight() ),
+		), $this, $variation );
 	}
 
 	/*
