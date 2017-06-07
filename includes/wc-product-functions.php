@@ -77,6 +77,7 @@ function wc_get_products( $args ) {
 		'post_parent'    => 'parent',
 		'posts_per_page' => 'limit',
 		'paged'          => 'page',
+        'post_type'      => 'type',
 	);
 
 	foreach ( $map_legacy as $from => $to ) {
