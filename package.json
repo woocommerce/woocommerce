@@ -43,7 +43,7 @@
     "grunt-wp-i18n": "~0.5.4",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
-    "wc-e2e-page-objects": "0.2.2"
+    "wc-e2e-page-objects": "0.3.0"
   },
   "engines": {
     "node": ">=6.9.4",
