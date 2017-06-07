@@ -229,10 +229,13 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '9.991', wc_format_decimal( 9.9912, 3 ) );
 
 		// trim zeros
-		$this->assertEquals( '9', wc_format_decimal( 9.00, false, true ) );
+		$this->assertEquals( '9', wc_format_decimal( '09.00', false, true ) );
 
 		// trim zeros and round
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
+
+		// run function twice
+		$this->assertEquals( '9.90', wc_format_decimal( wc_format_decimal( '9.90', '' ) ) );
 
 		// given string with thousands in german format.
 		update_option( 'woocommerce_price_decimal_sep', ',' );
@@ -240,6 +243,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// given string
 		$this->assertEquals( '9.99', wc_format_decimal( '9.99' ) );
+		$this->assertEquals( '9.99', wc_format_decimal( '9,99' ) );
 
 		// float
 		$this->assertEquals( '9.99', wc_format_decimal( 9.99 ) );
@@ -257,10 +261,15 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '9.991', wc_format_decimal( 9.9912, 3 ) );
 
 		// trim zeros
-		$this->assertEquals( '9', wc_format_decimal( 9.00, false, true ) );
+		$this->assertEquals( '9', wc_format_decimal( '09.00', false, true ) );
+		$this->assertEquals( '9', wc_format_decimal( '09,00', false, true ) );
 
 		// trim zeros and round
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
+
+		// run function twice
+		$this->assertEquals( '9.90', wc_format_decimal( wc_format_decimal( '9.90', '' ) ) );
+		$this->assertEquals( '9.90', wc_format_decimal( wc_format_decimal( '9,90', '' ) ) );
 
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 		update_option( 'woocommerce_price_thousand_sep', ',' );
