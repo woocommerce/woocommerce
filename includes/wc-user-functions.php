@@ -377,9 +377,9 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
+			$order = wc_get_order( $result->order_id );
+
 			if ( ! $order || $order->get_id() != $result->order_id ) {
-				// new order
-				$order    = wc_get_order( $result->order_id );
 				$_product = null;
 			}
 
