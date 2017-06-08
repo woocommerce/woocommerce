@@ -1535,7 +1535,7 @@ function wc_register_default_log_handler( $handlers ) {
 		$default_handler = new WC_Log_Handler_File();
 	}
 
-	array_push( $handlers, $default_handler );
+	$handlers[] = $default_handler;
 
 	return $handlers;
 }
