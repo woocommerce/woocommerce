@@ -44,7 +44,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'comment_shortcuts',
 		'dismissed_wp_pointers',
 		'show_welcome_panel',
-		'_woocommerce_persistent_cart',
 		'session_tokens',
 		'nickname',
 		'description',
@@ -81,6 +80,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$table_prefix = $wpdb->prefix ? $wpdb->prefix : 'wp_';
 
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys )
+			&& 0 !== strpos( $meta->meta_key, '_woocommerce_persistent_cart' )
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
 			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
