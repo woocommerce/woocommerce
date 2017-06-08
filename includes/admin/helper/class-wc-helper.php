@@ -157,6 +157,100 @@ class WC_Helper {
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . $local['_stylesheet'] ), 'upgrade-theme_' . $local['_stylesheet'] );
 				}
 			}
+
+			$subscription['has_update'] = false;
+			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
+				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
+			}
+
+			$subscription['download_url'] = $subscription['product_url'];
+			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
+				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
+			}
+
+			$subscription['actions'] = array();
+
+			if ( $subscription['has_update'] && ! $subscription['expired'] ) {
+				$action = array(
+					/* translators: %s: version number */
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $subscription['product_id'] ]['version'] ) ),
+					'button_label' => __( 'Update', 'woocommerce' ),
+					'button_url' => $subscription['update_url'],
+					'status' => 'update-available',
+					'icon' => 'dashicons-update',
+				);
+
+				// Subscription is not active on this site.
+				if ( ! $subscription['active'] ) {
+					$action['message'] .= ' ' . __( 'To enable this update you need to <strong>activate</strong> this subscription.', 'woocommerce' );
+					$action['button_label'] = null;
+					$action['button_url'] = null;
+				}
+
+				$subscription['actions'][] = $action;
+			}
+
+			if ( $subscription['has_update'] && $subscription['expired'] ) {
+				$action = array(
+					/* translators: %s: version number */
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $subscription['product_id'] ]['version'] ) ),
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$action['message'] .= ' ' . __( 'To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' );
+				$action['button_label'] = __( 'Purchase', 'woocommerce' );
+				$action['button_url'] = $subscription['product_url'];
+
+				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expired'] ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
+					'button_label' => __( 'Renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			}
+
+			if ( $subscription['expiring'] && ! $subscription['autorenew'] ) {
+				$action = array(
+					'message' => __( 'Subscription is <strong>expiring</strong> soon.', 'woocommerce' ),
+					'button_label' => __( 'Enable auto-renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expiring'] ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription is expiring soon. Please <strong>renew</strong> to continue receiving updates and support.', 'woocommerce' ) ),
+					'button_label' => __( 'Renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			}
+
+			if ( ! $subscription['active'] && $subscription['sites_max'] > 0 && $subscription['sites_active'] >= $subscription['sites_max'] ) {
+				$action = array(
+					'message' => __( 'You are already using the <strong>maximum number of sites available</strong> with your current subscription.', 'woocommerce' ),
+					'button_label' => __( 'Upgrade', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+			}
+
+			// Mark the first action primary.
+			if ( ! empty( $subscription['actions'] ) ) {
+				$subscription['actions'][0]['primary'] = true;
+			}
 		}
 
 		// Break the by-ref.
