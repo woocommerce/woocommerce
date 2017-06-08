@@ -200,7 +200,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		WHERE {$column} LIKE %s
 	", $key ) );
 
-		return ( $count > 0 ) ? false : true;
+		return $count <= 0;
 	}
 
 	/**
@@ -360,6 +360,8 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		$memory_limit = '128M';
 		if ( function_exists( 'ini_get' ) ) {
 			$memory_limit = ini_get( 'memory_limit' );
+		} else {
+
 		}
 
 		if ( ! $memory_limit || -1 === $memory_limit ) {

@@ -65,7 +65,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 				$value = $this->get_id();
 			break;
 			case 'exists' :
-				$value = ( $this->get_id() > 0 ) ? true : false;
+				$value = $this->get_id() > 0;
 			break;
 			case 'coupon_custom_fields' :
 				$legacy_custom_fields = array();
