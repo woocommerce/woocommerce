@@ -205,7 +205,6 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	public function validate_setting_text_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
 		return wp_kses_post( trim( stripslashes( $value ) ) );
-		return $value;
 	}
 
 	/**
