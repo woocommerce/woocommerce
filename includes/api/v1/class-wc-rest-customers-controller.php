@@ -288,8 +288,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		$total_users = $query->get_total();
 		if ( $total_users < 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
-			unset( $prepared_args['number'] );
-			unset( $prepared_args['offset'] );
+			unset( $prepared_args['number'], $prepared_args['offset'] );
 			$count_query = new WP_User_Query( $prepared_args );
 			$total_users = $count_query->get_total();
 		}

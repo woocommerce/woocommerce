@@ -380,8 +380,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$request_params = $request->get_query_params();
 		if ( ! empty( $request_params['filter'] ) ) {
 			// Normalize the pagination params.
-			unset( $request_params['filter']['posts_per_page'] );
-			unset( $request_params['filter']['paged'] );
+			unset( $request_params['filter']['posts_per_page'], $request_params['filter']['paged'] );
 		}
 		$base = add_query_arg( $request_params, rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 

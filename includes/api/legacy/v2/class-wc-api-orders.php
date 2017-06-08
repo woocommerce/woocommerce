@@ -217,8 +217,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			foreach ( $item_meta as $key => $values ) {
 				$item_meta[ $key ]->label = $values->display_key;
-				unset( $item_meta[ $key ]->display_key );
-				unset( $item_meta[ $key ]->display_value );
+				unset( $item_meta[ $key ]->display_key, $item_meta[ $key ]->display_value );
 			}
 
 			$order_data['line_items'][] = array(
@@ -732,8 +731,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 			}
 
-			unset( $address_fields['email'] );
-			unset( $address_fields['phone'] );
+			unset( $address_fields['email'], $address_fields['phone'] );
 		}
 
 		// shipping address
@@ -1531,8 +1529,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				foreach ( $item_meta as $key => $values ) {
 					$item_meta[ $key ]->label = $values->display_key;
-					unset( $item_meta[ $key ]->display_key );
-					unset( $item_meta[ $key ]->display_value );
+					unset( $item_meta[ $key ]->display_key, $item_meta[ $key ]->display_value );
 				}
 
 				$line_items[] = array(

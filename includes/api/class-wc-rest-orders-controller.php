@@ -178,8 +178,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		}
 
 		// Remove props we don't want to expose.
-		unset( $data['order_id'] );
-		unset( $data['type'] );
+		unset( $data['order_id'], $data['type'] );
 
 		return $data;
 	}

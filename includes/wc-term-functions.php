@@ -93,8 +93,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$orderby = $args['orderby'];
 
 		// Unset for wp_get_post_terms.
-		unset( $args['orderby'] );
-		unset( $args['fields'] );
+		unset( $args['orderby'], $args['fields'] );
 
 		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 

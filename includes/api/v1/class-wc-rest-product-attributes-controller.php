@@ -341,8 +341,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		$i = 0;
 		foreach ( $args as $key => $value ) {
 			if ( empty( $value ) && ! is_bool( $value ) ) {
-				unset( $args[ $key ] );
-				unset( $format[ $i ] );
+				unset( $args[ $key ], $format[ $i ] );
 			}
 
 			$i++;
