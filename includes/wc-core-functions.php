@@ -1430,13 +1430,13 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 
 /**
  * Get rounding precision for internal WC calculations.
- * Will increase the precision of wc_get_price_decimals by 2 decimals, unless WC_ROUNDING_PRECISION is set to a higher number.
+ * Will increase the precision of wc_get_price_decimals by 4 decimals, unless WC_ROUNDING_PRECISION is set to a higher number.
  *
  * @since 2.6.3
  * @return int
  */
 function wc_get_rounding_precision() {
-	$precision = wc_get_price_decimals() + 2;
+	$precision = wc_get_price_decimals() + 4;
 	if ( absint( WC_ROUNDING_PRECISION ) > $precision ) {
 		$precision = absint( WC_ROUNDING_PRECISION );
 	}
