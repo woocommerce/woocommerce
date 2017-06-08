@@ -61,7 +61,7 @@ class WC_Admin_Assets {
 			wp_enqueue_style( 'wp-color-picker' );
 		}
 
-		if ( in_array( $screen_id, array( 'dashboard' ) ) ) {
+		if ( $screen_id === 'dashboard' ) {
 			wp_enqueue_style( 'woocommerce_admin_dashboard_styles' );
 		}
 
@@ -168,12 +168,12 @@ class WC_Admin_Assets {
 		}
 
 		// Edit product category pages
-		if ( in_array( $screen_id, array( 'edit-product_cat' ) ) ) {
+		if ( $screen_id === 'edit-product_cat' ) {
 			wp_enqueue_media();
 		}
 
 		// Products
-		if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
+		if ( $screen_id === 'edit-product' ) {
 			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), WC_VERSION );
 			wp_enqueue_script( 'woocommerce_quick-edit' );
 		}

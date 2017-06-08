@@ -144,7 +144,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				$value = true; // These were deprecated in 2.2 and simply returned true in 2.6.x.
 				break;
 			default :
-				if ( in_array( $key, array_keys( $this->data ) ) ) {
+				if ( array_key_exists( $key, $this->data ) ) {
 					$value = $this->{"get_$key"}();
 				} else {
 					$value = get_post_meta( $this->id, '_' . $key, true );

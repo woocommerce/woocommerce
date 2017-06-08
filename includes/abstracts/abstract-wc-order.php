@@ -527,7 +527,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_currency( $value ) {
-		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
+		if ( $value && ! array_key_exists( $value, get_woocommerce_currencies() ) ) {
 			$this->error( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
 		$this->set_prop( 'currency', $value ? $value : get_woocommerce_currency() );

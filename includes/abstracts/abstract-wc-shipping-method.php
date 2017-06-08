@@ -347,7 +347,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					$available = in_array( $package['destination']['country'], array_diff( array_keys( WC()->countries->get_shipping_countries() ), $countries ) );
 				break;
 				default :
-					$available = in_array( $package['destination']['country'], array_keys( WC()->countries->get_shipping_countries() ) );
+					$available = array_key_exists( $package['destination']['country'], WC()->countries->get_shipping_countries() );
 				break;
 			}
 		}

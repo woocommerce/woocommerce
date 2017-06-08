@@ -118,7 +118,7 @@ class WC_Admin {
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
 			$plugin_slug = wc_clean( $_GET['wc-install-plugin-redirect'] );
 
-			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ) ) ) {
+			if ( current_user_can( 'install_plugins' ) && $plugin_slug === 'woocommerce-gateway-stripe' ) {
 				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
 				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
 			} else {
