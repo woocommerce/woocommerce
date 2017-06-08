@@ -51,7 +51,9 @@ abstract class WC_Session {
 	  * @return bool
 	  */
 	public function __isset( $key ) {
-		return isset( $this->_data[ sanitize_title( $key ) ] );
+		$key = apply_filters( 'woocommerce_session_isset', $key );
+
+		return isset( $this->_data[ sanitize_key( $key ) ] );
 	}
 
 	/**
@@ -60,6 +62,8 @@ abstract class WC_Session {
 	 * @param mixed $key
 	 */
 	public function __unset( $key ) {
+		$key = apply_filters( 'woocommerce_session_unset', $key );
+
 		if ( isset( $this->_data[ $key ] ) ) {
 			unset( $this->_data[ $key ] );
 			$this->_dirty = true;
@@ -74,8 +78,10 @@ abstract class WC_Session {
 	 * @return array|string value of session variable
 	 */
 	public function get( $key, $default = null ) {
-		$key = sanitize_key( $key );
-		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
+		$key   = sanitize_key( $key );
+		$value = isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
+
+		return apply_filters( 'woocommerce_session_get', $value, $key, $default );
 	}
 
 	/**
@@ -85,6 +91,8 @@ abstract class WC_Session {
 	 * @param mixed $value
 	 */
 	public function set( $key, $value ) {
+		$key = apply_filters( 'woocommerce_session_set', $key, $value );
+
 		if ( $value !== $this->get( $key ) ) {
 			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
 			$this->_dirty = true;
