@@ -523,7 +523,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' ),
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
 				);
 			break;
 			case 'wc-add-to-cart' :
