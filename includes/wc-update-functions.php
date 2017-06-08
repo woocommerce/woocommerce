@@ -1113,6 +1113,15 @@ function wc_update_310_downloadable_products() {
 }
 
 /**
+ * Find old order notes and ensure they have the correct type for exclusion.
+ */
+function wc_update_310_old_comments() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE $wpdb->comments comments LEFT JOIN $wpdb->posts as posts ON comments.comment_post_ID = posts.ID SET comment_type = 'order_note' WHERE posts.post_type = 'shop_order' AND comment_type = '';" );
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_310_db_version() {

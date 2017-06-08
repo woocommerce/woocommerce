@@ -246,6 +246,7 @@ class WC_Admin_Dashboard {
 	 */
 	public function recent_reviews() {
 		global $wpdb;
+
 		$query_from = apply_filters( 'woocommerce_report_recent_reviews_query_from', "FROM {$wpdb->comments} comments
 			LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
 			WHERE comments.comment_approved = '1'
@@ -256,8 +257,9 @@ class WC_Admin_Dashboard {
 			ORDER BY comments.comment_date_gmt DESC
 			LIMIT 5
 		" );
+
 		$comments = $wpdb->get_results( "
-			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, SUBSTRING(comments.comment_content,1,100) AS comment_excerpt
+			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content
 			{$query_from};
 		" );
 
@@ -276,7 +278,7 @@ class WC_Admin_Dashboard {
 
 				/* translators: %s: review author */
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( __( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
-				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
+				echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
 			}
 			echo '</ul>';
