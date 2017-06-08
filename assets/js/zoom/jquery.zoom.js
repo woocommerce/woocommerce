@@ -99,7 +99,7 @@
 			if (!settings.url) {
 				var srcElement = source.querySelector('img');
 				if (srcElement) {
-					settings.url = srcElement.getAttribute('data-src') || srcElement.currentSrc || srcElement.src;
+					settings.url = srcElement.getAttribute('data-large_image') || srcElement.currentSrc || srcElement.src;
 				}
 				if (!settings.url) {
 					return;
