@@ -274,6 +274,7 @@ class WC_Checkout {
 		}
 
 		try {
+			$new_order          = false;
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -292,6 +293,7 @@ class WC_Checkout {
 				$order->remove_order_items();
 			} else {
 				$order = new WC_Order();
+				$new_order = true;
 			}
 
 			foreach ( $data as $key => $value ) {
@@ -333,6 +335,10 @@ class WC_Checkout {
 
 			// Save the order.
 			$order_id = $order->save();
+
+			if ( $new_order ) {
+				do_action( 'woocommerce_new_order', $order_id );
+			}
 
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
