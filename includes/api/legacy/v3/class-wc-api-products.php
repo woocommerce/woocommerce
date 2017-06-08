@@ -1128,6 +1128,20 @@ class WC_API_Products extends WC_API_Resource {
 
 			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
+		
+		// Filter by featured meta ?filter[featured]=yes
+        if (!empty($args['featured'])) {
+            if (!is_array($query_args['meta_query'])) {
+                $query_args['meta_query'] = array();
+            }
+
+            $query_args['meta_query'][] = array(
+                'key' => '_featured',
+                'value' => $args['featured'] === 'yes' ? 'yes' : 'no',
+                'compare' => '='
+            );
+            $query_args['post_type'] = array('product', 'product_variation');
+        }
 
 		$query_args = $this->merge_query_args( $query_args, $args );
 
