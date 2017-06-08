@@ -406,7 +406,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
 
 		// 3rd party filtering of report data
-		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data, $this );
 	}
 
 	/**
@@ -530,7 +530,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 4,
 		);
 
-		return $legend;
+		return apply_filters( 'woocommerce_admin_report_legend', $legend, $this );
 	}
 
 	/**
@@ -544,7 +544,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 days', 'woocommerce' ),
 		);
 
-		$this->chart_colours = array(
+		$this->chart_colours = apply_filters( 'woocommerce_admin_report_chart_colours', array(
 			'sales_amount'     => '#b1d4ea',
 			'net_sales_amount' => '#3498db',
 			'average'          => '#b1d4ea',
@@ -554,7 +554,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'shipping_amount'  => '#5cc488',
 			'coupon_amount'    => '#f1c40f',
 			'refund_amount'    => '#e74c3c',
-		);
+		), $this );
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
@@ -639,10 +639,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		// 3rd party filtering of report data
-		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
+		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data, $this );
 
 		// Encode in json format
-		$chart_data = json_encode( array(
+		$chart_data = json_encode( apply_filters( 'woocommerce_admin_report_chart_processed_data', array(
 			'order_counts'        => array_values( $data['order_counts'] ),
 			'order_item_counts'   => array_values( $data['order_item_counts'] ),
 			'order_amounts'       => array_map( array( $this, 'round_chart_totals' ), array_values( $data['order_amounts'] ) ),
@@ -651,7 +651,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'shipping_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $data['shipping_amounts'] ) ),
 			'coupon_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $data['coupon_amounts'] ) ),
 			'refund_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $data['refund_amounts'] ) ),
-		) );
+		), $data, $this ) );
 		?>
 		<div class="chart-container">
 			<div class="chart-placeholder main"></div>
@@ -750,6 +750,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							shadowSize: 0,
 							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
 						},
+						<?= apply_filters( 'woocommerce_admin_report_chart_series_extra_json', '', $this ) ?>
 					];
 
 					if ( highlight !== 'undefined' && series[ highlight ] ) {
@@ -807,7 +808,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 									alignTicksWithAxis: 1,
 									color: 'transparent',
 									font: { color: "#aaa" }
-								}
+								},
+								<?= apply_filters( 'woocommerce_admin_report_chart_yaxes_extra_json', '', $this ) ?>
 							],
 						}
 					);
