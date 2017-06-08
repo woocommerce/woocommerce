@@ -273,6 +273,15 @@ jQuery( function ( $ ) {
 		}
 	}).change();
 
+	// Reviews.
+	$( 'input#woocommerce_enable_reviews' ).change(function() {
+		if ( $( this ).is( ':checked' ) ) {
+			$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).show();
+		} else {
+			$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).hide();
+		}
+	}).change();
+
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
