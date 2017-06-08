@@ -131,10 +131,9 @@ class WC_Admin_Report {
 					continue;
 			}
 
+			$get = "{$distinct} {$get_key}";
 			if ( $value['function'] ) {
 				$get = "{$value['function']}({$distinct} {$get_key})";
-			} else {
-				$get = "{$distinct} {$get_key}";
 			}
 
 			$select[] = "{$get} as {$value['name']}";
@@ -531,10 +530,9 @@ class WC_Admin_Report {
 				}
 
 				// 3 months max for day view
+				$this->chart_groupby = 'day';
 				if ( $interval > 3 ) {
 					$this->chart_groupby = 'month';
-				} else {
-					$this->chart_groupby = 'day';
 				}
 			break;
 

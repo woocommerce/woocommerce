@@ -317,10 +317,9 @@ class WC_Form_Handler {
 					// Update meta
 					update_post_meta( $order_id, '_payment_method', $payment_method );
 
+					$payment_method_title = '';
 					if ( isset( $available_gateways[ $payment_method ] ) ) {
 						$payment_method_title = $available_gateways[ $payment_method ]->get_title();
-					} else {
-						$payment_method_title = '';
 					}
 
 					update_post_meta( $order_id, '_payment_method_title', $payment_method_title );

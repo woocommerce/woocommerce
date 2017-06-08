@@ -288,10 +288,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 
 				// Set attribute visibility.
+				$is_visible = 1;
 				if ( isset( $attribute['visible'] ) ) {
 					$is_visible = $attribute['visible'];
-				} else {
-					$is_visible = 1;
 				}
 
 				// Set if is a variation attribute.

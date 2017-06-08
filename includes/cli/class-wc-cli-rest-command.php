@@ -182,17 +182,17 @@ class WC_CLI_REST_Command {
 	 * @param array $assoc_args
 	 */
 	public function list_items( $args, $assoc_args ) {
+
+		$method = 'GET';
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
 			$method = 'HEAD';
-		} else {
-			$method = 'GET';
 		}
 
 		list( $status, $body, $headers ) = $this->do_request( $method, $this->get_filled_route( $args ), $assoc_args );
+
+		$items = $body;
 		if ( ! empty( $assoc_args['format'] ) && 'ids' === $assoc_args['format'] ) {
 			$items = array_column( $body, 'id' );
-		} else {
-			$items = $body;
 		}
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
@@ -408,12 +408,12 @@ EOT;
 	 * @param bool|string $change
 	 */
 	private function nested_line( $line, $change = false ) {
+
+		$label = false;
 		if ( 'add' == $change ) {
 			$label = '+ ';
 		} elseif ( 'remove' == $change ) {
 			$label = '- ';
-		} else {
-			$label = false;
 		}
 
 		$spaces = ( $this->output_nesting_level * 2 ) + 2;

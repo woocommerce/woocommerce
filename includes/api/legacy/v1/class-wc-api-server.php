@@ -117,10 +117,9 @@ class WC_API_Server {
 	public function __construct( $path ) {
 
 		if ( empty( $path ) ) {
+			$path = '/';
 			if ( isset( $_SERVER['PATH_INFO'] ) ) {
 				$path = $_SERVER['PATH_INFO'];
-			} else {
-				$path = '/';
 			}
 		}
 

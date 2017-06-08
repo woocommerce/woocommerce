@@ -1240,10 +1240,9 @@ class WC_Admin_Post_Types {
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
+		$manage_stock = $was_managing_stock;
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
-		} else {
-			$manage_stock = $was_managing_stock;
 		}
 
 		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();

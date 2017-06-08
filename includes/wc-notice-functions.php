@@ -177,12 +177,11 @@ function wc_get_notices( $notice_type = '' ) {
 
 	$all_notices = WC()->session->get( 'wc_notices', array() );
 
+	$notices = array();
 	if ( empty( $notice_type ) ) {
 		$notices = $all_notices;
 	} elseif ( isset( $all_notices[ $notice_type ] ) ) {
 		$notices = $all_notices[ $notice_type ];
-	} else {
-		$notices = array();
 	}
 
 	return $notices;

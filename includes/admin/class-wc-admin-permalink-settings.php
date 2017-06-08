@@ -183,10 +183,10 @@ class WC_Admin_Permalink_Settings {
 			$product_base = isset( $_POST['product_permalink'] ) ? wc_clean( $_POST['product_permalink'] ) : '';
 
 			if ( 'custom' === $product_base ) {
+
+				$product_base = '/';
 				if ( isset( $_POST['product_permalink_structure'] ) ) {
 					$product_base = preg_replace( '#/+#', '/', '/' . str_replace( '#', '', trim( $_POST['product_permalink_structure'] ) ) );
-				} else {
-					$product_base = '/';
 				}
 
 				// This is an invalid base structure and breaks pages.

@@ -317,11 +317,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * @return WC_Product|bool
 	 */
 	public function get_product_from_item( $item ) {
+
+		$product = false;
+
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$product = $item->get_product();
-		} else {
-			$product = false;
 		}
+
 		return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
 	}
 

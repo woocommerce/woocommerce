@@ -881,6 +881,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+
+		$default_args = array(
+			'quantity'     => $qty,
+		);
+
 		if ( $product ) {
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -890,10 +895,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'variation'    => $product->is_type( 'variation' ) ? $product->get_attributes() : array(),
 				'subtotal'     => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
 				'total'        => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
-				'quantity'     => $qty,
-			);
-		} else {
-			$default_args = array(
 				'quantity'     => $qty,
 			);
 		}

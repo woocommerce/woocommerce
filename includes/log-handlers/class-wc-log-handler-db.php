@@ -131,13 +131,13 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		 * PHP < 5.3.6 correct behavior
 		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
 		 */
+		$debug_backtrace_arg = false;
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
 			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS;
-		} else {
-			$debug_backtrace_arg = false;
 		}
 
 		$trace = debug_backtrace( $debug_backtrace_arg );
+
 		foreach ( $trace as $t ) {
 			if ( isset( $t['file'] ) ) {
 				$filename = pathinfo( $t['file'], PATHINFO_FILENAME );

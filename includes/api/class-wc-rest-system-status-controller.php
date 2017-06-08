@@ -770,6 +770,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		$outdated_templates = false;
 		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
 		foreach ( $scan_files as $file ) {
+			$theme_file = false;
 			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
 			} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
@@ -778,8 +779,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				$theme_file = get_template_directory() . '/' . $file;
 			} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
 				$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
-			} else {
-				$theme_file = false;
 			}
 
 			if ( ! empty( $theme_file ) ) {

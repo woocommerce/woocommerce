@@ -355,11 +355,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @return int
 	 */
 	protected function get_memory_limit() {
+
+		// Sensible default.
+		$memory_limit = '128M';
 		if ( function_exists( 'ini_get' ) ) {
 			$memory_limit = ini_get( 'memory_limit' );
-		} else {
-			// Sensible default.
-			$memory_limit = '128M';
 		}
 
 		if ( ! $memory_limit || -1 === $memory_limit ) {

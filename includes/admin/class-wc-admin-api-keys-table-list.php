@@ -186,10 +186,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
 		$current_page = $this->get_pagenum();
+
+		$offset = 0;
 		if ( 1 < $current_page ) {
 			$offset = $per_page * ( $current_page - 1 );
-		} else {
-			$offset = 0;
 		}
 
 		$search = '';

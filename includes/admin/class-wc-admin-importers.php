@@ -209,10 +209,9 @@ class WC_Admin_Importers {
 		);
 
 		// Log failures.
+		$error_log = array();
 		if ( 0 !== $params['start_pos'] ) {
 			$error_log = array_filter( (array) get_user_option( 'product_import_error_log' ) );
-		} else {
-			$error_log = array();
 		}
 
 		$importer         = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );

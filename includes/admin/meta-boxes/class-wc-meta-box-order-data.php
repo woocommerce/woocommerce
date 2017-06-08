@@ -147,10 +147,9 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
+		$payment_gateways = array();
 		if ( WC()->payment_gateways() ) {
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
-		} else {
-			$payment_gateways = array();
 		}
 
 		$payment_method = $order->get_payment_method();

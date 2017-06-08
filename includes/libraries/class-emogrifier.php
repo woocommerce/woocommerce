@@ -383,12 +383,12 @@ class Emogrifier
 				}
 
 				// if it has a style attribute, get it, process it, and append (overwrite) new stuff
+				$oldStyleDeclarations = array();
 				if ($node->hasAttribute('style')) {
 					// break it up into an associative array
 					$oldStyleDeclarations = $this->parseCssDeclarationsBlock($node->getAttribute('style'));
-				} else {
-					$oldStyleDeclarations = array();
 				}
+
 				$newStyleDeclarations = $this->parseCssDeclarationsBlock($cssRule['declarationsBlock']);
 				if ($this->shouldMapCssToHtml) {
 					$this->mapCssToHtmlAttributes($newStyleDeclarations, $node);

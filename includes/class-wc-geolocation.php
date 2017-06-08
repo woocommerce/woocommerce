@@ -176,12 +176,11 @@ class WC_Geolocation {
 					$database = self::get_local_database_path();
 				}
 
+				$country_code = '';
 				if ( file_exists( $database ) ) {
 					$country_code = self::geolocate_via_db( $ip_address );
 				} elseif ( $api_fallback ) {
 					$country_code = self::geolocate_via_api( $ip_address );
-				} else {
-					$country_code = '';
 				}
 
 				if ( ! $country_code && $fallback ) {

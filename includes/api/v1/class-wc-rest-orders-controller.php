@@ -753,10 +753,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	protected function set_item( $order, $item_type, $posted ) {
 		global $wpdb;
 
+		$action = 'create';
 		if ( ! empty( $posted['id'] ) ) {
 			$action = 'update';
-		} else {
-			$action = 'create';
 		}
 
 		$method = 'prepare_' . $item_type;

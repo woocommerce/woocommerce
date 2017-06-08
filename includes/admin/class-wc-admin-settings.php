@@ -191,10 +191,9 @@ class WC_Admin_Settings {
 
 			$key = key( $option_array[ $option_name ] );
 
+			$option_value = null;
 			if ( isset( $option_values[ $key ] ) ) {
 				$option_value = $option_values[ $key ];
-			} else {
-				$option_value = null;
 			}
 
 		// Single value

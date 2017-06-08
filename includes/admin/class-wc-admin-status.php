@@ -41,10 +41,9 @@ class WC_Admin_Status {
 			$tools_controller = new WC_REST_System_Status_Tools_Controller;
 			$action           = wc_clean( $_GET['action'] );
 
+			$response = array( 'success' => false, 'message' => __( 'Tool does not exist.', 'woocommerce' ) );
 			if ( array_key_exists( $action, $tools ) ) {
 				$response = $tools_controller->execute_tool( $action );
-			} else {
-				$response = array( 'success' => false, 'message' => __( 'Tool does not exist.', 'woocommerce' ) );
 			}
 
 			if ( $response['success'] ) {

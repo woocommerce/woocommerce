@@ -91,11 +91,11 @@ abstract class WC_Log_Levels {
 	 * @return int 100 (debug) - 800 (emergency) or 0 if not recognized
 	 */
 	public static function get_level_severity( $level ) {
+		$severity = 0;
 		if ( self::is_valid_level( $level ) ) {
 			$severity = self::$level_to_severity[ strtolower( $level ) ];
-		} else {
-			$severity = 0;
 		}
+
 		return $severity;
 	}
 

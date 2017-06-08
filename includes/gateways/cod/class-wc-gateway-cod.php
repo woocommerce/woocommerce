@@ -156,10 +156,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			// Only apply if all packages are being shipped via chosen methods, or order is virtual
 			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
 
+			$chosen_shipping_methods = array();
 			if ( isset( $chosen_shipping_methods_session ) ) {
 				$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
-			} else {
-				$chosen_shipping_methods = array();
 			}
 
 			$check_method = false;

@@ -62,10 +62,9 @@ class WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
+		$resource_name = $type;
 		if ( 'shop_order' === $type || 'shop_coupon' === $type ) {
 			$resource_name = str_replace( 'shop_', '', $type );
-		} else {
-			$resource_name = $type;
 		}
 
 		$id = absint( $id );
@@ -300,10 +299,9 @@ class WC_API_Resource {
 	 */
 	protected function delete( $id, $type, $force = false ) {
 
+		$resource_name = $type;
 		if ( 'shop_order' === $type || 'shop_coupon' === $type ) {
 			$resource_name = str_replace( 'shop_', '', $type );
-		} else {
-			$resource_name = $type;
 		}
 
 		if ( 'customer' === $type ) {
