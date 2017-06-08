@@ -1005,6 +1005,9 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
 			}
 		}
+		
+		$order->add_item( $line_item );
+		
 	}
 
 	/**
