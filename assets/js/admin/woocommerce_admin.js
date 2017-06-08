@@ -273,7 +273,7 @@ jQuery( function ( $ ) {
 		}
 	}).change();
 
-	// Revies.
+	// Reviews.
 	$( 'input#woocommerce_enable_reviews' ).change(function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).show();
