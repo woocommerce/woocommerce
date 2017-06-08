@@ -174,8 +174,15 @@ class WC_Admin_Assets {
 
 		// Products
 		if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), WC_VERSION );
-			wp_enqueue_script( 'woocommerce_quick-edit' );
+			wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), WC_VERSION );
+
+			$params = array(
+				'strings' => array(
+					'allow_reviews' => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+				),
+			);
+
+			wp_localize_script( 'woocommerce_quick-edit', 'woocommerce_quick_edit', $params );
 		}
 
 		// Meta boxes
