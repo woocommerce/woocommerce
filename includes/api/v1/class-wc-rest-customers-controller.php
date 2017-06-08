@@ -386,9 +386,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		}
 
 		$customer = $this->prepare_item_for_response( $user_data, $request );
-		$response = rest_ensure_response( $customer );
-
-		return $response;
+		return rest_ensure_response( $customer );
 	}
 
 	/**

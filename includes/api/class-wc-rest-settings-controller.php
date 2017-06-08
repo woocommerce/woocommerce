@@ -84,8 +84,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 			}
 		}
 
-		$response = rest_ensure_response( $filtered_groups );
-		return $response;
+		return rest_ensure_response( $filtered_groups );
 	}
 
 	/**

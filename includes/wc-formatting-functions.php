@@ -731,7 +731,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 
 		foreach ( $base as $k => $v ) {
 			$amount      = 255 - $v;
-			$amount      = $amount / 100;
+			$amount      /= 100;
 			$amount      = round( $amount * $factor );
 			$new_decimal = $v + $amount;
 

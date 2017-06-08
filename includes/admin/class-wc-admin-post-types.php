@@ -1861,8 +1861,8 @@ class WC_Admin_Post_Types {
 		if ( isset( $_POST['type'] ) && 'downloadable_product' == $_POST['type'] ) {
 
 			if ( empty( $pathdata['subdir'] ) ) {
-				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
+				$pathdata['path']   .= '/woocommerce_uploads';
+				$pathdata['url']    .= '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
 				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
