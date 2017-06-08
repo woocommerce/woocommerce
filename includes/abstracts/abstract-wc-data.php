@@ -269,19 +269,20 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Validate meta key.
+	 * Check if the key is an internal one.
 	 *
 	 * @since  3.2.0
 	 * @param  string $key
-	 * @return bool   true if validation is successful, false otherwise
+	 * @return bool   true if it's an internal key, false otherwise
 	 */
-	private function validate_meta_key( $key ) {
+	protected function is_internal_meta_key( $key ) {
 		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.2.0' );
-			return false;
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
@@ -294,7 +295,7 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
-		if ( ! $this->validate_meta_key( $key ) ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'get_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
@@ -367,7 +368,7 @@ abstract class WC_Data {
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
-		if ( ! $this->validate_meta_key( $key ) ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'set_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
@@ -394,7 +395,7 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
-		if ( ! $this->validate_meta_key( $key ) ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'set_' . $key;
 
 			if ( is_callable( array( $this, $function ) ) ) {
