@@ -156,10 +156,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
 		} else {
+			$is_shipping_method = false;
 			foreach ( $shipping_methods as $method ) {
 				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ) ) && $method->has_settings() ) {
+					$is_shipping_method = true;
 					$method->admin_options();
 				}
+			}
+			if ( !$is_shipping_method ) {
+				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, '' );
+				WC_Admin_Settings::output_fields( $settings );
 			}
 		}
 	}
