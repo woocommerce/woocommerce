@@ -263,6 +263,43 @@ class WC_Helper {
 				continue;
 			}
 
+			$data['_product_url'] = '#';
+			$data['_has_update'] = false;
+
+			if ( ! empty( $updates[ $data['_product_id'] ] ) ) {
+				$data['_has_update'] = version_compare( $updates[ $data['_product_id'] ]['version'], $data['Version'], '>' );
+
+				if ( ! empty( $updates[ $data['_product_id'] ]['url'] ) ) {
+					$data['_product_url'] = $updates[ $data['_product_id'] ]['url'];
+				} elseif ( ! empty( $data['PluginURI'] ) ) {
+					$data['_product_url'] = $data['PluginURI'];
+				}
+			}
+
+			$data['_actions'] = array();
+
+			if ( $data['_has_update'] ) {
+				$action = array(
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $data['_product_id'] ]['version'] ) ),
+					'button_label' => __( 'Purchase', 'woocommerce' ),
+					'button_url' => $data['_product_url'],
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$data['_actions'][] = $action;
+			} else {
+				$action = array(
+					'message' => __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ),
+					'button_label' => __( 'Purchase', 'woocommerce' ),
+					'button_url' => $data['_product_url'],
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$data['_actions'][] = $action;
+			}
+
 			$no_subscriptions[ $filename ] = $data;
 		}
 

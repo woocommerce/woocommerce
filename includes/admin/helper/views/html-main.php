@@ -126,27 +126,11 @@
 		<table class="wp-list-table widefat fixed striped">
 			<?php /* Extensions without a subscription. */ ?>
 			<?php foreach ( $no_subscriptions as $filename => $data ) : ?>
-				<?php
-				$product_id = $data['_product_id'];
-				$update_available = false;
-
-				if ( ! empty( $updates[ $product_id ] ) &&
-					version_compare( $updates[ $product_id ]['version'], $data['Version'], '>' ) ) {
-					$update_available = true;
-				}
-
-				$product_url = '#';
-				if ( ! empty( $updates[ $product_id ]['url'] ) ) {
-					$product_url = $updates[ $product_id ]['url'];
-				} elseif ( ! empty( $data['PluginURI'] ) ) {
-					$product_url = $data['PluginURI'];
-				}
-				?>
 				<tbody>
 					<tr class="wp-list-table__row is-ext-header">
 						<td class="wp-list-table__ext-details color-bar autorenews">
 							<div class="wp-list-table__ext-title">
-								<a href="<?php echo esc_url( $product_url ); ?>" target="_blank"><?php echo esc_html( $data['Name'] ); ?></a>
+								<a href="<?php echo esc_url( $data['_product_url'] ); ?>" target="_blank"><?php echo esc_html( $data['Name'] ); ?></a>
 							</div>
 							<div class="wp-list-table__ext-description">
 							</div>
@@ -164,18 +148,18 @@
 						</td>
 					</tr>
 
-					<?php if ( $update_available ) : ?>
+					<?php foreach ( $data['_actions'] as $action ) : ?>
 					<tr class="wp-list-table__row wp-list-table__ext-updates">
-						<td class="wp-list-table__ext-status update-available">
-							<p><span class="dashicons dashicons-update"></span>
-								<?php printf( __( 'Version %s is available. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $product_id ]['version'] ) ); ?>
+						<td class="wp-list-table__ext-status <?php echo sanitize_html_class( $action['status'] ); ?>">
+							<p><span class="dashicons <?php echo sanitize_html_class( $action['icon'] ); ?>"></span>
+								<?php echo $action['message']; ?>
 							</p>
 						</td>
 						<td class="wp-list-table__ext-actions">
-							<a class="button" href="<?php echo esc_url( $product_url ); ?>" target="_blank"><?php _e( 'Purchase', 'woocommerce' ); ?></a>
+							<a class="button" href="<?php echo esc_url( $action['button_url'] ); ?>" target="_blank"><?php echo esc_html( $action['button_label'] ); ?></a>
 						</td>
 					</tr>
-					<?php endif; ?>
+					<?php endforeach; ?>
 
 				</tbody>
 
