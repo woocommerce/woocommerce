@@ -351,6 +351,8 @@ abstract class WC_Data {
 			'key'   => $key,
 			'value' => $value,
 		);
+
+		$this->update_meta_data_cache();
 	}
 
 	/**
@@ -369,6 +371,8 @@ abstract class WC_Data {
 				'key'   => $key,
 				'value' => $value,
 			);
+
+			$this->update_meta_data_cache();
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
@@ -386,6 +390,8 @@ abstract class WC_Data {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
+
+			$this->update_meta_data_cache();
 		}
 	}
 
@@ -487,6 +493,18 @@ abstract class WC_Data {
 		if ( ! empty( $this->cache_group ) ) {
 			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
 			wp_cache_delete( $cache_key, $this->cache_group );
+		}
+	}
+
+	/**
+	 * Update Meta Data cache
+	 *
+	 * @since 3.1.0
+	 */
+	public function update_meta_data_cache(){
+		if ( ! empty( $this->cache_group ) ) {
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
+			wp_cache_set( $cache_key, $this->meta_data, $this->cache_group );
 		}
 	}
 
