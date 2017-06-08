@@ -467,6 +467,36 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'title'           => __( 'Enable reviews', 'woocommerce' ),
+					'desc'            => __( 'Enable product reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_reviews',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+				),
+
+				array(
+					'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_label',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
+
+				array(
+					'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
+
+				array(
 					'title'           => __( 'Product ratings', 'woocommerce' ),
 					'desc'            => __( 'Enable star rating on reviews', 'woocommerce' ),
 					'id'              => 'woocommerce_enable_review_rating',
@@ -480,27 +510,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'            => __( 'Star ratings should be required, not optional', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_required',
 					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'end',
-					'show_if_checked' => 'yes',
-					'autoload'        => false,
-				),
-
-				array(
-					'title'           => __( 'Verified owners', 'woocommerce' ),
-					'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_label',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'start',
-					'show_if_checked' => 'yes',
-					'autoload'        => false,
-				),
-
-				array(
-					'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_required',
-					'default'         => 'no',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
 					'show_if_checked' => 'yes',

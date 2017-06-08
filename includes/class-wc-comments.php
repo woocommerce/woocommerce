@@ -22,6 +22,7 @@ class WC_Comments {
 	 */
 	public static function init() {
 		// Rating posts
+		add_filter( 'comments_open', array( __CLASS__, 'comments_open' ), 10, 2 );
 		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_rating' ), 0 );
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
 		add_action( 'comment_moderation_recipients', array( __CLASS__, 'comment_moderation_recipients' ), 10, 2 );
@@ -51,6 +52,21 @@ class WC_Comments {
 
 		// Review of verified purchase
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
+	}
+
+	/**
+	 * See if comments are open.
+	 *
+	 * @since  3.1.0
+	 * @param  bool $open
+	 * @param  int $post_id
+	 * @return bool
+	 */
+	public static function comments_open( $open, $post_id ) {
+		if ( 'product' === get_post_type( $post_id ) && ! post_type_supports( 'product', 'comments' ) ) {
+			$open = false;
+		}
+		return $open;
 	}
 
 	/**

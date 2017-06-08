@@ -33,7 +33,7 @@ class WC_Admin_Dashboard {
 	 * Init dashboard widgets.
 	 */
 	public function init() {
-		if ( current_user_can( 'publish_shop_orders' ) ) {
+		if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 			wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce recent reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 		}
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
