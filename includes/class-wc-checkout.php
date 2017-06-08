@@ -998,7 +998,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
-		if ( 'billing' === $type || false === $this->legacy_posted_data['ship_to_different_address'] ) {
+		if ( 'billing' === $type || ( isset( $this->legacy_posted_data['ship_to_different_address'] ) && false === $this->legacy_posted_data['ship_to_different_address'] ) ) {
 			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
 		} else {
 			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
