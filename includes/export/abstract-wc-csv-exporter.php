@@ -330,6 +330,8 @@ abstract class WC_CSV_Exporter {
 			$data = "'" . $data;
 		}
 
+		$data = str_replace( '"', '""', $data );
+
 		return $data;
 	}
 
@@ -354,7 +356,7 @@ abstract class WC_CSV_Exporter {
 		$data     = (string) urldecode( $data );
 		$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
 		$data     = 'UTF-8' === $encoding ? $data : utf8_encode( $data );
-		return $this->escape_data( addslashes( $data ) );
+		return $this->escape_data( wp_slash( $data ) );
 	}
 
 	/**
