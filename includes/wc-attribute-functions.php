@@ -54,7 +54,7 @@ function wc_get_attribute_taxonomies() {
 	if ( false === ( $attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' ) ) ) {
 		global $wpdb;
 
-		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies order by attribute_name ASC;" );
+		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name != '' ORDER BY attribute_name ASC;" );
 
 		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
 	}
@@ -69,7 +69,7 @@ function wc_get_attribute_taxonomies() {
  * @return string
  */
 function wc_attribute_taxonomy_name( $attribute_name ) {
-	return 'pa_' . wc_sanitize_taxonomy_name( $attribute_name );
+	return $attribute_name ? 'pa_' . wc_sanitize_taxonomy_name( $attribute_name ) : '';
 }
 
 /**
