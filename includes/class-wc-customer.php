@@ -170,16 +170,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	public function get_avatar_url() {
-		$avatar_html = get_avatar( $this->get_email() );
-
-		// Get the URL of the avatar from the provided HTML
-		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			return esc_url( $matches[1] );
-		}
-
-		return '';
+		return get_avatar_url( $this->get_email() );
 	}
 
 	/**
