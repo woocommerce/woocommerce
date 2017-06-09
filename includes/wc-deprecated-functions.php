@@ -938,10 +938,7 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 }
 
 /**
- * Wrapper for @see get_avatar() which doesn't simply return
- * the URL so we need to pluck it from the HTML img tag.
- *
- * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
+ * Return customer avatar URL.
  *
  * @deprecated 3.1.0
  * @since 2.6.0
@@ -952,14 +949,5 @@ function wc_get_customer_avatar_url( $email ) {
 	// Deprecated in favor of WordPress get_avatar_url() function.
 	wc_deprecated_function( 'wc_get_customer_avatar_url()', '3.1', 'get_avatar_url()' );
 
-	$avatar_html = get_avatar( $email );
-
-	// Get the URL of the avatar from the provided HTML.
-	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-		return esc_url_raw( $matches[1] );
-	}
-
-	return null;
+	return get_avatar_url( $email );
 }
