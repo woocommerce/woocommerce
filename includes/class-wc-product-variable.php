@@ -295,6 +295,7 @@ class WC_Product_Variable extends WC_Product {
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
+			'image_id'              => $variation->get_image_id(),
 			'is_downloadable'       => $variation->is_downloadable(),
 			'is_in_stock'           => $variation->is_in_stock(),
 			'is_purchasable'        => $variation->is_purchasable(),
