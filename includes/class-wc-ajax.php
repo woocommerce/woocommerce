@@ -1370,7 +1370,7 @@ class WC_AJAX {
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
 		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
 		$api_refund             = 'true' === $_POST['api_refund'];
-		$restock_refunded_items = 'true' === $_POST['restock_refunded_items'];
+		$restock_refunded_items = isset( $_POST['restock_refunded_items'] ) && 'true' === $_POST['restock_refunded_items'];
 		$refund                 = false;
 		$response_data          = array();
 
