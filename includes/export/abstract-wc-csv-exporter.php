@@ -26,7 +26,7 @@ abstract class WC_CSV_Exporter {
 	 * Batch limit.
 	 * @var integer
 	 */
-	protected $limit = 30;
+	protected $limit = 50;
 
 	/**
 	 * Number exported.
