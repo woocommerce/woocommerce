@@ -265,14 +265,6 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
-	// Trim left zeros.
-	if (  gettype( $number ) === 'string' && is_numeric( $number ) ) {
-		$number = ltrim( $number, '0' );
-		if ( '' === $number || substr( $number, 0, 1 ) === '.' ) {
-			$number = '0' . $number;
-		}
-	}
-
 	if ( false !== $dp ) {
 		$dp     = intval( '' == $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
