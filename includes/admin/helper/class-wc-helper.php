@@ -39,22 +39,11 @@ class WC_Helper {
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
 
-		// Stop the nagging about WooThemes Updater
-		remove_action( 'admin_notices', 'woothemes_updater_notice' );
-
-		// Remove WooThemes Updater notices
-		if ( ! empty( $GLOBALS['woothemes_updater'] ) ) {
-			remove_action( 'network_admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
-			remove_action( 'admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
-			remove_action( 'network_admin_menu', array( $GLOBALS['woothemes_updater']->admin, 'register_settings_screen' ) );
-			remove_action( 'admin_menu', array( $GLOBALS['woothemes_updater']->admin, 'register_settings_screen' ) );
-
-			// TODO: In a later version, when things are stable, attempt to deactivate the legacy helper.
-		}
-
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
+
+		do_action( 'woocommerce_helper_loaded' );
 	}
 
 	/**
@@ -1164,8 +1153,10 @@ class WC_Helper {
 
 	/**
 	 * Flush auth cache.
+	 *
+	 * @access private
 	 */
-	private static function _flush_authentication_cache() {
+	public static function _flush_authentication_cache() {
 		$request = WC_Helper_API::get( 'oauth/me', array(
 			'authenticated' => true,
 		) );
