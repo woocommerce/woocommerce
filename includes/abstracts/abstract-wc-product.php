@@ -1729,7 +1729,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
 
 		$image = '';
-
 		if ( has_post_thumbnail( $this->get_id() ) ) {
 			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
@@ -1803,7 +1802,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$files = $this->get_downloads();
 
 		$file = false;
-
 		if ( '' === $download_id ) {
 			$file = sizeof( $files ) ? current( $files ) : false;
 		} elseif ( isset( $files[ $download_id ] ) ) {
@@ -1870,7 +1868,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function get_availability_text() {
 
 		$availability = '';
-
 		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
@@ -1890,7 +1887,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function get_availability_class() {
 
 		$class = 'in-stock';
-
 		if ( ! $this->is_in_stock() ) {
 			$class = 'out-of-stock';
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {

@@ -1673,7 +1673,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			$product->delete( true );
-			$result = $product->get_id() > 0;
+			$result = $product->get_id() < 0;
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {

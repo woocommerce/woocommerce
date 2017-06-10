@@ -319,7 +319,6 @@ abstract class WC_Settings_API {
 	public function get_tooltip_html( $data ) {
 
 		$tip = '';
-
 		if ( true === $data['desc_tip'] ) {
 			$tip = $data['description'];
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
@@ -338,7 +337,6 @@ abstract class WC_Settings_API {
 	public function get_description_html( $data ) {
 
 		$description = '';
-
 		if ( true === $data['desc_tip'] ) {
 			$description = '';
 		} elseif ( ! empty( $data['desc_tip'] ) ) {

@@ -319,7 +319,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	public function get_product_from_item( $item ) {
 
 		$product = false;
-
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$product = $item->get_product();
 		}
