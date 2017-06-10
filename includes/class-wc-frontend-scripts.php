@@ -479,7 +479,7 @@ class WC_Frontend_Scripts {
 					) ),
 					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
 					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
-   					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
+					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
 						'shareEl'               => false,
 						'closeOnScroll'         => false,
 						'history'               => false,
@@ -523,7 +523,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' ),
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
 				);
 			break;
 			case 'wc-add-to-cart' :

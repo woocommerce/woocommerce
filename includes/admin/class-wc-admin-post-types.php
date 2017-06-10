@@ -586,11 +586,15 @@ class WC_Admin_Post_Types {
 					// check the status of the post
 					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
 
+					remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
 						'number'    => 1,
 						'status'    => $status,
 					) );
+
+					add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 					$latest_note = current( $latest_notes );
 

@@ -215,7 +215,7 @@ class WC_Cart {
 		 */
 		$cart = WC()->session->get( 'cart', null );
 
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) ) ) {
+		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
 			$cart                = $saved_cart['cart'];
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
@@ -314,7 +314,7 @@ class WC_Cart {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
-		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
+		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
 			'cart' => WC()->session->get( 'cart' ),
 		) );
 	}
@@ -323,7 +323,7 @@ class WC_Cart {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
+		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 	}
 
 	/*

@@ -219,6 +219,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
 			$object->save();
 
+			do_action( 'woocommerce_product_import_inserted_product_object', $object, $data );
+
 			return array(
 				'id'      => $object->get_id(),
 				'updated' => $updating,

@@ -81,6 +81,7 @@ class WC_Install {
 		),
 		'3.1.0' => array(
 			'wc_update_310_downloadable_products',
+			'wc_update_310_old_comments',
 			'wc_update_310_db_version',
 		),
 	);
