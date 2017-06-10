@@ -559,6 +559,12 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 
+		// Enable tracking when connected.
+		if ( class_exists( 'WC_Tracker' ) ) {
+			update_option( 'woocommerce_allow_tracking', 'yes' );
+			WC_Tracker::send_tracking_data( true );
+		}
+
 		wp_safe_redirect( add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
@@ -591,6 +597,9 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+
+		// Disable tracking when disconnected.
+		update_option( 'woocommerce_allow_tracking', 'no' );
 
 		wp_safe_redirect( $redirect_uri );
 		die();
