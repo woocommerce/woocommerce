@@ -226,16 +226,6 @@ class WC_Helper {
 				$subscription['actions'][] = $action;
 			}
 
-			if ( ! $subscription['active'] && $subscription['sites_max'] > 0 && $subscription['sites_active'] >= $subscription['sites_max'] ) {
-				$action = array(
-					'message' => __( 'You are already using the <strong>maximum number of sites available</strong> with your current subscription.', 'woocommerce' ),
-					'button_label' => __( 'Upgrade', 'woocommerce' ),
-					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
-					'status' => 'expired',
-					'icon' => 'dashicons-info',
-				);
-			}
-
 			// Mark the first action primary.
 			if ( ! empty( $subscription['actions'] ) ) {
 				$subscription['actions'][0]['primary'] = true;
