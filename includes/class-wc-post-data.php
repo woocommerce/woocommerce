@@ -170,10 +170,9 @@ class WC_Post_Data {
 	 * @param  string $taxonomy
 	 */
 	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
+		self::$editing_term = null;
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
 			self::$editing_term = get_term_by( 'id', $term_id, $taxonomy );
-		} else {
-			self::$editing_term = null;
 		}
 	}
 

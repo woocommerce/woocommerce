@@ -697,9 +697,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['paypal-braintree'] );
-			unset( $gateways['paypal-ec'] );
-			unset( $gateways['stripe'] );
+			unset( $gateways['paypal-braintree'], $gateways['paypal-ec'], $gateways['stripe'] );
 		}
 
 		return $gateways;

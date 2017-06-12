@@ -168,11 +168,9 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 		}
 		$args = $attributes['args'][ $param ];
 
-		if ( ! empty( $args['enum'] ) ) {
-			if ( ! in_array( $value, $args['enum'] ) ) {
-				/* translators: 1: parameter 2: arguments */
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
-			}
+		if ( ! empty( $args['enum'] ) && ! in_array( $value, $args['enum'] ) ) {
+			/* translators: 1: parameter 2: arguments */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
 		}
 
 		if ( 'integer' === $args['type'] && ! is_numeric( $value ) ) {

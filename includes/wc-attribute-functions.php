@@ -137,10 +137,9 @@ function wc_attribute_label( $name, $product = '' ) {
 			$product = wc_get_product( $product->get_parent_id() );
 		}
 		// Attempt to get label from product, as entered by the user.
+		$label = $name;
 		if ( ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ] ) ) {
 			$label = $attributes[ sanitize_title( $name ) ]->get_name();
-		} else {
-			$label = $name;
 		}
 	} else {
 		$label = $name;

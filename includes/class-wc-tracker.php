@@ -369,6 +369,7 @@ class WC_Tracker {
 
 		foreach ( $scanned_files as $plugin_name => $files ) {
 			foreach ( $files as $file ) {
+				$theme_file = false;
 				if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 					$theme_file = get_stylesheet_directory() . '/' . $file;
 				} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
@@ -377,8 +378,6 @@ class WC_Tracker {
 					$theme_file = get_template_directory() . '/' . $file;
 				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 					$theme_file = get_template_directory() . '/woocommerce/' . $file;
-				} else {
-					$theme_file = false;
 				}
 
 				if ( false !== $theme_file ) {

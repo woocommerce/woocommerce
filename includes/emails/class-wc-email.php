@@ -655,68 +655,63 @@ class WC_Email extends WC_Settings_API {
 		return get_stylesheet_directory() . '/' . apply_filters( 'woocommerce_template_directory', 'woocommerce', $template ) . '/' . $template;
 	}
 
-	/**
-	 * Move template action.
-	 *
-	 * @param string $template_type
-	 */
-	protected function move_template_action( $template_type ) {
-		if ( $template = $this->get_template( $template_type ) ) {
-			if ( ! empty( $template ) ) {
+    /**
+    * Move template action.
+    *
+    * @param string $template_type
+    */
+    protected function move_template_action( $template_type ) {
+        if ( $template = $this->get_template( $template_type ) && ! empty( $template ) ) {
 
-				$theme_file = $this->get_theme_template_file( $template );
+            $theme_file = $this->get_theme_template_file( $template );
 
-				if ( wp_mkdir_p( dirname( $theme_file ) ) && ! file_exists( $theme_file ) ) {
+            if ( wp_mkdir_p( dirname( $theme_file ) ) && ! file_exists( $theme_file ) ) {
 
-					// Locate template file
-					$core_file     = $this->template_base . $template;
-					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
+                // Locate template file
+                $core_file     = $this->template_base . $template;
+                $template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 
-					// Copy template file
-					copy( $template_file, $theme_file );
+                // Copy template file
+                copy( $template_file, $theme_file );
 
-					/**
-					 * woocommerce_copy_email_template action hook.
-					 *
-					 * @param string $template_type The copied template type
-					 * @param string $email The email object
-					 */
-					do_action( 'woocommerce_copy_email_template', $template_type, $this );
+                /**
+                * woocommerce_copy_email_template action hook.
+                *
+                * @param string $template_type The copied template type
+                * @param string $email The email object
+                */
+                do_action( 'woocommerce_copy_email_template', $template_type, $this );
 
-					echo '<div class="updated"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
-				}
-			}
-		}
-	}
+                echo '<div class="updated"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
+            }
+        }
+    }
 
-	/**
-	 * Delete template action.
-	 *
-	 * @param string $template_type
-	 */
-	protected function delete_template_action( $template_type ) {
-		if ( $template = $this->get_template( $template_type ) ) {
+    /**
+    * Delete template action.
+    *
+    * @param string $template_type
+    */
+    protected function delete_template_action( $template_type ) {
+        if ( $template = $this->get_template( $template_type ) && ! empty( $template ) ) {
 
-			if ( ! empty( $template ) ) {
+            $theme_file = $this->get_theme_template_file( $template );
 
-				$theme_file = $this->get_theme_template_file( $template );
+            if ( file_exists( $theme_file ) ) {
+                unlink( $theme_file );
 
-				if ( file_exists( $theme_file ) ) {
-					unlink( $theme_file );
+                /**
+                * woocommerce_delete_email_template action hook.
+                *
+                * @param string $template The deleted template type
+                * @param string $email The email object
+                */
+                do_action( 'woocommerce_delete_email_template', $template_type, $this );
 
-					/**
-					 * woocommerce_delete_email_template action hook.
-					 *
-					 * @param string $template The deleted template type
-					 * @param string $email The email object
-					 */
-					do_action( 'woocommerce_delete_email_template', $template_type, $this );
-
-					echo '<div class="updated"><p>' . __( 'Template file deleted from theme.', 'woocommerce' ) . '</p></div>';
-				}
-			}
-		}
-	}
+                echo '<div class="updated"><p>' . __( 'Template file deleted from theme.', 'woocommerce' ) . '</p></div>';
+            }
+        }
+    }
 
 	/**
 	 * Admin actions.

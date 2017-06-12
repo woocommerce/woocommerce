@@ -774,10 +774,8 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
-			if ( isset( $actions['inline hide-if-no-js'] ) ) {
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) && isset( $actions['inline hide-if-no-js'] ) ) {
 				unset( $actions['inline hide-if-no-js'] );
-			}
 		}
 
 		return $actions;
@@ -1246,10 +1244,9 @@ class WC_Admin_Post_Types {
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
+		$manage_stock = $was_managing_stock;
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
-		} else {
-			$manage_stock = $was_managing_stock;
 		}
 
 		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
@@ -1861,8 +1858,8 @@ class WC_Admin_Post_Types {
 		if ( isset( $_POST['type'] ) && 'downloadable_product' == $_POST['type'] ) {
 
 			if ( empty( $pathdata['subdir'] ) ) {
-				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
+				$pathdata['path']   .= '/woocommerce_uploads';
+				$pathdata['url']    .= '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
 				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];

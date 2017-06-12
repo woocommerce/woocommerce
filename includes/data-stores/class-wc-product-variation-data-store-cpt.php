@@ -293,14 +293,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$exclude_search  = in_array( 'exclude-from-search', $term_names );
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
 
+		$catalog_visibility = 'visible';
 		if ( $exclude_search && $exclude_catalog ) {
 			$catalog_visibility = 'hidden';
 		} elseif ( $exclude_search ) {
 			$catalog_visibility = 'catalog';
 		} elseif ( $exclude_catalog ) {
 			$catalog_visibility = 'search';
-		} else {
-			$catalog_visibility = 'visible';
 		}
 
 		$product->set_parent_data( array(

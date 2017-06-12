@@ -685,10 +685,9 @@ function wc_get_tax_class_by_tax_id( $tax_id ) {
  * @return WC_Payment_Gateway|bool
  */
 function wc_get_payment_gateway_by_order( $order ) {
+	$payment_gateways = array();
 	if ( WC()->payment_gateways() ) {
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
-	} else {
-		$payment_gateways = array();
 	}
 
 	if ( ! is_object( $order ) ) {

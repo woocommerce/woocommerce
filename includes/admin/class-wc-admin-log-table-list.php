@@ -282,10 +282,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
 		$current_page = $this->get_pagenum();
+
+		$offset = 0;
 		if ( 1 < $current_page ) {
 			$offset = $per_page * ( $current_page - 1 );
-		} else {
-			$offset = 0;
 		}
 
 		return $wpdb->prepare( 'OFFSET %d', $offset );
@@ -298,17 +298,17 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	protected function get_items_query_order() {
 		$valid_orders = array( 'level', 'source', 'timestamp' );
+
+		$by = 'timestamp';
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], $valid_orders ) ) {
 			$by = wc_clean( $_REQUEST['orderby'] );
-		} else {
-			$by = 'timestamp';
 		}
+
 		$by = esc_sql( $by );
 
+		$order = 'DESC';
 		if ( ! empty( $_REQUEST['order'] ) && 'asc' === strtolower( $_REQUEST['order'] ) ) {
 			$order = 'ASC';
-		} else {
-			$order = 'DESC';
 		}
 
 		return "ORDER BY {$by} {$order}, log_id {$order}";

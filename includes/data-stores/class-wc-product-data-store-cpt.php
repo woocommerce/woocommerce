@@ -347,14 +347,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$exclude_search  = in_array( 'exclude-from-search', $term_names );
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
 
+		$catalog_visibility = 'visible';
 		if ( $exclude_search && $exclude_catalog ) {
 			$catalog_visibility = 'hidden';
 		} elseif ( $exclude_search ) {
 			$catalog_visibility = 'catalog';
 		} elseif ( $exclude_catalog ) {
 			$catalog_visibility = 'search';
-		} else {
-			$catalog_visibility = 'visible';
 		}
 
 		$product->set_props( array(
@@ -1304,11 +1303,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_join     = '';
 		$type_where    = '';
 
-		if ( $type ) {
-			if ( in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
-				$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
-				$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
-			}
+		if ( $type && in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
+			$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
+			$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
 		}
 
 		$product_ids = $wpdb->get_col(

@@ -492,8 +492,7 @@ class WC_Tests_API_Webhooks extends WC_API_Unit_Test_Case {
 	protected function check_get_webhook_delivery_response( $response, $delivery ) {
 
 		// normalize data
-		unset( $response['created_at'] );
-		unset( $delivery['comment'] );
+		unset( $response['created_at'], $delivery['comment'] );
 
 		$this->assertEquals( $delivery, $response );
 	}

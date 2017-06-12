@@ -303,8 +303,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$query_result = get_terms( $taxonomy, $prepared_args );
 
 			$count_args = $prepared_args;
-			unset( $count_args['number'] );
-			unset( $count_args['offset'] );
+			unset( $count_args['number'], $count_args['offset'] );
 			$total_terms = wp_count_terms( $taxonomy, $count_args );
 
 			// Ensure we don't return results when offset is out of bounds.

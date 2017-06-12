@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function is_woocommerce() {
-	return apply_filters( 'is_woocommerce', ( is_shop() || is_product_taxonomy() || is_product() ) ? true : false );
+	return apply_filters( 'is_woocommerce', is_shop() || is_product_taxonomy() || is_product() );
 }
 
 if ( ! function_exists( 'is_shop' ) ) {
@@ -353,11 +353,7 @@ function wc_is_webhook_valid_topic( $topic ) {
 	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
 	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted', 'restored' ) );
 
-	if ( in_array( $resource, $valid_resources ) && in_array( $event, $valid_events ) ) {
-		return true;
-	}
-
-	return false;
+	return in_array( $resource, $valid_resources ) && in_array( $event, $valid_events );
 }
 
 /**

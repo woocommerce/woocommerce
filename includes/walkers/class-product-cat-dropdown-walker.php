@@ -49,10 +49,9 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 */
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
+		$pad = '';
 		if ( ! empty( $args['hierarchical'] ) ) {
 			$pad = str_repeat( '&nbsp;', $depth * 3 );
-		} else {
-			$pad = '';
 		}
 
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );

@@ -398,13 +398,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( empty( $meta_query['customer_emails']['value'] ) ) {
-			unset( $meta_query['customer_emails'] );
-			unset( $meta_query['relation'] );
+			unset( $meta_query['customer_emails'], $meta_query['relation'] );
 		}
 
 		if ( empty( $meta_query['customer_ids']['value'] ) ) {
-			unset( $meta_query['customer_ids'] );
-			unset( $meta_query['relation'] );
+			unset( $meta_query['customer_ids'], $meta_query['relation'] );
 		}
 
 		return $meta_query;

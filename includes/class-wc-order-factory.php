@@ -30,10 +30,9 @@ class WC_Order_Factory {
 		}
 
 		$order_type = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
+		$classname = false;
 		if ( $order_type_data = wc_get_order_type( $order_type ) ) {
 			$classname = $order_type_data['class_name'];
-		} else {
-			$classname = false;
 		}
 
 		// Filter classname so that the class can be overridden if extended.

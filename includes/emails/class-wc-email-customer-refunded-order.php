@@ -158,10 +158,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
+		$this->refund = false;
 		if ( ! empty( $refund_id ) ) {
 			$this->refund = wc_get_order( $refund_id );
-		} else {
-			$this->refund = false;
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {

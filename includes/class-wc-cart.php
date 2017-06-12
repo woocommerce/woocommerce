@@ -1675,15 +1675,15 @@ class WC_Cart {
 						} else {
 							$check_emails[] = sanitize_email( $posted['billing_email'] );
 							$user           = get_user_by( 'email', $posted['billing_email'] );
+
+							$usage_count = 0;
 							if ( $user ) {
 								$usage_count = sizeof( array_keys( $used_by, $user->ID ) );
-							} else {
-								$usage_count = 0;
 							}
 						}
 
 						foreach ( $check_emails as $check_email ) {
-							$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
+							$usage_count += sizeof( array_keys( $used_by, $check_email ) );
 						}
 
 						if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
@@ -2275,11 +2275,12 @@ class WC_Cart {
 	 * @return mixed formatted price or false if there are none
 	 */
 	public function get_total_discount() {
+
+		$total_discount = false;
 		if ( $this->get_cart_discount_total() ) {
 			$total_discount = wc_price( $this->get_cart_discount_total() );
-		} else {
-			$total_discount = false;
 		}
+
 		return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
 	}
 
@@ -2290,12 +2291,13 @@ class WC_Cart {
 	 * @return mixed formatted price or false if there are none
 	 */
 	public function get_discounts_before_tax() {
+
+		$discounts_before_tax = false;
 		wc_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
 		if ( $this->get_cart_discount_total() ) {
 			$discounts_before_tax = wc_price( $this->get_cart_discount_total() );
-		} else {
-			$discounts_before_tax = false;
 		}
+
 		return apply_filters( 'woocommerce_cart_discounts_before_tax', $discounts_before_tax, $this );
 	}
 

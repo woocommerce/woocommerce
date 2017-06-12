@@ -85,10 +85,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
 
+		$handle = 'log';
 		if ( isset( $context['source'] ) && $context['source'] ) {
 			$handle = $context['source'];
-		} else {
-			$handle = 'log';
 		}
 
 		$entry = self::format_entry( $timestamp, $level, $message, $context );
@@ -109,11 +108,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected static function format_entry( $timestamp, $level, $message, $context ) {
 
 		if ( isset( $context['_legacy'] ) && true === $context['_legacy'] ) {
+			$handle = 'log';
 			if ( isset( $context['source'] ) && $context['source'] ) {
 				$handle = $context['source'];
-			} else {
-				$handle = 'log';
 			}
+
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 			$time = date_i18n( 'm-d-Y @ H:i:s' );
 			$entry = "{$time} - {$message}";

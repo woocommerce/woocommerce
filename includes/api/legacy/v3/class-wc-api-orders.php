@@ -224,8 +224,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			foreach ( $item_meta as $key => $values ) {
 				$item_meta[ $key ]->label = $values->display_key;
-				unset( $item_meta[ $key ]->display_key );
-				unset( $item_meta[ $key ]->display_value );
+				unset( $item_meta[ $key ]->display_key, $item_meta[ $key ]->display_value );
 			}
 
 			$line_item = array(
@@ -778,8 +777,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 			}
 
-			unset( $address_fields['email'] );
-			unset( $address_fields['phone'] );
+			unset( $address_fields['email'], $address_fields['phone'] );
 		}
 
 		// shipping address
@@ -1021,26 +1019,24 @@ class WC_API_Orders extends WC_API_Resource {
 		$variation_id = null;
 		$variations_normalized = array();
 
-		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
-			if ( isset( $variations ) && is_array( $variations ) ) {
-				// start by normalizing the passed variations
-				foreach ( $variations as $key => $value ) {
-					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
-					$variations_normalized[ $key ] = strtolower( $value );
+		if ( $product->is_type( 'variable' ) && $product->has_child() && isset( $variations ) && is_array( $variations ) ) {
+			// start by normalizing the passed variations
+			foreach ( $variations as $key => $value ) {
+				$key = str_replace( array( 'attribute_', 'pa_' ), '', $key ); // from get_attributes in class-wc-api-products.php
+				$variations_normalized[ $key ] = strtolower( $value );
+			}
+			// now search through each product child and see if our passed variations match anything
+			foreach ( $product->get_children() as $variation ) {
+				$meta = array();
+				foreach ( get_post_meta( $variation ) as $key => $value ) {
+					$value = $value[0];
+					$key = str_replace( array( 'attribute_', 'pa_' ), '', $key );
+					$meta[ $key ] = strtolower( $value );
 				}
-				// now search through each product child and see if our passed variations match anything
-				foreach ( $product->get_children() as $variation ) {
-					$meta = array();
-					foreach ( get_post_meta( $variation ) as $key => $value ) {
-						$value = $value[0];
-						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
-						$meta[ $key ] = strtolower( $value );
-					}
-					// if the variation array is a part of the $meta array, we found our match
-					if ( $this->array_contains( $variations_normalized, $meta ) ) {
-						$variation_id = $variation;
-						break;
-					}
+				// if the variation array is a part of the $meta array, we found our match
+				if ( $this->array_contains( $variations_normalized, $meta ) ) {
+					$variation_id = $variation;
+					break;
 				}
 			}
 		}
@@ -1580,8 +1576,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				foreach ( $item_meta as $key => $values ) {
 					$item_meta[ $key ]->label = $values->display_key;
-					unset( $item_meta[ $key ]->display_key );
-					unset( $item_meta[ $key ]->display_value );
+					unset( $item_meta[ $key ]->display_key, $item_meta[ $key ]->display_value );
 				}
 
 				$line_items[] = array(

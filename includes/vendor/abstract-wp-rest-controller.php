@@ -204,10 +204,8 @@ abstract class WP_REST_Controller {
 					if ( empty( $details['context'] ) ) {
 						continue;
 					}
-					if ( ! in_array( $context, $details['context'] ) ) {
-						if ( isset( $data[ $key ][ $attribute ] ) ) {
-							unset( $data[ $key ][ $attribute ] );
-						}
+					if ( ! in_array( $context, $details['context'] ) && isset( $data[ $key ][ $attribute ] ) ) {
+						unset( $data[ $key ][ $attribute ] );
 					}
 				}
 			}

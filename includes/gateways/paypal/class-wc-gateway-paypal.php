@@ -227,11 +227,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
+
+		$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		if ( $this->testmode ) {
 			$this->view_transaction_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-		} else {
-			$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		}
+
 		return parent::get_transaction_url( $order );
 	}
 

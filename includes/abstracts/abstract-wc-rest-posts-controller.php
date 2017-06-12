@@ -181,7 +181,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 		if ( is_wp_error( $post_id ) ) {
 
-			if ( in_array( $post_id->get_error_code(), array( 'db_insert_error' ) ) ) {
+			if ( $post_id->get_error_code() === 'db_insert_error' ) {
 				$post_id->add_data( array( 'status' => 500 ) );
 			} else {
 				$post_id->add_data( array( 'status' => 400 ) );
@@ -263,7 +263,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		// Convert the post object to an array, otherwise wp_update_post will expect non-escaped input.
 		$post_id = wp_update_post( (array) $post, true );
 		if ( is_wp_error( $post_id ) ) {
-			if ( in_array( $post_id->get_error_code(), array( 'db_update_error' ) ) ) {
+			if ( $post_id->get_error_code() === 'db_update_error' ) {
 				$post_id->add_data( array( 'status' => 500 ) );
 			} else {
 				$post_id->add_data( array( 'status' => 400 ) );
@@ -380,8 +380,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		$request_params = $request->get_query_params();
 		if ( ! empty( $request_params['filter'] ) ) {
 			// Normalize the pagination params.
-			unset( $request_params['filter']['posts_per_page'] );
-			unset( $request_params['filter']['paged'] );
+			unset( $request_params['filter']['posts_per_page'], $request_params['filter']['paged'] );
 		}
 		$base = add_query_arg( $request_params, rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 

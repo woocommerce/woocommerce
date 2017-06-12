@@ -317,12 +317,12 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
+
+		$tip = '';
 		if ( true === $data['desc_tip'] ) {
 			$tip = $data['description'];
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$tip = $data['desc_tip'];
-		} else {
-			$tip = '';
 		}
 
 		return $tip ? wc_help_tip( $tip, true ) : '';
@@ -335,14 +335,14 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
+
+		$description = '';
 		if ( true === $data['desc_tip'] ) {
 			$description = '';
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$description = $data['description'];
 		} elseif ( ! empty( $data['description'] ) ) {
 			$description = $data['description'];
-		} else {
-			$description = '';
 		}
 
 		return $description ? '<p class="description">' . wp_kses_post( $description ) . '</p>' . "\n" : '';

@@ -52,8 +52,7 @@ function compareTables( $expected_rows, $actual_rows, $output ) {
 		throw new \Exception( $output );
 	}
 
-	unset( $actual_rows[0] );
-	unset( $expected_rows[0] );
+	unset( $actual_rows[0], $expected_rows[0] );
 
 	$missing_rows = array_diff( $expected_rows, $actual_rows );
 	if ( !empty( $missing_rows ) ) {

@@ -144,7 +144,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				$value = true; // These were deprecated in 2.2 and simply returned true in 2.6.x.
 				break;
 			default :
-				if ( in_array( $key, array_keys( $this->data ) ) ) {
+				if ( array_key_exists( $key, $this->data ) ) {
 					$value = $this->{"get_$key"}();
 				} else {
 					$value = get_post_meta( $this->id, '_' . $key, true );
@@ -357,7 +357,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function adjust_price( $price ) {
 		wc_deprecated_function( 'WC_Product::adjust_price', '3.0', 'WC_Product::set_price / WC_Product::get_price' );
-		$this->data['price'] = $this->data['price'] + $price;
+		$this->data['price'] += $price;
 	}
 
 	/**

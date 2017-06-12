@@ -527,7 +527,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_currency( $value ) {
-		if ( $value && ! in_array( $value, array_keys( get_woocommerce_currencies() ) ) ) {
+		if ( $value && ! array_key_exists( $value, get_woocommerce_currencies() ) ) {
 			$this->error( 'order_invalid_currency', __( 'Invalid currency code', 'woocommerce' ) );
 		}
 		$this->set_prop( 'currency', $value ? $value : get_woocommerce_currency() );
@@ -881,6 +881,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+
+		$default_args = array(
+			'quantity'     => $qty,
+		);
+
 		if ( $product ) {
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -890,10 +895,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'variation'    => $product->is_type( 'variation' ) ? $product->get_attributes() : array(),
 				'subtotal'     => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
 				'total'        => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
-				'quantity'     => $qty,
-			);
-		} else {
-			$default_args = array(
 				'quantity'     => $qty,
 			);
 		}
@@ -1404,7 +1405,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			// Remove discounts.
-			$subtotal = $subtotal - $this->get_total_discount();
+			$subtotal -= $this->get_total_discount();
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 		}
 
@@ -1606,7 +1607,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
-		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status ) ) || $this->get_status() === $status ? true : false, $this, $status );
+		return apply_filters( 'woocommerce_order_has_status', is_array( $status ) && in_array( $this->get_status(), $status ) || $this->get_status() === $status, $this, $status );
 	}
 
 	/**

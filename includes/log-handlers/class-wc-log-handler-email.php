@@ -191,7 +191,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * @param string email Email address to add
 	 */
 	public function add_email( $email ) {
-		array_push( $this->recipients, $email );
+		$this->recipients[] = $email;
 	}
 
 	/**

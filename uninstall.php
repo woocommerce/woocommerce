@@ -42,10 +42,9 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
+	$wc_attributes = array();
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_attribute_taxonomies';" ) ) {
 		$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
-	} else {
-		$wc_attributes = array();
 	}
 
 	// Tables.

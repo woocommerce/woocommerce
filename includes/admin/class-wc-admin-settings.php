@@ -191,10 +191,9 @@ class WC_Admin_Settings {
 
 			$key = key( $option_array[ $option_name ] );
 
+			$option_value = null;
 			if ( isset( $option_values[ $key ] ) ) {
 				$option_value = $option_values[ $key ];
-			} else {
-				$option_value = null;
 			}
 
 		// Single value
@@ -653,13 +652,13 @@ class WC_Admin_Settings {
 
 		if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
 			$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
-		} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
+		} elseif ( $description && $value['type'] === 'checkbox' ) {
 			$description = wp_kses_post( $description );
 		} elseif ( $description ) {
 			$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
 		}
 
-		if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ) ) ) {
+		if ( $tooltip_html && $value['type'] === 'checkbox' ) {
 			$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
 		} elseif ( $tooltip_html ) {
 			$tooltip_html = wc_help_tip( $tooltip_html );
@@ -820,11 +819,9 @@ class WC_Admin_Settings {
 		} else {
 
 			// Force method - protect, add rules to the htaccess file
-			if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
-				if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
-					fwrite( $file_handle, 'deny from all' );
-					fclose( $file_handle );
-				}
+			if ( ! file_exists( $downloads_url . '/.htaccess' ) && $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
+                fwrite( $file_handle, 'deny from all' );
+                fclose( $file_handle );
 			}
 		}
 	}

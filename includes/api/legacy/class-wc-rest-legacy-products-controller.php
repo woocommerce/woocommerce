@@ -74,14 +74,12 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Filter by attribute and term.
-		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
-				$tax_query[] = array(
-					'taxonomy' => $request['attribute'],
-					'field'    => 'term_id',
-					'terms'    => $request['attribute_term'],
-				);
-			}
+		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) && in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
+			$tax_query[] = array(
+				'taxonomy' => $request['attribute'],
+				'field'    => 'term_id',
+				'terms'    => $request['attribute_term'],
+			);
 		}
 
 		if ( ! empty( $tax_query ) ) {
@@ -732,10 +730,8 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 		$product->save();
 
 		// Save variations.
-		if ( $product->is_type( 'variable' ) ) {
-			if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-				$this->save_variations_data( $product, $request );
-			}
+		if ( $product->is_type( 'variable' ) && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
+			$this->save_variations_data( $product, $request );
 		}
 
 		// Clear caches here so in sync with any new variations/children.

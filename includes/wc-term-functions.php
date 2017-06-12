@@ -93,8 +93,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$orderby = $args['orderby'];
 
 		// Unset for wp_get_post_terms.
-		unset( $args['orderby'] );
-		unset( $args['fields'] );
+		unset( $args['orderby'], $args['fields'] );
 
 		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
 
@@ -445,10 +444,9 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$index 		= (int) $index;
 
 	// Meta name
+	$meta_name = 'order';
 	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
 		$meta_name = 'order_' . esc_attr( $taxonomy );
-	} else {
-		$meta_name = 'order';
 	}
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
@@ -520,14 +518,13 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// Meta name.
+	$meta_name = 'order';
 	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
 		$meta_name = 'order_' . esc_attr( $taxonomies[0] );
-	} else {
-		$meta_name = 'order';
 	}
 
 	// Query fields.
-	$clauses['fields'] = $clauses['fields'] . ', tm.meta_value';
+	$clauses['fields'] .= ', tm.meta_value';
 
 	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
