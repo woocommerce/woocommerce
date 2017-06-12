@@ -116,6 +116,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
+			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
 			$this->handle_updated_props( $product );
 
@@ -174,6 +175,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
+		$this->update_visibility( $product, true );
 		$this->update_attributes( $product );
 		$this->handle_updated_props( $product );
 
@@ -309,6 +311,28 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		}
+	}
+
+	/**
+	 * Update visibility terms based on props.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product
+	 * @param bool $force Force update. Used during create.
+	 */
+	protected function update_visibility( &$product, $force = false ) {
+		$changes = $product->get_changes();
+
+		if ( $force || array_intersect( array( 'stock_status' ), array_keys( $changes ) ) ) {
+			$terms = array();
+
+			if ( 'outofstock' === $product->get_stock_status() ) {
+				$terms[] = 'outofstock';
+			}
+
+			wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false );
 		}
 	}
 
