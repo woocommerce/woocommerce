@@ -11,6 +11,7 @@
 		this.position        = 0;
 		this.file            = wc_product_import_params.file;
 		this.update_existing = wc_product_import_params.update_existing;
+		this.delimiter       = wc_product_import_params.delimiter;
 		this.security        = wc_product_import_params.import_nonce;
 
 		// Number of import successes/failures.
@@ -43,6 +44,7 @@
 				mapping         : $this.mapping,
 				file            : $this.file,
 				update_existing : $this.update_existing,
+				delimiter       : $this.delimiter,
 				security        : $this.security
 			},
 			dataType: 'json',
