@@ -994,7 +994,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			$product = $this->save_default_attributes( $product, $request );
 		}
 
-		// Check children for a grouped product.
+		// Set children for a grouped product.
 		if ( $product->is_type( 'grouped' ) && isset( $request['grouped_products'] ) ) {
 			$product->set_children( $request['grouped_products'] );
 		}
