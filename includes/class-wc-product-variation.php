@@ -79,6 +79,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @return string Formatted product name
+	 */
+	public function get_formatted_name() {
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->get_id();
+		}
+
+		$formatted_variation_list = wc_get_formatted_variation( $this, true, true );
+
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() ) . '<span class="description">' . $formatted_variation_list . '</span>';
+	}
+
+	/**
 	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
 	 *
 	 * @return array of attributes and their values for this variation
