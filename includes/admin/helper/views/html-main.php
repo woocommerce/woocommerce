@@ -143,7 +143,6 @@
 									<span class="form-toggle__label-content">
 										<label for="activate-extension"><?php _e( 'Inactive', 'woocommerce' ); ?></label>
 									</span>
-									<span class="form-toggle__switch"></span>
 								</label>
 							</span>
 						</td>
