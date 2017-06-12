@@ -64,10 +64,12 @@ class WC_Product_CSV_Importer_Controller {
 	 *
 	 * @param  string $file File to import.
 	 * @param  array  $args Importer arguments.
+	 *
 	 * @return WC_Product_CSV_Importer
 	 */
 	public static function get_importer( $file, $args = array() ) {
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
+
 		return new $importer_class( $file, $args );
 	}
 
@@ -75,8 +77,8 @@ class WC_Product_CSV_Importer_Controller {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->steps = array(
-			'upload' => array(
+		$this->steps           = array(
+			'upload'  => array(
 				'name'    => __( 'Upload CSV file', 'woocommerce' ),
 				'view'    => array( $this, 'upload_form' ),
 				'handler' => array( $this, 'upload_form_handler' ),
@@ -86,25 +88,27 @@ class WC_Product_CSV_Importer_Controller {
 				'view'    => array( $this, 'mapping_form' ),
 				'handler' => '',
 			),
-			'import' => array(
+			'import'  => array(
 				'name'    => __( 'Import', 'woocommerce' ),
 				'view'    => array( $this, 'import' ),
 				'handler' => '',
 			),
-			'done' => array(
+			'done'    => array(
 				'name'    => __( 'Done!', 'woocommerce' ),
 				'view'    => array( $this, 'done' ),
 				'handler' => '',
 			),
 		);
-		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
-		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
+		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
 	}
 
 	/**
 	 * Get the URL for the next step's screen.
+	 *
 	 * @param string step   slug (default: current step)
+	 *
 	 * @return string       URL for next step if a next step exists.
 	 *                      Admin URL if it's the last step.
 	 *                      Empty string on failure.
@@ -128,10 +132,11 @@ class WC_Product_CSV_Importer_Controller {
 
 		$params = array(
 			'step'            => $keys[ $step_index + 1 ],
-			'file'            => $this->file,
+			'file'            => str_replace( DIRECTORY_SEPARATOR, "/", $this->file ),
 			'delimiter'       => $this->delimiter,
 			'update_existing' => $this->update_existing,
-			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
+			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ),
+			// wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
 		return add_query_arg( $params );
@@ -211,6 +216,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		if ( is_wp_error( $file ) ) {
 			$this->add_error( $file->get_error_message() );
+
 			return;
 		} else {
 			$this->file = $file;
@@ -232,9 +238,9 @@ class WC_Product_CSV_Importer_Controller {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
-			$overrides                 = array( 'test_form' => false, 'test_type' => false );
+			$overrides                = array( 'test_form' => false, 'test_type' => false );
 			$_FILES['import']['name'] .= '.txt';
-			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
+			$upload                   = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
@@ -278,6 +284,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		if ( empty( $sample ) ) {
 			$this->add_error( __( 'The file is empty, please try again with a new file.', 'woocommerce' ) );
+
 			return;
 		}
 
@@ -290,6 +297,7 @@ class WC_Product_CSV_Importer_Controller {
 	public function import() {
 		if ( ! is_file( $this->file ) ) {
 			$this->add_error( __( 'The file does not exist, please try again.', 'woocommerce' ) );
+
 			return;
 		}
 
@@ -329,11 +337,12 @@ class WC_Product_CSV_Importer_Controller {
 	 *
 	 * @param  array $raw_headers Raw header columns.
 	 * @param  bool  $num_indexes If should use numbers or raw header columns as indexes.
+	 *
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
-		$weight_unit     = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit  = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit    = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 
 		include( dirname( __FILE__ ) . '/mappings/mappings.php' );
 
@@ -421,6 +430,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Sanitize special column name regex.
 	 *
 	 * @param  string $value Raw special column name.
+	 *
 	 * @return string
 	 */
 	protected function sanitize_special_column_name_regex( $value ) {
@@ -431,6 +441,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Get mapping options.
 	 *
 	 * @param  string $item Item name
+	 *
 	 * @return array
 	 */
 	protected function get_mapping_options( $item = '' ) {
@@ -470,11 +481,11 @@ class WC_Product_CSV_Importer_Controller {
 				'name'    => __( 'Dimensions', 'woocommerce' ),
 				'options' => array(
 					/* translators: %s: dimension unit */
-					'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
+					'length' => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
 					/* translators: %s: dimension unit */
-					'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
+					'width'  => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
 					/* translators: %s: dimension unit */
-					'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
+					'height' => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
 				),
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
@@ -493,8 +504,8 @@ class WC_Product_CSV_Importer_Controller {
 			'external'           => array(
 				'name'    => __( 'External product', 'woocommerce' ),
 				'options' => array(
-					'product_url'  => __( 'External URL', 'woocommerce' ),
-					'button_text'  => __( 'Button text', 'woocommerce' ),
+					'product_url' => __( 'External URL', 'woocommerce' ),
+					'button_text' => __( 'Button text', 'woocommerce' ),
 				),
 			),
 			'downloads'          => array(
