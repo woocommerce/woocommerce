@@ -33,7 +33,7 @@ function wc_template_redirect() {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 
-	} elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'customer-logout' ) ) {
 
 		// Logout
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
@@ -2646,7 +2646,7 @@ function wc_logout_url( $redirect = '' ) {
 	$redirect        = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
 
 	if ( $logout_endpoint ) {
-		return wc_get_endpoint_url( 'customer-logout', '', $redirect );
+		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
 	} else {
 		return wp_logout_url( $redirect );
 	}
