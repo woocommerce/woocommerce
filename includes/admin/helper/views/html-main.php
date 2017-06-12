@@ -5,10 +5,12 @@
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php include( WC_Helper::get_view_filename( 'html-section-notices.php' ) ); ?>
-	<?php include( WC_Helper::get_view_filename( 'html-section-account.php' ) ); ?>
 
-	<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
-	<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
+	<div class="subscriptions-header">
+		<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
+		<?php include( WC_Helper::get_view_filename( 'html-section-account.php' ) ); ?>
+		<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
+	</div>
 
 	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>

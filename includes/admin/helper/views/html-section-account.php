@@ -1,15 +1,15 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
-<div class="connect-wrapper">
-	<div class="connected active">
-		<div class="user-info">
-			<?php echo get_avatar( $auth_user_data['email'], 100 ); ?>
-			<p><?php printf( __( 'Connected to: <strong>%s</strong>', 'woocommerce' ), esc_html( $auth_user_data['email'] ) ); ?></p>
-			<span class="chevron dashicons dashicons-arrow-up-alt2"></span>
+<a class="button button-update" href="<?php echo esc_url( $refresh_url ); ?>"><span class="dashicons dashicons-image-rotate"></span> <?php _e( 'Update', 'woocommerce' ); ?></a>
+<div class="user-info">
+	<header>
+		<p><?php printf( __( 'Connected to WooCommerce.com', 'woocommerce' ) ); ?> <span class="chevron dashicons dashicons-arrow-down-alt2"></span></p>
+	</header>
+	<section>
+		<p><?php echo get_avatar( $auth_user_data['email'], 48 ); ?> <?php echo esc_html( $auth_user_data['email'] ); ?></p>
+		<div class="actions">
+			<a class="" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><span class="dashicons dashicons-admin-generic"></span> <?php _e( 'My Subscriptions', 'woocommerce' ); ?></a>
+			<a class="" href="<?php echo esc_url( $disconnect_url ); ?>"><span class="dashicons dashicons-no"></span> <?php _e( 'Disconnect', 'woocommerce' ); ?></a>
 		</div>
-		<div class="buttons active">
-			<a class="button button-secondary" href="<?php echo esc_url( $disconnect_url ); ?>">Disconnect</a>
-			<a class="button" href="<?php echo esc_url( $refresh_url ); ?>">Refresh</a>
-		</div>
-	</div>
+	</section>
 </div>
