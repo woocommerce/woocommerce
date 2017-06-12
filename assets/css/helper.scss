@@ -211,6 +211,7 @@ $color_button_secondary: $woo_pink2;
 	.wp-list-table{
 		padding-top: 0 !important;
 		border: 0;
+		box-shadow: none;
 	}
 
 	.button{
@@ -223,6 +224,7 @@ $color_button_secondary: $woo_pink2;
 		background-color: rgba(0,0,0,0);
 
 		td{
+			align-items: center;
 			background-color: #fff;
 			border: 0px;
 			//border-top: 1px solid #e5e5e5;
@@ -262,16 +264,28 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		&:last-child td{
-			border-bottom: 6px solid #F1F1F1;
+			border-bottom: 24px solid #F1F1F1;
 			box-shadow: inset 0 -1px 0 #E1E1E1;
 		}
 	}
 
 	.wp-list-table__ext-details,
-	.wp-list-table__ext-status{
-		border-left: 1px solid #E1E1E1 !important;
+	.wp-list-table__ext-status,
+	.wp-list-table__licence-form{
+		//border-left: 1px solid #E1E1E1 !important;
 		padding-right: 22px;
+		position: relative;
 		width: 100%;
+
+		&::after{
+			background-color: #E1E1E1;
+			content: " ";
+			position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+			width: 1px;
+		}
 	}
 
 	.wp-list-table__ext-details{
@@ -292,6 +306,10 @@ $color_button_secondary: $woo_pink2;
 			margin-bottom: 12px;
 			width: 100%;
 		}
+
+		@media only screen and (max-width : 320px) {
+			max-width: 120px;
+		}
 	}
 	.wp-list-table__ext-description {
 		color: #333;
@@ -303,7 +321,7 @@ $color_button_secondary: $woo_pink2;
 			width: 100%;
 		}
 	}
-	.wp-list-table__ext-status {
+	.wp-list-table__ext-status{
 		position: relative;
 
 		&.update-available:after{
@@ -345,14 +363,23 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	.wp-list-table__ext-actions{
-		border-right: 1px solid #E1E1E1 !important;
 		min-width: 150px;
+		position: relative;
 		width: 25%;
 		text-align: right;
+
+		&::after{
+			background-color: #E1E1E1;
+			content: " ";
+			position: absolute;
+				top: 0;
+				bottom: 0;
+				right: 0;
+			width: 1px;
+		}
 	}
 
 	.wp-list-table__ext-updates {
-
 		td{
 			position: relative;
 
@@ -367,8 +394,11 @@ $color_button_secondary: $woo_pink2;
 			}
 		}
 
-		td.wp-list-table__ext-status:before {
-			left: 22px;
+		td.wp-list-table__ext-status,
+		td.wp-list-table__licence-form{
+			&:before {
+				left: 22px;
+			}
 		}
 
 		td.wp-list-table__ext-actions:before {
@@ -401,6 +431,60 @@ $color_button_secondary: $woo_pink2;
 	}
 }
 
+.wp-list-table__ext-add-licence{
+	position: relative;
+}
+
+.wp-list-table__licence-form{
+	div{
+		display: inline-flex;
+		padding-right: 16px;
+		vertical-align: middle;
+
+		@media only screen and (max-width : 782px) {
+			display: block;
+			padding: 0;
+		}
+	}
+	p{
+		margin: 0 !important;
+	}
+}
+
+.wp-list-table__licence-label{
+	label{
+		color: #23282d;
+		font-weight: 600;
+		line-height: 30px;
+	}
+}
+
+.wp-list-table__licence-field{
+	input{
+		height: 32px;
+
+		@media only screen and (max-width : 480px) {
+			width: 100%;
+		}
+	}
+
+	@media only screen and (max-width : 782px) {
+		padding: 8px 0 16px !important;
+	}
+}
+
+.wp-list-table__licence-actions{
+	.button{
+		margin-right: 8px;
+	}
+	.button-secondary{
+		margin: 0 0 0 8px;
+	}
+
+	@media only screen and (max-width : 480px) {
+		text-align: right;
+	}
+}
 
 /*------------------------------------------------------------------------------
   Expired notification bar
