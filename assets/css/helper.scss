@@ -171,6 +171,153 @@ $color_button_secondary: $woo_pink2;
 }
 
 /*------------------------------------------------------------------------------
+  Subscriptons Header
+------------------------------------------------------------------------------*/
+
+.wc-helper {
+	.subscriptions-header{
+		margin: 3em 0 0;
+		position: relative;
+		z-index: 10;
+
+		h2{
+			display: inline-block;
+			line-height: 25px;
+			margin: 0 0 1.5em 0;
+		}
+
+	}
+	.button-update, .button-update:hover{
+		background-color: #E6E6E6;
+		border-radius: 4px;
+		color: #333;
+		font-weight: 800;
+		font-size: 10px;
+		line-height: 20px;
+		margin-left: 6px;
+		opacity: 0.75;
+		padding: 3px 7px;
+		text-transform: uppercase;
+
+		.dashicons{
+			font-size: 12px;
+			height: 12px;
+			width: 12px;
+			vertical-align: text-bottom;
+		}
+	}
+
+	.button-update:hover{
+		opacity: 1;
+	}
+
+	.user-info{
+		box-sizing: border-box;
+		position: absolute;
+			top: -10px;
+			right: 0;
+		background-color: #fff;
+		border: 1px solid #E1E1E1;
+		border-radius: 4px;
+		font-size: 12px;
+		line-height: 26px;
+		transition: all .1s ease-in;
+
+		@media only screen and (max-width : 600px) {
+			position: relative;
+			width: 100%;
+		}
+
+		p{
+			line-height: 26px;
+			margin: 0;
+		}
+
+		&:hover{
+			box-shadow: 0 3px 5px rgba(0,0,0,.2);
+		}
+
+		header{
+			color: #555555;
+			font-weight: 600;
+			padding: 6px 14px;
+			position: relative;
+
+			p{
+				padding-right: 26px;
+			}
+
+			.dashicons{
+				position: absolute;
+				top: 9px;
+				right: 14px;
+				opacity: 0.5;
+			}
+
+			&:hover{
+				cursor: pointer;
+			}
+		}
+
+		section{
+			display: none;
+
+			p{
+				border-top: 1px solid #E1E1E1;
+				padding: 6px 14px;
+				text-align: center;
+			}
+
+			.actions{
+				display: flex;
+				border-top: 1px solid #E1E1E1;
+			}
+
+			a{
+				color: #A26897;
+				cursor: pointer;
+				font-weight: 600;
+				line-height: 38px;
+				padding: 0 14px;
+				text-align: center;
+				text-decoration: none;
+				white-space: nowrap;
+				width: 50%;
+
+				.dashicons{
+					vertical-align: middle;
+					margin-top: -3px;
+				}
+
+				&:first-child{
+					border-right: 1px solid #E1E1E1;
+				}
+
+				&:hover{
+					background-color: #A26897;
+					color: #fff;
+				}
+			}
+
+			.avatar{
+				border: 1px solid #ECE1EA;
+				border-radius: 50%;
+				height: auto;
+				margin-right: 6px;
+				width: 24px;
+				vertical-align: bottom;
+			}
+		}
+	}
+
+	.user-info:hover{
+		section{
+			display: block
+		}
+	}
+}
+
+/*------------------------------------------------------------------------------
   Subscripton table
 ------------------------------------------------------------------------------*/
 
@@ -212,6 +359,7 @@ $color_button_secondary: $woo_pink2;
 		padding-top: 0 !important;
 		border: 0;
 		box-shadow: none;
+		z-index: 1;
 	}
 
 	.button{
