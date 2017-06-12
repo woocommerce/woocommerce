@@ -26,7 +26,7 @@ abstract class WC_CSV_Exporter {
 	 * Batch limit.
 	 * @var integer
 	 */
-	protected $limit = 30;
+	protected $limit = 50;
 
 	/**
 	 * Number exported.
@@ -39,12 +39,6 @@ abstract class WC_CSV_Exporter {
 	 * @var array
 	 */
 	protected $row_data = array();
-
-	/**
-	 * The CSV data - each row is an array item.
-	 * @var string[]
-	 */
-	protected $csv_rows = array();
 
 	/**
 	 * Total rows to export.
@@ -206,7 +200,7 @@ abstract class WC_CSV_Exporter {
 	 * @return string
 	 */
 	protected function get_csv_data() {
-		return "\r\n" . implode( "\r\n", $this->export_rows() );
+		return $this->export_rows();
 	}
 
 	/**
@@ -216,17 +210,21 @@ abstract class WC_CSV_Exporter {
 	 * @return string
 	 */
 	protected function export_column_headers() {
-		$columns = $this->get_column_names();
-		$row     = '';
+		$columns    = $this->get_column_names();
+		$export_row = array();
+		$buffer     = fopen( 'php://output', 'w' );
+		ob_start();
 
 		foreach ( $columns as $column_id => $column_name ) {
 			if ( ! $this->is_column_exporting( $column_id ) ) {
 				continue;
 			}
-			$row .= '"' . addslashes( $column_name ) . '",';
+			$export_row[] = $column_name;
 		}
 
-		return rtrim( $row, ',' );
+		fputcsv( $buffer, $export_row );
+
+		return ob_get_clean();
 	}
 
 	/**
@@ -246,34 +244,37 @@ abstract class WC_CSV_Exporter {
 	 * @return array
 	 */
 	protected function export_rows() {
-		$this->csv_rows = array();
-		$data = $this->get_data_to_export();
-		array_walk( $data, array( $this, 'export_row' ) );
-		return apply_filters( "woocommerce_{$this->export_type}_export_rows", $this->csv_rows, $this );
+		$data   = $this->get_data_to_export();
+		$buffer = fopen( 'php://output', 'w' );
+		ob_start();
+
+		array_walk( $data, array( $this, 'export_row' ), $buffer );
+
+		return apply_filters( "woocommerce_{$this->export_type}_export_rows", ob_get_clean(), $this );
 	}
 
 	/**
-	 * Export a row in CSV format.
+	 * Export rows to an array ready for the CSV.
 	 *
 	 * @since 3.1.0
 	 * @param array $row_data
 	 */
-	protected function export_row( $row_data ) {
-		$columns = $this->get_column_names();
-		$row     = '';
+	protected function export_row( $row_data, $key, $buffer ) {
+		$columns    = $this->get_column_names();
+		$export_row = array();
 
 		foreach ( $columns as $column_id => $column_name ) {
 			if ( ! $this->is_column_exporting( $column_id ) ) {
 				continue;
 			}
 			if ( isset( $row_data[ $column_id ] ) ) {
-				$row .= '"' . $this->format_data( $row_data[ $column_id ] ) . '",';
+				$export_row[] = $this->format_data( $row_data[ $column_id ] );
 			} else {
-				$row .= '"",';
+				$export_row[] = '';
 			}
 		}
 
-		$this->csv_rows[] = rtrim( $row, ',' );
+		fputcsv( $buffer, $export_row );
 		++ $this->exported_row_count;
 	}
 
@@ -354,7 +355,7 @@ abstract class WC_CSV_Exporter {
 		$data     = (string) urldecode( $data );
 		$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
 		$data     = 'UTF-8' === $encoding ? $data : utf8_encode( $data );
-		return $this->escape_data( addslashes( $data ) );
+		return $this->escape_data( $data );
 	}
 
 	/**
