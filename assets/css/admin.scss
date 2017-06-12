@@ -5424,6 +5424,11 @@ table.bar_chart {
 		margin: 0;
 		padding: 8px;
 	}
+	.description {
+		display: block;
+		color: #999;
+		padding-top: 4px;
+	}
 }
 .select2-dropdown {
 	border-color: #ddd;
@@ -5464,6 +5469,9 @@ table.bar_chart {
 		}
 		.select2-selection__choice {
 			padding: 2px 6px;
+			.description {
+				display: none;
+			}
 		}
 	}
 	.select2-selection__clear {
