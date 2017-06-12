@@ -445,7 +445,23 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$orders = wc_get_orders( array( 'paginate' => true ) );
 		$this->assertEquals( 2, $orders->total );
 		$this->assertEquals( 2, count( $orders->orders ) );
+		$this->assertInstanceOf( 'WC_Order', $orders->orders[0] );
 		$this->assertEquals( 1, $orders->max_num_pages );
+	}
+
+	/**
+	 * Test the paginate parameter with return id for wc_get_orders.
+	 *
+	 * @since 3.1
+	 */
+	public function test_wc_get_order_paginate_id_param() {
+		$order = WC_Helper_order::create_order();
+		$order->save();
+
+		$orders = wc_get_orders( array( 'paginate' => true, 'return' => 'ids' ) );
+		$this->assertEquals( 1, $orders->total );
+		$this->assertEquals( 1, $orders->max_num_pages );
+		$this->assertEquals( $order->get_id(), $orders->orders[0] );
 	}
 
 	/**

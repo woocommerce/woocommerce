@@ -670,12 +670,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );
 		$query = new WP_Query( $args );
-
-		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
-			return $query->posts;
-		}
-
-		$orders = array_filter( array_map( 'wc_get_order', $query->posts ) );
+		$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
 			return (object) array(
