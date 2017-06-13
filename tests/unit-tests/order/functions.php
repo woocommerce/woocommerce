@@ -650,6 +650,15 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$orders = wc_get_orders( array( 'customer' => $customer2->get_id(), 'return' => 'ids' ) );
 		$expected = array( $order2->get_id() );
 		$this->assertEquals( $expected, $orders );
+
+		$orders = wc_get_orders( array( 'customer' => 'invalid' ) );
+		$this->assertEmpty( $orders );
+
+		$orders = wc_get_orders( array( 'customer' => array( 'invalid' ) ) );
+		$this->assertEmpty( $orders );
+
+		$orders = wc_get_orders( array( 'customer' => 'doesnt@exist.com' ) );
+		$this->assertEmpty( $orders );
 	}
 
 	/**

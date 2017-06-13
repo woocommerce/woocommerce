@@ -389,11 +389,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
-				$meta_query[] = $this->get_orders_generate_customer_meta_query( $value, 'and' );
+				$query_part = $this->get_orders_generate_customer_meta_query( $value, 'and' );
+				if ( is_wp_error( $query_part ) ) {
+					return $query_part;
+				}
+				$meta_query[] = $query_part;
 			} elseif ( is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
-			} else {
+			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
+			} else {
+				return new WP_Error( 'woocommerce_query_invalid', __( 'Invalid customer query.', 'woocommerce' ), $values );
 			}
 		}
 
@@ -648,7 +654,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
 			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
-			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
+			$customer_query = $this->get_orders_generate_customer_meta_query( $values );
+			if ( is_wp_error( $customer_query) ) {
+				$wp_query_args['errors'][] = $customer_query;
+			} else {
+				$wp_query_args['meta_query'][] = $customer_query;
+			}
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
@@ -669,7 +680,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );
-		$query = new WP_Query( $args );
+
+		if ( ! empty( $args['errors'] ) ) {
+			$query = (object) array(
+				'posts' => array(),
+				'found_posts' => 0,
+				'max_num_pages' => 0,
+			);
+		} else {
+			$query = new WP_Query( $args );
+		}
+
 		$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
