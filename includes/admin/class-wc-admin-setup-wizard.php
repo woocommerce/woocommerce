@@ -507,9 +507,6 @@ class WC_Admin_Setup_Wizard {
 					<p>
 						<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer easily as you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ); ?>
 					</p>
-					<p>
-						<a href="https://en-gb.wordpress.org/plugins/woocommerce-services/" target="_blank"><?php _e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?></a>
-					</p>
 				</div>
 			</li>
 		</ul>
