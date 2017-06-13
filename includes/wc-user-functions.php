@@ -140,15 +140,10 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	$linked          = 0;
 	$complete        = 0;
 	$customer        = get_user_by( 'id', absint( $customer_id ) );
-	if ( ! is_email( $customer->user_email ) ) {
-		return $linked;
-	}
-
 	$customer_orders = wc_get_orders( array(
-		'limit'         => -1,
-		'billing_email' => $customer->user_email,
-		'customer_id'   => 0,
-		'return'        => 'ids',
+		'limit'    => -1,
+		'customer' => array( array( 0, $customer->user_email ) ),
+		'return'   => 'ids',
 	) );
 
 	if ( ! empty( $customer_orders ) ) {

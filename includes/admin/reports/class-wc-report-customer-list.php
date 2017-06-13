@@ -164,16 +164,11 @@ class WC_Report_Customer_List extends WP_List_Table {
 							'action'    => "view",
 						);
 
-						if ( is_email( $user->user_email ) ) {
-							$orders = wc_get_orders( array(
-								'limit'          => 1,
-								'status'         => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-								'billing_email'  => $user->user_email,
-								'customer_id'    => 0,
-							) );
-						} else {
-							$orders = array();
-						}
+						$orders = wc_get_orders( array(
+							'limit'          => 1,
+							'status'         => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+							'customer'       => array( array( 0, $user->user_email ) ),
+						) );
 
 						if ( $orders ) {
 							$actions['link'] = array(
