@@ -334,8 +334,8 @@ class WC_Admin_Addons {
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
 			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
-			'title'       => __( 'Buy discounted shipping labels, print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'WooCommerce Services makes shipping a breeze. Get discounted rates and print labels – all from the convenience of your WordPress dashboard.', 'woocommerce' ),
+			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS and make shipping a breeze. Show live shipping rates, get discounted rates, and print labels - all from the convenience of your WooCommerce dashboard.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 		);
