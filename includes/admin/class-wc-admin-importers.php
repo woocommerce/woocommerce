@@ -203,6 +203,7 @@ class WC_Admin_Importers {
 
 		$file   = wc_clean( $_POST['file'] );
 		$params = array(
+			'delimiter'       => ! empty( $_POST['delimiter'] ) ? wc_clean( $_POST['delimiter'] ) : ',',
 			'start_pos'       => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0,
 			'mapping'         => isset( $_POST['mapping'] ) ? (array) $_POST['mapping'] : array(),
 			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false,
