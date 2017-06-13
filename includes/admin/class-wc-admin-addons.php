@@ -338,6 +338,7 @@ class WC_Admin_Addons {
 			'description' => __( 'Integrate your store with USPS and make shipping a breeze. Show live shipping rates, get discounted rates, and print labels - all from the convenience of your WooCommerce dashboard.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
+			'logos'       => array(),
 		);
 
 		switch ( $location['country'] ) {
@@ -346,6 +347,16 @@ class WC_Admin_Addons {
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
 					'title'       => __( 'Show realtime Canada Post shipping rates', 'woocommerce' ),
 					'description' => __( 'Automatically show shipping rates for Canada Post on the checkout page, and make shipping a breeze.', 'woocommerce' ),
+					'logos'       => array_merge( $defaults['logos'], array(
+						WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+					) ),
+				);
+				break;
+			case 'US':
+				$local_defaults = array(
+					'logos' => array_merge( $defaults['logos'], array(
+						WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+					) ),
 				);
 				break;
 			default:
@@ -365,6 +376,13 @@ class WC_Admin_Addons {
 			<div class="addons-wcs-banner-block-content">
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<ul>
+					<?php foreach ( $block_data['logos'] as $logo_link ) : ?>
+						<li>
+							<img class="wcs-service-logo" src="<?php echo esc_url( $logo_link ); ?>">
+						</li>
+					<?php endforeach; ?>
+				</ul>
 				<?php
 					self::output_button(
 						$block_data['href'],
