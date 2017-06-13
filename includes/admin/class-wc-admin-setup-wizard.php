@@ -494,18 +494,35 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 
+		$default_content = array(
+			'title'       => __( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ),
+			'description' => __( 'Print a label and take advantage of discounted shipping rates when you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ),
+		);
+
+		switch ( $base_location['country'] ) {
+			case 'CA':
+				$local_content = array(
+					'title'       => __( 'Automatically show Canada Post rates at checkout (recommended)', 'woocommerce' ),
+					'description' => __( 'Show live shipping rates from Canada Post and make shipping a breeze.', 'woocommerce' ),
+				);
+				break;
+			default:
+				$local_content = array();
+		}
+
+		$content = wp_parse_args( $local_content, $default_content );
 		?>
 		<ul class="wc-wizard-shipping-methods">
 			<li class="wc-wizard-shipping">
 				<div class="wc-wizard-shipping-enable">
 					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
 					<label>
-						<?php esc_html_e( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ); ?>
+						<?php echo esc_html( $content['title'] ) ?>
 					</label>
 				</div>
 				<div class="wc-wizard-shipping-description">
 					<p>
-						<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer easily as you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ); ?>
+						<?php echo esc_html( $content['description'] ); ?>
 					</p>
 				</div>
 			</li>
