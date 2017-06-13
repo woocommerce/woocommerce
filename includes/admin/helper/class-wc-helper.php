@@ -227,8 +227,11 @@ class WC_Helper {
 			}
 
 			// Mark the first action primary.
-			if ( ! empty( $subscription['actions'] ) ) {
-				$subscription['actions'][0]['primary'] = true;
+			foreach ( $subscription['actions'] as $key => $action ) {
+				if ( ! empty( $action['button_label'] ) ) {
+					$subscription['actions'][ $key ]['primary'] = true;
+					break;
+				}
 			}
 		}
 
