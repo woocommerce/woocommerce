@@ -212,6 +212,8 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		// Settings
+		$this->heading     = $this->get_option( 'heading', $this->get_default_subject() );
+		$this->subject     = $this->get_option( 'subject', $this->get_default_heading() );
 		$this->email_type  = $this->get_option( 'email_type' );
 		$this->enabled     = $this->get_option( 'enabled' );
 
