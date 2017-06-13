@@ -660,7 +660,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			$order_id  = absint( $_REQUEST['reference'] );
 			$order     = wc_get_order( $order_id );
 
-			if ( $signature === $_REQUEST['signature'] ) {
+			if ( hash_equals( $signature, $_REQUEST['signature'] ) ) {
 				$order_complete = $this->process_order_status( $order, $_REQUEST['paymentId'], $_REQUEST['paymentStatus'], $_REQUEST['paymentDate'] );
 
 				if ( ! $order_complete ) {
