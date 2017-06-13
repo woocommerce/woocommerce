@@ -97,9 +97,10 @@ class WC_Product_CSV_Importer_Controller {
 				'handler' => '',
 			),
 		);
-		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
-		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
+		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
+		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( $_REQUEST['delimiter'] ) : ',';
 	}
 
 	/**
@@ -271,7 +272,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step.
 	 */
 	protected function mapping_form() {
-		$importer     = self::get_importer( $this->file, array( 'lines' => 1 ) );
+		$args         = array(
+			'lines'     => 1,
+			'delimiter' => $this->delimiter,
+		);
+
+		$importer     = self::get_importer( $this->file, $args );
 		$headers      = $importer->get_raw_keys();
 		$mapped_items = $this->auto_map_columns( $headers );
 		$sample       = current( $importer->get_raw_data() );
@@ -305,6 +311,7 @@ class WC_Product_CSV_Importer_Controller {
 			'mapping'         => $mapping,
 			'file'            => $this->file,
 			'update_existing' => $this->update_existing,
+			'delimiter'       => $this->delimiter,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
 
