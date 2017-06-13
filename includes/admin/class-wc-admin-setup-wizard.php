@@ -490,7 +490,7 @@ class WC_Admin_Setup_Wizard {
 			$base_location = WC_Geolocation::geolocate_ip();
 		}
 
-		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ) ) ) {
+		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
 			return;
 		}
 
