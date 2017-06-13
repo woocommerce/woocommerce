@@ -311,7 +311,7 @@ class WC_Admin_Addons {
 	 *
 	 * @param object $block
 	 */
-	public static function output_wcs_banner_block( $block = null ) {
+	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
 		$location  = wc_get_base_location();
 
@@ -340,7 +340,19 @@ class WC_Admin_Addons {
 			'href'        => $button_url,
 		);
 
-		$block_data = wp_parse_args( $block, $defaults );
+		switch ( $location['country'] ) {
+			case 'CA':
+				$local_defaults = array(
+					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
+					'title'       => __( 'Show realtime Canada Post shipping rates', 'woocommerce' ),
+					'description' => __( 'Automatically show shipping rates for Canada Post on the checkout page, and make shipping a breeze.', 'woocommerce' ),
+				);
+				break;
+			default:
+				$local_defaults = array();
+		}
+
+		$block_data = array_merge( $defaults, $local_defaults, $block );
 		?>
 		<div class="addons-wcs-banner-block">
 			<div class="addons-wcs-banner-block-image">
