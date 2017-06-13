@@ -21,6 +21,9 @@ class WC_Helper_Compat {
 	 * Runs during woocommerce_helper_loaded
 	 */
 	public static function helper_loaded() {
+		// Stop the nagging about WooThemes Updater
+		remove_action( 'admin_notices', 'woothemes_updater_notice' );
+
 		if ( empty( $GLOBALS['woothemes_updater'] ) ) {
 			return;
 		}
@@ -34,9 +37,6 @@ class WC_Helper_Compat {
 	 * Remove legacy helper actions (notices, menus, etc.)
 	 */
 	public static function remove_actions() {
-		// Stop the nagging about WooThemes Updater
-		remove_action( 'admin_notices', 'woothemes_updater_notice' );
-
 		// Remove WooThemes Updater notices
 		remove_action( 'network_admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
 		remove_action( 'admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
