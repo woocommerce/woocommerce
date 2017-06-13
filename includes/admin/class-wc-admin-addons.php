@@ -316,7 +316,7 @@ class WC_Admin_Addons {
 		$location  = wc_get_base_location();
 
 		if (
-			! in_array( $location['country'], array( 'US', 'CA' ) ) ||
+			! in_array( $location['country'], array( 'US', 'CA' ), true ) ||
 			$is_active ||
 			! current_user_can( 'install_plugins' ) ||
 			! current_user_can( 'activate_plugins' )
