@@ -535,8 +535,6 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'WooCommerce can help you fulfill orders using various shipping options. <a href="%1$s" target="_blank">Additional shipping methods</a> can be installed later and managed from <a href="%2$s" target="_blank">shipping settings</a>.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=shipping_methods' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) ); ?></p>
-
 			<?php $this->wc_setup_wcs_tout(); ?>
 
 			<table class="form-table">
