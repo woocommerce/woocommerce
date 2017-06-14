@@ -55,6 +55,10 @@ class WC_Helper_API {
 	 */
 	private static function _authenticate( $url, &$args ) {
 		$auth = WC_Helper_Options::get( 'auth' );
+		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
+			return;
+		}
+
 		$request_uri = parse_url( $url, PHP_URL_PATH );
 		$query_string = parse_url( $url, PHP_URL_QUERY );
 		if ( $query_string ) {
