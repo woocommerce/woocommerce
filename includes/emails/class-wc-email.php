@@ -212,8 +212,8 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		// Settings
-		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' );
+		$this->email_type = $this->get_option( 'email_type' );
+		$this->enabled    = $this->get_option( 'enabled' );
 
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
@@ -534,22 +534,22 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'yes',
 			),
 			'subject'         => array(
-				'title'       => __( 'Email subject', 'woocommerce' ),
+				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
