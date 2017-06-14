@@ -746,9 +746,9 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters( 'woocommerce_product_visibility_options', array(
-		'visible' => __( 'Visible', 'woocommerce' ),
-		'catalog' => __( 'Catalog', 'woocommerce' ),
-		'search'  => __( 'Search', 'woocommerce' ),
+		'visible' => __( 'Shop and search results', 'woocommerce' ),
+		'catalog' => __( 'Shop only', 'woocommerce' ),
+		'search'  => __( 'Search results only', 'woocommerce' ),
 		'hidden'  => __( 'Hidden', 'woocommerce' ),
 	) );
 }
