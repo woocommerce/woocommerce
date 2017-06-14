@@ -490,25 +490,39 @@ class WC_Admin_Setup_Wizard {
 			$base_location = WC_Geolocation::geolocate_ip();
 		}
 
-		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ) ) ) {
+		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
 			return;
 		}
 
+		$default_content = array(
+			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
+		);
+
+		switch ( $base_location['country'] ) {
+			case 'CA':
+				$local_content = array(
+					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+					'description' => __( 'Display live Canada Post rates at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+				);
+				break;
+			default:
+				$local_content = array();
+		}
+
+		$content = wp_parse_args( $local_content, $default_content );
 		?>
 		<ul class="wc-wizard-shipping-methods">
 			<li class="wc-wizard-shipping">
 				<div class="wc-wizard-shipping-enable">
 					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
 					<label>
-						<?php esc_html_e( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ); ?>
+						<?php echo esc_html( $content['title'] ) ?>
 					</label>
 				</div>
 				<div class="wc-wizard-shipping-description">
 					<p>
-						<?php esc_html_e( 'Print a label, take advantage of discounted shipping rates, and send tracking information to your customer easily as you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ); ?>
-					</p>
-					<p>
-						<a href="https://en-gb.wordpress.org/plugins/woocommerce-services/" target="_blank"><?php _e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?></a>
+						<?php echo esc_html( $content['description'] ); ?>
 					</p>
 				</div>
 			</li>
@@ -535,8 +549,6 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'WooCommerce can help you fulfill orders using various shipping options. <a href="%1$s" target="_blank">Additional shipping methods</a> can be installed later and managed from <a href="%2$s" target="_blank">shipping settings</a>.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=shipping_methods' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) ); ?></p>
-
 			<?php $this->wc_setup_wcs_tout(); ?>
 
 			<table class="form-table">

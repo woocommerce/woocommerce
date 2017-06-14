@@ -39,22 +39,11 @@ class WC_Helper {
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
 
-		// Stop the nagging about WooThemes Updater
-		remove_action( 'admin_notices', 'woothemes_updater_notice' );
-
-		// Remove WooThemes Updater notices
-		if ( ! empty( $GLOBALS['woothemes_updater'] ) ) {
-			remove_action( 'network_admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
-			remove_action( 'admin_notices', array( $GLOBALS['woothemes_updater']->admin, 'maybe_display_activation_notice' ) );
-			remove_action( 'network_admin_menu', array( $GLOBALS['woothemes_updater']->admin, 'register_settings_screen' ) );
-			remove_action( 'admin_menu', array( $GLOBALS['woothemes_updater']->admin, 'register_settings_screen' ) );
-
-			// TODO: In a later version, when things are stable, attempt to deactivate the legacy helper.
-		}
-
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
+
+		do_action( 'woocommerce_helper_loaded' );
 	}
 
 	/**
@@ -157,6 +146,93 @@ class WC_Helper {
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . $local['_stylesheet'] ), 'upgrade-theme_' . $local['_stylesheet'] );
 				}
 			}
+
+			$subscription['has_update'] = false;
+			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
+				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
+			}
+
+			$subscription['download_url'] = $subscription['product_url'];
+			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
+				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
+			}
+
+			$subscription['actions'] = array();
+
+			if ( $subscription['has_update'] && ! $subscription['expired'] ) {
+				$action = array(
+					/* translators: %s: version number */
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $subscription['product_id'] ]['version'] ) ),
+					'button_label' => __( 'Update', 'woocommerce' ),
+					'button_url' => $subscription['update_url'],
+					'status' => 'update-available',
+					'icon' => 'dashicons-update',
+				);
+
+				// Subscription is not active on this site.
+				if ( ! $subscription['active'] ) {
+					$action['message'] .= ' ' . __( 'To enable this update you need to <strong>activate</strong> this subscription.', 'woocommerce' );
+					$action['button_label'] = null;
+					$action['button_url'] = null;
+				}
+
+				$subscription['actions'][] = $action;
+			}
+
+			if ( $subscription['has_update'] && $subscription['expired'] ) {
+				$action = array(
+					/* translators: %s: version number */
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>.', 'woocommerce' ), esc_html( $updates[ $subscription['product_id'] ]['version'] ) ),
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$action['message'] .= ' ' . __( 'To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' );
+				$action['button_label'] = __( 'Purchase', 'woocommerce' );
+				$action['button_url'] = $subscription['product_url'];
+
+				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expired'] ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
+					'button_label' => __( 'Renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			}
+
+			if ( $subscription['expiring'] && ! $subscription['autorenew'] ) {
+				$action = array(
+					'message' => __( 'Subscription is <strong>expiring</strong> soon.', 'woocommerce' ),
+					'button_label' => __( 'Enable auto-renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expiring'] ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription is expiring soon. Please <strong>renew</strong> to continue receiving updates and support.', 'woocommerce' ) ),
+					'button_label' => __( 'Renew', 'woocommerce' ),
+					'button_url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
+			}
+
+			// Mark the first action primary.
+			foreach ( $subscription['actions'] as $key => $action ) {
+				if ( ! empty( $action['button_label'] ) ) {
+					$subscription['actions'][ $key ]['primary'] = true;
+					break;
+				}
+			}
 		}
 
 		// Break the by-ref.
@@ -169,7 +245,50 @@ class WC_Helper {
 				continue;
 			}
 
+			$data['_product_url'] = '#';
+			$data['_has_update'] = false;
+
+			if ( ! empty( $updates[ $data['_product_id'] ] ) ) {
+				$data['_has_update'] = version_compare( $updates[ $data['_product_id'] ]['version'], $data['Version'], '>' );
+
+				if ( ! empty( $updates[ $data['_product_id'] ]['url'] ) ) {
+					$data['_product_url'] = $updates[ $data['_product_id'] ]['url'];
+				} elseif ( ! empty( $data['PluginURI'] ) ) {
+					$data['_product_url'] = $data['PluginURI'];
+				}
+			}
+
+			$data['_actions'] = array();
+
+			if ( $data['_has_update'] ) {
+				$action = array(
+					'message' => sprintf( __( 'Version %s is <strong>available</strong>. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $data['_product_id'] ]['version'] ) ),
+					'button_label' => __( 'Purchase', 'woocommerce' ),
+					'button_url' => $data['_product_url'],
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$data['_actions'][] = $action;
+			} else {
+				$action = array(
+					'message' => __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ),
+					'button_label' => __( 'Purchase', 'woocommerce' ),
+					'button_url' => $data['_product_url'],
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$data['_actions'][] = $action;
+			}
+
 			$no_subscriptions[ $filename ] = $data;
+		}
+
+		// Update the user id if it came from a migrated connection.
+		if ( empty( $auth['user_id'] ) ) {
+			$auth['user_id'] = get_current_user_id();
+			WC_Helper_Options::update( 'auth', $auth );
 		}
 
 		// We have an active connection.
@@ -449,6 +568,12 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 
+		// Enable tracking when connected.
+		if ( class_exists( 'WC_Tracker' ) ) {
+			update_option( 'woocommerce_allow_tracking', 'yes' );
+			WC_Tracker::send_tracking_data( true );
+		}
+
 		wp_safe_redirect( add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
@@ -481,6 +606,9 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+
+		// Disable tracking when disconnected.
+		update_option( 'woocommerce_allow_tracking', 'no' );
 
 		wp_safe_redirect( $redirect_uri );
 		die();
@@ -1033,8 +1161,10 @@ class WC_Helper {
 
 	/**
 	 * Flush auth cache.
+	 *
+	 * @access private
 	 */
-	private static function _flush_authentication_cache() {
+	public static function _flush_authentication_cache() {
 		$request = WC_Helper_API::get( 'oauth/me', array(
 			'authenticated' => true,
 		) );

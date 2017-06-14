@@ -81,6 +81,27 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_update_new_customer_past_orders with invalid or changed email.
+	 *
+	 * @since 3.1
+	 */
+	function test_wc_update_new_customer_past_orders_invalid_changed_email() {
+		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
+		$order1 = new WC_Order;
+		$order1->set_billing_email( 'test@example.com' );
+		$order1->set_status( 'completed' );
+		$order1->save();
+
+		wp_update_user( array( 'ID' => $customer_id, 'user_email' => 'invalid' ) );
+		$linked = wc_update_new_customer_past_orders( $customer_id );
+		$this->assertEquals( 0, $linked );
+
+		wp_update_user( array( 'ID' => $customer_id, 'user_email' => 'new@example.com' ) );
+		$linked = wc_update_new_customer_past_orders( $customer_id );
+		$this->assertEquals( 0, $linked );
+	}
+
+	/**
 	 * Test wc_paying_customer.
 	 *
 	 * @since 3.1

@@ -13,8 +13,8 @@
 					<p><?php _e( '<strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
 				<?php endif; ?>
 
-				<h2><?php _e( 'Connect your store to your WooCommerce.com account, and manage your purchases directly from your personal site', 'woocommerce' ); ?></h2>
-				<p><?php _e( 'When you connect your account, your purchases will automatically be listed on your site. You can disconnect the account at anytime. Once your connected, you will receive the updates &amp; support that come with your subscription. ', 'woocommerce' ); ?></p>
+				<h2><?php _e( 'Connect a WooCommerce.com account to manage subscriptions and updates from the convenience of your WooCommerce dashboard', 'woocommerce' ); ?></h2>
+				<p><?php _e( 'Once connected, WooCommerce.com purchases will be listed automatically within your WooCommerce dashboard. Manage subscriptions and get important notifications, updates, and support more easily – and disconnect at any time.', 'woocommerce' ); ?></p>
 				<p><a class="button-primary" href="<?php echo esc_url( $connect_url ); ?>"><?php _e( 'Connect your store', 'woocommerce' ); ?></a></p>
 			</div>
 		</div>

@@ -192,6 +192,8 @@ class WC_Admin_Importers {
 	 * Ajax callback for importing one batch of products from a CSV.
 	 */
 	public function do_ajax_product_import() {
+		global $wpdb;
+
 		check_ajax_referer( 'wc-product-import', 'security' );
 
 		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['file'] ) ) {
@@ -226,6 +228,10 @@ class WC_Admin_Importers {
 		update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
 		if ( 100 === $percent_complete ) {
+			// Clear temp meta.
+			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+
+			// Send success.
 			wp_send_json_success( array(
 				'position'   => 'done',
 				'percentage' => 100,

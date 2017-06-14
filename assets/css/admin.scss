@@ -119,8 +119,16 @@
 		align-self: stretch;
 		padding: 1em 0;
 
+		h1 {
+			padding-bottom: 0;
+		}
+
 		p {
-			margin-top: 0;
+			margin-bottom: 0;
+		}
+
+		.wcs-service-logo {
+			max-width: 40px;
 		}
 	}
 

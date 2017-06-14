@@ -197,6 +197,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
 			}
 
+			if ( 'importing' === $object->get_status() ) {
+				$object->set_status( 'publish' );
+				$object->set_slug( '' );
+			}
+
 			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
 
 			if ( is_wp_error( $result ) ) {
@@ -211,10 +216,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			$this->set_image_data( $object, $data );
 			$this->set_meta_data( $object, $data );
-
-			if ( 'importing' === $object->get_status() ) {
-				$object->set_status( 'publish' );
-			}
 
 			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
 			$object->save();
