@@ -335,7 +335,7 @@ class WC_Admin_Addons {
 			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
 			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
 			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'Integrate your store with USPS and make shipping a breeze. Show live shipping rates, get discounted rates, and print labels - all from the convenience of your WooCommerce dashboard.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 			'logos'       => array(),
@@ -345,8 +345,8 @@ class WC_Admin_Addons {
 			case 'CA':
 				$local_defaults = array(
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
-					'title'       => __( 'Show realtime Canada Post shipping rates', 'woocommerce' ),
-					'description' => __( 'Automatically show shipping rates for Canada Post on the checkout page, and make shipping a breeze.', 'woocommerce' ),
+					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 					'logos'       => array_merge( $defaults['logos'], array(
 						array(
 							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',

@@ -495,15 +495,15 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$default_content = array(
-			'title'       => __( 'Ship with WooCommerce Services (recommended)', 'woocommerce' ),
-			'description' => __( 'Print a label and take advantage of discounted shipping rates when you process your orders, all from the convenience of your WooCommerce dashboard.', 'woocommerce' ),
+			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
 		);
 
 		switch ( $base_location['country'] ) {
 			case 'CA':
 				$local_content = array(
-					'title'       => __( 'Automatically show Canada Post rates at checkout (recommended)', 'woocommerce' ),
-					'description' => __( 'Show live shipping rates from Canada Post and make shipping a breeze.', 'woocommerce' ),
+					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+					'description' => __( 'Display live Canada Post rates at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 				);
 				break;
 			default:
