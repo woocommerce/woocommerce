@@ -141,6 +141,12 @@ class WC_Helper_Compat {
 	 * Register menu item.
 	 */
 	public static function admin_menu() {
+		// No additional menu items for users who did not have a connected helper before.
+		$master_key = get_option( 'woothemes_helper_master_key' );
+		if ( empty( $master_key ) ) {
+			return;
+		}
+
 		add_dashboard_page( __( 'WooCommerce Helper', 'woocommerce' ), __( 'WooCommerce Helper', 'woocommerce' ), 'manage_options', 'woothemes-helper-compat', array( __CLASS__, 'render_compat_menu' ) );
 	}
 
