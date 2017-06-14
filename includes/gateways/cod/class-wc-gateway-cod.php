@@ -181,7 +181,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			$found = false;
 
 			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $check_method, $method_id ) === 0 ) {
+				if ( strpos( $method_id, $check_method ) === 0 ) {
 					$found = true;
 					break;
 				}
