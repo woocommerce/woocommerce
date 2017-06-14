@@ -144,18 +144,16 @@ class WC_Email_Cancelled_Order extends WC_Email {
 				'type'          => 'text',
 				/* translators: %s: default subject */
 				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
-				'placeholder'   => '',
+				'placeholder'   => $this->get_default_subject(),
 				'default'       => '',
-				'desc_tip'      => true,
 			),
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
 				/* translators: %s: default heading */
 				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
-				'placeholder'   => '',
+				'placeholder'   => $this->get_default_heading(),
 				'default'       => '',
-				'desc_tip'      => true,
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),

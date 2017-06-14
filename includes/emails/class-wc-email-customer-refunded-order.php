@@ -224,32 +224,32 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'type'        => 'text',
 				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
-				'placeholder' => '',
-				'desc_tip'    => true,
+				'placeholder' => $this->get_default_subject(),
+				'default'     => '',
 			),
 			'subject_partial' => array(
 				'title'       => __( 'Partial refund subject', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject( true ) . '</code>' ),
-				'placeholder' => '',
-				'desc_tip'    => true,
+				'placeholder' => $this->get_default_subject( true ),
+				'default'     => '',
 			),
 			'heading_full' => array(
 				'title'       => __( 'Full refund email heading', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
-				'placeholder' => '',
-				'desc_tip'    => true,
+				'placeholder' => $this->get_default_heading(),
+				'default'     => '',
 			),
 			'heading_partial' => array(
 				'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading( true ) . '</code>' ),
-				'placeholder' => '',
-				'desc_tip'    => true,
+				'placeholder' => $this->get_default_heading( true ),
+				'default'     => '',
 			),
 			'email_type' => array(
 				'title'       => __( 'Email type', 'woocommerce' ),

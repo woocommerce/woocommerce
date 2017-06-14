@@ -138,18 +138,16 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'type'          => 'text',
 				/* translators: %s: default subject */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
-				'placeholder'   => '',
+				'placeholder'   => $this->get_default_subject(),
 				'default'       => '',
-				'desc_tip'      => true,
 			),
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
 				/* translators: %s: default heading */
 				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
-				'placeholder'   => '',
+				'placeholder'   => $this->get_default_heading(),
 				'default'       => '',
-				'desc_tip'      => true,
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),

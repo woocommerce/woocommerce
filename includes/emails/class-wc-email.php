@@ -212,10 +212,8 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		// Settings
-		$this->heading     = $this->get_option( 'heading', $this->get_default_subject() );
-		$this->subject     = $this->get_option( 'subject', $this->get_default_heading() );
-		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' );
+		$this->email_type = $this->get_option( 'email_type' );
+		$this->enabled    = $this->get_option( 'enabled' );
 
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
@@ -540,18 +538,16 @@ class WC_Email extends WC_Settings_API {
 				'type'        => 'text',
 				/* translators: %s: default subject */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
-				'placeholder' => '',
+				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
 				/* translators: %s: default heading */
 				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
-				'placeholder' => '',
+				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
