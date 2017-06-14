@@ -24,6 +24,9 @@ class WC_Helper_Compat {
 		// Stop the nagging about WooThemes Updater
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
 
+		// A placeholder dashboard menu for legacy helper users.
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+
 		if ( empty( $GLOBALS['woothemes_updater'] ) ) {
 			return;
 		}
@@ -132,6 +135,24 @@ class WC_Helper_Compat {
 		if ( is_plugin_active( 'woothemes-updater/woothemes-updater.php' ) ) {
 			deactivate_plugins( 'woothemes-updater/woothemes-updater.php' );
 		}
+	}
+
+	/**
+	 * Register menu item.
+	 */
+	public static function admin_menu() {
+		add_dashboard_page( __( 'WooCommerce Helper', 'woocommerce' ), __( 'WooCommerce Helper', 'woocommerce' ), 'manage_options', 'woothemes-helper-compat', array( __CLASS__, 'render_compat_menu' ) );
+	}
+
+	/**
+	 * Render the legacy helper compat view.
+	 */
+	public static function render_compat_menu() {
+		$helper_url = add_query_arg( array(
+			'page' => 'wc-addons',
+			'section' => 'helper',
+		), admin_url( 'admin.php' ) );
+		include( WC_Helper::get_view_filename( 'html-helper-compat.php' ) );
 	}
 }
 
