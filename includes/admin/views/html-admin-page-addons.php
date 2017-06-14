@@ -40,6 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; ?>
 			<ul class="products">
 			<?php foreach ( $addons as $addon ) : ?>
+				<?php if ( 'shipping_methods' === $current_section ) {
+					// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
+					$country = WC()->countries->get_base_country();
+					if ( 'US' === $country
+						&& false !== strpos(
+								$addon->link, 'woocommerce.com/products/usps-shipping-method'
+							)
+					) {
+						continue;
+					}
+					if ( 'CA' === $country
+						&& false !== strpos(
+								$addon->link, 'woocommerce.com/products/canada-post-shipping-method'
+							)
+					) {
+						continue;
+					}
+				}
+				?>
 				<li class="product">
 					<a href="<?php echo esc_attr( $addon->link ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>
