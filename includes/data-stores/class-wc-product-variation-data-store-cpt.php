@@ -38,21 +38,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product_variation' !== $post_object->post_type ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || ! in_array( $post_object->post_type, array( 'product', 'product_variation' )) ) {
 			return;
-		}
-
-		$product->set_parent_id( $post_object->post_parent );
-		$parent_id = $product->get_parent_id();
-
-		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
-		if ( empty( $parent_id ) ) {
-			throw new Exception( sprintf( 'No parent product set for variation #%d', $product->get_id() ), 422 );
-		}
-
-		// The post parent is not a valid variable product so we should prevent this being created.
-		if ( 'product' !== get_post_type( $product->get_parent_id() ) ) {
-			throw new Exception( sprintf( 'Invalid parent for variation #%d', $product->get_id() ), 422 );
 		}
 
 		$product->set_props( array(
@@ -63,7 +50,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'status'          => $post_object->post_status,
 			'menu_order'      => $post_object->menu_order,
 			'reviews_allowed' => 'open' === $post_object->comment_status,
+			'parent_id'       => $post_object->post_parent,
 		) );
+
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
 
 		$this->read_downloads( $product );
 		$this->read_product_data( $product );
@@ -102,6 +95,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_name( $new_title );
 		}
 
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
+
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
@@ -114,6 +112,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'menu_order'     => $product->get_menu_order(),
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_name'      => $product->get_slug( 'edit' ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -150,6 +149,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_name( $new_title );
 		}
 
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
+
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
@@ -165,6 +169,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 				'post_type'         => 'product_variation',
+				'post_name'         => $product->get_slug( 'edit' ),
 			);
 
 			/**
