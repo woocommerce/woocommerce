@@ -107,12 +107,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int|string
 	 */
 	protected function parse_relative_field( $field ) {
+		global $wpdb;
+
 		if ( empty( $field ) ) {
 			return '';
 		}
 
 		if ( preg_match( '/^id:(\d+)$/', $field, $matches ) ) {
-			return intval( $matches[1] );
+			$id          = intval( $matches[1] );
+			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
+
+			return $original_id ? $original_id : $id;
 		}
 
 		if ( $id = wc_get_product_id_by_sku( $field ) ) {
@@ -134,6 +139,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Parse the ID field.
+	 *
+	 * If we're not doing an update, create a placeholder product so mapping works
+	 * for rows following this one.
+	 *
+	 * @return int
+	 */
+	protected function parse_id_field( $field ) {
+		$field = absint( $field );
+
+		// Not updating? Make sure we have a new placeholder for this ID.
+		if ( $field && ! $this->params['update_existing'] ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Import placeholder for ' . $field );
+			$product->set_status( 'importing' );
+			$product->add_meta_data( '_original_id', $field, true );
+			$field = $product->save();
+		}
+
+		return $field && ! is_wp_error( $field ) ? $field : 0;
 	}
 
 	/**
@@ -357,7 +385,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 * column_name => callback.
 		 */
 		$data_formatting = array(
-			'id'                => 'absint',
+			'id'                => array( $this, 'parse_id_field' ),
 			'type'              => array( $this, 'parse_comma_field' ),
 			'published'         => array( $this, 'parse_bool_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
