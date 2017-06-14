@@ -222,32 +222,36 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'subject_full' => array(
 				'title'       => __( 'Full refund subject', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject() . '</code>' ),
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
 				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
 			),
 			'subject_partial' => array(
 				'title'       => __( 'Partial refund subject', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_subject( true ) . '</code>' ),
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
 				'placeholder' => $this->get_default_subject( true ),
 				'default'     => '',
 			),
 			'heading_full' => array(
 				'title'       => __( 'Full refund email heading', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading() . '</code>' ),
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
 				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
 			),
 			'heading_partial' => array(
 				'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->get_default_heading( true ) . '</code>' ),
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
 				'placeholder' => $this->get_default_heading( true ),
 				'default'     => '',
 			),
