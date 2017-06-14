@@ -66,11 +66,28 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected $raw_data = array();
 
 	/**
+	 * Raw data.
+	 *
+	 * @var array
+	 */
+	protected $file_positions = array();
+
+	/**
 	 * Parsed data.
 	 *
 	 * @var array
 	 */
 	protected $parsed_data = array();
+
+	/**
+	 * Start time of current import.
+	 *
+	 * (default value: 0)
+	 *
+	 * @var int
+	 * @access protected
+	 */
+	protected $start_time = 0;
 
 	/**
 	 * Get file raw headers.
@@ -610,5 +627,60 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return $wpdb->insert_id;
+	}
+
+	/**
+	 * Memory exceeded
+	 *
+	 * Ensures the batch process never exceeds 90%
+	 * of the maximum WordPress memory.
+	 *
+	 * @return bool
+	 */
+	protected function memory_exceeded() {
+		$memory_limit   = $this->get_memory_limit() * 0.9; // 90% of max memory
+		$current_memory = memory_get_usage( true );
+		$return         = false;
+		if ( $current_memory >= $memory_limit ) {
+			$return = true;
+		}
+		return apply_filters( 'woocommerce_product_importer_memory_exceeded', $return );
+	}
+
+	/**
+	 * Get memory limit
+	 *
+	 * @return int
+	 */
+	protected function get_memory_limit() {
+		if ( function_exists( 'ini_get' ) ) {
+			$memory_limit = ini_get( 'memory_limit' );
+		} else {
+			// Sensible default.
+			$memory_limit = '128M';
+		}
+
+		if ( ! $memory_limit || -1 === intval( $memory_limit ) ) {
+			// Unlimited, set to 32GB.
+			$memory_limit = '32000M';
+		}
+		return intval( $memory_limit ) * 1024 * 1024;
+	}
+
+	/**
+	 * Time exceeded.
+	 *
+	 * Ensures the batch never exceeds a sensible time limit.
+	 * A timeout limit of 30s is common on shared hosting.
+	 *
+	 * @return bool
+	 */
+	protected function time_exceeded() {
+		$finish = $this->start_time + apply_filters( 'woocommerce_product_importer_default_time_limit', 20 ); // 20 seconds
+		$return = false;
+		if ( time() >= $finish ) {
+			$return = true;
+		}
+		return apply_filters( 'woocommerce_product_importer_time_exceeded', $return );
 	}
 }
