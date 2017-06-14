@@ -658,12 +658,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			// Sensible default.
 			$memory_limit = '128M';
 		}
-		if ( ! $memory_limit || -1 === $memory_limit ) {
+
+		if ( ! $memory_limit || -1 === intval( $memory_limit ) ) {
 			// Unlimited, set to 32GB.
 			$memory_limit = '32000M';
 		}
 		return intval( $memory_limit ) * 1024 * 1024;
 	}
+
 	/**
 	 * Time exceeded.
 	 *
