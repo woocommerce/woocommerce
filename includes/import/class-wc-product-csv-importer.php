@@ -60,7 +60,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'] ) ) ) {
-				$this->raw_data[] = $row;
+				$this->raw_data[]                                 = $row;
+				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
 				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
 					break;
@@ -636,11 +637,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return array
 	 */
 	public function import() {
-		$data = array(
-			'imported' => array(),
-			'failed'   => array(),
-			'updated'  => array(),
-			'skipped'  => array(),
+		$index = 0;
+		$data  = array(
+			'imported'  => array(),
+			'failed'    => array(),
+			'updated'   => array(),
+			'skipped'   => array(),
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
@@ -676,6 +678,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['updated'][]  = $result['id'];
 			} else {
 				$data['imported'][] = $result['id'];
+			}
+
+			$index ++;
+
+			if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+				$this->file_position = $this->file_positions[ $index ];
+				break;
 			}
 		}
 
