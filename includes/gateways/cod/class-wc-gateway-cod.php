@@ -177,10 +177,14 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				return false;
 			}
 
+			if ( strstr( $check_method, ':' ) ) {
+				$check_method = current( explode( ':', $check_method ) );
+			}
+
 			$found = false;
 
 			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $check_method, $method_id ) === 0 ) {
+				if ( $check_method === $method_id ) {
 					$found = true;
 					break;
 				}
