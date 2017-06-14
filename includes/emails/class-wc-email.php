@@ -534,7 +534,7 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'yes',
 			),
 			'subject'         => array(
-				'title'       => __( 'Email subject', 'woocommerce' ),
+				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'      => true,
 				/* translators: %s: list of placeholders */
