@@ -887,6 +887,10 @@ class WC_Form_Handler {
 				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 					$user = get_user_by( 'email', $username );
 
+					if ( ! $user ) {
+						$user = get_user_by( 'login', $username );
+					}
+
 					if ( isset( $user->user_login ) ) {
 						$creds['user_login'] = $user->user_login;
 					} else {

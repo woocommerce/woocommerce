@@ -33,7 +33,7 @@ function wc_template_redirect() {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 
-	} elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'customer-logout' ) ) {
 
 		// Logout
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
@@ -909,7 +909,9 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_rating() {
-		wc_get_template( 'single-product/rating.php' );
+		if ( post_type_supports( 'product', 'comments' ) ) {
+			wc_get_template( 'single-product/rating.php' );
+		}
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
@@ -1251,7 +1253,9 @@ if ( ! function_exists( 'woocommerce_review_display_rating' ) ) {
 	 * @return void
 	 */
 	function woocommerce_review_display_rating() {
-		wc_get_template( 'single-product/review-rating.php' );
+		if ( post_type_supports( 'product', 'comments' ) ) {
+			wc_get_template( 'single-product/review-rating.php' );
+		}
 	}
 }
 
@@ -2452,7 +2456,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
-			$value = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( strip_tags( $meta->display_value ) ) ) );
+			$value = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
 
@@ -2642,7 +2646,7 @@ function wc_logout_url( $redirect = '' ) {
 	$redirect        = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
 
 	if ( $logout_endpoint ) {
-		return wc_get_endpoint_url( 'customer-logout', '', $redirect );
+		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
 	} else {
 		return wp_logout_url( $redirect );
 	}

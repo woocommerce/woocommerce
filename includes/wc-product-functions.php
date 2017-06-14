@@ -746,9 +746,9 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters( 'woocommerce_product_visibility_options', array(
-		'visible' => __( 'Visible', 'woocommerce' ),
-		'catalog' => __( 'Catalog', 'woocommerce' ),
-		'search'  => __( 'Search', 'woocommerce' ),
+		'visible' => __( 'Shop and search results', 'woocommerce' ),
+		'catalog' => __( 'Shop only', 'woocommerce' ),
+		'search'  => __( 'Search results only', 'woocommerce' ),
 		'hidden'  => __( 'Hidden', 'woocommerce' ),
 	) );
 }
@@ -883,7 +883,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
  */
 function wc_get_product_term_ids( $product_id, $taxonomy ) {
 	$terms = get_the_terms( $product_id, $taxonomy );
-	return ! empty( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : array();
+	return ( empty( $terms ) || is_wp_error( $terms ) ) ? array() : wp_list_pluck( $terms, 'term_id' );
 }
 
 /**

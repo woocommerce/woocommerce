@@ -311,12 +311,12 @@ class WC_Admin_Addons {
 	 *
 	 * @param object $block
 	 */
-	public static function output_wcs_banner_block( $block = null ) {
+	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
 		$location  = wc_get_base_location();
 
 		if (
-			! in_array( $location['country'], array( 'US', 'CA' ) ) ||
+			! in_array( $location['country'], array( 'US', 'CA' ), true ) ||
 			$is_active ||
 			! current_user_can( 'install_plugins' ) ||
 			! current_user_can( 'activate_plugins' )
@@ -334,13 +334,42 @@ class WC_Admin_Addons {
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
 			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
-			'title'       => __( 'Buy discounted shipping labels, print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'WooCommerce Services makes shipping a breeze. Get discounted rates and print labels – all from the convenience of your WordPress dashboard.', 'woocommerce' ),
+			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
+			'logos'       => array(),
 		);
 
-		$block_data = wp_parse_args( $block, $defaults );
+		switch ( $location['country'] ) {
+			case 'CA':
+				$local_defaults = array(
+					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
+					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'logos'       => array_merge( $defaults['logos'], array(
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+							'alt'  => 'Canada Post logo',
+						),
+					) ),
+				);
+				break;
+			case 'US':
+				$local_defaults = array(
+					'logos'       => array_merge( $defaults['logos'], array(
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+							'alt'  => 'USPS logo',
+						),
+					) ),
+				);
+				break;
+			default:
+				$local_defaults = array();
+		}
+
+		$block_data = array_merge( $defaults, $local_defaults, $block );
 		?>
 		<div class="addons-wcs-banner-block">
 			<div class="addons-wcs-banner-block-image">
@@ -353,6 +382,17 @@ class WC_Admin_Addons {
 			<div class="addons-wcs-banner-block-content">
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<ul>
+					<?php foreach ( $block_data['logos'] as $logo ) : ?>
+						<li>
+							<img
+								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								class="wcs-service-logo"
+								src="<?php echo esc_url( $logo['link'] ); ?>"
+							>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 				<?php
 					self::output_button(
 						$block_data['href'],
@@ -392,7 +432,7 @@ class WC_Admin_Addons {
 					self::output_small_dark_block( $section );
 					break;
 				case 'wcs_banner_block':
-					self::output_wcs_banner_block( $section );
+					self::output_wcs_banner_block( (array) $section );
 					break;
 			}
 		}

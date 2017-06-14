@@ -97,9 +97,10 @@ class WC_Product_CSV_Importer_Controller {
 				'handler' => '',
 			),
 		);
-		$this->step = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
-		$this->file = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
+		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
+		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( $_REQUEST['delimiter'] ) : ',';
 	}
 
 	/**
@@ -128,7 +129,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		$params = array(
 			'step'            => $keys[ $step_index + 1 ],
-			'file'            => $this->file,
+			'file'            => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
 			'delimiter'       => $this->delimiter,
 			'update_existing' => $this->update_existing,
 			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
@@ -271,7 +272,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step.
 	 */
 	protected function mapping_form() {
-		$importer     = self::get_importer( $this->file, array( 'lines' => 1 ) );
+		$args         = array(
+			'lines'     => 1,
+			'delimiter' => $this->delimiter,
+		);
+
+		$importer     = self::get_importer( $this->file, $args );
 		$headers      = $importer->get_raw_keys();
 		$mapped_items = $this->auto_map_columns( $headers );
 		$sample       = current( $importer->get_raw_data() );
@@ -305,6 +311,7 @@ class WC_Product_CSV_Importer_Controller {
 			'mapping'         => $mapping,
 			'file'            => $this->file,
 			'update_existing' => $this->update_existing,
+			'delimiter'       => $this->delimiter,
 		) );
 		wp_enqueue_script( 'wc-product-import' );
 
@@ -457,11 +464,19 @@ class WC_Product_CSV_Importer_Controller {
 			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
 			'short_description'  => __( 'Short description', 'woocommerce' ),
 			'description'        => __( 'Description', 'woocommerce' ),
-			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
-			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'price'              => array(
+				'name'    => __( 'Price', 'woocommerce' ),
+				'options' => array(
+					'regular_price'     => __( 'Regular price', 'woocommerce' ),
+					'sale_price'        => __( 'Sale price', 'woocommerce' ),
+					'date_on_sale_from' => __( 'Date sale price starts', 'woocommerce' ),
+					'date_on_sale_to'   => __( 'Date sale price ends', 'woocommerce' ),
+				),
+			),
 			'tax_status'         => __( 'Tax status', 'woocommerce' ),
 			'tax_class'          => __( 'Tax class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'stock_quantity'     => _x( 'Stock', 'Quantity in stock', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			/* translators: %s: weight unit */
@@ -477,11 +492,6 @@ class WC_Product_CSV_Importer_Controller {
 					'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
 				),
 			),
-			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
-			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
-			'sale_price'         => __( 'Sale price', 'woocommerce' ),
-			'regular_price'      => __( 'Regular Price', 'woocommerce' ),
-			'stock_quantity'     => __( 'Stock', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
 			'tag_ids'            => __( 'Tags', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
@@ -516,6 +526,8 @@ class WC_Product_CSV_Importer_Controller {
 					'attributes:default' . $index  => __( 'Default attribute', 'woocommerce' ),
 				),
 			),
+			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
 			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
 		);
 

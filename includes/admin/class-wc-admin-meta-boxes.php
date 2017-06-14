@@ -168,9 +168,8 @@ class WC_Admin_Meta_Boxes {
 		global $post;
 
 		// Comments/Reviews
-		if ( isset( $post ) && ( 'publish' == $post->post_status || 'private' == $post->post_status ) ) {
+		if ( isset( $post ) && ( 'publish' == $post->post_status || 'private' == $post->post_status ) && post_type_supports( 'product', 'comments' ) ) {
 			remove_meta_box( 'commentsdiv', 'product', 'normal' );
-
 			add_meta_box( 'commentsdiv', __( 'Reviews', 'woocommerce' ), 'post_comment_meta_box', 'product', 'normal' );
 		}
 	}

@@ -967,7 +967,7 @@ button.pswp__button--zoom:hover {
 		cursor: pointer;
 	}
 
-	input[type=radio] {
+	input.input-radio[name=payment_method] {
 		display: none;
 
 		& + label {
