@@ -208,7 +208,8 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(
-			'meta_query'    => array(),
+			'errors'     => array(),
+			'meta_query' => array(),
 		);
 
 		foreach ( $query_vars as $key => $value ) {
