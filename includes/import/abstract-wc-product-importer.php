@@ -80,6 +80,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected $parsed_data = array();
 
 	/**
+	 * Start time of current import.
+	 *
+	 * (default value: 0)
+	 *
+	 * @var int
+	 * @access protected
+	 */
+	protected $start_time = 0;
+
+	/**
 	 * Get file raw headers.
 	 *
 	 * @return array

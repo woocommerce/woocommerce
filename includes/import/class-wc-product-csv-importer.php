@@ -637,8 +637,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return array
 	 */
 	public function import() {
-		$index = 0;
-		$data  = array(
+		$this->start_time = time();
+		$index            = 0;
+		$data             = array(
 			'imported'  => array(),
 			'failed'    => array(),
 			'updated'   => array(),
