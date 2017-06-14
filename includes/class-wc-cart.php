@@ -1362,16 +1362,14 @@ class WC_Cart {
 		// Only calculate the grand total + shipping if on the cart/checkout
 		if ( is_checkout() || is_cart() || defined( 'WOOCOMMERCE_CHECKOUT' ) || defined( 'WOOCOMMERCE_CART' ) ) {
 
-			// Calculate the Shipping
-			$methods_before_calculation = wc_get_chosen_shipping_method_ids();
+			// Calculate the Shipping.
+			$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+			$had_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
 			$this->calculate_shipping();
-			$methods_after_calculation  = wc_get_chosen_shipping_method_ids();
+			$has_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
 
 			// If methods changed and local pickup is selected, we need to do a recalculation of taxes.
-			if (
-				0 === count( array_intersect( $methods_before_calculation, apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) &&
-				0 < count( array_intersect( $methods_after_calculation, apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) &&
-				true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
+			if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && $had_local_pickup !== $has_local_pickup ) {
 				return $this->calculate_totals();
 			}
 
