@@ -348,14 +348,20 @@ class WC_Admin_Addons {
 					'title'       => __( 'Show realtime Canada Post shipping rates', 'woocommerce' ),
 					'description' => __( 'Automatically show shipping rates for Canada Post on the checkout page, and make shipping a breeze.', 'woocommerce' ),
 					'logos'       => array_merge( $defaults['logos'], array(
-						WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+							'alt'  => 'Canada Post logo',
+						),
 					) ),
 				);
 				break;
 			case 'US':
 				$local_defaults = array(
-					'logos' => array_merge( $defaults['logos'], array(
-						WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+					'logos'       => array_merge( $defaults['logos'], array(
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+							'alt'  => 'USPS logo',
+						),
 					) ),
 				);
 				break;
@@ -377,9 +383,13 @@ class WC_Admin_Addons {
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
 				<ul>
-					<?php foreach ( $block_data['logos'] as $logo_link ) : ?>
+					<?php foreach ( $block_data['logos'] as $logo ) : ?>
 						<li>
-							<img class="wcs-service-logo" src="<?php echo esc_url( $logo_link ); ?>">
+							<img
+								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								class="wcs-service-logo"
+								src="<?php echo esc_url( $logo['link'] ); ?>"
+							>
 						</li>
 					<?php endforeach; ?>
 				</ul>
