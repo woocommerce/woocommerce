@@ -1363,7 +1363,17 @@ class WC_Cart {
 		if ( is_checkout() || is_cart() || defined( 'WOOCOMMERCE_CHECKOUT' ) || defined( 'WOOCOMMERCE_CART' ) ) {
 
 			// Calculate the Shipping
+			$methods_before_calculation = wc_get_chosen_shipping_method_ids();
 			$this->calculate_shipping();
+			$methods_after_calculation  = wc_get_chosen_shipping_method_ids();
+
+			// If methods changed and local pickup is selected, we need to do a recalculation of taxes.
+			if (
+				0 === count( array_intersect( $methods_before_calculation, apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) &&
+				0 < count( array_intersect( $methods_after_calculation, apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) &&
+				true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
+				return $this->calculate_totals();
+			}
 
 			// Trigger the fees API where developers can add fees to the cart
 			$this->calculate_fees();
