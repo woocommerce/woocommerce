@@ -31,13 +31,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function __construct( $file, $params = array() ) {
 		$default_args = array(
-			'start_pos'       => 0, // File pointer start.
-			'end_pos'         => -1, // File pointer end.
-			'lines'           => -1, // Max lines to read.
-			'mapping'         => array(), // Column mapping. csv_heading => schema_heading.
-			'parse'           => false, // Whether to sanitize and format data.
-			'update_existing' => false, // Whether to update existing items.
-			'delimiter'       => ',', // CSV delimiter.
+			'start_pos'        => 0, // File pointer start.
+			'end_pos'          => -1, // File pointer end.
+			'lines'            => -1, // Max lines to read.
+			'mapping'          => array(), // Column mapping. csv_heading => schema_heading.
+			'parse'            => false, // Whether to sanitize and format data.
+			'update_existing'  => false, // Whether to update existing items.
+			'delimiter'        => ',', // CSV delimiter.
+			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -711,7 +712,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			$index ++;
 
-			if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+			if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
 				$this->file_position = $this->file_positions[ $index ];
 				break;
 			}
