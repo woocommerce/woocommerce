@@ -147,6 +147,12 @@ class WC_Helper_Compat {
 			return;
 		}
 
+		// Do not show the menu item if user has already seen the new screen.
+		$auth = WC_Helper_Options::get( 'auth' );
+		if ( ! empty( $auth['user_id'] ) ) {
+			return;
+		}
+
 		add_dashboard_page( __( 'WooCommerce Helper', 'woocommerce' ), __( 'WooCommerce Helper', 'woocommerce' ), 'manage_options', 'woothemes-helper-compat', array( __CLASS__, 'render_compat_menu' ) );
 	}
 

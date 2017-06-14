@@ -285,6 +285,12 @@ class WC_Helper {
 			$no_subscriptions[ $filename ] = $data;
 		}
 
+		// Update the user id if it came from a migrated connection.
+		if ( empty( $auth['user_id'] ) ) {
+			$auth['user_id'] = get_current_user_id();
+			WC_Helper_Options::update( 'auth', $auth );
+		}
+
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
 		return;
