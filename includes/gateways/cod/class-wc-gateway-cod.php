@@ -243,7 +243,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param  WC_Order $order
 	 * @return string
 	 */
-	public function change_payment_complete_order_status( $status, $order_id, $order ) {
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
 		if ( $order && 'cod' === $order->get_payment_method() ) {
 			$status = 'completed';
 		}
