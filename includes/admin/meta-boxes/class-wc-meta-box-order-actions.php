@@ -89,36 +89,18 @@ class WC_Meta_Box_Order_Actions {
 
 			$action = wc_clean( $_POST['wc_order_action'] );
 
-			if ( strstr( $action, 'send_email_' ) ) {
+			if ( 'send_order_details' === $action ) {
+				do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
 
-				// Switch back to the site locale.
-				wc_switch_to_site_locale();
-
-				do_action( 'woocommerce_before_resend_order_emails', $order );
-
-				// Ensure gateways are loaded in case they need to insert data into the emails.
+				// Send the customer invoice email.
 				WC()->payment_gateways();
 				WC()->shipping();
+				WC()->mailer()->customer_invoice( $order );
 
-				// Load mailer.
-				$mailer = WC()->mailer();
-				$email_to_send = str_replace( 'send_email_', '', $action );
-				$mails = $mailer->get_emails();
+				// Note the event.
+				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true );
 
-				if ( ! empty( $mails ) ) {
-					foreach ( $mails as $mail ) {
-						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->get_id(), $order );
-							/* translators: %s: email title */
-							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
-						}
-					}
-				}
-
-				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
-
-				// Restore user locale.
-				wc_restore_locale();
+				do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
 
 				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
