@@ -31,6 +31,11 @@ class WC_Meta_Box_Order_Actions {
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
+
+		$order_actions = apply_filters( 'woocommerce_order_actions', array(
+			'send_order_details'              => __( 'Email order details to customer', 'woocommerce' ),
+			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+		) );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -38,32 +43,11 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
-					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-						<?php
-						$mailer           = WC()->mailer();
-						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-						$mails            = $mailer->get_emails();
-
-						if ( ! empty( $mails ) && ! empty( $available_emails ) ) { ?>
-							<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
-							<?php
-							foreach ( $mails as $mail ) {
-								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_' . esc_attr( $mail->id ) . '">' . sprintf( __( 'Resend %s', 'woocommerce' ), esc_html( $mail->title ) ) . '</option>';
-								}
-							} ?>
-							</optgroup>
-							<?php
-						}
-						?>
-
-					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
-
-					<?php foreach ( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<option value=""><?php _e( 'Choose an action...', 'woocommerce' ); ?></option>
+					<?php foreach ( $order_actions as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
 				</select>
-
 				<button class="button wc-reload"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
