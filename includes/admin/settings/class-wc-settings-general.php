@@ -47,17 +47,66 @@ class WC_Settings_General extends WC_Settings_Page {
 
 		$settings = apply_filters( 'woocommerce_general_settings', array(
 
-			array( 'title' => __( 'General options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
+			array(
+				'title'    => __( 'Store Address', 'woocommerce' ),
+				'type'     => 'title',
+				'desc'     => __( 'This is where your business is located. Tax rates and shipping rates will use this address.', 'woocommerce' ),
+				'id'       => 'store_address'
+			),
 
 			array(
-				'title'    => __( 'Base location', 'woocommerce' ),
-				'desc'     => __( 'This is the base location for your business. Tax rates will be based on this country.', 'woocommerce' ),
+				'title'    => __( 'Street address', 'woocommerce' ),
+				'desc'     => __( 'The street address for your business location.', 'woocommerce' ),
+				'id'       => 'woocommerce_store_address',
+				'css'      => 'min-width:350px;',
+				'default'  => '',
+				'type'     => 'text',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Street address 2', 'woocommerce' ),
+				'desc'     => __( 'An additional, optional address line for your business location.', 'woocommerce' ),
+				'id'       => 'woocommerce_store_address_2',
+				'css'      => 'min-width:350px;',
+				'default'  => '',
+				'type'     => 'text',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'City', 'woocommerce' ),
+				'desc'     => __( 'The city in which your business is located.', 'woocommerce' ),
+				'id'       => 'woocommerce_store_city',
+				'css'      => 'min-width:350px;',
+				'default'  => '',
+				'type'     => 'text',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Country / State', 'woocommerce' ),
+				'desc'     => __( 'The country and state or province, if any, in which your business is located.', 'woocommerce' ),
 				'id'       => 'woocommerce_default_country',
 				'css'      => 'min-width:350px;',
 				'default'  => 'GB',
 				'type'     => 'single_select_country',
 				'desc_tip' => true,
 			),
+
+			array(
+				'title'    => __( 'Postal Code', 'woocommerce' ),
+				'desc'     => __( 'The postal code, if any, in which your business is located.', 'woocommerce' ),
+				'id'       => 'woocommerce_store_postcode',
+				'css'      => 'min-width:50px;',
+				'default'  => '',
+				'type'     => 'text',
+				'desc_tip' => true,
+			),
+
+			array( 'type' => 'sectionend', 'id' => 'store_address' ),
+
+			array( 'title' => __( 'General options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
 
 			array(
 				'title'    => __( 'Selling location(s)', 'woocommerce' ),
