@@ -2063,7 +2063,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'upsell_ids' => array(
-					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
+					'description' => __( 'List of upsell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
