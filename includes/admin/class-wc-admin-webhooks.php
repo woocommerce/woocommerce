@@ -129,7 +129,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook Webhook instance.
 	 */
 	private function update_api_version( $webhook ) {
-		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v1';
+		$version = ! empty( $_POST['webhook_api_version'] ) ? wc_clean( $_POST['webhook_api_version'] ) : 'wp_api_v2';
 
 		$webhook->set_api_version( $version );
 	}
@@ -203,7 +203,7 @@ class WC_Admin_Webhooks {
 		}
 
 		if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
-			wp_die( __( 'You don\'t have permissions to create Webhooks!', 'woocommerce' ) );
+			wp_die( __( 'You do not have permissions to create Webhooks!', 'woocommerce' ) );
 		}
 
 		$webhook_id = wp_insert_post( array(
@@ -225,7 +225,7 @@ class WC_Admin_Webhooks {
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
 		$webhook = new WC_Webhook( $webhook_id );
-		$webhook->set_api_version( 'wp_api_v1' );
+		$webhook->set_api_version( 'wp_api_v2' );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
@@ -288,7 +288,7 @@ class WC_Admin_Webhooks {
 		}
 
 		if ( ! current_user_can( 'edit_shop_webhooks' ) ) {
-			wp_die( __( 'You don\'t have permissions to edit Webhooks!', 'woocommerce' ) );
+			wp_die( __( 'You do not have permissions to edit Webhooks!', 'woocommerce' ) );
 		}
 
 		$webhooks = array_map( 'absint', (array) $_GET['webhook'] );
@@ -317,7 +317,7 @@ class WC_Admin_Webhooks {
 		}
 
 		if ( ! current_user_can( 'delete_shop_webhooks' ) ) {
-			wp_die( __( 'You don\'t have permissions to delete Webhooks!', 'woocommerce' ) );
+			wp_die( __( 'You do not have permissions to delete Webhooks!', 'woocommerce' ) );
 		}
 
 		$webhooks = get_posts( array(
@@ -430,16 +430,28 @@ class WC_Admin_Webhooks {
 	private static function table_list_output() {
 		echo '<h2>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
-		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
-		$webhooks_table_list->prepare_items();
+		// Get the webhooks count
+		$count = array_sum( (array) wp_count_posts( 'shop_webhook', 'readable' ) );
 
-		echo '<input type="hidden" name="page" value="wc-settings" />';
-		echo '<input type="hidden" name="tab" value="api" />';
-		echo '<input type="hidden" name="section" value="webhooks" />';
+		if ( absint( $count ) && $count > 0 ) {
+			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
+			$webhooks_table_list->prepare_items();
 
-		$webhooks_table_list->views();
-		$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
-		$webhooks_table_list->display();
+			echo '<input type="hidden" name="page" value="wc-settings" />';
+			echo '<input type="hidden" name="tab" value="api" />';
+			echo '<input type="hidden" name="section" value="webhooks" />';
+
+			$webhooks_table_list->views();
+			$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
+			$webhooks_table_list->display();
+		} else {
+			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
+			?>
+			<h2 class="woocommerce-BlankState-message"><?php _e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ); ?>"><?php _e( 'Create a new webhook', 'woocommerce' ); ?></a>
+
+			<?php echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
+		}
 	}
 
 	/**
@@ -476,6 +488,8 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the webhook topic data.
 	 *
+	 * @param WC_Webhook $webhook
+	 *
 	 * @return array
 	 */
 	public static function get_topic_data( $webhook ) {
@@ -504,6 +518,7 @@ class WC_Admin_Webhooks {
 	 * Get the logs navigation.
 	 *
 	 * @param  int $total
+	 * @param  WC_Webhook $webhook
 	 *
 	 * @return string
 	 */

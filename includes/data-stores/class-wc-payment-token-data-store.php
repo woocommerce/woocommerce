@@ -27,7 +27,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Create a new payment token in the database.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function create( &$token ) {
 		if ( false === $token->validate() ) {
@@ -68,7 +71,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Update a payment token.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function update( &$token ) {
 		if ( false === $token->validate() ) {
@@ -129,7 +135,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Read a token from the database.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$token ) {
 		global $wpdb;
@@ -224,7 +233,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		if ( $args['user_id'] ) {
-			$where[] = 'user_id = ' . absint( $args['user_id'] );
+			$where[] = $wpdb->prepare( 'user_id = %d', absint( $args['user_id'] ) );
 		}
 
 		if ( $args['gateway_id'] ) {
@@ -238,7 +247,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
 
 		if ( $args['type'] ) {
-			$where[] = 'type = ' . esc_sql( $args['type'] );
+			$where[] = $wpdb->prepare( 'type = %s', $args['type'] );
 		}
 
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) );
@@ -310,7 +319,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * of objects.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param id $token_id
+	 * @param bool $status
+	 *
 	 * @return string
 	 */
 	public function set_default_status( $token_id, $status = true ) {

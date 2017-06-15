@@ -487,6 +487,15 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 								'type'    => 'string',
 							),
 						),
+						'product_visibility_terms' => array(
+							'description' => __( 'Terms in the product visibility taxonomy.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'items'       => array(
+								'type'    => 'string',
+							),
+						),
 					),
 				),
 				'security' => array(
@@ -565,7 +574,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		// Test POST requests
 		$post_response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
-			'timeout'     => 60,
+			'timeout'     => 10,
 			'user-agent'  => 'WooCommerce/' . WC()->version,
 			'httpversion' => '1.1',
 			'body'        => array(
@@ -668,6 +677,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 */
 	public function get_active_plugins() {
 		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		require_once( ABSPATH . 'wp-admin/includes/update.php' );
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
 
 		// Get both site plugins and network plugins
 		$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -677,6 +691,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		}
 
 		$active_plugins_data = array();
+		$available_updates   = get_plugin_updates();
+
 		foreach ( $active_plugins as $plugin ) {
 			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 			$dirname        = dirname( $plugin );
@@ -703,20 +719,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 					}
 				}
 				$version_latest = $version_data['version'];
-			} else {
-				include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-
-				$api = plugins_api( 'plugin_information', array(
-					'slug'     => $slug,
-					'fields'   => array(
-						'sections' => false,
-						'tags'     => false,
-					),
-				) );
-
-				if ( is_object( $api ) && ! is_wp_error( $api ) && ! empty( $api->version ) ) {
-					$version_latest = $api->version;
-				}
+			} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+				$version_latest = $available_updates[ $plugin ]->update->new_version;
 			}
 
 			// convert plugin data to json response format.
@@ -823,18 +827,26 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$term_response[ $term->slug ] = strtolower( $term->name );
 		}
 
+		// Get a list of terms used for product visibility.
+		$product_visibility_terms = array();
+		$terms                    = get_terms( 'product_visibility', array( 'hide_empty' => 0 ) );
+		foreach ( $terms as $term ) {
+			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
+		}
+
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'         => 'yes' === get_option( 'woocommerce_api_enabled' ),
-			'force_ssl'           => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
-			'currency'            => get_woocommerce_currency(),
-			'currency_symbol'     => get_woocommerce_currency_symbol(),
-			'currency_position'   => get_option( 'woocommerce_currency_pos' ),
-			'thousand_separator'  => wc_get_price_thousand_separator(),
-			'decimal_separator'   => wc_get_price_decimal_separator(),
-			'number_of_decimals'  => wc_get_price_decimals(),
-			'geolocation_enabled' => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
-			'taxonomies'          => $term_response,
+			'api_enabled'              => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'force_ssl'                => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
+			'currency'                 => get_woocommerce_currency(),
+			'currency_symbol'          => get_woocommerce_currency_symbol(),
+			'currency_position'        => get_option( 'woocommerce_currency_pos' ),
+			'thousand_separator'       => wc_get_price_thousand_separator(),
+			'decimal_separator'        => wc_get_price_decimal_separator(),
+			'number_of_decimals'       => wc_get_price_decimals(),
+			'geolocation_enabled'      => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
+			'taxonomies'               => $term_response,
+			'product_visibility_terms' => $product_visibility_terms,
 		);
 	}
 
@@ -844,8 +856,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_security_info() {
+		$check_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
 		return array(
-			'secure_connection' => 'https' === substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ),
+			'secure_connection' => 'https' === substr( $check_page, 0, 5 ),
 			'hide_errors'       => ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ),
 		);
 	}
@@ -879,7 +892,6 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$pages_output = array();
 		foreach ( $check_pages as $page_name => $values ) {
-			$errors   = array();
 			$page_id  = get_option( $values['option'] );
 			$page_set = $page_exists = $page_visible = false;
 			$shortcode_present = $shortcode_required = false;

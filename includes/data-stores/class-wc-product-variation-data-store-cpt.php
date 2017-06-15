@@ -32,27 +32,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product
+	 * @throws Exception
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product_variation' !== $post_object->post_type ) {
+		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ) ) ) {
 			return;
-		}
-
-		$id = $product->get_id();
-		$product->set_parent_id( $post_object->post_parent );
-		$parent_id = $product->get_parent_id();
-
-		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
-		if ( empty( $parent_id ) ) {
-			throw new Exception( sprintf( 'No parent product set for variation #%d', $product->get_id() ), 422 );
-		}
-
-		// The post parent is not a valid variable product so we should prevent this being created.
-		if ( 'product' !== get_post_type( $product->get_parent_id() ) ) {
-			throw new Exception( sprintf( 'Invalid parent for variation #%d', $product->get_id() ), 422 );
 		}
 
 		$product->set_props( array(
@@ -63,8 +50,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'status'          => $post_object->post_status,
 			'menu_order'      => $post_object->menu_order,
 			'reviews_allowed' => 'open' === $post_object->comment_status,
+			'parent_id'       => $post_object->post_parent,
 		) );
 
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
+
+		$this->read_downloads( $product );
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
@@ -72,13 +66,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
-		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '3.0', '<' ) && 0 !== strpos( $post_object->post_title, get_post_field( 'post_title', $product->get_parent_id() ) ) ) {
-			$new_title = $this->generate_product_title( $product );
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			wp_update_post( array(
-				'ID'         => $product->get_id(),
-				'post_title' => $new_title,
-			) );
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
+			clean_post_cache( $product->get_id() );
 		}
 
 		// Set object_read true once all data is read.
@@ -89,18 +82,29 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Create a new product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
 			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
+
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
+
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_product_variation_data', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 			'post_author'    => get_current_user_id(),
-			'post_title'     => $this->generate_product_title( $product ),
+			'post_title'     => $product->get_name( 'edit' ),
 			'post_content'   => '',
 			'post_parent'    => $product->get_parent_id(),
 			'comment_status' => 'closed',
@@ -108,6 +112,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'menu_order'     => $product->get_menu_order(),
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_name'      => $product->get_slug( 'edit' ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -115,6 +120,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
+			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
 			$this->handle_updated_props( $product );
 
@@ -133,17 +139,27 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Updates an existing product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product
 	 */
 	public function update( &$product ) {
+		$product->save_meta_data();
+		$new_title = $this->generate_product_title( $product );
+
+		if ( $product->get_name( 'edit' ) !== $new_title ) {
+			$product->set_name( $new_title );
+		}
+
+		// The post parent is not a valid variable product so we should prevent this.
+		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+			$product->set_parent_id( 0 );
+		}
+
 		$changes = $product->get_changes();
-		$title   = $this->generate_product_title( $product );
 
 		// Only update the post when the post data changes.
-		if ( $title !== $product->get_name( 'edit' ) || array_intersect( array( 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $product->get_id(),
-				'post_title'        => $title,
+		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+			$post_data = array(
+				'post_title'        => $product->get_name( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
@@ -152,15 +168,33 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-			) );
+				'post_type'         => 'product_variation',
+				'post_name'         => $product->get_slug( 'edit' ),
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
+				clean_post_cache( $product->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+			}
+			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 
 		$this->update_post_meta( $product );
 		$this->update_terms( $product );
+		$this->update_visibility( $product, true );
 		$this->update_attributes( $product );
 		$this->handle_updated_props( $product );
 
-		$product->save_meta_data();
 		$product->apply_changes();
 
 		$this->update_version_and_type( $product );
@@ -178,40 +212,35 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 	/**
 	 * Generates a title with attribute information for a variation.
-	 * Products with 2+ attributes with one-word values will get a title of the form "Name - Attribute: Value, Attribute: Value"
-	 * All other products will get a title of the form "Name - Value, Value"
+	 * Products will get a title of the form "Name - Value, Value" or just "Name".
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$include_attribute_names = false;
 		$attributes = (array) $product->get_attributes();
 
-		// Determine whether to include attribute names through counting the number of one-word attribute values.
-		$one_word_attributes = 0;
-		foreach ( $attributes as $name => $value ) {
-			if ( false === strpos( $value, '-' ) ) {
-				++$one_word_attributes;
-			}
-			if ( $one_word_attributes > 1 ) {
-				$include_attribute_names = true;
-				break;
+		// Do not include attributes if the product has 3+ attributes.
+		$should_include_attributes = count( $attributes ) < 3;
+
+		// Do not include attributes if an attribute name has 2+ words and the
+		// product has multiple attributes.
+		if ( $should_include_attributes && 1 < count( $attributes ) ) {
+			foreach ( $attributes as $name => $value ) {
+				if ( false !== strpos( $name, '-' ) ) {
+					$should_include_attributes = false;
+					break;
+				}
 			}
 		}
 
-		$include_attribute_names = apply_filters( 'woocommerce_product_variation_title_include_attribute_names', $include_attribute_names, $product );
-		$title_base_text         = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_attributes_text   = wc_get_formatted_variation( $product, true, $include_attribute_names );
-		$separator               = ! empty( $title_attributes_text ) ? ' &ndash; ' : '';
+		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
+		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
+		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
-		return apply_filters( 'woocommerce_product_variation_title',
-			$title_base_text . $separator . $title_attributes_text,
-			$product,
-			$title_base_text,
-			$title_attributes_text
-		);
+		return apply_filters( 'woocommerce_product_variation_title', rtrim( $title_base . $separator . $title_suffix, $separator ), $product, $title_base, $title_suffix );
 	}
 
 	/**
@@ -238,13 +267,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'sale_price'        => get_post_meta( $id, '_sale_price', true ),
 			'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
 			'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
-			'tax_status'        => get_post_meta( $id, '_tax_status', true ),
 			'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
 			'stock_status'      => get_post_meta( $id, '_stock_status', true ),
 			'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
 			'virtual'           => get_post_meta( $id, '_virtual', true ),
 			'downloadable'      => get_post_meta( $id, '_downloadable', true ),
-			'downloads'         => array_filter( (array) get_post_meta( $id, '_downloadable_files', true ) ),
 			'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
 			'download_limit'    => get_post_meta( $id, '_download_limit', true ),
 			'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
@@ -256,7 +283,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'length'            => get_post_meta( $id, '_length', true ),
 			'width'             => get_post_meta( $id, '_width', true ),
 			'height'            => get_post_meta( $id, '_height', true ),
-			'tax_class'         => get_post_meta( $id, '_tax_class', true ),
+			'tax_class'         => ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : get_post_meta( $id, '_tax_class', true ),
 		) );
 
 		if ( $product->is_on_sale( 'edit' ) ) {
@@ -265,21 +292,43 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
-		$parent_object = get_post( $product->get_parent_id() );
+		$parent_object   = get_post( $product->get_parent_id() );
+		$terms           = get_the_terms( $product->get_parent_id(), 'product_visibility' );
+		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
+		$exclude_search  = in_array( 'exclude-from-search', $term_names );
+		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
+
+		if ( $exclude_search && $exclude_catalog ) {
+			$catalog_visibility = 'hidden';
+		} elseif ( $exclude_search ) {
+			$catalog_visibility = 'catalog';
+		} elseif ( $exclude_catalog ) {
+			$catalog_visibility = 'search';
+		} else {
+			$catalog_visibility = 'visible';
+		}
+
 		$product->set_parent_data( array(
-			'title'             => $parent_object->post_title,
-			'sku'               => get_post_meta( $product->get_parent_id(), '_sku', true ),
-			'manage_stock'      => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
-			'backorders'        => get_post_meta( $product->get_parent_id(), '_backorders', true ),
-			'stock_quantity'    => get_post_meta( $product->get_parent_id(), '_stock', true ),
-			'weight'            => get_post_meta( $product->get_parent_id(), '_weight', true ),
-			'length'            => get_post_meta( $product->get_parent_id(), '_length', true ),
-			'width'             => get_post_meta( $product->get_parent_id(), '_width', true ),
-			'height'            => get_post_meta( $product->get_parent_id(), '_height', true ),
-			'tax_class'         => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
-			'shipping_class_id' => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
-			'image_id'          => get_post_thumbnail_id( $product->get_parent_id() ),
+			'title'              => $parent_object->post_title,
+			'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
+			'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
+			'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
+			'stock_quantity'     => wc_stock_amount( get_post_meta( $product->get_parent_id(), '_stock', true ) ),
+			'weight'             => get_post_meta( $product->get_parent_id(), '_weight', true ),
+			'length'             => get_post_meta( $product->get_parent_id(), '_length', true ),
+			'width'              => get_post_meta( $product->get_parent_id(), '_width', true ),
+			'height'             => get_post_meta( $product->get_parent_id(), '_height', true ),
+			'tax_class'          => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
+			'shipping_class_id'  => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
+			'image_id'           => get_post_thumbnail_id( $product->get_parent_id() ),
+			'purchase_note'      => get_post_meta( $product->get_parent_id(), '_purchase_note', true ),
+			'catalog_visibility' => $catalog_visibility,
 		) );
+
+		// Pull data from the parent when there is no user-facing way to set props.
+		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
+		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
+		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
 	}
 
 	/**
@@ -294,6 +343,28 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		}
+	}
+
+	/**
+	 * Update visibility terms based on props.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product
+	 * @param bool $force Force update. Used during create.
+	 */
+	protected function update_visibility( &$product, $force = false ) {
+		$changes = $product->get_changes();
+
+		if ( $force || array_intersect( array( 'stock_status' ), array_keys( $changes ) ) ) {
+			$terms = array();
+
+			if ( 'outofstock' === $product->get_stock_status() ) {
+				$terms[] = 'outofstock';
+			}
+
+			wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false );
 		}
 	}
 

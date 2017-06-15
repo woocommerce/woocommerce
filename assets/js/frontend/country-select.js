@@ -10,7 +10,8 @@ jQuery( function( $ ) {
 		return {
 			'language': {
 				errorLoading: function() {
-					return wc_country_select_params.i18n_ajax_error;
+					// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
+					return wc_country_select_params.i18n_searching;
 				},
 				inputTooLong: function( args ) {
 					var overChars = args.input.length - args.maximum;

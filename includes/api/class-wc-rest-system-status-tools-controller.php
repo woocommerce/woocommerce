@@ -427,7 +427,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			break;
 			case 'install_pages' :
 				WC_Install::create_pages();
-				$message = __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' );
+				$message = __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
 			break;
 			case 'delete_taxes' :
 
@@ -446,7 +446,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				if ( isset( $tools[ $tool ]['callback'] ) ) {
 					$callback = $tools[ $tool ]['callback'];
 					$return = call_user_func( $callback );
-					if ( false === $return ) {
+					if ( is_string( $return ) ) {
+						$message = $return;
+					} elseif ( false === $return ) {
 						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
 						$ran = false;
 						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );

@@ -37,7 +37,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'excluded_product_ids'        => array(),
 		'usage_limit'                 => 0,
 		'usage_limit_per_user'        => 0,
-		'limit_usage_to_x_items'      => 0,
+		'limit_usage_to_x_items'      => null,
 		'free_shipping'               => false,
 		'product_categories'          => array(),
 		'excluded_product_categories' => array(),
@@ -159,7 +159,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get coupon code.
+	 * Get coupon amount.
 	 * @since  3.0.0
 	 * @param  string $context
 	 * @return float
@@ -262,7 +262,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Usage limited to certain amount of items
 	 * @since  3.0.0
 	 * @param  string $context
-	 * @return integer
+	 * @return integer|null
 	 */
 	public function get_limit_usage_to_x_items( $context = 'view' ) {
 		return $this->get_prop( 'limit_usage_to_x_items', $context );
@@ -388,11 +388,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		// Handle the limit_usage_to_x_items option
 		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {
 			if ( $discounting_amount ) {
-				if ( ! $this->get_limit_usage_to_x_items() ) {
+				if ( null === $this->get_limit_usage_to_x_items() ) {
 					$limit_usage_qty = $cart_item_qty;
 				} else {
 					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
-					$this->set_limit_usage_to_x_items( max( 0, $this->get_limit_usage_to_x_items() - $limit_usage_qty ) );
+
+					$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
 				}
 				if ( $single ) {
 					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
@@ -557,11 +558,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Set usage limit to x number of items.
 	 * @since  3.0.0
-	 * @param  int $limit_usage_to_x_items
+	 * @param  int|null $limit_usage_to_x_items
 	 * @throws WC_Data_Exception
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
-		$this->set_prop( 'limit_usage_to_x_items', absint( $limit_usage_to_x_items ) );
+		$this->set_prop( 'limit_usage_to_x_items', is_null( $limit_usage_to_x_items ) ? null : absint( $limit_usage_to_x_items ) );
 	}
 
 	/**
@@ -788,7 +789,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$user_id = get_current_user_id();
 		}
 		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->get_id() && $this->data_store ) {
-			global $wpdb;
 			$usage_count = $this->data_store->get_usage_by_user_id( $this, $user_id );
 			if ( $usage_count >= $this->get_usage_limit_per_user() ) {
 				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
@@ -1018,8 +1018,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Check if a coupon is valid for a product.
 	 *
-	 * @param  WC_Product  $product
-	 * @return boolean
+	 * @param  WC_Product $product
+	 * @param array $values
+	 *
+	 * @return bool
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
@@ -1027,7 +1029,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		$valid        = false;
-		$product_cats = wc_get_product_cat_ids( $product->get_id() );
+		$product_cats = wc_get_product_cat_ids( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() );
 		$product_ids  = array( $product->get_id(), $product->get_parent_id() );
 
 		// Specific products get the discount

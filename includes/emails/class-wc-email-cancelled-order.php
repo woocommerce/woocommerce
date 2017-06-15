@@ -26,13 +26,11 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		$this->id               = 'cancelled_order';
 		$this->title            = __( 'Cancelled order', 'woocommerce' );
 		$this->description      = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
-		$this->heading          = __( 'Cancelled order', 'woocommerce' );
-		$this->subject          = __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );
 		$this->template_html    = 'emails/admin-cancelled-order.php';
 		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
@@ -40,6 +38,26 @@ class WC_Email_Cancelled_Order extends WC_Email {
 
 		// Other settings
 		$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+	}
+
+	/**
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Cancelled order', 'woocommerce' );
 	}
 
 	/**
@@ -65,7 +83,9 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**
@@ -122,20 +142,20 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_subject(),
+				'default'       => '',
 			),
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_heading(),
+				'default'       => '',
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),

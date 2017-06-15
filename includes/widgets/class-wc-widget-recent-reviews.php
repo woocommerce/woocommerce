@@ -60,7 +60,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		ob_start();
 
 		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
+		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product', 'parent' => 0 ) );
 
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );

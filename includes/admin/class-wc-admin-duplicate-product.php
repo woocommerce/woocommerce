@@ -117,11 +117,17 @@ class WC_Admin_Duplicate_Product {
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
+		$duplicate->set_name( sprintf( __( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		$duplicate->set_status( 'draft' );
+		$duplicate->set_date_created( null );
+		$duplicate->set_slug( '' );
+		$duplicate->set_rating_counts( 0 );
+		$duplicate->set_average_rating( 0 );
+		$duplicate->set_review_count( 0 );
 
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
@@ -133,7 +139,8 @@ class WC_Admin_Duplicate_Product {
 		// Save parent product.
 		$duplicate->save();
 
-		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) ) {
+		// Duplicate children of a variable product.
+		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );
 				$child_duplicate = clone $child;
@@ -163,7 +170,7 @@ class WC_Admin_Duplicate_Product {
 	 *
 	 * @deprecated 3.0.0
 	 * @param mixed $id
-	 * @return WP_Post|bool
+	 * @return object|bool
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {

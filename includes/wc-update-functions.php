@@ -61,8 +61,9 @@ function wc_update_200_permalinks() {
 			}
 		}
 
-		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' )
+		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
 			$product_base .= trailingslashit( '%product_cat%' );
+		}
 
 		$permalinks = array(
 			'product_base' 		=> untrailingslashit( $product_base ),
@@ -101,7 +102,7 @@ function wc_update_200_taxrates() {
 	$loop = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
-	if ( $tax_rates )
+	if ( $tax_rates ) {
 		foreach ( $tax_rates as $tax_rate ) {
 
 			foreach ( $tax_rate['countries'] as $country => $states ) {
@@ -133,10 +134,11 @@ function wc_update_200_taxrates() {
 				}
 			}
 		}
+	}
 
 	$local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-	if ( $local_tax_rates )
+	if ( $local_tax_rates ) {
 		foreach ( $local_tax_rates as $tax_rate ) {
 
 			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
@@ -179,6 +181,7 @@ function wc_update_200_taxrates() {
 
 			$loop++;
 		}
+	}
 
 	update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 	update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
@@ -279,8 +282,9 @@ function wc_update_200_line_items() {
 		if ( ! empty( $order_taxes ) ) {
 			foreach ( $order_taxes as $order_tax ) {
 
-				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
+				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) ) {
 					continue;
+				}
 
 				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 			 		'order_item_name' 		=> $order_tax['label'],
@@ -612,7 +616,6 @@ function wc_update_240_options() {
 }
 
 function wc_update_240_shipping_methods() {
-	global $wpdb;
 	/**
 	 * Flat Rate Shipping.
 	 * Update legacy options to new math based options.
@@ -722,7 +725,6 @@ function wc_update_240_api_keys() {
 }
 
 function wc_update_240_webhooks() {
-	global $wpdb;
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
@@ -1020,7 +1022,18 @@ function wc_update_300_grouped_products() {
 				'post_type'      => 'product',
 				'fields'         => 'ids',
 			) );
-			add_post_meta( $parent_id, '_children', $children_ids, true );
+			update_post_meta( $parent_id, '_children', $children_ids );
+
+			// Update children to remove the parent.
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_parent' => 0,
+				),
+				array(
+					'post_parent' => $parent_id,
+				)
+			);
 		}
 	}
 }
@@ -1043,39 +1056,39 @@ function wc_update_300_product_visibility() {
 	WC_Install::create_terms();
 
 	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_taxonomy_id ) );
 	}
 
 	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_taxonomy_id ) );
 	}
 
 	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
 	}
 
 	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_taxonomy_id ) );
 	}
 
 	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_taxonomy_id ) );
 	}
 }
 
@@ -1084,4 +1097,33 @@ function wc_update_300_product_visibility() {
  */
 function wc_update_300_db_version() {
 	WC_Install::update_db_version( '3.0.0' );
+}
+
+/**
+ * Add an index to the downloadable product permissions table to improve performance of update_user_by_order_id.
+ */
+function wc_update_310_downloadable_products() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE column_name = 'order_id' and key_name = 'order_id'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX order_id (order_id)" );
+	}
+}
+
+/**
+ * Find old order notes and ensure they have the correct type for exclusion.
+ */
+function wc_update_310_old_comments() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE $wpdb->comments comments LEFT JOIN $wpdb->posts as posts ON comments.comment_post_ID = posts.ID SET comment_type = 'order_note' WHERE posts.post_type = 'shop_order' AND comment_type = '';" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_310_db_version() {
+	WC_Install::update_db_version( '3.1.0' );
 }

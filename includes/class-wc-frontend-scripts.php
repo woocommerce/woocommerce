@@ -92,7 +92,10 @@ class WC_Frontend_Scripts {
 
 	/**
 	 * Return protocol relative asset URL.
+	 *
 	 * @param string $path
+	 *
+	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
 		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
@@ -186,7 +189,7 @@ class WC_Frontend_Scripts {
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'    => array(),
-				'version' => '2.1.3',
+				'version' => '2.1.4',
 			),
 			'jquery-blockui' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
@@ -201,7 +204,7 @@ class WC_Frontend_Scripts {
 			'jquery-payment' => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1',
+				'version' => '3.0.0',
 			),
 			'photoswipe' => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
@@ -457,7 +460,7 @@ class WC_Frontend_Scripts {
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'home_url'     => home_url(),
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
-					'hash'         => isset( $_GET['version'] ) ? wc_clean( $_GET['version'] ) : '',
+					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '',
 				);
 			break;
 			case 'wc-single-product' :
@@ -467,16 +470,23 @@ class WC_Frontend_Scripts {
 					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
-						'smoothHeight'   => false,
+						'smoothHeight'   => true,
 						'directionNav'   => false,
 						'controlNav'     => 'thumbnails',
 						'slideshow'      => false,
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
 					) ),
-					'zoom_enabled'       => get_theme_support( 'wc-product-gallery-zoom' ),
-					'photoswipe_enabled' => get_theme_support( 'wc-product-gallery-lightbox' ),
-					'flexslider_enabled' => get_theme_support( 'wc-product-gallery-slider' ),
+					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
+						'shareEl'               => false,
+						'closeOnScroll'         => false,
+						'history'               => false,
+						'hideAnimationDuration' => 0,
+						'showAnimationDuration' => 0
+					) ),
+					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 			break;
 			case 'wc-checkout' :
@@ -513,7 +523,7 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' ),
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
 				);
 			break;
 			case 'wc-add-to-cart' :

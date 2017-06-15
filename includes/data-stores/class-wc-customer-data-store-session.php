@@ -17,6 +17,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @var array
 	 */
 	protected $session_keys = array(
+		'id',
 		'billing_postcode',
 		'billing_city',
 		'billing_address_1',
@@ -46,7 +47,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function create( &$customer ) {
 		$this->save_to_session( $customer );
@@ -55,7 +56,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function update( &$customer ) {
 		$this->save_to_session( $customer );
@@ -64,7 +65,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Saves all customer data to the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function save_to_session( $customer ) {
 		$data = array();
@@ -81,14 +82,15 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Read customer data from the session.
+	 * Read customer data from the session unless the user has logged in, in
+	 * which case the stored ID will differ from the actual ID.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function read( &$customer ) {
 		$data = (array) WC()->session->get( 'customer' );
-		if ( ! empty( $data ) ) {
+		if ( ! empty( $data ) && isset( $data['id'] ) && $data['id'] === $customer->get_id() ) {
 			foreach ( $this->session_keys as $session_key ) {
 				$function_key = $session_key;
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
@@ -106,38 +108,40 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Load default values if props are unset.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	protected function set_defaults( &$customer ) {
-		$default = wc_get_customer_default_location();
+		try {
+			$default = wc_get_customer_default_location();
 
-		if ( ! $customer->get_billing_country() ) {
-			$customer->set_billing_country( $default['country'] );
-		}
+			if ( ! $customer->get_billing_country() ) {
+				$customer->set_billing_country( $default['country'] );
+			}
 
-		if ( ! $customer->get_shipping_country() ) {
-			$customer->set_shipping_country( $customer->get_billing_country() );
-		}
+			if ( ! $customer->get_shipping_country() ) {
+				$customer->set_shipping_country( $customer->get_billing_country() );
+			}
 
-		if ( ! $customer->get_billing_state() ) {
-			$customer->set_billing_state( $default['state'] );
-		}
+			if ( ! $customer->get_billing_state() ) {
+				$customer->set_billing_state( $default['state'] );
+			}
 
-		if ( ! $customer->get_shipping_state() ) {
-			$customer->set_shipping_state( $customer->get_billing_state() );
-		}
+			if ( ! $customer->get_shipping_state() ) {
+				$customer->set_shipping_state( $customer->get_billing_state() );
+			}
 
-		if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$customer->set_billing_email( $current_user->user_email );
-		}
+			if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+				$current_user = wp_get_current_user();
+				$customer->set_billing_email( $current_user->user_email );
+			}
+		} catch ( WC_Data_Exception $e ) {}
 	}
 
 	/**
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {

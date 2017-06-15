@@ -1,16 +1,18 @@
-## EXPLANATION OF THE ISSUE
+### EXPLANATION OF THE ISSUE
 
 <!-- What happens, under which versions, under what conditions, when, and what were you expecting instead. -->
 
-## STEPS TO REPRODUCE THE ISSUE
+### STEPS TO REPRODUCE THE ISSUE
 
 <!-- 1. List steps to reproduce your issue so we can replicate. -->
 
-## SYSTEM STATUS REPORT
+### SYSTEM STATUS
 
+<details>
 ```
-Grab the system status report from WooCommerce > System Status and paste it here.
+Grab the system status report from WooCommerce > System Status and paste it here between the `details` tags.
 ```
+</details>
 
 <!--
 BEFORE POSTING YOUR ISSUE

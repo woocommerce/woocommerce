@@ -29,7 +29,7 @@ class WC_Post_Data {
 	 */
 	public static function init() {
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
-		add_action( 'woocommerce_deferred_product_sync', array( __CLASS__, 'deferred_product_sync' ), 10, 1 );
+		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -52,10 +52,17 @@ class WC_Post_Data {
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
+
+		// Meta cache flushing.
+		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
+		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 	}
 
 	/**
 	 * Link to parent products when getting permalink for variation.
+	 *
+	 * @param string $permalink
+	 * @param object $post
 	 *
 	 * @return string
 	 */
@@ -64,6 +71,18 @@ class WC_Post_Data {
 			return $variation->get_permalink();
 		}
 		return $permalink;
+	}
+
+	/**
+	 * Sync products queued to sync.
+	 */
+	public static function do_deferred_product_sync() {
+		global $wc_deferred_product_sync;
+
+		if ( ! empty( $wc_deferred_product_sync ) ) {
+			$wc_deferred_product_sync = wp_parse_id_list( $wc_deferred_product_sync );
+			array_walk( $wc_deferred_product_sync, array( __CLASS__, 'deferred_product_sync' ) );
+		}
 	}
 
 	/**
@@ -80,6 +99,13 @@ class WC_Post_Data {
 
 	/**
 	 * Delete transients when terms are set.
+	 *
+	 * @param int $object_id
+	 * @param mixed $terms
+	 * @param array $tt_ids
+	 * @param string $taxonomy
+	 * @param mixed $append
+	 * @param array $old_tt_ids
 	 */
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
@@ -89,6 +115,10 @@ class WC_Post_Data {
 
 	/**
 	 * When a post status changes.
+	 *
+	 * @param string $new_status
+	 * @param string $old_status
+	 * @param object $post
 	 */
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) {
@@ -126,10 +156,10 @@ class WC_Post_Data {
 	 * @param string $to
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		if ( 'variable' === $from ) {
+		if ( 'variable' === $from && 'variable' !== $to ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
-			$data_store->delete_variations( $product );
+			$data_store->delete_variations( $product->get_id() );
 		}
 	}
 
@@ -363,6 +393,8 @@ class WC_Post_Data {
 
 	/**
 	 * Remove item meta on permanent deletion.
+	 *
+	 * @param int $postid
 	 */
 	public static function delete_order_items( $postid ) {
 		global $wpdb;
@@ -383,10 +415,10 @@ class WC_Post_Data {
 
 	/**
 	 * Remove downloadable permissions on permanent order deletion.
+	 *
+	 * @param int $postid
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
-		global $wpdb;
-
 		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
@@ -408,7 +440,6 @@ class WC_Post_Data {
 		if ( $variation_id ) {
 			$product_id = $variation_id;
 		}
-		$product    = wc_get_product( $product_id );
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
 		if ( $downloads ) {
@@ -421,6 +452,17 @@ class WC_Post_Data {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Flush meta cache for CRUD objects on direct update.
+	 * @param  int $meta_id
+	 * @param  int $object_id
+	 * @param  string $meta_key
+	 * @param  string $meta_value
+	 */
+	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
+		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
 	}
 }
 

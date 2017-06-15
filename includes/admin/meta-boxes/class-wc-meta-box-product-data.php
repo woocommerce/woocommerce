@@ -25,7 +25,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-		global $post, $thepostid, $product_object;
+		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
@@ -57,7 +57,7 @@ class WC_Meta_Box_Product_Data {
 				'id'            => '_virtual',
 				'wrapper_class' => 'show_if_simple',
 				'label'         => __( 'Virtual', 'woocommerce' ),
-				'description'   => __( 'Virtual products are intangible and aren\'t shipped.', 'woocommerce' ),
+				'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
 				'default'       => 'no',
 			),
 			'downloadable' => array(
@@ -75,43 +75,76 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
-		return apply_filters( 'woocommerce_product_data_tabs', array(
+		$tabs = apply_filters( 'woocommerce_product_data_tabs', array(
 			'general' => array(
-				'label'  => __( 'General', 'woocommerce' ),
-				'target' => 'general_product_data',
-				'class'  => array( 'hide_if_grouped' ),
+				'label'    => __( 'General', 'woocommerce' ),
+				'target'   => 'general_product_data',
+				'class'    => array( 'hide_if_grouped' ),
+				'priority' => 10,
 			),
 			'inventory' => array(
-				'label'  => __( 'Inventory', 'woocommerce' ),
-				'target' => 'inventory_product_data',
-				'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
+				'label'    => __( 'Inventory', 'woocommerce' ),
+				'target'   => 'inventory_product_data',
+				'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
+				'priority' => 20,
 			),
 			'shipping' => array(
-				'label'  => __( 'Shipping', 'woocommerce' ),
-				'target' => 'shipping_product_data',
-				'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
+				'label'    => __( 'Shipping', 'woocommerce' ),
+				'target'   => 'shipping_product_data',
+				'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
+				'priority' => 30,
 			),
 			'linked_product' => array(
-				'label'  => __( 'Linked Products', 'woocommerce' ),
-				'target' => 'linked_product_data',
-				'class'  => array(),
+				'label'    => __( 'Linked Products', 'woocommerce' ),
+				'target'   => 'linked_product_data',
+				'class'    => array(),
+				'priority' => 40,
 			),
 			'attribute' => array(
-				'label'  => __( 'Attributes', 'woocommerce' ),
-				'target' => 'product_attributes',
-				'class'  => array(),
+				'label'    => __( 'Attributes', 'woocommerce' ),
+				'target'   => 'product_attributes',
+				'class'    => array(),
+				'priority' => 50,
 			),
 			'variations' => array(
-				'label'  => __( 'Variations', 'woocommerce' ),
-				'target' => 'variable_product_options',
-				'class'  => array( 'variations_tab', 'show_if_variable' ),
+				'label'    => __( 'Variations', 'woocommerce' ),
+				'target'   => 'variable_product_options',
+				'class'    => array( 'variations_tab', 'show_if_variable' ),
+				'priority' => 60,
 			),
 			'advanced' => array(
-				'label'  => __( 'Advanced', 'woocommerce' ),
-				'target' => 'advanced_product_data',
-				'class'  => array(),
+				'label'    => __( 'Advanced', 'woocommerce' ),
+				'target'   => 'advanced_product_data',
+				'class'    => array(),
+				'priority' => 70,
 			),
 		) );
+
+		// Sort tabs based on priority.
+		uasort( $tabs, array( __CLASS__, 'product_data_tabs_sort' ) );
+
+		return $tabs;
+	}
+
+	/**
+	 * Callback to sort product data tabs on priority.
+	 *
+	 * @since 3.1.0
+	 * @param int $a First item.
+	 * @param int $b Second item.
+	 *
+	 * @return bool
+	 */
+	private static function product_data_tabs_sort( $a, $b ) {
+		if ( ! isset( $a['priority'], $b['priority'] ) ) {
+			return -1;
+		}
+
+		if ( $a['priority'] == $b['priority'] ) {
+			return 0;
+		}
+
+		return $a['priority'] < $b['priority'] ? -1 : 1;
 	}
 
 	/**
@@ -140,6 +173,11 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare downloads for save.
+	 *
+	 * @param array $file_names
+	 * @param array $file_urls
+	 * @param array $file_hashes
+	 *
 	 * @return array
 	 */
 	private static function prepare_downloads( $file_names, $file_urls, $file_hashes ) {
@@ -171,6 +209,9 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare attributes for save.
+	 *
+	 * @param array $data
+	 *
 	 * @return array
 	 */
 	public static function prepare_attributes( $data = false ) {
@@ -192,9 +233,14 @@ class WC_Meta_Box_Product_Data {
 				if ( empty( $attribute_names[ $i ] ) || ! isset( $attribute_values[ $i ] ) ) {
 					continue;
 				}
+				$attribute_id   = 0;
 				$attribute_name = wc_clean( $attribute_names[ $i ] );
-				$attribute_id   = wc_attribute_taxonomy_id_by_name( $attribute_name );
-				$options        = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
+
+				if ( 'pa_' === substr( $attribute_name, 0, 3 ) ) {
+					$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
+				}
+
+				$options = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
 
 				if ( is_array( $options ) ) {
 					// Term ids sent as array.
@@ -254,11 +300,14 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param $post
 	 */
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type );
+		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
 		$errors       = $product->set_props( array(
@@ -283,9 +332,9 @@ class WC_Meta_Box_Product_Data {
 			'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
 			'date_on_sale_to'    => wc_clean( $_POST['_sale_price_dates_to'] ),
 			'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
-			'backorders'         => wc_clean( $_POST['_backorders'] ),
+			'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( $_POST['_backorders'] ) : null,
 			'stock_status'       => wc_clean( $_POST['_stock_status'] ),
-			'stock_quantity'     => wc_stock_amount( $_POST['_stock'] ),
+			'stock_quantity'     => isset( $_POST['_stock'] ) ? wc_stock_amount( $_POST['_stock'] ) : null,
 			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
 			'downloads'          => self::prepare_downloads(
@@ -351,7 +400,7 @@ class WC_Meta_Box_Product_Data {
 					'downloadable'      => isset( $_POST['variable_is_downloadable'][ $i ] ),
 					'date_on_sale_from' => wc_clean( $_POST['variable_sale_price_dates_from'][ $i ] ),
 					'date_on_sale_to'   => wc_clean( $_POST['variable_sale_price_dates_to'][ $i ] ),
-					'description'       => wp_kses_post( wc_sanitize_textarea( $_POST['variable_description'][ $i ] ) ),
+					'description'       => wp_kses_post( $_POST['variable_description'][ $i ] ),
 					'download_limit'    => wc_clean( $_POST['variable_download_limit'][ $i ] ),
 					'download_expiry'   => wc_clean( $_POST['variable_download_expiry'][ $i ] ),
 					'downloads'         => self::prepare_downloads(
@@ -360,8 +409,8 @@ class WC_Meta_Box_Product_Data {
 						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
 					),
 					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
-					'stock_quantity'    => wc_clean( $_POST['variable_stock'][ $i ] ),
-					'backorders'        => wc_clean( $_POST['variable_backorders'][ $i ] ),
+					'stock_quantity'    => isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ? wc_clean( $_POST['variable_stock'][ $i ] ) : null,
+					'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
 					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),

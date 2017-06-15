@@ -19,6 +19,8 @@ jQuery( function( $ ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
 			} else if ( url.indexOf( 'comment-page-' ) > 0 || url.indexOf( 'cpage=' ) > 0 ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
+			} else if ( hash === '#tab-additional_information' ) {
+				$tabs.find( 'li.additional_information_tab a' ).click();
 			} else {
 				$tabs.find( 'li:first a' ).click();
 			}
@@ -79,6 +81,7 @@ jQuery( function( $ ) {
 
 		// No images? Abort.
 		if ( 0 === this.$images.length ) {
+			this.$target.css( 'opacity', 1 );
 			return;
 		}
 
@@ -92,7 +95,7 @@ jQuery( function( $ ) {
 
 		// ...also taking args into account.
 		if ( args ) {
-			this.flexslider_enabled = false === args.photoswipe_enabled ? false : this.flexslider_enabled;
+			this.flexslider_enabled = false === args.flexslider_enabled ? false : this.flexslider_enabled;
 			this.zoom_enabled       = false === args.zoom_enabled ? false : this.zoom_enabled;
 			this.photoswipe_enabled = false === args.photoswipe_enabled ? false : this.photoswipe_enabled;
 		}
@@ -108,6 +111,8 @@ jQuery( function( $ ) {
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider();
 			$target.on( 'woocommerce_gallery_reset_slide_position', this.onResetSlidePosition );
+		} else {
+			this.$target.css( 'opacity', 1 );
 		}
 
 		if ( this.zoom_enabled ) {
@@ -124,9 +129,9 @@ jQuery( function( $ ) {
 	 * Initialize flexSlider.
 	 */
 	ProductGallery.prototype.initFlexslider = function() {
-		var images = this.$images;
+		var $target = this.$target;
 
-		this.$target.flexslider( {
+		$target.flexslider( {
 			selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
 			animation:      wc_single_product_params.flexslider.animation,
 			smoothHeight:   wc_single_product_params.flexslider.smoothHeight,
@@ -136,19 +141,7 @@ jQuery( function( $ ) {
 			animationSpeed: wc_single_product_params.flexslider.animationSpeed,
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
 			start: function() {
-				var largest_height = 0;
-
-				images.each( function() {
-					var height = $( this ).height();
-
-					if ( height > largest_height ) {
-						largest_height = height;
-					}
-				} );
-
-				images.each( function() {
-					$( this ).css( 'min-height', largest_height );
-				} );
+				$target.css( 'opacity', 1 );
 			}
 		} );
 	};
@@ -168,7 +161,7 @@ jQuery( function( $ ) {
 		$( zoomTarget ).each( function( index, target ) {
 			var image = $( target ).find( 'img' );
 
-			if ( image.attr( 'width' ) > galleryWidth ) {
+			if ( image.data( 'large_image_width' ) > galleryWidth ) {
 				zoomEnabled = true;
 				return false;
 			}
@@ -221,10 +214,10 @@ jQuery( function( $ ) {
 					large_image_w   = img.attr( 'data-large_image_width' ),
 					large_image_h   = img.attr( 'data-large_image_height' ),
 					item            = {
-						src: large_image_src,
-						w:   large_image_w,
-						h:   large_image_h,
-						title: img.attr( 'title' )
+						src  : large_image_src,
+						w    : large_image_w,
+						h    : large_image_h,
+						title: img.attr( 'data-caption' ) ? img.attr( 'data-caption' ) : img.attr( 'title' )
 					};
 				items.push( item );
 			} );
@@ -250,14 +243,9 @@ jQuery( function( $ ) {
 			clicked = this.$target.find( '.flex-active-slide' );
 		}
 
-		var options = {
-			index:                 $( clicked ).index(),
-			shareEl:               false,
-			closeOnScroll:         false,
-			history:               false,
-			hideAnimationDuration: 0,
-			showAnimationDuration: 0
-		};
+		var options = $.extend( {
+			index: $( clicked ).index()
+		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );

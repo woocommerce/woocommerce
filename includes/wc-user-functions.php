@@ -271,7 +271,8 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = wc_get_order( $order_id );
-				if ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) {
+
+				if ( $order && ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
@@ -279,7 +280,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->get_user_id() ) {
+				if ( $order && $user_id == $order->get_user_id() ) {
 					$allcaps['order_again'] = true;
 				}
 			break;
@@ -287,7 +288,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->get_user_id() ) {
+				if ( $order && $user_id == $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
 				}
 			break;
@@ -295,7 +296,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id  = $args[1];
 				$download = $args[2];
 
-				if ( $user_id == $download->get_user_id() ) {
+				if ( $download && $user_id == $download->get_user_id() ) {
 					$allcaps['download_file'] = true;
 				}
 			break;
@@ -501,12 +502,12 @@ function wc_review_is_from_verified_owner( $comment_id ) {
  * @since 2.5.0
  */
 function wc_disable_author_archives_for_customers() {
-	global $wp_query, $author;
+	global $author;
 
 	if ( is_author() ) {
 		$user = get_user_by( 'id', $author );
 
-		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+		if ( user_can( $user, 'customer' ) && ! user_can( $user, 'edit_posts' ) ) {
 			wp_redirect( wc_get_page_permalink( 'shop' ) );
 		}
 	}
@@ -600,27 +601,4 @@ function wc_get_customer_last_order( $customer_id ) {
 	" );
 
 	return wc_get_order( $id );
-}
-
-/**
- * Wrapper for @see get_avatar() which doesn't simply return
- * the URL so we need to pluck it from the HTML img tag.
- *
- * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
- *
- * @since 2.6.0
- * @param string $email the customer's email.
- * @return string the URL to the customer's avatar.
- */
-function wc_get_customer_avatar_url( $email ) {
-	$avatar_html = get_avatar( $email );
-
-	// Get the URL of the avatar from the provided HTML.
-	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-		return esc_url_raw( $matches[1] );
-	}
-
-	return null;
 }

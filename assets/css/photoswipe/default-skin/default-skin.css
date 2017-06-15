@@ -31,6 +31,7 @@
   margin: 0;
   float: right;
   opacity: 0.75;
+  z-index: 1600;
   -webkit-transition: opacity 0.2s;
           transition: opacity 0.2s;
   -webkit-box-shadow: none;

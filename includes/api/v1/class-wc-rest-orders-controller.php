@@ -125,8 +125,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( $post );
 		$dp    = $request['dp'];
 
@@ -187,17 +185,15 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				$product_sku  = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
 			$item_meta = array();
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $formatted_meta->key,
+					'label' => $formatted_meta->display_key,
+					'value' => wc_clean( $formatted_meta->display_value ),
 				);
 			}
 
@@ -266,12 +262,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'taxes'        => array(),
 			);
 
-			$shipping_taxes = maybe_unserialize( $shipping_item['taxes'] );
+			$shipping_taxes = $shipping_item->get_taxes();
 
-			if ( ! empty( $shipping_taxes ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $dp );
+			if ( ! empty( $shipping_taxes['total'] ) ) {
+				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes['total'] ), $dp );
 
-				foreach ( $shipping_taxes as $tax_rate_id => $tax ) {
+				foreach ( $shipping_taxes['total'] as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(
 						'id'       => $tax_rate_id,
 						'total'    => $tax,
@@ -407,7 +403,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}
@@ -603,8 +599,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Gets the product ID from the SKU or posted ID.
+	 *
 	 * @param array $posted Request data
+	 *
 	 * @return int
+	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -648,6 +647,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
@@ -675,6 +676,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_shipping_lines( $posted, $action ) {
@@ -696,6 +699,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_fee_lines( $posted, $action ) {
@@ -717,6 +722,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action ) {
@@ -825,7 +832,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -864,7 +871,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			/**
 			 * Fires after a single item is created or updated via the REST API.
 			 *
-			 * @param object          $post      Inserted object (not a WP_Post object).
+			 * @param WP_Post         $post      Post object.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
 			 */

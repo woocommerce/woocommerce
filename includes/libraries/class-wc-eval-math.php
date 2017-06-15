@@ -55,14 +55,18 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		public static function evaluate( $expr ) {
 			self::$last_error = null;
 			$expr = trim( $expr );
-			if ( substr( $expr, -1, 1 ) == ';' ) $expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
+			if ( substr( $expr, -1, 1 ) == ';' ) {
+				$expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
+			}
 			// ===============
 			// is it a variable assignment?
 			if ( preg_match( '/^\s*([a-z]\w*)\s*=\s*(.+)$/', $expr, $matches ) ) {
 				if ( in_array( $matches[1], self::$vb ) ) { // make sure we're not assigning to a constant
 					return self::trigger( "cannot assign to constant '$matches[1]'" );
 				}
-				if ( ( $tmp = self::pfx( self::nfx( $matches[2] ) ) ) === false ) return false; // get the result and make sure it's good
+				if ( ( $tmp = self::pfx( self::nfx( $matches[2] ) ) ) === false ) {
+					return false; // get the result and make sure it's good
+				}
 				self::$v[ $matches[1] ] = $tmp; // if so, stick it in the variable array
 				return self::$v[ $matches[1] ]; // and return the resulting value
 				// ===============
@@ -73,7 +77,9 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 					return self::trigger( "cannot redefine built-in function '$matches[1]()'" );
 				}
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
-				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
+				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) {
+					return false; // see if it can be converted to postfix
+				}
 				$stack_size = count( $stack );
 				for ( $i = 0; $i < $stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[ $i ];
@@ -97,7 +103,8 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 * Convert infix to postfix notation.
 		 *
 		 * @param  string $expr
-		 * @return string
+		 *
+		 * @return array|string
 		 */
 		private static function nfx( $expr ) {
 
@@ -154,11 +161,13 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						$arg_count = $stack->pop(); // see how many arguments there were (cleverly stored on the stack, thank you)
 						$output[] = $stack->pop(); // pop the function and push onto the output
 						if ( in_array( $fnn, self::$fb ) ) { // check the argument count
-							if ( $arg_count > 1 )
+							if ( $arg_count > 1 ) {
 								return self::trigger( "too many arguments ($arg_count given, 1 expected)" );
+							}
 						} elseif ( array_key_exists( $fnn, self::$f ) ) {
-							if ( count( self::$f[ $fnn ]['args'] ) != $arg_count )
+							if ( count( self::$f[ $fnn ]['args'] ) != $arg_count ) {
 								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[ $fnn ]['args'] ) . " expected)" );
+							}
 						} else { // did we somehow push a non-function on the stack? this should never happen
 							return self::trigger( "internal error" );
 						}
@@ -174,8 +183,9 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						}
 					}
 					// make sure there was a function
-					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) )
+					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) {
 						return self::trigger( "unexpected ','" );
+					}
 					$stack->push( $stack->pop() + 1 ); // increment the argument count
 					$stack->push( '(' ); // put the ( back on, we'll need to pop back to it again
 					$index++;
@@ -247,8 +257,12 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 			foreach ( $tokens as $token ) { // nice and easy
 				// if the token is a binary operator, pop two values off the stack, do the operation, and push the result back on
 				if ( in_array( $token, array( '+', '-', '*', '/', '^' ) ) ) {
-					if ( is_null( $op2 = $stack->pop() ) ) return self::trigger( "internal error" );
-					if ( is_null( $op1 = $stack->pop() ) ) return self::trigger( "internal error" );
+					if ( is_null( $op2 = $stack->pop() ) ) {
+						return self::trigger( "internal error" );
+					}
+					if ( is_null( $op1 = $stack->pop() ) ) {
+						return self::trigger( "internal error" );
+					}
 					switch ( $token ) {
 						case '+':
 							$stack->push( $op1 + $op2 );
@@ -324,7 +338,9 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				$file = $debugTrace[1]['file'] ? $debugTrace[1]['file'] : 'n/a';
 				$line = $debugTrace[1]['line'] ? $debugTrace[1]['line'] : 'n/a';
 			}
-			if ( isset( $debugTrace[2] ) ) $func = $debugTrace[2]['function'] ? $debugTrace[2]['function'] : 'n/a';
+			if ( isset( $debugTrace[2] ) ) {
+				$func = $debugTrace[2]['function'] ? $debugTrace[2]['function'] : 'n/a';
+			}
 			echo "\n$file, $func, $line\n";
 		}
 	}

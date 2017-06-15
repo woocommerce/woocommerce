@@ -151,6 +151,10 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
+			if ( ! empty( $request[ $key ] ) && is_array( $request[ $key ] ) ) {
+				$request[ $key ] = array_filter( $request[ $key ] );
+			}
+
 			if ( ! empty( $request[ $key ] ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
@@ -536,7 +540,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		foreach ( $product->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 

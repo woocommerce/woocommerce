@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['IT'] = array(
 	'AG' => __( 'Agrigento', 'woocommerce' ),
 	'AL' => __( 'Alessandria', 'woocommerce' ),
@@ -54,7 +58,7 @@ $states['IT'] = array(
 	'IM' => __( 'Imperia', 'woocommerce' ),
 	'IS' => __( 'Isernia', 'woocommerce' ),
 	'SP' => __( 'La Spezia', 'woocommerce' ),
-	'AQ' => __( 'L\'Aquila', 'woocommerce' ),
+	'AQ' => __( "L'Aquila", 'woocommerce' ),
 	'LT' => __( 'Latina', 'woocommerce' ),
 	'LE' => __( 'Lecce', 'woocommerce' ),
 	'LC' => __( 'Lecco', 'woocommerce' ),

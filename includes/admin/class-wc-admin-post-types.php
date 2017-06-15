@@ -51,7 +51,8 @@ class WC_Admin_Post_Types {
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 2, 100 );
 
 		// Views
-		add_filter( 'views_edit-product', array( $this, 'product_sorting_link' ) );
+		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
+		add_filter( 'disable_months_dropdown', array( $this, 'disable_months_dropdown' ), 10, 2 );
 
 		// Bulk / quick edit
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
@@ -108,6 +109,11 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Adjust shop order columns for the user on certain conditions.
+	 *
+	 * @param array $hidden
+	 * @param object $screen
+	 *
+	 * @return array
 	 */
 	public function adjust_shop_order_columns( $hidden, $screen ) {
 		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
@@ -439,7 +445,7 @@ class WC_Admin_Post_Types {
 				}
 
 				if ( $the_product->managing_stock() ) {
-					$stock_html .= ' (' . $the_product->get_stock_quantity() . ')';
+					$stock_html .= ' (' . wc_stock_amount( $the_product->get_stock_quantity() ) . ')';
 				}
 
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );
@@ -537,7 +543,7 @@ class WC_Admin_Post_Types {
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( __( 'Y-m-d', 'woocommerce' ) ) ) );
+				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) ) );
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -580,11 +586,15 @@ class WC_Admin_Post_Types {
 					// check the status of the post
 					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
 
+					remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
 						'number'    => 1,
 						'status'    => $status,
 					) );
+
+					add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 					$latest_note = current( $latest_notes );
 
@@ -774,27 +784,41 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Product sorting link.
-	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
+	 * Change views on the edit product screen.
 	 *
 	 * @param  array $views
 	 * @return array
 	 */
-	public function product_sorting_link( $views ) {
-		global $post_type, $wp_query;
+	public function product_views( $views ) {
+		global $wp_query;
 
-		if ( ! current_user_can( 'edit_others_pages' ) ) {
-			return $views;
+		// Products do not have authors.
+		unset( $views['mine'] );
+
+		// Add sorting link.
+		if ( current_user_can( 'edit_others_pages' ) ) {
+			$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
+			$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
+			$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
+			$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
+			$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sorting', 'woocommerce' ) . '</a>';
 		}
 
-		$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
-		$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
-		$query_string     = add_query_arg( 'orderby', urlencode( 'menu_order title' ), $query_string );
-		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
-		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort products', 'woocommerce' ) . '</a>';
-
 		return $views;
+	}
+
+	/**
+	 * @deprecated 3.1
+	 */
+	public function product_sorting_link( $views ) {
+		$this->product_views( $views );
+	}
+
+	/**
+	 * Disable months dropdown on product screen.
+	 */
+	public function disable_months_dropdown( $bool, $post_type ) {
+		return 'product' === $post_type ? true : $bool;
 	}
 
 	/**
@@ -1442,12 +1466,12 @@ class WC_Admin_Post_Types {
 		global $wp_query;
 
 		// Category Filtering
-		wc_product_dropdown_categories();
+		wc_product_dropdown_categories( array( 'option_select_text' => __( 'Filter by category', 'woocommerce' ) ) );
 
 		// Type filtering
 		$terms   = get_terms( 'product_type' );
 		$output  = '<select name="product_type" id="dropdown_product_type">';
-		$output .= '<option value="">' . __( 'Show all product types', 'woocommerce' ) . '</option>';
+		$output .= '<option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
 
 		foreach ( $terms as $term ) {
 			$output .= '<option value="' . sanitize_title( $term->name ) . '" ';
@@ -1806,15 +1830,13 @@ class WC_Admin_Post_Types {
 				<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
 				<?php
-					echo '<p>' . __( 'Choose where this product should be displayed in your catalog. The product will always be accessible directly.', 'woocommerce' ) . '</p>';
+					echo '<p>' . __( 'This setting determines which shop pages products will be listed on.', 'woocommerce' ) . '</p>';
 
 					foreach ( $visibility_options as $name => $label ) {
 						echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
 					}
 
-					echo '<p>' . __( 'Enable this option to feature this product.', 'woocommerce' ) . '</p>';
-
-					echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'Featured product', 'woocommerce' ) . '</label><br />';
+					echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
 					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php _e( 'OK', 'woocommerce' ); ?></a>
@@ -1899,6 +1921,8 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Show blank slate.
+	 *
+	 * @param string $which
 	 */
 	public function maybe_render_blank_state( $which ) {
 		global $post_type;
@@ -1931,6 +1955,7 @@ class WC_Admin_Post_Types {
 					?>
 					<h2 class="woocommerce-BlankState-message"><?php _e( 'Ready to start selling something awesome?', 'woocommerce' ); ?></h2>
 					<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product!', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>"><?php _e( 'Import products from a CSV file', 'woocommerce' ); ?></a>
 					<?php
 				break;
 			}
@@ -1941,6 +1966,11 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * When editing the shop page, we should hide templates.
+	 *
+	 * @param array $page_templates
+	 * @param $class
+	 * @param object $post
+	 *
 	 * @return array
 	 */
 	public function hide_cpt_archive_templates( $page_templates, $class, $post ) {
@@ -1955,6 +1985,8 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Show a notice above the CPT archive.
+	 *
+	 * @param object $post
 	 */
 	public function show_cpt_archive_notice( $post ) {
 		$shop_page_id = wc_get_page_id( 'shop' );

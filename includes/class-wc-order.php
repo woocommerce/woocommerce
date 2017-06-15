@@ -218,10 +218,13 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order status.
 	 * @since 3.0.0
+	 *
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual_update is this a manual order status change?
 	 * @param array details of change
+	 *
+	 * @return array
 	 */
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
@@ -255,7 +258,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
@@ -276,6 +279,11 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
+	 *
+	 * @param string $new_status
+	 * @param string $note
+	 * @param bool $manual
+	 *
 	 * @return bool success
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
@@ -730,7 +738,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_date_paid( $context = 'view' ) {
 		$date_paid = $this->get_prop( 'date_paid', $context );
 
-		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}
@@ -765,7 +773,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_address_map_url() {
-		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $this->get_address( 'shipping' ), $this );
+		$address = $this->get_address( 'shipping' );
+
+		// Remove name and company before generate the Google Maps URL.
+		unset( $address['first_name'], $address['last_name'], $address['company'] );
+
+		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $address, $this );
+
 		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
@@ -804,11 +818,21 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
-		if ( $this->get_shipping_address_1() || $this->get_shipping_address_2() ) {
+		if ( $this->has_shipping_address() ) {
 			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this ) );
 		} else {
 			return '';
 		}
+	}
+
+	/**
+	 * Returns true if the order has a shipping address.
+	 *
+	 * @since  3.0.4
+	 * @return boolean
+	 */
+	public function has_shipping_address() {
+		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
 	}
 
 	/*
@@ -846,11 +870,11 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order_key.
 	 *
-	 * @param string $value Max length 20 chars.
+	 * @param string $value Max length 22 chars.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
+		$this->set_prop( 'order_key', substr( $value, 0, 22 ) );
 	}
 
 	/**
@@ -1208,6 +1232,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * See if order matches cart_hash.
+	 *
+	 * @param string $cart_hash
+	 *
 	 * @return bool
 	 */
 	public function has_cart_hash( $cart_hash = '' ) {

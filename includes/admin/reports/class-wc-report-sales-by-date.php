@@ -299,6 +299,70 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		) );
 
 		/**
+		 * Refund lines - all partial refunds on all order types so we can plot full AND partial refunds on the chart.
+		 */
+		$this->report_data->refund_lines = (array) $this->get_order_report_data( array(
+			'data' => array(
+				'ID' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'refund_id',
+				),
+				'_refund_amount' => array(
+					'type'     => 'meta',
+					'function' => '',
+					'name'     => 'total_refund',
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date',
+				),
+				'order_item_type' => array(
+					'type'      => 'order_item',
+					'function'  => '',
+					'name'      => 'item_type',
+					'join_type' => 'LEFT',
+				),
+				'_order_total' => array(
+					'type'     => 'meta',
+					'function' => '',
+					'name'     => 'total_sales',
+				),
+				'_order_shipping' => array(
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_shipping',
+					'join_type' => 'LEFT',
+				),
+				'_order_tax' => array(
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_tax',
+					'join_type' => 'LEFT',
+				),
+				'_order_shipping_tax' => array(
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_shipping_tax',
+					'join_type' => 'LEFT',
+				),
+				'_qty' => array(
+					'type'            => 'order_item_meta',
+					'function'        => 'SUM',
+					'name'            => 'order_item_count',
+					'join_type'       => 'LEFT',
+				),
+			),
+			'group_by'            => 'refund_id',
+			'order_by'            => 'post_date ASC',
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_status'        => false,
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+		) );
+
+		/**
 		 * Total up refunds. Note: when an order is fully refunded, a refund line will be added.
 		 */
 		$this->report_data->total_tax_refunded          = 0;
@@ -336,10 +400,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		// Total orders and discounts also includes those which have been refunded at some point
 		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2, '.', '' );
 		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
-		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) ) - $this->report_data->total_refunded_orders;
 
-		// Item counts
-		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
+		// Total orders in this period, even if refunded.
+		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
+
+		// Item items ordered in this period, even if refunded.
+		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
 		// 3rd party filtering of report data
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
@@ -498,6 +564,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			$current_range = '7day';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
@@ -525,8 +592,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Round our totals correctly.
-	 * @param  string $amount
-	 * @return string
+	 *
+	 * @param array|string $amount
+	 *
+	 * @return array|string
 	 */
 	private function round_chart_totals( $amount ) {
 		if ( is_array( $amount ) ) {
@@ -546,16 +615,16 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		// Prepare data for report
 		$data = array(
-			'order_counts' => $this->prepare_chart_data( $this->report_data->order_counts, 'post_date', 'count', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'order_item_counts' => $this->prepare_chart_data( $this->report_data->order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'order_amounts' => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'coupon_amounts' => $this->prepare_chart_data( $this->report_data->coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'shipping_amounts' => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'refund_amounts' => $this->prepare_chart_data( $this->report_data->partial_refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'order_counts'         => $this->prepare_chart_data( $this->report_data->order_counts, 'post_date', 'count', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'order_item_counts'    => $this->prepare_chart_data( $this->report_data->order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'order_amounts'        => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'coupon_amounts'       => $this->prepare_chart_data( $this->report_data->coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'shipping_amounts'     => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'refund_amounts'       => $this->prepare_chart_data( $this->report_data->refund_lines, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'shipping_tax_amounts' => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'tax_amounts' => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby ),
-			'net_order_amounts' => array(),
-			'gross_order_amounts' => array(),
+			'tax_amounts'          => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'net_order_amounts'    => array(),
+			'gross_order_amounts'  => array(),
 		);
 
 		foreach ( $data['order_amounts'] as $order_amount_key => $order_amount_value ) {

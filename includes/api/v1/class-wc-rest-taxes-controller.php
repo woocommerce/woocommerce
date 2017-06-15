@@ -121,7 +121,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access create taxes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
@@ -149,7 +150,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access update a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
@@ -163,7 +165,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access delete a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
@@ -177,7 +180,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'batch' ) ) {
@@ -197,10 +201,8 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		global $wpdb;
 
 		$prepared_args = array();
-		$prepared_args['exclude'] = $request['exclude'];
-		$prepared_args['include'] = $request['include'];
-		$prepared_args['order']   = $request['order'];
-		$prepared_args['number']  = $request['per_page'];
+		$prepared_args['order']  = $request['order'];
+		$prepared_args['number'] = $request['per_page'];
 		if ( ! empty( $request['offset'] ) ) {
 			$prepared_args['offset'] = $request['offset'];
 		} else {
@@ -286,7 +288,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param stdClass|null $current Existing tax object.
-	 * @return stdClass
+	 * @return object
 	 */
 	protected function create_or_update_tax( $request, $current = null ) {
 		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );
@@ -648,27 +650,26 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
-
+		$params                       = array();
+		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';
 
-		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
-			'type'              => 'array',
-			'items'             => array(
-				'type'          => 'integer',
-			),
-			'default'           => array(),
-			'sanitize_callback' => 'wp_parse_id_list',
+		$params['page'] = array(
+			'description'        => __( 'Current page of the collection.', 'woocommerce' ),
+			'type'               => 'integer',
+			'default'            => 1,
+			'sanitize_callback'  => 'absint',
+			'validate_callback'  => 'rest_validate_request_arg',
+			'minimum'            => 1,
 		);
-		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
-			'type'              => 'array',
-			'items'             => array(
-				'type'          => 'integer',
-			),
-			'default'           => array(),
-			'sanitize_callback' => 'wp_parse_id_list',
+		$params['per_page'] = array(
+			'description'        => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+			'type'               => 'integer',
+			'default'            => 10,
+			'minimum'            => 1,
+			'maximum'            => 100,
+			'sanitize_callback'  => 'absint',
+			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),

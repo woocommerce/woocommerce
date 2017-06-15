@@ -31,8 +31,6 @@ class WC_Meta_Box_Order_Actions {
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
-
-		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -83,7 +81,7 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), strtolower( $order_type_object->labels->singular_name ) ); ?>" />
+				<input type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $post->post_status ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -99,8 +97,6 @@ class WC_Meta_Box_Order_Actions {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
 
@@ -112,9 +108,7 @@ class WC_Meta_Box_Order_Actions {
 			if ( strstr( $action, 'send_email_' ) ) {
 
 				// Switch back to the site locale.
-				if ( function_exists( 'switch_to_locale' ) ) {
-					switch_to_locale( get_locale() );
-				}
+				wc_switch_to_site_locale();
 
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
@@ -140,9 +134,7 @@ class WC_Meta_Box_Order_Actions {
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
 				// Restore user locale.
-				if ( function_exists( 'restore_current_locale' ) ) {
-					restore_current_locale();
-				}
+				wc_restore_locale();
 
 				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );

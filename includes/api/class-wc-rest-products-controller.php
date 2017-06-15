@@ -994,6 +994,11 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			$product = $this->save_default_attributes( $product, $request );
 		}
 
+		// Set children for a grouped product.
+		if ( $product->is_type( 'grouped' ) && isset( $request['grouped_products'] ) ) {
+			$product->set_children( $request['grouped_products'] );
+		}
+
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
 			$product = $this->set_product_images( $product, $request['images'] );
@@ -1069,9 +1074,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				}
 			}
 
-			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_image_ids( $gallery );
-			}
+			$product->set_gallery_image_ids( $gallery );
 		} else {
 			$product->set_image_id( '' );
 			$product->set_gallery_image_ids( array() );
@@ -1927,7 +1930,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 						'type'    => 'integer',
 					),
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),

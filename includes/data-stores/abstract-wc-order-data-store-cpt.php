@@ -77,7 +77,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 	/**
 	 * Method to read an order from the database.
-	 * @param WC_Order
+	 *
+	 * @param WC_Data $order
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$order ) {
 		$order->set_defaults();
@@ -86,7 +89,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$id = $order->get_id();
 		$order->set_props( array(
 			'parent_id'     => $post_object->post_parent,
 			'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
@@ -113,14 +115,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		$order->save_meta_data();
 		$order->set_version( WC_VERSION );
 
 		$changes = $order->get_changes();
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $order->get_id(),
+			$post_data = array(
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
@@ -128,17 +130,32 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-			) );
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $order->get_id() ) );
+				clean_post_cache( $order->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $order->get_id() ), $post_data ) );
+			}
+			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 		$this->update_post_meta( $order );
-		$order->save_meta_data();
 		$order->apply_changes();
 		$this->clear_caches( $order );
 	}
 
 	/**
 	 * Method to delete an order from the database.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
@@ -146,6 +163,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$args = wp_parse_args( $args, array(
 			'force_delete' => false,
 		) );
+
+		if ( ! $id ) {
+			return;
+		}
 
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
@@ -336,5 +357,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
+	}
+
+	/**
+	 * Return the order type of a given item which belongs to WC_Order
+	 *
+	 * @param WC_Order $order	Order Object
+	 * @param int	$order_id
+	 *
+	 * @return string Order Item type
+	 */
+	public function get_order_item_type( WC_Order $order, $order_item_id ) {
+		global $wpdb;
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d and order_item_id = %d",
+			$order->get_id(),
+			$order_item_id
+		);
+		return $wpdb->get_var( $query );
 	}
 }

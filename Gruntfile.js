@@ -115,8 +115,7 @@ module.exports = function( grunt ) {
 		sass: {
 			compile: {
 				options: {
-					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
+					sourcemap: 'none'
 				},
 				files: [{
 					expand: true,
@@ -249,6 +248,12 @@ module.exports = function( grunt ) {
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )
+			},
+			e2e_test: {
+				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
+			},
+			e2e_tests: {
+				command: 'npm run --silent test'
 			}
 		},
 
@@ -278,6 +283,26 @@ module.exports = function( grunt ) {
 					'!vendor/**'                                                 // Exclude vendor/
 				]
 			}
+		},
+
+		// Autoprefixer.
+		postcss: {
+			options: {
+				processors: [
+					require( 'autoprefixer' )({
+						browsers: [
+							'> 0.1%',
+							'ie 8',
+							'ie 9'
+						]
+					})
+				]
+			},
+			dist: {
+				src: [
+					'<%= dirs.css %>/*.css'
+				]
+			}
 		}
 	});
 
@@ -295,6 +320,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
+	grunt.loadNpmTasks( 'grunt-postcss' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -312,6 +338,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
+		'postcss',
 		'cssmin',
 		'concat'
 	]);
@@ -324,5 +351,13 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'dev', [
 		'default',
 		'makepot'
+	]);
+
+	grunt.registerTask( 'e2e-tests', [
+		'shell:e2e_tests'
+	]);
+
+	grunt.registerTask( 'e2e-test', [
+		'shell:e2e_test'
 	]);
 };

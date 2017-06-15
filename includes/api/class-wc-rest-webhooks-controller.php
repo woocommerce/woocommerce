@@ -32,7 +32,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
+	 * @param object $post
 	 * @param WP_REST_Request $request Request object.
+	 *
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $post, $request ) {
@@ -70,6 +72,16 @@ class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 		 * @param WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
+	}
+
+	/**
+	 * Get the default REST API version.
+	 *
+	 * @since  3.0.0
+	 * @return string
+	 */
+	protected function get_default_api_version() {
+		return 'wp_api_v2';
 	}
 
 	/**

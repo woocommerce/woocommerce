@@ -184,9 +184,9 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
 
-			echo '<span class="star-rating">
-					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '</span>
-				</span> (' . esc_html( $count ) . ')';
+			echo '<span class="star-rating">';
+			echo wc_get_star_rating_html( $rating );
+			echo '</span> (' . esc_html( $count ) . ')';
 
 			echo '</a>';
 

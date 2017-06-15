@@ -726,14 +726,14 @@ class WC_AJAX {
 		$customer = new WC_Customer( $user_id );
 
 		if ( has_filter( 'woocommerce_found_customer_details' ) ) {
-			wc_deprecated_function( 'The woocommerce_found_customer_details filter', '3.0', 'woocommerce_found_customer_details' );
+			wc_deprecated_function( 'The woocommerce_found_customer_details filter', '3.0', 'woocommerce_ajax_get_customer_details' );
 		}
 
 		$data = $customer->get_data();
 		$data['date_created']  = $data['date_created'] ? $data['date_created']->getTimestamp() : null;
 		$data['date_modified'] = $data['date_modified'] ? $data['date_modified']->getTimestamp() : null;
 
-		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $customer->get_data(), $customer, $user_id );
+		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $data, $customer, $user_id );
 		wp_send_json( $customer_data );
 	}
 
@@ -1026,9 +1026,7 @@ class WC_AJAX {
 		// Grab the order and recalc taxes
 		$order = wc_get_order( $order_id );
 		$order->calculate_taxes( $calculate_tax_args );
-
-		// Return HTML items
-		$order = wc_get_order( $order_id );
+		$order->calculate_totals( false );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 		wp_die();
 	}
@@ -1193,7 +1191,7 @@ class WC_AJAX {
 		}
 
 		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, (array) $_GET['exclude'] );
+			$ids = array_intersect( $ids, (array) $_GET['include'] );
 		}
 
 		if ( ! empty( $_GET['limit'] ) ) {
@@ -1224,13 +1222,33 @@ class WC_AJAX {
 
 		$term    = wc_clean( stripslashes( $_GET['term'] ) );
 		$exclude = array();
+		$limit   = '';
 
 		if ( empty( $term ) ) {
 			wp_die();
 		}
 
-		$data_store      = WC_Data_Store::load( 'customer' );
-		$ids             = $data_store->search_customers( $term );
+		// Search by ID.
+		if ( is_numeric( $term ) ) {
+			$customer = new WC_Customer( intval( $term ) );
+
+			// Customer does not exists.
+			if ( 0 === $customer->get_id() ) {
+				wp_die();
+			}
+
+			$ids = array( $customer->get_id() );
+		} else {
+			$data_store = WC_Data_Store::load( 'customer' );
+
+			// If search is smaller than 3 characters, limit result set to avoid
+			// too many rows being returned.
+			if ( 3 > strlen( $term ) ) {
+				$limit = 20;
+			}
+			$ids = $data_store->search_customers( $term, $limit );
+		}
+
 		$found_customers = array();
 
 		if ( ! empty( $_GET['exclude'] ) ) {
@@ -1310,6 +1328,13 @@ class WC_AJAX {
 			$index ++;
 			$menu_orders[ $id ] = $index;
 			$wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) );
+
+			/**
+			 * When a single product has gotten it's ordering updated.
+			 * $id The product ID
+			 * $index The new menu order
+			*/
+			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
 		}
 
 		if ( isset( $menu_orders[ $previd ] ) ) {
@@ -1517,7 +1542,7 @@ class WC_AJAX {
 				$key_id                  = $wpdb->insert_id;
 				$data['consumer_key']    = $consumer_key;
 				$data['consumer_secret'] = $consumer_secret;
-				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new API keys now. You won\'t be able to see it again!', 'woocommerce' );
+				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
 				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 
@@ -1679,6 +1704,28 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Stock Status as In Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_instock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'instock' );
+	}
+
+	/**
+	 * Bulk action - Set Stock Status as Out of Stock.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_outofstock( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'outofstock' );
+	}
+
+	/**
 	 * Bulk action - Set Stock.
 	 * @access private
 	 * @used-by bulk_edit_variations
@@ -1805,7 +1852,7 @@ class WC_AJAX {
 			}
 
 			if ( 'false' !== $data['date_to'] ) {
-				$variation->set_date_on_sale_from( wc_clean( $data['date_to'] ) );
+				$variation->set_date_on_sale_to( wc_clean( $data['date_to'] ) );
 			}
 
 			$variation->save();

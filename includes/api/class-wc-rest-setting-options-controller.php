@@ -178,12 +178,42 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 			if ( 'multi_select_countries' === $setting['type'] ) {
 				$setting['options'] = WC()->countries->get_countries();
 				$setting['type']    = 'multiselect';
+			} elseif ( 'single_select_country' === $setting['type'] ) {
+				$setting['type']    = 'select';
+				$setting['options'] = $this->get_countries_and_states();
 			}
 
 			$filtered_settings[] = $setting;
 		}
 
 		return $filtered_settings;
+	}
+
+	/**
+	 * Returns a list of countries and states for use in the base location setting.
+	 *
+	 * @since  3.0.7
+	 * @return array Array of states and countries.
+	 */
+	private function get_countries_and_states() {
+		$countries = WC()->countries->get_countries();
+		if ( ! $countries ) {
+			return array();
+		}
+
+		$output = array();
+
+		foreach ( $countries as $key => $value ) {
+			if ( $states = WC()->countries->get_states( $key ) ) {
+				foreach ( $states as $state_key => $state_value ) {
+					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
+				}
+			} else {
+				$output[ $key ] = $value;
+			}
+		}
+
+		return $output;
 	}
 
 	/**

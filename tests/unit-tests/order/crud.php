@@ -272,6 +272,29 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertCount( 2, $object->get_items() );
 	}
+	
+	/**
+	 * Test: get_different_items
+	 */
+	function test_get_different_items() {
+		$object  = new WC_Order();
+		$item_1  = new WC_Order_Item_Product();
+		$item_1->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+		$item_2  = new WC_Order_Item_Fee();
+		$item_2->set_props( array(
+			'name'       => 'Some Fee',
+			'tax_status' => 'taxable',
+			'total'      => '100',
+			'tax_class'  => '',
+		) );
+		$object->add_item( $item_1 );
+		$object->add_item( $item_2 );
+		// $object->save();
+		$this->assertCount( 2, $object->get_items( array( 'line_item', 'fee' ) ) );
+	}
 
 	/**
 	 * Test: get_fees
@@ -456,10 +479,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'product'  => WC_Helper_Product::create_simple_product(),
 			'quantity' => 4,
 		) );
-		$item->save();
-		$object->add_item( $item->get_id() );
+		$object->add_item( $item );
 		$object->save();
 		$this->assertTrue( $object->get_item( $item->get_id() ) instanceOf WC_Order_Item_Product );
+		$this->assertEquals( spl_object_hash( $item ), spl_object_hash( $object->get_item( $item->get_id() ) ) );
 
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
@@ -472,6 +495,51 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->add_item( $item );
 		$object->save();
 		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+
+		$object = new WC_Order( $object->get_id() );
+		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+	}
+
+	/**
+	 *	Make sure that items returned by get_item is tied to the order,
+	 *  and that is saved when the order is saved.
+	 */
+	public function test_get_item_object_is_updated_with_order_save() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+		) );
+		$object->add_item( $item );
+		$object->save();
+
+		$object = new WC_Order( $object->get_id() );
+		$item = $object->get_item( $item->get_id() );
+		$item->set_quantity( 6 );
+		$object->save();
+
+		$object = new WC_Order( $object->get_id() );
+		$this->assertEquals(6, $object->get_item( $item->get_id() )->get_quantity() );
+	}
+
+	/**
+	 * Makes sure that get_item only returns items related to the order
+	 */
+	public function test_get_item_from_another_order() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => WC_Helper_Product::create_simple_product(),
+			'quantity' => 4,
+			'order_id' => 999,
+		) );
+		$item->save();
+		$this->assertFalse( $object->get_item( $item->get_id() ) );
+
+		$object->save();
+		$this->assertFalse( $object->get_item( $item->get_id() ) );
+
 	}
 
 	/**
@@ -577,6 +645,51 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	function test_calculate_taxes_issue_with_addresses() {
+		global $wpdb;
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$taxes = array();
+
+		$taxes[] = WC_Tax::_insert_tax_rate( array(
+			'tax_rate_country'  => 'US',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		) );
+		$taxes[] = WC_Tax::_insert_tax_rate( array(
+			'tax_rate_country'  => 'PY',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		) );
+
+		update_option( 'woocommerce_default_country', 'PY:Central' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+
+		$order = new WC_Order;
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'CA' );
+		$order->add_product( WC_Helper_Product::create_simple_product(), 4 );
+		$order->calculate_taxes();
+
+		$tax = $order->get_taxes();
+		$this->assertEquals( 1, count( $tax ) );
+		$this->assertEquals( 'US-TAX-1', current( $tax )->get_name() );
 	}
 
 	/**
@@ -1159,7 +1272,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_shipping_state( 'Boulder' );
 		$object->set_shipping_postcode( '00001' );
 		$object->set_shipping_country( 'US' );
-		$this->assertEquals( 'https://maps.google.com/maps?&q=Barney%2C+Rubble%2C+Bedrock+Ltd.%2C+34+Stonepants+avenue%2C+Rockville%2C+Bedrock%2C+Boulder%2C+00001%2C+US&z=16', $object->get_shipping_address_map_url() );
+		$this->assertEquals( 'https://maps.google.com/maps?&q=34+Stonepants+avenue%2C+Rockville%2C+Bedrock%2C+Boulder%2C+00001%2C+US&z=16', $object->get_shipping_address_map_url() );
 	}
 
 	/**

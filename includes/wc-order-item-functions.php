@@ -15,23 +15,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Add a item to an order (for example a line item).
  *
- * @access public
  * @param int $order_id
- * @return mixed
+ * @param array $item_array
+ * @return int|bool Item ID or false
  */
-function wc_add_order_item( $order_id, $item ) {
-	if ( ! $order_id = absint( $order_id ) )
+function wc_add_order_item( $order_id, $item_array ) {
+	$order_id = absint( $order_id );
+
+	if ( ! $order_id ) {
 		return false;
+	}
 
 	$defaults = array(
-		'order_item_name'       => '',
-		'order_item_type'       => 'line_item',
+		'order_item_name' => '',
+		'order_item_type' => 'line_item',
 	);
 
-	$item = wp_parse_args( $item, $defaults );
-
+	$item_array = wp_parse_args( $item_array, $defaults );
 	$data_store = WC_Data_Store::load( 'order-item' );
-	$item_id    = $data_store->add_order_item( $order_id, $item );
+	$item_id    = $data_store->add_order_item( $order_id, $item_array );
+	$item       = WC_Order_Factory::get_order_item( $item_id );
 
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
@@ -96,8 +99,7 @@ function wc_delete_order_item( $item_id ) {
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->update_metadata( $item_id, $meta_key, $meta_value, $prev_value ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
-		wp_cache_delete( $cache_key, 'order-items' );
+		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
 		return true;
 	}
 	return false;
@@ -116,8 +118,7 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $meta_id = $data_store->add_metadata( $item_id, $meta_key, $meta_value, $unique ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
-		wp_cache_delete( $cache_key, 'order-items' );
+		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
 		return $meta_id;
 	}
 	return 0;
@@ -136,8 +137,7 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->delete_metadata( $item_id, $meta_key, $meta_value, $delete_all ) ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'order-items' ) . 'object_meta_' . $item_id;
-		wp_cache_delete( $cache_key, 'order-items' );
+		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
 		return true;
 	}
 	return false;

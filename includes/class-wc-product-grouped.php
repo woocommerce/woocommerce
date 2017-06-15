@@ -52,7 +52,7 @@ class WC_Product_Grouped extends WC_Product {
 	public function is_on_sale( $context = 'view' ) {
 		global $wpdb;
 
-		$on_sale = $this->get_children() && 1 === $wpdb->get_var( "SELECT 1 FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
+		$on_sale = $this->get_children() && null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_sale_price' AND meta_value > 0 AND post_id IN (" . implode( ',', array_map( 'esc_sql', $this->get_children() ) ) . ");" );
 
 		return 'view' === $context ? apply_filters( 'woocommerce_product_is_on_sale', $on_sale, $this ) : $on_sale;
 	}
@@ -79,7 +79,7 @@ class WC_Product_Grouped extends WC_Product {
 
 		foreach ( $this->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( '' !== $child->get_price() ) {
+			if ( $child && '' !== $child->get_price() ) {
 				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
 			}
 		}

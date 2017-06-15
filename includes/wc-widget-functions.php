@@ -43,9 +43,12 @@ function wc_register_widgets() {
 	register_widget( 'WC_Widget_Product_Search' );
 	register_widget( 'WC_Widget_Product_Tag_Cloud' );
 	register_widget( 'WC_Widget_Products' );
-	register_widget( 'WC_Widget_Rating_Filter' );
-	register_widget( 'WC_Widget_Recent_Reviews' );
 	register_widget( 'WC_Widget_Recently_Viewed' );
-	register_widget( 'WC_Widget_Top_Rated_Products' );
+
+	if ( post_type_supports( 'product', 'comments' ) ) {
+		register_widget( 'WC_Widget_Top_Rated_Products' );
+		register_widget( 'WC_Widget_Recent_Reviews' );
+		register_widget( 'WC_Widget_Rating_Filter' );
+	}
 }
 add_action( 'widgets_init', 'wc_register_widgets' );

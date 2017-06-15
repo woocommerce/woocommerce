@@ -3,11 +3,14 @@
 /* Modifided script from the simple-page-ordering plugin */
 jQuery( function( $ ) {
 
-	$( 'table.widefat.wp-list-table tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
+	$( 'table.widefat.wp-list-table tr' ).append(
+		'<td class="column-handle"></td>'
+	);
 
 	$( 'table.widefat.wp-list-table' ).sortable({
 		items: 'tbody tr:not(.inline-edit-row)',
 		cursor: 'move',
+		handle: '.column-handle',
 		axis: 'y',
 		forcePlaceholderSize: true,
 		helper: 'clone',

@@ -165,6 +165,7 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
  * @return float
  */
 function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
+	$weight  = (float) $weight;
 	$to_unit = strtolower( $to_unit );
 
 	if ( empty( $from_unit ) ) {
@@ -233,6 +234,9 @@ function wc_round_tax_total( $tax ) {
 
 /**
  * Make a refund total negative.
+ *
+ * @param float $amount
+ *
  * @return float
  */
 function wc_format_refund_total( $amount ) {
@@ -242,7 +246,9 @@ function wc_format_refund_total( $amount ) {
 /**
  * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove locale formatting, and optionally round + trim off zeros.
+ * Sanitize, remove decimals, and optionally round + trim off zeros.
+ *
+ * This function does not remove thousands - this should be done before passing a value to the function.
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
@@ -255,8 +261,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
+		$number = str_replace( $decimals, '.', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
@@ -539,6 +545,10 @@ function wc_time_format() {
  * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
  *
  * @since  3.0.0
+ *
+ * @param string $time_string
+ * @param int|null $from_timestamp
+ *
  * @return int
  */
 function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
@@ -557,6 +567,33 @@ function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
 	// @codingStandardsIgnoreEnd
 
 	return $next_timestamp;
+}
+
+/**
+ * Convert a date string to a WC_DateTime.
+ *
+ * @since  3.1.0
+ * @param string $time_string
+ * @return WC_DateTime
+ */
+function wc_string_to_datetime( $time_string ) {
+	// Strings are defined in local WP timezone. Convert to UTC.
+	if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $time_string, $date_bits ) ) {
+		$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
+		$timestamp = gmmktime( $date_bits[4], $date_bits[5], $date_bits[6], $date_bits[2], $date_bits[3], $date_bits[1] ) - $offset;
+	} else {
+		$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $time_string ) ) ) );
+	}
+	$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+
+	// Set local timezone or offset.
+	if ( get_option( 'timezone_string' ) ) {
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+	} else {
+		$datetime->set_utc_offset( wc_timezone_offset() );
+	}
+
+	return $datetime;
 }
 
 /**
@@ -605,14 +642,14 @@ function wc_timezone_string() {
  * Get timezone offset in seconds.
  *
  * @since  3.0.0
- * @return integer
+ * @return float
  */
 function wc_timezone_offset() {
 	if ( $timezone = get_option( 'timezone_string' ) ) {
 		$timezone_object = new DateTimeZone( $timezone );
 		return $timezone_object->getOffset( new DateTime( 'now' ) );
 	} else {
-		return intval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
+		return floatval( get_option( 'gmt_offset', 0 ) ) * HOUR_IN_SECONDS;
 	}
 }
 
@@ -633,7 +670,8 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
-	 * @return string
+	 *
+	 * @return array
 	 */
 	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
@@ -795,8 +833,18 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	$postcode = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $postcode ) : strtoupper( $postcode );
-	return preg_replace( '/[\s\-]/', '', trim( $postcode ) );
+	return preg_replace( '/[\s\-]/', '', trim( wc_strtoupper( $postcode ) ) );
+}
+
+/**
+ * Wrapper for mb_strtoupper which see's if supported first.
+ *
+ * @since  3.1.0
+ * @param  string $string
+ * @return string
+ */
+function wc_strtoupper( $string ) {
+	return function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $string ) : strtoupper( $string );
 }
 
 /**
@@ -847,7 +895,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * @return string
  */
 function wc_format_content( $raw_string ) {
-	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
+	return apply_filters( 'woocommerce_format_content', apply_filters( 'woocommerce_short_description', $raw_string ), $raw_string );
 }
 
 /**
@@ -868,8 +916,6 @@ function wc_format_product_short_description( $content ) {
 
 	return $content;
 }
-
-add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
  * Formats curency symbols when saved in settings.
@@ -1077,4 +1123,19 @@ function wc_format_datetime( $date, $format = '' ) {
 		return '';
 	}
 	return $date->date_i18n( $format );
+}
+
+/**
+ * Process oEmbeds.
+ *
+ * @since  3.1.0
+ * @param string $content
+ * @return string
+ */
+function wc_do_oembeds( $content ) {
+	global $wp_embed;
+
+	$content = $wp_embed->autoembed( $content );
+
+	return $content;
 }

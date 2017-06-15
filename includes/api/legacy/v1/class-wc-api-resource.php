@@ -62,16 +62,18 @@ class WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
-		if ( 'shop_order' === $type || 'shop_coupon' === $type )
+		if ( 'shop_order' === $type || 'shop_coupon' === $type ) {
 			$resource_name = str_replace( 'shop_', '', $type );
-		else
+		} else {
 			$resource_name = $type;
+		}
 
 		$id = absint( $id );
 
 		// validate ID
-		if ( empty( $id ) )
+		if ( empty( $id ) ) {
 			return new WP_Error( "woocommerce_api_invalid_{$resource_name}_id", sprintf( __( 'Invalid %s ID', 'woocommerce' ), $type ), array( 'status' => 404 ) );
+		}
 
 		// only custom post types have per-post type/permission checks
 		if ( 'customer' !== $type ) {
@@ -82,25 +84,29 @@ class WC_API_Resource {
 			$post_type = ( 'product_variation' === $post->post_type ) ? 'product' : $post->post_type;
 
 			// validate post type
-			if ( $type !== $post_type )
+			if ( $type !== $post_type ) {
 				return new WP_Error( "woocommerce_api_invalid_{$resource_name}", sprintf( __( 'Invalid %s', 'woocommerce' ), $resource_name ), array( 'status' => 404 ) );
+			}
 
 			// validate permissions
 			switch ( $context ) {
 
 				case 'read':
-					if ( ! $this->is_readable( $post ) )
+					if ( ! $this->is_readable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_read_{$resource_name}", sprintf( __( 'You do not have permission to read this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'edit':
-					if ( ! $this->is_editable( $post ) )
+					if ( ! $this->is_editable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_edit_{$resource_name}", sprintf( __( 'You do not have permission to edit this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'delete':
-					if ( ! $this->is_deletable( $post ) )
+					if ( ! $this->is_deletable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_delete_{$resource_name}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 			}
 		}
@@ -126,33 +132,40 @@ class WC_API_Resource {
 			$args['date_query'] = array();
 
 			// resources created after specified date
-			if ( ! empty( $request_args['created_at_min'] ) )
+			if ( ! empty( $request_args['created_at_min'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $this->server->parse_datetime( $request_args['created_at_min'] ), 'inclusive' => true );
+			}
 
 			// resources created before specified date
-			if ( ! empty( $request_args['created_at_max'] ) )
+			if ( ! empty( $request_args['created_at_max'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $this->server->parse_datetime( $request_args['created_at_max'] ), 'inclusive' => true );
+			}
 
 			// resources updated after specified date
-			if ( ! empty( $request_args['updated_at_min'] ) )
+			if ( ! empty( $request_args['updated_at_min'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $this->server->parse_datetime( $request_args['updated_at_min'] ), 'inclusive' => true );
+			}
 
 			// resources updated before specified date
-			if ( ! empty( $request_args['updated_at_max'] ) )
+			if ( ! empty( $request_args['updated_at_max'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $this->server->parse_datetime( $request_args['updated_at_max'] ), 'inclusive' => true );
+			}
 		}
 
 		// search
-		if ( ! empty( $request_args['q'] ) )
+		if ( ! empty( $request_args['q'] ) ) {
 			$args['s'] = $request_args['q'];
+		}
 
 		// resources per response
-		if ( ! empty( $request_args['limit'] ) )
+		if ( ! empty( $request_args['limit'] ) ) {
 			$args['posts_per_page'] = $request_args['limit'];
+		}
 
 		// resource offset
-		if ( ! empty( $request_args['offset'] ) )
+		if ( ! empty( $request_args['offset'] ) ) {
 			$args['offset'] = $request_args['offset'];
+		}
 
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
@@ -174,8 +187,9 @@ class WC_API_Resource {
 		if ( isset( $this->server->params['GET']['filter']['meta'] ) && 'true' === $this->server->params['GET']['filter']['meta'] && is_object( $resource ) ) {
 
 			// don't attempt to add meta more than once
-			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) )
+			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) ) {
 				return $data;
+			}
 
 			// define the top-level property name for the meta
 			switch ( get_class( $resource ) ) {
@@ -202,15 +216,10 @@ class WC_API_Resource {
 				// customer meta
 				$meta = (array) get_user_meta( $resource->ID );
 
-			} elseif ( is_a( $resource, 'WC_Product_Variation' ) ) {
-
-				// product variation meta
-				$meta = (array) get_post_meta( $resource->get_variation_id() );
-
 			} else {
 
 				// coupon/order/product meta
-				$meta = (array) get_post_meta( $resource->id );
+				$meta = (array) get_post_meta( $resource->get_id() );
 			}
 
 			foreach ( $meta as $meta_key => $meta_value ) {
@@ -236,8 +245,9 @@ class WC_API_Resource {
 	 */
 	public function filter_response_fields( $data, $resource, $fields ) {
 
-		if ( ! is_array( $data ) || empty( $fields ) )
+		if ( ! is_array( $data ) || empty( $fields ) ) {
 			return $data;
+		}
 
 		$fields = explode( ',', $fields );
 		$sub_fields = array();
@@ -290,27 +300,29 @@ class WC_API_Resource {
 	 */
 	protected function delete( $id, $type, $force = false ) {
 
-		if ( 'shop_order' === $type || 'shop_coupon' === $type )
+		if ( 'shop_order' === $type || 'shop_coupon' === $type ) {
 			$resource_name = str_replace( 'shop_', '', $type );
-		else
+		} else {
 			$resource_name = $type;
+		}
 
 		if ( 'customer' === $type ) {
 
 			$result = wp_delete_user( $id );
 
-			if ( $result )
+			if ( $result ) {
 				return array( 'message' => __( 'Permanently deleted customer', 'woocommerce' ) );
-			else
+			} else {
 				return new WP_Error( 'woocommerce_api_cannot_delete_customer', __( 'The customer cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
-
+			}
 		} else {
 
 			// delete order/coupon/product
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
-			if ( ! $result )
+			if ( ! $result ) {
 				return new WP_Error( "woocommerce_api_cannot_delete_{$resource_name}", sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), $resource_name ), array( 'status' => 500 ) );
+			}
 
 			if ( $force ) {
 				return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), $resource_name ) );
@@ -375,24 +387,24 @@ class WC_API_Resource {
 	 */
 	private function check_permission( $post, $context ) {
 
-		if ( ! is_a( $post, 'WP_Post' ) )
+		if ( ! is_a( $post, 'WP_Post' ) ) {
 			$post = get_post( $post );
+		}
 
-		if ( is_null( $post ) )
+		if ( is_null( $post ) ) {
 			return false;
+		}
 
 		$post_type = get_post_type_object( $post->post_type );
 
-		if ( 'read' === $context )
+		if ( 'read' === $context ) {
 			return current_user_can( $post_type->cap->read_private_posts, $post->ID );
-
-		elseif ( 'edit' === $context )
+		} elseif ( 'edit' === $context ) {
 			return current_user_can( $post_type->cap->edit_post, $post->ID );
-
-		elseif ( 'delete' === $context )
+		} elseif ( 'delete' === $context ) {
 			return current_user_can( $post_type->cap->delete_post, $post->ID );
-
-		else
+		} else {
 			return false;
+		}
 	}
 }

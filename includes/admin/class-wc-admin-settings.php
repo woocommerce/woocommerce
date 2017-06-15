@@ -172,8 +172,10 @@ class WC_Admin_Settings {
 	/**
 	 * Get a setting from the settings API.
 	 *
-	 * @param mixed $option_name
-	 * @return string
+	 * @param string $option_name
+	 * @param mixed $default
+	 *
+	 * @return mixed
 	 */
 	public static function get_option( $option_name, $default = '' ) {
 		// Array value
@@ -214,7 +216,7 @@ class WC_Admin_Settings {
 	 *
 	 * Loops though the woocommerce options array and outputs each field.
 	 *
-	 * @param array $options Opens array to output
+	 * @param array[] $options Opens array to output
 	 */
 	public static function output_fields( $options ) {
 		foreach ( $options as $value ) {
@@ -291,17 +293,8 @@ class WC_Admin_Settings {
 				case 'text':
 				case 'email':
 				case 'number':
-				case 'color' :
 				case 'password' :
-
-					$type         = $value['type'];
 					$option_value = self::get_option( $value['id'], $value['default'] );
-
-					if ( 'color' === $value['type'] ) {
-						$type = 'text';
-						$value['class'] .= 'colorpick';
-						$description .= '<div id="colorPickerDiv_' . esc_attr( $value['id'] ) . '" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>';
-					}
 
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
@@ -309,23 +302,43 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
-							&lrm;
-							<?php
-							if ( 'color' == $value['type'] ) {
-								echo '<span class="colorpickpreview" style="background: ' . esc_attr( $option_value ) . ';"></span>';
-							}
-							?>
 							<input
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
-								type="<?php echo esc_attr( $type ); ?>"
-								dir="ltr"
+								type="<?php echo esc_attr( $value['type'] ); ?>"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								value="<?php echo esc_attr( $option_value ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
 								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
+								/> <?php echo $description; ?>
+						</td>
+					</tr><?php
+					break;
+
+				// Color picker.
+				case 'color' :
+					$option_value = self::get_option( $value['id'], $value['default'] );
+
+					?><tr valign="top">
+						<th scope="row" class="titledesc">
+							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+							<?php echo $tooltip_html; ?>
+						</th>
+						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">&lrm;
+							<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>"></span>
+							<input
+								name="<?php echo esc_attr( $value['id'] ); ?>"
+								id="<?php echo esc_attr( $value['id'] ); ?>"
+								type="text"
+								dir="ltr"
+								style="<?php echo esc_attr( $value['css'] ); ?>"
+								value="<?php echo esc_attr( $option_value ); ?>"
+								class="<?php echo esc_attr( $value['class'] ); ?>colorpick"
+								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
+								<?php echo implode( ' ', $custom_attributes ); ?>
 								/>&lrm; <?php echo $description; ?>
+								<div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>
 						</td>
 					</tr><?php
 					break;

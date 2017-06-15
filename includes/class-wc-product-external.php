@@ -110,7 +110,8 @@ class WC_Product_External extends WC_Product {
 	 * External products cannot be stock managed.
 	 *
 	 * @since 3.0.0
-	 * @param bool
+	 *
+	 * @param string $stock_status
 	 */
 	public function set_stock_status( $stock_status = '' ) {
 		$this->set_prop( 'stock_status', 'instock' );
@@ -167,7 +168,7 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function single_add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text(), $this );
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text() ? $this->get_button_text() : _x( 'Buy product', 'placeholder', 'woocommerce' ), $this );
 	}
 
 	/**
@@ -177,6 +178,6 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->get_button_text(), $this );
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->get_button_text() ? $this->get_button_text() : _x( 'Buy product', 'placeholder', 'woocommerce' ), $this );
 	}
 }

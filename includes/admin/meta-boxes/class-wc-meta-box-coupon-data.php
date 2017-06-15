@@ -192,8 +192,10 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
 				</select> <?php echo wc_help_tip( __( 'A product must be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will be discounted.', 'woocommerce' ) ); ?></p>
@@ -207,8 +209,10 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_excluded_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
 				</select> <?php echo wc_help_tip( __( 'Product must not be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will not be discounted.', 'woocommerce' ) ); ?></p>
@@ -221,7 +225,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'                => 'customer_email',
 					'label'             => __( 'Email restrictions', 'woocommerce' ),
 					'placeholder'       => __( 'No restrictions', 'woocommerce' ),
-					'description'       => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
+					'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
 					'value'             => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
 					'desc_tip'          => true,
 					'type'              => 'email',
@@ -306,8 +310,6 @@ class WC_Meta_Box_Coupon_Data {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
 		// Check for dupe coupons
 		$coupon_code  = wc_format_coupon_code( $post->post_title );
 		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );

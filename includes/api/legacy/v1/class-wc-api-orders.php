@@ -70,8 +70,9 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function get_orders( $fields = null, $filter = array(), $status = null, $page = 1 ) {
 
-		if ( ! empty( $status ) )
+		if ( ! empty( $status ) ) {
 			$filter['status'] = $status;
+		}
 
 		$filter['page'] = $page;
 
@@ -81,8 +82,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach ( $query->posts as $order_id ) {
 
-			if ( ! $this->is_readable( $order_id ) )
+			if ( ! $this->is_readable( $order_id ) ) {
 				continue;
+			}
 
 			$orders[] = current( $this->get_order( $order_id, $fields ) );
 		}
@@ -99,7 +101,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order( $id, $fields = null ) {
 
@@ -235,19 +237,23 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get the total number of orders
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $status
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_orders_count( $status = null, $filter = array() ) {
 
-		if ( ! empty( $status ) )
+		if ( ! empty( $status ) ) {
 			$filter['status'] = $status;
+		}
 
 		$query = $this->query_orders( $filter );
 
-		if ( ! current_user_can( 'read_private_shop_orders' ) )
+		if ( ! current_user_can( 'read_private_shop_orders' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_orders_count', __( 'You do not have permission to read the orders count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		return array( 'count' => (int) $query->found_posts );
 	}
@@ -260,14 +266,15 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_order( $id, $data ) {
 
 		$id = $this->validate_request( $id, 'shop_order', 'edit' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$order = wc_get_order( $id );
 
@@ -299,15 +306,16 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order_notes( $id, $fields = null ) {
 
 		// ensure ID is valid order ID
 		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$args = array(
 			'post_id' => $id,

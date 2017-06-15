@@ -59,6 +59,8 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  * @param  string $replacement
  */
 function wc_doing_it_wrong( $function, $message, $version ) {
+	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
+
 	if ( is_ajax() ) {
 		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
@@ -933,4 +935,19 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 		update_post_meta( $product_id, '_sale_price_dates_from', '' );
 		update_post_meta( $product_id, '_sale_price_dates_to', '' );
 	}
+}
+
+/**
+ * Return customer avatar URL.
+ *
+ * @deprecated 3.1.0
+ * @since 2.6.0
+ * @param string $email the customer's email.
+ * @return string the URL to the customer's avatar.
+ */
+function wc_get_customer_avatar_url( $email ) {
+	// Deprecated in favor of WordPress get_avatar_url() function.
+	wc_deprecated_function( 'wc_get_customer_avatar_url()', '3.1', 'get_avatar_url()' );
+
+	return get_avatar_url( $email );
 }
