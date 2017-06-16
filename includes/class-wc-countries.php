@@ -659,10 +659,10 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
-                    'state' => array(
-                        'required' => false,
+					'state' => array(
+						'required' => false,
 					),
-                ),
+				),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -1113,6 +1113,9 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
+			if ( 'state' === $key ) {
+				$value['country_field'] = $type . 'country';
+			}
 			$address_fields[ $type . $key ] = $value;
 		}
 
