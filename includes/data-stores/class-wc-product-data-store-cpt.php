@@ -1121,6 +1121,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update_average_rating( $product ) {
 		update_post_meta( $product->get_id(), '_wc_average_rating', $product->get_average_rating( 'edit' ) );
+		self::update_visibility( $product, true );
 	}
 
 	/**
