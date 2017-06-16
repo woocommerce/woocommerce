@@ -30,12 +30,10 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	private function is_webhook_settings_page() {
-		return isset( $_GET['page'] )
-			&& 'wc-settings' == $_GET['page']
-			&& isset( $_GET['tab'] )
-			&& 'api' == $_GET['tab']
-			&& isset( $_GET['section'] )
-			&& 'webhooks' == isset( $_GET['section'] );
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+			&& 'wc-settings' === $_GET['page']
+			&& 'api' === $_GET['tab']
+			&& 'webhooks' === $_GET['section'];
 	}
 
 	/**
