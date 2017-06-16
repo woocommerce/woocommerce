@@ -335,6 +335,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Count products within certain terms, taking the main WP query into consideration.
 	 *
+	 * This query allows counts to be generated based on the viewed products, not all products.
+	 *
 	 * @param  array  $term_ids
 	 * @param  string $taxonomy
 	 * @param  string $query_type
@@ -383,9 +385,19 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$query['group_by'] = "GROUP BY terms.term_id";
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
-		$results           = $wpdb->get_results( $query );
 
-		return wp_list_pluck( $results, 'term_count', 'term_count_id' );
+		// We have a query - let's see if cached results of this query already exist.
+		$query_hash    = md5( $query );
+		$cached_counts = (array) get_transient( 'wc_layered_nav_counts' );
+
+		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
+			$results                      = $wpdb->get_results( $query, ARRAY_A );
+			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+			$cached_counts[ $query_hash ] = $counts;
+			set_transient( 'wc_layered_nav_counts', $cached_counts, DAY_IN_SECONDS );
+		}
+
+		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
 	}
 
 	/**
