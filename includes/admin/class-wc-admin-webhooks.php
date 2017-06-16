@@ -31,11 +31,11 @@ class WC_Admin_Webhooks {
 	 */
 	private function is_webhook_settings_page() {
 		return isset( $_GET['page'] )
-			&& 'wc-settings' == $_GET['page']
+			&& 'wc-settings' === $_GET['page']
 			&& isset( $_GET['tab'] )
-			&& 'api' == $_GET['tab']
+			&& 'api' === $_GET['tab']
 			&& isset( $_GET['section'] )
-			&& 'webhooks' == isset( $_GET['section'] );
+			&& 'webhooks' === isset( $_GET['section'] );
 	}
 
 	/**
