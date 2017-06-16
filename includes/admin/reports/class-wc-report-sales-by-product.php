@@ -211,6 +211,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					<input type="hidden" name="page" value="<?php echo ( ! empty( $_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : ''; ?>" />
 					<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( $_GET['tab'] ) : ''; ?>" />
 					<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( $_GET['report'] ) : ''; ?>" />
+					<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
 				</div>
 			</form>
 		</div>
