@@ -1898,7 +1898,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @subpackage    Forms
 	 *
 	 * @param string $key
-	 * @param mixed $args
+	 * @param mixed  $args
 	 * @param string $value (default: null)
 	 *
 	 * @return string
@@ -2003,11 +2003,9 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'state' :
-
-				/* Get Country */
-				$country_key = 'billing_state' === $key ? 'billing_country' : 'shipping_country';
-				$current_cc  = WC()->checkout->get_value( $country_key );
-				$states      = WC()->countries->get_states( $current_cc );
+				/* Get country this state field is representing */
+				$for_country = isset( $args['country'] ) ? $args['country'] : WC()->checkout->get_value( 'billing_state' === $key ? 'billing_country' : 'shipping_country' );
+				$states      = WC()->countries->get_states( $for_country );
 
 				if ( is_array( $states ) && empty( $states ) ) {
 
@@ -2015,7 +2013,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
 
-				} elseif ( ! is_null( $current_cc ) && is_array( $states ) ) {
+				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
 					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 						<option value="">' . esc_html__( 'Select a state&hellip;', 'woocommerce' ) . '</option>';
