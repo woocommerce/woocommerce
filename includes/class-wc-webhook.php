@@ -689,6 +689,8 @@ class WC_Webhook {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
 
+		delete_post_meta( $this->id, '_webhook_pending_delivery' );
+
 		return true;
 	}
 
