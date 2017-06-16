@@ -96,7 +96,7 @@ class WC_Shortcode_Checkout {
 
 			// Logged out customer does not have permission to pay for this order.
 			} elseif ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
-				echo '<div class="woocommerce-info">' . __( 'Please login to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
+				echo '<div class="woocommerce-info">' . __( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
 				woocommerce_login_form( array(
 					'redirect' => $order->get_checkout_payment_url(),
 				) );
