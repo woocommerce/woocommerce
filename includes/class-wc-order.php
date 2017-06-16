@@ -1276,17 +1276,22 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
+		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
 		$needs_address = false;
 
-		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			// Remove any instance IDs after :
-			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
+		if ( $this->get_shipping_methods() ) {
+			foreach ( $this->get_shipping_methods() as $shipping_method ) {
+				// Remove any instance IDs after :
+				$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
 
-			if ( ! in_array( $shipping_method_id, $hide ) ) {
-				$needs_address = true;
-				break;
+				if ( ! in_array( $shipping_method_id, $hide ) ) {
+					$needs_address = true;
+					break;
+				}
 			}
+		} else {
+			// If there are no shipping methods (manual order?) just assume we need an address.
+			$needs_address = true;
 		}
 
 		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
