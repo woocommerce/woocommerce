@@ -143,7 +143,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox( array(
 					'id'          => 'exclude_sale_items',
 					'label'       => __( 'Exclude sale items', 'woocommerce' ),
-					'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart.', 'woocommerce' ),
+					'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are items in the cart that are not on sale.', 'woocommerce' ),
 				) );
 
 				echo '</div><div class="options_group">';
