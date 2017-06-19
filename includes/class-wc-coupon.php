@@ -632,7 +632,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_email_restrictions( $emails = array() ) {
-		$emails = array_filter( array_map( 'sanitize_email', (array) $emails ) );
+		$emails = array_filter( array_map( 'sanitize_email', array_map( 'strtolower', (array) $emails ) ) );
 		foreach ( $emails as $email ) {
 			if ( ! is_email( $email ) ) {
 				$this->error( 'coupon_invalid_email_address', __( 'Invalid email address restriction', 'woocommerce' ) );
