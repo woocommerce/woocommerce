@@ -3288,6 +3288,11 @@ img.help_tip {
 							&::before {
 								@include icon_dashicons( '\f153' );
 								color: #999;
+								background: #fff;
+								border-radius: 50%;
+								height: 1em;
+								width: 1em;
+								line-height: 1em;
 							}
 
 							&:hover {
