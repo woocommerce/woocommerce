@@ -143,6 +143,7 @@ class WC_CLI_Runner {
 		foreach ( $supported_commands as $command => $endpoint_args ) {
 			$synopsis = array();
 			$arg_regs = array();
+			$ids      = array();
 
 			foreach ( $supported_ids as $id_name => $id_desc ) {
 				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
@@ -152,10 +153,10 @@ class WC_CLI_Runner {
 						'description' => $id_desc,
 						'optional'    => false,
 					);
+					$ids[] = $id_name;
 				}
 			}
-
-			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) ) {
+			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) && ! in_array( 'id', $ids )  ) {
 				$synopsis[] = array(
 					'name'		  => 'id',
 					'type'		  => 'positional',
@@ -165,7 +166,7 @@ class WC_CLI_Runner {
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
-				if ( ! in_array( $name, $positional_args ) ) {
+				if ( ! in_array( $name, $positional_args ) || strpos( $route, '<' . $id_name . '>' ) === false ) {
 					$arg_regs[] = array(
 						'name'		  => $name,
 						'type'		  => 'assoc',
