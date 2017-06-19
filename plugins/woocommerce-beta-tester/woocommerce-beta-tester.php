@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: WooCommerce Beta Tester
- * Plugin URI: https://github.com/woothemes/woocommerce-beta-tester
+ * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce from our Github repo. This will replace your installed version of WooCommerce with the latest tagged release on Github - use with caution, and not on production sites. You have been warned.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Mike Jolley
- * Author URI: http://woothemes.com/
- * Requires at least: 4.2
- * Tested up to: 4.4
+ * Author URI: http://woocommerce.com/
+ * Requires at least: 4.4
+ * Tested up to: 4.8
  *
  * Based on WP_GitHub_Updater by Joachim Kudish.
  */
@@ -61,7 +61,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 				'slug'               => 'woocommerce',
 				'proper_folder_name' => 'woocommerce',
 				'api_url'            => 'https://api.github.com/repos/woocommerce/woocommerce',
-				'github_url'         => 'https://github.com/woothemes/woocommerce',
+				'github_url'         => 'https://github.com/woocommerce/woocommerce',
 				'requires'           => '4.4',
 				'tested'             => '4.4'
 			);
@@ -84,7 +84,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 			$this->config[ 'new_version' ]  = $this->get_latest_prerelease();
 			$this->config[ 'last_updated' ] = $this->get_date();
 			$this->config[ 'description' ]  = $this->get_description();
-			$this->config[ 'zip_url' ]      = 'https://github.com/woothemes/woocommerce/zipball/' . $this->config[ 'new_version' ];
+			$this->config[ 'zip_url' ]      = 'https://github.com/woocommerce/woocommerce/zipball/' . $this->config[ 'new_version' ];
 		}
 
 		/**
@@ -278,7 +278,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
 			global $wp_filesystem;
 
-			if ( strstr( $source, '/woothemes-woocommerce-' ) ) {
+			if ( strstr( $source, '/woocommerce-woocommerce-' ) ) {
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
 
 				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
@@ -306,7 +306,7 @@ if ( ! function_exists( 'wcbt_woocoommerce_not_installed' ) ) {
 
 	function wcbt_woocoommerce_not_installed() {
 
-		echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Beta Tester requires %s to be installed.', 'woocommerce-beta-tester' ), '<a href="http://www.woothemes.com/woocommerce/" target="_blank">WooCommerce</a>' ) . '</p></div>';
+		echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Beta Tester requires %s to be installed.', 'woocommerce-beta-tester' ), '<a href="http://www.woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</p></div>';
 
 	}
 
