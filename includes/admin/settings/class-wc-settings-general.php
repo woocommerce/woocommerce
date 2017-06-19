@@ -55,7 +55,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Street address', 'woocommerce' ),
+				'title'    => __( 'Address line 1', 'woocommerce' ),
 				'desc'     => __( 'The street address for your business location.', 'woocommerce' ),
 				'id'       => 'woocommerce_store_address',
 				'css'      => 'min-width:350px;',
@@ -65,7 +65,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Street address 2', 'woocommerce' ),
+				'title'    => __( 'Address line 2', 'woocommerce' ),
 				'desc'     => __( 'An additional, optional address line for your business location.', 'woocommerce' ),
 				'id'       => 'woocommerce_store_address_2',
 				'css'      => 'min-width:350px;',
@@ -95,7 +95,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Postal Code', 'woocommerce' ),
+				'title'    => __( 'Postcode / ZIP', 'woocommerce' ),
 				'desc'     => __( 'The postal code, if any, in which your business is located.', 'woocommerce' ),
 				'id'       => 'woocommerce_store_postcode',
 				'css'      => 'min-width:50px;',
