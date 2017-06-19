@@ -113,6 +113,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 			'post_name'      => $product->get_slug( 'edit' ),
+			'meta_input'     => $this->get_meta_input( $product, true ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -133,6 +134,29 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			do_action( 'woocommerce_new_product_variation', $id );
 		}
+	}
+
+	/**
+	 * Get an array of key/value pairs of meta data to pass to WP to update.
+	 *
+	 * @param  WC_Product  $product
+	 * @param  boolean $force Used during creation to force meta updating.
+	 * @return array
+	 */
+	protected function get_meta_input( &$product, $force = false ) {
+		$meta_input        = parent::get_meta_input( $product, $force );
+		$meta_key_to_props = array(
+			'_variation_description' => 'description',
+		);
+
+		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
+			$meta_input[ $meta_key ] = $product->{"get_$prop"}( 'edit' );
+			$this->updated_props[]   = $prop;
+		}
+
+		return $meta_input;
 	}
 
 	/**
@@ -394,30 +418,5 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				delete_post_meta( $product->get_id(), $key );
 			}
 		}
-	}
-
-	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
-	 */
-	public function update_post_meta( &$product, $force = false ) {
-		$meta_key_to_props = array(
-			'_variation_description' => 'description',
-		);
-
-		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
-
-		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value   = $product->{"get_$prop"}( 'edit' );
-			$updated = update_post_meta( $product->get_id(), $meta_key, $value );
-			if ( $updated ) {
-				$this->updated_props[] = $prop;
-			}
-		}
-
-		parent::update_post_meta( $product, $force );
 	}
 }

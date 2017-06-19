@@ -101,6 +101,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 			'post_name'      => $product->get_slug( 'edit' ),
+			'meta_input'     => $this->get_meta_input( $product, true ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -436,13 +437,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 * Get an array of key/value pairs of meta data to pass to WP to update.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
-	 * @since 3.0.0
+	 * @param  WC_Product  $product
+	 * @param  boolean $force Used during creation to force meta updating.
+	 * @return array
 	 */
-	protected function update_post_meta( &$product, $force = false ) {
+	protected function get_meta_input( &$product, $force = false ) {
+		$meta_input        = array();
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -487,15 +489,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
+
 			switch ( $prop ) {
 				case 'virtual' :
 				case 'downloadable' :
 				case 'manage_stock' :
 				case 'sold_individually' :
-					$updated = update_post_meta( $product->get_id(), $meta_key, wc_bool_to_string( $value ) );
+					$value = wc_bool_to_string( $value );
 					break;
 				case 'gallery_image_ids' :
-					$updated = update_post_meta( $product->get_id(), $meta_key, implode( ',', $value ) );
+					$value = implode( ',', $value );
 					break;
 				case 'image_id' :
 					if ( ! empty( $value ) ) {
@@ -507,15 +510,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 				case 'date_on_sale_from' :
 				case 'date_on_sale_to' :
-					$updated = update_post_meta( $product->get_id(), $meta_key, $value ? $value->getTimestamp() : '' );
-					break;
-				default :
-					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
+					$value = $value ? $value->getTimestamp() : '';
 					break;
 			}
-			if ( $updated ) {
-				$this->updated_props[] = $prop;
-			}
+
+			$meta_input[ $meta_key ] = $value;
+			$this->updated_props[]   = $prop;
 		}
 
 		// Update extra data associated with the product like button text or product URL for external products.
@@ -535,6 +535,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $this->update_downloads( $product, $force ) ) {
 			$this->updated_props[] = 'downloads';
+		}
+
+		return $meta_input;
+	}
+
+	/**
+	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 *
+	 * @param WC_Product
+	 * @param bool Force update. Used during create.
+	 * @since 3.0.0
+	 */
+	protected function update_post_meta( &$product, $force = false ) {
+		$meta = $this->get_meta_input();
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $product->get_id(), $key, $value );
 		}
 	}
 
