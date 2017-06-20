@@ -1034,6 +1034,17 @@ function wc_products_array_filter_visible( $product ) {
 }
 
 /**
+ * Callback for array filter to get visible grouped products only.
+ *
+ * @since  3.1.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_products_array_filter_visible_grouped( $product ) {
+	return $product && is_a( $product, 'WC_Product' ) && ( 'publish' === $product->get_status() || current_user_can( 'edit_product', $product->get_id() ) );
+}
+
+/**
  * Callback for array filter to get products the user can edit only.
  *
  * @since  3.0.0
