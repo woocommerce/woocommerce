@@ -826,13 +826,35 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Returns true if the order has a shipping address.
+	 * Get downloadable items for the order.
 	 *
-	 * @since  3.0.4
-	 * @return boolean
+	 * @return array
 	 */
-	public function has_shipping_address() {
-		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
+	public function get_downloadable_items() {
+		$downloads = array();
+
+		foreach ( $this->get_items() as $item ) {
+			if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $item_downloads = $item->get_item_downloads() ) ) {
+				$product = $item->get_product();
+
+				foreach ( $item_downloads as $file ) {
+					$downloads[] = array(
+						'download_url'          => $file['download_url'],
+						'download_id'           => $file['id'],
+						'product_id'            => $product->get_id(),
+						'product_name'          => $product->get_name(),
+						'download_name'         => $file['name'],
+						'order_id'              => $this->get_id(),
+						'order_key'             => $this->get_order_key(),
+						'downloads_remaining'   => $file['downloads_remaining'],
+						'access_expires'        => $file['access_expires']
+					);
+
+				}
+			}
+		}
+
+		return $downloads;
 	}
 
 	/*
@@ -1259,7 +1281,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Checks if product download is permitted.
+	 * Checks if order download is permitted.
 	 *
 	 * @return bool
 	 */
@@ -1290,6 +1312,16 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
+	}
+
+	/**
+	 * Returns true if the order has a shipping address.
+	 *
+	 * @since  3.0.4
+	 * @return boolean
+	 */
+	public function has_shipping_address() {
+		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
 	}
 
 	/**

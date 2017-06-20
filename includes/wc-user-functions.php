@@ -411,7 +411,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
-				$_product->get_name() . ' &ndash; ' . $download_file['name'],
+				$download_file['name'],
 				$_product,
 				$result->download_id,
 				$file_number
