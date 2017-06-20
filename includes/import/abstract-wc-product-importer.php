@@ -194,6 +194,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function process_item( $data ) {
 		try {
+			do_action( 'woocommerce_product_import_before_process_item', $data );
+
 			// Get product ID from SKU if created during the importation.
 			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
 				$data['id'] = $product_id;
