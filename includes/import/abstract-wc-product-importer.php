@@ -304,7 +304,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				// Get ID if is a global attribute.
 				if ( ! empty( $attribute['taxonomy'] ) ) {
-					$attribute_id = $this->get_attribute_taxonomy_id_by_name( $attribute['name'] );
+					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
 				}
 
 				// Set attribute visibility.
@@ -458,7 +458,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Get ID if is a global attribute.
 			if ( ! empty( $attribute['taxonomy'] ) ) {
-				$attribute_id = $this->get_attribute_taxonomy_id_by_name( $attribute['name'] );
+				$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
 			}
 
 			if ( $attribute_id ) {
@@ -562,44 +562,47 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Get attribute taxonomy ID by name.
+	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
 	 * @param  string $name Attribute name.
 	 * @return int
 	 */
-	protected function get_attribute_taxonomy_id_by_name( $name ) {
-		global $wpdb;
+	protected function get_attribute_taxonomy_id( $raw_name ) {
+		global $wpdb, $wc_product_attributes;
 
-		// Check if exists.
-		if ( $attribute_id = wc_attribute_taxonomy_id_by_name( $name ) ) {
+		// These are exported as labels, so convert the label to a name if possible first.
+		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
+		$attribute_name   = '';
+
+		if ( ! $attribute_name = array_search( $raw_name, $attribute_labels ) ) {
+			$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
+		}
+
+		// Get the ID from the name.
+		if ( $attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name ) ) {
 			return $attribute_id;
 		}
 
-		// Register new attribute.
-		$slug = wc_sanitize_taxonomy_name( $name );
+		// If the attribute does not exist, create it.
 		$args = array(
-			'attribute_label'   => $name,
-			'attribute_name'    => wc_sanitize_taxonomy_name( $name ),
+			'attribute_label'   => $raw_name,
+			'attribute_name'    => $attribute_name,
 			'attribute_type'    => 'select',
 			'attribute_orderby' => 'menu_order',
 			'attribute_public'  => 0,
 		);
 
 		// Validate attribute.
-		if ( strlen( $slug ) >= 28 ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), 400 );
-		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), 400 );
-		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), 400 );
+		if ( strlen( $attribute_name ) >= 28 ) {
+			throw new Exception( sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $attribute_name ), 400 );
+		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+			throw new Exception( sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
+		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
+			throw new Exception( sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
 		}
 
-		$result = $wpdb->insert(
-			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
-			array( '%s', '%s', '%s', '%s', '%d' )
-		);
+		$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $args, array( '%s', '%s', '%s', '%s', '%d' ) );
 
 		// Pass errors.
 		if ( is_wp_error( $result ) ) {
@@ -610,16 +613,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		// Register as taxonomy while importing.
-		$taxonomy_data = array(
-			'labels' => array(
-				'name' => $name,
-			),
-		);
-		register_taxonomy( wc_attribute_taxonomy_name( $slug ), array( 'product' ), $taxonomy_data );
+		register_taxonomy( wc_attribute_taxonomy_name( $attribute_name ), array( 'product' ), array( 'labels' => array( 'name' => $raw_name ) ) );
 
 		// Set product attributes global.
-		global $wc_product_attributes;
 		$wc_product_attributes = array();
+
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
 			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
 				$wc_product_attributes[ $name ] = $tax;
