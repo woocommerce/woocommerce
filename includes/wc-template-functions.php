@@ -1003,7 +1003,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ) );
+		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			usort( $products, 'wc_products_array_orderby_menu_order' );
