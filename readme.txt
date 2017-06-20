@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.0.9 - 2017-XX-XX =
+* Fix - Fix missing states in state field when selected country differs from checkout data. Required template modification.
 * Fix - Updated `woocommerce_email_actions` to send email when order status changes from processing to cancelled.
 * Fix - Fix undefined variables in terms and legacy order API endpoints.
 * Fix - Correctly update variation outofstock term on save.
@@ -171,7 +172,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Remove extra escaping to fix saving of special characters in attribute terms.
 * Fix - Stricter shipping method matching in COD to prevent conflicts.
 * Fix - Recalculate totals after local pickup selection so taxes are recalculated.
-* Fix - Fix edge case state field issues when selected country differs from checkout data.
 * Fix - Add missing nonce to product sales report.
 * Fix - Fix webhook save actions and ping the URL to test only once.
 * Fix - Fix issue with CLI IDs which overlap with actual data.
