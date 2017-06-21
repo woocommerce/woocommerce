@@ -49,7 +49,10 @@
 							<br/>
 							<span class="subscription">
 							<?php
-								if ( $subscription['sites_max'] > 0 ) {
+								if ( ! $subscription['active'] && $subscription['maxed'] ) {
+									/* translators: %1$d: sites active, %2$d max sites active */
+									printf( __( 'Subscription: Not available - %1$d of %2$d already in use', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
+								} elseif ( $subscription['sites_max'] > 0 ) {
 									/* translators: %1$d: sites active, %2$d max sites active */
 									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
 								} else {
