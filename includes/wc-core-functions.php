@@ -1231,7 +1231,7 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '-', ' ', $type );
 	$type = str_replace( '_', ' ', $type );
 
-	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+	$labels = apply_filters( 'woocommerce_credit_card_type_labels', array(
 		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
 		'visa'             => __( 'Visa', 'woocommerce' ),
 		'discover'         => __( 'Discover', 'woocommerce' ),
@@ -1679,4 +1679,16 @@ function wc_make_phone_clickable( $phone ) {
 	$number = trim( preg_replace( '/[^\d|\+]/', '', $phone ) );
 
 	return '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>';
+}
+
+/**
+ * Get an item of post data if set, otherwise return a default value.
+ *
+ * @since  3.0.9
+ * @param  string $key
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_post_data_by_key( $key, $default = '' ) {
+	return wc_clean( isset( $_POST[ $key ] ) ? $_POST[ $key ] : $default );
 }
