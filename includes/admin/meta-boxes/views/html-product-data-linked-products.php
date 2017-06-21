@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</select> <?php echo wc_help_tip( __( 'Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ); ?>
 		</p>
 
-		<p class="form-field">
+		<p class="form-field hide_if_external">
 			<label for="crosssell_ids"><?php _e( 'Cross-sells', 'woocommerce' ); ?></label>
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="crosssell_ids" name="crosssell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
