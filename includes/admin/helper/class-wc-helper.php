@@ -152,6 +152,7 @@ class WC_Helper {
 				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
 			}
 
+			$subscription['download_primary'] = true;
 			$subscription['download_url'] = $subscription['product_url'];
 			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
@@ -221,6 +222,7 @@ class WC_Helper {
 					'icon' => 'dashicons-info',
 				);
 
+				$subscription['download_primary'] = false;
 				$subscription['actions'][] = $action;
 			} elseif ( $subscription['expiring'] ) {
 				$action = array(
@@ -231,6 +233,7 @@ class WC_Helper {
 					'icon' => 'dashicons-info',
 				);
 
+				$subscription['download_primary'] = false;
 				$subscription['actions'][] = $action;
 			}
 

@@ -69,7 +69,7 @@
 						<?php if ( ! $subscription['active'] && $subscription['maxed'] ) : ?>
 							<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Upgrade', 'woocommerce' ); ?></a>
 						<?php elseif ( ! $subscription['local']['installed'] && ! $subscription['expired'] ) : ?>
-							<a class="button" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
+							<a class="button <?php if ( empty( $subscription['download_primary'] ) ) : ?>button-secondary<?php endif; ?>" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $subscription['active'] ) : ?>
 							<span class="form-toggle__wrapper">
 								<a href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>" class="form-toggle active is-compact" role="link" aria-checked="true"><?php _e( 'Active', 'woocommerce' ); ?></a>
