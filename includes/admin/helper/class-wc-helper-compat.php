@@ -93,6 +93,7 @@ class WC_Helper_Compat {
 			'body' => array(
 				'request_token' => $request_token,
 				'home_url' => home_url(),
+				'migrate' => true,
 			),
 		) );
 
