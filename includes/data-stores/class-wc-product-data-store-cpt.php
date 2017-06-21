@@ -66,7 +66,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected $extra_data_saved = false;
 
 	/**
-	 * Stores updated props.
+	 * Stores list of updated props.
 	 * @var array
 	 */
 	protected $updated_props = array();
@@ -101,22 +101,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 			'post_name'      => $product->get_slug( 'edit' ),
+			'_thumbnail_id'  => $product->get_image_id( 'edit' ),
 			'meta_input'     => $this->get_meta_input( $product, true ),
+			'tax_input'      => $this->get_tax_input( $product, true ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
-
-			$this->update_post_meta( $product, true );
-			$this->update_terms( $product, true );
-			$this->update_visibility( $product, true );
-			$this->update_attributes( $product, true );
-			$this->update_version_and_type( $product );
-			$this->handle_updated_props( $product );
-
-			$product->save_meta_data();
 			$product->apply_changes();
 
+			$this->handle_updated_props( $product );
 			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_new_product', $id );
@@ -225,20 +219,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to delete a product from the database.
+	 *
 	 * @param WC_Product $product
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$product, $args = array() ) {
-		$id        = $product->get_id();
-		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
-
-		$args = wp_parse_args( $args, array(
-			'force_delete' => false,
-		) );
-
-		if ( ! $id ) {
+		if ( ! $id = $product->get_id() ) {
 			return;
 		}
+		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
+		$args      = wp_parse_args( $args, array(
+			'force_delete' => false,
+		) );
 
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
@@ -439,12 +431,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Get an array of key/value pairs of meta data to pass to WP to update.
 	 *
+	 * @since  3.2.0
 	 * @param  WC_Product  $product
 	 * @param  boolean $force Used during creation to force meta updating.
 	 * @return array
 	 */
 	protected function get_meta_input( &$product, $force = false ) {
-		$meta_input        = array();
+		$meta_input        = array(
+			'_product_version' => WC_VERSION,
+		);
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
@@ -500,14 +495,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'gallery_image_ids' :
 					$value = implode( ',', $value );
 					break;
-				case 'image_id' :
-					if ( ! empty( $value ) ) {
-						set_post_thumbnail( $product->get_id(), $value );
-					} else {
-						delete_post_meta( $product->get_id(), '_thumbnail_id' );
-					}
-					$updated = true;
-					break;
 				case 'date_on_sale_from' :
 				case 'date_on_sale_to' :
 					$value = $value ? $value->getTimestamp() : '';
@@ -533,26 +520,128 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( $this->update_downloads( $product, $force ) ) {
-			$this->updated_props[] = 'downloads';
+		if ( $force || array_key_exists( 'downloads', $changes ) ) {
+			$downloads   = $product->get_downloads();
+			$meta_values = array();
+
+			if ( $downloads ) {
+				foreach ( $downloads as $key => $download ) {
+					// Store in format WC uses in meta.
+					$meta_values[ $key ] = $download->get_data();
+				}
+			}
+
+			if ( $product->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
+			} else {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
+			}
+
+			$meta_input['_downloadable_files'] = $meta_values;
 		}
+
+		if ( $force || array_key_exists( 'attributes', $changes ) ) {
+			$meta_values = array();
+
+			if ( $attributes = $product->get_attributes() ) {
+				if ( is_null( $attribute ) ) {
+					continue;
+				} elseif ( $attribute->is_taxonomy() ) {
+					$value = '';
+				} else {
+					$value = wc_implode_text_attributes( $attribute->get_options() );
+				}
+				// Store in format WC uses in meta.
+				$meta_values[ $attribute_key ] = array(
+					'name'         => $attribute->get_name(),
+					'value'        => $value,
+					'position'     => $attribute->get_position(),
+					'is_visible'   => $attribute->get_visible() ? 1 : 0,
+					'is_variation' => $attribute->get_variation() ? 1 : 0,
+					'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+				);
+			}
+			$meta_input['_product_attributes'] = $meta_values;
+		}
+
+
+		// get_meta_data
 
 		return $meta_input;
 	}
 
 	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 * Get an array of tax data to pass to WP to update.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
-	 * @since 3.0.0
+	 * @since  3.2.0
+	 * @param  WC_Product  $product
+	 * @param  boolean $force Used during creation to force meta updating.
+	 * @return array
 	 */
-	protected function update_post_meta( &$product, $force = false ) {
-		$meta = $this->get_meta_input();
+	protected function get_tax_input( &$product, $force = false ) {
+		$changes   = $product->get_changes();
+		$tax_input = array(
+			'product_type' => $product->get_type(),
+		);
 
-		foreach ( $meta as $key => $value ) {
-			update_post_meta( $product->get_id(), $key, $value );
+		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
+			$tax_input['product_cat'] = $product->get_category_ids( 'edit' );
 		}
+
+		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
+			$tax_input['product_tag'] = $product->get_tag_ids( 'edit' );
+		}
+
+		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
+			$tax_input['product_shipping_class'] = array( $product->get_shipping_class_id( 'edit' ) );
+		}
+
+		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
+			$tax_input['product_visibility'] = array();
+
+			if ( $product->get_featured() ) {
+				$tax_input['product_visibility'][] = 'featured';
+			}
+			if ( 'outofstock' === $product->get_stock_status() ) {
+				$tax_input['product_visibility'][] = 'outofstock';
+			}
+
+			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+
+			if ( $rating > 0 ) {
+				$tax_input['product_visibility'][] = 'rated-' . $rating;
+			}
+
+			switch ( $product->get_catalog_visibility() ) {
+				case 'hidden' :
+					$tax_input['product_visibility'][] = 'exclude-from-search';
+					$tax_input['product_visibility'][] = 'exclude-from-catalog';
+					break;
+				case 'catalog' :
+					$tax_input['product_visibility'][] = 'exclude-from-search';
+					break;
+				case 'search' :
+					$tax_input['product_visibility'][] = 'exclude-from-catalog';
+					break;
+			}
+		}
+
+		if ( $force || array_key_exists( 'attributes', $changes ) ) {
+			if ( $attributes = $product->get_attributes() ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					if ( is_null( $attribute ) ) {
+						if ( taxonomy_exists( $attribute_key ) ) {
+							// Handle attributes that have been unset.
+							$tax_input[ $attribute_key ] = array();
+						}
+					} elseif ( $attribute->is_taxonomy() ) {
+						$tax_input[ $attribute->get_name() ] = wp_list_pluck( $attribute->get_terms(), 'term_id' );
+					}
+				}
+			}
+		}
+
+		return $tax_input;
 	}
 
 	/**
@@ -580,178 +669,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
+
+
+/*
+if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
+	delete_transient( 'wc_featured_products' );
+	do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
+}
+
+
+
+if ( $this->update_downloads( $product, $force ) ) {
+	$this->updated_props[] = 'downloads';
+}
+
+
+
+$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
+$new_type = $product->get_type();
+
+wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
+update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+
+// Action for the transition.
+if ( $old_type !== $new_type ) {
+	do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
+}
+ */
+
+
+
 		// Trigger action so 3rd parties can deal with updated props.
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 
 		// After handling, we can reset the props array.
 		$this->updated_props = array();
-	}
-
-	/**
-	 * For all stored terms in all taxonomies, save them to the DB.
-	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
-	 * @since 3.0.0
-	 */
-	protected function update_terms( &$product, $force = false ) {
-		$changes = $product->get_changes();
-
-		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
-		}
-		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
-		}
-		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
-		}
-	}
-
-	/**
-	 * Update visibility terms based on props.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param WC_Product $product
-	 * @param bool $force Force update. Used during create.
-	 */
-	protected function update_visibility( &$product, $force = false ) {
-		$changes = $product->get_changes();
-
-		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
-			$terms = array();
-
-			if ( $product->get_featured() ) {
-				$terms[] = 'featured';
-			}
-
-			if ( 'outofstock' === $product->get_stock_status() ) {
-				$terms[] = 'outofstock';
-			}
-
-			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
-
-			if ( $rating > 0 ) {
-				$terms[] = 'rated-' . $rating;
-			}
-
-			switch ( $product->get_catalog_visibility() ) {
-				case 'hidden' :
-					$terms[] = 'exclude-from-search';
-					$terms[] = 'exclude-from-catalog';
-					break;
-				case 'catalog' :
-					$terms[] = 'exclude-from-search';
-					break;
-				case 'search' :
-					$terms[] = 'exclude-from-catalog';
-					break;
-			}
-
-			if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
-				delete_transient( 'wc_featured_products' );
-				do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
-			}
-		}
-	}
-
-	/**
-	 * Update attributes which are a mix of terms and meta data.
-	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
-	 * @since 3.0.0
-	 */
-	protected function update_attributes( &$product, $force = false ) {
-		$changes = $product->get_changes();
-
-		if ( $force || array_key_exists( 'attributes', $changes ) ) {
-			$attributes  = $product->get_attributes();
-			$meta_values = array();
-
-			if ( $attributes ) {
-				foreach ( $attributes as $attribute_key => $attribute ) {
-					$value = '';
-
-					if ( is_null( $attribute ) ) {
-						if ( taxonomy_exists( $attribute_key ) ) {
-							// Handle attributes that have been unset.
-							wp_set_object_terms( $product->get_id(), array(), $attribute_key );
-						}
-						continue;
-
-					} elseif ( $attribute->is_taxonomy() ) {
-						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
-					} else {
-						$value = wc_implode_text_attributes( $attribute->get_options() );
-					}
-
-					// Store in format WC uses in meta.
-					$meta_values[ $attribute_key ] = array(
-						'name'         => $attribute->get_name(),
-						'value'        => $value,
-						'position'     => $attribute->get_position(),
-						'is_visible'   => $attribute->get_visible() ? 1 : 0,
-						'is_variation' => $attribute->get_variation() ? 1 : 0,
-						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
-					);
-				}
-			}
-			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
-		}
-	}
-
-	/**
-	 * Update downloads.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Product $product
-	 * @param bool Force update. Used during create.
-	 * @return bool If updated or not.
-	 */
-	protected function update_downloads( &$product, $force = false ) {
-		$changes = $product->get_changes();
-
-		if ( $force || array_key_exists( 'downloads', $changes ) ) {
-			$downloads   = $product->get_downloads();
-			$meta_values = array();
-
-			if ( $downloads ) {
-				foreach ( $downloads as $key => $download ) {
-					// Store in format WC uses in meta.
-					$meta_values[ $key ] = $download->get_data();
-				}
-			}
-
-			if ( $product->is_type( 'variation' ) ) {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
-			} else {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
-			}
-
-			return update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
-		}
-		return false;
-	}
-
-	/**
-	 * Make sure we store the product type and version (to track data changes).
-	 *
-	 * @param WC_Product
-	 * @since 3.0.0
-	 */
-	protected function update_version_and_type( &$product ) {
-		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
-		$new_type = $product->get_type();
-
-		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
-
-		// Action for the transition.
-		if ( $old_type !== $new_type ) {
-			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
-		}
 	}
 
 	/**
@@ -1384,5 +1336,173 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		} else {
 			return false;
 		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Deprecated methods.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 *
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of meta_input.
+	 * @param WC_Product
+	 * @param bool Force update. Used during create.
+	 */
+	protected function update_post_meta( &$product, $force = false ) {
+		wc_deprecated_function( 'update_post_meta', '3.2' );
+
+		$meta_input = $this->get_meta_input( $force );
+
+		foreach ( $meta_input as $key => $value ) {
+			update_post_meta( $product->get_id(), $key, $value );
+		}
+	}
+
+	/**
+	 * For all stored terms in all taxonomies, save them to the DB.
+	 *
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of meta_input.
+	 * @param WC_Product
+	 * @param bool Force update. Used during create.
+	 */
+	protected function update_terms( &$product, $force = false ) {
+		wc_deprecated_function( 'update_terms', '3.2' );
+
+		$tax_input = $this->get_tax_input( $force );
+
+		foreach ( $tax_input as $taxonomy => $terms ) {
+			wp_set_post_terms( $product->get_id(), $terms, $taxonomy, false );
+		}
+	}
+
+	/**
+	 * Update visibility terms based on props.
+	 *
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of tax_input.
+	 * @param WC_Product $product
+	 * @param bool $force Force update. Used during create.
+	 */
+	protected function update_visibility( &$product, $force = false ) {
+		wc_deprecated_function( 'update_visibility', '3.2' );
+
+		$tax_input = $this->get_tax_input( $force );
+
+		if ( isset( $tax_input['product_visibility'] ) && ! is_wp_error( wp_set_post_terms( $product->get_id(), $tax_input['product_visibility'], 'product_visibility', false ) ) ) {
+			delete_transient( 'wc_featured_products' );
+			do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
+		}
+	}
+
+	/**
+	 * Make sure we store the product type and version (to track data changes).
+	 *
+	 * @param WC_Product
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of tax_input and meta_input.
+	 */
+	protected function update_version_and_type( &$product ) {
+		wc_deprecated_function( 'update_version_and_type', '3.2' );
+
+		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
+		$new_type = $product->get_type();
+
+		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
+		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+
+		// Action for the transition.
+		if ( $old_type !== $new_type ) {
+			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
+		}
+	}
+
+	/**
+	 * Update attributes which are a mix of terms and meta data.
+	 *
+	 * @param WC_Product
+	 * @param bool Force update. Used during create.
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of tax_input and meta_input.
+	 */
+	protected function update_attributes( &$product, $force = false ) {
+		wc_deprecated_function( 'update_attributes', '3.2' );
+
+		$changes = $product->get_changes();
+
+		if ( $force || array_key_exists( 'attributes', $changes ) ) {
+			$attributes  = $product->get_attributes();
+			$meta_values = array();
+
+			if ( $attributes ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					$value = '';
+
+					if ( is_null( $attribute ) ) {
+						if ( taxonomy_exists( $attribute_key ) ) {
+							// Handle attributes that have been unset.
+							wp_set_object_terms( $product->get_id(), array(), $attribute_key );
+						}
+						continue;
+
+					} elseif ( $attribute->is_taxonomy() ) {
+						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
+					} else {
+						$value = wc_implode_text_attributes( $attribute->get_options() );
+					}
+
+					// Store in format WC uses in meta.
+					$meta_values[ $attribute_key ] = array(
+						'name'         => $attribute->get_name(),
+						'value'        => $value,
+						'position'     => $attribute->get_position(),
+						'is_visible'   => $attribute->get_visible() ? 1 : 0,
+						'is_variation' => $attribute->get_variation() ? 1 : 0,
+						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+					);
+				}
+			}
+			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
+		}
+	}
+
+	/**
+	 * Update downloads.
+	 *
+	 * @since 3.0.0
+	 * @deprecated 3.2.0 In favour of tax_input and meta_input.
+	 * @param WC_Product $product
+	 * @param bool Force update. Used during create.
+	 * @return bool If updated or not.
+	 */
+	protected function update_downloads( &$product, $force = false ) {
+		wc_deprecated_function( 'update_downloads', '3.2' );
+
+		$changes = $product->get_changes();
+
+		if ( $force || array_key_exists( 'downloads', $changes ) ) {
+			$downloads   = $product->get_downloads();
+			$meta_values = array();
+
+			if ( $downloads ) {
+				foreach ( $downloads as $key => $download ) {
+					// Store in format WC uses in meta.
+					$meta_values[ $key ] = $download->get_data();
+				}
+			}
+
+			if ( $product->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
+			} else {
+				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
+			}
+
+			return update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
+		}
+		return false;
 	}
 }
