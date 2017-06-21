@@ -302,6 +302,15 @@ class WC_Helper {
 			WC_Helper_Options::update( 'auth', $auth );
 		}
 
+		// Sort alphabetically
+		uasort( $subscriptions, function( $a, $b ) {
+			return strcmp( $a['product_name'], $b['product_name'] );
+		} );
+
+		uasort( $no_subscriptions, function( $a, $b ) {
+			return strcmp( $a['Name'], $b['Name'] );
+		} );
+
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
 		return;
