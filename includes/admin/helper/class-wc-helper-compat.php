@@ -153,7 +153,7 @@ class WC_Helper_Compat {
 			return;
 		}
 
-		add_dashboard_page( __( 'WooCommerce Helper', 'woocommerce' ), __( 'WooCommerce Helper', 'woocommerce' ), 'manage_options', 'woothemes-helper-compat', array( __CLASS__, 'render_compat_menu' ) );
+		add_dashboard_page( __( 'WooCommerce Helper', 'woocommerce' ), __( 'WooCommerce Helper', 'woocommerce' ), 'manage_options', 'woothemes-helper', array( __CLASS__, 'render_compat_menu' ) );
 	}
 
 	/**
