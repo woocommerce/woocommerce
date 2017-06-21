@@ -58,6 +58,9 @@
 								} else {
 									_e( 'Subscription: Unlimited', 'woocommerce' );
 								}
+								if ( isset( $subscription['master_user_email'] ) ) {
+									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), $subscription['master_user_email'] );
+								}
 							?>
 							</span>
 						</div>
