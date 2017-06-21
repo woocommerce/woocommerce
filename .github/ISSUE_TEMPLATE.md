@@ -1,5 +1,7 @@
 ## Prerequisites
 
+<!-- Mark checked items with an [x] -->
+
 - [ ] I have searched for similar issues in both open and closed tickets and cannot find a duplicate
 - [ ] The issue still exists against the latest `master` branch of WooCommerce
 - [ ] This is not a usage question (Those should be directed to the [community](https://wordpress.org/support/plugin/woocommerce), unless this is a question about a premium plugin in which you should [use the helpdesk](https://woocommerce.com/my-account/tickets/) for official extensions or contact the author of 3rd party extensions)
