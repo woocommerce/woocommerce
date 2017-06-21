@@ -5803,6 +5803,7 @@ table.bar_chart {
 			margin: 0;
 			border: 0;
 			box-shadow: none;
+			width: 100%;
 
 			td, th {
 				border: 0;
@@ -5842,6 +5843,9 @@ table.bar_chart {
 					code {
 						background: none;
 						padding: 0;
+						white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+						word-wrap: break-word; /* IE */
+						word-break: break-all;
 					}
 				}
 			}
