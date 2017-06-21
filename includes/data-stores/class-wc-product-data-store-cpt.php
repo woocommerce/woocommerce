@@ -283,6 +283,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_average_rating( $average_rating );
 		}
 
+		// Prime the cache.
+		update_object_term_cache( $id, 'product' );
+
 		$product->set_props( array(
 			'sku'                => get_post_meta( $id, '_sku', true ),
 			'regular_price'      => get_post_meta( $id, '_regular_price', true ),
