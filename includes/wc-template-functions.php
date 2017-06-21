@@ -2658,3 +2658,15 @@ function wc_logout_url( $redirect = '' ) {
 function wc_empty_cart_message() {
 	echo '<p class="cart-empty">' . apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) . '</p>';
 }
+
+/**
+ * Disable search engines indexing core, dynamic, cart/checkout pages.
+ *
+ * @since 3.2.0
+ */
+function wc_page_noindex() {
+	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', 'wc_page_noindex' );
