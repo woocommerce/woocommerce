@@ -860,6 +860,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid_for_cart = false;
 			if ( ! WC()->cart->is_empty() ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
+						continue;
+					}
 					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
 					// If we find an item with a cat in our allowed cat list, the coupon is valid
@@ -963,7 +966,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid_for_cart = true;
 			if ( ! WC()->cart->is_empty() ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
+						continue;
+					}
 					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+
 					if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
 						$valid_for_cart = false;
 					}
