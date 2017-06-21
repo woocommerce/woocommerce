@@ -192,6 +192,14 @@ class WC_Helper {
 				$action['button_url'] = $subscription['product_url'];
 
 				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expired'] && isset( $subscription['master_user_email'] ) ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription has expired. Contact the owner to <strong>renew</strong> the subscription to receive updates and support.', 'woocommerce' ) ),
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
 			} elseif ( $subscription['expired'] ) {
 				$action = array(
 					'message' => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
@@ -272,7 +280,7 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ),
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
