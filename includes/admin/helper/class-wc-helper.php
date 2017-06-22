@@ -193,7 +193,7 @@ class WC_Helper {
 				$action['button_url'] = $subscription['product_url'];
 
 				$subscription['actions'][] = $action;
-			} elseif ( $subscription['expired'] && isset( $subscription['master_user_email'] ) ) {
+			} elseif ( $subscription['expired'] && ! empty( $subscription['master_user_email'] ) ) {
 				$action = array(
 					'message' => sprintf( __( 'This subscription has expired. Contact the owner to <strong>renew</strong> the subscription to receive updates and support.', 'woocommerce' ) ),
 					'status' => 'expired',
