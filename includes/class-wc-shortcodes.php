@@ -101,6 +101,9 @@ class WC_Shortcodes {
 		ob_start();
 
 		if ( $products->have_posts() ) {
+
+			// Prime caches before grabbing objects.
+			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
 			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>

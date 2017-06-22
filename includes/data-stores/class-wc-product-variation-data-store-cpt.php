@@ -261,6 +261,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
+
 		$product->set_props( array(
 			'description'       => get_post_meta( $id, '_variation_description', true ),
 			'regular_price'     => get_post_meta( $id, '_regular_price', true ),
