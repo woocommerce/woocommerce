@@ -48,7 +48,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'manage_edit-shop_order_sortable_columns', array( $this, 'shop_order_sortable_columns' ) );
 
 		add_filter( 'list_table_primary_column', array( $this, 'list_table_primary_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 2, 100 );
+		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 100, 2 );
 
 		// Views
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
