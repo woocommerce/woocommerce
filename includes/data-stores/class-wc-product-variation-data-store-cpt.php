@@ -309,7 +309,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_parent_data( array(
-			'title'              => $parent_object->post_title,
+			'title'              => $parent_object ? $parent_object->post_title : '',
 			'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
 			'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 			'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
