@@ -303,13 +303,8 @@ class WC_Helper {
 		}
 
 		// Sort alphabetically
-		uasort( $subscriptions, function( $a, $b ) {
-			return strcmp( $a['product_name'], $b['product_name'] );
-		} );
-
-		uasort( $no_subscriptions, function( $a, $b ) {
-			return strcmp( $a['Name'], $b['Name'] );
-		} );
+		uasort( $subscriptions, array( __CLASS__, '_sort_by_product_name' ) );
+		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
@@ -1211,6 +1206,30 @@ class WC_Helper {
 	 */
 	private static function _flush_updates_cache() {
 		WC_Helper_Updater::flush_updates_cache();
+	}
+
+	/**
+	 * Sort subscriptions by the product_name.
+	 *
+	 * @param array $a Subscription array
+	 * @param array $b Subscription array
+	 *
+	 * @return int
+	 */
+	public static function _sort_by_product_name( $a, $b ) {
+		return strcmp( $a['product_name'], $b['product_name'] );
+	}
+
+	/**
+	 * Sort subscriptions by the Name.
+	 *
+	 * @param array $a Product array
+	 * @param array $b Product array
+	 *
+	 * @return int
+	 */
+	public static function _sort_by_name( $a, $b ) {
+		return strcmp( $a['Name'], $b['Name'] );
 	}
 
 	/**
