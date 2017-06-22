@@ -283,7 +283,7 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
