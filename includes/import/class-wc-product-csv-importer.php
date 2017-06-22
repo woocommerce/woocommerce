@@ -622,6 +622,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 			$data = array();
 
+			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
+
 			foreach ( $row as $id => $value ) {
 				// Skip ignored columns.
 				if ( empty( $mapped_keys[ $id ] ) ) {
