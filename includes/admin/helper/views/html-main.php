@@ -111,7 +111,7 @@
 						</p>
 					</td>
 					<td class="wp-list-table__ext-actions">
-						<?php if ( $action['button_label'] && $action['button_url'] ) : ?>
+						<?php if ( ! empty( $action['button_label'] ) && ! empty( $action['button_url'] ) ) : ?>
 						<a class="button <?php if ( empty( $action['primary'] ) ) : ?>button-secondary<?php endif; ?>" href="<?php echo esc_url( $action['button_url'] ); ?>"><?php echo esc_html( $action['button_label'] ); ?></a>
 						<?php endif; ?>
 					</td>
