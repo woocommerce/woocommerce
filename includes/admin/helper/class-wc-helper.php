@@ -152,6 +152,7 @@ class WC_Helper {
 				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
 			}
 
+			$subscription['download_primary'] = true;
 			$subscription['download_url'] = $subscription['product_url'];
 			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
@@ -192,6 +193,14 @@ class WC_Helper {
 				$action['button_url'] = $subscription['product_url'];
 
 				$subscription['actions'][] = $action;
+			} elseif ( $subscription['expired'] && ! empty( $subscription['master_user_email'] ) ) {
+				$action = array(
+					'message' => sprintf( __( 'This subscription has expired. Contact the owner to <strong>renew</strong> the subscription to receive updates and support.', 'woocommerce' ) ),
+					'status' => 'expired',
+					'icon' => 'dashicons-info',
+				);
+
+				$subscription['actions'][] = $action;
 			} elseif ( $subscription['expired'] ) {
 				$action = array(
 					'message' => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
@@ -213,6 +222,7 @@ class WC_Helper {
 					'icon' => 'dashicons-info',
 				);
 
+				$subscription['download_primary'] = false;
 				$subscription['actions'][] = $action;
 			} elseif ( $subscription['expiring'] ) {
 				$action = array(
@@ -223,6 +233,7 @@ class WC_Helper {
 					'icon' => 'dashicons-info',
 				);
 
+				$subscription['download_primary'] = false;
 				$subscription['actions'][] = $action;
 			}
 
@@ -272,7 +283,7 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ),
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
@@ -290,6 +301,10 @@ class WC_Helper {
 			$auth['user_id'] = get_current_user_id();
 			WC_Helper_Options::update( 'auth', $auth );
 		}
+
+		// Sort alphabetically
+		uasort( $subscriptions, array( __CLASS__, '_sort_by_product_name' ) );
+		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
@@ -1191,6 +1206,30 @@ class WC_Helper {
 	 */
 	private static function _flush_updates_cache() {
 		WC_Helper_Updater::flush_updates_cache();
+	}
+
+	/**
+	 * Sort subscriptions by the product_name.
+	 *
+	 * @param array $a Subscription array
+	 * @param array $b Subscription array
+	 *
+	 * @return int
+	 */
+	public static function _sort_by_product_name( $a, $b ) {
+		return strcmp( $a['product_name'], $b['product_name'] );
+	}
+
+	/**
+	 * Sort subscriptions by the Name.
+	 *
+	 * @param array $a Product array
+	 * @param array $b Product array
+	 *
+	 * @return int
+	 */
+	public static function _sort_by_name( $a, $b ) {
+		return strcmp( $a['Name'], $b['Name'] );
 	}
 
 	/**

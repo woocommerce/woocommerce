@@ -49,11 +49,17 @@
 							<br/>
 							<span class="subscription">
 							<?php
-								if ( $subscription['sites_max'] > 0 ) {
+								if ( ! $subscription['active'] && $subscription['maxed'] ) {
 									/* translators: %1$d: sites active, %2$d max sites active */
-									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
+									printf( __( 'Subscription: Not available - %1$d of %2$d already in use', 'woocommerce' ), absint( $subscription['sites_active'] ), absint( $subscription['sites_max'] ) );
+								} elseif ( $subscription['sites_max'] > 0 ) {
+									/* translators: %1$d: sites active, %2$d max sites active */
+									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), absint( $subscription['sites_active'] ), absint( $subscription['sites_max'] ) );
 								} else {
 									_e( 'Subscription: Unlimited', 'woocommerce' );
+								}
+								if ( isset( $subscription['master_user_email'] ) ) {
+									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), esc_html( $subscription['master_user_email'] ) );
 								}
 							?>
 							</span>
@@ -63,7 +69,7 @@
 						<?php if ( ! $subscription['active'] && $subscription['maxed'] ) : ?>
 							<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Upgrade', 'woocommerce' ); ?></a>
 						<?php elseif ( ! $subscription['local']['installed'] && ! $subscription['expired'] ) : ?>
-							<a class="button" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
+							<a class="button <?php echo empty( $subscription['download_primary'] ) ? 'button-secondary' : ''; ?>" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $subscription['active'] ) : ?>
 							<span class="form-toggle__wrapper">
 								<a href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>" class="form-toggle active is-compact" role="link" aria-checked="true"><?php _e( 'Active', 'woocommerce' ); ?></a>
@@ -105,8 +111,8 @@
 						</p>
 					</td>
 					<td class="wp-list-table__ext-actions">
-						<?php if ( $action['button_label'] && $action['button_url'] ) : ?>
-						<a class="button <?php if ( empty( $action['primary'] ) ) : ?>button-secondary<?php endif; ?>" href="<?php echo esc_url( $action['button_url'] ); ?>"><?php echo esc_html( $action['button_label'] ); ?></a>
+						<?php if ( ! empty( $action['button_label'] ) && ! empty( $action['button_url'] ) ) : ?>
+						<a class="button <?php echo empty( $action['primary'] ) ? 'button-secondary' : ''; ?>" href="<?php echo esc_url( $action['button_url'] ); ?>"><?php echo esc_html( $action['button_label'] ); ?></a>
 						<?php endif; ?>
 					</td>
 				</tr>
