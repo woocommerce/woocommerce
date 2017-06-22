@@ -51,10 +51,10 @@
 							<?php
 								if ( ! $subscription['active'] && $subscription['maxed'] ) {
 									/* translators: %1$d: sites active, %2$d max sites active */
-									printf( __( 'Subscription: Not available - %1$d of %2$d already in use', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
+									printf( __( 'Subscription: Not available - %1$d of %2$d already in use', 'woocommerce' ), absint( $subscription['sites_active'] ), absint( $subscription['sites_max'] ) );
 								} elseif ( $subscription['sites_max'] > 0 ) {
 									/* translators: %1$d: sites active, %2$d max sites active */
-									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), $subscription['sites_active'], $subscription['sites_max'] );
+									printf( __( 'Subscription: Using %1$d of %2$d sites available', 'woocommerce' ), absint( $subscription['sites_active'] ), absint( $subscription['sites_max'] ) );
 								} else {
 									_e( 'Subscription: Unlimited', 'woocommerce' );
 								}
