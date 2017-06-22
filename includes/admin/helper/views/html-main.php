@@ -69,7 +69,7 @@
 						<?php if ( ! $subscription['active'] && $subscription['maxed'] ) : ?>
 							<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php _e( 'Upgrade', 'woocommerce' ); ?></a>
 						<?php elseif ( ! $subscription['local']['installed'] && ! $subscription['expired'] ) : ?>
-							<a class="button <?php if ( empty( $subscription['download_primary'] ) ) : ?>button-secondary<?php endif; ?>" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
+							<a class="button <?php echo empty( $subscription['download_primary'] ) ? 'button-secondary' : ''; ?>" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php _e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $subscription['active'] ) : ?>
 							<span class="form-toggle__wrapper">
 								<a href="<?php echo esc_url( $subscription['deactivate_url'] ); ?>" class="form-toggle active is-compact" role="link" aria-checked="true"><?php _e( 'Active', 'woocommerce' ); ?></a>
@@ -112,7 +112,7 @@
 					</td>
 					<td class="wp-list-table__ext-actions">
 						<?php if ( ! empty( $action['button_label'] ) && ! empty( $action['button_url'] ) ) : ?>
-						<a class="button <?php if ( empty( $action['primary'] ) ) : ?>button-secondary<?php endif; ?>" href="<?php echo esc_url( $action['button_url'] ); ?>"><?php echo esc_html( $action['button_label'] ); ?></a>
+						<a class="button <?php echo empty( $action['primary'] ) ? 'button-secondary' : ''; ?>" href="<?php echo esc_url( $action['button_url'] ); ?>"><?php echo esc_html( $action['button_label'] ); ?></a>
 						<?php endif; ?>
 					</td>
 				</tr>
