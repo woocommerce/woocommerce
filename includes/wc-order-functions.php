@@ -839,6 +839,9 @@ function wc_cancel_unpaid_orders() {
 		return;
 	}
 
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $periodicity ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
 	$data_store    = WC_Data_Store::load( 'order' );
 	$unpaid_orders = $data_store->get_unpaid_orders( strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
 
@@ -851,8 +854,6 @@ function wc_cancel_unpaid_orders() {
 			}
 		}
 	}
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $periodicity ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 
