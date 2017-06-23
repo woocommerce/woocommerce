@@ -376,15 +376,19 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
  * @param int $order_id
  * @param bool $force
  */
-function wc_downloadable_product_permissions( $order_id, $force = false ) {
+function wc_downloadable_product_permissions( $order_id ) {
+	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
+		return; // Only do this once
+	}
+
 	$order = wc_get_order( $order_id );
+
+	if ( $order && $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 
 	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
 		return;
 	}
 
-	if ( $order->has_status( 'processing' ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
-		return;
 	}
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
@@ -829,6 +833,7 @@ add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts
  */
 function wc_cancel_unpaid_orders() {
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+	$periodicity   = get_option( 'woocommerce_hold_stock_check_periodicity', $held_duration );
 
 	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
 		return;
@@ -847,7 +852,7 @@ function wc_cancel_unpaid_orders() {
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $periodicity ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 
