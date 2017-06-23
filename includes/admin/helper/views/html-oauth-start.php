@@ -13,7 +13,7 @@
 					<p><?php _e( '<strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
 				<?php endif; ?>
 
-				<h2><?php _e( 'Manage your subscriptions, get important product notifications, and updates, all from the convenience of your WooCommerce Dashboard', 'woocommerce' ); ?></h2>
+				<h2><?php _e( 'Manage your subscriptions, get important product notifications, and updates, all from the convenience of your WooCommerce dashboard', 'woocommerce' ); ?></h2>
 				<p><?php _e( 'Once connected, your WooCommerce.com purchases will be listed here.', 'woocommerce' ); ?></p>
 				<p><a class="button button-primary" href="<?php echo esc_url( $connect_url ); ?>"><?php _e( 'Connect', 'woocommerce' ); ?></a></p>
 			</div>
