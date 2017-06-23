@@ -4,15 +4,6 @@
 
 $white: #ffffff;
 
-// Primary Accent (Blues)
-$blue-wordpress:         #0087be;
-$woo_pink2:             #78dcfa;
-$woo_pink1:            #00aadc;
-$blue-dark:              #005082;
-
-// Jetpack Green
-$green-jetpack:          #8cc258;
-
 // Grays
 $gray:                   #87a6bc;
 $gray-light:             lighten( $gray, 33% ); //#f3f6f8
@@ -54,7 +45,7 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-	.button, .button:hover {
+	.button, .button:hover, .button:focus, .button:active{
 		background-color: $color_button_primary;
 		border-width: 0;
 		box-shadow: none;
@@ -68,15 +59,16 @@ $color_button_secondary: $woo_pink2;
 		@media only screen and (max-width : 782px) {
 			line-height: 2;
 		}
-	}
-	.button:hover {
-		opacity: 0.8;
+
+		&.button-secondary {
+			background-color: #e6e6e6;
+			color: #3c3c3c;
+			text-shadow: none;
+		}
 	}
 
-	.button.button-secondary {
-		background-color: #e6e6e6;
-		color: #3c3c3c;
-		text-shadow: none;
+	.button:hover {
+		opacity: 0.8;
 	}
 }
 
@@ -809,6 +801,10 @@ $color_button_secondary: $woo_pink2;
 		padding: 45px 20px 20px 30px;
 		position: relative;
 		overflow: hidden;
+
+		h2,p{
+			max-width: 800px;
+		}
 	}
 
 	.start-container::before {
@@ -837,34 +833,15 @@ $color_button_secondary: $woo_pink2;
 		position: relative;
 	}
 
-	.wp-core-ui .button-primary {
-		background: #bb77ae;
-		border-color: #A36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		color: #fff;
-		text-shadow: 0 -1px 1px #A36597, 1px 0 1px #A36597, 0 1px 1px #A36597, -1px 0 1px #A36597;
-	}
+	.button-primary {
+		height: 37px;
+		line-height: 37px;
+		min-width: 124px;
+		padding: 0 13px;
 
-	.wp-core-ui a.button-primary:hover {
-		background: #A36597;
-		border-color: #A36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-	}
-
-	.wp-core-ui a.button-primary:focus {
-		background: #A36597;
-		border-color: #A36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-	}
-
-	.wp-core-ui a.button-primary:active {
-		background: #A36597;
-		border-color: #A36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		&:hover,&:active,&:focus{
+			padding: 0 13px;
+		}
 	}
 }
 
