@@ -33,7 +33,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 
 	$weight_unit      = get_option( 'woocommerce_weight_unit' );
 	$dimension_unit   = get_option( 'woocommerce_dimension_unit' );
-	$default_mappings = array(
+	$new_mappings = array(
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',
 		'SKU'                                     => 'sku',
@@ -73,7 +73,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'Button text'                             => 'button_text',
 	);
 
-	return array_merge( $mappings, $default_mappings );
+	return array_merge( $mappings, $new_mappings );
 }
 add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_importer_default_english_mappings', 100 );
 
@@ -89,7 +89,7 @@ function wc_importer_default_special_english_mappings( $mappings ) {
 		return $mappings;
 	}
 
-	$default_mappings = array(
+	$new_mappings = array(
 		'Attribute %d name'     => 'attributes:name',
 		'Attribute %d value(s)' => 'attributes:value',
 		'Attribute %d visible'  => 'attributes:visible',
@@ -100,6 +100,6 @@ function wc_importer_default_special_english_mappings( $mappings ) {
 		'Meta: %s'              => 'meta:',
 	);
 
-	return array_merge( $mappings, $generic_mappings );
+	return array_merge( $mappings, $new_mappings );
 }
 add_filter( 'woocommerce_csv_product_import_mapping_special_columns', 'wc_importer_default_special_english_mappings', 100 );
