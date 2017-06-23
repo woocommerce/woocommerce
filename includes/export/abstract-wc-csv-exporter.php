@@ -147,7 +147,7 @@ abstract class WC_CSV_Exporter {
 	public function export() {
 		$this->prepare_data_to_export();
 		$this->send_headers();
-		$this->send_content( $this->export_column_headers() . $this->get_csv_data() );
+		$this->send_content( chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers() . $this->get_csv_data() );
 		die();
 	}
 
