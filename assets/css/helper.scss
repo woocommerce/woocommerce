@@ -802,7 +802,8 @@ $color_button_secondary: $woo_pink2;
 		position: relative;
 		overflow: hidden;
 
-		h2,p{
+		h2,
+		p {
 			max-width: 800px;
 		}
 	}
@@ -839,7 +840,9 @@ $color_button_secondary: $woo_pink2;
 		min-width: 124px;
 		padding: 0 13px;
 
-		&:hover,&:active,&:focus{
+		&:hover,
+		&:active,
+		&:focus {
 			padding: 0 13px;
 		}
 	}
