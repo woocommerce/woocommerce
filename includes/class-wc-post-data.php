@@ -223,7 +223,8 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Ensure floats are correctly converted to strings based on PHP locale.
+	 * Ensure floats are correctly converted to strings based on PHP locale,
+	 * and handles null meta.
 	 *
 	 * @param  null $check
 	 * @param  int $object_id
@@ -238,15 +239,14 @@ class WC_Post_Data {
 			wp_cache_delete( 'product-' . $object_id, 'products' );
 		}
 
+		// Convert floats to string and update.
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ) ) ) {
+			update_metadata( 'post', $object_id, $meta_key, wc_float_to_string( $meta_value ), $prev_value );
+			return true;
 
-			// Convert float to string
-			$meta_value = wc_float_to_string( $meta_value );
-
-			// Update meta value with new string
-			update_metadata( 'post', $object_id, $meta_key, $meta_value, $prev_value );
-
-			// Return
+		// Delete rather than set NULL value meta.
+		} elseif ( is_null( $meta_value ) ) {
+			delete_metadata( 'post', $object_id, $meta_key, $prev_value );
 			return true;
 		}
 		return $check;

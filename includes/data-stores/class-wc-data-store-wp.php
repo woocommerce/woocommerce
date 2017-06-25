@@ -418,4 +418,56 @@ class WC_Data_Store_WP {
 
 		return $wp_query_args;
 	}
+
+	/**
+	 * Helper to update the post using wp_update_post.
+	 *
+	 * When updating this object, to prevent infinite loops, use $wpdb
+	 * to update data, since wp_update_post spawns more calls to the
+	 * save_post action.
+	 *
+	 * This ensures hooks are fired by either WP itself (admin screen save),
+	 * or an update purely from CRUD.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Product $product
+	 * @param  array $post_data
+	 */
+	protected function update_post( &$product, $post_data ) {
+		if ( doing_action( 'save_post' ) ) {
+			// Save taxonomies.
+			if ( ! empty( $post_data['tax_input'] ) ) {
+				foreach ( $post_data['tax_input'] as $taxonomy => $terms ) {
+					$terms        = is_array( $terms ) ? array_filter( $terms ) : $terms;
+					$taxonomy_obj = get_taxonomy( $taxonomy );
+					if ( $taxonomy_obj && current_user_can( $taxonomy_obj->cap->assign_terms ) ) {
+						wp_set_post_terms( $product->get_id(), $terms, $taxonomy );
+					}
+				}
+			}
+
+			// Save meta.
+			if ( ! empty( $post_data['meta_input'] ) ) {
+				foreach ( $post_data['meta_input'] as $field => $value ) {
+					update_post_meta( $product->get_id(), $field, $value );
+				}
+			}
+
+			// Save thumbnail.
+			$thumbnail_id = intval( $post_data['_thumbnail_id'] );
+
+			if ( -1 === $thumbnail_id ) {
+				delete_post_thumbnail( $product->get_id() );
+			} else {
+				set_post_thumbnail( $product->get_id(), $thumbnail_id );
+			}
+
+			unset( $post_data['tax_input'], $post_data['meta_input'], $post_data['_thumbnail_id'] );
+
+			// Update the post object.
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
+		} else {
+			wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+		}
+	}
 }

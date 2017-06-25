@@ -106,33 +106,127 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $product->get_name( 'edit' ),
 			'post_content'   => '',
-			'post_parent'    => $product->get_parent_id(),
+			'post_parent'    => $product->get_parent_id( 'edit' ),
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
 			'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 			'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 			'post_name'      => $product->get_slug( 'edit' ),
+			'_thumbnail_id'  => $product->get_image_id( 'edit' ),
+			'meta_input'     => $this->get_meta_input( $product, true ),
+			'tax_input'      => $this->get_tax_input( $product, true ),
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
-			$this->update_post_meta( $product, true );
-			$this->update_terms( $product, true );
-			$this->update_visibility( $product, true );
-			$this->update_attributes( $product, true );
-			$this->handle_updated_props( $product );
-
+			// Save data and refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 			$product->save_meta_data();
-			$product->apply_changes();
+			$product->read_meta_data( true );
 
-			$this->update_version_and_type( $product );
-
+			// Data handling after save.
+			$this->updated_props = array_keys( $product->get_data() );
+			$this->handle_updated_props( $product );
 			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_new_product_variation', $id );
 		}
+	}
+
+	/**
+	 * Get an array of key/value pairs of meta data to pass to WP to update.
+	 *
+	 * @param  WC_Product  $product
+	 * @param  boolean $force Used during creation to force meta updating.
+	 * @return array
+	 */
+	protected function get_meta_data( &$product, $force = false ) {
+		$changes           = $product->get_changes();
+		$meta              = parent::get_meta_data( $product, $force );
+		$meta_key_to_props = array(
+			'_variation_description' => 'description',
+		);
+
+		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
+			$meta_input[ $meta_key ] = $product->{"get_$prop"}( 'edit' );
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * Get an array of meta keys and values for attributes of this data object.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Product  $product
+	 * @param  boolean $force
+	 * @return array
+	 */
+	protected function get_attribues_meta( &$product, $force = false ) {
+		global $wpdb;
+
+		$meta = array();
+
+		if ( $force || array_key_exists( 'attributes', $product->get_changes() ) ) {
+			$updated_attribute_keys = array();
+
+			if ( $attributes = $product->get_attributes() ) {
+				foreach ( $attributes as $key => $value ) {
+					$meta[ 'attribute_' . $key ] = $value;
+					$updated_attribute_keys[]    = 'attribute_' . $key;
+				}
+			}
+
+			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
+			$delete_attribute_keys = $wpdb->get_col(
+				$wpdb->prepare( "
+					SELECT meta_key FROM {$wpdb->postmeta}
+					WHERE meta_key LIKE 'attribute_%%'
+					AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' )
+					AND post_id = %d;
+					",
+					$product->get_id()
+				)
+			);
+
+			foreach ( $delete_attribute_keys as $key ) {
+				$meta[ 'attribute_' . $key ] = null;
+			}
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * Get an array of tax data to pass to WP to update.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Product  $product
+	 * @param  boolean $force Used during creation to force meta updating.
+	 * @return array
+	 */
+	protected function get_tax_input( &$product, $force = false ) {
+		$changes   = $product->get_changes();
+		$tax_input = array(
+			'product_type' => 'variation',
+		);
+
+		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
+			$tax_input['product_shipping_class'] = array( $product->get_shipping_class_id( 'edit' ) );
+		}
+
+		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
+			$tax_input['product_visibility'] = array();
+
+			if ( 'outofstock' === $product->get_stock_status() ) {
+				$tax_input['product_visibility'][] = 'outofstock';
+			}
+		}
+
+		return $tax_input;
 	}
 
 	/**
@@ -142,7 +236,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product $product
 	 */
 	public function update( &$product ) {
-		$product->save_meta_data();
 		$new_title = $this->generate_product_title( $product );
 
 		if ( $product->get_name( 'edit' ) !== $new_title ) {
@@ -156,49 +249,30 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$changes = $product->get_changes();
 
-		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
-			$post_data = array(
-				'post_title'        => $product->get_name( 'edit' ),
-				'post_parent'       => $product->get_parent_id( 'edit' ),
-				'comment_status'    => 'closed',
-				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
-				'menu_order'        => $product->get_menu_order( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-				'post_type'         => 'product_variation',
-				'post_name'         => $product->get_slug( 'edit' ),
-			);
+		$this->update_post( $product, array(
+			'post_title'        => $product->get_name( 'edit' ),
+			'post_parent'       => $product->get_parent_id( 'edit' ),
+			'comment_status'    => 'closed',
+			'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
+			'menu_order'        => $product->get_menu_order( 'edit' ),
+			'post_date'         => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+			'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+			'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $product->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
+			'post_type'         => 'product_variation',
+			'post_name'         => $product->get_slug( 'edit' ),
+			'_thumbnail_id'     => $product->get_image_id( 'edit' ),
+			'meta_input'        => $this->get_meta_input( $product ),
+			'tax_input'         => $this->get_tax_input( $product ),
+		) );
 
-			/**
-			 * When updating this object, to prevent infinite loops, use $wpdb
-			 * to update data, since wp_update_post spawns more calls to the
-			 * save_post action.
-			 *
-			 * This ensures hooks are fired by either WP itself (admin screen save),
-			 * or an update purely from CRUD.
-			 */
-			if ( doing_action( 'save_post' ) ) {
-				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
-				clean_post_cache( $product->get_id() );
-			} else {
-				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
-			}
-			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
-		}
+		// Save data and refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+		$product->save_meta_data();
+		$product->read_meta_data( true );
 
-		$this->update_post_meta( $product );
-		$this->update_terms( $product );
-		$this->update_visibility( $product, true );
-		$this->update_attributes( $product );
+		// Data handling after save.
+		$this->updated_props = array_keys( $changes );
 		$this->handle_updated_props( $product );
-
-		$product->apply_changes();
-
-		$this->update_version_and_type( $product );
-
 		$this->clear_caches( $product );
 
 		do_action( 'woocommerce_update_product_variation', $product->get_id() );
@@ -241,16 +315,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
 		return apply_filters( 'woocommerce_product_variation_title', rtrim( $title_base . $separator . $title_suffix, $separator ), $product, $title_base, $title_suffix );
-	}
-
-	/**
-	 * Make sure we store the product version (to track data changes).
-	 *
-	 * @param WC_Product
-	 * @since 3.0.0
-	 */
-	protected function update_version_and_type( &$product ) {
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
 	}
 
 	/**
@@ -398,27 +462,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 * Make sure we store the product version (to track data changes).
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @since 3.0.0
 	 */
-	public function update_post_meta( &$product, $force = false ) {
-		$meta_key_to_props = array(
-			'_variation_description' => 'description',
-		);
-
-		$props_to_update = $force ? $meta_key_to_props : $this->get_props_to_update( $product, $meta_key_to_props );
-
-		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value   = $product->{"get_$prop"}( 'edit' );
-			$updated = update_post_meta( $product->get_id(), $meta_key, $value );
-			if ( $updated ) {
-				$this->updated_props[] = $prop;
-			}
-		}
-
-		parent::update_post_meta( $product, $force );
+	protected function update_version_and_type( &$product ) {
+		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
 	}
 }

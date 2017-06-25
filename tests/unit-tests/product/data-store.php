@@ -391,7 +391,15 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->set_width( 10 );
 		$variation->save();
 
+		$taxonomy_obj = get_taxonomy( 'product_type' );
+		var_dump($taxonomy_obj);
+		var_dump( current_user_can( $taxonomy_obj->cap->assign_terms ) );
+
+		var_dump($product->get_type());
+
 		$product = wc_get_product( $product->get_id() );
+
+		var_dump($product->get_type());
 
 		$store = new WC_Product_Variable_Data_Store_CPT();
 
