@@ -106,7 +106,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'post_author'    => get_current_user_id(),
 			'post_title'     => $product->get_name( 'edit' ),
 			'post_content'   => '',
-			'post_parent'    => $product->get_parent_id(),
+			'post_parent'    => $product->get_parent_id( 'edit' ),
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'menu_order'     => $product->get_menu_order(),
@@ -119,6 +119,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
+			$product->set_id( $id );
+
 			// Save data and refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 			$product->save_meta_data();
 			$product->read_meta_data( true );
@@ -152,20 +154,46 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$meta_input[ $meta_key ] = $product->{"get_$prop"}( 'edit' );
 		}
 
-		if ( $force || array_key_exists( 'attributes', $changes ) ) {
-			global $wpdb;
-			$attributes             = $product->get_attributes();
+		return $meta;
+	}
+
+	/**
+	 * Get an array of meta keys and values for attributes of this data object.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Product  $product
+	 * @param  boolean $force
+	 * @return array
+	 */
+	protected function get_attribues_meta( &$product, $force = false ) {
+		global $wpdb;
+
+		$meta = array();
+
+		if ( $force || array_key_exists( 'attributes', $product->get_changes() ) ) {
 			$updated_attribute_keys = array();
 
-			foreach ( $attributes as $key => $value ) {
-				$meta[ 'attribute_' . $key ] = $value;
+			if ( $attributes = $product->get_attributes() ) {
+				foreach ( $attributes as $key => $value ) {
+					$meta[ 'attribute_' . $key ] = $value;
+					$updated_attribute_keys[]    = 'attribute_' . $key;
+				}
 			}
-//@todo
+
 			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
-			$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d;", $product->get_id() ) );
+			$delete_attribute_keys = $wpdb->get_col(
+				$wpdb->prepare( "
+					SELECT meta_key FROM {$wpdb->postmeta}
+					WHERE meta_key LIKE 'attribute_%%'
+					AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' )
+					AND post_id = %d;
+					",
+					$product->get_id()
+				)
+			);
 
 			foreach ( $delete_attribute_keys as $key ) {
-				delete_post_meta( $product->get_id(), $key );
+				$meta[ 'attribute_' . $key ] = null;
 			}
 		}
 
