@@ -376,9 +376,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
 				}
-			} else {
-				$value = ucwords( str_replace( '-', ' ', $value ) );
-			}
+			} 
 
 			if ( $include_names ) {
 				if ( $flat ) {
