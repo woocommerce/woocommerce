@@ -119,7 +119,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id          = intval( $matches[1] );
 			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
 
-			return $original_id ? $original_id : $id;
+			if ( $original_id ) {
+				return $original_id;
+
+			// If we're not updating existing posts, we need a placeholder.
+			} elseif ( ! $this->params['update_existing'] ) {
+				$product = new WC_Product_Simple();
+				$product->set_name( 'Import placeholder for ' . $field );
+				$product->set_status( 'importing' );
+				$product->add_meta_data( '_original_id', $field, true );
+				$id = $product->save();
+			}
+
+			return $id;
 		}
 
 		if ( $id = wc_get_product_id_by_sku( $field ) ) {
