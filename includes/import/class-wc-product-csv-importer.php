@@ -120,14 +120,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
 
 			if ( $original_id ) {
-				return $original_id;
+				return absint( $original_id );
 
 			// If we're not updating existing posts, we need a placeholder.
 			} elseif ( ! $this->params['update_existing'] ) {
 				$product = new WC_Product_Simple();
-				$product->set_name( 'Import placeholder for ' . $field );
+				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
-				$product->add_meta_data( '_original_id', $field, true );
+				$product->add_meta_data( '_original_id', $id, true );
 				$id = $product->save();
 			}
 
@@ -164,18 +164,31 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int
 	 */
 	protected function parse_id_field( $field ) {
-		$field = absint( $field );
+		global $wpdb;
 
-		// Not updating? Make sure we have a new placeholder for this ID.
-		if ( $field && ! $this->params['update_existing'] ) {
-			$product = new WC_Product_Simple();
-			$product->set_name( 'Import placeholder for ' . $field );
-			$product->set_status( 'importing' );
-			$product->add_meta_data( '_original_id', $field, true );
-			$field = $product->save();
+		$id = absint( $field );
+
+		if ( ! $id ) {
+			return 0;
 		}
 
-		return $field && ! is_wp_error( $field ) ? $field : 0;
+		// See if this maps to an ID placeholder already.
+		$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
+
+		if ( $original_id ) {
+			return absint( $original_id );
+		}
+
+		// Not updating? Make sure we have a new placeholder for this ID.
+		if ( ! $this->params['update_existing'] ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Import placeholder for ' . $id );
+			$product->set_status( 'importing' );
+			$product->add_meta_data( '_original_id', $id, true );
+			$id = $product->save();
+		}
+
+		return $id && ! is_wp_error( $id ) ? $id : 0;
 	}
 
 	/**
