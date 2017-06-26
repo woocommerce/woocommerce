@@ -230,6 +230,8 @@ class WC_Admin_Importers {
 		if ( 100 === $percent_complete ) {
 			// Clear temp meta.
 			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+			$wpdb->delete( $wpdb->posts, array( 'post_status' => 'importing', 'post_type' => 'product' ) );
+			$wpdb->delete( $wpdb->posts, array( 'post_status' => 'importing', 'post_type' => 'product_variation' ) );
 
 			// Send success.
 			wp_send_json_success( array(
