@@ -140,7 +140,7 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->save();
 
 		// Duplicate children of a variable product.
-		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && $product->is_type( 'variable' ) ) {
+		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );
 				$child_duplicate = clone $child;
