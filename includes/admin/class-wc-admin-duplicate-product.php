@@ -160,6 +160,9 @@ class WC_Admin_Duplicate_Product {
 
 				$child_duplicate->save();
 			}
+
+			// Get new object to reflect new children.
+			$duplicate = wc_get_product( $duplicate->get_id() );
 		}
 
 		return $duplicate;
