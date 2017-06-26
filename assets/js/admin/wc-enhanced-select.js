@@ -59,7 +59,7 @@ jQuery( function( $ ) {
 						placeholder: $( this ).data( 'placeholder' )
 					}, getEnhancedSelectFormatString() );
 
-					$( this ).select2( select2_args ).addClass( 'enhanced' );
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 
 				$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).filter( ':not(.enhanced)' ).each( function() {
@@ -69,7 +69,7 @@ jQuery( function( $ ) {
 						placeholder: $( this ).data( 'placeholder' )
 					}, getEnhancedSelectFormatString() );
 
-					$( this ).select2( select2_args ).addClass( 'enhanced' );
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 
 				// Ajax product search box
@@ -112,7 +112,7 @@ jQuery( function( $ ) {
 
 					select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
-					$( this ).select2( select2_args ).addClass( 'enhanced' );
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 
 					if ( $( this ).data( 'sortable' ) ) {
 						var $select = $(this);
@@ -175,7 +175,7 @@ jQuery( function( $ ) {
 
 					select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
-					$( this ).select2( select2_args ).addClass( 'enhanced' );
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 
 					if ( $( this ).data( 'sortable' ) ) {
 						var $select = $(this);
@@ -200,14 +200,14 @@ jQuery( function( $ ) {
 
 			// WooCommerce Backbone Modal
 			.on( 'wc_backbone_modal_before_remove', function() {
-				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).selectWoo( 'close' );
 			})
 
 			.trigger( 'wc-enhanced-select-init' );
 
 		$( 'html' ).on( 'click', function( event ) {
 			if ( this === event.target ) {
-				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).select2( 'close' );
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).selectWoo( 'close' );
 			}
 		} );
 	} catch( err ) {

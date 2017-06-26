@@ -12,7 +12,7 @@ jQuery( function ( $ ) {
 				this.states = $.parseJSON( wc_users_params.countries.replace( /&quot;/g, '"' ) );
 			}
 
-			$( '.js_field-country' ).select2().change( this.change_country );
+			$( '.js_field-country' ).selectWoo().change( this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
 
@@ -59,7 +59,7 @@ jQuery( function ( $ ) {
 
 				$state.replaceWith( $states_select );
 
-				$states_select.show().select2().hide().change();
+				$states_select.show().selectWoo().hide().change();
 			} else {
 				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" />' );
 			}
