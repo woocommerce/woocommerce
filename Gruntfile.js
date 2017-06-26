@@ -273,7 +273,7 @@ module.exports = function( grunt ) {
 		phpcs: {
 			options: {
 				bin: 'vendor/bin/phpcs',
-				standard: './phpcs.ruleset.xml'
+				standard: './dev.ruleset.xml'
 			},
 			dist: {
 				src:  [
