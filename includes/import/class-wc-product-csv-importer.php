@@ -56,6 +56,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
 			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'] );
 
+			// Remove BOM signature from the first item.
+			if ( isset( $this->raw_keys[0] ) ) {
+				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
+			}
+
 			if ( 0 !== $this->params['start_pos'] ) {
 				fseek( $handle, (int) $this->params['start_pos'] );
 			}
@@ -79,6 +84,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( $this->params['parse'] ) {
 			$this->set_parsed_data();
 		}
+	}
+
+	/**
+	 * Remove UTF-8 BOM signature.
+	 *
+	 * @param  string $string String to handle.
+	 * @return string
+	 */
+	protected function remove_utf8_bom( $string ) {
+		if ( 'efbbbf' === substr( bin2hex( $string ), 0, 6 ) ) {
+			$string = substr( $string, 3 );
+		}
+
+		return $string;
 	}
 
 	/**
