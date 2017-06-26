@@ -497,7 +497,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$callbacks[] = $callback;
 		}
 
-		return $callbacks;
+		return apply_filters( 'woocommerce_product_importer_formatting_callbacks', $callbacks, $this );
 	}
 
 	/**
