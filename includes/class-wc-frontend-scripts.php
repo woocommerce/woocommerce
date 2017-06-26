@@ -227,9 +227,9 @@ class WC_Frontend_Scripts {
 				'version' => WC_VERSION,
 			),
 			'select2' => array(
-				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
+				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '4.0.3',
+				'version' => '5.0.0',
 			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
