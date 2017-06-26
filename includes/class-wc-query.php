@@ -452,6 +452,8 @@ class WC_Query {
 		if ( ! $orderby ) {
 			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
+			$orderby_value = is_array( $orderby_value ) ? $orderby_value[0] : $orderby_value;
+
 			// Get order + orderby args from string
 			$orderby_value = explode( '-', $orderby_value );
 			$orderby       = esc_attr( $orderby_value[0] );
