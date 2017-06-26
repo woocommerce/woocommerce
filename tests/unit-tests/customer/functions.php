@@ -112,6 +112,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$customer = new WC_Customer( $customer_id );
 		$this->assertFalse( $customer->get_is_paying_customer() );
 
+		// Test after new order created.
 		$order1 = new WC_Order;
 		$order1->set_customer_id( $customer_id );
 		$order1->set_status( 'completed' );
@@ -119,6 +120,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		$customer = new WC_Customer( $customer_id );
 		$this->assertTrue( $customer->get_is_paying_customer() );
+
+		// Test after the order is deleted!
+		$order1->delete( true );
+		$customer = new WC_Customer( $customer_id );
+		$this->assertFalse( $customer->get_is_paying_customer() );
 	}
 
 	/**
