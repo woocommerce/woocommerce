@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: @todo link to wiki page.
+ * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -79,7 +79,7 @@ function wc_get_orders( $args ) {
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action).', 'woocommerce' ), '2.5' );
+		wc_doing_it_wrong( __FUNCTION__, 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action)', '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -686,7 +686,7 @@ function wc_get_tax_class_by_tax_id( $tax_id ) {
  */
 function wc_get_payment_gateway_by_order( $order ) {
 	if ( WC()->payment_gateways() ) {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 	} else {
 		$payment_gateways = array();
 	}
@@ -850,3 +850,17 @@ function wc_cancel_unpaid_orders() {
 	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
+
+/**
+ * Sanitize order id removing unwanted characters.
+ *
+ * E.g Users can sometimes try to track an order id using # with no success.
+ * This function will fix this.
+ *
+ * @since 3.1.0
+ * @param int $order_id
+ */
+function wc_sanitize_order_id( $order_id ) {
+	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
+}
+add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );

@@ -147,7 +147,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Update A Single Shipping Zone Method.
+	 * Update A Single Payment Method.
 	 *
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|WP_Error

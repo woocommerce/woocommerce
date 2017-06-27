@@ -215,7 +215,7 @@ class WC_Cart {
 		 */
 		$cart = WC()->session->get( 'cart', null );
 
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) ) ) {
+		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
 			$cart                = $saved_cart['cart'];
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
@@ -314,7 +314,7 @@ class WC_Cart {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
-		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
+		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
 			'cart' => WC()->session->get( 'cart' ),
 		) );
 	}
@@ -323,7 +323,7 @@ class WC_Cart {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
+		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 	}
 
 	/*
@@ -888,6 +888,9 @@ class WC_Cart {
 			// Get the product
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 
+			// Filter quantity being added to the cart before stock checks
+			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
+
 			// Sanity check
 			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
 				return false;
@@ -1359,8 +1362,16 @@ class WC_Cart {
 		// Only calculate the grand total + shipping if on the cart/checkout
 		if ( is_checkout() || is_cart() || defined( 'WOOCOMMERCE_CHECKOUT' ) || defined( 'WOOCOMMERCE_CART' ) ) {
 
-			// Calculate the Shipping
+			// Calculate the Shipping.
+			$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+			$had_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
 			$this->calculate_shipping();
+			$has_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
+
+			// If methods changed and local pickup is selected, we need to do a recalculation of taxes.
+			if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && $had_local_pickup !== $has_local_pickup ) {
+				return $this->calculate_totals();
+			}
 
 			// Trigger the fees API where developers can add fees to the cart
 			$this->calculate_fees();

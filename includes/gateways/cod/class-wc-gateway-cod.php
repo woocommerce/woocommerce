@@ -178,10 +178,14 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				return false;
 			}
 
+			if ( strstr( $check_method, ':' ) ) {
+				$check_method = current( explode( ':', $check_method ) );
+			}
+
 			$found = false;
 
 			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $check_method, $method_id ) === 0 ) {
+				if ( $check_method === $method_id ) {
 					$found = true;
 					break;
 				}
@@ -239,7 +243,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param  WC_Order $order
 	 * @return string
 	 */
-	public function change_payment_complete_order_status( $status, $order_id, $order ) {
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
 		if ( $order && 'cod' === $order->get_payment_method() ) {
 			$status = 'completed';
 		}

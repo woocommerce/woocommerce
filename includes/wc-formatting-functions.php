@@ -246,7 +246,9 @@ function wc_format_refund_total( $amount ) {
 /**
  * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove locale formatting, and optionally round + trim off zeros.
+ * Sanitize, remove decimals, and optionally round + trim off zeros.
+ *
+ * This function does not remove thousands - this should be done before passing a value to the function.
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
@@ -259,7 +261,6 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
-		$number = str_replace( wc_get_price_thousand_separator(), '', $number );
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
@@ -303,7 +304,7 @@ function wc_float_to_string( $float ) {
  * @return string
  */
 function wc_format_localized_price( $value ) {
-	return str_replace( '.', wc_get_price_decimal_separator(), strval( $value ) );
+	return apply_filters( 'woocommerce_format_localized_price', str_replace( '.', wc_get_price_decimal_separator(), strval( $value ) ), $value );
 }
 
 /**
@@ -313,7 +314,7 @@ function wc_format_localized_price( $value ) {
  */
 function wc_format_localized_decimal( $value ) {
 	$locale = localeconv();
-	return str_replace( '.', $locale['decimal_point'], strval( $value ) );
+	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $locale['decimal_point'], strval( $value ) ), $value );
 }
 
 /**

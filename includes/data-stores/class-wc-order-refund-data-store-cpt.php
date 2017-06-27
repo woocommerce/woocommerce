@@ -41,6 +41,10 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	public function delete( &$order, $args = array() ) {
 		$id = $order->get_id();
 
+		if ( ! $id ) {
+			return;
+		}
+
 		wp_delete_post( $id );
 		$order->set_id( 0 );
 		do_action( 'woocommerce_delete_order_refund', $id );

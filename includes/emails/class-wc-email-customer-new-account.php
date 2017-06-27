@@ -61,20 +61,28 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->template_html  = 'emails/customer-new-account.php';
 		$this->template_plain = 'emails/plain/customer-new-account.php';
 
-		$this->set_email_strings();
-
 		// Call parent constructor
 		parent::__construct();
 	}
 
 	/**
-	 * Set email strings.
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->subject = __( 'Your account on {site_title}', 'woocommerce' );
-		$this->heading = __( 'Welcome to {site_title}', 'woocommerce' );
-		$this->restore_locale();
+	public function get_default_subject() {
+		return __( 'Your account on {site_title}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Welcome to {site_title}', 'woocommerce' );
 	}
 
 	/**
@@ -100,7 +108,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**

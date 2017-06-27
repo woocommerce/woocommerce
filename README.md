@@ -22,3 +22,6 @@ Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
+
+## Contributing new features to the WooCommerce REST API
+If you're like to add a feature to the next version of the REST API, contribute here: https://github.com/woocommerce/wc-api-dev

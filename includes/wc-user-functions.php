@@ -50,7 +50,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ) );
 		}
 
 		// Handle username creation.
@@ -507,7 +507,7 @@ function wc_disable_author_archives_for_customers() {
 	if ( is_author() ) {
 		$user = get_user_by( 'id', $author );
 
-		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+		if ( user_can( $user, 'customer' ) && ! user_can( $user, 'edit_posts' ) ) {
 			wp_redirect( wc_get_page_permalink( 'shop' ) );
 		}
 	}
@@ -601,27 +601,4 @@ function wc_get_customer_last_order( $customer_id ) {
 	" );
 
 	return wc_get_order( $id );
-}
-
-/**
- * Wrapper for @see get_avatar() which doesn't simply return
- * the URL so we need to pluck it from the HTML img tag.
- *
- * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
- *
- * @since 2.6.0
- * @param string $email the customer's email.
- * @return string the URL to the customer's avatar.
- */
-function wc_get_customer_avatar_url( $email ) {
-	$avatar_html = get_avatar( $email );
-
-	// Get the URL of the avatar from the provided HTML.
-	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-		return esc_url_raw( $matches[1] );
-	}
-
-	return null;
 }

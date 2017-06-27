@@ -33,7 +33,7 @@ function wc_template_redirect() {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 
-	} elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'customer-logout' ) ) {
 
 		// Logout
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
@@ -909,7 +909,9 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_rating() {
-		wc_get_template( 'single-product/rating.php' );
+		if ( post_type_supports( 'product', 'comments' ) ) {
+			wc_get_template( 'single-product/rating.php' );
+		}
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
@@ -1001,7 +1003,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ) );
+		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			usort( $products, 'wc_products_array_orderby_menu_order' );
@@ -1251,7 +1253,9 @@ if ( ! function_exists( 'woocommerce_review_display_rating' ) ) {
 	 * @return void
 	 */
 	function woocommerce_review_display_rating() {
-		wc_get_template( 'single-product/review-rating.php' );
+		if ( post_type_supports( 'product', 'comments' ) ) {
+			wc_get_template( 'single-product/review-rating.php' );
+		}
 	}
 }
 
@@ -1894,7 +1898,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @subpackage    Forms
 	 *
 	 * @param string $key
-	 * @param mixed $args
+	 * @param mixed  $args
 	 * @param string $value (default: null)
 	 *
 	 * @return string
@@ -1999,11 +2003,9 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'state' :
-
-				/* Get Country */
-				$country_key = 'billing_state' === $key ? 'billing_country' : 'shipping_country';
-				$current_cc  = WC()->checkout->get_value( $country_key );
-				$states      = WC()->countries->get_states( $current_cc );
+				/* Get country this state field is representing */
+				$for_country = isset( $args['country'] ) ? $args['country'] : WC()->checkout->get_value( 'billing_state' === $key ? 'billing_country' : 'shipping_country' );
+				$states      = WC()->countries->get_states( $for_country );
 
 				if ( is_array( $states ) && empty( $states ) ) {
 
@@ -2011,7 +2013,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
 
-				} elseif ( ! is_null( $current_cc ) && is_array( $states ) ) {
+				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
 					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 						<option value="">' . esc_html__( 'Select a state&hellip;', 'woocommerce' ) . '</option>';
@@ -2452,7 +2454,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
-			$value = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( strip_tags( $meta->display_value ) ) ) );
+			$value = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
 
@@ -2642,7 +2644,7 @@ function wc_logout_url( $redirect = '' ) {
 	$redirect        = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
 
 	if ( $logout_endpoint ) {
-		return wc_get_endpoint_url( 'customer-logout', '', $redirect );
+		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
 	} else {
 		return wp_logout_url( $redirect );
 	}
@@ -2656,3 +2658,15 @@ function wc_logout_url( $redirect = '' ) {
 function wc_empty_cart_message() {
 	echo '<p class="cart-empty">' . apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) . '</p>';
 }
+
+/**
+ * Disable search engines indexing core, dynamic, cart/checkout pages.
+ *
+ * @since 3.2.0
+ */
+function wc_page_noindex() {
+	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', 'wc_page_noindex' );

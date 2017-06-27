@@ -1098,3 +1098,32 @@ function wc_update_300_product_visibility() {
 function wc_update_300_db_version() {
 	WC_Install::update_db_version( '3.0.0' );
 }
+
+/**
+ * Add an index to the downloadable product permissions table to improve performance of update_user_by_order_id.
+ */
+function wc_update_310_downloadable_products() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE column_name = 'order_id' and key_name = 'order_id'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX order_id (order_id)" );
+	}
+}
+
+/**
+ * Find old order notes and ensure they have the correct type for exclusion.
+ */
+function wc_update_310_old_comments() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE $wpdb->comments comments LEFT JOIN $wpdb->posts as posts ON comments.comment_post_ID = posts.ID SET comment_type = 'order_note' WHERE posts.post_type = 'shop_order' AND comment_type = '';" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_310_db_version() {
+	WC_Install::update_db_version( '3.1.0' );
+}

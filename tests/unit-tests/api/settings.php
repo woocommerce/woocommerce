@@ -539,10 +539,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array(
 			'id'          => 'subject',
 			'label'       => 'Subject',
-			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'description' => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'type'        => 'text',
 			'default'     => '',
-			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => '',
 		), $setting );
 
@@ -557,10 +557,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array(
 			'id'          => 'subject',
 			'label'       => 'Subject',
-			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'description' => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'type'        => 'text',
 			'default'     => '',
-			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => 'This is my subject',
 		), $setting );
 

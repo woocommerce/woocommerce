@@ -546,7 +546,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_created.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_created( $date = null ) {
@@ -556,7 +556,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_modified.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_modified( $date = null ) {
@@ -782,14 +782,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's type.
+	 * Get an order item object, based on it's ID. The item must belong to the current
+	 * order. If the item cannot be found or it doens't belong to current order
+	 * FALSE will be returned.
 	 *
 	 * @since  3.0.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
 	 */
 	public function get_item( $item_id ) {
-		return WC_Order_Factory::get_order_item( $item_id );
+		$type = $this->data_store->get_order_item_type( $this, $item_id );
+		if ( ! $type ) {
+			return false;
+		}
+
+		$items = $this->get_items( $type );
+		return ! empty( $items[ $item_id ] ) ? $items[ $item_id ] : false;
 	}
 
 	/**
@@ -1003,11 +1011,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
+	 * If by default the taxes are based on the shipping address and the current order doesn't
+	 * have any, it would use the billing address rather than using the Shopping base location.
+	 *
 	 * Will use the base country unless customer addresses are set.
 	 * @param $args array Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+
+		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = 'billing';
+		}
+
 		$args         = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
 			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),

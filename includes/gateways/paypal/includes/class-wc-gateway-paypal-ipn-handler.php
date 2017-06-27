@@ -55,7 +55,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			$posted['payment_status'] = strtolower( $posted['payment_status'] );
 
 			// Sandbox fix.
-			if ( isset( $posted['test_ipn'] ) && 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
+			if ( ( empty( $posted['pending_reason'] ) || 'authorization' !== $posted['pending_reason'] ) && isset( $posted['test_ipn'] ) && 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
 				$posted['payment_status'] = 'completed';
 			}
 
