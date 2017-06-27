@@ -346,7 +346,7 @@ class WC_Admin_Addons {
 				$local_defaults = array(
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
 					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'description' => __( 'Display live Canada Post rates at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 					'logos'       => array_merge( $defaults['logos'], array(
 						array(
 							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
