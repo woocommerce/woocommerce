@@ -127,7 +127,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return int|string
 	 */
-	protected function parse_relative_field( $field ) {
+	public function parse_relative_field( $field ) {
 		global $wpdb;
 
 		if ( empty( $field ) ) {
@@ -182,7 +182,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @return int
 	 */
-	protected function parse_id_field( $field ) {
+	public function parse_id_field( $field ) {
 		global $wpdb;
 
 		$id = absint( $field );
@@ -216,7 +216,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array
 	 */
-	protected function parse_relative_comma_field( $field ) {
+	public function parse_relative_comma_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -230,7 +230,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array
 	 */
-	protected function parse_comma_field( $field ) {
+	public function parse_comma_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -244,7 +244,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return bool|string
 	 */
-	protected function parse_bool_field( $field ) {
+	public function parse_bool_field( $field ) {
 		if ( '0' === $field ) {
 			return false;
 		}
@@ -263,7 +263,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return float|string
 	 */
-	protected function parse_float_field( $field ) {
+	public function parse_float_field( $field ) {
 		if ( '' === $field ) {
 			return $field;
 		}
@@ -278,7 +278,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array of arrays with "parent" and "name" keys.
 	 */
-	protected function parse_categories_field( $field ) {
+	public function parse_categories_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -323,7 +323,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return array
 	 */
-	protected function parse_tags_field( $field ) {
+	public function parse_tags_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -350,7 +350,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return int
 	 */
-	protected function parse_shipping_class_field( $field ) {
+	public function parse_shipping_class_field( $field ) {
 		if ( empty( $field ) ) {
 			return 0;
 		}
@@ -370,7 +370,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return array
 	 */
-	protected function parse_images_field( $field ) {
+	public function parse_images_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
@@ -385,7 +385,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return string|null
 	 */
-	protected function parse_date_field( $field ) {
+	public function parse_date_field( $field ) {
 		if ( empty( $field ) ) {
 			return null;
 		}
@@ -403,7 +403,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return string
 	 */
-	protected function parse_backorders_field( $field ) {
+	public function parse_backorders_field( $field ) {
 		if ( empty( $field ) ) {
 			return '';
 		}
@@ -497,7 +497,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$callbacks[] = $callback;
 		}
 
-		return $callbacks;
+		return apply_filters( 'woocommerce_product_importer_formatting_callbacks', $callbacks, $this );
 	}
 
 	/**
@@ -677,7 +677,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
-			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ) );
+			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
 		}
 	}
 
