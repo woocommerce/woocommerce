@@ -1292,6 +1292,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$this->data_store->update( $this );
 			} else {
 				$this->data_store->create( $this );
+				// Trigger action after creating a product type in it's data store.
+				do_action( 'woocommerce_after_' . $this->object_type . '_object_created', $this, $this->data_store );
 			}
 			if ( $this->get_parent_id() ) {
 				wc_deferred_product_sync( $this->get_parent_id() );
