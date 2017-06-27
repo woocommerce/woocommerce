@@ -484,7 +484,7 @@ class WC_Frontend_Scripts {
 						'closeOnScroll'         => false,
 						'history'               => false,
 						'hideAnimationDuration' => 0,
-						'showAnimationDuration' => 0
+						'showAnimationDuration' => 0,
 					) ),
 					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
