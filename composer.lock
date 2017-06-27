@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e1a8fa4256dcf3ef3caee1b027d6779",
+    "content-hash": "43e386f7b4f53035cfe7eec88d2d9ee6",
     "packages": [
         {
             "name": "composer/installers",
@@ -1505,6 +1505,39 @@
                 "validate"
             ],
             "time": "2016-11-23T20:04:58+00:00"
+        },
+        {
+            "name": "woocommerce/woocommerce-git-hooks",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/woocommerce/woocommerce-git-hooks.git",
+                "reference": "e9ed8c16d07aed82d9f92546bd7550e30ccd59ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-git-hooks/zipball/e9ed8c16d07aed82d9f92546bd7550e30ccd59ce",
+                "reference": "e9ed8c16d07aed82d9f92546bd7550e30ccd59ce",
+                "shasum": ""
+            },
+            "type": "scripts",
+            "autoload": {
+                "psr-4": {
+                    "WooCommerce\\GitHooks\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Claudio Sanches",
+                    "email": "claudio@automattic.com"
+                }
+            ],
+            "description": "WooCommerce Git Hooks",
+            "time": "2017-06-27T02:52:32+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
