@@ -600,7 +600,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			throw new Exception( sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $attribute_name ), 400 );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
 			throw new Exception( sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
-		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
+		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
 			throw new Exception( sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
 		}
 
@@ -610,6 +610,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( $result->get_error_message(), 400 );
 		}
+
+		$attribute_id = absint( $wpdb->insert_id );
 
 		// Delete transient.
 		delete_transient( 'wc_attribute_taxonomies' );
@@ -621,12 +623,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$wc_product_attributes = array();
 
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
-				$wc_product_attributes[ $name ] = $tax;
-			}
+			$wc_product_attributes[ wc_attribute_taxonomy_name( $attribute_name ) ] = $tax;
 		}
 
-		return $wpdb->insert_id;
+		return $attribute_id;
 	}
 
 	/**
