@@ -1184,13 +1184,16 @@ function wc_deferred_product_sync( $product_id ) {
 }
 
 /**
- * Determine if the provided post object is the product post type.
+ * Determine if the provided post object or post ID is the product post type.
  * 
  * @since  3.2.0
- * @param  object $post_object
+ * @param  object|int $post_object
  * @return bool
  */
 function wc_is_product_post_type( $post_object ) {
+	if ( is_int( $post_object ) ) {
+		$post_object = get_post( $post_object );
+	}
 	$valid_type = $post_object && 'product' == $post_object->post_type;
 	
 	return apply_filters( 'woocommerce_is_product_post_type', $valid_type, $post_object );
