@@ -1733,8 +1733,14 @@ class WC_Cart {
 		// Sanitize coupon code.
 		$coupon_code = wc_format_coupon_code( $coupon_code );
 
-		// Get the coupon.
-		$the_coupon = new WC_Coupon( $coupon_code );
+		// Only allow coupons by code, not by id.
+		$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
+		if ( $coupon_id ) {
+			$the_coupon = new WC_Coupon( $coupon_id );
+		} else {
+			$the_coupon = new WC_Coupon;
+			$the_coupon->set_code( $coupon_code );
+		}
 
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
