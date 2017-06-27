@@ -503,7 +503,7 @@ class WC_Admin_Setup_Wizard {
 			case 'CA':
 				$local_content = array(
 					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-					'description' => __( 'Display live Canada Post rates at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 				);
 				break;
 			default:
