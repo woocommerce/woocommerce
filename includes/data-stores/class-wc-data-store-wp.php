@@ -100,7 +100,7 @@ class WC_Data_Store_WP {
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, $meta->value, false );
+		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, wp_slash( $meta->value ), false );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class WC_Data_Store_WP {
 	 * @param  stdClass (containing ->id, ->key and ->value)
 	 */
 	public function update_meta( &$object, $meta ) {
-		update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
+		update_metadata_by_mid( $this->meta_type, $meta->id, wp_slash( $meta->value ), $meta->key );
 	}
 
 	/**
