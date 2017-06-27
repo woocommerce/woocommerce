@@ -39,6 +39,11 @@ function wc_template_redirect() {
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
 
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && 'true' === $wp->query_vars['customer-logout'] ) {
+		// Redirect to the correct logout endpoint.
+		wp_redirect( esc_url_raw( wc_get_account_endpoint_url( 'customer-logout' ) ) );
+		exit;
+
 	} elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
 
 		// Redirect to the product page if we have a single product
