@@ -209,7 +209,7 @@ class WC_Admin_Importers {
 			'start_pos'       => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0,
 			'mapping'         => isset( $_POST['mapping'] ) ? (array) $_POST['mapping'] : array(),
 			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false,
-			'lines'           => apply_filters( 'woocommerce_product_import_batch_size', 10 ),
+			'lines'           => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
 			'parse'           => true,
 		);
 
