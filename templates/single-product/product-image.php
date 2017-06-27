@@ -25,7 +25,7 @@ $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 
 $thumbnail_size    = apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' );
 $post_thumbnail_id = get_post_thumbnail_id( $post->ID );
 $full_size_image   = wp_get_attachment_image_src( $post_thumbnail_id, $thumbnail_size );
-$image_title       = get_post_field( 'post_excerpt', $post_thumbnail_id );
+$image_title       = get_post_field( 'post_title', $post_thumbnail_id );
 $placeholder       = has_post_thumbnail() ? 'with-images' : 'without-images';
 $wrapper_classes   = apply_filters( 'woocommerce_single_product_image_gallery_classes', array(
 	'woocommerce-product-gallery',
@@ -39,6 +39,7 @@ $wrapper_classes   = apply_filters( 'woocommerce_single_product_image_gallery_cl
 		<?php
 		$attributes = array(
 			'title'                   => $image_title,
+			'alt'                     => $image_title,
 			'data-src'                => $full_size_image[0],
 			'data-large_image'        => $full_size_image[0],
 			'data-large_image_width'  => $full_size_image[1],
