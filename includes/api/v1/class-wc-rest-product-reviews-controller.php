@@ -205,7 +205,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$product_id = (int) $request['product_id'];
 
-		if ( 'product' !== get_post_type( $product_id ) ) {
+		if ( ! wc_is_product_post_type( $product_id ) ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -230,7 +230,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$id         = (int) $request['id'];
 		$product_id = (int) $request['product_id'];
 
-		if ( 'product' !== get_post_type( $product_id ) ) {
+		if ( ! wc_is_product_post_type( $product_id ) ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -256,7 +256,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	public function create_item( $request ) {
 		$product_id = (int) $request['product_id'];
 
-		if ( 'product' !== get_post_type( $product_id ) ) {
+		if ( ! wc_is_product_post_type( $product_id ) ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -311,7 +311,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$product_review_id = (int) $request['id'];
 		$product_id        = (int) $request['product_id'];
 
-		if ( 'product' !== get_post_type( $product_id ) ) {
+		if ( ! wc_is_product_post_type( $product_id ) ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 

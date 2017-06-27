@@ -142,7 +142,7 @@ class WC_Breadcrumb {
 			$post = get_post( $post_id );
 		}
 
-		if ( 'product' === get_post_type( $post ) ) {
+		if ( wc_is_product_post_type( $post ) ) {
 			$this->prepend_shop_page();
 			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );

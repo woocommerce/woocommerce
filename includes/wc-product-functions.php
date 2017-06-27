@@ -238,7 +238,7 @@ function wc_get_featured_product_ids() {
  */
 function wc_product_post_type_link( $permalink, $post ) {
 	// Abort if post is not a product.
-	if ( 'product' !== $post->post_type ) {
+	if ( ! wc_is_product_post_type( $post ) ) {
 		return $permalink;
 	}
 
