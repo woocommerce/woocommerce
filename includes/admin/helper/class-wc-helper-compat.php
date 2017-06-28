@@ -135,7 +135,18 @@ class WC_Helper_Compat {
 
 		if ( is_plugin_active( 'woothemes-updater/woothemes-updater.php' ) ) {
 			deactivate_plugins( 'woothemes-updater/woothemes-updater.php' );
+
+			// Admin notice
+			add_action( 'admin_notices', array( __CLASS__, 'plugin_deactivated_notice' ) );
 		}
+	}
+
+	/**
+	 * Display admin notice if plugin was forcefully deactivated.
+	 */
+	public static function plugin_deactivated_notice() {
+		$notice = __( 'The WooCommerce Helper plugin is no longer needed.', 'woocommerce' );
+		echo '<div id="message" class="updated notice is-dismissible"><p>' . $notice . '</p></div>';
 	}
 
 	/**
