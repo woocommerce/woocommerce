@@ -2622,7 +2622,7 @@ function wc_get_star_rating_html( $rating, $count = 0 ) {
 
 	$html .= '</span>';
 
-	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count  );
+	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count );
 }
 
 /**
