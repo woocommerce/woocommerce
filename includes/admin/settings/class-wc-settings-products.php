@@ -264,6 +264,20 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'title'             => __( 'Hold Stock Check Periodicity (minutes)', 'woocommerce' ),
+					'desc'              => __( 'Time in minutes between held stock checks. Must be less or equal to the Hold Stock setting', 'woocommerce' ),
+					'id'                => 'woocommerce_hold_stock_check_periodicity',
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'min'  => 0,
+						'step' => 1
+					),
+					'css'               => 'width: 80px;',
+					'default'           => '60',
+					'autoload'          => false
+				),
+
+				array(
 					'title'         => __( 'Notifications', 'woocommerce' ),
 					'desc'          => __( 'Enable low stock notifications', 'woocommerce' ),
 					'id'            => 'woocommerce_notify_low_stock',

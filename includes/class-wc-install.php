@@ -304,9 +304,10 @@ class WC_Install {
 		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
+		$hold_stock_check_periodicity = get_option( 'woocommerce_hold_stock_check_periodicity', $held_duration );
 
-		if ( '' != $held_duration ) {
-			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		if ( '' != $hold_stock_check_periodicity ) {
+			wp_schedule_single_event( time() + ( absint( $hold_stock_check_periodicity ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );

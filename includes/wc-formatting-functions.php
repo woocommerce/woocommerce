@@ -943,14 +943,36 @@ function wc_format_option_price_num_decimals( $value, $option, $raw_value ) {
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_decimals', 'wc_format_option_price_num_decimals', 10, 3 );
 
 /**
- * Formats hold stock option and sets cron event up.
+ * Formats hold stock option
  * @param  string $value
  * @param  array $option
  * @param  string $raw_value
  * @return string
  */
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
+	return ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );
+
+/**
+ * Formats hold stock check periodicity option and sets cron event up.
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_hold_stock_check_periodicity( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''
+
+	$hold_stock_minutes = get_option( 'woocommerce_hold_stock_minutes' );
+
+	if ( empty( $hold_stock_minutes ) ) {
+		$value = '';
+	}
+
+	if ( ! empty( $hold_stock_minutes ) && ( empty( $value ) || $value > $hold_stock_minutes ) ) {
+		$value = $hold_stock_minutes;
+	}
 
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 
@@ -960,7 +982,8 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 
 	return $value;
 }
-add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_check_periodicity', 'wc_format_option_hold_stock_check_periodicity', 10, 3 );
+
 
 /**
  * Sanitize terms from an attribute text based.
