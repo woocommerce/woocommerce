@@ -1,6 +1,10 @@
 /* global woocommerce_admin */
 jQuery( function ( $ ) {
 
+	if ( 'undefined' === typeof woocommerce_admin ) {
+		return;
+	}
+
 	// Add buttons to product screen.
 	var $product_screen = $( '.edit-php.post-type-product' ),
 		$title_action   = $product_screen.find( '.page-title-action:first' ),
