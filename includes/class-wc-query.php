@@ -334,6 +334,14 @@ class WC_Query {
 	}
 
 	/**
+	 * Search post excerpt.
+	 * @deprecated 3.1.0 - Since WordPress 4.5 not needed anymore.
+	 */
+	public function search_post_excerpt( $where = '' ) {
+		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.1.0', 'Excerpt added to search query by default since WordPress 4.5.' );
+	}
+
+	/**
 	 * WP SEO meta description.
 	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
@@ -401,6 +409,14 @@ class WC_Query {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+	}
+
+	/**
+	 * Remove the posts_where filter.
+	 * @deprecated 3.1.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
+	 */
+	public function remove_posts_where() {
+		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.1.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
 	}
 
 	/**
