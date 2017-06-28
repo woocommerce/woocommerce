@@ -36,6 +36,8 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 			)
 		);
 
+		$this->clear_cache( $order_id );
+
 		return absint( $wpdb->insert_id );
 	}
 
@@ -49,6 +51,9 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 */
 	public function update_order_item( $item_id, $item ) {
 		global $wpdb;
+
+		$this->maybe_clear_cache( $item_id );
+
 		return $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
 	}
 
@@ -62,6 +67,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
+		$this->maybe_clear_cache( $item_id );
 	}
 
 	/**
@@ -145,5 +151,30 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		global $wpdb;
 		$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
 		return $item_data->order_item_type;
+	}
+
+	/**
+	 * Clear order item cache if item is linked to an order.
+	 *
+	 * @param int
+	 * @since 3.1.0
+	 */
+	protected function maybe_clear_cache( $item_id ) {
+
+		$order_id = $this->get_order_id_by_order_item_id( $item_id );
+
+		if ( ! empty( $order_id ) ) {
+			$this->clear_cache( $order_id );
+		}
+	}
+
+	/**
+	 * Clear order item cache.
+	 *
+	 * @param int
+	 * @since 3.1.0
+	 */
+	protected function clear_cache( $order_id ) {
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
 	}
 }
