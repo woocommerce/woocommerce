@@ -339,6 +339,7 @@ class WC_Query {
 	 */
 	public function search_post_excerpt( $where = '' ) {
 		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.1.0', 'Excerpt added to search query by default since WordPress 4.5.' );
+		return $where;
 	}
 
 	/**
