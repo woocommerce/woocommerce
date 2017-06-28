@@ -709,11 +709,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Process importer.
 	 *
+	 * Do not import products with IDs or SKUs that already exist if option
+	 * update existing is false, and likewise, if updating products, do not
+	 * process rows which do not exist if an ID/SKU is provided.
+	 *
 	 * @return array
 	 */
 	public function import() {
 		$this->start_time = time();
 		$index            = 0;
+		$update_existing  = $this->params['update_existing'];
 		$data             = array(
 			'imported'  => array(),
 			'failed'    => array(),
@@ -722,27 +727,32 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-			// Do not import products with IDs or SKUs that already exist if option
-			// is true UNLESS this is a dummy product created during this import.
-			if ( ! $this->params['update_existing'] ) {
-				$id      = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-				$sku     = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$id_exists  = false;
+			$sku_exists = false;
 
-				if ( $id ) {
-					$product = wc_get_product( $id );
+			if ( $id ) {
+				$product   = wc_get_product( $id );
+				$id_exists = $product && 'importing' !== $product->get_status();
+			} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
+				$product    = wc_get_product( $id_from_sku );
+				$sku_exists = $product && 'importing' !== $product->get_status();
+			}
 
-					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
-						continue;
-					}
-				} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
-					$product = wc_get_product( $id_from_sku );
+			if ( $id_exists && ! $update_existing ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
+			}
 
-					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
-						continue;
-					}
-				}
+			if ( $sku_exists && ! $update_existing ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
+			}
+
+			if ( $update_existing && ( $id || $sku ) && ! $id_exists && ! $sku_exists ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'No matching product exists to update.', 'woocommerce' ), array( 'id' => $id, 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
 			}
 
 			$result = $this->process_item( $parsed_data );
