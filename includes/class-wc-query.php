@@ -335,10 +335,10 @@ class WC_Query {
 
 	/**
 	 * Search post excerpt.
-	 * @deprecated 3.1.0 - Since WordPress 4.5 not needed anymore.
+	 * @deprecated 3.2.0 - Bot needed anymore since WordPress 4.5.
 	 */
 	public function search_post_excerpt( $where = '' ) {
-		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.1.0', 'Excerpt added to search query by default since WordPress 4.5.' );
+		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.2.0', 'Excerpt added to search query by default since WordPress 4.5.' );
 		return $where;
 	}
 
@@ -414,10 +414,10 @@ class WC_Query {
 
 	/**
 	 * Remove the posts_where filter.
-	 * @deprecated 3.1.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
+	 * @deprecated 3.2.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
 	 */
 	public function remove_posts_where() {
-		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.1.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
+		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.2.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
 	}
 
 	/**
