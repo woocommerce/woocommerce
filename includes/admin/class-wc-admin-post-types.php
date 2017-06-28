@@ -2027,7 +2027,7 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( wc_get_page_id( 'terms' ) === $post->ID ) {
-			$post_states['wc_page_for_myaccount'] = __( 'Terms and Conditions Page', 'woocommerce' );
+			$post_states['wc_page_for_terms'] = __( 'Terms and Conditions Page', 'woocommerce' );
 		}
 
 		return $post_states;
