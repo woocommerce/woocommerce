@@ -1129,6 +1129,38 @@ function wc_update_310_db_version() {
 }
 
 /**
+ * Add the billing and shipping index meta for old orders that may not have it.
+ */
+function wc_update_311_order_indices() {
+	$args = array(
+		'post_status'    => 'any',
+		'post_type'      => 'shop_order',
+		'posts_per_page' => -1,
+		'fields'         => 'ids',
+		'meta_query'     => array(
+			array(
+				'key'     => '_billing_address_index',
+				'compare' => 'NOT EXISTS'
+			),
+		),
+	);
+
+	$ids = get_posts( $args );
+	foreach ( $ids as $id ) {
+		$order = new WC_Order( $id );
+		update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
+		update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_311_db_version() {
+	WC_Install::update_db_version( '3.1.1' );
+}
+
+/**
  * Update state codes for Mexico.
  */
 function wc_update_320_mexican_states() {
