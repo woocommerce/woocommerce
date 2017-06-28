@@ -105,6 +105,9 @@ class WC_Admin_Post_Types {
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
 		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
+
+		// Add a post display state for special WC pages.
+		add_filter( 'display_post_states', array( $this, 'add_display_post_states' ), 10, 2 );
 	}
 
 	/**
@@ -1998,6 +2001,36 @@ class WC_Admin_Post_Types {
 			</div>
 			<?php
 		}
+	}
+
+	/**
+	 * Add a post display state for special WC pages in the page list table.
+	 *
+	 * @param array   $post_states An array of post display states.
+	 * @param WP_Post $post        The current post object.
+	 */
+	public function add_display_post_states( $post_states, $post ) {
+		if ( wc_get_page_id( 'shop' ) === $post->ID ) {
+			$post_states['wc_page_for_shop'] = __( 'Shop Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'cart' ) === $post->ID ) {
+			$post_states['wc_page_for_cart'] = __( 'Cart Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'checkout' ) === $post->ID ) {
+			$post_states['wc_page_for_checkout'] = __( 'Checkout Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'myaccount' ) === $post->ID ) {
+			$post_states['wc_page_for_myaccount'] = __( 'My Account Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'terms' ) === $post->ID ) {
+			$post_states['wc_page_for_myaccount'] = __( 'Terms and Conditions Page', 'woocommerce' );
+		}
+
+		return $post_states;
 	}
 }
 
