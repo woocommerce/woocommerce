@@ -227,5 +227,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Upgrade Notice ==
 
-= 3.0 =
-3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
+= 3.1 =
+3.1 is a minor update. If you are upgrading from 3.0 things should continue to work as expected. If upgrading from 2.6.x, please ensure your plugin and theme is compatible with 3.x beforehand. To be safe, make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
