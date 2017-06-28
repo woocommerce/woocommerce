@@ -24,6 +24,8 @@ $order = wc_get_order( $order_id );
 
 $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
+$downloads             = $order->get_downloadable_items();
+$has_downloads         = $order->has_downloadable_item();
 ?>
 
 <section class="woocommerce-order-details">
@@ -73,6 +75,13 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 	</table>
 
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
+
+		<?php if ( $has_downloads ) : ?>
+			<section class="woocommerce-order-downloads">
+				<h2 class="woocommerce-order-downloads__title"><?php _e( 'Order downloads', 'woocommerce' ); ?></h2>
+				<?php wc_get_template( 'order/order-downloads.php', array( 'downloads' => $downloads ) ); ?>
+			</section>
+		<?php endif; ?>
 
 	<?php if ( $show_customer_details ) : ?>
 		<?php wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) ); ?>
