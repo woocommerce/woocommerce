@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.1.0-rc.2\n"
+"Project-Id-Version: WooCommerce 3.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-06-23 23:26:45+00:00\n"
+"POT-Creation-Date: 2017-06-28 15:43:09+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5344,31 +5344,31 @@ msgstr ""
 msgid "Invalid currency code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1445
+#: includes/abstracts/abstract-wc-order.php:1437
 #. translators: %s: shipping method
 msgid "via %s"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1450
+#: includes/abstracts/abstract-wc-order.php:1442
 #: includes/class-wc-cart.php:1626 includes/class-wc-product-grouped.php:108
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1478
+#: includes/abstracts/abstract-wc-order.php:1470
 msgid "Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1493
+#: includes/abstracts/abstract-wc-order.php:1485
 #: includes/admin/meta-boxes/views/html-order-items.php:121
 msgid "Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1508
+#: includes/abstracts/abstract-wc-order.php:1500
 #: includes/admin/meta-boxes/views/html-order-items.php:131
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1567
+#: includes/abstracts/abstract-wc-order.php:1559
 #: includes/admin/meta-boxes/views/html-order-item.php:97
 #: includes/admin/meta-boxes/views/html-order-item.php:143
 #: includes/shortcodes/class-wc-shortcode-checkout.php:156
@@ -5904,6 +5904,7 @@ msgid "Show Canada Post shipping rates"
 msgstr ""
 
 #: includes/admin/class-wc-admin-addons.php:349
+#: includes/admin/class-wc-admin-setup-wizard.php:506
 msgid ""
 "Display live rates from Canada Post at checkout to make shipping a breeze. "
 "Powered by WooCommerce Services."
@@ -5932,7 +5933,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:83
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1161
+#: includes/wc-template-functions.php:1166
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -7932,7 +7933,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:124
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:63
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:112
-#: includes/admin/settings/class-wc-settings-tax.php:177
+#: includes/admin/settings/class-wc-settings-tax.php:183
 #: includes/admin/settings/views/html-settings-tax.php:27
 #: templates/cart/shipping-calculator.php:85
 msgid "City"
@@ -7942,7 +7943,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:128
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:116
-#: includes/admin/settings/class-wc-settings-tax.php:176
+#: includes/admin/settings/class-wc-settings-tax.php:182
 #: includes/admin/settings/views/html-settings-tax.php:26
 #: includes/class-wc-countries.php:620
 #: templates/cart/shipping-calculator.php:93
@@ -7964,7 +7965,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:136
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:1992
+#: includes/wc-template-functions.php:1997
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -8121,7 +8122,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-shipping.php:17
 #: includes/admin/meta-boxes/views/html-product-data-variations.php:69
 #: includes/admin/settings/class-wc-settings-shipping.php:27
-#: includes/admin/settings/class-wc-settings-tax.php:182
+#: includes/admin/settings/class-wc-settings-tax.php:188
 #: includes/admin/settings/views/html-settings-tax.php:32
 #: includes/class-wc-order-item-shipping.php:157
 #: templates/cart/cart-totals.php:55 templates/cart/cart-totals.php:56
@@ -8356,12 +8357,6 @@ msgstr ""
 msgid ""
 "Print labels and get discounted USPS shipping rates, right from your "
 "WooCommerce dashboard. Powered by WooCommerce Services."
-msgstr ""
-
-#: includes/admin/class-wc-admin-setup-wizard.php:506
-msgid ""
-"Display live Canada Post rates at checkout to make shipping a breeze. "
-"Powered by WooCommerce Services."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:556
@@ -9050,7 +9045,7 @@ msgstr ""
 
 #: includes/admin/helper/views/html-main.php:72
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:2502 templates/myaccount/downloads.php:76
+#: includes/wc-template-functions.php:2507 templates/myaccount/downloads.php:76
 msgid "Download"
 msgstr ""
 
@@ -9138,7 +9133,7 @@ msgid ""
 "post_max_size being defined as smaller than upload_max_filesize in php.ini."
 msgstr ""
 
-#: includes/admin/importers/class-wc-product-csv-importer-controller.php:239
+#: includes/admin/importers/class-wc-product-csv-importer-controller.php:240
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:273
 msgid "Invalid file type. The importer supports CSV and TXT file formats."
 msgstr ""
@@ -9215,7 +9210,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-items.php:308
 #: includes/admin/meta-boxes/views/html-product-data-general.php:148
 #: includes/admin/meta-boxes/views/html-variation-admin.php:281
-#: includes/admin/settings/class-wc-settings-tax.php:183
+#: includes/admin/settings/class-wc-settings-tax.php:189
 #: includes/admin/views/html-bulk-edit-product.php:89
 #: includes/admin/views/html-quick-edit-product.php:68
 #: includes/export/class-wc-product-csv-exporter.php:92
@@ -10416,7 +10411,7 @@ msgid "Rate code"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-items.php:310
-#: includes/admin/settings/class-wc-settings-tax.php:178
+#: includes/admin/settings/class-wc-settings-tax.php:184
 msgid "Rate %"
 msgstr ""
 
@@ -11592,16 +11587,16 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-api.php:27
-#: includes/admin/settings/class-wc-settings-api.php:68
+#: includes/admin/settings/class-wc-settings-api.php:72
 msgid "API"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-api.php:61
+#: includes/admin/settings/class-wc-settings-api.php:65
 #: includes/admin/settings/class-wc-settings-general.php:50
 msgid "General options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-api.php:69
+#: includes/admin/settings/class-wc-settings-api.php:73
 msgid "Enable the REST API"
 msgstr ""
 
@@ -12015,7 +12010,7 @@ msgid "Store notice text"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:156
-#: includes/wc-template-functions.php:520
+#: includes/wc-template-functions.php:525
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
@@ -12444,7 +12439,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:250
 #: includes/admin/settings/class-wc-settings-shipping.php:281
 #: includes/admin/settings/class-wc-settings-shipping.php:337
-#: includes/admin/settings/class-wc-settings-tax.php:172
+#: includes/admin/settings/class-wc-settings-tax.php:178
 msgid "Your changed data will be lost if you leave this page without saving."
 msgstr ""
 
@@ -12508,30 +12503,30 @@ msgstr ""
 msgid "%s rates"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:171
+#: includes/admin/settings/class-wc-settings-tax.php:177
 msgid "No row(s) selected"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:174
+#: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "Country code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:175
+#: includes/admin/settings/class-wc-settings-tax.php:181
 #: includes/admin/settings/views/html-settings-tax.php:25
 msgid "State code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:179
+#: includes/admin/settings/class-wc-settings-tax.php:185
 #: includes/admin/settings/views/html-settings-tax.php:29
 msgid "Tax name"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:180
+#: includes/admin/settings/class-wc-settings-tax.php:186
 #: includes/admin/settings/views/html-settings-tax.php:30
 msgid "Priority"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:181
+#: includes/admin/settings/class-wc-settings-tax.php:187
 #: includes/admin/settings/views/html-settings-tax.php:31
 msgid "Compound"
 msgstr ""
@@ -14028,7 +14023,7 @@ msgstr ""
 #: includes/admin/views/html-notice-template-check.php:13
 #: includes/admin/views/html-notice-theme-support.php:12
 #: includes/admin/views/html-notice-updated.php:12
-#: includes/wc-template-functions.php:523
+#: includes/wc-template-functions.php:528
 msgid "Dismiss"
 msgstr ""
 
@@ -18420,7 +18415,7 @@ msgid "Get cart should not be called before the wp_loaded action."
 msgstr ""
 
 #: includes/class-wc-cart.php:915 includes/class-wc-frontend-scripts.php:533
-#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1471
+#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1476
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -18855,7 +18850,7 @@ msgstr ""
 msgid "Buy now"
 msgstr ""
 
-#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2615
+#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2620
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:166
 #. translators: %s: average rating
 #. translators: %s: rating
@@ -19013,7 +19008,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:510
-#: includes/wc-template-functions.php:1933
+#: includes/wc-template-functions.php:1938
 msgid "required"
 msgstr ""
 
@@ -20912,24 +20907,28 @@ msgstr ""
 msgid "Not able to attach \"%s\"."
 msgstr ""
 
-#: includes/import/class-wc-product-csv-importer.php:656
+#: includes/import/class-wc-product-csv-importer.php:700
 msgid "ID %d"
 msgstr ""
 
-#: includes/import/class-wc-product-csv-importer.php:659
+#: includes/import/class-wc-product-csv-importer.php:703
 msgid "SKU %s"
 msgstr ""
 
-#: includes/import/class-wc-product-csv-importer.php:691
+#: includes/import/class-wc-product-csv-importer.php:744
 msgid "A product with this ID already exists."
 msgstr ""
 
-#: includes/import/class-wc-product-csv-importer.php:698
+#: includes/import/class-wc-product-csv-importer.php:749
 msgid "A product with this SKU already exists."
 msgstr ""
 
+#: includes/import/class-wc-product-csv-importer.php:754
+msgid "No matching product exists to update."
+msgstr ""
+
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:2502
+#: includes/wc-template-functions.php:2507
 #. translators: 1: current item count
 msgid "Download %d"
 msgstr ""
@@ -22268,91 +22267,91 @@ msgstr ""
 msgid "Checkout is not available whilst your cart is empty."
 msgstr ""
 
-#: includes/wc-template-functions.php:171
+#: includes/wc-template-functions.php:176
 msgid "New products"
 msgstr ""
 
-#: includes/wc-template-functions.php:179
+#: includes/wc-template-functions.php:184
 msgid "New products added to %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:187
+#: includes/wc-template-functions.php:192
 msgid "New products tagged %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:540
+#: includes/wc-template-functions.php:545
 msgid "Search results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/wc-template-functions.php:543
+#: includes/wc-template-functions.php:548
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:826
+#: includes/wc-template-functions.php:831
 msgid "Default sorting"
 msgstr ""
 
-#: includes/wc-template-functions.php:827
+#: includes/wc-template-functions.php:832
 msgid "Sort by popularity"
 msgstr ""
 
-#: includes/wc-template-functions.php:828
+#: includes/wc-template-functions.php:833
 msgid "Sort by average rating"
 msgstr ""
 
-#: includes/wc-template-functions.php:829
+#: includes/wc-template-functions.php:834
 msgid "Sort by newness"
 msgstr ""
 
-#: includes/wc-template-functions.php:830
+#: includes/wc-template-functions.php:835
 msgid "Sort by price: low to high"
 msgstr ""
 
-#: includes/wc-template-functions.php:831
+#: includes/wc-template-functions.php:836
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:1170
+#: includes/wc-template-functions.php:1175
 #: templates/checkout/form-shipping.php:63
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1179
+#: includes/wc-template-functions.php:1184
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1483
+#: includes/wc-template-functions.php:1488
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1610
+#: includes/wc-template-functions.php:1615
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:2000
+#: includes/wc-template-functions.php:2005
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:2019
+#: includes/wc-template-functions.php:2024
 #: templates/cart/shipping-calculator.php:64
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2064
-#: includes/wc-template-functions.php:2216
-#: includes/wc-template-functions.php:2226
+#: includes/wc-template-functions.php:2069
+#: includes/wc-template-functions.php:2221
+#: includes/wc-template-functions.php:2231
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2612
+#: includes/wc-template-functions.php:2617
 #. translators: 1: rating 2: rating count
 msgid "Rated %1$s out of 5 based on %2$s customer rating"
 msgid_plural "Rated %1$s out of 5 based on %2$s customer ratings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:2659
+#: includes/wc-template-functions.php:2664
 msgid "Your cart is currently empty."
 msgstr ""
 
@@ -23778,12 +23777,12 @@ msgid_plural "Shipping %d"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1563
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2630
+#: includes/wc-template-functions.php:2635
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
