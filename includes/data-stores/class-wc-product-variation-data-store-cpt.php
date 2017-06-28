@@ -54,7 +54,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		) );
 
 		// The post parent is not a valid variable product so we should prevent this.
-		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+		if ( $product->get_parent_id( 'edit' ) && ! wc_is_product_post_type( $product->get_parent_id( 'edit' ) ) ) {
 			$product->set_parent_id( 0 );
 		}
 
@@ -96,7 +96,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		// The post parent is not a valid variable product so we should prevent this.
-		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+		if ( $product->get_parent_id( 'edit' ) && ! wc_is_product_post_type( $product->get_parent_id( 'edit' ) ) ) {
 			$product->set_parent_id( 0 );
 		}
 
@@ -155,7 +155,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		// The post parent is not a valid variable product so we should prevent this.
-		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
+		if ( $product->get_parent_id( 'edit' ) && ! wc_is_product_post_type( $product->get_parent_id( 'edit' ) ) ) {
 			$product->set_parent_id( 0 );
 		}
 

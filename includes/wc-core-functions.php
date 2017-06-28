@@ -877,7 +877,7 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
 	$post = get_post( $post_id );
-	if ( 'product' === get_post_type( $post->post_parent ) ) {
+	if ( wc_is_product_post_type( $post->post_parent ) ) {
 		$permalinks = wc_get_permalink_structure();
 		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $permalinks['product_rewrite_slug'], $matches ) ) {
 			$link = home_url( '/?attachment_id=' . $post->ID );

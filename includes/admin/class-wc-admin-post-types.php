@@ -770,7 +770,7 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function row_actions( $actions, $post ) {
-		if ( 'product' === $post->post_type ) {
+		if ( wc_is_product_post_type( $post ) ) {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 

@@ -61,7 +61,7 @@ class WC_Comments {
 	 * @return bool
 	 */
 	public static function comments_open( $open, $post_id ) {
-		if ( 'product' === get_post_type( $post_id ) && ! post_type_supports( 'product', 'comments' ) ) {
+		if ( wc_is_product_post_type( $post_id ) && ! post_type_supports( 'product', 'comments' ) ) {
 			$open = false;
 		}
 		return $open;
@@ -148,7 +148,7 @@ class WC_Comments {
 	 * @param int $comment_id
 	 */
 	public static function add_comment_rating( $comment_id ) {
-		if ( isset( $_POST['rating'] ) && 'product' === get_post_type( $_POST['comment_post_ID'] ) ) {
+		if ( isset( $_POST['rating'] ) && wc_is_product_post_type( $_POST['comment_post_ID'] ) ) {
 			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
 				return;
 			}
@@ -170,7 +170,7 @@ class WC_Comments {
 	public static function comment_moderation_recipients( $emails, $comment_id ) {
 		$comment = get_comment( $comment_id );
 
-		if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+		if ( $comment && ! wc_is_product_post_type( $comment->comment_post_ID ) ) {
 			$emails = array( get_option( 'admin_email' ) );
 		}
 
@@ -183,7 +183,7 @@ class WC_Comments {
 	 */
 	public static function clear_transients( $post_id ) {
 
-		if ( 'product' === get_post_type( $post_id ) ) {
+		if ( wc_is_product_post_type( $post_id ) ) {
 			$product = wc_get_product( $post_id );
 			self::get_rating_counts_for_product( $product );
 			self::get_average_rating_for_product( $product );
@@ -280,7 +280,7 @@ class WC_Comments {
 	public static function add_comment_purchase_verification( $comment_id ) {
 		$comment  = get_comment( $comment_id );
 		$verified = false;
-		if ( 'product' === get_post_type( $comment->comment_post_ID ) ) {
+		if ( wc_is_product_post_type( $comment->comment_post_ID ) ) {
 			$verified = wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID );
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}

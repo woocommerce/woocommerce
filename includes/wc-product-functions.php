@@ -238,7 +238,7 @@ function wc_get_featured_product_ids() {
  */
 function wc_product_post_type_link( $permalink, $post ) {
 	// Abort if post is not a product.
-	if ( 'product' !== $post->post_type ) {
+	if ( ! wc_is_product_post_type( $post ) ) {
 		return $permalink;
 	}
 
@@ -1181,4 +1181,20 @@ function wc_deferred_product_sync( $product_id ) {
 	}
 
 	$wc_deferred_product_sync[] = $product_id;
+}
+
+/**
+ * Determine if the provided post object or post ID is the product post type.
+ * 
+ * @since  3.2.0
+ * @param  object|int $post_object
+ * @return bool
+ */
+function wc_is_product_post_type( $post_object ) {
+	if ( is_int( $post_object ) ) {
+		$post_object = get_post( $post_object );
+	}
+	$valid_type = $post_object && 'product' == $post_object->post_type;
+	
+	return apply_filters( 'woocommerce_is_product_post_type', $valid_type, $post_object );
 }
