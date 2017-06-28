@@ -6,7 +6,7 @@ jQuery( function ( $ ) {
 		$title_action   = $product_screen.find( '.page-title-action:first' ),
 		$blankslate     = $product_screen.find( '.woocommerce-BlankState' );
 
-	if ( 0 === $blankslate.length ) {
+	if ( 0 === $blankslate.length && typeof woocommerce_admin !== 'undefined' )  {
 		$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
 		$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
 	} else {
