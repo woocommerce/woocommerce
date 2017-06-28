@@ -201,7 +201,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Set and restore wp_query so product page functions think it's a real product page.
 * Fix - Variation default value of '0' fails to save on product.
 * Fix - Prevent locations being added to the "Rest Of The World" shipping zone via the API.
-* Dev - Made WC_Order get_item() method use caching, and fixed it to only return items from the actual order object being used.
 * Dev - Allow date created to be set in wc_create_refund.
 * Dev - Introduced a [WC_Order_Query class](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query) for finding/searching orders.
 * Dev - Added "restored" webhook.
