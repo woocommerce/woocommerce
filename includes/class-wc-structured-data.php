@@ -233,6 +233,8 @@ class WC_Structured_Data {
 			}
 		}
 
+		$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+
 		if ( $product->get_rating_count() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
