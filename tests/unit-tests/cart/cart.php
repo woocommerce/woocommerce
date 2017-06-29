@@ -587,6 +587,25 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test add_discount allows coupons by code but not by ID.
+	 *
+	 * @since 3.2
+	 */
+	public function test_add_discount_code_id() {
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 100 );
+		$coupon->save();
+
+		$success = WC()->cart->add_discount( $coupon->get_code() );
+		$this->assertTrue( $success );
+
+		$success = WC()->cart->add_discount( (string) $coupon->get_id() );
+		$this->assertFalse( $success );
+	}
+
 	public function test_add_invidual_use_coupon() {
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon->set_individual_use( true );

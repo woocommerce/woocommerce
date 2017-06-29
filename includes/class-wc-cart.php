@@ -1736,6 +1736,13 @@ class WC_Cart {
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
+		// Prevent adding coupons by post ID.
+		if ( $the_coupon->get_code() !== $coupon_code ) {
+			$the_coupon->set_code( $coupon_code );
+			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			return false;
+		}
+
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
 			wc_add_notice( $the_coupon->get_error_message(), 'error' );

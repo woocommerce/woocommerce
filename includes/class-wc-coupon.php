@@ -85,11 +85,18 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $data ) ) {
 			$this->read_manual_coupon( $data, $coupon );
 			return;
-		} elseif ( is_numeric( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
+		} elseif ( is_int( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->set_id( $data );
 		} elseif ( ! empty( $data ) ) {
-			$this->set_id( wc_get_coupon_id_by_code( $data ) );
-			$this->set_code( $data );
+			$id = wc_get_coupon_id_by_code( $data );
+
+			// Need to support numeric strings for backwards compatibility.
+			if ( ! $id && 'shop_coupon' === get_post_type( $data ) ) {
+				$this->set_id( $data );
+			} else {
+				$this->set_id( $id );
+				$this->set_code( $data );
+			}
 		} else {
 			$this->set_object_read( true );
 		}
