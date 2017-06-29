@@ -48,6 +48,9 @@ class WC_Meta_Box_Order_Notes {
 				$note_classes   = array( 'note' );
 				$note_classes[] = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? 'customer-note' : '';
 				$note_classes[] = ( __( 'WooCommerce', 'woocommerce' ) === $note->comment_author ) ? 'system-note' : '';
+                                if ( 0 === strpos( $note->comment_content, 'Order status changed by bulk edit:' ) ) {
+                                    $note_classes[] = 'system-note';
+                                }
 				$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 				?>
 				<li rel="<?php echo absint( $note->comment_ID ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
