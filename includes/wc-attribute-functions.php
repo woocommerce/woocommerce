@@ -42,7 +42,12 @@ function wc_get_text_attributes_filter_callback( $value ) {
  * @return string
  */
 function wc_implode_text_attributes( $attributes ) {
-	return implode( ' ' . WC_DELIMITER . ' ', $attributes );
+	if(is_array($attributes)){
+		return implode( ' ' . WC_DELIMITER . ' ', $attributes );
+	}
+	else{
+		return $attributes;
+	}
 }
 
 /**
