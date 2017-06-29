@@ -424,7 +424,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
 						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%1\$s' )
 						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%3\$s' ) )
-				GROUP BY post_id";
+					GROUP BY post_id";
 				$rows = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name' ) );
 				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name' ) );
 
