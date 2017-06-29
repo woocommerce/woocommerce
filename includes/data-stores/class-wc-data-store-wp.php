@@ -111,7 +111,7 @@ class WC_Data_Store_WP {
 	 * @param  stdClass (containing ->id, ->key and ->value)
 	 */
 	public function update_meta( &$object, $meta ) {
-		update_metadata_by_mid( $this->meta_type, $meta->id, wp_slash( $meta->value ), $meta->key );
+		update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
 	}
 
 	/**
