@@ -2,13 +2,25 @@
 /**
  * Customer note email
  *
- * @author 		WooThemes
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-note.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
+ * @author		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.0.0
+ * @version		2.5.0
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-echo $email_heading . "\n\n";
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+echo "= " . $email_heading . " =\n\n";
 
 echo __( "Hello, a note has just been added to your order:", 'woocommerce' ) . "\n\n";
 
@@ -20,39 +32,29 @@ echo "----------\n\n";
 
 echo __( "For your reference, your order details are shown below.", 'woocommerce' ) . "\n\n";
 
-echo "****************************************************\n\n";
+echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
+/**
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
-echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
-echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
+/**
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-echo "\n" . $order->email_order_items_table( $order->is_download_permitted(), true, '', '', '', true );
+/**
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-echo "----------\n\n";
-
-if ( $totals = $order->get_order_item_totals() ) {
-	foreach ( $totals as $total ) {
-		echo $total['label'] . "\t " . $total['value'] . "\n";
-	}
-}
-
-echo "\n****************************************************\n\n";
-
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
-
-echo __( 'Your details', 'woocommerce' ) . "\n\n";
-
-if ( $order->billing_email )
-	echo __( 'Email:', 'woocommerce' ); echo $order->billing_email . "\n";
-
-if ( $order->billing_phone )
-	echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone . "\n";
-
-wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
-
-echo "\n****************************************************\n\n";
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

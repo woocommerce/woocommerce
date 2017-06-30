@@ -2,50 +2,53 @@
 /**
  * Customer invoice email (plain text)
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-invoice.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author		WooThemes
- * @package		WooCommerce/Templates/Emails/Plain
- * @version		2.2.0
+ * @package 	WooCommerce/Templates/Emails/Plain
+ * @version		2.5.0
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-echo $email_heading . "\n\n";
-
-if ( $order->has_status( 'pending' ) )
-	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ) . "\n\n";
-
-echo "****************************************************\n\n";
-
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
-
-echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
-echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
-
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
-
-echo "\n";
-
-switch ( $order->get_status() ) {
-	case "completed" :
-		echo $order->email_order_items_table( $order->is_download_permitted(), false, true, '', '', true );
-	break;
-	case "processing" :
-		echo $order->email_order_items_table( $order->is_download_permitted(), true, true, '', '', true );
-	break;
-	default :
-		echo $order->email_order_items_table( $order->is_download_permitted(), true, false, '', '', true );
-	break;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-echo "----------\n\n";
+echo "= " . $email_heading . " =\n\n";
 
-if ( $totals = $order->get_order_item_totals() ) {
-	foreach ( $totals as $total ) {
-		echo $total['label'] . "\t " . $total['value'] . "\n";
-	}
+if ( $order->has_status( 'pending' ) ) {
+	echo sprintf( __( 'An order has been created for you on %1$s. To pay for this order please use the following link: %2$s', 'woocommerce' ), get_bloginfo( 'name', 'display' ), $order->get_checkout_payment_url() ) . "\n\n";
 }
 
-echo "\n****************************************************\n\n";
+echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
+/**
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
+
+/**
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
+
+/**
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

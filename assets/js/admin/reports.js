@@ -1,226 +1,251 @@
-jQuery(function($) {
+jQuery(function( $ ) {
 
-    function showTooltip(x, y, contents) {
-        jQuery('<div class="chart-tooltip">' + contents + '</div>').css( {
-            top: y - 16,
-       		left: x + 20
-        }).appendTo("body").fadeIn(200);
-    }
+	function showTooltip( x, y, contents ) {
+		$( '<div class="chart-tooltip">' + contents + '</div>' ).css( {
+			top: y - 16,
+			left: x + 20
+		}).appendTo( 'body' ).fadeIn( 200 );
+	}
 
-    var prev_data_index = null;
-    var prev_series_index = null;
+	var prev_data_index = null;
+	var prev_series_index = null;
 
-    jQuery(".chart-placeholder").bind( "plothover", function (event, pos, item) {
-        if (item) {
-            if ( prev_data_index != item.dataIndex || prev_series_index != item.seriesIndex ) {
-                prev_data_index   = item.dataIndex;
-                prev_series_index = item.seriesIndex;
+	$( '.chart-placeholder' ).bind( 'plothover', function ( event, pos, item ) {
+		if ( item ) {
+			if ( prev_data_index !== item.dataIndex || prev_series_index !== item.seriesIndex ) {
+				prev_data_index   = item.dataIndex;
+				prev_series_index = item.seriesIndex;
 
-                jQuery( ".chart-tooltip" ).remove();
+				$( '.chart-tooltip' ).remove();
 
-                if ( item.series.points.show || item.series.enable_tooltip ) {
+				if ( item.series.points.show || item.series.enable_tooltip ) {
 
-                    var y = item.series.data[item.dataIndex][1];
+					var y = item.series.data[item.dataIndex][1],
+						tooltip_content = '';
 
-                    tooltip_content = '';
+					if ( item.series.prepend_label ) {
+						tooltip_content = tooltip_content + item.series.label + ': ';
+					}
 
-                    if ( item.series.prepend_label )
-                        tooltip_content = tooltip_content + item.series.label + ": ";
+					if ( item.series.prepend_tooltip ) {
+						tooltip_content = tooltip_content + item.series.prepend_tooltip;
+					}
 
-                    if ( item.series.prepend_tooltip )
-                        tooltip_content = tooltip_content + item.series.prepend_tooltip;
+					tooltip_content = tooltip_content + y;
 
-                    tooltip_content = tooltip_content + y;
+					if ( item.series.append_tooltip ) {
+						tooltip_content = tooltip_content + item.series.append_tooltip;
+					}
 
-                    if ( item.series.append_tooltip )
-                        tooltip_content = tooltip_content + item.series.append_tooltip;
+					if ( item.series.pie.show ) {
+						showTooltip( pos.pageX, pos.pageY, tooltip_content );
+					} else {
+						showTooltip( item.pageX, item.pageY, tooltip_content );
+					}
+				}
+			}
+		} else {
+			$( '.chart-tooltip' ).remove();
+			prev_data_index = null;
+		}
+	});
 
-                    if ( item.series.pie.show ) {
+	$( '.wc_sparkline.bars' ).each( function() {
+		var chart_data = $( this ).data( 'sparkline' );
 
-                        showTooltip( pos.pageX, pos.pageY, tooltip_content );
+		var options = {
+			grid: {
+				show: false
+			}
+		};
 
-                    } else {
+		// main series
+		var series = [{
+			data: chart_data,
+			color: $( this ).data( 'color' ),
+			bars: {
+				fillColor: $( this ).data( 'color' ),
+				fill: true,
+				show: true,
+				lineWidth: 1,
+				barWidth: $( this ).data( 'barwidth' ),
+				align: 'center'
+			},
+			shadowSize: 0
+		}];
 
-                    	showTooltip( item.pageX, item.pageY, tooltip_content );
+		// draw the sparkline
+		$.plot( $( this ), series, options );
+	});
 
-                    }
+	$( '.wc_sparkline.lines' ).each( function() {
+		var chart_data = $( this ).data( 'sparkline' );
 
-                }
-            }
-        }
-        else {
-            jQuery(".chart-tooltip").remove();
-            prev_data_index = null;
-        }
-    });
+		var options = {
+			grid: {
+				show: false
+			}
+		};
 
-    $('.wc_sparkline.bars').each(function() {
-        var chart_data = $(this).data('sparkline');
+		// main series
+		var series = [{
+			data: chart_data,
+			color: $( this ).data( 'color' ),
+			lines: {
+				fill: false,
+				show: true,
+				lineWidth: 1,
+				align: 'center'
+			},
+			shadowSize: 0
+		}];
 
-        var options = {
-            grid: {
-                show: false
-            }
-        };
+		// draw the sparkline
+		$.plot( $( this ), series, options );
+	});
 
-        // main series
-        var series = [{
-            data: chart_data,
-            color: $(this).data('color'),
-            bars: { fillColor: $(this).data('color'), fill: true, show: true, lineWidth: 1, barWidth: $(this).data('barwidth'), align: 'center' },
-            shadowSize: 0
-        }];
+	var dates = $( '.range_datepicker' ).datepicker({
+		changeMonth: true,
+		changeYear: true,
+		defaultDate: '',
+		dateFormat: 'yy-mm-dd',
+		numberOfMonths: 1,
+		minDate: '-20Y',
+		maxDate: '+0D',
+		showButtonPanel: true,
+		showOn: 'focus',
+		buttonImageOnly: true,
+		onSelect: function( selectedDate ) {
+			var option = $( this ).is( '.from' ) ? 'minDate' : 'maxDate',
+				instance = $( this ).data( 'datepicker' ),
+				date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
 
-        // draw the sparkline
-        var plot = $.plot( $(this), series, options );
-    });
+			dates.not( this ).datepicker( 'option', option, date );
+		}
+	});
 
-    $('.wc_sparkline.lines').each(function() {
-        var chart_data = $(this).data('sparkline');
+	var a = document.createElement( 'a' );
 
-        var options = {
-            grid: {
-                show: false
-            }
-        };
+	if ( typeof a.download === 'undefined' ) {
+		$( '.export_csv' ).hide();
+	}
 
-        // main series
-        var series = [{
-            data: chart_data,
-            color: $(this).data('color'),
-            lines: { fill: false, show: true, lineWidth: 1, align: 'center' },
-            shadowSize: 0
-        }];
+	// Export
+	$( '.export_csv' ).click( function() {
+		var exclude_series = $( this ).data( 'exclude_series' ) || '';
+		exclude_series    = exclude_series.toString();
+		exclude_series    = exclude_series.split( ',' );
+		var xaxes_label   = $( this ).data( 'xaxes' );
+		var groupby       = $( this ) .data( 'groupby' );
+		var index_type    = $( this ).data( 'index_type' );
+		var export_format = $( this ).data( 'export' );
+		var csv_data      = 'data:application/csv;charset=utf-8,';
+		var s, series_data, d;
 
-        // draw the sparkline
-        var plot = $.plot( $(this), series, options );
-    });
+		if ( 'table' === export_format ) {
 
-    var dates = jQuery( ".range_datepicker" ).datepicker({
-        changeMonth: true,
-        changeYear: true,
-        defaultDate: "",
-        dateFormat: "yy-mm-dd",
-        numberOfMonths: 1,
-        maxDate: "+0D",
-        showButtonPanel: true,
-        showOn: "focus",
-        buttonImageOnly: true,
-        onSelect: function( selectedDate ) {
-            var option = jQuery(this).is('.from') ? "minDate" : "maxDate",
-                instance = jQuery( this ).data( "datepicker" ),
-                date = jQuery.datepicker.parseDate(
-                    instance.settings.dateFormat ||
-                    jQuery.datepicker._defaults.dateFormat,
-                    selectedDate, instance.settings );
-            dates.not( this ).datepicker( "option", option, date );
-        }
-    });
+			$( this ).offsetParent().find( 'thead tr,tbody tr' ).each( function() {
+				$( this ).find( 'th, td' ).each( function() {
+					var value = $( this ).text();
+					value = value.replace( '[?]', '' ).replace( '#', '' );
+					csv_data += '"' + value + '"' + ',';
+				});
+				csv_data = csv_data.substring( 0, csv_data.length - 1 );
+				csv_data += '\n';
+			});
 
-    // Export
-    $('.export_csv').click(function(){
-        var exclude_series = $(this).data( 'exclude_series' ) || '';
-        exclude_series     = exclude_series.toString();
-        exclude_series     = exclude_series.split(',');
-        var xaxes_label    = $(this).data('xaxes');
-        var groupby        = $(this).data('groupby');
-        var export_format  = $(this).data('export');
-        var csv_data       = "data:application/csv;charset=utf-8,"
+			$( this ).offsetParent().find( 'tfoot tr' ).each( function() {
+				$( this ).find( 'th, td' ).each( function() {
+					var value = $( this ).text();
+					value = value.replace( '[?]', '' ).replace( '#', '' );
+					csv_data += '"' + value + '"' + ',';
+					if ( $( this ).attr( 'colspan' ) > 0 ) {
+						for ( i = 1; i < $(this).attr('colspan'); i++ ) {
+							csv_data += '"",';
+						}
+					}
+				});
+				csv_data = csv_data.substring( 0, csv_data.length - 1 );
+				csv_data += '\n';
+			});
 
-        if ( export_format == 'table' ) {
+		} else {
 
-            $(this).closest('div').find('thead tr,tbody tr').each(function() {
-                $(this).find('th,td').each(function() {
-                    value = $(this).text();
-                    value = value.replace( '[?]', '' );
-                    csv_data += '"' + value + '"' + ",";
-                });
-                csv_data = csv_data.substring( 0, csv_data.length - 1 );
-                csv_data += "\n";
-            });
+			if ( ! window.main_chart ) {
+				return false;
+			}
 
-            $(this).closest('div').find('tfoot tr').each(function() {
-                $(this).find('th,td').each(function() {
-                    value = $(this).text();
-                    value = value.replace( '[?]', '' );
-                    csv_data += '"' + value + '"' + ",";
-                    if ( $(this).attr('colspan') > 0 )
-                        for ( i = 1; i < $(this).attr('colspan'); i++ )
-                            csv_data += '"",';
-                });
-                csv_data = csv_data.substring( 0, csv_data.length - 1 );
-                csv_data += "\n";
-            });
+			var the_series = window.main_chart.getData();
+			var series     = [];
+			csv_data      += '"' + xaxes_label + '",';
 
-        } else {
+			$.each( the_series, function( index, value ) {
+				if ( ! exclude_series || $.inArray( index.toString(), exclude_series ) === -1 ) {
+					series.push( value );
+				}
+			});
 
-            if ( ! window.main_chart )
-                return false;
+			// CSV Headers
+			for ( s = 0; s < series.length; ++s ) {
+				csv_data += '"' + series[s].label + '",';
+			}
 
-            var the_series = window.main_chart.getData();
-            var series     = [];
-            csv_data   += xaxes_label + ",";
+			csv_data = csv_data.substring( 0, csv_data.length - 1 );
+			csv_data += '\n';
 
-            $.each(the_series, function( index, value ) {
-                if ( ! exclude_series || $.inArray( index.toString(), exclude_series ) == -1 )
-                    series.push( value );
-            });
+			// Get x axis values
+			var xaxis = {};
 
-            // CSV Headers
-            for ( var s = 0; s < series.length; ++s ) {
-                csv_data += series[s].label + ',';
-            }
+			for ( s = 0; s < series.length; ++s ) {
+				series_data = series[s].data;
+				for ( d = 0; d < series_data.length; ++d ) {
+					xaxis[series_data[d][0]] = [];
+					// Zero values to start
+					for ( var i = 0; i < series.length; ++i ) {
+						xaxis[series_data[d][0]].push(0);
+					}
+				}
+			}
 
-            csv_data = csv_data.substring( 0, csv_data.length - 1 );
-            csv_data += "\n";
+			// Add chart data
+			for ( s = 0; s < series.length; ++s ) {
+				series_data = series[s].data;
+				for ( d = 0; d < series_data.length; ++d ) {
+					xaxis[series_data[d][0]][s] = series_data[d][1];
+				}
+			}
 
-            // Get x axis values
-            var xaxis = {}
+			// Loop data and output to csv string
+			$.each( xaxis, function( index, value ) {
+				var date = new Date( parseInt( index, 10 ) );
 
-            for ( var s = 0; s < series.length; ++s ) {
-                var series_data = series[s].data;
-                for ( var d = 0; d < series_data.length; ++d ) {
-                    xaxis[series_data[d][0]] = new Array();
-                    // Zero values to start
-                    for ( var i = 0; i < series.length; ++i ) {
-                        xaxis[series_data[d][0]].push(0);
-                    }
-                }
-            }
+				if ( 'none' === index_type ) {
+					csv_data += '"' + index + '",';
+				} else {
+					if ( groupby === 'day' ) {
+						csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '-' + date.getUTCDate() + '",';
+					} else {
+						csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '",';
+					}
+				}
 
-            // Add chart data
-            for ( var s = 0; s < series.length; ++s ) {
-                var series_data = series[s].data;
-                for ( var d = 0; d < series_data.length; ++d ) {
-                    xaxis[series_data[d][0]][s] = series_data[d][1];
-                }
-            }
+				for ( var d = 0; d < value.length; ++d ) {
+					var val = value[d];
 
-            // Loop data and output to csv string
-            $.each( xaxis, function( index, value ) {
-                var date = new Date( parseInt( index ) );
+					if ( Math.round( val ) !== val ) {
+						val = parseFloat( val );
+						val = val.toFixed( 2 );
+					}
 
-                if ( groupby == 'day' )
-                    csv_data += date.getFullYear() + "-" + parseInt( date.getMonth() + 1 ) + "-" + date.getDate() + ',';
-                else
-                    csv_data += date.getFullYear() + "-" + parseInt( date.getMonth() + 1 ) + ',';
+					csv_data += '"' + val + '",';
+				}
+				csv_data = csv_data.substring( 0, csv_data.length - 1 );
+				csv_data += '\n';
+			} );
+		}
 
-                for ( var d = 0; d < value.length; ++d ) {
-                    val = value[d];
-
-                    if( Math.round( val ) != val )
-                        val = val.toFixed(2);
-
-                    csv_data += val + ',';
-                }
-                csv_data = csv_data.substring( 0, csv_data.length - 1 );
-                csv_data += "\n";
-            } );
-
-        }
-
-        // Set data as href and return
-        $(this).attr( 'href', encodeURI( csv_data ) );
-        return true;
-    });
+		// Set data as href and return
+		$( this ).attr( 'href', encodeURI( csv_data ) );
+		return true;
+	});
 });

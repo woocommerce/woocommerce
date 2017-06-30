@@ -1,13 +1,17 @@
 <?php
 /**
- * Japan
+ * Japan States
  *
- * @author 		Kiyoshi Tsuji
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.0.0
  */
 global $states;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 $states['JP'] = array(
 	'JP01' => __( 'Hokkaido', 'woocommerce' ),
@@ -35,9 +39,9 @@ $states['JP'] = array(
 	'JP23' => __( 'Aichi', 'woocommerce' ),
 	'JP24' => __( 'Mie', 'woocommerce' ),
 	'JP25' => __( 'Shiga', 'woocommerce' ),
-	'JP26' => __( 'Kyouto', 'woocommerce' ),
+	'JP26' => __( 'Kyoto', 'woocommerce' ),
 	'JP27' => __( 'Osaka', 'woocommerce' ),
-	'JP28' => __( 'Hyougo', 'woocommerce' ),
+	'JP28' => __( 'Hyogo', 'woocommerce' ),
 	'JP29' => __( 'Nara', 'woocommerce' ),
 	'JP30' => __( 'Wakayama', 'woocommerce' ),
 	'JP31' => __( 'Tottori', 'woocommerce' ),

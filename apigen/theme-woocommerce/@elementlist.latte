@@ -1,0 +1,60 @@
+{define elements}
+<tr n:foreach="$elements as $element">
+	<td class="name"><a href="{$element|elementUrl}" n:class="$element->deprecated ? deprecated, !$element->valid ? invalid">{if $namespace}{$element->shortName}{else}{$element->name}{/if}</a></td>
+	<td>{$element|shortDescription|noescape}</td>
+</tr>
+{/define}
+
+{if $classes}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Classes summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="classes">
+	{include elements, elements => $classes}
+	</table>
+</div>
+{/if}
+
+{if $interfaces}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Interfaces summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="interfaces">
+	{include elements, elements => $interfaces}
+	</table>
+</div>
+{/if}
+
+{if $traits}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Traits summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="traits">
+	{include elements, elements => $traits}
+	</table>
+</div>
+{/if}
+
+{if $exceptions}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Exceptions summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="exceptions">
+	{include elements, elements => $exceptions}
+	</table>
+</div>
+{/if}
+
+{if $constants}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Constants summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="constants">
+	{include elements, elements => $constants}
+	</table>
+</div>
+{/if}
+
+{if $functions}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Functions summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="functions">
+	{include elements, elements => $functions}
+	</table>
+</div>
+{/if}

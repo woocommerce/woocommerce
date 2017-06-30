@@ -2,12 +2,16 @@
 /**
  * Peru states
  *
- * @author 		WooThemes
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.1.0
  */
 global $states;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 $states['PE'] = array(
 	'CAL' => __( 'El Callao', 'woocommerce' ),
@@ -35,5 +39,5 @@ $states['PE'] = array(
 	'SAM' => __( 'San Mart&iacute;n', 'woocommerce' ),
 	'TAC' => __( 'Tacna', 'woocommerce' ),
 	'TUM' => __( 'Tumbes', 'woocommerce' ),
-	'UCA' => __( 'Ucayali', 'woocommerce' )
+	'UCA' => __( 'Ucayali', 'woocommerce' ),
 );

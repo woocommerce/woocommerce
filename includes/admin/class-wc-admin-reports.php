@@ -4,18 +4,20 @@
  *
  * Functions used for displaying sales and customer reports in admin.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Reports
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
  * @version     2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-if ( ! class_exists( 'WC_Admin_Reports' ) ) :
+if ( ! class_exists( 'WC_Admin_Reports', false ) ) :
 
 /**
- * WC_Admin_Reports Class
+ * WC_Admin_Reports Class.
  */
 class WC_Admin_Reports {
 
@@ -28,8 +30,8 @@ class WC_Admin_Reports {
 		$current_tab    = ! empty( $_GET['tab'] ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( $_GET['report'] ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
 
-		include_once( 'reports/class-wc-admin-report.php' );
-		include_once( 'views/html-admin-page-reports.php' );
+		include_once( dirname( __FILE__ ) . '/reports/class-wc-admin-report.php' );
+		include_once( dirname( __FILE__ ) . '/views/html-admin-page-reports.php' );
 	}
 
 	/**
@@ -42,48 +44,48 @@ class WC_Admin_Reports {
 			'orders'     => array(
 				'title'  => __( 'Orders', 'woocommerce' ),
 				'reports' => array(
-					"sales_by_date"    => array(
+					"sales_by_date" => array(
 						'title'       => __( 'Sales by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"sales_by_product"     => array(
+					"sales_by_product" => array(
 						'title'       => __( 'Sales by product', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"sales_by_category" => array(
 						'title'       => __( 'Sales by category', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"coupon_usage" => array(
 						'title'       => __( 'Coupons by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
-					)
-				)
+						'callback'    => array( __CLASS__, 'get_report' ),
+					),
+				),
 			),
 			'customers' => array(
 				'title'  => __( 'Customers', 'woocommerce' ),
 				'reports' => array(
 					"customers" => array(
-						'title'       => __( 'Customers vs. Guests', 'woocommerce' ),
+						'title'       => __( 'Customers vs. guests', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"customer_list" => array(
-						'title'       => __( 'Customer List', 'woocommerce' ),
+						'title'       => __( 'Customer list', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-				)
+				),
 			),
 			'stock'     => array(
 				'title'  => __( 'Stock', 'woocommerce' ),
@@ -92,25 +94,25 @@ class WC_Admin_Reports {
 						'title'       => __( 'Low in stock', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"out_of_stock" => array(
 						'title'       => __( 'Out of stock', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"most_stocked" => array(
 						'title'       => __( 'Most Stocked', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-				)
-			)
+				),
+			),
 		);
 
-		if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
+		if ( wc_tax_enabled() ) {
 			$reports['taxes'] = array(
 				'title'  => __( 'Taxes', 'woocommerce' ),
 				'reports' => array(
@@ -118,15 +120,15 @@ class WC_Admin_Reports {
 						'title'       => __( 'Taxes by code', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"taxes_by_date" => array(
 						'title'       => __( 'Taxes by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( __CLASS__, 'get_report' )
+						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-				)
+				),
 			);
 		}
 
@@ -149,7 +151,9 @@ class WC_Admin_Reports {
 	}
 
 	/**
-	 * Get a report from our reports subfolder
+	 * Get a report from our reports subfolder.
+	 *
+	 * @param string $name
 	 */
 	public static function get_report( $name ) {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
@@ -157,8 +161,9 @@ class WC_Admin_Reports {
 
 		include_once( apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class ) );
 
-		if ( ! class_exists( $class ) )
+		if ( ! class_exists( $class ) ) {
 			return;
+		}
 
 		$report = new $class();
 		$report->output_report();

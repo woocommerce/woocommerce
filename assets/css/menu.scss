@@ -1,0 +1,75 @@
+/**
+ * menu.scss
+ * Styles applied to dashboard menu items added via WooCommerce.
+ * Adds icons to top level menu items, etc.
+ */
+
+/**
+ * Imports
+ */
+@import 'mixins';
+@import 'variables';
+@import 'fonts';
+
+/**
+ * Styling begins
+ */
+#adminmenu #toplevel_page_woocommerce .menu-icon-generic div.wp-menu-image::before {
+	font-family: 'WooCommerce' !important;
+	content: '\e03d';
+}
+
+#adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image::before,
+#adminmenu #menu-posts-product .menu-icon-product div.wp-menu-image::before {
+	font-family: 'WooCommerce' !important;
+	content: '\e006';
+}
+
+#adminmenu #toplevel_page_wc-reports .menu-icon-generic div.wp-menu-image::before {
+	font-family: 'WooCommerce' !important;
+	content: '\e023';
+	font-size: 1.3em !important;
+}
+
+span.mce_woocommerce_shortcodes_button {
+	background-image: none !important;
+	@include ir();
+
+	&::before {
+		@include icon( '\e01d' );
+		font-size: 0.9em;
+		line-height: 1.2;
+	}
+}
+
+#woocommerce-update {
+	.updating-message {
+		.wc_plugin_upgrade_notice {
+			display: none;
+		}
+	}
+	.wc_plugin_upgrade_notice {
+		font-weight: normal;
+		color: #fff !important;
+		background: #d54d21 !important;
+		padding: 1em !important;
+		margin: 9px 0 !important;
+
+		a {
+			color: #fff;
+			text-decoration: underline;
+		}
+
+		&::before {
+			color: #fff !important;
+			content: '\f348';
+			display: inline-block;
+			font: 400 18px/1 dashicons;
+			speak: none;
+			margin: 0 8px 0 -2px;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			vertical-align: top;
+		}
+	}
+}

@@ -1,15 +1,27 @@
+<?php
+/**
+ * Admin View: Page - Reports
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+?>
 <div class="wrap woocommerce">
-	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			foreach ( $reports as $key => $report_group ) {
-				echo '<a href="'.admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
-				if ( $current_tab == $key ) echo 'nav-tab-active';
-				echo '">' . esc_html( $report_group[ 'title' ] ) . '</a>';
+				echo '<a href="' . admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ) . '" class="nav-tab ';
+				if ( $current_tab == $key ) {
+					echo 'nav-tab-active';
+				}
+				echo '">' . esc_html( $report_group['title'] ) . '</a>';
 			}
-		?>
-		<?php do_action('wc_reports_tabs'); ?>
-	</h2>
 
+			do_action( 'wc_reports_tabs' );
+		?>
+	</nav>
 	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
 		<ul class="subsubsub">
@@ -21,7 +33,9 @@
 
 					$link = '<a href="admin.php?page=wc-reports&tab=' . urlencode( $current_tab ) . '&amp;report=' . urlencode( $key ) . '" class="';
 
-					if ( $key == $current_report ) $link .= 'current';
+					if ( $key == $current_report ) {
+						$link .= 'current';
+					}
 
 					$link .= '">' . $report['title'] . '</a>';
 
@@ -29,7 +43,7 @@
 
 				}
 
-				echo implode(' | </li><li>', $links);
+				echo implode( ' | </li><li>', $links );
 
 			?></li>
 		</ul>
@@ -37,18 +51,23 @@
 		<?php
 	}
 
-	if ( isset( $reports[ $current_tab ][ 'reports' ][ $current_report ] ) ) {
+	if ( isset( $reports[ $current_tab ]['reports'][ $current_report ] ) ) {
 
-		$report = $reports[ $current_tab ][ 'reports' ][ $current_report ];
+		$report = $reports[ $current_tab ]['reports'][ $current_report ];
 
-		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true )
-			echo '<h3>' . $report['title'] . '</h3>';
+		if ( ! isset( $report['hide_title'] ) || true != $report['hide_title'] ) {
+			echo '<h1>' . esc_html( $report['title'] ) . '</h1>';
+		} else {
+			echo '<h1 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h1>';
+		}
 
-		if ( $report['description'] )
+		if ( $report['description'] ) {
 			echo '<p>' . $report['description'] . '</p>';
+		}
 
-		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) )
+		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) ) {
 			call_user_func( $report['callback'], $current_report );
+		}
 	}
 	?>
 </div>

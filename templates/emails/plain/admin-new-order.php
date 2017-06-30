@@ -2,50 +2,51 @@
 /**
  * Admin new order email (plain text)
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/admin-new-order.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version 	2.0.0
+ * @version		2.5.0
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-echo $email_heading . "\n\n";
-
-echo sprintf( __( 'You have received an order from %s. Their order is as follows:', 'woocommerce' ), $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
-
-echo "****************************************************\n\n";
-
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
-
-echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
-echo sprintf( __( 'Order link: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . "\n";
-echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) ) . "\n";
-
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
-
-echo "\n" . $order->email_order_items_table( false, true, '', '', '', true );
-
-echo "----------\n\n";
-
-if ( $totals = $order->get_order_item_totals() ) {
-	foreach ( $totals as $total ) {
-		echo $total['label'] . "\t " . $total['value'] . "\n";
-	}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-echo "\n****************************************************\n\n";
+echo "= " . $email_heading . " =\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
+echo sprintf( __( 'You have received an order from %s.', 'woocommerce' ), $order->get_formatted_billing_full_name() ) . "\n\n";
 
-echo __( 'Customer details', 'woocommerce' ) . "\n";
+echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-if ( $order->billing_email )
-	echo __( 'Email:', 'woocommerce' ); echo $order->billing_email . "\n";
+/**
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
-if ( $order->billing_phone )
-	echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone . "\n";
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
+/**
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-echo "\n****************************************************\n\n";
+/**
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
