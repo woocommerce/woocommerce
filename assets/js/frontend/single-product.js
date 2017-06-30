@@ -103,6 +103,7 @@ jQuery( function( $ ) {
 		// Bind functions to this.
 		this.initFlexslider       = this.initFlexslider.bind( this );
 		this.initZoom             = this.initZoom.bind( this );
+		this.initZoomForTarget    = this.initZoomForTarget.bind( this );
 		this.initPhotoswipe       = this.initPhotoswipe.bind( this );
 		this.onResetSlidePosition = this.onResetSlidePosition.bind( this );
 		this.getGalleryItems      = this.getGalleryItems.bind( this );
@@ -129,7 +130,8 @@ jQuery( function( $ ) {
 	 * Initialize flexSlider.
 	 */
 	ProductGallery.prototype.initFlexslider = function() {
-		var $target = this.$target;
+		var $target = this.$target,
+			gallery = this;
 
 		$target.flexslider( {
 			selector:       '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
@@ -142,6 +144,9 @@ jQuery( function( $ ) {
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
 			start: function() {
 				$target.css( 'opacity', 1 );
+			},
+			after: function( slider ) {
+				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 			}
 		} );
 	};
@@ -150,13 +155,15 @@ jQuery( function( $ ) {
 	 * Init zoom.
 	 */
 	ProductGallery.prototype.initZoom = function() {
-		var zoomTarget   = this.$images,
-			galleryWidth = this.$target.width(),
-			zoomEnabled  = false;
+		this.initZoomForTarget( this.$images.first() );
+	};
 
-		if ( ! this.flexslider_enabled ) {
-			zoomTarget = zoomTarget.first();
-		}
+	/**
+	 * Init zoom.
+	 */
+	ProductGallery.prototype.initZoomForTarget = function( zoomTarget ) {
+		var galleryWidth = this.$target.width(),
+			zoomEnabled  = false;
 
 		$( zoomTarget ).each( function( index, target ) {
 			var image = $( target ).find( 'img' );
