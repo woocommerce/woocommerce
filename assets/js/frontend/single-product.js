@@ -144,6 +144,26 @@ jQuery( function( $ ) {
 				$target.css( 'opacity', 1 );
 			}
 		} );
+
+		// Trigger resize after main image loads to ensure correct gallery size.
+		$( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' ).one( 'load', function() {
+			var $image = $( this );
+
+			if ( $image ) {
+				setTimeout(function(){
+					var setHeight = $image.closest( '.woocommerce-product-gallery__image' ).height();
+					var $viewport = $image.closest( '.flex-viewport' );
+
+					if ( setHeight && $viewport ) {
+						$viewport.height( setHeight );
+					}
+				}, 100 );
+			}
+		} ).each( function() {
+			if ( this.complete ) {
+				$( this ).load();
+			}
+		} );
 	};
 
 	/**
