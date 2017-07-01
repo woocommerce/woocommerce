@@ -290,7 +290,7 @@
 
 								// If there were errors, prepend the form.
 								if ( response.data.errors.length > 0 ) {
-									this.showErrors( response.data.errors );
+									shippingMethodView.showErrors( response.data.errors );
 								}
 
 								// Method was saved. Re-render.
