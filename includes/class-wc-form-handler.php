@@ -922,6 +922,10 @@ class WC_Form_Handler {
 						$redirect = $_POST['redirect'];
 					} elseif ( wp_get_referer() ) {
 						$redirect = wp_get_referer();
+					} elseif ( wp_get_raw_referer() ) {
+                        //wp_get_referer() returns false if already on the right page,
+                        //so if referer is set we just need to refresh current page
+                        $redirect = wp_validate_redirect(wp_get_raw_referer());
 					} else {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
