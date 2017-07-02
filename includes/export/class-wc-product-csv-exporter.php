@@ -531,9 +531,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$meta_data = $product->get_meta_data();
 
 			if ( count( $meta_data ) ) {
+				$metas_to_skip = apply_filters( 'woocommerce_product_export_skip_custom_meta', array(), $product, $meta_data );
+
 				$i = 1;
 				foreach ( $meta_data as $meta ) {
-					if ( ! is_scalar( $meta->value ) ) {
+					if ( ! is_scalar( $meta->value ) || in_array( $meta->key, $metas_to_skip ) ) {
 						continue;
 					}
 					$column_key                        = 'meta:' . esc_attr( $meta->key );
