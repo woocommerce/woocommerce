@@ -604,6 +604,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'shipping_tax'   => 'order_shipping_tax',
 			'cart_tax'       => 'order_tax',
 			'total'          => 'order_total',
+			'page'           => 'paged',
 		);
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
