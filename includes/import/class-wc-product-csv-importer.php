@@ -657,6 +657,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formating_callback();
 		$mapped_keys     = $this->get_mapped_keys();
+		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row ) {
@@ -672,6 +673,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				// Skip ignored columns.
 				if ( empty( $mapped_keys[ $id ] ) ) {
 					continue;
+				}
+
+				// Convert UTF8.
+				if ( $use_mb ) {
+					$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
+					if ( $encoding ) {
+						$value = mb_convert_encoding( $value, 'UTF-8', $encoding );
+					} else {
+						$value = mb_convert_encoding( $value, 'UTF-8', 'UTF-8' );
+					}
+				} else {
+					$value = wp_check_invalid_utf8( $value, true );
 				}
 
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
