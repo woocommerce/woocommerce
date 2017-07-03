@@ -221,7 +221,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_filter( array_map( array( $this, 'parse_relative_field' ), array_map( 'trim', explode( ',', $field ) ) ) );
+		return array_filter( array_map( array( $this, 'parse_relative_field' ), $this->explode_values( $field ) ) );
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_map( 'wc_clean', array_map( 'trim', explode( ',', $field ) ) );
+		return array_map( 'wc_clean', $this->explode_values( $field ) );
 	}
 
 	/**
@@ -283,7 +283,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$row_terms  = array_map( 'trim', explode( ',', $field ) );
+		$row_terms  = $this->explode_values( $field );
 		$categories = array();
 
 		foreach ( $row_terms as $row_term ) {
@@ -328,7 +328,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$names = array_map( 'trim', explode( ',', $field ) );
+		$names = $this->explode_values( $field );
 		$tags  = array();
 
 		foreach ( $names as $name ) {
@@ -375,7 +375,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_map( 'esc_url_raw', array_map( 'trim', explode( ',', $field ) ) );
+		return array_map( 'esc_url_raw', $this->explode_values( $field ) );
 	}
 
 	/**
