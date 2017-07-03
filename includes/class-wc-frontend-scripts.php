@@ -91,14 +91,14 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Return protocol relative asset URL.
+	 * Return asset URL.
 	 *
 	 * @param string $path
 	 *
 	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
-		return apply_filters( 'woocommerce_get_asset_url', str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) ), $path );
+		return apply_filters( 'woocommerce_get_asset_url', plugins_url( $path, WC_PLUGIN_FILE ), $path );
 	}
 
 	/**
