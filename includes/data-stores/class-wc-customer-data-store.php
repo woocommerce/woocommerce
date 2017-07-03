@@ -379,7 +379,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 			'fields'         => 'ID',
 			'number'         => $limit,
-		), $term, $limit, 'main_query' );
+		), $term, $limit, 'main_query' ) );
 
 		$query2 = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'fields'         => 'ID',
@@ -397,7 +397,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					'compare' => 'LIKE',
 				),
 			),
-		), $term, $limit, 'meta_query' );
+		), $term, $limit, 'meta_query' ) );
 
 		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
 
