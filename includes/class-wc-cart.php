@@ -1994,6 +1994,10 @@ class WC_Cart {
 	 * Fee is an amount of money charged for a particular piece of work
 	 * or for a particular right or service, and not supposed to be negative.
 	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
+	 * persist.
+	 *
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
 	 * @param bool   $taxable   Is the fee taxable? (default: false).
