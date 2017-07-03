@@ -236,6 +236,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		sort( $orders );
 		$this->assertEquals( $expected, $orders );
 
+		$orders   = wc_get_orders( array( 'date_before' => '2017-01-15', 'date_after' => '2015-01-01 00:00:00', 'return' => 'ids' ) );
+		$expected = array( $order_1, $order_2, $order_3 );
+		sort( $expected );
+		sort( $orders );
+		$this->assertEquals( $expected, $orders );
+
 		$order1->delete();
 		$order2->delete();
 		$order3->delete();
