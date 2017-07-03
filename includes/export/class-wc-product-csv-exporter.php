@@ -240,7 +240,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
-		return implode( ', ', $images );
+		return $this->implode_values( $images );
 	}
 
 	/**
@@ -261,7 +261,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
-		return implode( ',', $product_list );
+		return $this->implode_values( $product_list );
 	}
 
 	/**
@@ -327,7 +327,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 			$grouped_products[] = $child->get_sku( 'edit' ) ? $child->get_sku( 'edit' ) : 'id:' . $child_id;
 		}
-		return implode( ',', $grouped_products );
+		return $this->implode_values( $grouped_products );
 	}
 
 	/**
@@ -421,7 +421,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$types[] = 'virtual';
 		}
 
-		return implode( ', ', $types );
+		return $this->implode_values( $types );
 	}
 
 	/**
@@ -479,10 +479,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 								$values[] = $term->name;
 							}
 
-							$row[ 'attributes:value' . $i ]    = implode( ', ', $values );
+							$row[ 'attributes:value' . $i ]    = $this->implode_values( $values );
 							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
-							$row[ 'attributes:value' . $i ]    = implode( ', ', $attribute->get_options() );
+							$row[ 'attributes:value' . $i ]    = $this->implode_values( $attribute->get_options() );
 							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
 

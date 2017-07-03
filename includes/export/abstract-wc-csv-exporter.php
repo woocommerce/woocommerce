@@ -405,6 +405,25 @@ abstract class WC_CSV_Exporter {
 			}
 		}
 
-		return implode( ', ', $formatted_terms );
+		return $this->implode_values( $formatted_terms );
+	}
+
+	/**
+	 * Implode CSV cell values using commas by default, and wrapping values
+	 * which contain the separator.
+	 *
+	 * @since  3.2.0
+	 * @param  array  $values
+	 * @return string
+	 */
+	protected function implode_values( $values ) {
+		$values_to_implode  = array();
+
+		foreach ( $values as $value ) {
+			$value               = (string) is_scalar( $value ) ? $value : '';
+			$values_to_implode[] = str_replace( ',', '\\,', $value );
+		}
+
+		return implode( ', ', $values_to_implode );
 	}
 }

@@ -683,4 +683,31 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 		return apply_filters( 'woocommerce_product_importer_time_exceeded', $return );
 	}
+
+	/**
+	 * Explode CSV cell values using commas by default, and handling escaped
+	 * separators.
+	 *
+	 * @since  3.2.0
+	 * @param  string $value
+	 * @return array
+	 */
+	protected function explode_values( $value ) {
+		$value  = str_replace( '\\,', '::separator::', $value );
+		$values = explode( ',', $value );
+		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
+
+		return $values;
+	}
+
+	/**
+	 * Remove formatting and trim each value.
+	 *
+	 * @since  3.2.0
+	 * @param  string $value
+	 * @return string
+	 */
+	protected function explode_values_formatter( $value ) {
+		return trim( str_replace( '::separator::', ',', $value ) );
+	}
 }
