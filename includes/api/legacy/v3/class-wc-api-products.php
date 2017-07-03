@@ -1198,7 +1198,7 @@ class WC_API_Products extends WC_API_Resource {
 			'upsell_ids'         => array_map( 'absint', $product->get_upsell_ids() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sell_ids() ),
 			'parent_id'          => $product->get_parent_id(),
-			'categories'         => wc_get_object_terms( $product->get_id(), 'product_cat', 'name' ),
+			'categories'         => wc_get_object_terms( $product->get_id(), 'product_cat', 'name', 'term_id'),
 			'tags'               => wc_get_object_terms( $product->get_id(), 'product_tag', 'name' ),
 			'images'             => $this->get_images( $product ),
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->get_id() ) ),
