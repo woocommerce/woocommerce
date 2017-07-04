@@ -891,16 +891,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	private function validate_sale_items() {
 		if ( $this->get_exclude_sale_items() ) {
-			$valid_for_cart      = false;
-			$product_ids_on_sale = wc_get_product_ids_on_sale();
+			$valid_for_cart = false;
 
 			if ( ! WC()->cart->is_empty() ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( ! empty( $cart_item['variation_id'] ) ) {
-						if ( ! in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
-							$valid_for_cart = true;
-						}
-					} elseif ( ! in_array( $cart_item['product_id'], $product_ids_on_sale, true ) ) {
+					$product = $cart_item['data'];
+
+					if ( ! $product->is_on_sale() ) {
 						$valid_for_cart = true;
 					}
 				}
@@ -1072,12 +1069,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		// Sale Items excluded from discount
-		if ( $this->get_exclude_sale_items() ) {
-			$product_ids_on_sale = wc_get_product_ids_on_sale();
-
-			if ( in_array( $product->get_id(), $product_ids_on_sale, true ) ) {
-				$valid = false;
-			}
+		if ( $this->get_exclude_sale_items() && $product->is_on_sale() ) {
+			$valid = false;
 		}
 
 		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
