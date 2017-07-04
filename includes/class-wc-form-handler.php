@@ -920,13 +920,13 @@ class WC_Form_Handler {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = $_POST['redirect'];
-					} elseif ( wp_get_referer() ) {
-						$redirect = wp_get_referer();
+					} elseif ( wc_get_raw_referer() ) {
+						$redirect = wc_get_raw_referer();
 					} else {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ), wc_get_page_permalink( 'myaccount' ) ) );
 					exit;
 				}
 			} catch ( Exception $e ) {
