@@ -152,7 +152,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				// Filter for 3rd parties.
 				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
+					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
 
 				// Handle special columns which don't map 1:1 to product data.
 				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
