@@ -47,8 +47,7 @@ class WC_Post_Data {
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
-		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_items' ) );
-		add_action( 'before_delete_post', array( __CLASS__, 'delete_order_downloadable_permissions' ) );
+		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
@@ -388,6 +387,38 @@ class WC_Post_Data {
 			$data_store->untrash_variations( $id );
 
 			wc_product_force_unique_sku( $id );
+		}
+	}
+
+	/**
+	 * Before deleting an order, do some cleanup.
+	 *
+	 * @since 3.2.0
+	 * @param int $order_id
+	 */
+	public static function before_delete_order( $order_id ) {
+		if ( in_array( get_post_type( $order_id ), wc_get_order_types() ) ) {
+			// Clean up user.
+			$order       = wc_get_order( $order_id );
+			$customer_id = $order->get_customer_id();
+
+			if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
+				$customer    = new WC_Customer( $customer_id );
+				$order_count = $customer->get_order_count();
+				$order_count --;
+
+				if ( 0 === $order_count ) {
+					$customer->set_is_paying_customer( false );
+					$customer->save();
+				}
+
+				// Delete order count meta.
+				delete_user_meta( $customer_id, '_order_count' );
+			}
+
+			// Clean up items.
+			self::delete_order_items( $order_id );
+			self::delete_order_downloadable_permissions( $order_id );
 		}
 	}
 
