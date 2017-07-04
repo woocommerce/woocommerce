@@ -920,8 +920,8 @@ class WC_Form_Handler {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = $_POST['redirect'];
-					} elseif ( wp_get_raw_referer() ) {
-						$redirect = wp_get_raw_referer();
+					} elseif ( wc_get_raw_referer() ) {
+						$redirect = wc_get_raw_referer();
 					} else {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
