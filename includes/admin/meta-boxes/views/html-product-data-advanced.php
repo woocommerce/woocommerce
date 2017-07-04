@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div id="advanced_product_data" class="panel woocommerce_options_panel hidden">
 
-	<div class="options_group hide_if_external">
+	<div class="options_group hide_if_external hide_if_grouped">
 		<?php
 			woocommerce_wp_textarea_input( array(
 				'id'          => '_purchase_note',
