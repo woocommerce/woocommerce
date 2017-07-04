@@ -335,7 +335,7 @@ class WC_Query {
 
 	/**
 	 * Search post excerpt.
-	 * @deprecated 3.2.0 - Bot needed anymore since WordPress 4.5.
+	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
 	 */
 	public function search_post_excerpt( $where = '' ) {
 		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.2.0', 'Excerpt added to search query by default since WordPress 4.5.' );
