@@ -1458,8 +1458,8 @@ class WC_Cart {
 		}
 
 		// Get totals for the chosen shipping method
-		$this->shipping_total 		= WC()->shipping->shipping_total;	// Shipping Total
-		$this->shipping_taxes		= WC()->shipping->shipping_taxes;	// Shipping Taxes
+		$this->shipping_total = WC()->shipping->shipping_total; // Shipping Total
+		$this->shipping_taxes = WC()->shipping->shipping_taxes; // Shipping Taxes
 	}
 
 	/**
@@ -1515,6 +1515,7 @@ class WC_Cart {
 						'address'   => WC()->customer->get_shipping_address(),
 						'address_2' => WC()->customer->get_shipping_address_2(),
 					),
+					'cart_subtotal'       => $this->get_displayed_subtotal(),
 				),
 			)
 		);
