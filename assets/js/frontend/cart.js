@@ -532,7 +532,9 @@ jQuery( function( $ ) {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
-				success: update_wc_div,
+				success:  function( response ) {
+					update_wc_div( response );
+				},
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
