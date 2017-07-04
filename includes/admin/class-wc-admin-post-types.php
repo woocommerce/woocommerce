@@ -48,7 +48,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'manage_edit-shop_order_sortable_columns', array( $this, 'shop_order_sortable_columns' ) );
 
 		add_filter( 'list_table_primary_column', array( $this, 'list_table_primary_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 2, 100 );
+		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 100, 2 );
 
 		// Views
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
@@ -105,6 +105,9 @@ class WC_Admin_Post_Types {
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
 		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
+
+		// Add a post display state for special WC pages.
+		add_filter( 'display_post_states', array( $this, 'add_display_post_states' ), 10, 2 );
 	}
 
 	/**
@@ -169,7 +172,7 @@ class WC_Admin_Post_Types {
 			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
-			11 => __( 'Order updated and email sent.', 'woocommerce' ),
+			11 => __( 'Order updated and sent to the customer.', 'woocommerce' ),
 		);
 
 		$messages['shop_coupon'] = array(
@@ -1998,6 +2001,36 @@ class WC_Admin_Post_Types {
 			</div>
 			<?php
 		}
+	}
+
+	/**
+	 * Add a post display state for special WC pages in the page list table.
+	 *
+	 * @param array   $post_states An array of post display states.
+	 * @param WP_Post $post        The current post object.
+	 */
+	public function add_display_post_states( $post_states, $post ) {
+		if ( wc_get_page_id( 'shop' ) === $post->ID ) {
+			$post_states['wc_page_for_shop'] = __( 'Shop Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'cart' ) === $post->ID ) {
+			$post_states['wc_page_for_cart'] = __( 'Cart Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'checkout' ) === $post->ID ) {
+			$post_states['wc_page_for_checkout'] = __( 'Checkout Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'myaccount' ) === $post->ID ) {
+			$post_states['wc_page_for_myaccount'] = __( 'My Account Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'terms' ) === $post->ID ) {
+			$post_states['wc_page_for_terms'] = __( 'Terms and Conditions Page', 'woocommerce' );
+		}
+
+		return $post_states;
 	}
 }
 

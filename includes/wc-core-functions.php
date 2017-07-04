@@ -1231,7 +1231,7 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '-', ' ', $type );
 	$type = str_replace( '_', ' ', $type );
 
-	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+	$labels = apply_filters( 'woocommerce_credit_card_type_labels', array(
 		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
 		'visa'             => __( 'Visa', 'woocommerce' ),
 		'discover'         => __( 'Discover', 'woocommerce' ),

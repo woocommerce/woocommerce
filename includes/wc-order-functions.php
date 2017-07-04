@@ -57,7 +57,7 @@ function wc_get_orders( $args ) {
 	}
 
 	if ( $date_before && $date_after ) {
-		$args['date_created'] = $date_before . '...' . $date_after;
+		$args['date_created'] = $date_after . '...' . $date_before;
 	} elseif ( $date_before ) {
 		$args['date_created'] = '<' . $date_before;
 	} elseif ( $date_after ) {

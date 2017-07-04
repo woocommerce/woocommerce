@@ -39,6 +39,11 @@ function wc_template_redirect() {
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
 
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && 'true' === $wp->query_vars['customer-logout'] ) {
+		// Redirect to the correct logout endpoint.
+		wp_redirect( esc_url_raw( wc_get_account_endpoint_url( 'customer-logout' ) ) );
+		exit;
+
 	} elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
 
 		// Redirect to the product page if we have a single product
@@ -1003,7 +1008,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ) );
+		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			usort( $products, 'wc_products_array_orderby_menu_order' );
@@ -2617,7 +2622,7 @@ function wc_get_star_rating_html( $rating, $count = 0 ) {
 
 	$html .= '</span>';
 
-	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count  );
+	return apply_filters( 'woocommerce_get_star_rating_html', $html, $rating, $count );
 }
 
 /**
@@ -2658,3 +2663,15 @@ function wc_logout_url( $redirect = '' ) {
 function wc_empty_cart_message() {
 	echo '<p class="cart-empty">' . apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) . '</p>';
 }
+
+/**
+ * Disable search engines indexing core, dynamic, cart/checkout pages.
+ *
+ * @since 3.2.0
+ */
+function wc_page_noindex() {
+	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
+		wp_no_robots();
+	}
+}
+add_action( 'wp_head', 'wc_page_noindex' );

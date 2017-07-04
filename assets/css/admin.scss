@@ -3065,8 +3065,17 @@ img.help_tip {
 			display: block;
 		}
 
+		// Give regular settings inputs a standard width and padding.
+		select,
+		textarea,
+		input[type="text"],
+		input[type="email"],
+		input[type="number"],
 		input.regular-input {
 			width: 400px;
+			margin: 0;
+			padding: 6px;
+			box-sizing: border-box;
 		}
 
 		textarea.wide-input {
@@ -3150,7 +3159,7 @@ img.help_tip {
 		}
 
 		.colorpickpreview {
-			padding: 3px;
+			padding: 6px;
 			padding-left: 20px;
 			border: 1px solid #ddd;
 			/* rtl:ignore */
@@ -5720,8 +5729,7 @@ table.bar_chart {
 					outline: 0;
 					box-shadow: none;
 					display: inline-block;
-					min-width: 25%;
-					box-sizing: borde
+					min-width: 100%;
 				}
 			}
 		}
@@ -5803,6 +5811,7 @@ table.bar_chart {
 			margin: 0;
 			border: 0;
 			box-shadow: none;
+			width: 100%;
 
 			td, th {
 				border: 0;
@@ -5842,6 +5851,9 @@ table.bar_chart {
 					code {
 						background: none;
 						padding: 0;
+						white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+						word-wrap: break-word; /* IE */
+						word-break: break-all;
 					}
 				}
 			}

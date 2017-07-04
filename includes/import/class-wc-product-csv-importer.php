@@ -56,6 +56,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
 			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'] );
 
+			// Remove BOM signature from the first item.
+			if ( isset( $this->raw_keys[0] ) ) {
+				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
+			}
+
 			if ( 0 !== $this->params['start_pos'] ) {
 				fseek( $handle, (int) $this->params['start_pos'] );
 			}
@@ -79,6 +84,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( $this->params['parse'] ) {
 			$this->set_parsed_data();
 		}
+	}
+
+	/**
+	 * Remove UTF-8 BOM signature.
+	 *
+	 * @param  string $string String to handle.
+	 * @return string
+	 */
+	protected function remove_utf8_bom( $string ) {
+		if ( 'efbbbf' === substr( bin2hex( $string ), 0, 6 ) ) {
+			$string = substr( $string, 3 );
+		}
+
+		return $string;
 	}
 
 	/**
@@ -108,7 +127,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return int|string
 	 */
-	protected function parse_relative_field( $field ) {
+	public function parse_relative_field( $field ) {
 		global $wpdb;
 
 		if ( empty( $field ) ) {
@@ -119,7 +138,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id          = intval( $matches[1] );
 			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
 
-			return $original_id ? $original_id : $id;
+			if ( $original_id ) {
+				return absint( $original_id );
+
+			// If we're not updating existing posts, we need a placeholder.
+			} elseif ( ! $this->params['update_existing'] ) {
+				$product = new WC_Product_Simple();
+				$product->set_name( 'Import placeholder for ' . $id );
+				$product->set_status( 'importing' );
+				$product->add_meta_data( '_original_id', $id, true );
+				$id = $product->save();
+			}
+
+			return $id;
 		}
 
 		if ( $id = wc_get_product_id_by_sku( $field ) ) {
@@ -151,19 +182,32 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @return int
 	 */
-	protected function parse_id_field( $field ) {
-		$field = absint( $field );
+	public function parse_id_field( $field ) {
+		global $wpdb;
 
-		// Not updating? Make sure we have a new placeholder for this ID.
-		if ( $field && ! $this->params['update_existing'] ) {
-			$product = new WC_Product_Simple();
-			$product->set_name( 'Import placeholder for ' . $field );
-			$product->set_status( 'importing' );
-			$product->add_meta_data( '_original_id', $field, true );
-			$field = $product->save();
+		$id = absint( $field );
+
+		if ( ! $id ) {
+			return 0;
 		}
 
-		return $field && ! is_wp_error( $field ) ? $field : 0;
+		// See if this maps to an ID placeholder already.
+		$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
+
+		if ( $original_id ) {
+			return absint( $original_id );
+		}
+
+		// Not updating? Make sure we have a new placeholder for this ID.
+		if ( ! $this->params['update_existing'] ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Import placeholder for ' . $id );
+			$product->set_status( 'importing' );
+			$product->add_meta_data( '_original_id', $id, true );
+			$id = $product->save();
+		}
+
+		return $id && ! is_wp_error( $id ) ? $id : 0;
 	}
 
 	/**
@@ -172,12 +216,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array
 	 */
-	protected function parse_relative_comma_field( $field ) {
+	public function parse_relative_comma_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
 
-		return array_filter( array_map( array( $this, 'parse_relative_field' ), array_map( 'trim', explode( ',', $field ) ) ) );
+		return array_filter( array_map( array( $this, 'parse_relative_field' ), $this->explode_values( $field ) ) );
 	}
 
 	/**
@@ -186,12 +230,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array
 	 */
-	protected function parse_comma_field( $field ) {
+	public function parse_comma_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
 
-		return array_map( 'wc_clean', array_map( 'trim', explode( ',', $field ) ) );
+		return array_map( 'wc_clean', $this->explode_values( $field ) );
 	}
 
 	/**
@@ -200,7 +244,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return bool|string
 	 */
-	protected function parse_bool_field( $field ) {
+	public function parse_bool_field( $field ) {
 		if ( '0' === $field ) {
 			return false;
 		}
@@ -219,7 +263,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return float|string
 	 */
-	protected function parse_float_field( $field ) {
+	public function parse_float_field( $field ) {
 		if ( '' === $field ) {
 			return $field;
 		}
@@ -234,12 +278,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $field Field value.
 	 * @return array of arrays with "parent" and "name" keys.
 	 */
-	protected function parse_categories_field( $field ) {
+	public function parse_categories_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
 
-		$row_terms  = array_map( 'trim', explode( ',', $field ) );
+		$row_terms  = $this->explode_values( $field );
 		$categories = array();
 
 		foreach ( $row_terms as $row_term ) {
@@ -279,12 +323,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return array
 	 */
-	protected function parse_tags_field( $field ) {
+	public function parse_tags_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
 
-		$names = array_map( 'trim', explode( ',', $field ) );
+		$names = $this->explode_values( $field );
 		$tags  = array();
 
 		foreach ( $names as $name ) {
@@ -306,7 +350,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return int
 	 */
-	protected function parse_shipping_class_field( $field ) {
+	public function parse_shipping_class_field( $field ) {
 		if ( empty( $field ) ) {
 			return 0;
 		}
@@ -326,12 +370,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return array
 	 */
-	protected function parse_images_field( $field ) {
+	public function parse_images_field( $field ) {
 		if ( empty( $field ) ) {
 			return array();
 		}
 
-		return array_map( 'esc_url_raw', array_map( 'trim', explode( ',', $field ) ) );
+		return array_map( 'esc_url_raw', $this->explode_values( $field ) );
 	}
 
 	/**
@@ -341,7 +385,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return string|null
 	 */
-	protected function parse_date_field( $field ) {
+	public function parse_date_field( $field ) {
 		if ( empty( $field ) ) {
 			return null;
 		}
@@ -359,7 +403,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param  string $field Field value.
 	 * @return string
 	 */
-	protected function parse_backorders_field( $field ) {
+	public function parse_backorders_field( $field ) {
 		if ( empty( $field ) ) {
 			return '';
 		}
@@ -453,7 +497,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$callbacks[] = $callback;
 		}
 
-		return $callbacks;
+		return apply_filters( 'woocommerce_product_importer_formatting_callbacks', $callbacks, $this );
 	}
 
 	/**
@@ -613,6 +657,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formating_callback();
 		$mapped_keys     = $this->get_mapped_keys();
+		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row ) {
@@ -622,16 +667,30 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 			$data = array();
 
+			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
+
 			foreach ( $row as $id => $value ) {
 				// Skip ignored columns.
 				if ( empty( $mapped_keys[ $id ] ) ) {
 					continue;
 				}
 
+				// Convert UTF8.
+				if ( $use_mb ) {
+					$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
+					if ( $encoding ) {
+						$value = mb_convert_encoding( $value, 'UTF-8', $encoding );
+					} else {
+						$value = mb_convert_encoding( $value, 'UTF-8', 'UTF-8' );
+					}
+				} else {
+					$value = wp_check_invalid_utf8( $value, true );
+				}
+
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
-			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ) );
+			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
 		}
 	}
 
@@ -663,11 +722,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Process importer.
 	 *
+	 * Do not import products with IDs or SKUs that already exist if option
+	 * update existing is false, and likewise, if updating products, do not
+	 * process rows which do not exist if an ID/SKU is provided.
+	 *
 	 * @return array
 	 */
 	public function import() {
 		$this->start_time = time();
 		$index            = 0;
+		$update_existing  = $this->params['update_existing'];
 		$data             = array(
 			'imported'  => array(),
 			'failed'    => array(),
@@ -676,27 +740,32 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-			// Do not import products with IDs or SKUs that already exist if option
-			// is true UNLESS this is a dummy product created during this import.
-			if ( ! $this->params['update_existing'] ) {
-				$id      = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-				$sku     = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$id_exists  = false;
+			$sku_exists = false;
 
-				if ( $id ) {
-					$product = wc_get_product( $id );
+			if ( $id ) {
+				$product   = wc_get_product( $id );
+				$id_exists = $product && 'importing' !== $product->get_status();
+			} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
+				$product    = wc_get_product( $id_from_sku );
+				$sku_exists = $product && 'importing' !== $product->get_status();
+			}
 
-					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
-						continue;
-					}
-				} elseif ( $sku && ( $id_from_sku = wc_get_product_id_by_sku( $sku ) ) ) {
-					$product = wc_get_product( $id_from_sku );
+			if ( $id_exists && ! $update_existing ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array( 'id' => $id, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
+			}
 
-					if ( $product && 'importing' !== $product->get_status() ) {
-						$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
-						continue;
-					}
-				}
+			if ( $sku_exists && ! $update_existing ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array( 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
+			}
+
+			if ( $update_existing && ( $id || $sku ) && ! $id_exists && ! $sku_exists ) {
+				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'No matching product exists to update.', 'woocommerce' ), array( 'id' => $id, 'sku' => $sku, 'row' => $this->get_row_id( $parsed_data ) ) );
+				continue;
 			}
 
 			$result = $this->process_item( $parsed_data );

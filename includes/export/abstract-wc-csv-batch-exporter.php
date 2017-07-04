@@ -101,7 +101,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 
 		// Add columns when finished.
 		if ( 100 === $this->get_percent_complete() ) {
-			$file = $this->export_column_headers() . $file;
+			$file = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers() . $file;
 		}
 
 		$file .= $data;
