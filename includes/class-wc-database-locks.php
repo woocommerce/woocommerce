@@ -27,7 +27,7 @@ class WC_Database_Locks {
 	 */
 	public static function get_request_id() {
 		if ( ! self::$request_id ) {
-			self::$request_id = uniqid( mt_rand(), true );
+			self::$request_id = uniqid( wp_rand(), true );
 			add_action( 'shutdown', __CLASS__, 'release_all_locks' );
 		}
 		return self::$request_id;
@@ -40,7 +40,10 @@ class WC_Database_Locks {
 	 */
 	public static function get_lock( $lock_name ) {
 		global $wpdb;
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_locks WHERE name = %s;", $lock_name ) );
+
+		$lock = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_locks WHERE name = %s;", $lock_name ) );
+
+		return $lock ? $lock : false;
 	}
 
 	/**
@@ -57,7 +60,7 @@ class WC_Database_Locks {
 			$release_timeout = HOUR_IN_SECONDS;
 		}
 
-		$lock_result = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->prefix}woocommerce_locks ( `name`, `request_id`, `timestamp` ) VALUES ( %s, %s, 'no' );", $lock_name, self::get_request_id(), time() ) );
+		$lock_result = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->prefix}woocommerce_locks ( `name`, `request_id`, `expires` ) VALUES ( %s, %s, %s );", $lock_name, self::get_request_id(), gmdate( 'Y-m-d H:i:s', time() + $release_timeout ) ) );
 
 		if ( ! $lock_result ) {
 			$lock_result = self::get_lock( $lock_name );
@@ -68,7 +71,7 @@ class WC_Database_Locks {
 			}
 
 			// Check to see if the lock is still valid. If it is, bail.
-			if ( $lock_result->timestamp > ( time() - $release_timeout ) ) {
+			if ( strtotime( $lock_result->expires ) > time() ) {
 				return false;
 			}
 
@@ -114,7 +117,7 @@ class WC_Database_Locks {
 	 */
 	public static function release_lock( $lock_name ) {
 		global $wpdb;
-		return $wpdb->delete( "{$wpdb->prefix}woocommerce_locks", array( 'name' => $lock_name ) );
+		return (bool) $wpdb->delete( "{$wpdb->prefix}woocommerce_locks", array( 'name' => $lock_name ) );
 	}
 
 	/**
@@ -122,6 +125,7 @@ class WC_Database_Locks {
 	 */
 	public static function release_all_locks() {
 		global $wpdb;
+
 		if ( self::$request_id ) {
 			$wpdb->delete( "{$wpdb->prefix}woocommerce_locks", array( 'request_id' => self::$request_id ) );
 		}

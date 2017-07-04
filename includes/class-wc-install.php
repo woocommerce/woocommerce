@@ -626,8 +626,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_locks (
   name char(32) NOT NULL,
-  request_id char(32) NOT NULL,
-  timestamp datetime NOT NULL,
+  request_id char(100) NOT NULL,
+  expires datetime NOT NULL,
   PRIMARY KEY (name)
 ) $collate;
 		";
