@@ -98,7 +98,7 @@ class WC_Frontend_Scripts {
 	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
-		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
+		return apply_filters( 'woocommerce_get_asset_url', str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) ), $path );
 	}
 
 	/**
