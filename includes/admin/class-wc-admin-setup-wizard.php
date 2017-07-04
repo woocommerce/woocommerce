@@ -308,10 +308,19 @@ class WC_Admin_Setup_Wizard {
 	 * Location and Tax settings.
 	 */
 	public function wc_setup_location() {
-		$user_location  = WC_Geolocation::geolocate_ip();
-		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
-		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
-		$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+		$address        = WC()->countries->get_base_address();
+		$address_2      = WC()->countries->get_base_address_2();
+		$city           = WC()->countries->get_base_city();
+		$state          = WC()->countries->get_base_state();
+		$country        = WC()->countries->get_base_country();
+		$postcode       = WC()->countries->get_base_postcode();
+
+		if ( empty( $country ) ) {
+			$user_location  = WC_Geolocation::geolocate_ip();
+			$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
+			$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
+			$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+		}
 
 		// Defaults
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
@@ -324,11 +333,40 @@ class WC_Admin_Setup_Wizard {
 		<form method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="store_location"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+					<tr>
+						<th scope="row"><label for="store_address"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+						<td>
+							<input type="text" id="store_address" name="store_address" value="<?php echo esc_attr( $address ); ?>" />
+							<span class="description"> <?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<input type="text" id="store_address_2" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
+							<span class="description"> <?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
+							<span class="description"> <?php esc_html_e( 'City', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
+							</select>
+							<span class="description"> <?php esc_html_e( 'Country / State', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<th scope="row">&nbsp;</th>
 					<td>
-					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-						</select>
+						<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
+						<span class="description"> <?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -423,14 +461,24 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_location_save() {
 		check_admin_referer( 'wc-setup' );
 
+		$address        = sanitize_text_field( $_POST['store_address'] );
+		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
+		$city           = sanitize_text_field( $_POST['store_city'] );
 		$store_location = sanitize_text_field( $_POST['store_location'] );
+		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
+
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
 		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
 		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
 		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
 
+		update_option( 'woocommerce_store_address', $address );
+		update_option( 'woocommerce_store_address_2', $address_2 );
+		update_option( 'woocommerce_store_city', $city );
 		update_option( 'woocommerce_default_country', $store_location );
+		update_option( 'woocommerce_store_postcode', $postcode );
+
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_currency_pos', $currency_pos );
 		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
@@ -503,7 +551,7 @@ class WC_Admin_Setup_Wizard {
 			case 'CA':
 				$local_content = array(
 					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-					'description' => __( 'Display live Canada Post rates at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 				);
 				break;
 			default:

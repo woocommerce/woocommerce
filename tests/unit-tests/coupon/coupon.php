@@ -7,6 +7,46 @@
 class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 	/**
+	 * Test the code/id differentiation of the coupon constructor.
+	 *
+	 * @since 3.2
+	 */
+	public function test_constructor_code_id() {
+		$string_code_1 = 'test';
+
+		// Coupon with a standard string code.
+		$coupon_1 = new WC_Coupon;
+		$coupon_1->set_code( $string_code_1 );
+		$coupon_1->save();
+
+		// Coupon with a string code that is the same as coupon 1's ID.
+		$coupon_2 = new WC_Coupon;
+		$coupon_2->set_code( (string) $coupon_1->get_id() );
+		$coupon_2->save();
+
+		$int_id_1 = $coupon_1->get_id();
+		$int_id_2 = $coupon_2->get_id();
+		$string_code_2 = $coupon_2->get_code();
+
+		// Test getting a coupon by integer ID.
+		$test_coupon = new WC_Coupon( $int_id_1 );
+		$this->assertEquals( $int_id_1, $test_coupon->get_id() );
+		$test_coupon = new WC_Coupon( $int_id_2 );
+		$this->assertEquals( $int_id_2, $test_coupon->get_id() );
+
+		// Test getting a coupon by string code.
+		$test_coupon = new WC_Coupon( $string_code_1 );
+		$this->assertEquals( $string_code_1, $test_coupon->get_code() );
+		$test_coupon = new WC_Coupon( $string_code_2 );
+		$this->assertEquals( $string_code_2, $test_coupon->get_code() );
+
+		// Test getting a coupon by string id.
+		// Required for backwards compatibility, but will try and initialize coupon by code if possible first.
+		$test_coupon = new WC_Coupon( (string) $coupon_2->get_id() );
+		$this->assertEquals( $coupon_2->get_id(), $test_coupon->get_id() );
+	}
+
+	/**
 	 * Test add_discount method.
 	 *
 	 * @since 2.3

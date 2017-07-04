@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$states['RO'] = array (
+$states['RO'] = array(
 	'AB' => __( 'Alba' , 'woocommerce' ),
 	'AR' => __( 'Arad' , 'woocommerce' ),
 	'AG' => __( 'Arges' , 'woocommerce' ),

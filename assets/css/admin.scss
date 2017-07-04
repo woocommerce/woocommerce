@@ -3065,8 +3065,17 @@ img.help_tip {
 			display: block;
 		}
 
+		// Give regular settings inputs a standard width and padding.
+		select,
+		textarea,
+		input[type="text"],
+		input[type="email"],
+		input[type="number"],
 		input.regular-input {
 			width: 400px;
+			margin: 0;
+			padding: 6px;
+			box-sizing: border-box;
 		}
 
 		textarea.wide-input {
@@ -3150,7 +3159,7 @@ img.help_tip {
 		}
 
 		.colorpickpreview {
-			padding: 3px;
+			padding: 6px;
 			padding-left: 20px;
 			border: 1px solid #ddd;
 			/* rtl:ignore */

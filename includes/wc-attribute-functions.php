@@ -345,5 +345,5 @@ function wc_is_attribute_in_product_name( $attribute, $name ) {
  * @return bool
  */
 function wc_array_filter_default_attributes( $attribute ) {
-	return ( ! empty( $attribute ) || $attribute === '0' );
+	return ( ! empty( $attribute ) || '0' === $attribute );
 }

@@ -463,7 +463,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Get order object.
 		$order = wc_get_order( $order_id );
-		$props = array( 'status' => wc_clean( $_POST['order_status'] ) );
+		$props = array();
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
@@ -543,6 +543,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Save order data.
 		$order->set_props( $props );
+		$order->set_status( wc_clean( $_POST['order_status'] ), '', true );
 		$order->save();
 	}
 }

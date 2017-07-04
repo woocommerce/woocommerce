@@ -48,7 +48,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'       => 'woocommerce_myaccount_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
-				'class'    => 'wc-enhanced-select',
+				'class'    => 'wc-enhanced-select-nostd',
 				'css'      => 'min-width:300px;',
 				'desc_tip' => true,
 			),
