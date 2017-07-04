@@ -162,7 +162,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Products that the coupon will be applied to, or that need to be in the cart in order for the "Fixed Cart Discount" to be applied.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Products that the coupon will be applied to, or that need to be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				// Exclude Product ids
@@ -179,7 +179,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Products that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed Cart Discount" to be applied.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Products that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				echo '</div><div class="options_group">';
@@ -198,7 +198,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will be applied to, or that need to be in the cart in order for the "Fixed Cart Discount" to be applied.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will be applied to, or that need to be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				// Exclude Categories
@@ -215,7 +215,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed Cart Discount" to be applied.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				echo '</div><div class="options_group">';
