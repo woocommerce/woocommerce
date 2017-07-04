@@ -155,7 +155,7 @@ jQuery( function( $ ) {
 			var $image = $( this );
 
 			if ( $image ) {
-				setTimeout(function(){
+				setTimeout( function() {
 					var setHeight = $image.closest( '.woocommerce-product-gallery__image' ).height();
 					var $viewport = $image.closest( '.flex-viewport' );
 
