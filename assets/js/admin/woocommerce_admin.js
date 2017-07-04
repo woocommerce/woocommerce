@@ -35,7 +35,7 @@ jQuery( function ( $ ) {
 		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text]', function() {
 			var regex;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).hasClass( '.wc_input_price' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			} else {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
@@ -62,10 +62,10 @@ jQuery( function ( $ ) {
 		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text]', function() {
 			var regex, error;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).hasClass( '.wc_input_price' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 				error = 'i18n_mon_decimal_error';
-			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
+			} else if ( $( this ).hasClass( '.wc_input_country_iso' ) ) {
 				regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
 				error = 'i18n_country_iso_error';
 			} else {
