@@ -1736,6 +1736,13 @@ class WC_Cart {
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
+		// Prevent adding coupons by post ID.
+		if ( $the_coupon->get_code() !== $coupon_code ) {
+			$the_coupon->set_code( $coupon_code );
+			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			return false;
+		}
+
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
 			wc_add_notice( $the_coupon->get_error_message(), 'error' );
@@ -1986,6 +1993,10 @@ class WC_Cart {
 	 *
 	 * Fee is an amount of money charged for a particular piece of work
 	 * or for a particular right or service, and not supposed to be negative.
+	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
+	 * persist.
 	 *
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).

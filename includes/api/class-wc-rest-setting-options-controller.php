@@ -171,8 +171,8 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
-				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
+				$setting['value']    = $admin_setting_value;
 			}
 
 			if ( 'multi_select_countries' === $setting['type'] ) {

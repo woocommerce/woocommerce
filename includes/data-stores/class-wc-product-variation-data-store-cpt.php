@@ -143,6 +143,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
+
+		if ( ! $product->get_date_created() ) {
+			$product->set_date_created( current_time( 'timestamp', true ) );
+		}
+
 		$new_title = $this->generate_product_title( $product );
 
 		if ( $product->get_name( 'edit' ) !== $new_title ) {
@@ -261,6 +266,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
+
 		$product->set_props( array(
 			'description'       => get_post_meta( $id, '_variation_description', true ),
 			'regular_price'     => get_post_meta( $id, '_regular_price', true ),
@@ -309,7 +315,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$product->set_parent_data( array(
-			'title'              => $parent_object->post_title,
+			'title'              => $parent_object ? $parent_object->post_title : '',
 			'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
 			'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 			'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),

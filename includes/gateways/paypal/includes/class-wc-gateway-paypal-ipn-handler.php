@@ -54,11 +54,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			// Lowercase returned variables.
 			$posted['payment_status'] = strtolower( $posted['payment_status'] );
 
-			// Sandbox fix.
-			if ( ( empty( $posted['pending_reason'] ) || 'authorization' !== $posted['pending_reason'] ) && isset( $posted['test_ipn'] ) && 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
-				$posted['payment_status'] = 'completed';
-			}
-
 			WC_Gateway_Paypal::log( 'Found order #' . $order->get_id() );
 			WC_Gateway_Paypal::log( 'Payment status: ' . $posted['payment_status'] );
 

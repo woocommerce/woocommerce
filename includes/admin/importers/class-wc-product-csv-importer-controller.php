@@ -228,13 +228,19 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return string|WP_Error
 	 */
 	public function handle_upload() {
+		$valid_filetypes = apply_filters( 'woocommerce_csv_product_import_valid_filetypes', array( 'csv' => 'text/csv', 'txt' => 'text/plain' ) );
+
 		if ( empty( $_POST['file_url'] ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
-			$overrides                 = array( 'test_form' => false, 'test_type' => false );
-			$_FILES['import']['name'] .= '.txt';
+			$filetype = wp_check_filetype( $_FILES['import']['name'], $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+			}
+
+			$overrides                 = array( 'test_form' => false, 'mimes' => $valid_filetypes );
 			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
@@ -262,6 +268,11 @@ class WC_Product_CSV_Importer_Controller {
 
 			return $upload['file'];
 		} elseif ( file_exists( ABSPATH . $_POST['file_url'] ) ) {
+			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'], $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+			}
+
 			return ABSPATH . $_POST['file_url'];
 		}
 
@@ -388,21 +399,18 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Button text', 'woocommerce' )                             => 'button_text',
 		) );
 
-		$special_columns = array_map(
-			array( $this, 'sanitize_special_column_name_regex' ),
-			apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
-				array(
-					'attributes:name'     => __( 'Attribute %d name', 'woocommerce' ),
-					'attributes:value'    => __( 'Attribute %d value(s)', 'woocommerce' ),
-					'attributes:visible'  => __( 'Attribute %d visible', 'woocommerce' ),
-					'attributes:taxonomy' => __( 'Attribute %d global', 'woocommerce' ),
-					'attributes:default'  => __( 'Attribute %d default', 'woocommerce' ),
-					'downloads:name'      => __( 'Download %d name', 'woocommerce' ),
-					'downloads:url'       => __( 'Download %d URL', 'woocommerce' ),
-					'meta:'               => __( 'Meta: %s', 'woocommerce' ),
-				)
+		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
+			array(
+				__( 'Attribute %d name', 'woocommerce' )     => 'attributes:name',
+				__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
+				__( 'Attribute %d visible', 'woocommerce' )  => 'attributes:visible',
+				__( 'Attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
+				__( 'Attribute %d default', 'woocommerce' )  => 'attributes:default',
+				__( 'Download %d name', 'woocommerce' )      => 'downloads:name',
+				__( 'Download %d URL', 'woocommerce' )       => 'downloads:url',
+				__( 'Meta: %s', 'woocommerce' )              => 'meta:',
 			)
-		);
+		) );
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
@@ -412,7 +420,7 @@ class WC_Product_CSV_Importer_Controller {
 			if ( isset( $default_columns[ $field ] ) ) {
 				$headers[ $index ] = $default_columns[ $field ];
 			} else {
-				foreach ( $special_columns as $special_key => $regex ) {
+				foreach ( $special_columns as $regex => $special_key ) {
 					if ( preg_match( $regex, $field, $matches ) ) {
 						$headers[ $index ] = $special_key . $matches[1];
 						break;
@@ -432,6 +440,24 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function sanitize_special_column_name_regex( $value ) {
 		return '/' . str_replace( array( '%d', '%s' ), '(.*)', quotemeta( $value ) ) . '/';
+	}
+
+	/**
+	 * Get special columns.
+	 *
+	 * @param  array $columns Raw special columns.
+	 * @return array
+	 */
+	protected function get_special_columns( $columns ) {
+		$formatted = array();
+
+		foreach ( $columns as $key => $value ) {
+			$regex = $this->sanitize_special_column_name_regex( $key );
+
+			$formatted[ $regex ] = $value;
+		}
+
+		return $formatted;
 	}
 
 	/**

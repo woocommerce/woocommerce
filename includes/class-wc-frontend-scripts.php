@@ -91,14 +91,14 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Return protocol relative asset URL.
+	 * Return asset URL.
 	 *
 	 * @param string $path
 	 *
 	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
-		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
+		return apply_filters( 'woocommerce_get_asset_url', plugins_url( $path, WC_PLUGIN_FILE ), $path );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class WC_Frontend_Scripts {
 			'flexslider' => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.6.1',
+				'version' => '2.6.3',
 			),
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -484,7 +484,7 @@ class WC_Frontend_Scripts {
 						'closeOnScroll'         => false,
 						'history'               => false,
 						'hideAnimationDuration' => 0,
-						'showAnimationDuration' => 0
+						'showAnimationDuration' => 0,
 					) ),
 					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
