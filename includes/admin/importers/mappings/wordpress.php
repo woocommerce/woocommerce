@@ -16,6 +16,7 @@ function wc_importer_wordpress_mappings( $mappings ) {
 	$wp_mappings = array(
 		'post_id'      => 'id',
 		'post_title'   => 'name',
+		'post_name'    => 'slug',
 		'post_content' => 'description',
 		'post_excerpt' => 'short_description',
 		'post_parent'  => 'parent_id',

@@ -440,6 +440,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'name'              => 'wp_filter_post_kses',
 			'short_description' => 'wp_filter_post_kses',
 			'description'       => 'wp_filter_post_kses',
+			'slug'              => 'sanitize_title',
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
