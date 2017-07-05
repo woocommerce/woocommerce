@@ -315,7 +315,8 @@ class WC_Meta_Box_Product_Data {
 		// Handle stock changes.
 		if ( isset( $_POST['_stock'] ) ) {
 			if ( isset( $_POST['_original_stock'] ) && wc_stock_amount( $product->get_stock_quantity( 'edit' ) ) !== wc_stock_amount( $_POST['_original_stock'] ) ) {
-				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %d has %d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
+				/* translators: 1: product ID 2: quantity in stock */
+				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
 			} else {
 				$stock = wc_stock_amount( $_POST['_stock'] );
 			}
@@ -407,7 +408,8 @@ class WC_Meta_Box_Product_Data {
 				// Handle stock changes.
 				if ( isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ) {
 					if ( isset( $_POST['variable_original_stock'], $_POST['variable_original_stock'][ $i ] ) && wc_stock_amount( $variation->get_stock_quantity( 'edit' ) ) !== wc_stock_amount( $_POST['variable_original_stock'][ $i ] ) ) {
-						WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %d has %d units in stock.', 'woocommerce' ), $variation->get_id(), $variation->get_stock_quantity( 'edit' ) ) );
+						/* translators: 1: product ID 2: quantity in stock */
+						WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $variation->get_id(), $variation->get_stock_quantity( 'edit' ) ) );
 					} else {
 						$stock = wc_stock_amount( $_POST['variable_stock'][ $i ] );
 					}

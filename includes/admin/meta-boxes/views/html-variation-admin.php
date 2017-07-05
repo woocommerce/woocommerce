@@ -170,7 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'wrapper_class'     => 'form-row form-row-first',
 						) );
 
-						echo '<input type="hidden" name="variable_original_stock[' . $loop . ']" value="' . esc_attr( wc_stock_amount( $variation_object->get_stock_quantity( 'edit'  ) ) ) . '" />';
+						echo '<input type="hidden" name="variable_original_stock[' . $loop . ']" value="' . esc_attr( wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 						woocommerce_wp_select( array(
 							'id'            => "variable_backorders{$loop}",
