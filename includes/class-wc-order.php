@@ -87,13 +87,18 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * When a payment is complete this function is called.
 	 *
-	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
+	 * Most of the time this should mark an order as 'processing' so that admin
+	 * can process/post the items.
+	 *
 	 * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action.
 	 * Stock levels are reduced at this point.
-	 * Sales are also recorded for products.
-	 * Finally, record the date of payment.
 	 *
-	 * Order must exist.
+	 * Sales are also recorded for products, as is the date of payment.
+	 *
+	 * The order must exist before it can be completed.
+	 *
+	 * Since we need to ensure this is only called once so things like stock
+	 * levels are correct, this implements WC_Database_Locks.
 	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 * @return bool success
@@ -103,25 +108,32 @@ class WC_Order extends WC_Abstract_Order {
 			if ( ! $this->get_id() ) {
 				return false;
 			}
-			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
-			if ( ! empty( WC()->session ) ) {
-				WC()->session->set( 'order_awaiting_payment', false );
-			}
+			$lock_name = 'order_' . $this->get_id() . '_payment_complete';
 
-			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-				if ( ! empty( $transaction_id ) ) {
-					$this->set_transaction_id( $transaction_id );
+			if ( WC_Database_Locks::aquire_lock( $lock_name ) ) {
+				do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
+
+				if ( ! empty( WC()->session ) ) {
+					WC()->session->set( 'order_awaiting_payment', false );
 				}
-				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp', true ) );
-				}
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
-				$this->save();
 
-				do_action( 'woocommerce_payment_complete', $this->get_id() );
-			} else {
-				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+				if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+					if ( ! empty( $transaction_id ) ) {
+						$this->set_transaction_id( $transaction_id );
+					}
+					if ( ! $this->get_date_paid( 'edit' ) ) {
+						$this->set_date_paid( current_time( 'timestamp', true ) );
+					}
+					$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
+					$this->save();
+
+					do_action( 'woocommerce_payment_complete', $this->get_id() );
+				} else {
+					do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+				}
+
+				WC_Database_Locks::release_lock( $lock_name );
 			}
 		} catch ( Exception $e ) {
 			return false;
