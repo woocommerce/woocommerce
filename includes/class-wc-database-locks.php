@@ -36,14 +36,12 @@ class WC_Database_Locks {
 	/**
 	 * Get an existing lock.
 	 *
-	 * @return object|false
+	 * @param  string $lock_name
+	 * @return object|null
 	 */
 	public static function get_lock( $lock_name ) {
 		global $wpdb;
-
-		$lock = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_locks WHERE name = %s;", $lock_name ) );
-
-		return $lock ? $lock : false;
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_locks WHERE name = %s;", $lock_name ) );
 	}
 
 	/**

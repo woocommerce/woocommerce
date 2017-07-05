@@ -61,24 +61,24 @@ class WC_Tests_Locks extends WC_Unit_Test_Case {
 	function test_release_lock() {
 		WC_Database_Locks::create_lock( 'lock_to_release' );
 
-		$this->assertNotFalse( WC_Database_Locks::get_lock( 'lock_to_release' ) );
+		$this->assertNotNull( WC_Database_Locks::get_lock( 'lock_to_release' ) );
 		$this->assertTrue( WC_Database_Locks::release_lock( 'lock_to_release' ) );
-		$this->assertFalse( WC_Database_Locks::get_lock( 'lock_to_release' ) );
+		$this->assertNull( WC_Database_Locks::get_lock( 'lock_to_release' ) );
 	}
 
 	/**
 	 * test_release_all_locks.
 	 */
 	function test_release_all_locks() {
-		$this->assertNotFalse( WC_Database_Locks::create_lock( 'release_all_locks_1' ) );
-		$this->assertNotFalse( WC_Database_Locks::create_lock( 'release_all_locks_2' ) );
-		$this->assertNotFalse( WC_Database_Locks::create_lock( 'release_all_locks_3' ) );
+		$this->assertNotNull( WC_Database_Locks::create_lock( 'release_all_locks_1' ) );
+		$this->assertNotNull( WC_Database_Locks::create_lock( 'release_all_locks_2' ) );
+		$this->assertNotNull( WC_Database_Locks::create_lock( 'release_all_locks_3' ) );
 
 		WC_Database_Locks::release_all_locks();
 
-		$this->assertFalse( WC_Database_Locks::get_lock( 'release_all_locks_1' ) );
-		$this->assertFalse( WC_Database_Locks::get_lock( 'release_all_locks_2' ) );
-		$this->assertFalse( WC_Database_Locks::get_lock( 'release_all_locks_3' ) );
+		$this->assertNull( WC_Database_Locks::get_lock( 'release_all_locks_1' ) );
+		$this->assertNull( WC_Database_Locks::get_lock( 'release_all_locks_2' ) );
+		$this->assertNull( WC_Database_Locks::get_lock( 'release_all_locks_3' ) );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Tests_Locks extends WC_Unit_Test_Case {
 	 */
 	function test_get_lock() {
 		$this->assertTrue( WC_Database_Locks::create_lock( 'test_lock' ) );
-		$this->assertNotFalse( WC_Database_Locks::get_lock( 'test_lock' ) );
-		$this->assertFalse( WC_Database_Locks::get_lock( 'this_lock_does_not_exist' ) );
+		$this->assertNotNull( WC_Database_Locks::get_lock( 'test_lock' ) );
+		$this->assertNull( WC_Database_Locks::get_lock( 'this_lock_does_not_exist' ) );
 	}
 }
