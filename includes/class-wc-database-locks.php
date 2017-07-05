@@ -28,7 +28,7 @@ class WC_Database_Locks {
 	public static function get_request_id() {
 		if ( ! self::$request_id ) {
 			self::$request_id = uniqid( wp_rand(), true );
-			add_action( 'shutdown', __CLASS__, 'release_all_locks' );
+			add_action( 'shutdown', array( __CLASS__, 'release_all_locks' ) );
 		}
 		return self::$request_id;
 	}
@@ -101,7 +101,7 @@ class WC_Database_Locks {
 				return true;
 			}
 
-			sleep( 1 );
+			usleep( rand( 0, 1000000 ) );
 		}
 
 		return false;
