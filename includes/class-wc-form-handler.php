@@ -140,8 +140,21 @@ class WC_Form_Handler {
 
 		if ( 0 === wc_notice_count( 'error' ) ) {
 
-			foreach ( $address as $key => $field ) {
-				update_user_meta( $user_id, $key, $_POST[ $key ] );
+			$customer = new WC_Customer( $user_id );
+
+			if ( $customer ) {
+				foreach ( $address as $key => $field ) {
+					if ( is_callable( array( $customer, "set_$key" ) ) ) {
+						$customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					} else {
+						$customer->update_meta_data( $key, wc_clean( $_POST[ $key ] ) );
+					}
+
+					if ( WC()->customer && is_callable( array( WC()->customer, "set_$key" ) ) ) {
+						WC()->customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					}
+				}
+				$customer->save();
 			}
 
 			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
