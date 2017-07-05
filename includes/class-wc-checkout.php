@@ -655,7 +655,7 @@ class WC_Checkout {
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
-						$valid_state_values = array_flip( array_map( 'wc_strtoupper', $valid_states ) );
+						$valid_state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $valid_states ) ) );
 						$data[ $key ]       = wc_strtoupper( $data[ $key ] );
 
 						if ( isset( $valid_state_values[ $data[ $key ] ] ) ) {
@@ -663,7 +663,7 @@ class WC_Checkout {
 							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
-						if ( ! in_array( $data[ $key ], array_keys( $valid_states ) ) ) {
+						if ( ! in_array( $data[ $key ], $valid_state_values ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
 						}
