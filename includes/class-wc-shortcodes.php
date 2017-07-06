@@ -177,7 +177,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public static function wc_products( $atts ) {
+	public static function wc_products( $atts, $loop_name = 'wc_products' ) {
 		if ( empty( $atts ) ) {
 			return '';
 		}
@@ -199,7 +199,7 @@ class WC_Shortcodes {
 			'featured'      => false,
 		), $atts, 'wc_products' );
 
-		$query_args = apply_filters( 'woocommerce_default_wc_products_query_args', array(
+		$query_args = apply_filters( "woocommerce_default_{$loop_name}_query_args", array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
@@ -301,7 +301,7 @@ class WC_Shortcodes {
 			}
 		}
 
-		return self::product_loop( $query_args, $atts, 'wc_products' );
+		return self::product_loop( $query_args, $atts, $loop_name );
 	}
 
 	/**
@@ -328,7 +328,7 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'product_category' );
 	}
 
 
@@ -424,7 +424,7 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'recent_products' );
 	}
 
 	/**
@@ -446,7 +446,7 @@ class WC_Shortcodes {
 			'skus'    => '',
 		), $deprecated, 'products' );
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'products' );
 	}
 
 	/**
@@ -466,7 +466,7 @@ class WC_Shortcodes {
 			$args['ids'] = $deprecated['id'];
 		}
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'product' );
 	}
 
 	/**
@@ -579,7 +579,7 @@ class WC_Shortcodes {
 
 		$args['on_sale'] = true;
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'sale_products' );
 	}
 
 	/**
@@ -602,7 +602,7 @@ class WC_Shortcodes {
 
 		$args['orderby'] = 'popularity';
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'best_selling_products' );
 	}
 
 	/**
@@ -627,7 +627,7 @@ class WC_Shortcodes {
 
 		$args['orderby'] = 'rating';
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'top_rated_products' );
 	}
 
 	/**
@@ -652,7 +652,7 @@ class WC_Shortcodes {
 
 		$args['featured'] = 'true';
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'featured_products' );
 	}
 
 	/**
@@ -787,7 +787,7 @@ class WC_Shortcodes {
 		$args['attr_terms'] = $args['filter'];
 		unset( $args['filter'] );
 
-		return self::wc_products( $args );
+		return self::wc_products( $args, 'product_attribute' );
 	}
 
 	/**
