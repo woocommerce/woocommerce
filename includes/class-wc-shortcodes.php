@@ -835,31 +835,3 @@ class WC_Shortcodes {
 
 		return ob_get_clean();
 	}
-
-	/**
-	 * Adds a tax_query index to the query to filter by category.
-	 *
-	 * @param array $args
-	 * @param string $category
-	 * @param string $operator
-	 * @return array;
-	 * @access private
-	 */
-	private static function _maybe_add_category_args( $args, $category, $operator ) {
-		if ( ! empty( $category ) ) {
-			if ( empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array();
-			}
-			$args['tax_query'][] = array(
-				array(
-					'taxonomy' => 'product_cat',
-					'terms'    => array_map( 'sanitize_title', explode( ',', $category ) ),
-					'field'    => 'slug',
-					'operator' => $operator,
-				),
-			);
-		}
-
-		return $args;
-	}
-}
