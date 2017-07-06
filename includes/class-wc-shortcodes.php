@@ -175,6 +175,7 @@ class WC_Shortcodes {
 	 * Main products shortcode.
 	 *
 	 * @param array $atts
+	 * @param str $loop_name
 	 * @return string
 	 */
 	public static function wc_products( $atts, $loop_name = 'wc_products' ) {
@@ -208,6 +209,7 @@ class WC_Shortcodes {
 			'order'               => $atts['order'],
 			'posts_per_page'      => $atts['per_page'],
 			'tax_query'           => WC()->query->get_tax_query(),
+			'meta_query'          => WC()->query->get_meta_query(),
 		) );
 
 		/*
