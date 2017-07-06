@@ -20,6 +20,7 @@ class WC_Shortcodes {
 	 */
 	public static function init() {
 		$shortcodes = array(
+			'wc_products'                => __CLASS__ . '::wc_products',
 			'product'                    => __CLASS__ . '::product',
 			'product_page'               => __CLASS__ . '::product_page',
 			'product_category'           => __CLASS__ . '::product_category',
@@ -168,6 +169,137 @@ class WC_Shortcodes {
 	 */
 	public static function my_account( $atts ) {
 		return self::shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
+	}
+
+	/**
+	 * Main products shortcode.
+	 *
+	 * @param array $atts
+	 * @return string
+	 */
+	public static function wc_products( $atts ) {
+		if ( empty( $atts ) ) {
+			return '';
+		}
+
+		// Filterable with the shortcode_atts_{$shortcode} filter.
+		$atts = shortcode_atts( array(
+			'orderby'       => '',      // menu_order, title, date, rand, price, popularity, rating, or id
+			'order'         => 'desc',  // asc or desc
+			'per_page'      => '4',
+			'columns'       => '4',
+			'ids'           => '',     // comma separated IDs
+			'skus'          => '',     // comma separated SKUs
+			'category'      => '',     // comma separated category slugs
+			'cat_operator'  => 'IN',   // IN, NOT IN, or AND
+			'attribute'     => '',     // single attribute slug
+			'attr_terms'    => '',     // comma separated term slugs
+			'attr_operator' => 'IN',   // IN, NOT IN, or AND
+			'on_sale'       => false,
+			'featured'      => false,
+		), $atts, 'wc_products' );
+
+		$query_args = apply_filters( 'woocommerce_default_wc_products_query_args', array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'orderby'             => $atts['orderby'], // defaults to 'menu_order title' later on.
+			'order'               => $atts['order'],
+			'posts_per_page'      => $atts['per_page'],
+			'tax_query'           => WC()->query->get_tax_query(),
+		) );
+
+		/*
+		|-------------------------
+		| Ordering
+		|-------------------------
+		*/
+
+		if ( 'popularity' === $atts['orderby'] ) {
+			$query_args['meta_key'] = 'total_sales';
+			$query_args['orderby'] = array(
+				'meta_value_num' => 'DESC',
+				'date' => 'DESC',
+			);
+		} else {
+			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+			$query_args['orderby'] = $ordering_args['orderby'];
+			$query_args['order']   = $ordering_args['order'];
+
+			// Add the meta key if ordering by rating.
+			if ( isset( $ordering_args['meta_key'] ) ) {
+				$query_args['meta_key'] = $ordering_args['meta_key'];
+			}
+		}
+
+		/*
+		|-------------------------
+		| Taxonomy Queries
+		|-------------------------
+		*/
+
+		if ( ! empty( $atts['category'] ) ) {
+			$query_args['tax_query'][] = array(
+					'taxonomy'     => 'product_cat',
+					'terms'        => array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
+					'field'        => 'slug',
+					'operator'     => $atts['cat_operator'],
+			);
+		}
+
+		if ( ! empty( $atts['featured'] ) && $atts['featured'] ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'terms'    => 'featured',
+				'field'    => 'name',
+				'operator' => 'IN',
+			);
+		}
+
+		if ( ! empty( $atts['attribute'] ) && ! empty( $atts['attr_terms'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
+				'terms'    => array_map( 'sanitize_title', explode( ',', $atts['attr_terms'] ) ),
+				'field'    => 'slug',
+				'operator' => $atts['attr_operator'],
+			);
+		}
+
+		/*
+		|-------------------------
+		| Meta Queries & post__in
+		|-------------------------
+		*/
+
+		$min_per_page = 0;
+		if ( ! empty( $atts['ids'] ) ) {
+			$min_per_page += count( explode( ',', $atts['ids'] ) );
+			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
+		}
+
+		if ( ! empty( $atts['skus'] ) ) {
+			$min_per_page += count( explode( ',', $atts['skus'] ) );
+			$query_args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
+				'compare' => 'IN',
+			);
+		}
+
+		// Ensure enough products are shown if IDs or SKUs were entered.
+		if ( $query_args['posts_per_page'] < $min_per_page && '-1' != $query_args['posts_per_page'] ) {
+			$query_args['posts_per_page'] = $min_per_page;
+		}
+
+		if ( ! empty( $atts['on_sale'] ) && $atts['on_sale'] ) {
+			if ( isset( $query_args['post__in'] ) ) {
+				$query_args['post__in'] = array_merge( $query_args['post__in'], wc_get_product_ids_on_sale() );
+			} else {
+				$query_args['post__in'] = array_merge( array( 0 ), wc_get_product_ids_on_sale() );
+			}
+		}
+
+		return self::product_loop( $query_args, $atts, 'wc_products' );
 	}
 
 	/**
