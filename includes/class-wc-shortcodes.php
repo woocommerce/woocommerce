@@ -306,49 +306,28 @@ class WC_Shortcodes {
 	/**
 	 * List products in a category shortcode.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function product_category( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function product_category( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'menu_order title',
 			'order'    => 'asc',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'product_category' );
+		), $deprecated, 'product_category' );
 
-		if ( ! $atts['category'] ) {
+		if ( ! $deprecated['category'] ) {
 			return '';
 		}
 
-		// Default ordering args
-		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
-		$meta_query    = WC()->query->get_meta_query();
-		$query_args    = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $ordering_args['orderby'],
-			'order'               => $ordering_args['order'],
-			'posts_per_page'      => $atts['per_page'],
-			'meta_query'          => $meta_query,
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		if ( isset( $ordering_args['meta_key'] ) ) {
-			$query_args['meta_key'] = $ordering_args['meta_key'];
-		}
-
-		$return = self::product_loop( $query_args, $atts, 'product_cat' );
-
-		// Remove ordering query arguments
-		WC()->query->remove_ordering_args();
-
-		return $return;
+		return self::wc_products( $args );
 	}
 
 
@@ -427,74 +406,50 @@ class WC_Shortcodes {
 	/**
 	 * Recent Products shortcode.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function recent_products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function recent_products( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
 			'order'    => 'desc',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'recent_products' );
+		), $deprecated, 'recent_products' );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
+		// Force to sorting by date for now.
+		// TODO: revist how recent products are chosen in the new shortcode.
+		$args['orderby'] = 'date';
 
-		return self::product_loop( $query_args, $atts, 'recent_products' );
+		return self::wc_products( $args );
 	}
 
 	/**
 	 * List multiple products shortcode.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function products( $deprecated ) {
+		if ( empty( $deprecated ) ) {
+			return '';
+		}
+
+		$args = shortcode_atts( array(
 			'columns' => '4',
 			'orderby' => 'title',
 			'order'   => 'asc',
 			'ids'     => '',
 			'skus'    => '',
-		), $atts, 'products' );
+		), $deprecated, 'products' );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'posts_per_page'      => -1,
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
-
-		if ( ! empty( $atts['skus'] ) ) {
-			$query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
-				'compare' => 'IN',
-			);
-		}
-
-		if ( ! empty( $atts['ids'] ) ) {
-			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
-		}
-
-		return self::product_loop( $query_args, $atts, 'products' );
+		return self::wc_products( $args );
 	}
 
 	/**
@@ -503,61 +458,18 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public static function product( $atts ) {
-		if ( empty( $atts ) ) {
-			return '';
+	public static function product( $deprecated ) {
+		$args = array();
+
+		if ( isset( $deprecated['sku'] ) ) {
+			$args['skus'] = $deprecated['sku'];
 		}
 
-		$meta_query = WC()->query->get_meta_query();
-
-		$args = array(
-			'post_type'      => 'product',
-			'posts_per_page' => 1,
-			'no_found_rows'  => 1,
-			'post_status'    => 'publish',
-			'meta_query'     => $meta_query,
-			'tax_query'      => WC()->query->get_tax_query(),
-		);
-
-		if ( isset( $atts['sku'] ) ) {
-			$args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $atts['sku'],
-				'compare' => '=',
-			);
+		if ( isset( $deprecated['id'] ) ) {
+			$args['ids'] = $deprecated['id'];
 		}
 
-		if ( isset( $atts['id'] ) ) {
-			$args['p'] = $atts['id'];
-		}
-
-		ob_start();
-
-		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts, null ) );
-
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		wp_reset_postdata();
-
-		$css_class = 'woocommerce';
-
-		if ( isset( $atts['class'] ) ) {
-			$css_class .= ' ' . $atts['class'];
-		}
-
-		return '<div class="' . esc_attr( $css_class ) . '">' . ob_get_clean() . '</div>';
+		return self::wc_products( $args );
 	}
 
 	/**
@@ -651,143 +563,103 @@ class WC_Shortcodes {
 	/**
 	 * List all products on sale.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function sale_products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function sale_products( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
 			'order'    => 'asc',
 			'category' => '', // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'sale_products' );
+		), $deprecated, 'sale_products' );
 
-		$query_args = array(
-			'posts_per_page' => $atts['per_page'],
-			'orderby'        => $atts['orderby'],
-			'order'          => $atts['order'],
-			'no_found_rows'  => 1,
-			'post_status'    => 'publish',
-			'post_type'      => 'product',
-			'meta_query'     => WC()->query->get_meta_query(),
-			'tax_query'      => WC()->query->get_tax_query(),
-			'post__in'       => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
+		$args['on_sale'] = true;
 
-		return self::product_loop( $query_args, $atts, 'sale_products' );
+		return self::wc_products( $args );
 	}
 
 	/**
 	 * List best selling products on sale.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function best_selling_products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function best_selling_products( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'best_selling_products' );
+		), $deprecated, 'best_selling_products' );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'meta_key'            => 'total_sales',
-			'orderby'             => 'meta_value_num',
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
+		// Force to sorting by popularity for now.
+		// TODO: revist how best selling products are chosen in the new shortcode.
+		$args['orderby'] = 'popularity';
 
-		return self::product_loop( $query_args, $atts, 'best_selling_products' );
+		return self::wc_products( $args );
 	}
 
 	/**
 	 * List top rated products on sale.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function top_rated_products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function top_rated_products( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
 			'order'    => 'asc',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'top_rated_products' );
+		), $deprecated, 'top_rated_products' );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'posts_per_page'      => $atts['per_page'],
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
+		// Force to sorting by rating for now.
+		// TODO: revist how top rated products are chosen in the new shortcode.
+		$args['orderby'] = 'rating';
 
-		add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-
-		$return = self::product_loop( $query_args, $atts, 'top_rated_products' );
-
-		remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-
-		return $return;
+		return self::wc_products( $args );
 	}
 
 	/**
 	 * Output featured products.
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function featured_products( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function featured_products( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
 			'order'    => 'desc',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'featured_products' );
+		), $deprecated, 'featured_products' );
 
-		$meta_query  = WC()->query->get_meta_query();
-		$tax_query   = WC()->query->get_tax_query();
-		$tax_query[] = array(
-			'taxonomy' => 'product_visibility',
-			'field'    => 'name',
-			'terms'    => 'featured',
-			'operator' => 'IN',
-		);
+		// Map to the new key.
+		$args['cat_operator'] = $args['operator'];
+		unset( $args['operator'] );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
-		);
+		$args['featured'] = 'true';
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		return self::product_loop( $query_args, $atts, 'featured_products' );
+		return self::wc_products( $args );
 	}
 
 	/**
@@ -922,37 +794,24 @@ class WC_Shortcodes {
 	 * List products with an attribute shortcode.
 	 * Example [product_attribute attribute='color' filter='black'].
 	 *
-	 * @param array $atts
+	 * @param array $deprecated
 	 * @return string
 	 */
-	public static function product_attribute( $atts ) {
-		$atts = shortcode_atts( array(
+	public static function product_attribute( $deprecated ) {
+		$args = shortcode_atts( array(
 			'per_page'  => '12',
 			'columns'   => '4',
 			'orderby'   => 'title',
 			'order'     => 'asc',
 			'attribute' => '',
 			'filter'    => '',
-		), $atts, 'product_attribute' );
+		), $deprecated, 'product_attribute' );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		// Map to the new keys.
+		$args['attr_terms'] = $args['filter'];
+		unset( $args['filter'] );
 
-		$query_args['tax_query'][] = array(
-			'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
-			'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
-			'field'    => 'slug',
-		);
-
-		return self::product_loop( $query_args, $atts, 'product_attribute' );
+		return self::wc_products( $args );
 	}
 
 	/**
