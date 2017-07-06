@@ -1468,7 +1468,7 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) {
 
 	/**
-	 * Output the proceed to checkout button.
+	 * Output the view cart button.
 	 *
 	 * @subpackage	Cart
 	 */
