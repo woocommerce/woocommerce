@@ -44,6 +44,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$this->params = wp_parse_args( $params, $default_args );
 		$this->file   = $file;
 
+		if ( isset( $this->params['mapping']['from'], $this->params['mapping']['to'] ) ) {
+			$this->params['mapping'] = array_combine( $this->params['mapping']['from'], $this->params['mapping']['to'] );
+		}
+
 		$this->read_file();
 	}
 
