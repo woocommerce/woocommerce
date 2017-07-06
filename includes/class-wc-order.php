@@ -134,6 +134,8 @@ class WC_Order extends WC_Abstract_Order {
 				}
 
 				WC_Database_Locks::release_lock( $lock_name );
+			} else {
+				return false;
 			}
 		} catch ( Exception $e ) {
 			return false;
