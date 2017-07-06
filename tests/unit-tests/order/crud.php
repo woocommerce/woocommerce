@@ -272,7 +272,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertCount( 2, $object->get_items() );
 	}
-	
+
 	/**
 	 * Test: get_different_items
 	 */
