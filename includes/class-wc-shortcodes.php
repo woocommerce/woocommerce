@@ -217,10 +217,11 @@ class WC_Shortcodes {
 		*/
 
 		if ( 'popularity' === $atts['orderby'] ) {
+			// can remove after get_catalog_ordering_args() is updated
 			$query_args['meta_key'] = 'total_sales';
 			$query_args['orderby'] = array(
 				'meta_value_num' => 'DESC',
-				'date' => 'DESC',
+				'post_date'      => 'DESC',
 			);
 		} else {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
@@ -423,10 +424,6 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		// Force to sorting by date for now.
-		// TODO: revist how recent products are chosen in the new shortcode.
-		$args['orderby'] = 'date';
-
 		return self::wc_products( $args );
 	}
 
@@ -603,8 +600,6 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		// Force to sorting by popularity for now.
-		// TODO: revist how best selling products are chosen in the new shortcode.
 		$args['orderby'] = 'popularity';
 
 		return self::wc_products( $args );
@@ -630,8 +625,6 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		// Force to sorting by rating for now.
-		// TODO: revist how top rated products are chosen in the new shortcode.
 		$args['orderby'] = 'rating';
 
 		return self::wc_products( $args );
@@ -818,3 +811,5 @@ class WC_Shortcodes {
 
 		return ob_get_clean();
 	}
+
+}
