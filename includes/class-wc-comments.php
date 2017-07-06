@@ -97,7 +97,7 @@ class WC_Comments {
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_where( $where ) {
-		return ( $where ? ' AND ' : '' ) . " comment_type != 'order_note' ";
+		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 	}
 
 	/**
@@ -125,7 +125,7 @@ class WC_Comments {
 	 * @return string
 	 */
 	public static function exclude_webhook_comments_from_feed_where( $where ) {
-		return ( $where ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+		return $where . ( $where ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
 	}
 
 	/**

@@ -132,4 +132,29 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$product = wc_get_product( $object->get_id() );
 		$this->assertEquals( 'val2', $product->get_meta( '_some_meta_key', true ) );
 	}
+
+	/**
+	 * Tests setting objects and strings in meta to ensure slashing/unslashing works.
+	 */
+	function test_strings_in_meta() {
+		// Create objects.
+		$object = new WC_Product;
+		$object_to_store = new stdClass();
+		$object_to_store->prop1 = 'prop_value';
+		$object_to_store->prop2 = 'prop_value_with_\\\"quotes"';
+
+		$object->add_meta_data( 'Test Object', $object_to_store );
+		$object->add_meta_data( 'Test meta with slash', 'Test\slashes' );
+		$object_id = $object->save();
+
+		// Get object and check it.
+		$object = wc_get_product( $object_id );
+		$value = $object->get_meta( 'Test Object', true );
+
+		$this->assertEquals( $object_to_store, $object->get_meta( 'Test Object', true ) );
+		$this->assertEquals( 'Test\slashes', $object->get_meta( 'Test meta with slash', true ) );
+
+		// clean
+		$object->delete();
+	}
 }

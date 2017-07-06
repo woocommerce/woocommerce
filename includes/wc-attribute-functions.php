@@ -137,7 +137,7 @@ function wc_attribute_label( $name, $product = '' ) {
 			$product = wc_get_product( $product->get_parent_id() );
 		}
 		// Attempt to get label from product, as entered by the user.
-		if ( ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ] ) ) {
+		if ( false !== $product && ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ] ) ) {
 			$label = $attributes[ sanitize_title( $name ) ]->get_name();
 		} else {
 			$label = $name;
@@ -345,5 +345,5 @@ function wc_is_attribute_in_product_name( $attribute, $name ) {
  * @return bool
  */
 function wc_array_filter_default_attributes( $attribute ) {
-	return ( ! empty( $attribute ) || $attribute === '0' );
+	return ( ! empty( $attribute ) || '0' === $attribute );
 }

@@ -158,7 +158,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						woocommerce_wp_text_input( array(
 							'id'                => "variable_stock{$loop}",
 							'name'              => "variable_stock[{$loop}]",
-							'value'             => $variation_object->get_stock_quantity( 'edit' ),
+							'value'             => wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ),
 							'label'             => __( 'Stock quantity', 'woocommerce' ),
 							'desc_tip'          => true,
 							'description'       => __( "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options.", 'woocommerce' ),
@@ -169,6 +169,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'data_type'         => 'stock',
 							'wrapper_class'     => 'form-row form-row-first',
 						) );
+
+						echo '<input type="hidden" name="variable_original_stock[' . $loop . ']" value="' . esc_attr( wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 						woocommerce_wp_select( array(
 							'id'            => "variable_backorders{$loop}",

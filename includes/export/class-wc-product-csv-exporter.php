@@ -152,7 +152,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				// Filter for 3rd parties.
 				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
+					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
 
 				// Handle special columns which don't map 1:1 to product data.
 				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
@@ -240,7 +240,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
-		return implode( ', ', $images );
+		return $this->implode_values( $images );
 	}
 
 	/**
@@ -261,7 +261,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
-		return implode( ',', $product_list );
+		return $this->implode_values( $product_list );
 	}
 
 	/**
@@ -327,7 +327,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 			$grouped_products[] = $child->get_sku( 'edit' ) ? $child->get_sku( 'edit' ) : 'id:' . $child_id;
 		}
-		return implode( ',', $grouped_products );
+		return $this->implode_values( $grouped_products );
 	}
 
 	/**
@@ -421,7 +421,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$types[] = 'virtual';
 		}
 
-		return implode( ', ', $types );
+		return $this->implode_values( $types );
 	}
 
 	/**
@@ -479,10 +479,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 								$values[] = $term->name;
 							}
 
-							$row[ 'attributes:value' . $i ]    = implode( ', ', $values );
+							$row[ 'attributes:value' . $i ]    = $this->implode_values( $values );
 							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
-							$row[ 'attributes:value' . $i ]    = implode( ', ', $attribute->get_options() );
+							$row[ 'attributes:value' . $i ]    = $this->implode_values( $attribute->get_options() );
 							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
 
@@ -531,9 +531,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$meta_data = $product->get_meta_data();
 
 			if ( count( $meta_data ) ) {
+				$meta_keys_to_skip = apply_filters( 'woocommerce_product_export_skip_meta_keys', array(), $product );
+
 				$i = 1;
 				foreach ( $meta_data as $meta ) {
-					if ( ! is_scalar( $meta->value ) ) {
+					if ( ! is_scalar( $meta->value ) || in_array( $meta->key, $meta_keys_to_skip ) ) {
 						continue;
 					}
 					$column_key                        = 'meta:' . esc_attr( $meta->key );

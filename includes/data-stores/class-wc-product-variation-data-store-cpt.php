@@ -143,6 +143,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
+
+		if ( ! $product->get_date_created() ) {
+			$product->set_date_created( current_time( 'timestamp', true ) );
+		}
+
 		$new_title = $this->generate_product_title( $product );
 
 		if ( $product->get_name( 'edit' ) !== $new_title ) {

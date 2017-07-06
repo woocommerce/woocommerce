@@ -1,5 +1,86 @@
 == Changelog ==
 
+= 3.1.0 - 2017-06-28 =
+* Feature - Built-in product CSV importer and exporter for products.
+* Feature - Display (toggle-able) terms inline on the checkout rather than showing a link.
+* Feature - On the "pay for order" page, if logged out show a login form rather than an error message.
+* Feature - Enabled oembed support for product short descriptions.
+* Feature - Added bulk variation update for stock status.
+* Feature - On customer profiles: added a button to copy billing address to shipping address.
+* Feature - Setup Wizard - Automatic Shipping Zone Creation In Setup Wizard for the base location.
+* Feature - Setup Wizard - Added a new optional Storefront Theme step if you're using a non-WooCommerce compatible theme.
+* Feature - Made it possible to manage extension licenses purchased from WooCommerce.com on the extensions screen.
+* Tweak - Gallery - Added a data-caption for captions to support both captions and titles for SEO.
+* Tweak - Gallery - Used smoothHeight setting to better support images of different heights.
+* Tweak - UI - Added blank states for API keys & webhooks.
+* Tweak - UI - Made Product submenu labels consistent in admin.
+* Tweak - UI - Changed street address field label and placeholder to minimize user error on checkout.
+* Tweak - UI - Added a confirmation before deleting log files.
+* Tweak - If prices are the same for all variations, use price not priceSpecification in structured data.
+* Tweak - Added variable so shipping calculator is shown on first row only when showing multiple shipping packages.
+* Tweak - Updated mini-cart HTML to use a list.
+* Tweak - Allow linking to single product additional_information tab from url hash.
+* Tweak - Re-included WooCommerce endpoints on the appearance > menus screens.
+* Tweak - Always sync incorrect titles on variation read regardless of version.
+* Tweak - Standardize rating HTML in all templates.
+* Tweak - When searching, disable WC sort order so results are sorted by relevance.
+* Tweak - Update price sorting code to use min or max for variable products depending on sorting direction.
+* Tweak - Utilize $product method to get thumbnail in loops.
+* Tweak - Check for an existing display name before updating a user on checkout. Adds display_name prop to the CRUD.
+* Tweak - Adapt variable product price used in sorting based on direction of sort.
+* Tweak - Made state validation less strict for keys.
+* Tweak - For COD orders, force payment complete status to be completed.
+* Fix - Use get_max_purchase_quantity in cart template and fix logic when stock management is off.
+* Fix - Added log_id as the secondary sorting column to log list so log entries sort correctly.
+* Fix - Fix shop page when using shop base and UTF8 shop page slug.
+* Fix - Added handles so drag and drop does not break edit on mobile when sorting categories.
+* Fix - Added ABSPATH checks to all files.
+* Fix - Fixed how to flush rewrite rules after saving the shop main page.
+* Fix - Emails sent via admin should switch to global locale.
+* Fix - Set and restore wp_query so product page functions think it's a real product page.
+* Fix - Variation default value of '0' fails to save on product.
+* Fix - Prevent locations being added to the "Rest Of The World" shipping zone via the API.
+* Dev - Allow date created to be set in wc_create_refund.
+* Dev - Introduced a [WC_Order_Query class](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query) for finding/searching orders.
+* Dev - Added "restored" webhook.
+* Dev - Support floats for the custom attribute name sorting function.
+* Dev - Updated Emogrifier to version 1.2.
+* Dev - Sort product data tabs by priority in admin screen.
+* Dev - Added new hooks for: dashboard reviews widget, product and category sorting events, woocommerce_add_to_cart_sold_individually_found_in_cart, cart empty messages.
+* Dev - Added filters for zoom / flexslider / photoswipe enabling.
+* Dev - Added filter for cookie name.
+* Dev - Added ability to filter Photoswipe lightbox options.
+* Dev - Added new filter for product thumbnail size.
+* Dev - Added action for displaying custom data for fees in admin.
+* Dev - Changed build_payload from private to public in webhook system.
+* Dev - Added deprecated notice to WC_Order_Item_Meta (deprecated in 3.0).
+* Dev - Added namespace to jQuery events that are removed in VariationForm.
+* Dev - Made WC_Checkout::get_posted_data() public.
+* Dev - Add custom message for custom system status tools.
+* Dev - Added filters to change which order items are created and loaded to support custom item types.
+* Dev - Updated jQuery payment and serializejson libraries.
+* Localization - Added Bolivian states.
+* Localization - Use VAT for Norway instead of Tax.
+
+= 3.0.9 - 2017-06-22 =
+* Fix - Exclude sale products from category checks if coupon is not valid for sale products in coupon class.
+* Fix - Fix missing states in state field when selected country differs from checkout data. Required template modification.
+* Fix - Updated `woocommerce_email_actions` to send email when order status changes from processing to cancelled.
+* Fix - Fix undefined variables in terms and legacy order API endpoints.
+* Fix - Correctly update variation outofstock term on save.
+* Fix - Add a nonce and confirmation message for logging out via the customer my account page.
+* Fix - Allow setting grouped_products via the API.
+* Fix - Prevent edge case errors in `wc_get_product_term_ids`.
+* Fix - Remove extra escaping to fix saving of special characters in attribute terms.
+* Fix - Stricter shipping method matching in COD to prevent conflicts.
+* Fix - Recalculate totals after local pickup selection so taxes are recalculated.
+* Fix - Add missing nonce to product sales report.
+* Fix - Fix webhook save actions and ping the URL to test only once.
+* Fix - Fix issue with CLI IDs which overlap with actual data.
+* Fix - Normalise emails in coupons so lower/upper case is ignored.
+* Fix - Added background color to `x` button in product gallery edit box.
+* Dev - Renamed `woocommerce_credit_card_type_labels` filter from `wocommerce_credit_card_type_labels`.
+
 = 3.0.8 - 2017-06-06 =
 * Fix - Include multi-dimensional array support in oAuth1.0.
 * Fix - Stock/backorder notice when stock management is disabled.

@@ -221,7 +221,7 @@ function wc_cart_totals_shipping_html() {
 			'package'                  => $package,
 			'available_methods'        => $package['rates'],
 			'show_package_details'     => sizeof( $packages ) > 1,
-			'show_shipping_calculator' => $first,
+			'show_shipping_calculator' => is_cart() && $first,
 			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
 			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
