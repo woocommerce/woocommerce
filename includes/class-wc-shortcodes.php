@@ -774,23 +774,6 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * woocommerce_order_by_rating_post_clauses function.
-	 *
-	 * @param array $args
-	 * @return array
-	 */
-	public static function order_by_rating_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['where']   .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
-		$args['join']    .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID               = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
-		$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
-		$args['groupby'] = "$wpdb->posts.ID";
-
-		return $args;
-	}
-
-	/**
 	 * List products with an attribute shortcode.
 	 * Example [product_attribute attribute='color' filter='black'].
 	 *
