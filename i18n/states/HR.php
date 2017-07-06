@@ -34,6 +34,6 @@ $states['HR'] = array(
 	'HR16' => 'Vukovarsko-srijemska županija' ,
 	'HR13' => 'Zadarska županija' ,
 	'HR01' => 'Zagrebačka županija' ,
-	'HR-15' => 'Šibensko-kninska županija' ,
-	'HR-21' => 'Grad Zagreb'
+	'HR15' => 'Šibensko-kninska županija' ,
+	'HR21' => 'Grad Zagreb'
 );
