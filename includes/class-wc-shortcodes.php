@@ -203,6 +203,7 @@ class WC_Shortcodes {
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
+			'no_found_rows'       => 1,
 			'orderby'             => $atts['orderby'], // defaults to 'menu_order title' later on.
 			'order'               => $atts['order'],
 			'posts_per_page'      => $atts['per_page'],
