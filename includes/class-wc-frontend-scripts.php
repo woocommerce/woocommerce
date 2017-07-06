@@ -231,6 +231,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery' ),
 				'version' => '4.0.3',
 			),
+			'selectWoo' => array(
+				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => '1.0.0',
+			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
@@ -367,7 +372,7 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-cart' );
 		}
 		if ( is_checkout() || is_account_page() ) {
-			self::enqueue_script( 'select2' );
+			self::enqueue_script( 'selectWoo' );
 			self::enqueue_style( 'select2' );
 
 			// Password strength meter. Load in checkout, account login and edit account page.
