@@ -588,7 +588,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order1->set_discount_total( 5.50 );
 		$order1->set_discount_tax( 0.50 );
 		$order1->set_shipping_total( 3.99 );
-		$order1->set_shipping_tax( 0.25);
+		$order1->set_shipping_tax( 0.25 );
 		$order1->set_cart_tax( 0.10 );
 		$order1->set_total( 10.34 );
 		$order1->save();
@@ -596,7 +596,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order2->set_discount_total( 2.50 );
 		$order2->set_discount_tax( 0.20 );
 		$order2->set_shipping_total( 2.99 );
-		$order2->set_shipping_tax( 0.15);
+		$order2->set_shipping_tax( 0.15 );
 		$order2->set_cart_tax( 0.05 );
 		$order2->set_total( 5.89 );
 		$order2->save();
