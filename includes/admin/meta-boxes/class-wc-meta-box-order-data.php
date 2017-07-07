@@ -234,7 +234,7 @@ class WC_Meta_Box_Order_Data {
 						</select></p>
 
 						<p class="form-field form-field-wide wc-customer-user">
-							<!--email_off-->
+							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
