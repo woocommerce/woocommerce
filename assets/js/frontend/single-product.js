@@ -142,6 +142,7 @@ jQuery( function( $ ) {
 			slideshow:      wc_single_product_params.flexslider.slideshow,
 			animationSpeed: wc_single_product_params.flexslider.animationSpeed,
 			animationLoop:  wc_single_product_params.flexslider.animationLoop, // Breaks photoswipe pagination if true.
+			allowOneSlide:  wc_single_product_params.flexslider.allowOneSlide,
 			start: function() {
 				$target.css( 'opacity', 1 );
 			},
