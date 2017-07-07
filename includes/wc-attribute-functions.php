@@ -512,7 +512,7 @@ function wc_delete_attribute( $id ) {
 		array( '%d' )
 	);
 
-	if ( false === $deleted ) {
+	if ( in_array( $deleted, array( 0, false ), true ) ) {
 		return false;
 	}
 
