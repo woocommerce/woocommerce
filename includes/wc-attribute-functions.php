@@ -445,7 +445,7 @@ function wc_create_attribute( $args ) {
 	if ( 0 === $id ) {
 		$results = $wpdb->insert(
 			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
+			$data,
 			$format
 		);
 
@@ -457,7 +457,7 @@ function wc_create_attribute( $args ) {
 	} else {
 		$results = $wpdb->update(
 			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
+			$data,
 			array( 'attribute_id' => $id ),
 			$format,
 			array( '%d' )
@@ -467,6 +467,9 @@ function wc_create_attribute( $args ) {
 			return new WP_Error( 'cannot_update_attribute', __( 'Could not update the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 	}
+
+	// Clear transients.
+	delete_transient( 'wc_attribute_taxonomies' );
 
 	return $id;
 }
@@ -510,6 +513,9 @@ function wc_delete_attribute( $id ) {
 	if ( false === $deleted ) {
 		return false;
 	}
+
+	// Clear transients.
+	delete_transient( 'wc_attribute_taxonomies' );
 
 	return true;
 }
