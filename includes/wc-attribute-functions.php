@@ -504,6 +504,8 @@ function wc_update_attribute( $id, $args ) {
  * @return bool
  */
 function wc_delete_attribute( $id ) {
+	global $wpdb;
+
 	$deleted = $wpdb->delete(
 		$wpdb->prefix . 'woocommerce_attribute_taxonomies',
 		array( 'attribute_id' => $id ),
