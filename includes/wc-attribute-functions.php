@@ -347,3 +347,34 @@ function wc_is_attribute_in_product_name( $attribute, $name ) {
 function wc_array_filter_default_attributes( $attribute ) {
 	return ( ! empty( $attribute ) || '0' === $attribute );
 }
+
+/**
+ * Get attribute data by ID.
+ *
+ * @since  3.2.0
+ * @param  int $id Attribute ID.
+ * @return stdClass|null
+ */
+function wc_get_attribute( $id ) {
+	global $wpdb;
+
+	$data = $wpdb->get_row( $wpdb->prepare( "
+		SELECT *
+		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+		WHERE attribute_id = %d
+	 ", $id ) );
+
+	if ( is_wp_error( $data ) || is_null( $data ) ) {
+		return null;
+	}
+
+	$attribute               = new stdClass();
+	$attribute->id           = (int) $data->attribute_id;
+	$attribute->name         = $data->attribute_label;
+	$attribute->slug         = wc_attribute_taxonomy_name( $data->attribute_name );
+	$attribute->type         = $data->attribute_type;
+	$attribute->order_by     = $data->attribute_orderby;
+	$attribute->has_archives = (bool) $data->attribute_public;
+
+	return $attribute;
+}
