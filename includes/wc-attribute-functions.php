@@ -492,3 +492,24 @@ function wc_update_attribute( $id, $args ) {
 
 	return wc_create_attribute( $args );
 }
+
+/**
+ * Delete attribute by ID.
+ *
+ * @since  3.2.0
+ * @param  int $id Attribute ID.
+ * @return bool
+ */
+function wc_delete_attribute( $id ) {
+	$deleted = $wpdb->delete(
+		$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+		array( 'attribute_id' => $id ),
+		array( '%d' )
+	);
+
+	if ( false === $deleted ) {
+		return false;
+	}
+
+	return true;
+}
