@@ -91,15 +91,22 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+			if ( 1 < count( $value ) ) {
+				$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + array( '@graph' => $value );
+			} else {
+				$data[ $type ] = $value[0];
+			}
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
 		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
 		if ( ! empty( $data ) ) {
-			$data = count( $data ) > 1 ? array( '@graph' => $data ) : $data[0];
+			if ( 1 < count( $data ) ) {
+				$data = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, '', '' ) + array( '@graph' => $data );
+			} else {
+				$data = $data[0];
+			}
 		}
 
 		return $data;
