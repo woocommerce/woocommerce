@@ -881,7 +881,7 @@ class WC_Checkout {
 			}
 
 			// If the display name is an email, update to the user's full name.
-			if ( is_email( $customer->get_display_name() ) ) {
+			if ( is_email( $customer->get_display_name() ) || (! empty( $data['billing_last_name'] ) && ! empty( $data['billing_first_name'] ) ) ) {
 				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
 			}
 
