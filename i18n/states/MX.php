@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $states['MX'] = array(
-	'DF	' => __( 'Ciudad de M&eacute;xico', 'woocommerce' ),
+	'DF' => __( 'Ciudad de M&eacute;xico', 'woocommerce' ),
 	'JA' => __( 'Jalisco', 'woocommerce' ),
 	'NL' => __( 'Nuevo Le&oacute;n', 'woocommerce' ),
 	'AG' => __( 'Aguascalientes', 'woocommerce' ),
