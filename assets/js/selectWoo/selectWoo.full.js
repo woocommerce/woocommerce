@@ -1621,7 +1621,7 @@ S2.define('select2/selection/multiple',[
     $selection.addClass('select2-selection--multiple');
 
     $selection.html(
-      '<ul class="select2-selection__rendered"></ul>'
+      '<ul class="select2-selection__rendered" aria-live="polite" aria-relevant="additions removals" aria-atomic="true"></ul>'
     );
 
     return $selection;
@@ -1674,7 +1674,7 @@ S2.define('select2/selection/multiple',[
   MultipleSelection.prototype.selectionContainer = function () {
     var $container = $(
       '<li class="select2-selection__choice">' +
-        '<span class="select2-selection__choice__remove" role="presentation">' +
+        '<span class="select2-selection__choice__remove" role="presentation" aria-hidden="true">' +
           '&times;' +
         '</span>' +
       '</li>'
@@ -3045,8 +3045,15 @@ S2.define('select2/data/base',[
   };
 
   BaseAdapter.prototype.generateResultId = function (container, data) {
-    var id = container.id + '-result-';
+    var id = '';
 
+    if (container != null) {
+      id += container.id
+    } else {
+      id += Utils.generateChars(4);
+    }
+
+    id += '-result-';
     id += Utils.generateChars(4);
 
     if (data.id != null) {
@@ -3330,7 +3337,7 @@ S2.define('select2/data/select',[
       item.text = item.text.toString();
     }
 
-    if (item._resultId == null && item.id && this.container != null) {
+    if (item._resultId == null && item.id) {
       item._resultId = this.generateResultId(this.container, item);
     }
 
