@@ -146,7 +146,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'2017-01-01',
-				'2030-01-01',
+				'2030-01-01 0:00:00',
 				'taxable',
 				'standard',
 				'1',
