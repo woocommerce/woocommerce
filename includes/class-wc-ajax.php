@@ -2361,7 +2361,8 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
-				$term_id = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$inserted_term = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
 			} else {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}
