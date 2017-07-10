@@ -322,7 +322,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Ouput custom columns for products.
+	 * Output custom columns for products.
 	 *
 	 * @param string $column
 	 */

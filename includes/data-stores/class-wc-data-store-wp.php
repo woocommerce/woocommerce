@@ -360,7 +360,7 @@ class WC_Data_Store_WP {
 		}
 
 		// Meta dates are stored as timestamps in the db.
-		// Check against begining/end-of-day timestamps when using 'day' precision.
+		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
 			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );

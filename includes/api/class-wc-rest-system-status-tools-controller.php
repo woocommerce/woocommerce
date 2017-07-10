@@ -110,7 +110,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * A list of avaiable tools for use in the system status section.
+	 * A list of available tools for use in the system status section.
 	 * 'button' becomes 'action' in the API.
 	 *
 	 * @return array

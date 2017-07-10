@@ -351,7 +351,7 @@ class WC_Checkout {
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
 			/**
-			 * Filter hook to get inital item object.
+			 * Filter hook to get initial item object.
 			 * @since 3.1.0
 			 */
 			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );

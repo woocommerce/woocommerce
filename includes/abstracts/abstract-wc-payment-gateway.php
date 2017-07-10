@@ -360,7 +360,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
+	 * Core credit card form which gateways can used if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
 	 * @param  array $args
 	 * @param  array $fields
 	 */
