@@ -22,6 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
+	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], network_admin_url() ) ) {
+		return $default_url;
+	}
+
 	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
 	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
@@ -179,7 +184,7 @@ function wc_get_account_orders_columns() {
 		'order-date'    => __( 'Date', 'woocommerce' ),
 		'order-status'  => __( 'Status', 'woocommerce' ),
 		'order-total'   => __( 'Total', 'woocommerce' ),
-		'order-actions' => '&nbsp;',
+		'order-actions' => __( 'Actions', 'woocommerce' ),
 	) );
 
 	// Deprecated filter since 2.6.0.

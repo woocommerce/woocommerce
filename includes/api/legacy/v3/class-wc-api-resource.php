@@ -118,18 +118,21 @@ class WC_API_Resource {
 			switch ( $context ) {
 
 				case 'read':
-					if ( ! $this->is_readable( $post ) )
+					if ( ! $this->is_readable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_read_{$resource_name}", sprintf( __( 'You do not have permission to read this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'edit':
-					if ( ! $this->is_editable( $post ) )
+					if ( ! $this->is_editable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_edit_{$resource_name}", sprintf( __( 'You do not have permission to edit this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'delete':
-					if ( ! $this->is_deletable( $post ) )
+					if ( ! $this->is_deletable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_delete_{$resource_name}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 			}
 		}
@@ -245,8 +248,9 @@ class WC_API_Resource {
 		if ( isset( $this->server->params['GET']['filter']['meta'] ) && 'true' === $this->server->params['GET']['filter']['meta'] && is_object( $resource ) ) {
 
 			// don't attempt to add meta more than once
-			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) )
+			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) ) {
 				return $data;
+			}
 
 			// define the top-level property name for the meta
 			switch ( get_class( $resource ) ) {
@@ -273,15 +277,10 @@ class WC_API_Resource {
 				// customer meta
 				$meta = (array) get_user_meta( $resource->ID );
 
-			} elseif ( is_a( $resource, 'WC_Product_Variation' ) ) {
-
-				// product variation meta
-				$meta = (array) get_post_meta( $resource->get_variation_id() );
-
 			} else {
 
 				// coupon/order/product meta
-				$meta = (array) get_post_meta( $resource->id );
+				$meta = (array) get_post_meta( $resource->get_id() );
 			}
 
 			foreach ( $meta as $meta_key => $meta_value ) {
@@ -372,18 +371,19 @@ class WC_API_Resource {
 
 			$result = wp_delete_user( $id );
 
-			if ( $result )
+			if ( $result ) {
 				return array( 'message' => __( 'Permanently deleted customer', 'woocommerce' ) );
-			else
+			} else {
 				return new WP_Error( 'woocommerce_api_cannot_delete_customer', __( 'The customer cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
-
+			}
 		} else {
 
 			// delete order/coupon/product/webhook
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
-			if ( ! $result )
+			if ( ! $result ) {
 				return new WP_Error( "woocommerce_api_cannot_delete_{$resource_name}", sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), $resource_name ), array( 'status' => 500 ) );
+			}
 
 			if ( $force ) {
 				return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), $resource_name ) );

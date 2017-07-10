@@ -1,8 +1,8 @@
 <?php
 /**
- * My Orders
+ * My Orders - Deprecated
  *
- * @deprecated  2.6.0 this template file is no longer used. My Account shortcode uses orders.php.
+ * @deprecated 2.6.0 this template file is no longer used. My Account shortcode uses orders.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -56,7 +56,7 @@ if ( $customer_orders ) : ?>
 								</a>
 
 							<?php elseif ( 'order-date' === $column_id ) : ?>
-								<time datetime="<?php echo esc_attr( date( 'Y-m-d', $order->get_date_created() ) ); ?>" title="<?php echo esc_attr( $order->get_date_created() ); ?>"><?php echo esc_html( date_i18n( get_option( 'date_format' ), $order->get_date_created() ) ); ?></time>
+								<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
 
 							<?php elseif ( 'order-status' === $column_id ) : ?>
 								<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>

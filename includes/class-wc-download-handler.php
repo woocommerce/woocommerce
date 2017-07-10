@@ -75,7 +75,9 @@ class WC_Download_Handler {
 		$count     = $download->get_download_count();
 		$remaining = $download->get_downloads_remaining();
 		$download->set_download_count( $count + 1 );
-		$download->set_downloads_remaining( $remaining - 1 );
+		if ( '' !== $remaining ) {
+			$download->set_downloads_remaining( $remaining - 1 );
+		}
 		$download->save();
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
@@ -109,7 +111,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_download_expiry( $download ) {
-		if ( $download->get_access_expires() > 0 && $download->get_access_expires() < strtotime( 'midnight', current_time( 'timestamp' ) ) ) {
+		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', current_time( 'timestamp', true ) ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
@@ -136,6 +138,8 @@ class WC_Download_Handler {
 
 	/**
 	 * @deprecated
+	 *
+	 * @param $download_data
 	 */
 	public static function count_download( $download_data ) {}
 
@@ -202,6 +206,10 @@ class WC_Download_Handler {
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
+
+		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+			$remote_file = false;
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
 		// Check if we have an absolute path
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
@@ -392,7 +400,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

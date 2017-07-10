@@ -1,29 +1,35 @@
-## EXPLANATION OF THE ISSUE
+## Prerequisites
 
-<!-- What happens, under which versions, under what conditions, when, and what were you expecting instead. -->
+<!-- Mark checked items with an [x] -->
 
-## STEPS TO REPRODUCE THE ISSUE
+- [ ] I have searched for similar issues in both open and closed tickets and cannot find a duplicate
+- [ ] The issue still exists against the latest `master` branch of WooCommerce
+- [ ] This is not a usage question (Those should be directed to the [community](https://wordpress.org/support/plugin/woocommerce), unless this is a question about a premium plugin in which you should [use the helpdesk](https://woocommerce.com/my-account/tickets/) for official extensions or contact the author of 3rd party extensions)
+- [ ] I have attempted to find the simplest possible steps to reproduce the issue
+- [ ] I have included a failing test as a pull request (Optional)
 
-<!-- 1. List steps to reproduce your issue so we can replicate. -->
+## Steps to reproduce the issue
 
-## SYSTEM STATUS REPORT
+1.
+2.
+3.
 
+## Expected behavior and actual behavior
+
+When I follow those steps, I see...
+
+I was expecting...
+
+## Environment
+
+<details>
 ```
 Grab the system status report from WooCommerce > System Status and paste it here.
 ```
+</details>
 
-<!--
-BEFORE POSTING YOUR ISSUE
-- These comments won't show up when you submit the issue.
-- Try to add as much detail as possible. Be specific!
-- GitHub issues ARE NOT FOR SUPPORT! If you have questions, use the either:
-  - https://wordpress.org/support/plugin/woocommerce for general support
-  - https://woocommerce.com/my-account/tickets/ for premium plugin support
-- If you're requesting a new feature, explain why you'd like it to be added.
-- Search this repository (top of the page) for the issue and it has not been fixed or reported already.
+## Isolating the problem
 
-Before logging BUGS, ensure you:
-- Use the latest stable release of WooCommerce.
-- Disabled all plugins to ensure it's a core bug and not a plugin issue.
-- Switched to Twenty Twelve theme to ensure it's a core bug and not a theme issue.
--->
+- [ ] This bug happens with only WooCommerce plugin active
+- [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/storefront/)
+- [ ] I can reproduce this bug consistently

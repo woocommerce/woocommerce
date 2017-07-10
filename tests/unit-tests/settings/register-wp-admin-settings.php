@@ -3,10 +3,10 @@
 /**
  * Settings API: WP-Admin Helper Tests
  * Tests the helper class that makes settings (currently present in wp-admin)
- * avaiable to the REST API.
+ * available to the REST API.
  *
  * @package WooCommerce\Tests\Settings
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
@@ -38,7 +38,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::__construct
 	 */
 	public function test_constructor() {
@@ -49,7 +49,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_group
 	 */
 	public function test_register_group() {
@@ -73,7 +73,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function register_setting_provider() {
 		return array(
@@ -163,7 +163,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @dataProvider register_setting_provider
 	 * @covers WC_Register_WP_Admin_Settings::register_setting
 	 */
@@ -176,7 +176,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings_one_section() {
@@ -200,7 +200,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
 	public function test_register_settings() {

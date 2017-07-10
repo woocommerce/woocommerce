@@ -127,7 +127,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -138,7 +138,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Prepare a single product output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -178,7 +178,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -369,26 +369,30 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 
 			$images[] = array(
-				'id'            => (int) $attachment_id,
-				'date_created'  => wc_rest_prepare_date_response( $attachment_post->post_date_gmt ),
-				'date_modified' => wc_rest_prepare_date_response( $attachment_post->post_modified_gmt ),
-				'src'           => current( $attachment ),
-				'name'          => get_the_title( $attachment_id ),
-				'alt'           => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'position'      => (int) $position,
+				'id'                => (int) $attachment_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
+				'src'               => current( $attachment ),
+				'name'              => get_the_title( $attachment_id ),
+				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+				'position'          => (int) $position,
 			);
 		}
 
 		// Set a placeholder image if the product has no images set.
 		if ( empty( $images ) ) {
 			$images[] = array(
-				'id'            => 0,
-				'date_created'  => wc_rest_prepare_date_response( current_time( 'mysql' ) ), // Default to now.
-				'date_modified' => wc_rest_prepare_date_response( current_time( 'mysql' ) ),
-				'src'           => wc_placeholder_img_src(),
-				'name'          => __( 'Placeholder', 'woocommerce' ),
-				'alt'           => __( 'Placeholder', 'woocommerce' ),
-				'position'      => 0,
+				'id'                => 0,
+				'date_created'      => wc_rest_prepare_date_response( current_time( 'mysql' ), false ), // Default to now.
+				'date_created_gmt'  => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ), // Default to now.
+				'date_modified'     => wc_rest_prepare_date_response( current_time( 'mysql' ), false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ),
+				'src'               => wc_placeholder_img_src(),
+				'name'              => __( 'Placeholder', 'woocommerce' ),
+				'alt'               => __( 'Placeholder', 'woocommerce' ),
+				'position'          => 0,
 			);
 		}
 
@@ -398,6 +402,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Get attribute taxonomy label.
 	 *
+	 * @deprecated 3.0.0
+	 *
 	 * @param  string $name Taxonomy name.
 	 * @return string
 	 */
@@ -406,6 +412,33 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
+	}
+
+	/**
+	 * Get product attribute taxonomy name.
+	 *
+	 * @since  3.0.0
+	 * @param  string     $slug    Taxonomy name.
+	 * @param  WC_Product $product Product data.
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_name( $slug, $product ) {
+		$attributes = $product->get_attributes();
+
+		if ( ! isset( $attributes[ $slug ] ) ) {
+			return str_replace( 'pa_', '', $slug );
+		}
+
+		$attribute = $attributes[ $slug ];
+
+		// Taxonomy attribute name.
+		if ( $attribute->is_taxonomy() ) {
+			$taxonomy = $attribute->get_taxonomy_object();
+			return $taxonomy->attribute_label;
+		}
+
+		// Custom product attribute name.
+		return $attribute->get_name();
 	}
 
 	/**
@@ -422,13 +455,13 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				if ( 0 === strpos( $key, 'pa_' ) ) {
 					$default[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
-						'name'   => $this->get_attribute_taxonomy_label( $key ),
+						'name'   => $this->get_attribute_taxonomy_name( $key, $product ),
 						'option' => $value,
 					);
 				} else {
 					$default[] = array(
 						'id'     => 0,
-						'name'   => str_replace( 'pa_', '', $key ),
+						'name'   => $this->get_attribute_taxonomy_name( $key, $product ),
 						'option' => $value,
 					);
 				}
@@ -465,7 +498,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		$attributes = array();
 
 		if ( $product->is_type( 'variation' ) ) {
-			// Variation attributes.
+			$_product = wc_get_product( $product->get_parent_id() );
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				$name = str_replace( 'attribute_', '', $attribute_name );
 
@@ -478,38 +511,27 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					$option_term = get_term_by( 'slug', $attribute, $name );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
-						'name'   => $this->get_attribute_taxonomy_label( $name ),
+						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
 					);
 				} else {
 					$attributes[] = array(
 						'id'     => 0,
-						'name'   => $name,
+						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'option' => $attribute,
 					);
 				}
 			}
 		} else {
 			foreach ( $product->get_attributes() as $attribute ) {
-				if ( $attribute['is_taxonomy'] ) {
-					$attributes[] = array(
-						'id'        => wc_attribute_taxonomy_id_by_name( $attribute['name'] ),
-						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
-						'position'  => (int) $attribute['position'],
-						'visible'   => (bool) $attribute['is_visible'],
-						'variation' => (bool) $attribute['is_variation'],
-						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
-					);
-				} else {
-					$attributes[] = array(
-						'id'        => 0,
-						'name'      => $attribute['name'],
-						'position'  => (int) $attribute['position'],
-						'visible'   => (bool) $attribute['is_visible'],
-						'variation' => (bool) $attribute['is_variation'],
-						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
-					);
-				}
+				$attributes[] = array(
+					'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+					'name'      => $this->get_attribute_taxonomy_name( $attribute['name'], $product ),
+					'position'  => (int) $attribute['position'],
+					'visible'   => (bool) $attribute['is_visible'],
+					'variation' => (bool) $attribute['is_variation'],
+					'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
+				);
 			}
 		}
 
@@ -528,8 +550,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'name'                  => $product->get_name(),
 			'slug'                  => $product->get_slug(),
 			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified() ),
+			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created(), false ),
+			'date_created_gmt'      => wc_rest_prepare_date_response( $product->get_date_created() ),
+			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
+			'date_modified_gmt'     => wc_rest_prepare_date_response( $product->get_date_modified() ),
 			'type'                  => $product->get_type(),
 			'status'                => $product->get_status(),
 			'featured'              => $product->is_featured(),
@@ -540,8 +564,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
 			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'date_on_sale_from'     => $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from() ) : '',
-			'date_on_sale_to'       => $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to() ) : '',
+			'date_on_sale_from'     => wc_rest_prepare_date_response( $product->get_date_on_sale_from(), false ),
+			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from() ),
+			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to(), false ),
+			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to() ),
 			'price_html'            => $product->get_price_html(),
 			'on_sale'               => $product->is_on_sale(),
 			'purchasable'           => $product->is_purchasable(),
@@ -551,7 +577,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'downloads'             => $this->get_downloads( $product ),
 			'download_limit'        => $product->get_download_limit(),
 			'download_expiry'       => $product->get_download_expiry(),
-			'download_type'         => 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'tax_status'            => $product->get_tax_status(),
@@ -811,8 +836,16 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				$product->set_date_on_sale_from( $request['date_on_sale_from'] );
 			}
 
+			if ( isset( $request['date_on_sale_from_gmt'] ) ) {
+				$product->set_date_on_sale_from( $request['date_on_sale_from_gmt'] ? strtotime( $request['date_on_sale_from_gmt'] ) : null );
+			}
+
 			if ( isset( $request['date_on_sale_to'] ) ) {
 				$product->set_date_on_sale_to( $request['date_on_sale_to'] );
+			}
+
+			if ( isset( $request['date_on_sale_to_gmt'] ) ) {
+				$product->set_date_on_sale_to( $request['date_on_sale_to_gmt'] ? strtotime( $request['date_on_sale_to_gmt'] ) : null );
 			}
 		}
 
@@ -961,6 +994,11 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			$product = $this->save_default_attributes( $product, $request );
 		}
 
+		// Set children for a grouped product.
+		if ( $product->is_type( 'grouped' ) && isset( $request['grouped_products'] ) ) {
+			$product->set_children( $request['grouped_products'] );
+		}
+
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
 			$product = $this->set_product_images( $product, $request['images'] );
@@ -1036,9 +1074,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				}
 			}
 
-			if ( ! empty( $gallery ) ) {
-				$product->set_gallery_image_ids( $gallery );
-			}
+			$product->set_gallery_image_ids( $gallery );
 		} else {
 			$product->set_image_id( '' );
 			$product->set_gallery_image_ids( array() );
@@ -1084,11 +1120,9 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
-			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
-
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
-			}
+			$data_store        = $product->get_data_store();
+			$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			$product->set_shipping_class_id( $shipping_class_id );
 		}
 
 		return $product;
@@ -1099,12 +1133,12 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 2.7.
+	 * @param int        $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() not requires a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -1147,7 +1181,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product      $product Product instance.
 	 * @param WP_REST_Request $request Request data.
@@ -1155,7 +1189,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$attributes = $product->get_variation_attributes();
+
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $attribute ) {
@@ -1354,8 +1389,20 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( "The date the product was created, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( "The date the product was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1419,13 +1466,23 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from' => array(
-					'description' => __( 'Start date of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_from_gmt' => array(
+					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_to_gmt' => array(
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'price_html' => array(
@@ -1491,23 +1548,16 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
-				),
-				'download_type' => array(
-					'description' => __( 'Download type, this controls the schema on the front-end.', 'woocommerce' ),
-					'type'        => 'string',
-					'default'     => 'standard',
-					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
@@ -1753,8 +1803,20 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
+							'date_created_gmt' => array(
+								'description' => __( "The date the image was created, as GMT.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
 							'date_modified' => array(
 								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'date_modified_gmt' => array(
+								'description' => __( "The date the image was last modified, as GMT.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1853,7 +1915,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				'variations' => array(
 					'description' => __( 'List of variations IDs.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'    => 'integer',
 					),
@@ -1866,7 +1928,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 						'type'    => 'integer',
 					),
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),

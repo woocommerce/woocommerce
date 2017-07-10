@@ -110,6 +110,7 @@ jQuery(function( $ ) {
 		defaultDate: '',
 		dateFormat: 'yy-mm-dd',
 		numberOfMonths: 1,
+		minDate: '-20Y',
 		maxDate: '+0D',
 		showButtonPanel: true,
 		showOn: 'focus',

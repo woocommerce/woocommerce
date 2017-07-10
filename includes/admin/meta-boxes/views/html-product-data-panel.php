@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
@@ -12,7 +17,7 @@
 		</label>
 
 		<?php foreach ( self::get_product_type_options() as $key => $option ) :
-			if ( $product_object ) {
+			if ( metadata_exists( 'post', $post->ID, '_' . $key ) ) {
 				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : 'yes' === get_post_meta( $post->ID, '_' . $key, true );
 			} else {
 				$selected_value = 'yes' === ( isset( $option['default'] ) ? $option['default'] : 'no' );

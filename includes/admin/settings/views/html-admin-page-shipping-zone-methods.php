@@ -102,7 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
-			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a>
+			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
 			<div class="row-actions">
 				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
 			</div>

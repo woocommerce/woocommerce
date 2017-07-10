@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Twenty Seventeen suport.
+ * Twenty Seventeen support.
  *
  * @class   WC_Twenty_Seventeen
  * @since   2.6.9

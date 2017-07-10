@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Used to test swapping out data stores.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -28,7 +28,7 @@ class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store_Interface {
  *
  * Used to test swapping out data stores.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */

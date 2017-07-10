@@ -9,11 +9,11 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
-## Reporting Security issues
+## Reporting Security Issues
 To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).
 
 ## Support
-This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
+This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core, WooCommerce issues only. Support can take place through the appropriate channels:
 
 * The [WooCommerce premium support portal](https://woocommerce.com/my-account/create-a-ticket/) for customers who have purchased themes or extensions.
 * [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
@@ -21,4 +21,7 @@ This repository is not suitable for support. Please don't use our issue tracker 
 Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
-If you have a patch, or stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
+
+## Contributing new features to the WooCommerce REST API
+If you're like to add a feature to the next version of the REST API, contribute here: https://github.com/woocommerce/wc-api-dev

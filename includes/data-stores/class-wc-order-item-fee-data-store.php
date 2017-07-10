@@ -6,14 +6,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Fee Data Store
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
 class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface {
+
 	/**
 	 * Data stored in meta keys.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array( '_tax_class', '_tax_status', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
@@ -21,8 +22,8 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	/**
 	 * Read/populate data properties specific to this order item.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Order_Item $item
+	 * @since 3.0.0
+	 * @param WC_Order_Item_Fee $item
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
@@ -40,8 +41,8 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 * Saves an item's data to the database / item meta.
 	 * Ran after both create and update, so $id will be set.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Order_Item $item
+	 * @since 3.0.0
+	 * @param WC_Order_Item_Fee $item
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();

@@ -54,6 +54,8 @@ class WC_Shortcodes {
 	 *
 	 * @param string[] $function
 	 * @param array $atts (default: array())
+	 * @param array $wrapper
+	 *
 	 * @return string
 	 */
 	public static function shortcode_wrapper(
@@ -87,17 +89,21 @@ class WC_Shortcodes {
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $loop_name;
+		$query_args                  = apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name );
 		$transient_name              = 'wc_loop' . substr( md5( json_encode( $query_args ) . $loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
-			$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
+			$products = new WP_Query( $query_args );
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
 		}
 
 		ob_start();
 
 		if ( $products->have_posts() ) {
+
+			// Prime caches before grabbing objects.
+			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
 			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>
@@ -394,7 +400,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts, null ) );
 
 		if ( $products->have_posts() ) : ?>
 
@@ -428,7 +434,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_add_to_cart( $atts ) {
-		global $wpdb, $post;
+		global $post;
 
 		if ( empty( $atts ) ) {
 			return '';
@@ -485,8 +491,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_add_to_cart_url( $atts ) {
-		global $wpdb;
-
 		if ( empty( $atts ) ) {
 			return '';
 		}
@@ -729,19 +733,25 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		while ( $single_product->have_posts() ) :
-			$single_product->the_post();
-			wp_enqueue_script( 'wc-single-product' );
+		global $wp_query;
+
+		// Backup query object so following loops think this is a product page.
+		$previous_wp_query = $wp_query;
+		$wp_query          = $single_product;
+
+		wp_enqueue_script( 'wc-single-product' );
+
+		while ( $single_product->have_posts() ) {
+			$single_product->the_post()
 			?>
-
 			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
-
 				<?php wc_get_template_part( 'content', 'single-product' ); ?>
-
 			</div>
+			<?php
+		}
 
-		<?php endwhile; // end of the loop.
-
+		// restore $previous_wp_query and reset post data.
+		$wp_query = $previous_wp_query;
 		wp_reset_postdata();
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';

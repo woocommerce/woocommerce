@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Shipping Zone Data Store.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -15,8 +15,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Method to create a new shipping zone.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Shipping_Zone
+	 * @since 3.0.0
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function create( &$zone ) {
 		global $wpdb;
@@ -35,8 +35,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Update zone in the database.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Shipping_Zone
+	 * @since 3.0.0
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function update( &$zone ) {
 		global $wpdb;
@@ -56,8 +56,9 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Method to read a shipping zone from the database.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Shipping_Zone
+	 * @since 3.0.0
+	 * @param WC_Shipping_Zone $zone
+	 * @throws Exception
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
@@ -82,8 +83,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Deletes a shipping zone from the database.
 	 *
-	 * @since  2.7.0
-	 * @param  WC_Shipping_Zone
+	 * @since  3.0.0
+	 * @param  WC_Shipping_Zone $zone
 	 * @param  array $args Array of args to pass to the delete method.
 	 * @return bool result
 	 */
@@ -105,7 +106,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Get a list of shipping methods for a specific zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int   $zone_id      Zone ID
 	 * @param  bool  $enabled_only True to request enabled methods only.
 	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
@@ -119,7 +120,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Get count of methods for a zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int Zone ID
 	 * @return int Method Count
 	 */
@@ -131,7 +132,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Add a shipping method to a zone.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int    $zone_id Zone ID
 	 * @param  string $type    Method Type/ID
 	 * @param  int    $order   Method Order
@@ -158,7 +159,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Delete a method instance.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param int $instance_id
 	 */
 	public function delete_method( $instance_id ) {
@@ -170,7 +171,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Get a shipping zone method instance.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int
 	 * @return object
 	 */
@@ -182,7 +183,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Find a matching zone ID for a given package.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  object $package
 	 * @return int
 	 */
@@ -226,7 +227,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Return an ordered list of zones.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array An array of objects containing a zone_id, zone_name, and zone_order.
 	 */
 	public function get_zones() {
@@ -238,7 +239,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	/**
 	 * Return a zone ID from an instance ID.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int
 	 * @return int
 	 */
@@ -265,11 +266,13 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Save locations to the DB.
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param WC_Shipping_Zone
+	 *
+	 * @return bool|void
 	 */
 	private function save_locations( &$zone ) {
-		$updated_props = array();
 		$changed_props = array_keys( $zone->get_changes() );
 		if ( ! in_array( 'zone_locations', $changed_props ) ) {
 			return false;

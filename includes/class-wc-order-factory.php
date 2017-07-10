@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooCommerce
@@ -44,15 +44,7 @@ class WC_Order_Factory {
 		}
 
 		try {
-			// Try to get from cache, otherwise create a new object,
-			$order = wp_cache_get( 'object-' . $order_id, 'orders' );
-
-			if ( ! is_a( $order, 'WC_Order' ) ) {
-				$order = new $classname( $order_id );
-				wp_cache_set( 'object-' . $order_id, $order, 'orders' );
-			}
-
-			return $order;
+			return new $classname( $order_id );
 		} catch ( Exception $e ) {
 			return false;
 		}
@@ -64,8 +56,6 @@ class WC_Order_Factory {
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
-		global $wpdb;
-
 		if ( is_numeric( $item_id ) ) {
 			$item_type = WC_Data_Store::load( 'order-item' )->get_order_item_type( $item_id );
 			$id        = $item_id;
@@ -76,7 +66,6 @@ class WC_Order_Factory {
 			$id        = $item_id->order_item_id;
 			$item_type = $item_id->order_item_type;
 		} else {
-			$item_data = false;
 			$item_type = false;
 			$id        = false;
 		}
@@ -101,17 +90,12 @@ class WC_Order_Factory {
 					$classname = 'WC_Order_Item_Tax';
 				break;
 			}
-			if ( $classname ) {
+
+			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
+
+			if ( $classname && class_exists( $classname ) ) {
 				try {
-					// Try to get from cache, otherwise create a new object,
-					$item = wp_cache_get( 'object-' . $id, 'order-items' );
-
-					if ( ! is_a( $item, 'WC_Order_Item' ) ) {
-						$item = new $classname( $id );
-						wp_cache_set( 'object-' . $id, $item, 'order-items' );
-					}
-
-					return $item;
+					return new $classname( $id );
 				} catch ( Exception $e ) {
 					return false;
 				}
@@ -123,7 +107,7 @@ class WC_Order_Factory {
 	/**
 	 * Get the order ID depending on what was passed.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  mixed $order
 	 * @return int|bool false on failure
 	 */

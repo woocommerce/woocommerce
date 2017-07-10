@@ -8,15 +8,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by the order item data store (for functions).
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooCommerce
  */
 interface WC_Order_Item_Data_Store_Interface {
+
 	/**
 	 * Add an order item to an order.
 	 * @param  int   $order_id
-	 * @param  array $item. order_item_name and order_item_type.
+	 * @param  array $item order_item_name and order_item_type.
 	 * @return int   Order Item ID
 	 */
 	public function add_order_item( $order_id, $item );
@@ -24,7 +25,7 @@ interface WC_Order_Item_Data_Store_Interface {
 	/**
 	 * Update an order item.
 	 * @param  int   $item_id
-	 * @param  array $item. order_item_name or order_item_type.
+	 * @param  array $item order_item_name or order_item_type.
 	 * @return boolean
 	 */
 	public function update_order_item( $item_id, $item );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Product Price, including microdata for SEO
+ * Single Product Price
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/price.php.
  *
@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

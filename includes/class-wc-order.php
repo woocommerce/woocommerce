@@ -24,8 +24,8 @@ class WC_Order extends WC_Abstract_Order {
 	protected $status_transition = false;
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
@@ -35,8 +35,8 @@ class WC_Order extends WC_Abstract_Order {
 		'currency'             => '',
 		'version'              => '',
 		'prices_include_tax'   => false,
-		'date_created'         => '',
-		'date_modified'        => '',
+		'date_created'         => null,
+		'date_modified'        => null,
 		'discount_total'       => 0,
 		'discount_tax'         => 0,
 		'shipping_total'       => 0,
@@ -79,8 +79,8 @@ class WC_Order extends WC_Abstract_Order {
 		'customer_user_agent'  => '',
 		'created_via'          => '',
 		'customer_note'        => '',
-		'date_completed'       => '',
-		'date_paid'            => '',
+		'date_completed'       => null,
+		'date_paid'            => null,
 		'cart_hash'            => '',
 	);
 
@@ -114,7 +114,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp' ) );
+					$this->set_date_paid( current_time( 'timestamp', true ) );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -195,7 +195,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Save data to the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return int order ID
 	 */
 	public function save() {
@@ -217,16 +217,19 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set order status.
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual_update is this a manual order status change?
 	 * @param array details of change
+	 *
+	 * @return array
 	 */
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
 
-		if ( ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
 			$this->status_transition = array(
 				'from'   => ! empty( $this->status_transition['from'] ) ? $this->status_transition['from'] : $result['from'],
 				'to'     => $result['to'],
@@ -252,12 +255,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * This ensures the data exists even if a gateway does not use the
 	 * `payment_complete` method.
 	 *
-	 * @since 2.7.0
-	 * @param $date_paid What to set date paid to. Defaults to current time.
+	 * @since 3.0.0
 	 */
-	public function maybe_set_date_paid( $date_paid = '' ) {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( array( 'processing', 'completed' ) ) ) {
-			$this->set_date_paid( $date_paid ? $date_paid : current_time( 'timestamp' ) );
+	public function maybe_set_date_paid() {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
+			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
 
@@ -266,17 +268,22 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * Sets the date completed variable when transitioning to completed status.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp' ) );
+			$this->set_date_completed( current_time( 'timestamp', true ) );
 		}
 	}
 
 	/**
 	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
+	 *
+	 * @param string $new_status
+	 * @param string $note
+	 * @param bool $manual
+	 *
 	 * @return bool success
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
@@ -310,7 +317,7 @@ class WC_Order extends WC_Abstract_Order {
 				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->status_transition['to'] ) );
 			}
 
-			// Note the transition occured
+			// Note the transition occurred
 			$this->add_order_note( trim( $this->status_transition['note'] . ' ' . $transition_note ), 0, $this->status_transition['manual'] );
 
 			// This has ran, so reset status transition variable
@@ -329,7 +336,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get all class data in array format.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -383,7 +390,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get order key.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $context
 	 * @return string
 	 */
@@ -423,7 +430,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Gets a prop for a getter method.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
 	 * @param  string $address billing or shipping.
 	 * @param  string $context What the value is for. Valid values are view and edit.
@@ -716,7 +723,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get date_completed.
 	 *
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_completed( $context = 'view' ) {
 		return $this->get_prop( 'date_completed', $context );
@@ -726,10 +733,16 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get date_paid.
 	 *
 	 * @param  string $context
-	 * @return int
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_paid( $context = 'view' ) {
-		return $this->get_prop( 'date_paid', $context );
+		$date_paid = $this->get_prop( 'date_paid', $context );
+
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
+			// In view context, return a date if missing.
+			$date_paid = $this->get_date_created( 'edit' );
+		}
+		return $date_paid;
 	}
 
 	/**
@@ -760,7 +773,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_address_map_url() {
-		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $this->get_address( 'shipping' ), $this );
+		$address = $this->get_address( 'shipping' );
+
+		// Remove name and company before generate the Google Maps URL.
+		unset( $address['first_name'], $address['last_name'], $address['company'] );
+
+		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $address, $this );
+
 		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
@@ -799,11 +818,21 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
-		if ( $this->get_shipping_address_1() || $this->get_shipping_address_2() ) {
+		if ( $this->has_shipping_address() ) {
 			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this ) );
 		} else {
 			return '';
 		}
+	}
+
+	/**
+	 * Returns true if the order has a shipping address.
+	 *
+	 * @since  3.0.4
+	 * @return boolean
+	 */
+	public function has_shipping_address() {
+		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
 	}
 
 	/*
@@ -813,7 +842,7 @@ class WC_Order extends WC_Abstract_Order {
 	|
 	| Functions for setting order data. These should not update anything in the
 	| database itself and should only change what is stored in the class
-	| object. However, for backwards compatibility pre 2.7.0 some of these
+	| object. However, for backwards compatibility pre 3.0.0 some of these
 	| setters may handle both.
 	|
 	*/
@@ -821,7 +850,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Sets a prop for a setter method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value Value of the prop.
@@ -841,11 +870,11 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order_key.
 	 *
-	 * @param string $value Max length 20 chars.
+	 * @param string $value Max length 22 chars.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_order_key( $value ) {
-		$this->set_prop( 'order_key', substr( $value, 0, 20 ) );
+		$this->set_prop( 'order_key', substr( $value, 0, 22 ) );
 	}
 
 	/**
@@ -1077,7 +1106,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 *
-	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
+	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 3.0
 	 * @throws WC_Data_Exception
 	 */
 	public function set_payment_method( $payment_method = '' ) {
@@ -1155,21 +1184,21 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date_completed.
 	 *
-	 * @param string $timestamp
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_completed( $timestamp ) {
-		$this->set_prop( 'date_completed', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_completed( $date = null ) {
+		$this->set_date_prop( 'date_completed', $date );
 	}
 
 	/**
 	 * Set date_paid.
 	 *
-	 * @param string $timestamp
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception
 	 */
-	public function set_date_paid( $timestamp ) {
-		$this->set_prop( 'date_paid', is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp ) );
+	public function set_date_paid( $date = null ) {
+		$this->set_date_prop( 'date_paid', $date );
 	}
 
 	/**
@@ -1203,6 +1232,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * See if order matches cart_hash.
+	 *
+	 * @param string $cart_hash
+	 *
 	 * @return bool
 	 */
 	public function has_cart_hash( $cart_hash = '' ) {
@@ -1289,10 +1321,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return bool
 	 */
-	protected function needs_processing() {
+	public function needs_processing() {
 		$needs_processing = false;
 
 		if ( sizeof( $this->get_items() ) > 0 ) {
@@ -1672,7 +1704,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item.
+	 * Get the refunded tax amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
@@ -1683,8 +1715,11 @@ class WC_Order extends WC_Abstract_Order {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$total += $refunded_item->get_total_tax();
+				$refunded_item_id = (int) $refunded_item->get_meta( '_refunded_item_id' );
+				if ( $refunded_item_id === $item_id ) {
+					$taxes = $refunded_item->get_taxes();
+					$total += isset( $taxes['total'][ $tax_id ] ) ? $taxes['total'][ $tax_id ] : 0;
+					break;
 				}
 			}
 		}

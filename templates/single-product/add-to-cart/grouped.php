@@ -10,10 +10,10 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.7.0
+ * @see         https://docs.woocommerce.com/document/template-structure/
+ * @author      WooThemes
+ * @package     WooCommerce/Templates
+ * @version     3.0.7
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,16 +28,17 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<tbody>
 			<?php
 				$quantites_required = false;
+				$previous_post      = $post;
 
 				foreach ( $grouped_products as $grouped_product ) {
-					$post_object = get_post( $grouped_product->get_id() );
-					$quantites_required = $quantites_required || $grouped_product->is_purchasable();
+					$post_object        = get_post( $grouped_product->get_id() );
+					$quantites_required = $quantites_required || ( $grouped_product->is_purchasable() && ! $grouped_product->has_options() );
 
-					setup_postdata( $GLOBALS['post'] =& $post_object );
+					setup_postdata( $post =& $post_object );
 					?>
 					<tr id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<td>
-							<?php if ( ! $grouped_product->is_purchasable() ) : ?>
+							<?php if ( ! $grouped_product->is_purchasable() || $grouped_product->has_options() ) : ?>
 								<?php woocommerce_template_loop_add_to_cart(); ?>
 
 							<?php elseif ( $grouped_product->is_sold_individually() ) : ?>
@@ -46,7 +47,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							<?php else : ?>
 								<?php
 									/**
-									 * @since 2.7.0.
+									 * @since 3.0.0.
 									 */
 									do_action( 'woocommerce_before_add_to_cart_quantity' );
 
@@ -58,7 +59,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 									) );
 
 									/**
-									 * @since 2.7.0.
+									 * @since 3.0.0.
 									 */
 									do_action( 'woocommerce_after_add_to_cart_quantity' );
 								?>
@@ -66,7 +67,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						</td>
 						<td class="label">
 							<label for="product-<?php echo $grouped_product->get_id(); ?>">
-								<?php echo $product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink(), $grouped_product->get_id() ) ) . '">' . get_the_title() . '</a>' : get_the_title(); ?>
+								<?php echo $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink( $grouped_product->get_id() ), $grouped_product->get_id() ) ) . '">' . $grouped_product->get_name() . '</a>' : $grouped_product->get_name(); ?>
 							</label>
 						</td>
 						<?php do_action( 'woocommerce_grouped_product_list_before_price', $grouped_product ); ?>
@@ -79,7 +80,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					</tr>
 					<?php
 				}
-				wp_reset_postdata();
+				// Return data to original post.
+				setup_postdata( $post =& $previous_post );
 			?>
 		</tbody>
 	</table>
