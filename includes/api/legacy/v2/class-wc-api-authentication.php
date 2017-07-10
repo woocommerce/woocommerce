@@ -191,7 +191,7 @@ class WC_API_Authentication {
 	 *
 	 * @since  2.4.0
 	 * @param  int $user_id
-	 * @return WC_User
+	 * @return WP_User
 	 * @throws Exception
 	 */
 	private function get_user_by_id( $user_id ) {
@@ -231,7 +231,7 @@ class WC_API_Authentication {
 		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . WC()->api->server->path );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature
-		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );
 		unset( $params['oauth_signature'] );
 
 		// Remove filters and convert them from array to strings to void normalize issues

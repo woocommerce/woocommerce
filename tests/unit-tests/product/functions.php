@@ -10,7 +10,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Tests wc_get_products().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_products() {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
@@ -313,7 +313,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_min_max_price_meta_query()
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query( array( 'min_price' => 10, 'max_price' => 100 ) );
@@ -322,14 +322,14 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'key'     => '_price',
 			'value'   => array( 10, 100 ),
 			'compare' => 'BETWEEN',
-			'type'    => 'DECIMAL',
+			'type'    => 'NUMERIC',
 		), $meta_query );
 	}
 
 	/**
 	 * Test wc_product_force_unique_sku
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_product_force_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
@@ -357,5 +357,19 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		update_post_meta( $product_4_id, '_sku', 'another-custom-sku' );
 		wc_product_force_unique_sku( $product_4_id );
 		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
+	}
+
+	/**
+	 * Test wc_is_attribute_in_product_name
+	 *
+	 * @since 3.0.2
+	 */
+	public function test_wc_is_attribute_in_product_name() {
+		$this->assertTrue( wc_is_attribute_in_product_name( 'L', 'Product &ndash; L' ) );
+		$this->assertTrue( wc_is_attribute_in_product_name( 'Two Words', 'Product &ndash; L, Two Words' ) );
+		$this->assertTrue( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; The Cool One &ndash; Blue, Large' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product L Thing' ) );
+		$this->assertFalse( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; Large, Blueish' ) );
 	}
 }

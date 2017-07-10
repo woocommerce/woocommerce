@@ -51,21 +51,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
 							$topics = apply_filters( 'woocommerce_webhook_topics', array(
-								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
-								'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
-								'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
-								'coupon.deleted'   => __( 'Coupon deleted', 'woocommerce' ),
-								'customer.created' => __( 'Customer created', 'woocommerce' ),
-								'customer.updated' => __( 'Customer updated', 'woocommerce' ),
-								'customer.deleted' => __( 'Customer deleted', 'woocommerce' ),
-								'order.created'    => __( 'Order created', 'woocommerce' ),
-								'order.updated'    => __( 'Order updated', 'woocommerce' ),
-								'order.deleted'    => __( 'Order deleted', 'woocommerce' ),
-								'product.created'  => __( 'Product created', 'woocommerce' ),
-								'product.updated'  => __( 'Product updated', 'woocommerce' ),
-								'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
-								'action'           => __( 'Action', 'woocommerce' ),
-								'custom'           => __( 'Custom', 'woocommerce' ),
+								''                  => __( 'Select an option&hellip;', 'woocommerce' ),
+								'coupon.created'    => __( 'Coupon created', 'woocommerce' ),
+								'coupon.updated'    => __( 'Coupon updated', 'woocommerce' ),
+								'coupon.deleted'    => __( 'Coupon deleted', 'woocommerce' ),
+								'coupon.restored'   => __( 'Coupon restored', 'woocommerce' ),
+								'customer.created'  => __( 'Customer created', 'woocommerce' ),
+								'customer.updated'  => __( 'Customer updated', 'woocommerce' ),
+								'customer.deleted'  => __( 'Customer deleted', 'woocommerce' ),
+								'order.created'     => __( 'Order created', 'woocommerce' ),
+								'order.updated'     => __( 'Order updated', 'woocommerce' ),
+								'order.deleted'     => __( 'Order deleted', 'woocommerce' ),
+								'order.restored'    => __( 'Order restored', 'woocommerce' ),
+								'product.created'   => __( 'Product created', 'woocommerce' ),
+								'product.updated'   => __( 'Product updated', 'woocommerce' ),
+								'product.deleted'   => __( 'Product deleted', 'woocommerce' ),
+								'product.restored'  => __( 'Product restored', 'woocommerce' ),
+								'action'            => __( 'Action', 'woocommerce' ),
+								'custom'            => __( 'Custom', 'woocommerce' ),
 							) );
 
 							foreach ( $topics as $topic_slug => $topic_name ) : ?>
@@ -117,6 +120,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</th>
 				<td class="forminp">
 					<select name="webhook_api_version" id="webhook_api_version">
+						<option value="wp_api_v2" <?php selected( 'wp_api_v2', $webhook->get_api_version(), true ); ?>><?php _e( 'WP REST API Integration v2', 'woocommerce' ); ?></option>
 						<option value="wp_api_v1" <?php selected( 'wp_api_v1', $webhook->get_api_version(), true ); ?>><?php _e( 'WP REST API Integration v1', 'woocommerce' ); ?></option>
 						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php _e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?></option>
 					</select>

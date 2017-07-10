@@ -3,7 +3,7 @@
  * Tests for the product reviews REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Product_Reviews extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -33,7 +33,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting all product reviews.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_reviews() {
 		wp_set_current_user( $this->user );
@@ -49,13 +49,14 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 10, count( $product_reviews ) );
 		$this->assertContains( array(
-			'id'           => $review_id,
-			'date_created' => '2016-01-01T11:11:11',
-			'review'       => 'Review content here',
-			'rating'       => 0,
-			'name'         => 'admin',
-			'email'        => 'woo@woo.local',
-			'verified'     => false,
+			'id'               => $review_id,
+			'date_created'     => $product_reviews[0]['date_created'],
+			'date_created_gmt' => $product_reviews[0]['date_created_gmt'],
+			'review'           => 'Review content here',
+			'rating'           => 0,
+			'name'             => 'admin',
+			'email'            => 'woo@woo.local',
+			'verified'         => false,
 			'_links' => array(
 				'self'       => array(
 					array(
@@ -79,7 +80,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure product reviews cannot be viewed without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_reviews_without_permission() {
 		wp_set_current_user( 0 );
@@ -91,7 +92,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure an error is returned when an invalid product is loaded.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_reviews_invalid_product() {
 		wp_set_current_user( $this->user );
@@ -102,7 +103,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single product review.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_review() {
 		wp_set_current_user( $this->user );
@@ -114,20 +115,21 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array(
-			'id'           => $product_review_id,
-			'date_created' => '2016-01-01T11:11:11',
-			'review'       => 'Review content here',
-			'rating'       => 0,
-			'name'         => 'admin',
-			'email'        => 'woo@woo.local',
-			'verified'     => false,
+			'id'               => $product_review_id,
+			'date_created'     => $data['date_created'],
+			'date_created_gmt' => $data['date_created_gmt'],
+			'review'           => 'Review content here',
+			'rating'           => 0,
+			'name'             => 'admin',
+			'email'            => 'woo@woo.local',
+			'verified'         => false,
 		), $data );
 	}
 
 	/**
 	 * Tests getting a single product review without the correct permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_review_without_permission() {
 		wp_set_current_user( 0 );
@@ -140,7 +142,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a product review with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -152,7 +154,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests creating a product review.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_product_review() {
 		wp_set_current_user( $this->user );
@@ -169,20 +171,21 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( array(
-			'id'           => $data['id'],
-			'date_created' => $data['date_created'],
-			'review'       => 'Hello world.',
-			'rating'       => 5,
-			'name'         => 'Admin',
-			'email'        => 'woo@woo.local',
-			'verified'     => false,
+			'id'               => $data['id'],
+			'date_created'     => $data['date_created'],
+			'date_created_gmt' => $data['date_created_gmt'],
+			'review'           => 'Hello world.',
+			'rating'           => 5,
+			'name'             => 'Admin',
+			'email'            => 'woo@woo.local',
+			'verified'         => false,
 		), $data );
 	}
 
 	/**
 	 * Tests creating a product review without required fields.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_product_review_invalid_fields() {
 		wp_set_current_user( $this->user );
@@ -225,7 +228,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests updating a product review.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product_review() {
 		wp_set_current_user( $this->user );
@@ -257,7 +260,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests updating a product review without the correct permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product_review_without_permission() {
 		wp_set_current_user( 0 );
@@ -279,7 +282,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests that updating a product review with an invalid id fails.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -300,7 +303,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product_review() {
 		wp_set_current_user( $this->user );
@@ -316,7 +319,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review without permission/creds.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -332,7 +335,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review with an invalid id.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -396,7 +399,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test the product review schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_review_schema() {
 		wp_set_current_user( $this->user );
@@ -406,10 +409,11 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 7, count( $properties ) );
+		$this->assertEquals( 8, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'review', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
+		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'rating', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'email', $properties );

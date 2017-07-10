@@ -33,5 +33,6 @@ exclude_paths:
   - assets/js/prettyPhoto/*
   - assets/js/round/*
   - assets/js/select2/*
+  - assets/js/selectWoo/*
   - assets/js/stupidtable/*
   - assets/js/zeroclipboard/*

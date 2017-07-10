@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.7.0
+ * @version  3.0.0
  * @extends  WC_Widget
  */
 class WC_Widget_Top_Rated_Products extends WC_Widget {

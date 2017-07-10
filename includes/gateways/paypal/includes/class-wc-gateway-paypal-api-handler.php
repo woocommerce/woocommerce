@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handles Refunds and other API requests such as capture.
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Gateway_Paypal_API_Handler {
 
@@ -136,7 +136,7 @@ class WC_Gateway_Paypal_API_Handler {
 
 /**
  * Here for backwards compatibility.
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
 	public static function get_request( $order, $amount = null, $reason = '' ) {

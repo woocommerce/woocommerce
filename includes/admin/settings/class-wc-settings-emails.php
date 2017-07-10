@@ -65,7 +65,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'    => __( '"From" name', 'woocommerce' ),
-				'desc'     => __( 'How the sender\'s name appears in outgoing WooCommerce emails.', 'woocommerce' ),
+				'desc'     => __( 'How the sender name appears in outgoing WooCommerce emails.', 'woocommerce' ),
 				'id'       => 'woocommerce_email_from_name',
 				'type'     => 'text',
 				'css'      => 'min-width:300px;',
@@ -76,7 +76,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array(
 				'title'             => __( '"From" address', 'woocommerce' ),
-				'desc'              => __( 'How the sender\'s email appears in outgoing WooCommerce emails.', 'woocommerce' ),
+				'desc'              => __( 'How the sender email appears in outgoing WooCommerce emails.', 'woocommerce' ),
 				'id'                => 'woocommerce_email_from_address',
 				'type'              => 'email',
 				'custom_attributes' => array(
@@ -269,11 +269,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">';
 
 										if ( $email->is_manual() ) {
-											echo '<span class="status-manual tips" data-tip="' . __( 'Manually sent', 'woocommerce' ) . '">' . __( 'Manual', 'woocommerce' ) . '</span>';
+											echo '<span class="status-manual tips" data-tip="' . esc_attr__( 'Manually sent', 'woocommerce' ) . '">' . esc_html__( 'Manual', 'woocommerce' ) . '</span>';
 										} elseif ( $email->is_enabled() ) {
-											echo '<span class="status-enabled tips" data-tip="' . __( 'Enabled', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+											echo '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Enabled', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
 										} else {
-											echo '<span class="status-disabled tips" data-tip="' . __( 'Disabled', 'woocommerce' ) . '">-</span>';
+											echo '<span class="status-disabled tips" data-tip="' . esc_attr__( 'Disabled', 'woocommerce' ) . '">-</span>';
 										}
 
 										echo '</td>';
@@ -285,7 +285,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									break;
 									case 'actions' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a class="button alignright tips" data-tip="' . __( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . __( 'Configure', 'woocommerce' ) . '</a>
+											<a class="button alignright tips" data-tip="' . esc_attr__( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . esc_html__( 'Configure', 'woocommerce' ) . '</a>
 										</td>';
 									break;
 									default :

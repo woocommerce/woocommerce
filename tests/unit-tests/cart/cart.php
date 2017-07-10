@@ -568,7 +568,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Test cart coupons.
 	 */
 	public function test_get_coupons() {
-
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
 
@@ -586,5 +585,91 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Delete coupon
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
+	}
+
+	/**
+	 * Test add_discount allows coupons by code but not by ID.
+	 *
+	 * @since 3.2
+	 */
+	public function test_add_discount_code_id() {
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 100 );
+		$coupon->save();
+
+		$success = WC()->cart->add_discount( $coupon->get_code() );
+		$this->assertTrue( $success );
+
+		$success = WC()->cart->add_discount( (string) $coupon->get_id() );
+		$this->assertFalse( $success );
+	}
+
+	public function test_add_invidual_use_coupon() {
+		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
+		$iu_coupon->set_individual_use( true );
+		$iu_coupon->save();
+		$coupon = WC_Helper_Coupon::create_coupon();
+
+		WC()->cart->add_discount( $iu_coupon->get_code() );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		$coupons = WC()->cart->get_coupons();
+
+		$this->assertEquals( count( $coupons ), 1 );
+		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
+
+		// Clean up
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_code() );
+		WC_Helper_Coupon::delete_coupon( $iu_coupon->get_code() );
+	}
+
+	public function test_add_individual_use_coupon_removal() {
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
+		$iu_coupon->set_individual_use( true );
+		$iu_coupon->save();
+
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->add_discount( $iu_coupon->get_code() );
+
+		$coupons = WC()->cart->get_coupons();
+
+		$this->assertEquals( count( $coupons ), 1 );
+		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
+		$this->assertEquals( 1, did_action( 'woocommerce_removed_coupon' ) );
+
+		// Clean up
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_code() );
+		WC_Helper_Coupon::delete_coupon( $iu_coupon->get_code() );
+	}
+
+	public function test_add_individual_use_coupon_double_individual() {
+		$iu_coupon1 = WC_Helper_Coupon::create_coupon( 'code1' );
+		$iu_coupon1->set_individual_use( true );
+		$iu_coupon1->save();
+
+		$iu_coupon2 = WC_Helper_Coupon::create_coupon( 'code2' );
+		$iu_coupon2->set_individual_use( true );
+		$iu_coupon2->save();
+
+		WC()->cart->add_discount( $iu_coupon1->get_code() );
+		WC()->cart->add_discount( $iu_coupon2->get_code() );
+
+		$coupons = WC()->cart->get_coupons();
+
+		$this->assertEquals( count( $coupons ), 1 );
+		$this->assertEquals( 'code2', reset( $coupons )->get_code() );
+
+		// Clean up
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Coupon::delete_coupon( $iu_coupon1->get_code() );
+		WC_Helper_Coupon::delete_coupon( $iu_coupon2->get_code() );
 	}
 }

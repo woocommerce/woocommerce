@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -202,7 +202,8 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
@@ -307,8 +308,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function get_item( $request ) {
-		global $wpdb;
-
 		$attribute = $this->get_attribute( (int) $request['id'] );
 
 		if ( is_wp_error( $attribute ) ) {
@@ -656,7 +655,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Schedule to flush rewrite rules.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function flush_rewrite_rules() {
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );

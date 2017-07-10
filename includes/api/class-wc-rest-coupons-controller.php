@@ -119,7 +119,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -128,14 +128,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	}
 
 	/**
-	 * Prepare a single coupon output for response.
+	 * Get formatted item data.
 	 *
-	 * @since  2.7.0
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @since  3.0.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
 	 */
-	public function prepare_object_for_response( $object, $request ) {
+	protected function get_formatted_item_data( $object ) {
 		$data = $object->get_data();
 
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
@@ -149,7 +148,9 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : null;
+			$datetime 	  			= $data[ $key ];
+			$data[ $key ] 			= wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] 	= wc_rest_prepare_date_response( $datetime );
 		}
 
 		// Format null values.
@@ -157,6 +158,47 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 			$data[ $key ] = $data[ $key ] ? $data[ $key ] : null;
 		}
 
+		return array(
+			'id'                          => $object->get_id(),
+			'code'                        => $data['code'],
+			'amount'                      => $data['amount'],
+			'date_created'                => $data['date_created'],
+			'date_created_gmt'            => $data['date_created_gmt'],
+			'date_modified'               => $data['date_modified'],
+			'date_modified_gmt'           => $data['date_modified_gmt'],
+			'discount_type'               => $data['discount_type'],
+			'description'                 => $data['description'],
+			'date_expires'                => $data['date_expires'],
+			'date_expires_gmt'            => $data['date_expires_gmt'],
+			'usage_count'                 => $data['usage_count'],
+			'individual_use'              => $data['individual_use'],
+			'product_ids'                 => $data['product_ids'],
+			'excluded_product_ids'        => $data['excluded_product_ids'],
+			'usage_limit'                 => $data['usage_limit'],
+			'usage_limit_per_user'        => $data['usage_limit_per_user'],
+			'limit_usage_to_x_items'      => $data['limit_usage_to_x_items'],
+			'free_shipping'               => $data['free_shipping'],
+			'product_categories'          => $data['product_categories'],
+			'excluded_product_categories' => $data['excluded_product_categories'],
+			'exclude_sale_items'          => $data['exclude_sale_items'],
+			'minimum_amount'              => $data['minimum_amount'],
+			'maximum_amount'              => $data['maximum_amount'],
+			'email_restrictions'          => $data['email_restrictions'],
+			'used_by'                     => $data['used_by'],
+			'meta_data'                   => $data['meta_data'],
+		);
+	}
+
+	/**
+	 * Prepare a single coupon output for response.
+	 *
+	 * @since  3.0.0
+	 * @param  WC_Data         $object  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$data 	  = $this->get_formatted_item_data( $object );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
@@ -179,7 +221,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -297,7 +339,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'amount' => array(
-					'description' => __( 'The amount of discount.', 'woocommerce' ),
+					'description' => __( 'The amount of discount. Should always be numeric, even if setting a percentage.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -307,8 +349,20 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( 'The date the coupon was created, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_modified' => array(
 					'description' => __( "The date the coupon was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt' => array(
+					'description' => __( 'The date the coupon was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -326,7 +380,12 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_expires' => array(
-					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
+					'description' => __( "The date the coupon expires, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_expires_gmt' => array(
+					'description' => __( "The date the coupon expires, as GMT.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -337,13 +396,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'readonly'    => true,
 				),
 				'individual_use' => array(
-					'description' => __( 'Whether coupon can only be used individually.', 'woocommerce' ),
+					'description' => __( 'If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_ids' => array(
-					'description' => __( "List of product ID's the coupon can be used on.", 'woocommerce' ),
+					'description' => __( "List of product IDs the coupon can be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -351,7 +410,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'excluded_product_ids' => array(
-					'description' => __( "List of product ID's the coupon cannot be used on.", 'woocommerce' ),
+					'description' => __( "List of product IDs the coupon cannot be used on.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -359,7 +418,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_limit' => array(
-					'description' => __( 'How many times the coupon can be used.', 'woocommerce' ),
+					'description' => __( 'How many times the coupon can be used in total.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -374,13 +433,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'free_shipping' => array(
-					'description' => __( 'Define if can be applied for free shipping.', 'woocommerce' ),
+					'description' => __( 'If true and if the free shipping method requires a coupon, this coupon will enable free shipping.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_categories' => array(
-					'description' => __( "List of category ID's the coupon applies to.", 'woocommerce' ),
+					'description' => __( "List of category IDs the coupon applies to.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -388,7 +447,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'excluded_product_categories' => array(
-					'description' => __( "List of category ID's the coupon does not apply to.", 'woocommerce' ),
+					'description' => __( "List of category IDs the coupon does not apply to.", 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -396,7 +455,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'exclude_sale_items' => array(
-					'description' => __( 'Define if should not apply when have sale items.', 'woocommerce' ),
+					'description' => __( 'If true, this coupon will not be applied to items that have sale prices.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
@@ -420,7 +479,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'used_by' => array(
-					'description' => __( 'List of user IDs who have used the coupon.', 'woocommerce' ),
+					'description' => __( 'List of user IDs (or guest email addresses) that have used the coupon.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',

@@ -37,6 +37,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'change_payment_complete_order_status' ), 10, 3 );
 
 		// Customer Emails
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
@@ -177,10 +178,14 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				return false;
 			}
 
+			if ( strstr( $check_method, ':' ) ) {
+				$check_method = current( explode( ':', $check_method ) );
+			}
+
 			$found = false;
 
 			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $check_method, $method_id ) === 0 ) {
+				if ( $check_method === $method_id ) {
 					$found = true;
 					break;
 				}
@@ -227,6 +232,22 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		if ( $this->instructions ) {
 			echo wpautop( wptexturize( $this->instructions ) );
 		}
+	}
+
+	/**
+	 * Change payment complete order status to completed for COD orders.
+	 *
+	 * @since  3.1.0
+	 * @param  string $status
+	 * @param  int $order_id
+	 * @param  WC_Order $order
+	 * @return string
+	 */
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
+		if ( $order && 'cod' === $order->get_payment_method() ) {
+			$status = 'completed';
+		}
+		return $status;
 	}
 
 	/**

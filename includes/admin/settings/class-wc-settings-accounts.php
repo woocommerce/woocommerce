@@ -48,7 +48,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'       => 'woocommerce_myaccount_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
-				'class'    => 'wc-enhanced-select',
+				'class'    => 'wc-enhanced-select-nostd',
 				'css'      => 'min-width:300px;',
 				'desc_tip' => true,
 			),
@@ -58,8 +58,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			array( 'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
-				'title'         => __( 'Enable registration', 'woocommerce' ),
-				'desc'          => __( 'Enable registration on the "Checkout" page.', 'woocommerce' ),
+				'title'         => __( 'Customer registration', 'woocommerce' ),
+				'desc'          => __( 'Enable customer registration on the "Checkout" page.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -68,7 +68,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
-				'desc'          => __( 'Enable registration on the "My account" page.', 'woocommerce' ),
+				'desc'          => __( 'Enable customer registration on the "My account" page.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
 				'type'          => 'checkbox',

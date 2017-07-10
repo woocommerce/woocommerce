@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Enables WooCommerce, via the the command line.
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  * @author  WooCommerce
  */
