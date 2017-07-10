@@ -161,6 +161,27 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.1.1 - 2017-07-11 =
+* Fix - Appends "where" clauses in the comment feed to prevent a notice.
+* Fix - Changed state validation logic to work for MX states.
+* Fix - Fixed structured data output for variable product prices.
+* Fix - Prevent extra slashes being added to meta values when using the CRUD.
+* Fix - 7day reports should start from midnight, not the current time.
+* Fix - Status changes made by admin should be marked as a manual in the order notes.
+* Fix - Gallery; Trigger resize after main image loads to ensure correct gallery size.
+* Fix - Improved detection of DOING_AUTOSAVE in admin meta box code.
+* Fix - Fixed order helper queries when before_date and after_date args are both, corrected use of "paged", and corrected use of filters.
+* Fix - Corrected error handling in zones shippingMethodView.
+* Fix - Product exporter: fixed meta data checkbox option.
+* Fix - Product importer: fixed handling of non UTF8 characters in descriptions.
+* Fix - Tweak terms and conditions template to check for disallowed shortcodes.
+* Fix - Rest API: Allow unsetting product shipping class.
+* Fix - Avoid CloudFlare email obfuscation in admin.
+* Tweak - Improved my-account redirects and fallbacks.
+* Tweak - Add `cart_subtotal` to the shipping package so prices are recalculated when needed.
+* Tweak - Add search_customers() filter in customer data store.
+* Tweak - Product exporter: woocommerce_product_export_skip_meta_keys filter to control what gets exported.
+
 = 3.1.0 - 2017-06-28 =
 * Feature - Built-in product CSV importer and exporter for products.
 * Feature - Display (toggle-able) terms inline on the checkout rather than showing a link.
