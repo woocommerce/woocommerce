@@ -18,31 +18,32 @@ class WC_HookFinder {
 				$dir = '';
 			}
 
-	        return self::get_files( basename( $pattern ), $flags, $dir . '/' );
+			return self::get_files( basename( $pattern ), $flags, $dir . '/' );
 
-	    } // End IF Statement
+		} // End IF Statement
 
-	    $paths = glob( $path . '*', GLOB_ONLYDIR | GLOB_NOSORT );
-	    $files = glob( $path . $pattern, $flags );
+		$paths = glob( $path . '*', GLOB_ONLYDIR | GLOB_NOSORT );
+		$files = glob( $path . $pattern, $flags );
 
-	    if ( is_array( $paths ) ) {
-		    foreach ( $paths as $p ) {
-			    $found_files = array();
-		   		$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
-		   		foreach ( $retrieved_files as $file ) {
-			   		if ( ! in_array( $file, self::$found_files ) )
-			   			$found_files[] = $file;
-		   		}
+		if ( is_array( $paths ) ) {
+			foreach ( $paths as $p ) {
+				$found_files = array();
+				$retrieved_files = (array) self::get_files( $pattern, $flags, $p . '/' );
+				foreach ( $retrieved_files as $file ) {
+					if ( ! in_array( $file, self::$found_files ) ) {
+						$found_files[] = $file;
+					}
+				}
 
-		   		self::$found_files = array_merge( self::$found_files, $found_files );
+				self::$found_files = array_merge( self::$found_files, $found_files );
 
-		   		if ( is_array( $files ) && is_array( $found_files ) ) {
-		   			$files = array_merge( $files, $found_files );
-		   		}
-		    } // End FOREACH Loop
-	    }
-	    return $files;
-    }
+				if ( is_array( $files ) && is_array( $found_files ) ) {
+					$files = array_merge( $files, $found_files );
+				}
+			} // End FOREACH Loop
+		}
+		return $files;
+	}
 
 	private static function get_hook_link( $hook, $details = array() ) {
 		if ( ! empty( $details['class'] ) ) {
@@ -166,7 +167,7 @@ class WC_HookFinder {
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
 										self::$custom_hooks_found[ $hook ]['file'][] = self::$current_file;
 									} else {
-    									self::$custom_hooks_found[ $hook ] = array(
+										self::$custom_hooks_found[ $hook ] = array(
 											'line'     => $token[2],
 											'class'    => $current_class,
 											'function' => $current_function,

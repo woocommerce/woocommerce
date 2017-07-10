@@ -9,9 +9,8 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "*",
-    "wimg/php-compatibility": "*",
-    "simplyadmire/composer-plugins" : "@dev"
+    "wp-coding-standards/wpcs": "0.10.0",
+    "phpunit/phpunit": "5.7.19"
   },
   "scripts": {
     "post-install-cmd": [

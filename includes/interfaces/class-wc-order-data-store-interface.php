@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by order store classes.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooThemes
  */
@@ -16,7 +16,7 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Get amount already refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return string
 	 */
 	public function get_total_refunded( $order );
@@ -24,7 +24,7 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order );
@@ -32,7 +32,7 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Get the total shipping refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return float
 	 */
 	public function get_total_shipping_refunded( $order );
@@ -63,7 +63,7 @@ interface WC_Order_Data_Store_Interface {
 
 	/**
 	 * Get unpaid orders after a certain date,
-	 * @param  int timestamp $date
+	 * @param  int $date timestamp
 	 * @return array
 	 */
 	public function get_unpaid_orders( $date );

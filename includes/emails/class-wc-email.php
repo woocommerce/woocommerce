@@ -46,6 +46,26 @@ class WC_Email extends WC_Settings_API {
 	public $description;
 
 	/**
+	 * Default heading.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localication can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $heading = '';
+
+	/**
+	 * Default subject.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localication can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $subject = '';
+
+	/**
 	 * Plain text template path.
 	 * @var string
 	 */
@@ -68,18 +88,6 @@ class WC_Email extends WC_Settings_API {
 	 * @var string
 	 */
 	public $recipient;
-
-	/**
-	 * Heading for the email content.
-	 * @var string
-	 */
-	public $heading;
-
-	/**
-	 * Subject for the email.
-	 * @var string
-	 */
-	public $subject;
 
 	/**
 	 * Object this email is for, for example a customer, product, or email.
@@ -204,10 +212,8 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		// Settings
-		$this->heading     = $this->get_option( 'heading', $this->heading );
-		$this->subject     = $this->get_option( 'subject', $this->subject );
-		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' );
+		$this->email_type = $this->get_option( 'email_type' );
+		$this->enabled    = $this->get_option( 'enabled' );
 
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
@@ -244,12 +250,50 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Set the locale to the store locale for customer emails to make sure emails are in the store language.
+	 */
+	public function setup_locale() {
+		if ( $this->is_customer_email() ) {
+			wc_switch_to_site_locale();
+		}
+	}
+
+	/**
+	 * Restore the locale to the default locale. Use after finished with setup_locale.
+	 */
+	public function restore_locale() {
+		if ( $this->is_customer_email() ) {
+			wc_restore_locale();
+		}
+	}
+
+	/**
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return $this->subject;
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return $this->heading;
+	}
+
+	/**
 	 * Get email subject.
 	 *
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->subject ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object );
 	}
 
 	/**
@@ -258,7 +302,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->heading ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object );
 	}
 
 	/**
@@ -280,7 +324,7 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
 
-		if ( 'new_order' === $this->id ) {
+		if ( 'new_order' === $this->id && $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
 			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
 		}
 
@@ -490,22 +534,22 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'yes',
 			),
 			'subject'         => array(
-				'title'       => __( 'Email subject', 'woocommerce' ),
+				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),

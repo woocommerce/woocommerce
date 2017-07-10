@@ -75,7 +75,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	}
 
 	/**
-	 * Retuns topic count text.
+	 * Returns topic count text.
 	 *
 	 * @since 2.6.0
 	 * @param int $count

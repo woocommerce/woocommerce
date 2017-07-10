@@ -194,6 +194,22 @@ class WC_Mock_WC_Data extends WC_Data {
 	}
 
 	/**
+	 * Set the data to any arbitrary data.
+	 * @param array $data
+	 */
+	public function set_data( $data ) {
+		$this->data = $data;
+	}
+
+	/**
+	 * Set the changes to any arbitrary changes.
+	 * @param array $changes
+	 */
+	public function set_changes( $changes ) {
+		$this->changes = $changes;
+	}
+
+	/**
 	 * Simple save.
 	 */
 	public function save() {

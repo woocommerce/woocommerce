@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -151,37 +151,35 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
-			if ( ! empty( $request[ $key ] ) ) {
-				$terms = explode( ',', $request[ $key ] );
+			if ( ! empty( $request[ $key ] ) && is_array( $request[ $key ] ) ) {
+				$request[ $key ] = array_filter( $request[ $key ] );
+			}
 
+			if ( ! empty( $request[ $key ] ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request[ $key ],
 				);
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$terms = explode( ',', $request['type'] );
-
 			$tax_query[] = array(
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
-				'terms'    => $terms,
+				'terms'    => $request['type'],
 			);
 		}
 
 		// Filter by attribute and term.
 		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
-				$terms = explode( ',', $request['attribute_term'] );
-
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 				$tax_query[] = array(
 					'taxonomy' => $request['attribute'],
 					'field'    => 'term_id',
-					'terms'    => $terms,
+					'terms'    => $request['attribute_term'],
 				);
 			}
 		}
@@ -192,15 +190,17 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'][] = array(
+			$args['meta_query'] = $this->add_meta_query( $args, array(
 				'key'     => '_sku',
-				'value'   => $request['sku'],
-				'compare' => '=',
-			);
+				'value'   => $skus,
+				'compare' => 'IN',
+			) );
 		}
 
 		// Apply all WP_Query filters again.
@@ -211,7 +211,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Force the post_type argument, since it's not a user input variable.
 		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = $this->get_post_types();
+			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
 		}
@@ -443,7 +443,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get product menu order.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product Product instance.
 	 * @return int
 	 */
@@ -475,8 +475,8 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
 			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'date_on_sale_from'     => $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from() ) : '',
-			'date_on_sale_to'       => $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to() ) : '',
+			'date_on_sale_from'     => $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from()->getTimestamp() ) : '',
+			'date_on_sale_to'       => $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() ) : '',
 			'price_html'            => $product->get_price_html(),
 			'on_sale'               => $product->is_on_sale(),
 			'purchasable'           => $product->is_purchasable(),
@@ -540,7 +540,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		foreach ( $product->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 
@@ -553,8 +553,8 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				'price'              => $variation->get_price(),
 				'regular_price'      => $variation->get_regular_price(),
 				'sale_price'         => $variation->get_sale_price(),
-				'date_on_sale_from'  => $variation->get_date_on_sale_from() ? date( 'Y-m-d', $variation->get_date_on_sale_from() ) : '',
-				'date_on_sale_to'    => $variation->get_date_on_sale_to() ? date( 'Y-m-d', $variation->get_date_on_sale_to() ) : '',
+				'date_on_sale_from'  => $variation->get_date_on_sale_from() ? date( 'Y-m-d', $variation->get_date_on_sale_from()->getTimestamp() ) : '',
+				'date_on_sale_to'    => $variation->get_date_on_sale_to() ? date( 'Y-m-d', $variation->get_date_on_sale_to()->getTimestamp() ) : '',
 				'on_sale'            => $variation->is_on_sale(),
 				'purchasable'        => $variation->is_purchasable(),
 				'visible'            => $variation->is_visible(),
@@ -823,7 +823,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product images.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param int $product_id
 	 * @param array $images
 	 * @throws WC_REST_Exception
@@ -932,11 +932,9 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
-			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
-
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
-			}
+			$data_store        = $product->get_data_store();
+			$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			$product->set_shipping_class_id( $shipping_class_id );
 		}
 
 		return $product;
@@ -947,12 +945,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 2.7.
+	 * @param int        $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() not requires a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() not requires a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -982,7 +980,6 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
 		$term_ids = wp_list_pluck( $terms, 'id' );
-		$term_ids = array_unique( array_map( 'intval', $term_ids ) );
 
 		if ( 'cat' === $taxonomy ) {
 			$product->set_category_ids( $term_ids );
@@ -996,7 +993,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product      $product Product instance.
 	 * @param WP_REST_Request $request Request data.
@@ -1004,7 +1001,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
-			$attributes = $product->get_variation_attributes();
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $attribute ) {
@@ -1056,7 +1053,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save product meta.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
 	 * @return bool
@@ -1899,13 +1896,13 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
@@ -1915,7 +1912,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'default'     => 'standard',
 					'enum'        => array( 'standard' ),
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'external_url' => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
@@ -2064,7 +2061,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'upsell_ids' => array(
-					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
+					'description' => __( 'List of upsell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -2377,13 +2374,13 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'download_limit' => array(
-								'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
+								'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 								'type'        => 'integer',
 								'default'     => null,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'download_expiry' => array(
-								'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
+								'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 								'type'        => 'integer',
 								'default'     => null,
 								'context'     => array( 'view', 'edit' ),

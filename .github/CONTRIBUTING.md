@@ -11,7 +11,7 @@ GitHub is for _bug reports and contributions only_ - if you have a support quest
 - [WooExperts](https://woocommerce.com/experts/)
 - [Codeable](https://codeable.io/)
 
-## Contributing To The Core
+## Contributing to Core
 
 ### Reporting Issues
 
@@ -78,7 +78,7 @@ We don’t have a Style Guide template available, so feel free to create your ow
 
 If you created a style guide for your language, please let us know so we can add it in the list above. You can also add it by yourself by submitting a PR for this file.
 
-### Translating The Core
+### Translating Core
 
 We have a [project on translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce). You can join the localization team of your language and help by translating WooCommerce. [Find more about using joining a language team and using GlotPress](https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/).
 
@@ -93,7 +93,7 @@ By translating video tutorials you'll be helping non-English speaking users and 
 # Additional Resources
 
 * [General GitHub documentation](https://help.github.com/)
-* [GitHub pull request documentation](https://help.github.com/send-pull-requests/)
+* [GitHub pull request documentation](https://help.github.com/articles/about-pull-requests/)
 * [Translator Handbook](https://make.wordpress.org/polyglots/handbook/)
 * [WooCommerce Docs](https://docs.woocommerce.com/)
 * [WooCommerce Support](https://support.woocommerce.com)

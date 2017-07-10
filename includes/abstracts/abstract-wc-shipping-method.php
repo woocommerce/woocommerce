@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     2.7.0
+ * @version     3.0.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
@@ -137,6 +137,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
+	 *
+	 * @param array $package
 	 */
 	public function calculate_shipping( $package = array() ) {}
 
@@ -261,7 +263,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$total_cost = wc_format_decimal( $total_cost, wc_get_price_decimals() );
 
 		// Create rate object
-		$rate = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
+		$rate = new WC_Shipping_Rate();
+		$rate->set_id( $args['id'] );
+		$rate->set_method_id( $this->id );
+		$rate->set_instance_id( $this->instance_id );
+		$rate->set_label( $args['label'] );
+		$rate->set_cost( $total_cost );
+		$rate->set_taxes( $taxes );
 
 		if ( ! empty( $args['meta_data'] ) ) {
 			foreach ( $args['meta_data'] as $key => $value ) {

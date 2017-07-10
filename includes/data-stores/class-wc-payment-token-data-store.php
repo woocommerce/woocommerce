@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Payment Token Data Store: Custom Table.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -19,10 +19,18 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	protected $meta_type = 'payment_token';
 
 	/**
+	 * If we have already saved our extra data, don't do automatic / default handling.
+	 */
+	protected $extra_data_saved = false;
+
+	/**
 	 * Create a new payment token in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function create( &$token ) {
 		if ( false === $token->validate() ) {
@@ -47,6 +55,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $payment_token_data );
 		$token_id = $wpdb->insert_id;
 		$token->set_id( $token_id );
+		$this->save_extra_data( $token, true );
 		$token->save_meta_data();
 		$token->apply_changes();
 
@@ -55,14 +64,17 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			WC_Payment_Tokens::set_users_default( $token->get_user_id(), $token_id );
 		}
 
-		do_action( 'woocommerce_payment_token_created', $token_id );
+		do_action( 'woocommerce_new_payment_token', $token_id );
 	}
 
 	/**
 	 * Update a payment token.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function update( &$token ) {
 		if ( false === $token->validate() ) {
@@ -72,11 +84,13 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		global $wpdb;
 
 		$updated_props      = array();
-		$payment_token_data = array();
-		$props              = array( 'gateway_id', 'token', 'user_id', 'type' );
+		$core_props         = array( 'gateway_id', 'token', 'user_id', 'type' );
 		$changed_props      = array_keys( $token->get_changes() );
 
 		foreach ( $changed_props as $prop ) {
+			if ( ! in_array( $prop, $core_props ) ) {
+				continue;
+			}
 			$updated_props[]             = $prop;
 			$payment_token_data[ $prop ] = $token->{"get_" . $prop}( 'edit' );
 		}
@@ -89,6 +103,8 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			);
 		}
 
+		$updated_extra_props = $this->save_extra_data( $token );
+		$updated_props       = array_merge( $updated_props, $updated_extra_props );
 		$token->save_meta_data();
 		$token->apply_changes();
 
@@ -104,7 +120,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	/**
 	 * Remove a payment token from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Payment_Token $token
 	 * @param bool $force_delete
 	 */
@@ -118,8 +134,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	/**
 	 * Read a token from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param WC_Payment_Token $token
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$token ) {
 		global $wpdb;
@@ -130,6 +149,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 				'gateway_id' => $data->gateway_id,
 				'default'    => $data->is_default,
 			) );
+			$this->read_extra_data( $token );
 			$token->read_meta_data();
 			$token->set_object_read( true );
 			do_action( 'woocommerce_payment_token_loaded', $token );
@@ -139,11 +159,59 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	}
 
 	/**
-	 * Returns an array of objects (stdObject) matching specific token critera.
+	 * Read extra data associated with the token (like last4 digits of a card for expiry dates).
+	 *
+	 * @param WC_Payment_Token
+	 * @since 3.0.0
+	 */
+	protected function read_extra_data( &$token ) {
+		foreach ( $token->get_extra_data_keys() as $key ) {
+			$function = 'set_' . $key;
+			if ( is_callable( array( $token, $function ) ) ) {
+				$token->{$function}( get_metadata( 'payment_token', $token->get_id(), $key, true ) );
+			}
+		}
+	}
+
+	/**
+	 * Saves extra token data as meta.
+	 *
+	 * @since 3.0.0
+	 * @param $token WC_Token
+	 * @param $force bool
+	 * @return array List of updated props.
+	 */
+	protected function save_extra_data( &$token, $force = false ) {
+		if ( $this->extra_data_saved ) {
+			return array();
+		}
+
+		$updated_props     = array();
+		$extra_data_keys   = $token->get_extra_data_keys();
+		$meta_key_to_props = ! empty( $extra_data_keys ) ? array_combine( $extra_data_keys, $extra_data_keys ) : array();
+		$props_to_update   = $force ? $meta_key_to_props : $this->get_props_to_update( $token, $meta_key_to_props );
+
+		foreach ( $extra_data_keys as $key ) {
+			if ( ! array_key_exists( $key, $props_to_update ) ) {
+				continue;
+			}
+			$function = 'get_' . $key;
+			if ( is_callable( array( $token, $function ) ) ) {
+				if ( update_metadata( 'payment_token', $token->get_id(), $key, $token->{$function}( 'edit' ) ) ) {
+					$updated_props[] = $key;
+				}
+			}
+		}
+
+		return $updated_props;
+	}
+
+	/**
+	 * Returns an array of objects (stdObject) matching specific token criteria.
 	 * Accepts token_id, user_id, gateway_id, and type.
 	 * Each object should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $args
 	 * @return array
 	 */
@@ -165,7 +233,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		if ( $args['user_id'] ) {
-			$where[] = 'user_id = ' . absint( $args['user_id'] );
+			$where[] = $wpdb->prepare( 'user_id = %d', absint( $args['user_id'] ) );
 		}
 
 		if ( $args['gateway_id'] ) {
@@ -179,7 +247,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
 
 		if ( $args['type'] ) {
-			$where[] = 'type = ' . esc_sql( $args['type'] );
+			$where[] = $wpdb->prepare( 'type = %s', $args['type'] );
 		}
 
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) );
@@ -191,7 +259,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Returns an stdObject of a token for a user's default token.
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param id $user_id
 	 * @return object
 	 */
@@ -207,7 +275,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Returns an stdObject of a token.
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param id $token_id
 	 * @return object
 	 */
@@ -222,7 +290,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	/**
 	 * Returns metadata for a specific payment token.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param id $token_id
 	 * @return array
 	 */
@@ -233,7 +301,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	/**
 	 * Get a token's type by ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param id $token_id
 	 * @return string
 	 */
@@ -250,8 +318,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * looping through tokens and setting their statuses instead of creating a bunch
 	 * of objects.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param id $token_id
+	 * @param bool $status
+	 *
 	 * @return string
 	 */
 	public function set_default_status( $token_id, $status = true ) {

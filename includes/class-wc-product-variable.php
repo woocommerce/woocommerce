@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The WooCommerce product class handles individual product data.
  *
- * @version		2.7.0
+ * @version		3.0.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -118,6 +118,16 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns the price in html format.
 	 *
+	 * Note: Variable prices do not show suffixes like other product types. This
+	 * is due to some things like tax classes being set at variation level which
+	 * could differ from the parent price. The only way to show accurate prices
+	 * would be to load the variation and get IT's price, which adds extra
+	 * overhead and still has edge cases where the values would be inaccurate.
+	 *
+	 * Additionally, ranges of prices no longer show 'striked out' sale prices
+	 * due to the strings being very long and unclear/confusing. A single range
+	 * is shown instead.
+	 *
 	 * @param string $price (default: '')
 	 * @return string
 	 */
@@ -125,28 +135,58 @@ class WC_Product_Variable extends WC_Product {
 		$prices = $this->get_variation_prices( true );
 
 		if ( empty( $prices['price'] ) ) {
-			return apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
-		}
-
-		$min_price = current( $prices['price'] );
-		$max_price = end( $prices['price'] );
-
-		if ( $min_price !== $max_price ) {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_format_price_range( $min_price, $max_price ), $this );
+			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		} else {
-			$price = apply_filters( 'woocommerce_variable_price_html', wc_price( $min_price ) . $this->get_price_suffix(), $this );
+			$min_price     = current( $prices['price'] );
+			$max_price     = end( $prices['price'] );
+			$min_reg_price = current( $prices['regular_price'] );
+			$max_reg_price = end( $prices['regular_price'] );
+
+			if ( $min_price !== $max_price ) {
+				$price = wc_format_price_range( $min_price, $max_price );
+			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+				$price = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
+			} else {
+				$price = wc_price( $min_price );
+			}
+
+			$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 		}
+
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Get the suffix to display after prices > 0.
+	 *
+	 * This is skipped if the suffix
+	 * has dynamic values such as {price_excluding_tax} for variable products.
+	 * @see get_price_html for an explanation as to why.
+	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+		$suffix = get_option( 'woocommerce_price_display_suffix' );
+
+		if ( strstr( $suffix, '{' ) ) {
+			return apply_filters( 'woocommerce_get_price_suffix', '', $this, $price, $qty );
+		} else {
+			return parent::get_price_suffix( $price, $qty );
+		}
 	}
 
 	/**
 	 * Return a products child ids.
 	 *
+	 * @param bool|string $visible_only
+	 *
 	 * @return array Children ids
 	 */
 	public function get_children( $visible_only = '' ) {
 		if ( is_bool( $visible_only ) ) {
-			wc_deprecated_argument( 'visible_only', '2.7', 'WC_Product_Variable::get_visible_children' );
+			wc_deprecated_argument( 'visible_only', '3.0', 'WC_Product_Variable::get_visible_children' );
 			return $visible_only ? $this->get_visible_children() : $this->get_children();
 		}
 		return apply_filters( 'woocommerce_get_children', $this->children, $this, false );
@@ -155,7 +195,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return a products child ids - visible only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array Children ids
 	 */
 	public function get_visible_children() {
@@ -185,6 +225,10 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Variable products themselves cannot be downloadable.
+	 *
+	 * @param string $context
+	 *
+	 * @return bool
 	 */
 	public function get_downloadable( $context = 'view' ) {
 		return false;
@@ -192,6 +236,10 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Variable products themselves cannot be virtual.
+	 *
+	 * @param string $context
+	 *
+	 * @return bool
 	 */
 	public function get_virtual( $context = 'view' ) {
 		return false;
@@ -209,7 +257,7 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
-			if ( ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
 
@@ -235,29 +283,35 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $variation );
 		}
 
-		return apply_filters( 'woocommerce_available_variation', array_merge( $variation->get_data(), array(
+		// See if prices should be shown for each variation after selection.
+		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
+
+		return apply_filters( 'woocommerce_available_variation', array(
 			'attributes'            => $variation->get_variation_attributes(),
-			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-			'weight_html'           => wc_format_weight( $variation->get_weight() ),
-			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => wc_get_stock_html( $variation ),
-			'variation_id'          => $variation->get_id(),
-			'variation_is_visible'  => $variation->variation_is_visible(),
-			'variation_is_active'   => $variation->variation_is_active(),
-			'is_purchasable'        => $variation->is_purchasable(),
+			'backorders_allowed'    => $variation->backorders_allowed(),
+			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
+			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
-			'min_qty'               => $variation->get_min_purchase_quantity(),
-			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
-			'backorders_allowed'    => $variation->backorders_allowed(),
-			'is_in_stock'           => $variation->is_in_stock(),
+			'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
+			'image_id'              => $variation->get_image_id(),
 			'is_downloadable'       => $variation->is_downloadable(),
-			'is_virtual'            => $variation->is_virtual(),
+			'is_in_stock'           => $variation->is_in_stock(),
+			'is_purchasable'        => $variation->is_purchasable(),
 			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description' => $variation->get_description(),
-		) ), $this, $variation );
+			'is_virtual'            => $variation->is_virtual(),
+			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
+			'min_qty'               => $variation->get_min_purchase_quantity(),
+			'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'sku'                   => $variation->get_sku(),
+			'variation_description' => wc_format_content( $variation->get_description() ),
+			'variation_id'          => $variation->get_id(),
+			'variation_is_active'   => $variation->variation_is_active(),
+			'variation_is_visible'  => $variation->variation_is_visible(),
+			'weight'                => wc_format_weight( $variation->get_weight() ),
+			'weight_html'           => wc_format_weight( $variation->get_weight() ),
+		), $this, $variation );
 	}
 
 	/*
@@ -269,7 +323,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of variation attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_variation_attributes( $variation_attributes ) {
@@ -279,7 +333,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of children for the product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_children( $children ) {
@@ -289,7 +343,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sets an array of visible children only.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array
 	 */
 	public function set_visible_children( $visible_children ) {
@@ -304,13 +358,18 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Ensure properties are set correctly before save.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function validate_props() {
 		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
+			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+
+		// If backorders are enabled, always in stock.
+		} elseif ( 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'instock' );
 
 		// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -329,7 +388,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function save() {
 		$this->validate_props();
@@ -378,14 +437,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function child_is_in_stock() {
-		$transient_name = 'wc_child_is_in_stock_' . $this->get_id();
-		$in_stock       = get_transient( $transient_name );
-
-		if ( false === $in_stock ) {
-			$in_stock = $this->data_store->child_is_in_stock( $this );
-			set_transient( $transient_name, $in_stock, DAY_IN_SECONDS * 30 );
-		}
-		return (bool) $in_stock;
+		return $this->data_store->child_is_in_stock( $this );
 	}
 
 	/**
@@ -436,6 +488,17 @@ class WC_Product_Variable extends WC_Product {
 		return parent::has_weight() || $this->child_has_weight();
 	}
 
+	/**
+	 * Returns whether or not the product has additional options that need
+	 * selecting before adding to cart.
+	 *
+	 * @since  3.0.0
+	 * @return boolean
+	 */
+	public function has_options() {
+		return true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Sync with child variations.
@@ -466,7 +529,7 @@ class WC_Product_Variable extends WC_Product {
 				$product->save();
 			}
 
-			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '2.7', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product' );
+			wc_do_deprecated_action( 'woocommerce_variable_product_sync', array( $product->get_id(), $product->get_visible_children() ), '3.0', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product' );
 		}
 		return $product;
 	}

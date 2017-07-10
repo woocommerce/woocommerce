@@ -78,7 +78,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 *     @type string $source Optional. Determines log file to write to. Default 'log'.
 	 *     @type bool $_legacy Optional. Default false. True to use outdated log format
-	 *         orignally used in deprecated WC_Logger::add calls.
+	 *         originally used in deprecated WC_Logger::add calls.
 	 * }
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
@@ -148,7 +148,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				}
 			}
 
-			if ( $this->handles[ $handle ] = @fopen( $file, $mode ) ) {
+			if ( $resource = @fopen( $file, $mode ) ) {
+				$this->handles[ $handle ] = $resource;
 				return true;
 			}
 		}
@@ -163,7 +164,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool True if $handle is open.
 	 */
 	protected function is_open( $handle ) {
-		return array_key_exists( $handle, $this->handles );
+		return array_key_exists( $handle, $this->handles ) && is_resource( $this->handles[ $handle ] );
 	}
 
 	/**
@@ -175,7 +176,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	protected function close( $handle ) {
 		$result = false;
 
-		if ( $this->is_open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
+		if ( $this->is_open( $handle ) ) {
 			$result = fclose( $this->handles[ $handle ] );
 			unset( $this->handles[ $handle ] );
 		}
@@ -341,7 +342,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		if ( function_exists( 'wp_hash' ) ) {
 			return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '2.7' );
+			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.0' );
 			return false;
 		}
 	}

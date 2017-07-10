@@ -7,6 +7,27 @@
 class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
+	 * Restore UTC on failire.
+	 */
+	 public function tearDown() {
+ 		parent::tearDown();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+		update_option( 'gmt_offset', 0 );
+		update_option( 'timezone_string', '' );
+	}
+
+	public function onNotSuccessfulTest( $e ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+		update_option( 'gmt_offset', 0 );
+		update_option( 'timezone_string', '' );
+		parent::onNotSuccessfulTest( $e );
+	}
+
+	/**
 	 * Create a test post we can add/test meta against.
 	 */
 	public function create_test_post() {
@@ -95,6 +116,45 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the meta data cache is not shared among instances.
+	 */
+	function test_get_meta_data_shared_bug() {
+		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'wrong value';
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertNotEquals( 'wrong value', $metas[0]->value );
+	}
+
+	/**
+	 * Tests the cache invalidation after an order is saved
+	 */
+	function test_get_meta_data_cache_invalidation() {
+		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'updated value';
+		$order->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertEquals( 'updated value', $metas[0]->value );
+	}
+
+	/**
 	 * Test getting meta by ID.
 	 */
 	function test_get_meta() {
@@ -118,6 +178,38 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 			$this->assertEquals( "val{$i}", $data->value );
 			$i++;
 		}
+	}
+
+	/**
+	 * Test seeing if meta exists.
+	 */
+	function test_has_meta() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save_meta_data();
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$this->assertTrue( $object->meta_exists( 'test_meta_key' ) );
+		$this->assertTrue( $object->meta_exists( 'test_multi_meta_key' ) );
+		$this->assertFalse( $object->meta_exists( 'thiskeyisnothere' ) );
+	}
+
+	/**
+	 * Test getting meta that hasn't been set
+	 */
+	function test_get_meta_no_meta() {
+		$object = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$single_on = $object->get_meta( 'doesnt-exist', true );
+		$single_off = $object->get_meta( 'also-doesnt-exist', false );
+
+		$this->assertEquals( '', $single_on );
+		$this->assertEquals( array(), $single_off );
 	}
 
 	/**
@@ -257,5 +349,182 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->add_meta_data( 'test_field_2', 'val1', true );
 		$object->update_meta_data( 'test_field_0', 'another field 2' );
 		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
+	}
+
+	/**
+	 * Test protected method set_date_prop by testing a order date setter.
+	 */
+	function set_date_prop_gmt_offset( $timezone = 'UTC' ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( $timezone );
+
+		$object = new WC_Order();
+
+		// Change timezone in WP.
+		update_option( 'gmt_offset', -4 );
+
+		// Set date to a UTC timestamp and expect a valid UTC timestamp back.
+		$object->set_date_created( 1488979186 );
+		$this->assertEquals( 1488979186, $object->get_date_created()->getTimestamp() );
+
+		// Set date to a string without timezone info. This will be assumed in local timezone and thus should match the offset timestamp.
+		$object->set_date_created( '2017-01-02' );
+		$this->assertEquals( -14400, $object->get_date_created()->getOffset() );
+		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+
+		// Date time with no timezone.
+		$object->set_date_created( '2017-01-02T00:00' );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time with offset.
+		$object->set_date_created( '2017-01-01T20:00:00-04:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time different offset to site timezone.
+		$object->set_date_created( '2017-01-01T16:00:00-08:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time in UTC.
+		$object->set_date_created( '2017-01-02T00:00:00+00:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 20:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// Restore default.
+		update_option( 'gmt_offset', 0 );
+
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+	}
+
+	/**
+	 * Test protected method set_date_prop by testing a order date setter.
+	 */
+	function set_date_prop_timezone_string( $timezone = 'UTC' ) {
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( $timezone );
+
+		$object = new WC_Order();
+
+		// Repeat tests with timezone_string. America/New_York is -5 in the winter and -4 in summer.
+		update_option( 'timezone_string', 'America/New_York' );
+
+		// Set date to a UTC timestamp and expect a valid UTC timestamp back.
+		$object->set_date_created( 1488979186 );
+		$this->assertEquals( 1488979186, $object->get_date_created()->getTimestamp() );
+
+		// Set date to a string without timezone info. This will be assumed in local timezone and thus should match the offset timestamp.
+		$object->set_date_created( '2017-01-02' );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// Date time with no timezone.
+		$object->set_date_created( '2017-01-02T00:00' );
+		$this->assertEquals( 1483315200 - $object->get_date_created()->getOffset(), $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getOffsetTimestamp() );
+		$this->assertEquals( '2017-01-02 00:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time with offset.
+		$object->set_date_created( '2017-01-01T19:00:00-05:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 19:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time different offset to site timezone.
+		$object->set_date_created( '2017-01-01T16:00:00-08:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 19:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// ISO 8601 date time in UTC.
+		$object->set_date_created( '2017-01-02T00:00:00+00:00' );
+		$this->assertEquals( 1483315200, $object->get_date_created()->getTimestamp() );
+		$this->assertEquals( '2017-01-01 19:00:00', $object->get_date_created()->date( 'Y-m-d H:i:s' ) );
+
+		// Restore default.
+		update_option( 'timezone_string', '' );
+
+		date_default_timezone_set( 'UTC' );
+		// @codingStandardsIgnoreEnd
+	}
+
+	/**
+	 * Test protected method set_date_prop by testing a order date setter.
+	 */
+	function test_set_date_prop_server_timezone() {
+		$this->set_date_prop_gmt_offset();
+		$this->set_date_prop_timezone_string();
+
+		// Repeat all tests with different server timezone.
+		$this->set_date_prop_gmt_offset( 'Pacific/Fiji' );
+		$this->set_date_prop_timezone_string( 'Pacific/Fiji' );
+
+		// Repeat all tests with different server timezone.
+		$this->set_date_prop_gmt_offset( 'Pacific/Tahiti' );
+		$this->set_date_prop_timezone_string( 'Pacific/Tahiti' );
+	}
+
+	/**
+	 * Test applying changes
+	 */
+	function test_apply_changes() {
+		$data = array(
+			'prop1' => 'value1',
+			'prop2' => 'value2',
+		);
+
+		$changes = array(
+			'prop1' => 'new_value1',
+			'prop3' => 'value3',
+		);
+
+		$object = new WC_Mock_WC_Data;
+		$object->set_data( $data );
+		$object->set_changes( $changes );
+		$object->apply_changes();
+
+		$new_data = $object->get_data();
+		$new_changes = $object->get_changes();
+
+		$this->assertEquals( 'new_value1', $new_data['prop1'] );
+		$this->assertEquals( 'value2', $new_data['prop2'] );
+		$this->assertEquals( 'value3', $new_data['prop3'] );
+		$this->assertEmpty( $new_changes );
+	}
+
+	/**
+	 * Test applying changes with a nested array
+	 */
+	function test_apply_changes_nested() {
+		$data = array(
+			'prop1' => 'value1',
+			'prop2' => array(
+				'subprop1' => 1,
+				'subprop2' => 2,
+			),
+		);
+
+		$changes = array(
+			'prop2' => array(
+				'subprop1' => 1000,
+				'subprop3' => 3,
+			),
+		);
+
+		$object = new WC_Mock_WC_Data;
+		$object->set_data( $data );
+		$object->set_changes( $changes );
+		$object->apply_changes();
+
+		$new_data = $object->get_data();
+
+		$this->assertEquals( 'value1', $new_data['prop1'] );
+		$this->assertEquals( 1000, $new_data['prop2']['subprop1'] );
+		$this->assertEquals( 2, $new_data['prop2']['subprop2'] );
+		$this->assertEquals( 3, $new_data['prop2']['subprop3'] );
 	}
 }

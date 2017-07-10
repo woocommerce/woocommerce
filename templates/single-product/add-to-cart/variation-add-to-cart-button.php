@@ -5,7 +5,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,16 +16,18 @@ global $product;
 <div class="woocommerce-variation-add-to-cart variations_button">
 	<?php
 		/**
-		 * @since 2.7.0.
+		 * @since 3.0.0.
 		 */
 		do_action( 'woocommerce_before_add_to_cart_quantity' );
 
 		woocommerce_quantity_input( array(
-			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( $_POST['quantity'] ) : 1,
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( $_POST['quantity'] ) : $product->get_min_purchase_quantity(),
 		) );
 
 		/**
-		 * @since 2.7.0.
+		 * @since 3.0.0.
 		 */
 		do_action( 'woocommerce_after_add_to_cart_quantity' );
 	?>

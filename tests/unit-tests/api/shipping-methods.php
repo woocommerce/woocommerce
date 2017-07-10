@@ -3,7 +3,7 @@
  * Tests for the Shipping Methods REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Shipping_Methods extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -33,7 +33,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting all shipping methods.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_methods() {
 		wp_set_current_user( $this->user );
@@ -64,7 +64,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure shipping methods cannot viewed without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_methods_without_permission() {
 		wp_set_current_user( 0 );
@@ -75,7 +75,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single shipping method.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method() {
 		wp_set_current_user( $this->user );
@@ -94,7 +94,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single shipping method without the correct permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method_without_permission() {
 		wp_set_current_user( 0 );
@@ -106,7 +106,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a shipping method with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_shipping_method_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -117,7 +117,7 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test the shipping method schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_shipping_method_schema() {
 		wp_set_current_user( $this->user );

@@ -9,6 +9,7 @@ project.properties
 
 # Grunt
 /node_modules/
+none
 
 # Sass
 .sass-cache/
@@ -32,6 +33,7 @@ tests/cli/vendor
 # Unit tests
 /tmp
 /tests/bin/tmp
+/tests/e2e-tests/config/local-*.json
 
 # Logs
 /logs

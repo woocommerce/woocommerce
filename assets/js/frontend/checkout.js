@@ -168,6 +168,15 @@ jQuery( function( $ ) {
 		reset_update_checkout_timer: function() {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
+		is_valid_json: function( raw_json ) {
+			try {
+				var json = $.parseJSON( raw_json );
+
+				return ( json && 'object' === typeof json );
+			} catch ( e ) {
+				return false;
+			}
+		},
 		validate_field: function( e ) {
 			var $this             = $( this ),
 				$parent           = $this.closest( '.form-row' ),
@@ -294,7 +303,7 @@ jQuery( function( $ ) {
 					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
 
 					// Reload the page if requested
-					if ( 'true' === data.reload ) {
+					if ( true === data.reload ) {
 						window.location.reload();
 						return;
 					}
@@ -331,7 +340,7 @@ jQuery( function( $ ) {
 						$( '#terms' ).prop( 'checked', true );
 					}
 
-					// Fill in the payment details if possible
+					// Fill in the payment details if possible without overwriting data if set.
 					if ( ! $.isEmptyObject( paymentDetails ) ) {
 						$( '.payment_box input' ).each( function() {
 							var ID = $( this ).attr( 'id' );
@@ -339,7 +348,7 @@ jQuery( function( $ ) {
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
-								} else {
+								} else if ( 0 === $( this ).val().length ) {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
 							}
@@ -356,7 +365,7 @@ jQuery( function( $ ) {
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
-							$form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
+							$form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
 						} else {
 							$form.prepend( data );
 						}
@@ -413,27 +422,20 @@ jQuery( function( $ ) {
 							return raw_response;
 						}
 
-						try {
-							// Check for valid JSON
-							var data = $.parseJSON( raw_response );
-
-							if ( data && 'object' === typeof data ) {
-
-								// Valid - return it so it can be parsed by Ajax handler
-								return raw_response;
-							}
-
-						} catch ( e ) {
-
+						if ( wc_checkout_form.is_valid_json( raw_response ) ) {
+							return raw_response;
+						} else {
 							// Attempt to fix the malformed JSON
-							var valid_json = raw_response.match( /{"result.*"}/ );
+							var maybe_valid_json = raw_response.match( /{"result.*}/ );
 
-							if ( null === valid_json ) {
+							if ( null === maybe_valid_json ) {
 								console.log( 'Unable to fix malformed JSON' );
-							} else {
+							} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
 								console.log( 'Fixed malformed JSON. Original:' );
 								console.log( raw_response );
-								raw_response = valid_json[0];
+								raw_response = maybe_valid_json[0];
+							} else {
+								console.log( 'Unable to fix malformed JSON' );
 							}
 						}
 
@@ -448,26 +450,26 @@ jQuery( function( $ ) {
 					dataType:   'json',
 					success:	function( result ) {
 						try {
-							if ( result.result === 'success' ) {
+							if ( 'success' === result.result ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {
 									window.location = decodeURI( result.redirect );
 								}
-							} else if ( result.result === 'failure' ) {
+							} else if ( 'failure' === result.result ) {
 								throw 'Result failure';
 							} else {
 								throw 'Invalid response';
 							}
 						} catch( err ) {
 							// Reload page
-							if ( result.reload === 'true' ) {
+							if ( true === result.reload ) {
 								window.location.reload();
 								return;
 							}
 
 							// Trigger update in case we need a fresh nonce
-							if ( result.refresh === 'true' ) {
+							if ( true === result.refresh ) {
 								$( document.body ).trigger( 'update_checkout' );
 							}
 
@@ -488,8 +490,8 @@ jQuery( function( $ ) {
 			return false;
 		},
 		submit_error: function( error_message ) {
-			$( '.woocommerce-error, .woocommerce-message' ).remove();
-			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + error_message + '</div>' );
+			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
+			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
@@ -608,7 +610,21 @@ jQuery( function( $ ) {
 		}
 	};
 
+	var wc_terms_toggle = {
+		init: function() {
+			$( document.body ).on( 'click', 'a.woocommerce-terms-and-conditions-link', this.toggle_terms );
+		},
+
+		toggle_terms: function() {
+			if ( $( '.woocommerce-terms-and-conditions' ).length ) {
+				$( '.woocommerce-terms-and-conditions' ).slideToggle();
+				return false;
+			}
+		}
+	};
+
 	wc_checkout_form.init();
 	wc_checkout_coupons.init();
 	wc_checkout_login_form.init();
+	wc_terms_toggle.init();
 });
