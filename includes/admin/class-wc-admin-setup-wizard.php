@@ -202,11 +202,11 @@ class WC_Admin_Setup_Wizard {
 	 * Output the steps.
 	 */
 	public function setup_wizard_steps() {
-		$ouput_steps = $this->steps;
-		array_shift( $ouput_steps );
+		$output_steps = $this->steps;
+		array_shift( $output_steps );
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $ouput_steps as $step_key => $step ) : ?>
+			<?php foreach ( $output_steps as $step_key => $step ) : ?>
 				<li class="<?php
 					if ( $step_key === $this->step ) {
 						echo 'active';

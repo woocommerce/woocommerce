@@ -411,7 +411,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_price_thousand_separator() {
 		$separator = get_option( 'woocommerce_price_thousand_sep' );
 
-		// defualt value
+		// default value
 		$this->assertEquals( ',', wc_get_price_thousand_separator() );
 
 		update_option( 'woocommerce_price_thousand_sep', '.' );
@@ -431,7 +431,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_price_decimal_separator() {
 		$separator = get_option( 'woocommerce_price_decimal_sep' );
 
-		// defualt value
+		// default value
 		$this->assertEquals( '.', wc_get_price_decimal_separator() );
 
 		update_option( 'woocommerce_price_decimal_sep', ',' );
@@ -451,7 +451,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_price_decimals() {
 		$decimals = get_option( 'woocommerce_price_num_decimals' );
 
-		// defualt value
+		// default value
 		$this->assertEquals( 2, wc_get_price_decimals() );
 
 		update_option( 'woocommerce_price_num_decimals', '1' );

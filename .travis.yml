@@ -13,7 +13,7 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
 
-# Additonal tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
+# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
 matrix:
   include:
   - php: 5.6

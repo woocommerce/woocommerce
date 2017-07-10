@@ -1587,7 +1587,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns whether or not the product has additonal options that need
+	 * Returns whether or not the product has additional options that need
 	 * selecting before adding to cart.
 	 *
 	 * @since  3.0.0

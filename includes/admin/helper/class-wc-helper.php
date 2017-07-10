@@ -1017,7 +1017,7 @@ class WC_Helper {
 			return;
 		}
 
-		self::log( 'Auto-activated a subscripton for ' . $filename );
+		self::log( 'Auto-activated a subscription for ' . $filename );
 		self::_flush_subscriptions_cache();
 	}
 
@@ -1073,7 +1073,7 @@ class WC_Helper {
 		}
 
 		if ( $deactivated ) {
-			self::log( sprintf( 'Auto-deactivated %d subscripton(s) for %s', $deactivated, $filename ) );
+			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
 			self::_flush_subscriptions_cache();
 		}
 	}
