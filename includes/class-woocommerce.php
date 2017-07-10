@@ -161,7 +161,7 @@ final class WooCommerce {
 	 * @since  2.3
 	 */
 	private function init_hooks() {
-		register_activation_hook( __FILE__, array( 'WC_Install', 'install' ) );
+		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
@@ -194,9 +194,6 @@ final class WooCommerce {
 	private function define_constants() {
 		$upload_dir = wp_upload_dir();
 
-		$this->define( 'WC_PLUGIN_FILE', __FILE__ );
-		$this->define( 'WC_ABSPATH', dirname( __FILE__ ) . '/' );
-		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 		$this->define( 'WC_VERSION', $this->version );
 		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
 		$this->define( 'WC_ROUNDING_PRECISION', 4 );
@@ -466,7 +463,7 @@ final class WooCommerce {
 
 		unload_textdomain( 'woocommerce' );
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . '/i18n/languages' );
+		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( WC_PLUGIN_FILE ) ) . '/i18n/languages' );
 	}
 
 	/**
@@ -512,7 +509,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
-		return untrailingslashit( plugins_url( '/', __FILE__ ) );
+		return untrailingslashit( plugins_url( '/', WC_PLUGIN_FILE ) );
 	}
 
 	/**
@@ -520,7 +517,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( __FILE__ ) );
+		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
 	}
 
 	/**
