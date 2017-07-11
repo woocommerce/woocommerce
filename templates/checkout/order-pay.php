@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <ul class="order_details">
 	<li class="order">
-		<?php _e( 'Order Number:', 'woocommerce' ); ?>
+		<?php _e( 'Order number:', 'woocommerce' ); ?>
 		<strong><?php echo $order->get_order_number(); ?></strong>
 	</li>
 	<li class="date">
 		<?php _e( 'Date:', 'woocommerce' ); ?>
-		<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
+		<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
 	</li>
 	<li class="total">
 		<?php _e( 'Total:', 'woocommerce' ); ?>
@@ -37,14 +37,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</li>
 	<?php if ( $order->get_payment_method_title() ) : ?>
 	<li class="method">
-		<?php _e( 'Payment Method:', 'woocommerce' ); ?>
+		<?php _e( 'Payment method:', 'woocommerce' ); ?>
 		<strong><?php
-			echo $order->get_payment_method_title();
+			echo wp_kses_post( $order->get_payment_method_title() );
 		?></strong>
 	</li>
 	<?php endif; ?>
 </ul>
 
-<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
+<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
 
 <div class="clear"></div>
