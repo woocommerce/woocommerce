@@ -20,27 +20,47 @@ class WC_Admin_Plugin_Updates {
 	const VERSION_REQUIRED_HEADER = 'WC requires at least';
 	const VERSION_TESTED_HEADER = 'WC tested up to';
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
-		wp_cache_delete( 'plugins', 'plugins' );
 		add_filter( 'extra_plugin_headers', array( $this, 'enable_wc_plugin_headers' ) );
-		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'output_plugin_warnings' ), 11, 2 );
+		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'output_untested_plugin_warnings' ), 11, 2 );
 	}
 
+	/**
+	 * Read in WooCommerce headers when reading plugin headers.
+	 *
+	 * @param array $headers
+	 * @return array $headers
+	 */
 	public function enable_wc_plugin_headers( $headers ) {
 		$headers['WCRequires'] = self::VERSION_REQUIRED_HEADER;
 		$headers['WCTested'] =  self::VERSION_TESTED_HEADER;
 		return $headers;
 	}
 
-	public function output_plugin_warnings( $data, $response ) {
-		$untested = $this->get_untested_plugins( $response->new_version );
-
-		foreach ( $untested as $plugin ) {
-			echo $plugin['Name'] . ' ' . $plugin[ self::VERSION_TESTED_HEADER ] . '<br/>';
+	/**
+	 * Output a warning message if plugins exist with a tested version lower than the new version.
+	 *
+	 * @param array $data
+	 * @param stdObject $response
+	 */
+	public function output_untested_plugin_warnings( $data, $response ) {
+		$plugins = $this->get_untested_plugins( $response->new_version );
+		if ( empty( $plugins ) ) {
+			return;
 		}
 
+		include( 'views/html-notice-untested-extensions.php' );
 	}
 
+	/**
+	 * Get plugins that have a tested version lower than the input version.
+	 *
+	 * @param string $version
+	 * @return array of plugin info arrays
+	 */
 	protected function get_untested_plugins( $version ) {
 		$extensions = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
 		$untested = array();
@@ -54,6 +74,12 @@ class WC_Admin_Plugin_Updates {
 		return $untested;
 	}
 
+	/**
+	 * Get plugins that have a valid value for a specific header.
+	 *
+	 * @param string $header
+	 * @return array of plugin info arrays
+	 */
 	protected function get_plugins_with_header( $header ) {
 		$plugins = get_plugins();
 		$matches = array();
