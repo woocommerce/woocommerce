@@ -305,7 +305,6 @@ class WC_Emails {
 		}
 
 		$email->trigger( $order->get_id(), $order );
-		exit;
 	}
 
 	/**
