@@ -64,7 +64,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		global $wpdb;
 		if ( 0 === $zone->get_id() || "0" === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
-			$zone->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
+			$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
 			$zone->read_meta_data();
 			$zone->set_object_read( true );
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
