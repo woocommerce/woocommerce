@@ -38,8 +38,8 @@ function wc_get_orders( $args ) {
 	);
 
 	foreach ( $map_legacy as $from => $to ) {
-		if ( isset( $args[ $from ] ) ) {
-			$args[ $to ] = $args[ $from ];
+		if ( isset( $args[ $to ] ) ) {
+			$args[ $from ] = $args[ $to ];
 		}
 	}
 
