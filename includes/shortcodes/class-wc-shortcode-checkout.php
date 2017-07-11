@@ -130,9 +130,7 @@ class WC_Shortcode_Checkout {
 
 				if ( $order->needs_payment() ) {
 
-					wc_get_template( 'checkout/order-pay.php', array(
-						'order'              => $order
-					) );
+					wc_get_template( 'checkout/order-pay.php', array( 'order' => $order ) );
 					
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
