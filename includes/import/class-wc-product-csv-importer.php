@@ -39,8 +39,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'update_existing'  => false, // Whether to update existing items.
 			'delimiter'        => ',', // CSV delimiter.
 			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
-			'enclosure'        => '"', //The enclousure argument passed to fgetcsv.
-			'escape'           => '\\', //The escape argument passed to fgetcsv.
+			'enclosure'        => '"', // The character used to wrap text in the CSV.
+			'escape'           => '\\',
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
