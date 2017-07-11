@@ -1873,6 +1873,23 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_order_downloads_table' ) ) {
+
+	/**
+	 * Displays order downloads in a table.
+	 *
+	 * @since 3.2.0
+	 * @param array $downloads
+	 */
+	function woocommerce_order_downloads_table( $downloads ) {
+		if ( ! $downloads ) {
+			return;
+		}
+		wc_get_template( 'order/order-downloads.php', array(
+			'downloads' => $downloads,
+		) );
+	}
+}
 
 if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 
