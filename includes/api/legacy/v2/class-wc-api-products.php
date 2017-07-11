@@ -696,6 +696,10 @@ class WC_API_Products extends WC_API_Resource {
 			$product = wc_get_product( $product );
 		}
 
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return array();
+		}
+
 		$prices_precision = wc_get_price_decimals();
 		return array(
 			'title'              => $product->get_name(),
