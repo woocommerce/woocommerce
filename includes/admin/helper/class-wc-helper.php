@@ -315,9 +315,11 @@ class WC_Helper {
 	 * Enqueue admin scripts and styles.
 	 */
 	public static function admin_enqueue_scripts() {
-		$screen = get_current_screen();
+		$screen       = get_current_screen();
+		$screen_id    = $screen ? $screen->id : '';
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
-		if ( 'woocommerce_page_wc-addons' == $screen->id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
 		}
 	}
@@ -441,7 +443,9 @@ class WC_Helper {
 	 * Various early-phase actions with possible redirects.
 	 */
 	public static function current_screen( $screen ) {
-		if ( 'woocommerce_page_wc-addons' != $screen->id ) {
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+
+		if ( $wc_screen_id . '_page_wc-addons' !== $screen->id ) {
 			return;
 		}
 
@@ -1082,8 +1086,10 @@ class WC_Helper {
 	 * Add a note about available extension updates if Woo core has an update available.
 	 */
 	public static function admin_notices() {
-		$screen = get_current_screen();
-		if ( 'update-core' !== $screen->id ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+
+		if ( 'update-core' !== $screen_id ) {
 			return;
 		}
 
