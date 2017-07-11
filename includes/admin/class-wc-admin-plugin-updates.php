@@ -41,7 +41,7 @@ class WC_Admin_Plugin_Updates {
 	}
 
 	/**
-	 * Output a warning message if plugins exist with a tested version lower than the new version.
+	 * Output a warning message if plugins exist with a tested version lower than the WooCommerce version.
 	 *
 	 * @param array $data
 	 * @param stdObject $response
