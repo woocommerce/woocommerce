@@ -220,7 +220,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
 			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
-			$_chosen_attributes   = WC_Query                                                                                       ::get_layered_nav_chosen_attributes();
+			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
 			$taxonomy_filter_name = str_replace( 'pa_', '', $taxonomy );
 			$taxonomy_label       = wc_attribute_label( $taxonomy );
 			$any_label            = apply_filters( 'woocommerce_layered_nav_any_label', sprintf( __( 'Any %s', 'woocommerce' ), $taxonomy_label ), $taxonomy_label, $taxonomy );
