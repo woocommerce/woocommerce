@@ -35,11 +35,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php _e( 'Total:', 'woocommerce' ); ?>
 		<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 	</li>
-	<?php if ($order->payment_method_title) : ?>
+	<?php if ( $order->get_payment_method_title() ) : ?>
 	<li class="method">
 		<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 		<strong><?php
-			echo $order->payment_method_title;
+			echo $order->get_payment_method_title();
 		?></strong>
 	</li>
 	<?php endif; ?>
