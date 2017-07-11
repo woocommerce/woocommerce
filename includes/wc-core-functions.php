@@ -15,22 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include core functions (available in both admin and frontend).
-include( 'wc-conditional-functions.php' );
-include( 'wc-coupon-functions.php' );
-include( 'wc-user-functions.php' );
-include( 'wc-deprecated-functions.php' );
-include( 'wc-formatting-functions.php' );
-include( 'wc-order-functions.php' );
-include( 'wc-order-item-functions.php' );
-include( 'wc-page-functions.php' );
-include( 'wc-product-functions.php' );
-include( 'wc-stock-functions.php' );
-include( 'wc-account-functions.php' );
-include( 'wc-term-functions.php' );
-include( 'wc-attribute-functions.php' );
-include( 'wc-rest-functions.php' );
-include( 'wc-widget-functions.php' );
-include( 'wc-webhook-functions.php' );
+include( dirname(__FILE__).'/wc-conditional-functions.php' );
+include( dirname(__FILE__).'/wc-coupon-functions.php' );
+include( dirname(__FILE__).'/wc-user-functions.php' );
+include( dirname(__FILE__).'/wc-deprecated-functions.php' );
+include( dirname(__FILE__).'/wc-formatting-functions.php' );
+include( dirname(__FILE__).'/wc-order-functions.php' );
+include( dirname(__FILE__).'/wc-order-item-functions.php' );
+include( dirname(__FILE__).'/wc-page-functions.php' );
+include( dirname(__FILE__).'/wc-product-functions.php' );
+include( dirname(__FILE__).'/wc-stock-functions.php' );
+include( dirname(__FILE__).'/wc-account-functions.php' );
+include( dirname(__FILE__).'/wc-term-functions.php' );
+include( dirname(__FILE__).'/wc-attribute-functions.php' );
+include( dirname(__FILE__).'/wc-rest-functions.php' );
+include( dirname(__FILE__).'/wc-widget-functions.php' );
+include( dirname(__FILE__).'/wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.
