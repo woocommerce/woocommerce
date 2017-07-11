@@ -128,7 +128,7 @@ class WC_Shipping_Rate {
 	 * @param int $instance_id
 	 */
 	public function set_instance_id( $instance_id ) {
-		$this->data['method_id'] = absint( $instance_id );
+		$this->data['instance_id'] = absint( $instance_id );
 	}
 
 	/**

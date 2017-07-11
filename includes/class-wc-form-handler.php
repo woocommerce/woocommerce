@@ -569,8 +569,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		// Clear current cart
-		WC()->cart->empty_cart();
+		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );

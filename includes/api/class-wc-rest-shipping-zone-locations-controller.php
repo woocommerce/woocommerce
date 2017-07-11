@@ -87,7 +87,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		}
 
 		if ( 0 === $zone->get_id() ) {
-			return new WP_Error( "woocommerce_rest_shipping_zone_locations_invalid_zone", __( 'The "rest of the world" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+			return new WP_Error( "woocommerce_rest_shipping_zone_locations_invalid_zone", __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
 		}
 
 		$raw_locations = $request->get_json_params();
