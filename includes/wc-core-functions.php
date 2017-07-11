@@ -15,22 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include core functions (available in both admin and frontend).
-include( WC_ABSPATH . '/includes/wc-conditional-functions.php' );
-include( WC_ABSPATH . '/includes/wc-coupon-functions.php' );
-include( WC_ABSPATH . '/includes/wc-user-functions.php' );
-include( WC_ABSPATH . '/includes/wc-deprecated-functions.php' );
-include( WC_ABSPATH . '/includes/wc-formatting-functions.php' );
-include( WC_ABSPATH . '/includes/wc-order-functions.php' );
-include( WC_ABSPATH . '/includes/wc-order-item-functions.php' );
-include( WC_ABSPATH . '/includes/wc-page-functions.php' );
-include( WC_ABSPATH . '/includes/wc-product-functions.php' );
-include( WC_ABSPATH . '/includes/wc-stock-functions.php' );
-include( WC_ABSPATH . '/includes/wc-account-functions.php' );
-include( WC_ABSPATH . '/includes/wc-term-functions.php' );
-include( WC_ABSPATH . '/includes/wc-attribute-functions.php' );
-include( WC_ABSPATH . '/includes/wc-rest-functions.php' );
-include( WC_ABSPATH . '/includes/wc-widget-functions.php' );
-include( WC_ABSPATH . '/includes/wc-webhook-functions.php' );
+include( WC_ABSPATH . 'includes/wc-conditional-functions.php' );
+include( WC_ABSPATH . 'includes/wc-coupon-functions.php' );
+include( WC_ABSPATH . 'includes/wc-user-functions.php' );
+include( WC_ABSPATH . 'includes/wc-deprecated-functions.php' );
+include( WC_ABSPATH . 'includes/wc-formatting-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-item-functions.php' );
+include( WC_ABSPATH . 'includes/wc-page-functions.php' );
+include( WC_ABSPATH . 'includes/wc-product-functions.php' );
+include( WC_ABSPATH . 'includes/wc-stock-functions.php' );
+include( WC_ABSPATH . 'includes/wc-account-functions.php' );
+include( WC_ABSPATH . 'includes/wc-term-functions.php' );
+include( WC_ABSPATH . 'includes/wc-attribute-functions.php' );
+include( WC_ABSPATH . 'includes/wc-rest-functions.php' );
+include( WC_ABSPATH . 'includes/wc-widget-functions.php' );
+include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.
