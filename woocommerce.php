@@ -327,6 +327,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory
 		include_once( WC_ABSPATH . 'includes/class-wc-order-query.php' ); // Order query
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory
+		include_once( WC_ABSPATH . 'includes/class-wc-product-query.php' ); // Product query
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );
 		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway
