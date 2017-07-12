@@ -40,7 +40,7 @@ class WC_Helper_Updater {
 
 			$item = array(
 				'id' => 'woo-' . $plugin['_product_id'],
-				'slug' => $data['slug'],
+				'slug' => 'woo-' . $data['slug'],
 				'plugin' => $filename,
 				'new_version' => $data['version'],
 				'url' => $data['url'],
