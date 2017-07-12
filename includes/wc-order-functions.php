@@ -965,6 +965,9 @@ function wc_get_order_notes( $args ) {
 	// Always approved.
 	$args['status'] = 'approve';
 
+	// Does not support 'count' or 'fields';
+	unset( $args['count'], $args['fields'] );
+
 	remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 	$notes = get_comments( $args );
