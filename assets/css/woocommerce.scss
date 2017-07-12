@@ -1453,13 +1453,13 @@ p.demo_store,
 	/**
 	 * Layered nav widget
 	 */
-	.widget_layered_nav ul {
+	.woocommerce-widget-layered-nav-list {
 		margin: 0;
 		padding: 0;
 		border: 0;
 		list-style: none outside;
 
-		li {
+		.woocommerce-widget-layered-nav-list__item {
 			@include clearfix();
 			padding: 0 0 1px;
 			list-style: none;
@@ -1469,11 +1469,13 @@ p.demo_store,
 				padding: 1px 0;
 			}
 		}
-
-		li.chosen a::before {
+		.woocommerce-widget-layered-nav-list__item--chosen a::before {
 			@include iconbefore( '\e013' );
 			color: $red;
 		}
+	}
+	.woocommerce-widget-layered-nav-dropdown__submit {
+		margin-top: 1em;
 	}
 
 	.widget_layered_nav_filters ul {
