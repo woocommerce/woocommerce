@@ -24,7 +24,11 @@
 						</div>
 
 						<div class="wp-list-table__ext-description">
-							<?php if ( $subscription['expired'] ) : ?>
+							<?php if ( $subscription['lifetime'] ) : ?>
+								<span class="renews">
+									<?php _e( 'Lifetime Subscription', 'woocommerce' ); ?>
+								</span>
+							<?php elseif ( $subscription['expired'] ) : ?>
 								<span class="renews">
 									<strong><?php _e( 'Expired :(', 'woocommerce' ); ?></strong>
 									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
