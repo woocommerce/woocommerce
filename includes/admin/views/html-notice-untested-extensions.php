@@ -8,11 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<?php /* Close previous message container. */ ?>
-</p></div>
-
-<div class="update-message notice inline notice-error notice-alt wc-untested-extensions-notice">
-	<p>
+<div id="wc-untested-extensions-notice" style="display:none" class="wc-untested-extensions-notice">
+	<div class="wc-untested-extensions-notice--contents">
 		<strong>
 			<?php
 				/* translators: %s: version number */
@@ -26,5 +23,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php foreach ( $plugins as $plugin ): ?>
 			<span><?php echo wc_clean( $plugin['Name'] ); ?></span>
 		<?php endforeach ?>
-
-		<?php /* The container will get closed automatically after the 'in_plugin_update_message' hook. */ ?>
+	</div>
+</div>

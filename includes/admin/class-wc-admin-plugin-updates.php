@@ -26,6 +26,24 @@ class WC_Admin_Plugin_Updates {
 	public function __construct() {
 		add_filter( 'extra_plugin_headers', array( $this, 'enable_wc_plugin_headers' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'output_untested_plugin_warnings' ), 11, 2 );
+		add_action( 'admin_footer', array( $this, 'js' ) );
+	}
+
+	public function js() {
+		?>
+		<script>
+			(function($){
+				var $update_box = $( '#woocommerce-update' );
+				var $update_link = $update_box.find('a.update-link');
+				var update_url = $update_link.attr( 'href' );
+
+				$update_link.removeClass( 'update-link' );
+				$update_link.addClass( 'thickbox open-plugin-details-modal' ); // 'open-plugin-details-modal' class is required in all plugin page thickboxes to prevent JS errors on close. See wp-admin/js/plugin-install.js.
+				$update_link.attr( 'href', '#TB_inline&height=600&width=550&inlineId=wc-untested-extensions-notice' );
+
+			})(jQuery);
+		</script>
+		<?php
 	}
 
 	/**
