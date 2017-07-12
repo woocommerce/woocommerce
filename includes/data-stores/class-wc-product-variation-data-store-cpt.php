@@ -245,7 +245,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
 		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
-		return apply_filters( 'woocommerce_product_variation_title', rtrim( $title_base . $separator . $title_suffix, $separator ), $product, $title_base, $title_suffix );
+		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
 	}
 
 	/**
