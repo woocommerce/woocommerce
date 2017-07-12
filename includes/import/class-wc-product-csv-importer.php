@@ -40,7 +40,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'delimiter'        => ',', // CSV delimiter.
 			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
 			'enclosure'        => '"', // The character used to wrap text in the CSV.
-			'escape'           => '\\',
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -60,7 +59,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	protected function read_file() {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
-			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] );
+			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] );
 
 			// Remove BOM signature from the first item.
 			if ( isset( $this->raw_keys[0] ) ) {
@@ -71,7 +70,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				fseek( $handle, (int) $this->params['start_pos'] );
 			}
 
-			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ) ) {
+			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ) ) ) {
 				$this->raw_data[]                                 = $row;
 				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
