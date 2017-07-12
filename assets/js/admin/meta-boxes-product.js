@@ -244,10 +244,10 @@ jQuery( function( $ ) {
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
 			showButtonPanel: true,
-			onSelect: function( selectedDate ) {
-				var option   = $( this ).is( '#_sale_price_dates_from, .sale_price_dates_from' ) ? 'minDate' : 'maxDate';
-				var instance = $( this ).data( 'datepicker' );
-				var date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+			onSelect: function() {
+				var option = $( this ).is( '#_sale_price_dates_from, .sale_price_dates_from' ) ? 'minDate' : 'maxDate',
+					date   = $( this ).datepicker( 'getDate' );
+
 				dates.not( this ).datepicker( 'option', option, date );
 			}
 		});
