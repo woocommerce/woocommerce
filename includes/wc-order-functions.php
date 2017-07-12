@@ -1005,9 +1005,5 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
  * @return bool         True on success, false on failure.
  */
 function wc_delete_order_note( $note_id ) {
-	if ( ! current_user_can( 'edit_shop_orders' ) ) {
-		return false;
-	}
-
 	return wp_delete_comment( $note_id, true );
 }
