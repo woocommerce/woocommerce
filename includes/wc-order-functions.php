@@ -866,7 +866,7 @@ function wc_sanitize_order_id( $order_id ) {
 add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
 
 /**
- * Get order note.
+ * Get an order note.
  *
  * @since  3.2.0
  * @param  int|WP_Comment $data Note ID (or WP_Comment instance for internal use only).
@@ -995,8 +995,9 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
 }
 
 /**
- * Delete order note.
+ * Delete an order note.
  *
+ * @since  3.2.0
  * @param  int $note_id Order note.
  * @return bool         True on success, false on failure.
  */
