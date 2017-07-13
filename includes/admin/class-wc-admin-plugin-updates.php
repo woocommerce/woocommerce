@@ -63,34 +63,65 @@ class WC_Admin_Plugin_Updates {
 
 		if ( ! empty( $this->untested_plugins ) && 'major' === $this->relative_upgrade_type ) {
 			$this->upgrade_notice .= $this->get_extensions_modal_warning();
-			add_action( 'admin_footer', array( $this, 'js' ) );
+			add_action( 'admin_print_footer_scripts', array( $this, 'modal_js' ) );
 		}
 
 		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $this->upgrade_notice ) );
 	}
 
-	public function js() {
+	public function modal_js() {
 		?>
 		<script>
-			(function($){
+			( function( $ ) {
 				var $update_box = $( '#woocommerce-update' );
 				var $update_link = $update_box.find('a.update-link').first();
+
 				var update_url = $update_link.attr( 'href' );
+				var old_tb_position = false;
 
+				// Initialize thickbox.
 				$update_link.removeClass( 'update-link' );
-				$update_link.addClass( 'thickbox open-plugin-details-modal' ); // 'open-plugin-details-modal' class is required in all plugin page thickboxes to prevent JS errors on close. See wp-admin/js/plugin-install.js.
+				$update_link.addClass( 'wc-thickbox' );
 				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
+				tb_init( '.wc-thickbox' );
 
+				// Set up a custom thickbox overlay.
+				$update_link.on( 'click', function( evt ) {
+					var $overlay = $( '#TB_overlay' );
+					if ( ! $overlay.length ) {
+						$( 'body' ).append( '<div id="TB_overlay"></div><div id="TB_window" class="wc_untested_extensions_modal_container"></div>' );
+					} else {
+						$( '#TB_window' ).removeClass( 'thickbox-loading' ).addClass( 'wc_untested_extensions_modal_container' );
+					}
+
+					// WP overrides the tb_position function. We need to use a different tb_position function than that one.
+					// This is based on the original tb_position.
+					if ( ! old_tb_position ) {
+						old_tb_position = tb_position;
+					}
+					tb_position = function() {
+						$( '#TB_window' ).css( { marginLeft: '-' + parseInt( ( TB_WIDTH / 2 ), 10 ) + 'px', width: TB_WIDTH + 'px' } );
+						$( '#TB_window' ).css( { marginTop: '-' + parseInt( ( TB_HEIGHT / 2 ), 10 ) + 'px' } );
+					};
+				});
+
+				// Reset tb_position to WP default when modal is closed.
+				$( 'body' ).on( 'thickbox:removed', function() {
+					if ( old_tb_position ) {
+						tb_position = old_tb_position;
+					}
+				});
+
+				// Trigger the update if the user accepts the modal's warning.
 				$( '#wc_untested_extensions_modal .accept' ).on( 'click', function( evt ) {
 					evt.preventDefault();
 					tb_remove();
+					$update_link.removeClass( 'wc-thickbox open-plugin-details-modal' );
 					$update_link.addClass( 'update-link' );
 					$update_link.attr( 'href', update_url );
 					$update_link.click();
 				});
-
-
-			})(jQuery);
+			})( jQuery );
 		</script>
 		<?php
 	}
@@ -114,8 +145,12 @@ class WC_Admin_Plugin_Updates {
 	}
 
 	protected function get_extensions_modal_warning() {
-		$plugins = $this->untested_plugins;
 		$new_version = $this->new_version;
+		$plugins = get_plugins();
+		foreach ( $plugins as &$plugin ) {
+			$plugin['UpgradeType'] = $this->get_upgrade_type( $plugin[ self::VERSION_TESTED_HEADER ], $new_version );
+
+		}
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-modal.php' );
@@ -188,19 +223,24 @@ class WC_Admin_Plugin_Updates {
 	*/
 
 	protected function get_upgrade_type( $current_version, $upgrade_version ) {
+		if ( empty( $current_version ) || empty( $upgrade_version ) ) {
+			return 'unknown';
+		}
+
+		if ( $current_version === $upgrade_version ) {
+			return 'current';
+		}
+
 		$current_parts = explode( '.', $current_version );
 		$upgrade_parts = explode( '.', $upgrade_version );
 
-		if ( 3 !== count( $current_parts ) || 3 !== count( $upgrade_parts ) ) {
-			return 'unknown';
-		}
-		if ( (int) $current_parts[0] < (int) $upgrade_parts[0] ) {
+		if ( isset( $upgrade_parts[0] ) && (int) $current_parts[0] < (int) $upgrade_parts[0] ) {
 			return 'major';
 		}
-		if ( (int) $current_parts[1] < (int) $upgrade_parts[1] ) {
+		if ( isset( $upgrade_parts[1] ) && (int) $current_parts[1] < (int) $upgrade_parts[1] ) {
 			return 'minor';
 		}
-		if ( (int) $current_parts[2] < (int) $upgrade_parts[2] ) {
+		if ( isset( $upgrade_parts[2] ) && (int) $current_parts[2] < (int) $upgrade_parts[2] ) {
 			return 'patch';
 		}
 		return 'unknown';

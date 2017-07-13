@@ -87,9 +87,43 @@ span.mce_woocommerce_shortcodes_button {
 	display: none;
 }
 
+.wc_untested_extensions_modal_container #TB_ajaxContent {
+	height: 100% !important;
+}
+
 .wc_untested_extensions_modal--content {
-	span {
-		display: list-item;
-		margin-left: 1.5em;
+	.keys {
+		border: 1px solid black;
+		padding: 1em;
+		margin-bottom: 1em;
+
+		.heading {
+			font-weight: bold;
+		}
+	}
+
+	.plugin-status {
+		margin-left: 1em;
+	}
+
+	.current, .patch {
+		color: green;
+	}
+
+	.minor {
+		color: orange;
+	}
+
+	.major {
+		color: red;
+	}
+
+	.unknown {
+		color: gray;
+	}
+
+	.update-anyways {
+		margin-top: 2em;
+		margin-left: 1em;
 	}
 }
