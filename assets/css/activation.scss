@@ -93,18 +93,3 @@ div.woocommerce-no-shipping-methods-notice {
 		position: absolute;
 	}
 }
-
-div.wc-untested-extensions-notice--contents {
-	span {
-		display: list-item;
-		margin-left: 1.5em;
-
-		&:first-of-type {
-			margin-top: .5em;
-		}
-
-		&:last-of-type {
-			margin-botton: 1em;
-		}
-	}
-}

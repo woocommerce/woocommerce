@@ -60,6 +60,15 @@ span.mce_woocommerce_shortcodes_button {
 			text-decoration: underline;
 		}
 
+		&.minor {
+			background: #b5b0a4 !important;
+		}
+
+		&.extensions_warning span {
+			display: list-item;
+			margin-left: 1.5em;
+		}
+
 		&::before {
 			color: #fff !important;
 			content: '\f348';
@@ -71,5 +80,16 @@ span.mce_woocommerce_shortcodes_button {
 			-moz-osx-font-smoothing: grayscale;
 			vertical-align: top;
 		}
+	}
+}
+
+#wc_untested_extensions_modal {
+	display: none;
+}
+
+.wc_untested_extensions_modal--content {
+	span {
+		display: list-item;
+		margin-left: 1.5em;
 	}
 }

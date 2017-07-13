@@ -74,12 +74,12 @@ class WC_Admin_Plugin_Updates {
 		<script>
 			(function($){
 				var $update_box = $( '#woocommerce-update' );
-				var $update_link = $update_box.find('a.update-link');
+				var $update_link = $update_box.find('a.update-link').first();
 				var update_url = $update_link.attr( 'href' );
 
 				$update_link.removeClass( 'update-link' );
 				$update_link.addClass( 'thickbox open-plugin-details-modal' ); // 'open-plugin-details-modal' class is required in all plugin page thickboxes to prevent JS errors on close. See wp-admin/js/plugin-install.js.
-				$update_link.attr( 'href', '#TB_inline&height=600&width=550&inlineId=wc-untested-extensions-notice' );
+				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
 
 			})(jQuery);
 		</script>
@@ -97,6 +97,7 @@ class WC_Admin_Plugin_Updates {
 	protected function get_extensions_inline_warning() {
 		$plugins = $this->untested_plugins;
 		$new_version = $this->new_version;
+		$upgrade_type = $this->relative_upgrade_type;
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
@@ -107,7 +108,9 @@ class WC_Admin_Plugin_Updates {
 		$plugins = $this->untested_plugins;
 		$new_version = $this->new_version;
 
-		//ob_start();
+		ob_start();
+		include( 'views/html-notice-untested-extensions-modal.php' );
+		return ob_get_clean();
 	}
 
 	protected function get_upgrade_notice( $version ) {
