@@ -15,7 +15,7 @@ GitHub is for _bug reports and contributions only_ - if you have a support quest
 
 ### Reporting Issues
 
-Reporting issues is a great way to became a contributor as it doesn't require technical skills. In fact you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and [submit an issue report](https://github.com/woocommerce/woocommerce/issues/new) if you spot a bug. Sound like something you're up for? Go for it!
+Reporting issues is a great way to become a contributor as it doesn't require technical skills. In fact, you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and [submit an issue report](https://github.com/woocommerce/woocommerce/issues/new) if you spot a bug. Sound like something you're up for? Go for it!
 
 #### How To Submit An Issue Report
 
@@ -44,7 +44,7 @@ If you think something could be improved and you're able to do so, make your cha
 * Please **don't** modify the changelog - this will be maintained by the WooCommerce developers.
 * Please **don't** add your localizations or update the .pot files - these will also be maintained by the WooCommerce developers. To contribute to the localization of WooCommerce, please join the [translate.wordpress.org project](https://translate.wordpress.org/projects/wp-plugins/woocommerce). This is much needed, if you speak a language that needs translating consider yourself officially invited to the party.
 
-After you follow the step above, the next stage will be waiting on us to merge your Pull Request. We review them all, and make suggestions and changes as and if necessary.
+After you follow the step above, the next stage will be waiting for us to merge your Pull Request. We review them all, and make suggestions and changes as and if necessary.
 
 ## Contribute To Localizing WooCommerce
 
