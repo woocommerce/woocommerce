@@ -2,11 +2,15 @@
 /**
  * Main WooCommerce Class
  *
- * @author   WooThemes
+ * @author   Automattic
  * @category API
  * @package  WooCommerce
  * @since    3.2.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 /**
  * Main WooCommerce Class.
