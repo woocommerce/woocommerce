@@ -244,11 +244,10 @@ jQuery( function( $ ) {
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
 			showButtonPanel: true,
-			onSelect: function( selectedDate ) {
-				var option   = $( this ).next().is('.hasDatepicker') ? 'minDate' : 'maxDate',
-					instance = $( this ).data( 'datepicker' ),
-					dates    = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
-					date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+			onSelect: function() {
+				var option = $( this ).next().is('.hasDatepicker') ? 'minDate' : 'maxDate',
+					dates  = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
+					date   = $( this ).datepicker( 'getDate' );
 
 				dates.not( this ).datepicker( 'option', option, date );
 				$( this ).change();
