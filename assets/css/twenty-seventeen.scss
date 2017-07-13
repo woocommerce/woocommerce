@@ -1039,6 +1039,10 @@ button.pswp__button--zoom:hover {
 			}
 		}
 	}
+
+	.select2-container--focus .select2-selection {
+		border-color: white;
+	}
 }
 
 /**
