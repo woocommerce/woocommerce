@@ -26,10 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach ?>
 		</div>
 
-		<div class="update-anyways">
-			<a href="<?php echo wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=woocommerce/woocommerce.php' ), 'upgrade-plugin_woocommerce/woocommerce.php' ); ?>">
-				<?php _e( 'Upgrade anyways', 'woocommerce' ); ?>
-			</a>
-		</div>
+		<?php if ( current_user_can( 'update_plugins' ) ): ?>
+			<div class="update-anyways">
+				<a class="accept" href="#">
+					<?php _e( 'I have read the warning and wish to update anyways', 'woocommerce' ); ?>
+				</a>
+			</div>
+		<?php endif ?>
 	</div>
 </div>

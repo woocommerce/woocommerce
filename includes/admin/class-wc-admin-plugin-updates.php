@@ -81,6 +81,15 @@ class WC_Admin_Plugin_Updates {
 				$update_link.addClass( 'thickbox open-plugin-details-modal' ); // 'open-plugin-details-modal' class is required in all plugin page thickboxes to prevent JS errors on close. See wp-admin/js/plugin-install.js.
 				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
 
+				$( '#wc_untested_extensions_modal .accept' ).on( 'click', function( evt ) {
+					evt.preventDefault();
+					tb_remove();
+					$update_link.addClass( 'update-link' );
+					$update_link.attr( 'href', update_url );
+					$update_link.click();
+				});
+
+
 			})(jQuery);
 		</script>
 		<?php
