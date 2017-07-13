@@ -239,7 +239,7 @@ jQuery( function( $ ) {
 
 	// DATE PICKER FIELDS.
 	$( '.sale_price_dates_fields' ).each( function() {
-		var dates = $( this ).find( 'input' ).datepicker({
+		$( this ).find( 'input' ).datepicker({
 			defaultDate: '',
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
