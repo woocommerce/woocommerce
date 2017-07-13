@@ -184,8 +184,8 @@ class WC_Shortcodes {
 
 		// Filterable with the shortcode_atts_{$shortcode} filter.
 		$atts = shortcode_atts( array(
-			'orderby'       => '',      // menu_order, title, date, rand, price, popularity, rating, or id
-			'order'         => 'desc',  // asc or desc
+			'orderby'       => '',     // menu_order, title, date, rand, price, popularity, rating, or id
+			'order'         => 'desc', // asc or desc
 			'limit'         => '4',
 			'per_page'      => '',     // overrides 'limit'
 			'columns'       => '4',
@@ -200,14 +200,27 @@ class WC_Shortcodes {
 			'featured'      => false,
 		), $atts, 'products' );
 
+		$query_args = self::products_query_args( $atts, $loop_name );
+
+		return self::product_loop( $query_args, $atts, $loop_name );
+	}
+
+	/**
+	 * Take in the shortcode attributes and return query args.
+	 *
+	 * @param array $atts
+	 * @param str $loop_name
+	 * @return array
+	 */
+	public static function products_query_args( $atts, $loop_name ) {
 		$query_args = apply_filters( "woocommerce_default_{$loop_name}_query_args", array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
-			'orderby'             => $atts['orderby'], // defaults to 'menu_order title' later on.
-			'order'               => $atts['order'],
-			'posts_per_page'      => $atts['limit'],
+			'orderby'             => empty( $atts['orderby'] ) ? '' : $atts['orderby'],
+			'order'               => empty( $atts['order'] ) ? 'desc' : $atts['order'],
+			'posts_per_page'      => empty( $atts['limit'] ) ? '1' : $atts['limit'],
 			'tax_query'           => WC()->query->get_tax_query(),
 			'meta_query'          => WC()->query->get_meta_query(),
 		) );
@@ -218,13 +231,18 @@ class WC_Shortcodes {
 		|-------------------------
 		*/
 
-		if ( 'popularity' === $atts['orderby'] ) {
+		if ( 'popularity' === $query_args['orderby'] ) {
+			$query_args['order'] = ( 'DESC' === strtoupper( $query_args['order'] ) ) ? 'DESC' : 'ASC';
+
 			// can remove after get_catalog_ordering_args() is updated
 			$query_args['meta_key'] = 'total_sales';
 			$query_args['orderby'] = array(
 				'meta_value_num' => 'DESC',
 				'post_date'      => 'DESC',
 			);
+		} else if ( is_string( $query_args['orderby'] ) && 'ID' === strtoupper( $query_args['orderby'] ) ) {
+			$query_args['orderby'] = 'ID';
+			$query_args['order'] = ( 'DESC' === strtoupper( $query_args['order'] ) ) ? 'DESC' : 'ASC';
 		} else {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
 			$query_args['orderby'] = $ordering_args['orderby'];
@@ -247,7 +265,7 @@ class WC_Shortcodes {
 					'taxonomy'     => 'product_cat',
 					'terms'        => array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
 					'field'        => 'slug',
-					'operator'     => $atts['cat_operator'],
+					'operator'     => empty( $atts['cat_operator'] ) ? 'IN' : $atts['cat_operator'],
 			);
 		}
 
@@ -265,7 +283,7 @@ class WC_Shortcodes {
 				'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
 				'terms'    => array_map( 'sanitize_title', explode( ',', $atts['attr_terms'] ) ),
 				'field'    => 'slug',
-				'operator' => $atts['attr_operator'],
+				'operator' => empty( $atts['attr_operator'] ) ? 'IN' : $atts['attr_operator'],
 			);
 		}
 
@@ -308,7 +326,7 @@ class WC_Shortcodes {
 			}
 		}
 
-		return self::product_loop( $query_args, $atts, $loop_name );
+		return $query_args;
 	}
 
 	/**
