@@ -884,7 +884,7 @@ function wc_get_order_note( $data ) {
 	return (object) apply_filters( 'woocommerce_get_order_note', array(
 		'id'            => (int) $data->comment_ID,
 		'date_created'  => wc_string_to_datetime( $data->comment_date ),
-		'note'          => $data->comment_content,
+		'content'       => $data->comment_content,
 		'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 		'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
 	), $data );
