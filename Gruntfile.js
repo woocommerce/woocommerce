@@ -273,9 +273,11 @@ module.exports = function( grunt ) {
 		phpcs: {
 			options: {
 				bin: 'vendor/bin/phpcs',
-				standard: './dev.ruleset.xml'
 			},
 			dist: {
+				options: {
+					standard: './phpcs.ruleset.xml'
+				},
 				src:  [
 					'**/*.php',                                                  // Include all files
 					'!apigen/**',                                                // Exclude apigen/
@@ -287,6 +289,12 @@ module.exports = function( grunt ) {
 					'!tmp/**',                                                   // Exclude tmp/
 					'!vendor/**'                                                 // Exclude vendor/
 				]
+			},
+			dev: {
+				options: {
+					standard: './dev.ruleset.xml'
+				},
+				src: '<%= phpcs.dist.src %>'
 			}
 		},
 
