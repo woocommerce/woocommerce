@@ -989,6 +989,7 @@ ul.wc_coupon_list_block {
 			textarea,
 			select,
 			.wc-enhanced-select,
+			.wc-category-search,
 			.wc-customer-search {
 				width: 100%;
 			}
@@ -5517,6 +5518,7 @@ table.bar_chart {
 .woocommerce table.form-table .select2-container {
 	min-width: 400px !important;
 }
+.post-type-product .tablenav,
 .post-type-shop_order .tablenav {
 	.actions {
 		overflow: visible;
