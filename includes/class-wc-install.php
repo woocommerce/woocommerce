@@ -100,7 +100,6 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
-		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
@@ -832,67 +831,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				}
 			}
 		}
-	}
-
-	/**
-	 * Show plugin changes. Code adapted from W3 Total Cache.
-	 *
-	 * @param array $args
-	 */
-	public static function in_plugin_update_message( $args ) {
-		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
-
-		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
-			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
-
-			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-				$upgrade_notice = self::parse_update_notice( $response['body'], $args['new_version'] );
-				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
-			}
-		}
-
-		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $upgrade_notice ) );
-	}
-
-	/**
-	 * Parse update notice from readme file.
-	 *
-	 * @param  string $content
-	 * @param  string $new_version
-	 * @return string
-	 */
-	private static function parse_update_notice( $content, $new_version ) {
-		// Output Upgrade Notice.
-		$matches        = null;
-		$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
-		$upgrade_notice = '';
-
-		if ( preg_match( $regexp, $content, $matches ) ) {
-			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
-
-			// Convert the full version strings to minor versions.
-			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
-			$current_version_parts = explode( '.', WC_VERSION );
-
-			if ( 3 !== sizeof( $notice_version_parts ) ) {
-				return;
-			}
-
-			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
-			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
-
-			// Check the latest stable version and ignore trunk.
-			if ( version_compare( $current_version, $notice_version, '<' ) ) {
-
-				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
-
-				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
-				}
-			}
-		}
-
-		return wp_kses_post( $upgrade_notice );
 	}
 
 	/**
