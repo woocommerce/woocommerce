@@ -93,6 +93,7 @@ class WC_AJAX {
 			'get_cart_totals'                                  => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
+			'remove_from_cart'                                 => true,
 			'checkout'                                         => true,
 			'get_variation'                                    => true,
 			'get_customer_location'                            => true,
@@ -379,6 +380,21 @@ class WC_AJAX {
 			);
 
 			wp_send_json( $data );
+		}
+	}
+
+	/**
+	 * AJAX add to cart.
+	 */
+	public static function remove_from_cart() {
+		ob_start();
+
+		$cart_item_key = wc_clean( $_POST['cart_item_key'] );
+
+		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			self::get_refreshed_fragments();
+		} else {
+			wp_send_json_error();
 		}
 	}
 
