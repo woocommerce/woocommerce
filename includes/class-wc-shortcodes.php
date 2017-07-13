@@ -20,26 +20,25 @@ class WC_Shortcodes {
 	 */
 	public static function init() {
 		$shortcodes = array(
-			'wc_products'                => __CLASS__ . '::wc_products',
-			'product'                    => __CLASS__ . '::product',
+			'products'                   => __CLASS__ . '::products',
 			'product_page'               => __CLASS__ . '::product_page',
-			'product_category'           => __CLASS__ . '::product_category',
 			'product_categories'         => __CLASS__ . '::product_categories',
 			'add_to_cart'                => __CLASS__ . '::product_add_to_cart',
 			'add_to_cart_url'            => __CLASS__ . '::product_add_to_cart_url',
-			'products'                   => __CLASS__ . '::products',
-			'recent_products'            => __CLASS__ . '::recent_products',
-			'sale_products'              => __CLASS__ . '::sale_products',
-			'best_selling_products'      => __CLASS__ . '::best_selling_products',
-			'top_rated_products'         => __CLASS__ . '::top_rated_products',
-			'featured_products'          => __CLASS__ . '::featured_products',
-			'product_attribute'          => __CLASS__ . '::product_attribute',
 			'related_products'           => __CLASS__ . '::related_products',
 			'shop_messages'              => __CLASS__ . '::shop_messages',
 			'woocommerce_order_tracking' => __CLASS__ . '::order_tracking',
 			'woocommerce_cart'           => __CLASS__ . '::cart',
 			'woocommerce_checkout'       => __CLASS__ . '::checkout',
 			'woocommerce_my_account'     => __CLASS__ . '::my_account',
+			'product'                    => __CLASS__ . '::product',
+			'product_category'           => __CLASS__ . '::product_category',
+			'recent_products'            => __CLASS__ . '::recent_products',
+			'sale_products'              => __CLASS__ . '::sale_products',
+			'best_selling_products'      => __CLASS__ . '::best_selling_products',
+			'top_rated_products'         => __CLASS__ . '::top_rated_products',
+			'featured_products'          => __CLASS__ . '::featured_products',
+			'product_attribute'          => __CLASS__ . '::product_attribute',
 		);
 
 		foreach ( $shortcodes as $shortcode => $function ) {
@@ -172,13 +171,13 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Main products shortcode.
+	 * Main product listing shortcode.
 	 *
 	 * @param array $atts
 	 * @param str $loop_name
 	 * @return string
 	 */
-	public static function wc_products( $atts, $loop_name = 'wc_products' ) {
+	public static function products( $atts, $loop_name = 'products' ) {
 		if ( empty( $atts ) ) {
 			return '';
 		}
@@ -198,7 +197,7 @@ class WC_Shortcodes {
 			'attr_operator' => 'IN',   // IN, NOT IN, or AND
 			'on_sale'       => false,
 			'featured'      => false,
-		), $atts, 'wc_products' );
+		), $atts, 'products' );
 
 		$query_args = apply_filters( "woocommerce_default_{$loop_name}_query_args", array(
 			'post_type'           => 'product',
@@ -330,7 +329,7 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		return self::wc_products( $args, 'product_category' );
+		return self::products( $args, 'product_category' );
 	}
 
 
@@ -426,29 +425,7 @@ class WC_Shortcodes {
 		$args['cat_operator'] = $args['operator'];
 		unset( $args['operator'] );
 
-		return self::wc_products( $args, 'recent_products' );
-	}
-
-	/**
-	 * List multiple products shortcode.
-	 *
-	 * @param array $deprecated
-	 * @return string
-	 */
-	public static function products( $deprecated ) {
-		if ( empty( $deprecated ) ) {
-			return '';
-		}
-
-		$args = shortcode_atts( array(
-			'columns' => '4',
-			'orderby' => 'title',
-			'order'   => 'asc',
-			'ids'     => '',
-			'skus'    => '',
-		), $deprecated, 'products' );
-
-		return self::wc_products( $args, 'products' );
+		return self::products( $args, 'recent_products' );
 	}
 
 	/**
@@ -468,7 +445,7 @@ class WC_Shortcodes {
 			$args['ids'] = $deprecated['id'];
 		}
 
-		return self::wc_products( $args, 'product' );
+		return self::products( $args, 'product' );
 	}
 
 	/**
@@ -581,7 +558,7 @@ class WC_Shortcodes {
 
 		$args['on_sale'] = true;
 
-		return self::wc_products( $args, 'sale_products' );
+		return self::products( $args, 'sale_products' );
 	}
 
 	/**
@@ -604,7 +581,7 @@ class WC_Shortcodes {
 
 		$args['orderby'] = 'popularity';
 
-		return self::wc_products( $args, 'best_selling_products' );
+		return self::products( $args, 'best_selling_products' );
 	}
 
 	/**
@@ -629,7 +606,7 @@ class WC_Shortcodes {
 
 		$args['orderby'] = 'rating';
 
-		return self::wc_products( $args, 'top_rated_products' );
+		return self::products( $args, 'top_rated_products' );
 	}
 
 	/**
@@ -654,7 +631,7 @@ class WC_Shortcodes {
 
 		$args['featured'] = 'true';
 
-		return self::wc_products( $args, 'featured_products' );
+		return self::products( $args, 'featured_products' );
 	}
 
 	/**
@@ -789,7 +766,7 @@ class WC_Shortcodes {
 		$args['attr_terms'] = $args['filter'];
 		unset( $args['filter'] );
 
-		return self::wc_products( $args, 'product_attribute' );
+		return self::products( $args, 'product_attribute' );
 	}
 
 	/**
