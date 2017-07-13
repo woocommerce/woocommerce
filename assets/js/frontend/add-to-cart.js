@@ -11,9 +11,10 @@ jQuery( function( $ ) {
 	var AddToCartHandler = function() {
 		$( document )
 			.on( 'click', '.add_to_cart_button', this.onAddToCart )
+			.on( 'click', '.remove_from_cart_button', this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
 			.on( 'added_to_cart', this.updateCartPage )
-			.on( 'added_to_cart', this.updateFragments );
+			.on( 'added_to_cart removed_from_cart', this.updateFragments );
 	};
 
 	/**
@@ -62,6 +63,34 @@ jQuery( function( $ ) {
 				$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
 			});
 		}
+	};
+
+	/**
+	 * Update fragments after remove from cart event in mini-cart.
+	 */
+	AddToCartHandler.prototype.onRemoveFromCart = function( e ) {
+		var $thisbutton = $( this ),
+			$row        = $thisbutton.closest( '.woocommerce-mini-cart-item' );
+
+		e.preventDefault();
+
+		$row.block({
+			message: null,
+			overlayCSS: {
+				opacity: 0.6
+			}
+		});
+
+		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), { cart_item_key : $thisbutton.data( 'cart_item_key' ) }, function( response ) {
+			if ( ! response || ! response.fragments ) {
+				window.location = $thisbutton.attr( 'href' );
+				return;
+			}
+			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash ] );
+		}).fail( function() {
+			window.location = $thisbutton.attr( 'href' );
+			return;
+		});
 	};
 
 	/**

@@ -165,8 +165,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			$check_method = false;
 
 			if ( is_object( $order ) ) {
-				if ( $order->shipping_method ) {
-					$check_method = $order->shipping_method;
+				if ( $order->get_shipping_method() ) {
+					$check_method = $order->get_shipping_method();
 				}
 			} elseif ( empty( $chosen_shipping_methods ) || sizeof( $chosen_shipping_methods ) > 1 ) {
 				$check_method = false;

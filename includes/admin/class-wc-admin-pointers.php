@@ -239,11 +239,34 @@ class WC_Admin_Pointers {
 				function show_wc_pointer( id ) {
 					var pointer = wc_pointers.pointers[ id ];
 					var options = $.extend( pointer.options, {
+						pointerClass: 'wp-pointer wc-pointer',
 						close: function() {
 							if ( pointer.next ) {
 								show_wc_pointer( pointer.next );
 							}
-						}
+						},
+						buttons: function( event, t ) {
+							var close   = '" . esc_js( __( 'Dismiss', 'woocommerce' ) ) . "',
+								next    = '" . esc_js( __( 'Next', 'woocommerce' ) ) . "',
+								button  = $( '<a class=\"close\" href=\"#\">' + close + '</a>' ),
+								button2 = $( '<a class=\"button button-primary\" href=\"#\">' + next + '</a>' ),
+								wrapper = $( '<div class=\"wc-pointer-buttons\" />' );
+
+							button.bind( 'click.pointer', function(e) {
+								e.preventDefault();
+								t.element.pointer('destroy');
+							});
+
+							button2.bind( 'click.pointer', function(e) {
+								e.preventDefault();
+								t.element.pointer('close');
+							});
+
+							wrapper.append( button );
+							wrapper.append( button2 );
+
+							return wrapper;
+						},
 					} );
 					var this_pointer = $( pointer.target ).pointer( options );
 					this_pointer.pointer( 'open' );
