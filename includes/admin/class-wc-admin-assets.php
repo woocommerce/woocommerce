@@ -128,6 +128,7 @@ class WC_Admin_Assets {
 			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 			'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
+			'search_categories_nonce'   => wp_create_nonce( 'search-categories' ),
 		) );
 
 		// Accounting
