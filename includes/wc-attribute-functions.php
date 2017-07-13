@@ -472,7 +472,16 @@ function wc_create_attribute( $args ) {
 		}
 	}
 
-	// Clear transients.
+	/**
+	 * Attribute created.
+	 *
+	 * @param int   $id   Created attribute ID.
+	 * @param array $data Data used to created the attribute.
+	 */
+	do_action( 'woocommerce_attribute_created', $id, $data );
+
+	// Clear cache and flush rewrite rules.
+	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 	delete_transient( 'wc_attribute_taxonomies' );
 
 	return $id;
