@@ -186,7 +186,8 @@ class WC_Shortcodes {
 		$atts = shortcode_atts( array(
 			'orderby'       => '',      // menu_order, title, date, rand, price, popularity, rating, or id
 			'order'         => 'desc',  // asc or desc
-			'per_page'      => '4',
+			'limit'         => '4',
+			'per_page'      => '',     // overrides 'limit'
 			'columns'       => '4',
 			'ids'           => '',     // comma separated IDs
 			'skus'          => '',     // comma separated SKUs
@@ -206,7 +207,7 @@ class WC_Shortcodes {
 			'no_found_rows'       => 1,
 			'orderby'             => $atts['orderby'], // defaults to 'menu_order title' later on.
 			'order'               => $atts['order'],
-			'posts_per_page'      => $atts['per_page'],
+			'posts_per_page'      => $atts['limit'],
 			'tax_query'           => WC()->query->get_tax_query(),
 			'meta_query'          => WC()->query->get_meta_query(),
 		) );
@@ -287,6 +288,11 @@ class WC_Shortcodes {
 				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
 				'compare' => 'IN',
 			);
+		}
+
+		// Allow 'per_page' to override 'limit' for backwards compatibility.
+		if ( ! empty( $atts['per_page'] ) ) {
+			$query_args['posts_per_page'] = $atts['per_page'];
 		}
 
 		// Ensure enough products are shown if IDs or SKUs were entered.
