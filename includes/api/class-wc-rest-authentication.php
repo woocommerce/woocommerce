@@ -533,6 +533,8 @@ class WC_REST_Authentication {
 					return new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 				}
 				break;
+			case 'OPTIONS' :
+				return true;
 
 			default :
 				return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Unknown request method.', 'woocommerce' ), array( 'status' => 401 ) );
