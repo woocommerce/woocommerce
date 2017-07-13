@@ -842,4 +842,70 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$expected = array( $order2_id );
 		$this->assertEquals( $expected, $orders );
 	}
+
+	/**
+	 * Test wc_get_order_note().
+	 *
+	 * @since 3.2.0
+	 */
+	public function test_wc_get_order_note() {
+		$note_content = 'Note content';
+		$order        = WC_Helper_Order::create_order();
+		$note_id      = (int) $order->add_order_note( $note_content );
+		$expected     = array(
+			'id'            => $note_id,
+			'note'          => $note_content,
+			'customer_note' => false,
+			'added_by'      => 'system',
+		);
+		$note = (array) wc_get_order_note( $note_id );
+		unset( $note['date_created'] );
+
+		$this->assertEquals( $expected, $note );
+	}
+
+	/**
+	 * Test wc_get_order_notes().
+	 *
+	 * @since 3.2.0
+	 */
+	public function test_wc_get_order_notes() {
+		$order = WC_Helper_Order::create_order();
+		$order->add_order_note( 'Customer note', 1 );
+		$order->add_order_note( 'Internal note' );
+		$order->add_order_note( 'Another internal note' );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertEquals( 3, count( $notes ) );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id(), 'type' => 'customer' ) );
+		$this->assertEquals( 1, count( $notes ) );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id(), 'type' => 'internal' ) );
+		$this->assertEquals( 2, count( $notes ) );
+	}
+
+	/**
+	 * Test wc_create_order_note().
+	 *
+	 * @since 3.2.0
+	 */
+	public function test_wc_create_order_note() {
+		$order = WC_Helper_Order::create_order();
+
+		$note_id = wc_create_order_note( $order->get_id(), 'Note content', false, false );
+		$this->assertTrue( 0 < $note_id );
+	}
+
+	/**
+	 * Test wc_delete_order_note().
+	 *
+	 * @since 3.2.0
+	 */
+	public function test_wc_delete_order_note() {
+		$order   = WC_Helper_Order::create_order();
+		$note_id = $order->add_order_note( 'Note content' );
+
+		$this->assertTrue( wc_delete_order_note( $note_id ) );
+	}
 }
