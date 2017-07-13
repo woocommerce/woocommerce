@@ -16,6 +16,7 @@
  * @category Core
  * @author Automattic
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -48,9 +49,9 @@ if ( ! class_exists( 'WooCommerce' ) ) {
  * @since  2.1
  * @return WooCommerce
  */
-function WC() {
+function wc() {
 	return WooCommerce::instance();
 }
 
 // Global for backwards compatibility.
-$GLOBALS['woocommerce'] = WC();
+$GLOBALS['woocommerce'] = wc();
