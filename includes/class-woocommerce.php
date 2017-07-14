@@ -1,6 +1,6 @@
 <?php
 /**
- * Main WooCommerce Class
+ * WooCommerce setup
  *
  * @author   Automattic
  * @category API
@@ -204,6 +204,8 @@ final class WooCommerce {
 	private function define_constants() {
 		$upload_dir = wp_upload_dir();
 
+		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
+		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
 		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
 		$this->define( 'WC_ROUNDING_PRECISION', 4 );
