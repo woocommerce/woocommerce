@@ -87,8 +87,6 @@ function wc_get_products( $args ) {
 
 	$query = new WC_Product_Query( $args );
 	return $query->get_products();
-
-	//return WC_Data_Store::load( 'product' )->get_products( $args );
 }
 
 /**
