@@ -1168,124 +1168,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return array|object
 	 */
 	public function get_products( $args = array() ) {
-		/**
-		 * Generate WP_Query args.
-		 */
-		$wp_query_args = array(
-			'post_status'    => $args['status'],
-			'posts_per_page' => $args['limit'],
-			'meta_query'     => array(),
-			'orderby'        => $args['orderby'],
-			'order'          => $args['order'],
-			'tax_query'      => array(),
-		);
-
-		if ( 'variation' === $args['type'] ) {
-			$wp_query_args['post_type'] = 'product_variation';
-		} elseif ( is_array( $args['type'] ) && in_array( 'variation', $args['type'] ) ) {
-			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
-			$wp_query_args['tax_query'][] = array(
-				'relation' => 'OR',
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'slug',
-					'terms'    => $args['type'],
-				),
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'id',
-					'operator' => 'NOT EXISTS',
-				),
-			);
-		} else {
-			$wp_query_args['post_type']   = 'product';
-			$wp_query_args['tax_query'][] = array(
-				'taxonomy' => 'product_type',
-				'field'    => 'slug',
-				'terms'    => $args['type'],
-			);
-		}
-
-		// Do not load unnecessary post data if the user only wants IDs.
-		if ( 'ids' === $args['return'] ) {
-			$wp_query_args['fields'] = 'ids';
-		}
-
-		if ( ! empty( $args['sku'] ) ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $args['sku'],
-				'compare' => 'LIKE',
-			);
-		}
-
-		if ( ! empty( $args['category'] ) ) {
-			$wp_query_args['tax_query'][] = array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'   => $args['category'],
-			);
-		}
-
-		if ( ! empty( $args['tag'] ) ) {
-			$wp_query_args['tax_query'][] = array(
-				'taxonomy' => 'product_tag',
-				'field'    => 'slug',
-				'terms'   => $args['tag'],
-			);
-		}
-
-		if ( ! empty( $args['shipping_class'] ) ) {
-			$wp_query_args['tax_query'][] = array(
-				'taxonomy' => 'product_shipping_class',
-				'field'    => 'slug',
-				'terms'   => $args['shipping_class'],
-			);
-		}
-
-		if ( ! is_null( $args['parent'] ) ) {
-			$wp_query_args['post_parent'] = absint( $args['parent'] );
-		}
-
-		if ( ! is_null( $args['offset'] ) ) {
-			$wp_query_args['offset'] = absint( $args['offset'] );
-		} else {
-			$wp_query_args['paged'] = absint( $args['page'] );
-		}
-
-		if ( ! empty( $args['include'] ) ) {
-			$wp_query_args['post__in'] = array_map( 'absint', $args['include'] );
-		}
-
-		if ( ! empty( $args['exclude'] ) ) {
-			$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
-		}
-
-		if ( ! $args['paginate'] ) {
-			$wp_query_args['no_found_rows'] = true;
-		}
-
-		// Get results.
-		$products = new WP_Query( $wp_query_args );
-
-		if ( 'objects' === $args['return'] ) {
-			// Prime caches before grabbing objects.
-			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
-
-			$return = array_filter( array_map( 'wc_get_product', $products->posts ) );
-		} else {
-			$return = $products->posts;
-		}
-
-		if ( $args['paginate'] ) {
-			return (object) array(
-				'products'      => $return,
-				'total'         => $products->found_posts,
-				'max_num_pages' => $products->max_num_pages,
-			);
-		} else {
-			return $return;
-		}
+		$query = new WC_Product_Query( $args );
+		return $query->get_products();
 	}
 
 	/**
@@ -1385,8 +1269,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
 		$key_mapping = array(
-			'status'         => 'post_status',
-			'page'           => 'paged',
+			'status'   => 'post_status',
+			'page'     => 'paged',
+			'include'  => 'post__in',
 		);
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
@@ -1520,6 +1405,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		} else {
 			$query = new WP_Query( $args );
+		}
+
+		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
+			// Prime caches before grabbing objects.
+			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
 		}
 
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );
