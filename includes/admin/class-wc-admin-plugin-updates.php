@@ -20,10 +20,10 @@ class WC_Admin_Plugin_Updates {
 	const VERSION_REQUIRED_HEADER = 'WC requires at least';
 	const VERSION_TESTED_HEADER = 'WC tested up to';
 
-	protected $relative_upgrade_type = ''; // One of: 'unknown', 'major', 'minor', 'patch'.
 	protected $upgrade_notice = '';
 	protected $new_version = '';
-	protected $untested_extensions = array();
+	protected $major_untested_plugins = array();
+	protected $minor_untested_plugins = array();
 
 	/**
 	 * Constructor.
@@ -54,14 +54,19 @@ class WC_Admin_Plugin_Updates {
 
 		$this->new_version = $response->new_version;
 		$this->upgrade_notice = $this->get_upgrade_notice( $response->new_version );
-		$this->relative_upgrade_type = $this->get_upgrade_type( $args['Version'], $response->new_version );
-		$this->untested_plugins = $this->get_untested_plugins( $response->new_version );
 
-		if ( ! empty( $this->untested_plugins ) && ( 'major' == $this->relative_upgrade_type || 'minor' == $this->relative_upgrade_type ) ) {
-			$this->upgrade_notice .= $this->get_extensions_inline_warning();
+		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, 'major' );
+		$this->minor_untested_plugins = $this->get_untested_plugins( $response->new_version, 'minor' );
+
+		if ( ! empty( $this->major_untested_plugins ) ) {
+			$this->upgrade_notice .= $this->get_extensions_inline_warning_major();
 		}
 
-		if ( ! empty( $this->untested_plugins ) && 'major' === $this->relative_upgrade_type ) {
+		if ( ! empty( $this->minor_untested_plugins ) ) {
+			$this->upgrade_notice .= $this->get_extensions_inline_warning_minor();
+		}
+
+		if ( ! empty( $this->major_untested_plugins ) ) {
 			$this->upgrade_notice .= $this->get_extensions_modal_warning();
 			add_action( 'admin_print_footer_scripts', array( $this, 'modal_js' ) );
 		}
@@ -134,10 +139,30 @@ class WC_Admin_Plugin_Updates {
 	| Methods for getting messages.
 	*/
 
-	protected function get_extensions_inline_warning() {
-		$plugins = $this->untested_plugins;
-		$new_version = $this->new_version;
-		$upgrade_type = $this->relative_upgrade_type;
+	protected function get_extensions_inline_warning_minor() {
+		$upgrade_type = 'minor';
+		$plugins = $this->minor_untested_plugins;
+
+		$version_parts = explode( '.', $this->new_version );
+		$new_version = $version_parts[0] . '.' . $version_parts[1];
+
+		/* translators: %s: version number */
+		$message = sprintf( __( 'The following plugin(s) are not listed fully-compatible with WooCommerce %s yet. If possible, update these plugins before updating WooCommerce:', 'woocommerce' ), $new_version );
+
+		ob_start();
+		include( 'views/html-notice-untested-extensions-inline.php' );
+		return ob_get_clean();
+	}
+
+	protected function get_extensions_inline_warning_major() {
+		$upgrade_type = 'major';
+		$plugins = $this->major_untested_plugins;
+
+		$version_parts = explode( '.', $this->new_version );
+		$new_version = $version_parts[0] . '.0';
+
+		/* translators: %s: version number */
+		$message = sprintf( __( 'Heads up! The following plugin(s) are not listed compatible with WooCommerce %s yet. If you upgrade without upgrading these extensions first, you may experience issues:', 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
@@ -250,14 +275,29 @@ class WC_Admin_Plugin_Updates {
 	 * Get plugins that have a tested version lower than the input version.
 	 *
 	 * @param string $version
+	 * @param string $release 'major' or 'minor'.
 	 * @return array of plugin info arrays
 	 */
-	protected function get_untested_plugins( $version ) {
+	protected function get_untested_plugins( $version, $release ) {
 		$extensions = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
 		$untested = array();
 
+		$version_parts = explode( '.', $version );
+		$version = $version_parts[0];
+
+		if ( 'minor' === $release ) {
+			$version .= '.' . $version_parts[1];
+		}
+
 		foreach ( $extensions as $file => $plugin ) {
-			if ( version_compare( $plugin[ self::VERSION_TESTED_HEADER ], $version, '<' ) ) {
+			$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
+			$plugin_version = $plugin_version_parts[0];
+
+			if ( 'minor' === $release ) {
+				$plugin_version .= '.' . $plugin_version_parts[1];
+			}
+
+			if ( version_compare( $plugin_version, $version, '<' ) ) {
 				$untested[ $file ] = $plugin;
 			}
 		}
