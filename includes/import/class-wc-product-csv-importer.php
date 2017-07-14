@@ -185,9 +185,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * If we're not doing an update, create a placeholder product so mapping works
 	 * for rows following this one.
 	 *
+	 * @param  stirng $field
+	 * @param  array $raw_data
 	 * @return int
 	 */
-	public function parse_id_field( $field ) {
+	public function parse_id_field( $field, $raw_data = array() ) {
 		global $wpdb;
 
 		$id = absint( $field );
@@ -205,10 +207,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
+			// If row has a SKU, make sure placeholder was not made already.
+			if ( isset( $raw_data['sku'] ) && $id = wc_get_product_id_by_sku( $raw_data['sku'] ) ) {
+				return $id;
+			}
+
 			$product = new WC_Product_Simple();
 			$product->set_name( 'Import placeholder for ' . $id );
 			$product->set_status( 'importing' );
 			$product->add_meta_data( '_original_id', $id, true );
+
+			// If row has a SKU, make sure placeholder has it too.
+			if ( isset( $raw_data['sku'] ) ) {
+				$product->set_sku( $raw_data['sku'] );
+			}
 			$id = $product->save();
 		}
 
@@ -693,7 +705,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$value = wp_check_invalid_utf8( $value, true );
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value, array_combine( $mapped_keys, $row ) );
 			}
 
 			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
