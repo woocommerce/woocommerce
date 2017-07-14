@@ -11,35 +11,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div id="wc_untested_extensions_modal">
 	<div class="wc_untested_extensions_modal--content">
 		<div class="wc_plugin_upgrade_notice extensions_warning">
+			<h1><?php _e( 'Warning', 'woocommerce' ); ?></h1>
+
 			<h4>
 				<?php
 					/* translators: %s: version number */
 					printf(
-						__( 'Some of your plugins are not listed compatible with WooCommerce %s yet. If you upgrade without upgrading these extensions first, you may experience issues:', 'woocommerce' ),
+						__( 'These plugins are not listed compatible with WooCommerce %s yet. This is a major update. If you upgrade without upgrading these extensions first, you may experience issues:', 'woocommerce' ),
 						wc_clean( $new_version )
 					);
 				?>
 			</h4>
 
-			<div class="keys">
-				<div class="heading">Key</div>
-				<div class="key current">&#x2587; Up to date.</div>
-				<div class="key minor">&#x2587; Not up-to-date with the latest minor WooCommerce release.</div>
-				<div class="key major">&#x2587; Not up-to-date with the latest major WooCommerce release.</div>
-				<div class="key unknown">&#x2587; Unknown</div>
-			</div>
-
 			<?php foreach ( $plugins as $plugin ): ?>
-				<div class="plugin-status <?php echo esc_attr( $plugin['UpgradeType'] ); ?>">&#x2587; <?php echo wc_clean( $plugin['Name'] ); ?></div>
+				<div class="plugin-details">
+					<?php echo wc_clean( $plugin['Name'] ); ?>
+					&mdash;
+					<?php
+					/* translators: %s: version number */
+					printf( __( 'Tested up to WooCommerce %s', 'woocommerce' ), wc_clean( $plugin['WC tested up to'] ) );
+					?>
+				</div>
 			<?php endforeach ?>
-		</div>
 
-		<?php if ( current_user_can( 'update_plugins' ) ): ?>
-			<p class="woocommerce-actions update-anyways">
-				<a class="button-primary accept" href="#">
-					<?php _e( 'I understand and wish to update anyways', 'woocommerce' ); ?>
-				</a>
-			</p>
-		<?php endif ?>
+			<?php if ( current_user_can( 'update_plugins' ) ): ?>
+				<div class="actions">
+					<p class="woocommerce-actions cancel">
+						<a href="#">
+							Cancel
+						</a>
+					</p>
+					<p class="woocommerce-actions update-anyways">
+						<a class="button-primary accept" href="#">
+							<?php _e( 'I understand and wish to update', 'woocommerce' ); ?>
+						</a>
+					</p>
+				</div>
+			<?php endif ?>
 	</div>
 </div>

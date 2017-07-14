@@ -126,6 +126,11 @@ class WC_Admin_Plugin_Updates {
 					$update_link.attr( 'href', update_url );
 					$update_link.click();
 				});
+
+				$( '#wc_untested_extensions_modal .cancel a' ).on( 'click', function( evt ) {
+					evt.preventDefault();
+					tb_remove();
+				});
 			})( jQuery );
 		</script>
 		<?php
@@ -141,13 +146,13 @@ class WC_Admin_Plugin_Updates {
 
 	protected function get_extensions_inline_warning_minor() {
 		$upgrade_type = 'minor';
-		$plugins = $this->minor_untested_plugins;
+		$plugins = ! empty( $this->major_untested_plugins ) ? array_diff_key( $this->minor_untested_plugins, $this->major_untested_plugins ) : $this->minor_untested_plugins;
 
 		$version_parts = explode( '.', $this->new_version );
 		$new_version = $version_parts[0] . '.' . $version_parts[1];
 
 		/* translators: %s: version number */
-		$message = sprintf( __( 'The following plugin(s) are not listed fully-compatible with WooCommerce %s yet. If possible, update these plugins before updating WooCommerce:', 'woocommerce' ), $new_version );
+		$message = sprintf( __( 'The following plugin(s) are not listed fully-compatible with WooCommerce %s yet. If possible, upgrade these plugins before upgrading WooCommerce:', 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
@@ -170,12 +175,10 @@ class WC_Admin_Plugin_Updates {
 	}
 
 	protected function get_extensions_modal_warning() {
-		$new_version = $this->new_version;
-		$plugins = get_plugins();
-		foreach ( $plugins as &$plugin ) {
-			$plugin['UpgradeType'] = $this->get_upgrade_type( $plugin[ self::VERSION_TESTED_HEADER ], $new_version );
+		$version_parts = explode( '.', $this->new_version );
+		$new_version = $version_parts[0] . '.0';
 
-		}
+		$plugins = $this->major_untested_plugins;
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-modal.php' );
@@ -246,30 +249,6 @@ class WC_Admin_Plugin_Updates {
 	|
 	| Methods for getting & manipulating data.
 	*/
-
-	protected function get_upgrade_type( $current_version, $upgrade_version ) {
-		if ( empty( $current_version ) || empty( $upgrade_version ) ) {
-			return 'unknown';
-		}
-
-		if ( $current_version === $upgrade_version ) {
-			return 'current';
-		}
-
-		$current_parts = explode( '.', $current_version );
-		$upgrade_parts = explode( '.', $upgrade_version );
-
-		if ( isset( $upgrade_parts[0] ) && (int) $current_parts[0] < (int) $upgrade_parts[0] ) {
-			return 'major';
-		}
-		if ( isset( $upgrade_parts[1] ) && (int) $current_parts[1] < (int) $upgrade_parts[1] ) {
-			return 'minor';
-		}
-		if ( isset( $upgrade_parts[2] ) && (int) $current_parts[2] < (int) $upgrade_parts[2] ) {
-			return 'patch';
-		}
-		return 'unknown';
-	}
 
 	/**
 	 * Get plugins that have a tested version lower than the input version.
