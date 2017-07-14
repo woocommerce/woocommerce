@@ -1139,17 +1139,3 @@ function wc_do_oembeds( $content ) {
 
 	return $content;
 }
-
-/**
- * Get part of a string before :.
- *
- * Used for example in shipping methods ids where they take the format
- * method_id:instance_id
- *
- * @since  3.2.0
- * @param  string $string
- * @return string
- */
-function wc_get_string_before_colon( $string ) {
-	return trim( current( explode( ':', (string) $string ) ) );
-}

@@ -150,17 +150,48 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// Only apply if all packages are being shipped via chosen method, or order is virtual.
+		// Check methods
 		if ( ! empty( $this->enable_for_methods ) && $needs_shipping ) {
-			$chosen_shipping_methods = array();
 
-			if ( is_object( $order ) ) {
-				$chosen_shipping_methods = array_unique( array_map( 'wc_get_string_before_colon', $order->get_shipping_methods() ) );
-			} elseif ( $chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' ) ) {
-				$chosen_shipping_methods = array_unique( array_map( 'wc_get_string_before_colon', $chosen_shipping_methods_session ) );
+			// Only apply if all packages are being shipped via chosen methods, or order is virtual
+			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
+
+			if ( isset( $chosen_shipping_methods_session ) ) {
+				$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
+			} else {
+				$chosen_shipping_methods = array();
 			}
 
-			if ( 0 < count( array_diff( $chosen_shipping_methods, $this->enable_for_methods ) ) ) {
+			$check_method = false;
+
+			if ( is_object( $order ) ) {
+				if ( $order->get_shipping_method() ) {
+					$check_method = $order->get_shipping_method();
+				}
+			} elseif ( empty( $chosen_shipping_methods ) || sizeof( $chosen_shipping_methods ) > 1 ) {
+				$check_method = false;
+			} elseif ( sizeof( $chosen_shipping_methods ) == 1 ) {
+				$check_method = $chosen_shipping_methods[0];
+			}
+
+			if ( ! $check_method ) {
+				return false;
+			}
+
+			if ( strstr( $check_method, ':' ) ) {
+				$check_method = current( explode( ':', $check_method ) );
+			}
+
+			$found = false;
+
+			foreach ( $this->enable_for_methods as $method_id ) {
+				if ( $check_method === $method_id ) {
+					$found = true;
+					break;
+				}
+			}
+
+			if ( ! $found ) {
 				return false;
 			}
 		}
