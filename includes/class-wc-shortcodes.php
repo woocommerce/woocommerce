@@ -731,6 +731,9 @@ class WC_Shortcodes {
 		<?php
 		}
 
+		// For "is_single" to always make load comments_template() for reviews.
+		$single_product->is_single = true;
+
 		ob_start();
 
 		global $wp_query;
