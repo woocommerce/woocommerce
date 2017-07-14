@@ -1291,6 +1291,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
+		if ( ! isset( $wp_query_args['date_query'] ) ) {
+			$wp_query_args['date_query'] = array();
+		}
+		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			$wp_query_args['meta_query'] = array();
+		}
+
 		// Add the special SKU query if needed.
 		if ( $sku_query ) {
 			$wp_query_args['meta_query'][] = array(
@@ -1298,13 +1305,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'value'   => $sku_query,
 				'compare' => 'LIKE',
 			);
-		}
-
-		if ( ! isset( $wp_query_args['date_query'] ) ) {
-			$wp_query_args['date_query'] = array();
-		}
-		if ( ! isset( $wp_query_args['meta_query'] ) ) {
-			$wp_query_args['meta_query'] = array();
 		}
 
 		// Handle product types.
