@@ -14,7 +14,9 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 	public function test_product_query_new() {
 		$query = new WC_Product_Query();
 		$this->assertEquals( '', $query->get( 'weight' ) );
-		$this->assertEquals( array( 'product', 'product_variation' ), $query->get( 'type' ) );
+		$types = $query->get( 'type' );
+		sort( $types );
+		$this->assertEquals( array( 'external', 'grouped', 'simple', 'variable' ), $types );
 	}
 
 	/**
@@ -29,7 +31,7 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 		$product1->set_sale_price( '5.00' );
 		$product1->save();
 
-		$product2 = new WC_Product_Variation();
+		$product2 = new WC_Product_Grouped();
 		$product2->set_sku( 'sku2' );
 		$product2->set_regular_price( '12.50' );
 		$product2->set_sale_price( '5.00' );
@@ -63,7 +65,6 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 		$results = $query->get_products();
 		$this->assertEquals( 1, count( $results ) );
 	}
-
 
 	/**
 	 * Test querying by product date properties for dates stored in metadata.

@@ -1396,13 +1396,82 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// SKU needs special handling because it works with partial matches.
+		// Don't auto-generate meta query args for it.
+		$sku_query = false;
+		if ( isset( $query_vars['sku'] ) ) {
+			$sku_query = $query_vars['sku'];
+			unset( $query_vars['sku'] );
+		}
+
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		// Add the special SKU query if needed.
+		if ( $sku_query ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => $sku_query,
+				'compare' => 'LIKE',
+			);
+		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
 			$wp_query_args['meta_query'] = array();
+		}
+
+		// Handle product types.
+		if ( 'variation' === $query_vars['type'] ) {
+			$wp_query_args['post_type'] = 'product_variation';
+		} elseif ( is_array( $query_vars['type'] ) && in_array( 'variation', $query_vars['type'] ) ) {
+			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
+			$wp_query_args['tax_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => $query_vars['type'],
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'id',
+					'operator' => 'NOT EXISTS',
+				),
+			);
+		} else {
+			$wp_query_args['post_type']   = 'product';
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => $query_vars['type'],
+			);
+		}
+
+		if ( ! empty( $query_vars['category'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'   => $query_vars['category'],
+			);
+		}
+
+		if ( ! empty( $query_vars['tag'] ) ) {
+			unset( $wp_query_args['tag'] );
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'   => $query_vars['tag'],
+			);
+		}
+
+		if ( ! empty( $query_vars['shipping_class'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_shipping_class',
+				'field'    => 'slug',
+				'terms'   => $query_vars['shipping_class'],
+			);
 		}
 
 		$date_queries = array(
