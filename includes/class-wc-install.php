@@ -79,6 +79,15 @@ class WC_Install {
 			'wc_update_300_product_visibility',
 			'wc_update_300_db_version',
 		),
+		'3.1.0' => array(
+			'wc_update_310_downloadable_products',
+			'wc_update_310_old_comments',
+			'wc_update_310_db_version',
+		),
+		'3.2.0' => array(
+			'wc_update_320_mexican_states',
+			'wc_update_320_db_version',
+		),
 	);
 
 	/** @var object Background update class */
@@ -97,6 +106,7 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+		add_action( 'woocommerce_theme_background_installer', array( __CLASS__, 'theme_background_installer' ), 10, 1 );
 	}
 
 	/**
@@ -516,7 +526,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   download_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
-  KEY download_order_product (download_id,order_id,product_id)
+  KEY download_order_product (download_id,order_id,product_id),
+  KEY order_id (order_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
@@ -825,6 +836,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
+	 *
+	 * @param array $args
 	 */
 	public static function in_plugin_update_message( $args ) {
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
@@ -838,7 +851,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			}
 		}
 
-		echo wp_kses_post( $upgrade_notice );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $upgrade_notice ) );
 	}
 
 	/**
@@ -1083,6 +1096,65 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
+	 *
+	 * @param string $theme_slug
+	 * @since 3.1.0
+	 */
+	public static function theme_background_installer( $theme_slug ) {
+		// Explicitly clear the event.
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
+
+		if ( ! empty( $theme_slug ) ) {
+			// Suppress feedback
+			ob_start();
+
+			try {
+				$theme = wp_get_theme( $theme_slug );
+
+				if ( ! $theme->exists() ) {
+					require_once( ABSPATH . 'wp-admin/includes/file.php' );
+					include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+					include_once( ABSPATH . 'wp-admin/includes/theme.php' );
+
+					WP_Filesystem();
+
+					$skin     = new Automatic_Upgrader_Skin;
+					$upgrader = new Theme_Upgrader( $skin );
+					$api      = themes_api( 'theme_information', array(
+						'slug'   => $theme_slug,
+						'fields' => array( 'sections' => false ),
+					) );
+					$result   = $upgrader->install( $api->download_link );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					} elseif ( is_wp_error( $skin->result ) ) {
+						throw new Exception( $skin->result->get_error_message() );
+					} elseif ( is_null( $result ) ) {
+						throw new Exception( 'Unable to connect to the filesystem. Please confirm your credentials.' );
+					}
+				}
+
+				switch_theme( $theme_slug );
+			} catch ( Exception $e ) {
+				WC_Admin_Notices::add_custom_notice(
+					$theme_slug . '_install_error',
+					sprintf(
+						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
+						$theme_slug,
+						$e->getMessage(),
+						esc_url( admin_url( 'update.php?action=install-theme&theme=' . $theme_slug . '&_wpnonce=' . wp_create_nonce( 'install-theme_' . $theme_slug ) ) )
+					)
+				);
+			}
+
+			// Discard feedback
+			ob_end_clean();
 		}
 	}
 }

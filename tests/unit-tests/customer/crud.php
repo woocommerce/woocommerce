@@ -95,6 +95,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_password( 'hunter2' );
 		$customer->set_first_name( 'Billy' );
 		$customer->set_last_name( 'Bob' );
+		$customer->set_display_name( 'Billy Bob' );
 		$customer->save();
 		$customer_id = $customer->get_id();
 		$customer_read = new WC_Customer( $customer_id );
@@ -103,6 +104,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( 'test@woo.local', $customer_read->get_email() );
 		$this->assertEquals( 'Billy', $customer_read->get_first_name() );
 		$this->assertEquals( 'Bob', $customer_read->get_last_name() );
+		$this->assertEquals( 'Billy Bob', $customer_read->get_display_name() );
 		$this->assertEquals( $username, $customer_read->get_username() );
 	}
 
@@ -183,6 +185,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 			'email' => 'test@woo.local',
 			'first_name' => 'Bob',
 			'last_name' => 'tester',
+			'display_name' => 'Bob Tester',
 			'role' => 'customer',
 			'date_created' => $time,
 			'date_modified' => $time,

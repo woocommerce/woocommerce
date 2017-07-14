@@ -215,7 +215,7 @@ class WC_Cart {
 		 */
 		$cart = WC()->session->get( 'cart', null );
 
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) ) ) {
+		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
 			$cart                = $saved_cart['cart'];
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
@@ -314,7 +314,7 @@ class WC_Cart {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
-		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
+		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
 			'cart' => WC()->session->get( 'cart' ),
 		) );
 	}
@@ -323,7 +323,7 @@ class WC_Cart {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
+		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 	}
 
 	/*
@@ -619,7 +619,7 @@ class WC_Cart {
 			}
 		}
 		$cross_sells = array_diff( $cross_sells, $in_cart );
-		return wp_parse_id_list( $cross_sells );
+		return apply_filters( 'woocommerce_cart_crosssell_ids', wp_parse_id_list( $cross_sells ), $this );
 	}
 
 	/**
@@ -887,6 +887,9 @@ class WC_Cart {
 
 			// Get the product
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
+
+			// Filter quantity being added to the cart before stock checks
+			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
 
 			// Sanity check
 			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
@@ -1359,8 +1362,16 @@ class WC_Cart {
 		// Only calculate the grand total + shipping if on the cart/checkout
 		if ( is_checkout() || is_cart() || defined( 'WOOCOMMERCE_CHECKOUT' ) || defined( 'WOOCOMMERCE_CART' ) ) {
 
-			// Calculate the Shipping
+			// Calculate the Shipping.
+			$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+			$had_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
 			$this->calculate_shipping();
+			$has_local_pickup     = 0 < count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) );
+
+			// If methods changed and local pickup is selected, we need to do a recalculation of taxes.
+			if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && $had_local_pickup !== $has_local_pickup ) {
+				return $this->calculate_totals();
+			}
 
 			// Trigger the fees API where developers can add fees to the cart
 			$this->calculate_fees();
@@ -1447,8 +1458,8 @@ class WC_Cart {
 		}
 
 		// Get totals for the chosen shipping method
-		$this->shipping_total 		= WC()->shipping->shipping_total;	// Shipping Total
-		$this->shipping_taxes		= WC()->shipping->shipping_taxes;	// Shipping Taxes
+		$this->shipping_total = WC()->shipping->shipping_total; // Shipping Total
+		$this->shipping_taxes = WC()->shipping->shipping_taxes; // Shipping Taxes
 	}
 
 	/**
@@ -1504,6 +1515,7 @@ class WC_Cart {
 						'address'   => WC()->customer->get_shipping_address(),
 						'address_2' => WC()->customer->get_shipping_address_2(),
 					),
+					'cart_subtotal'       => $this->get_displayed_subtotal(),
 				),
 			)
 		);
@@ -1725,6 +1737,13 @@ class WC_Cart {
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
+		// Prevent adding coupons by post ID.
+		if ( $the_coupon->get_code() !== $coupon_code ) {
+			$the_coupon->set_code( $coupon_code );
+			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			return false;
+		}
+
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
 			wc_add_notice( $the_coupon->get_error_message(), 'error' );
@@ -1793,6 +1812,9 @@ class WC_Cart {
 
 	/**
 	 * Get array of applied coupon objects and codes.
+	 *
+	 * @param null $deprecated
+	 *
 	 * @return array of applied coupons
 	 */
 	public function get_coupons( $deprecated = null ) {
@@ -1847,6 +1869,8 @@ class WC_Cart {
 
 	/**
 	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
+	 *
+	 * @param null $deprecated
 	 */
 	public function remove_coupons( $deprecated = null ) {
 		$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
@@ -1970,6 +1994,10 @@ class WC_Cart {
 	 *
 	 * Fee is an amount of money charged for a particular piece of work
 	 * or for a particular right or service, and not supposed to be negative.
+	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
+	 * persist.
 	 *
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
@@ -2305,6 +2333,9 @@ class WC_Cart {
 	/**
 	 * Function to apply cart discounts after tax.
 	 * @deprecated Coupons can not be applied after tax
+	 *
+	 * @param $values
+	 * @param $price
 	 */
 	public function apply_cart_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
@@ -2313,6 +2344,9 @@ class WC_Cart {
 	/**
 	 * Function to apply product discounts after tax.
 	 * @deprecated Coupons can not be applied after tax
+	 *
+	 * @param $values
+	 * @param $price
 	 */
 	public function apply_product_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );

@@ -16,9 +16,7 @@
 
 		// Initial state.
 		this.$singleVariationWrap.show();
-		this.$form.unbind( 'check_variations update_variation_values found_variation' );
-		this.$resetVariations.unbind( 'click' );
-		this.$attributeFields.unbind( 'change ' );
+		this.$form.off( '.wc-variation-form' );
 
 		// Methods.
 		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
@@ -27,17 +25,17 @@
 		this.toggleResetLink        = this.toggleResetLink.bind( this );
 
 		// Events.
-		$form.on( 'click', '.reset_variations', { variationForm: this }, this.onReset );
+		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: this }, this.onReset );
 		$form.on( 'reload_product_variations', { variationForm: this }, this.onReload );
 		$form.on( 'hide_variation', { variationForm: this }, this.onHide );
 		$form.on( 'show_variation', { variationForm: this }, this.onShow );
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
 		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
 		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
-		$form.on( 'change', '.variations select', { variationForm: this }, this.onChange );
-		$form.on( 'found_variation', { variationForm: this }, this.onFoundVariation );
-		$form.on( 'check_variations', { variationForm: this }, this.onFindVariation );
-		$form.on( 'update_variation_values', { variationForm: this }, this.onUpdateAttributes );
+		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: this }, this.onChange );
+		$form.on( 'found_variation.wc-variation-form', { variationForm: this }, this.onFoundVariation );
+		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
+		$form.on( 'update_variation_values.wc-variation-form', { variationForm: this }, this.onUpdateAttributes );
 
 		// Check variations once init.
 		$form.trigger( 'check_variations' );
@@ -197,13 +195,13 @@
 		}
 
 		if ( variation.weight ) {
-			$weight.wc_set_content( variation.weight );
+			$weight.wc_set_content( variation.weight_html );
 		} else {
 			$weight.wc_reset_content();
 		}
 
 		if ( variation.dimensions ) {
-			$dimensions.wc_set_content( variation.dimensions );
+			$dimensions.wc_set_content( variation.dimensions_html );
 		} else {
 			$dimensions.wc_reset_content();
 		}
@@ -554,20 +552,27 @@
 			$product_link     = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
-			$product_img.wc_set_variation_attr( 'src', variation.image.src );
-			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
-			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
-			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
-			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
-			$product_img.wc_set_variation_attr( 'title', variation.image.title );
-			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
-			$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
-			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
-			$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
-			$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
-			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
-			$gallery_img.wc_set_variation_attr( 'src', variation.image.thumb_src );
-			$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
+			if ( $( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' ).length > 0 ) {
+				$gallery_img = $( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' );
+				$gallery_img.trigger( 'click' );
+				$form.attr( 'current-image', variation.image_id );
+				return;
+			} else {
+				$product_img.wc_set_variation_attr( 'src', variation.image.src );
+				$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
+				$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
+				$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
+				$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
+				$product_img.wc_set_variation_attr( 'title', variation.image.title );
+				$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
+				$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
+				$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
+				$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
+				$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
+				$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
+				$gallery_img.wc_set_variation_attr( 'src', variation.image.thumb_src );
+				$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
+			}
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'width' );
@@ -586,10 +591,10 @@
 		}
 
 		window.setTimeout( function() {
-			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
-			$form.wc_maybe_trigger_slide_position_reset( variation );
 			$( window ).trigger( 'resize' );
-		}, 10 );
+			$form.wc_maybe_trigger_slide_position_reset( variation );
+			$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
+		}, 20 );
 	};
 
 	$(function() {

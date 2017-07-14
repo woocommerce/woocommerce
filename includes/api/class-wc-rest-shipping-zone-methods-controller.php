@@ -279,10 +279,11 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Updates settings, order, and enabled status on create.
 	 *
-	 * @param $instance_id integer
-	 * @param $method
+	 * @param int $instance_id integer
+	 * @param WC_Shipping_Method $method
 	 * @param WP_REST_Request $request
-	 * @return $method
+	 *
+	 * @return WC_Shipping_Method
 	 */
 	public function update_fields( $instance_id, $method, $request ) {
 		global $wpdb;
@@ -367,6 +368,10 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 
 	/**
 	 * Return settings associated with this shipping zone method instance.
+	 *
+	 * @param WC_Shipping_Method $item
+	 *
+	 * @return array
 	 */
 	public function get_settings( $item ) {
 		$item->init_instance_settings();

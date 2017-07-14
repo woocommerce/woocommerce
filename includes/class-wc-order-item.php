@@ -35,7 +35,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'order_item';
@@ -113,7 +113,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Get parent order object.
-	 * @return int
+	 * @return WC_Order
 	 */
 	public function get_order() {
 		return wc_get_order( $this->get_order_id() );
@@ -153,7 +153,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Type checking
-	 * @param  string|array  $Type
+	 * @param  string|array  $type
 	 * @return boolean
 	 */
 	public function is_type( $type ) {
@@ -206,8 +206,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
-				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
+				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key, $meta, $this ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value, $meta, $this ) ) ),
 			);
 		}
 
@@ -295,7 +295,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$return = array();
 
 			foreach ( $this->meta_data as $meta ) {
-				$return[ $meta->key ] = $meta;
+				$return[ $meta->id ] = $meta;
 			}
 
 			return $return;

@@ -100,7 +100,7 @@ class WC_Data_Store_WP {
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, $meta->value, false );
+		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
 	}
 
 	/**
@@ -155,7 +155,10 @@ class WC_Data_Store_WP {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array
+	 *
+	 * @param string $key
+	 *
+	 * @return string
 	 */
 	protected function prefix_key( $key ) {
 		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;
@@ -205,7 +208,8 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args = array(
-			'meta_query'    => array(),
+			'errors'     => array(),
+			'meta_query' => array(),
 		);
 
 		foreach ( $query_vars as $key => $value ) {
@@ -356,7 +360,7 @@ class WC_Data_Store_WP {
 		}
 
 		// Meta dates are stored as timestamps in the db.
-		// Check against begining/end-of-day timestamps when using 'day' precision.
+		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
 			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );

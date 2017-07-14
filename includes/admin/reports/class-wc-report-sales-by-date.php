@@ -400,10 +400,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		// Total orders and discounts also includes those which have been refunded at some point
 		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2, '.', '' );
 		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
-		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) ) - $this->report_data->total_refunded_orders;
 
-		// Item counts
-		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
+		// Total orders in this period, even if refunded.
+		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
+
+		// Item items ordered in this period, even if refunded.
+		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
 		// 3rd party filtering of report data
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
@@ -590,8 +592,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Round our totals correctly.
-	 * @param  string $amount
-	 * @return string
+	 *
+	 * @param array|string $amount
+	 *
+	 * @return array|string
 	 */
 	private function round_chart_totals( $amount ) {
 		if ( is_array( $amount ) ) {

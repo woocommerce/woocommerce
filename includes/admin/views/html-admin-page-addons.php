@@ -11,7 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
-	<h1><?php echo get_admin_page_title(); ?></h1>
+	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>" class="nav-tab nav-tab-active"><?php _e( 'Browse Extensions', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php _e( 'WooCommerce.com Subscriptions', 'woocommerce' ); ?></a>
+	</nav>
+
+	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
@@ -28,8 +33,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		<?php endif; ?>
 		<?php if ( 'featured' !== $current_section && $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+			<?php if ( 'shipping_methods' === $current_section ) : ?>
+				<div class="addons-shipping-methods">
+					<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
+				</div>
+			<?php endif; ?>
 			<ul class="products">
 			<?php foreach ( $addons as $addon ) : ?>
+				<?php if ( 'shipping_methods' === $current_section ) {
+					// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
+					$country = WC()->countries->get_base_country();
+					if ( 'US' === $country
+						&& false !== strpos(
+								$addon->link, 'woocommerce.com/products/usps-shipping-method'
+							)
+					) {
+						continue;
+					}
+					if ( 'CA' === $country
+						&& false !== strpos(
+								$addon->link, 'woocommerce.com/products/canada-post-shipping-method'
+							)
+					) {
+						continue;
+					}
+				}
+				?>
 				<li class="product">
 					<a href="<?php echo esc_attr( $addon->link ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>

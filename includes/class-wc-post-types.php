@@ -249,6 +249,11 @@ class WC_Post_types {
 		do_action( 'woocommerce_register_post_type' );
 
 		$permalinks = wc_get_permalink_structure();
+		$supports = array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'publicize', 'wpcom-markdown' );
+
+		if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
+			$supports[] = 'comments';
+		}
 
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
@@ -289,7 +294,7 @@ class WC_Post_types {
 					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
 					'rewrite'             => $permalinks['product_rewrite_slug'] ? array( 'slug' => $permalinks['product_rewrite_slug'], 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
-					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'publicize', 'wpcom-markdown' ),
+					'supports'            => $supports,
 					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop',
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,

@@ -140,8 +140,21 @@ class WC_Form_Handler {
 
 		if ( 0 === wc_notice_count( 'error' ) ) {
 
-			foreach ( $address as $key => $field ) {
-				update_user_meta( $user_id, $key, $_POST[ $key ] );
+			$customer = new WC_Customer( $user_id );
+
+			if ( $customer ) {
+				foreach ( $address as $key => $field ) {
+					if ( is_callable( array( $customer, "set_$key" ) ) ) {
+						$customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					} else {
+						$customer->update_meta_data( $key, wc_clean( $_POST[ $key ] ) );
+					}
+
+					if ( WC()->customer && is_callable( array( WC()->customer, "set_$key" ) ) ) {
+						WC()->customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					}
+				}
+				$customer->save();
 			}
 
 			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
@@ -462,7 +475,7 @@ class WC_Form_Handler {
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
-					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
+					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
@@ -556,8 +569,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		// Clear current cart
-		WC()->cart->empty_cart();
+		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
@@ -826,7 +840,10 @@ class WC_Form_Handler {
 					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
-					if ( '' === $valid_value || $valid_value === $value ) {
+					if ( $valid_value === $value ) {
+						$variations[ $taxonomy ] = $value;
+					// If valid values are empty, this is an 'any' variation so get all possible values.
+					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs() ) ) {
 						$variations[ $taxonomy ] = $value;
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
@@ -884,6 +901,10 @@ class WC_Form_Handler {
 				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 					$user = get_user_by( 'email', $username );
 
+					if ( ! $user ) {
+						$user = get_user_by( 'login', $username );
+					}
+
 					if ( isset( $user->user_login ) ) {
 						$creds['user_login'] = $user->user_login;
 					} else {
@@ -913,13 +934,13 @@ class WC_Form_Handler {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = $_POST['redirect'];
-					} elseif ( wp_get_referer() ) {
-						$redirect = wp_get_referer();
+					} elseif ( wc_get_raw_referer() ) {
+						$redirect = wc_get_raw_referer();
 					} else {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ), wc_get_page_permalink( 'myaccount' ) ) );
 					exit;
 				}
 			} catch ( Exception $e ) {

@@ -65,20 +65,25 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' ),
 			),
-			'locale' => array(
-				'name'    => __( 'Store locale', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_locale' ),
-				'handler' => array( $this, 'wc_setup_locale_save' ),
+			'location' => array(
+				'name'    => __( 'Store location', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_location' ),
+				'handler' => array( $this, 'wc_setup_location_save' ),
 			),
-			'shipping_taxes' => array(
-				'name'    => __( 'Shipping &amp; tax', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
-				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
+			'shipping' => array(
+				'name'    => __( 'Shipping', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_shipping' ),
+				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
 			'payments' => array(
 				'name'    => __( 'Payments', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_payments' ),
 				'handler' => array( $this, 'wc_setup_payments_save' ),
+			),
+			'theme' => array(
+				'name'    => __( 'Theme', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_theme' ),
+				'handler' => array( $this, 'wc_setup_theme_save' ),
 			),
 			'next_steps' => array(
 				'name'    => __( 'Ready!', 'woocommerce' ),
@@ -87,13 +92,18 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
+		// Hide storefront step if using a WooCommerce theme or user cannot modify themes.
+		if ( ! current_user_can( 'install_themes' ) || ! current_user_can( 'switch_themes' ) || is_multisite() || current_theme_supports( 'woocommerce' ) ) {
+			unset( $default_steps['theme'] );
+		}
+
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
-		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
+		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
 			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 			'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
@@ -112,7 +122,7 @@ class WC_Admin_Setup_Wizard {
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
 
-		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup.min.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), WC_VERSION );
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) ),
 		) );
@@ -192,11 +202,11 @@ class WC_Admin_Setup_Wizard {
 	 * Output the steps.
 	 */
 	public function setup_wizard_steps() {
-		$ouput_steps = $this->steps;
-		array_shift( $ouput_steps );
+		$output_steps = $this->steps;
+		array_shift( $output_steps );
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $ouput_steps as $step_key => $step ) : ?>
+			<?php foreach ( $output_steps as $step_key => $step ) : ?>
 				<li class="<?php
 					if ( $step_key === $this->step ) {
 						echo 'active';
@@ -295,13 +305,22 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale settings.
+	 * Location and Tax settings.
 	 */
-	public function wc_setup_locale() {
-		$user_location  = WC_Geolocation::geolocate_ip();
-		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
-		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
-		$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+	public function wc_setup_location() {
+		$address        = WC()->countries->get_base_address();
+		$address_2      = WC()->countries->get_base_address_2();
+		$city           = WC()->countries->get_base_city();
+		$state          = WC()->countries->get_base_state();
+		$country        = WC()->countries->get_base_country();
+		$postcode       = WC()->countries->get_base_postcode();
+
+		if ( empty( $country ) ) {
+			$user_location  = WC_Geolocation::geolocate_ip();
+			$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
+			$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
+			$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+		}
 
 		// Defaults
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
@@ -309,18 +328,45 @@ class WC_Admin_Setup_Wizard {
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
 		$num_decimals   = get_option( 'woocommerce_price_num_decimals', '2' );
 		$thousand_sep   = get_option( 'woocommerce_price_thousand_sep', ',' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
-		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
-		<h1><?php esc_html_e( 'Store locale setup', 'woocommerce' ); ?></h1>
+		<h1><?php esc_html_e( 'Store location setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="store_location"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+					<tr>
+						<th scope="row"><label for="store_address"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+						<td>
+							<input type="text" id="store_address" name="store_address" value="<?php echo esc_attr( $address ); ?>" />
+							<span class="description"> <?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<input type="text" id="store_address_2" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
+							<span class="description"> <?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
+							<span class="description"> <?php esc_html_e( 'City', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">&nbsp;</th>
+						<td>
+							<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
+							</select>
+							<span class="description"> <?php esc_html_e( 'Country / State', 'woocommerce' ); ?></span>
+						</td>
+					</tr>
+					<th scope="row">&nbsp;</th>
 					<td>
-					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-						</select>
+						<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
+						<span class="description"> <?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -367,83 +413,6 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-			</table>
-			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
-				<?php wp_nonce_field( 'wc-setup' ); ?>
-			</p>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Save Locale Settings.
-	 */
-	public function wc_setup_locale_save() {
-		check_admin_referer( 'wc-setup' );
-
-		$store_location = sanitize_text_field( $_POST['store_location'] );
-		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
-		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
-		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
-		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
-		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
-		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
-		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
-
-		update_option( 'woocommerce_default_country', $store_location );
-		update_option( 'woocommerce_currency', $currency_code );
-		update_option( 'woocommerce_currency_pos', $currency_pos );
-		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
-		update_option( 'woocommerce_price_num_decimals', $num_decimals );
-		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
-		update_option( 'woocommerce_weight_unit', $weight_unit );
-		update_option( 'woocommerce_dimension_unit', $dimension_unit );
-
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
-		exit;
-	}
-
-	/**
-	 * Shipping and taxes.
-	 */
-	public function wc_setup_shipping_taxes() {
-		?>
-		<h1><?php esc_html_e( 'Shipping &amp; Tax setup', 'woocommerce' ); ?></h1>
-		<form method="post">
-			<p><?php esc_html_e( 'If you will be charging sales tax, or shipping physical goods to customers, you can enable these below. This is optional and can be changed later.', 'woocommerce' ); ?></p>
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="woocommerce_calc_shipping"><?php esc_html_e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_ship_to_countries', '' ) !== 'disabled', true ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
-						<label for="woocommerce_calc_shipping"><?php esc_html_e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
 					<th scope="row"><label for="woocommerce_calc_taxes"><?php esc_html_e( 'Will you be charging sales tax?', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="checkbox" <?php checked( get_option( 'woocommerce_calc_taxes', 'no' ), 'yes' ); ?> id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
@@ -457,59 +426,25 @@ class WC_Admin_Setup_Wizard {
 						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php esc_html_e( 'I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
-				<?php
-					$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-					$tax_rates   = array();
-					$country     = WC()->countries->get_base_country();
-					$state       = WC()->countries->get_base_state();
-
-					if ( isset( $locale_info[ $country ] ) ) {
-						if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
-						} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
-							$tax_rates = $locale_info[ $country ]['tax_rates'][''];
-						}
-						if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
-							$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
-						}
-					}
-					if ( $tax_rates ) {
-						?>
-						<tr class="tax-rates">
-							<td colspan="2">
-								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
-								<div class="importing-tax-rates">
-									<table class="tax-rates">
-										<thead>
-											<tr>
-												<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
-												<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
-											</tr>
-										</thead>
-										<tbody>
-											<?php
-												foreach ( $tax_rates as $rate ) {
-													?>
-													<tr>
-														<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
-														<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
-													</tr>
-													<?php
-												}
-											?>
-										</tbody>
-									</table>
-								</div>
-								<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
-							</td>
-						</tr>
-						<?php
-					}
-				?>
+				<tr class="tax-rates" style="display: none;">
+					<td colspan="2">
+						<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in <a href="%s" target="_blank">our documentation</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/' ); ?></p>
+						<div class="importing-tax-rates">
+							<table class="tax-rates">
+								<thead>
+								<tr>
+									<th><?php esc_html_e( 'Country', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'State', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'Rate (%)', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
+								</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+						<p class="description"><?php printf( __( 'You may need to add/edit rates based on your products or business location which can be done from the <a href="%s" target="_blank">tax settings</a> screen. If in doubt, speak to an accountant.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) ); ?></p>
+					</td>
+				</tr>
 			</table>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -521,39 +456,36 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save shipping and tax options.
+	 * Save Locale and Tax settings.
 	 */
-	public function wc_setup_shipping_taxes_save() {
+	public function wc_setup_location_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$enable_shipping  = isset( $_POST['woocommerce_calc_shipping'] );
-		$enable_taxes     = isset( $_POST['woocommerce_calc_taxes'] );
-		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
+		$address        = sanitize_text_field( $_POST['store_address'] );
+		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
+		$city           = sanitize_text_field( $_POST['store_city'] );
+		$store_location = sanitize_text_field( $_POST['store_location'] );
+		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 
-		if ( $enable_shipping ) {
-			update_option( 'woocommerce_ship_to_countries', '' );
-			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
+		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
+		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
+		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
+		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
 
-			/*
-			 * If this is the initial shipping setup, create a shipping
-			 * zone containing the country the store is located in, with
-			 * a "free shipping" method preconfigured.
-			 */
-			if ( false === $current_shipping ) {
-				$default_country = get_option( 'woocommerce_default_country' );
-				$location        = wc_format_country_state_string( $default_country );
+		update_option( 'woocommerce_store_address', $address );
+		update_option( 'woocommerce_store_address_2', $address_2 );
+		update_option( 'woocommerce_store_city', $city );
+		update_option( 'woocommerce_default_country', $store_location );
+		update_option( 'woocommerce_store_postcode', $postcode );
 
-				$zone = new WC_Shipping_Zone( null );
-				$zone->set_zone_order( 0 );
-				$zone->add_location( $location['country'], 'country' );
-				$zone->set_zone_name( $zone->get_formatted_location() );
-				$zone->add_shipping_method( 'free_shipping' );
-				$zone->save();
-			}
-		} else {
-			update_option( 'woocommerce_ship_to_countries', 'disabled' );
-		}
+		update_option( 'woocommerce_currency', $currency_code );
+		update_option( 'woocommerce_currency_pos', $currency_pos );
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_num_decimals', $num_decimals );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
 
+		$enable_taxes   = isset( $_POST['woocommerce_calc_taxes'] );
 		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
 
@@ -590,6 +522,165 @@ class WC_Admin_Setup_Wizard {
 					WC_Tax::_insert_tax_rate( $tax_rate );
 				}
 			}
+		}
+
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		exit;
+	}
+
+	/**
+	 * Tout WooCommerce Services for North American stores.
+	 */
+	protected function wc_setup_wcs_tout() {
+		$base_location = wc_get_base_location();
+
+		if ( false === $base_location['country'] ) {
+			$base_location = WC_Geolocation::geolocate_ip();
+		}
+
+		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
+			return;
+		}
+
+		$default_content = array(
+			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
+		);
+
+		switch ( $base_location['country'] ) {
+			case 'CA':
+				$local_content = array(
+					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+				);
+				break;
+			default:
+				$local_content = array();
+		}
+
+		$content = wp_parse_args( $local_content, $default_content );
+		?>
+		<ul class="wc-wizard-shipping-methods">
+			<li class="wc-wizard-shipping">
+				<div class="wc-wizard-shipping-enable">
+					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
+					<label>
+						<?php echo esc_html( $content['title'] ) ?>
+					</label>
+				</div>
+				<div class="wc-wizard-shipping-description">
+					<p>
+						<?php echo esc_html( $content['description'] ); ?>
+					</p>
+				</div>
+			</li>
+		</ul>
+		<?php
+	}
+
+	/**
+	 * Shipping.
+	 */
+	public function wc_setup_shipping() {
+		$dimension_unit = get_option( 'woocommerce_dimension_unit', false );
+		$weight_unit    = get_option( 'woocommerce_weight_unit', false );
+		if ( false === $dimension_unit || false === $weight_unit ) {
+			$country = get_option( 'woocommerce_default_country', '' );
+			if ( 0 === strpos( $country, 'US:' ) ) {
+				$dimension_unit = 'in';
+				$weight_unit = 'oz';
+			} else {
+				$dimension_unit = 'cm';
+				$weight_unit = 'kg';
+			}
+		}
+		?>
+		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<?php $this->wc_setup_wcs_tout(); ?>
+
+			<table class="form-table">
+				<tr>
+					<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+			</table>
+
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<input type="submit" class="button button-large button-next" value="<?php esc_attr_e( 'Skip this step', 'woocommerce' ); ?>" name="save_step" />
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</p>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Save shipping options.
+	 */
+	public function wc_setup_shipping_save() {
+		check_admin_referer( 'wc-setup' );
+
+		if ( isset( $_POST['save_step'] ) && esc_attr( 'Skip this step', 'woocommerce' ) === $_POST['save_step'] ) {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			exit;
+		}
+
+		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
+		$install_services = isset( $_POST['woocommerce_install_services'] );
+		$weight_unit      = sanitize_text_field( $_POST['weight_unit'] );
+		$dimension_unit   = sanitize_text_field( $_POST['dimension_unit'] );
+
+		update_option( 'woocommerce_ship_to_countries', '' );
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+
+		/*
+		 * If this is the initial shipping setup, create a shipping
+		 * zone containing the country the store is located in, with
+		 * a "free shipping" method preconfigured.
+		 */
+		if ( false === $current_shipping ) {
+			$default_country = get_option( 'woocommerce_default_country' );
+			$location        = wc_format_country_state_string( $default_country );
+
+			$zone = new WC_Shipping_Zone( null );
+			$zone->set_zone_order( 0 );
+			$zone->add_location( $location['country'], 'country' );
+			$zone->set_zone_name( $zone->get_formatted_location() );
+			$zone->add_shipping_method( 'free_shipping' );
+			$zone->save();
+		}
+
+		if ( $install_services && ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
+			$services_plugin_id = 'woocommerce-services';
+			$services_plugin    = array(
+				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+				'repo-slug' => 'woocommerce-services',
+			);
+			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
+		} else {
+			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
@@ -763,6 +854,45 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Theme step.
+	 */
+	private function wc_setup_theme() {
+		?>
+		<form method="post" class="wc-wizard-storefront">
+			<p class="wc-wizard-storefront-intro">
+				<?php echo wp_kses_post( __( '<strong>Storefront</strong> is the free WordPress theme built and maintained by the makers of WooCommerce.', 'woocommerce' ) ); ?>
+				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/storefront-intro.png' ); ?>" alt="Storefront" />
+			</p>
+
+			<ul class="wc-wizard-storefront-features">
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__bulletproof first"><?php echo wp_kses_post( __( '<strong>Bulletproof WooCommerce integration:</strong> Rest assured the integration between WooCommerce, WooCommerce extensions and Storefront is water-tight.', 'woocommerce' ) ); ?></li>
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__accessibility last"><?php echo wp_kses_post( __( '<strong>Built with accessibility in mind:</strong> Storefront adheres to the strict wordpress.org accessibility guidelines making your store accessible to the widest audience possible.', 'woocommerce' ) ); ?></li>
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__extendable first"><?php echo wp_kses_post( __( '<strong>Child themes and extensions available:</strong> Like WooCommerce, you can extend Storefront with an extension or child theme to make your store truly your own.', 'woocommerce' ) ); ?></li>
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__compatibility last"><?php echo wp_kses_post( __( '<strong>No Shortcodes, sliders or page builders:</strong> Bring your favorite sliders or page builders, Storefront is built to work with the most popular options.', 'woocommerce' ) ); ?></li>
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__mobile first"><?php echo wp_kses_post( __( '<strong>Clean, simple mobile-first design:</strong> The perfect place to start when customizing your store, looks beautiful on any device.', 'woocommerce' ) ); ?></li>
+				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__search last"><?php echo wp_kses_post( __( '<strong>Optimized for search:</strong> Valid schema markup for improved SEO performance.', 'woocommerce' ) ); ?></li>
+			</ul>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Install &amp; activate Storefront', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</p>
+		</form>
+		<?php
+
+	}
+
+	/**
+	 * Theme step save.
+	 */
+	private function wc_setup_theme_save() {
+		check_admin_referer( 'wc-setup' );
+		wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		exit;
+	}
+
+	/**
 	 * Actions on the final step.
 	 */
 	private function wc_setup_ready_actions() {
@@ -804,6 +934,7 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php esc_html_e( 'Next steps', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="setup-product"><a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php esc_html_e( 'Create your first product!', 'woocommerce' ); ?></a></li>
+					<li class="setup-product"><a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>"><?php esc_html_e( 'Import products from a CSV file', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 			<div class="wc-setup-next-steps-last">

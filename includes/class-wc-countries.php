@@ -137,7 +137,7 @@ class WC_Countries {
 	/**
 	 * Get the states for a country.
 	 * @param  string $cc country code
-	 * @return array of states
+	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
 		if ( empty( $this->states ) ) {
@@ -149,6 +149,26 @@ class WC_Countries {
 		} else {
 			return $this->states;
 		}
+	}
+
+	/**
+	 * Get the base address (first line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address() {
+		$base_address = get_option( 'woocommerce_store_address', '' );
+		return apply_filters( 'woocommerce_countries_base_address', $base_address );
+	}
+
+	/**
+	 * Get the base address (second line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address_2() {
+		$base_address_2 = get_option( 'woocommerce_store_address_2', '' );
+		return apply_filters( 'woocommerce_countries_base_address_2', $base_address_2 );
 	}
 
 	/**
@@ -171,18 +191,22 @@ class WC_Countries {
 
 	/**
 	 * Get the base city for the store.
+	 * @version 3.1.1
 	 * @return string
 	 */
 	public function get_base_city() {
-		return apply_filters( 'woocommerce_countries_base_city', '' );
+		$base_city = get_option( 'woocommerce_store_city', '' );
+		return apply_filters( 'woocommerce_countries_base_city', $base_city );
 	}
 
 	/**
 	 * Get the base postcode for the store.
+	 * @since 3.1.1
 	 * @return string
 	 */
 	public function get_base_postcode() {
-		return apply_filters( 'woocommerce_countries_base_postcode', '' );
+		$base_postcode = get_option( 'woocommerce_store_postcode', '' );
+		return apply_filters( 'woocommerce_countries_base_postcode', $base_postcode );
 	}
 
 	/**
@@ -304,7 +328,7 @@ class WC_Countries {
 	 *
 	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
 	 *
-	 * @param  $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
+	 * @param  string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
 	 * @return string[]
 	 */
 	public function get_european_union_countries( $type = '' ) {
@@ -320,6 +344,9 @@ class WC_Countries {
 
 	/**
 	 * Gets the correct string for shipping - either 'to the' or 'to'
+	 *
+	 * @param string $country_code
+	 *
 	 * @return string
 	 */
 	public function shipping_to_prefix( $country_code = '' ) {
@@ -332,6 +359,9 @@ class WC_Countries {
 
 	/**
 	 * Prefix certain countries with 'the'
+	 *
+	 * @param string $country_code
+	 *
 	 * @return string
 	 */
 	public function estimated_for_prefix( $country_code = '' ) {
@@ -347,7 +377,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -357,7 +387,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -367,7 +397,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
@@ -653,10 +683,10 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
-                    'state' => array(
-                        'required' => false,
+					'state' => array(
+						'required' => false,
 					),
-                ),
+				),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -1107,6 +1137,9 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
+			if ( 'state' === $key ) {
+				$value['country_field'] = $type . 'country';
+			}
 			$address_fields[ $type . $key ] = $value;
 		}
 

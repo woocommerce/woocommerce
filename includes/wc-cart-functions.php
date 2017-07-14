@@ -48,7 +48,7 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true ) ) ) {
+	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
 		return;
 	}
 
@@ -85,6 +85,8 @@ function wc_get_raw_referer() {
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
+ *
+ * @return mixed|void
  */
 function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
@@ -219,7 +221,7 @@ function wc_cart_totals_shipping_html() {
 			'package'                  => $package,
 			'available_methods'        => $package['rates'],
 			'show_package_details'     => sizeof( $packages ) > 1,
-			'show_shipping_calculator' => $first,
+			'show_shipping_calculator' => is_cart() && $first,
 			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
 			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
@@ -245,8 +247,11 @@ function wc_cart_totals_taxes_total_html() {
  * Get a coupon label.
  *
  * @access public
+ *
  * @param string $coupon
  * @param bool $echo or return
+ *
+ * @return string
  */
 function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 	if ( is_string( $coupon ) ) {

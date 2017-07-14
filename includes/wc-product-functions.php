@@ -95,7 +95,7 @@ function wc_get_products( $args ) {
  *
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
- * @return WC_Product|null
+ * @return WC_Product|null|false
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -317,6 +317,9 @@ function wc_placeholder_img_src() {
  * Get the placeholder image.
  *
  * @access public
+ *
+ * @param string $size
+ *
  * @return string
  */
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
@@ -373,8 +376,6 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
 				}
-			} else {
-				$value = ucwords( str_replace( '-', ' ', $value ) );
 			}
 
 			if ( $include_names ) {
@@ -415,18 +416,19 @@ function wc_scheduled_sales() {
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
 		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
-			$sale_price = $product->get_sale_price();
+			if ( $product = wc_get_product( $product_id ) ) {
+				$sale_price = $product->get_sale_price();
 
-			if ( $sale_price ) {
-				$product->set_price( $sale_price );
-				$product->set_date_on_sale_from( '' );
-			} else {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+				if ( $sale_price ) {
+					$product->set_price( $sale_price );
+					$product->set_date_on_sale_from( '' );
+				} else {
+					$product->set_date_on_sale_to( '' );
+					$product->set_date_on_sale_from( '' );
+				}
+
+				$product->save();
 			}
-
-			$product->save();
 		}
 
 		delete_transient( 'wc_products_onsale' );
@@ -436,13 +438,14 @@ function wc_scheduled_sales() {
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
 		foreach ( $product_ids as $product_id ) {
-			$product       = wc_get_product( $product_id );
-			$regular_price = $product->get_regular_price();
-			$product->set_price( $regular_price );
-			$product->set_sale_price( '' );
-			$product->set_date_on_sale_to( '' );
-			$product->set_date_on_sale_from( '' );
-			$product->save();
+			if ( $product = wc_get_product( $product_id ) ) {
+				$regular_price = $product->get_regular_price();
+				$product->set_price( $regular_price );
+				$product->set_sale_price( '' );
+				$product->set_date_on_sale_to( '' );
+				$product->set_date_on_sale_from( '' );
+				$product->save();
+			}
 		}
 
 		WC_Cache_Helper::get_transient_version( 'product', true );
@@ -685,7 +688,10 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param object|bool $product
+ *
+ * @param int $attachment_id
+ * @param object $product
+ *
  * @return array
  */
 function wc_get_product_attachment_props( $attachment_id = null, $product = false ) {
@@ -740,9 +746,9 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters( 'woocommerce_product_visibility_options', array(
-		'visible' => __( 'Visible', 'woocommerce' ),
-		'catalog' => __( 'Catalog', 'woocommerce' ),
-		'search'  => __( 'Search', 'woocommerce' ),
+		'visible' => __( 'Shop and search results', 'woocommerce' ),
+		'catalog' => __( 'Shop only', 'woocommerce' ),
+		'search'  => __( 'Search results only', 'woocommerce' ),
 		'hidden'  => __( 'Hidden', 'woocommerce' ),
 	) );
 }
@@ -877,7 +883,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
  */
 function wc_get_product_term_ids( $product_id, $taxonomy ) {
 	$terms = get_the_terms( $product_id, $taxonomy );
-	return ! empty( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : array();
+	return ( empty( $terms ) || is_wp_error( $terms ) ) ? array() : wp_list_pluck( $terms, 'term_id' );
 }
 
 /**
@@ -1028,6 +1034,17 @@ function wc_products_array_filter_visible( $product ) {
 }
 
 /**
+ * Callback for array filter to get visible grouped products only.
+ *
+ * @since  3.1.0
+ * @param  WC_Product $product
+ * @return bool
+ */
+function wc_products_array_filter_visible_grouped( $product ) {
+	return $product && is_a( $product, 'WC_Product' ) && ( 'publish' === $product->get_status() || current_user_can( 'edit_product', $product->get_id() ) );
+}
+
+/**
  * Callback for array filter to get products the user can edit only.
  *
  * @since  3.0.0
@@ -1041,8 +1058,11 @@ function wc_products_array_filter_editable( $product ) {
 /**
  * Sort an array of products by a value.
  * @since  3.0.0
- * @param  array $products
- * @param  string $orderby
+ *
+ * @param array $products
+ * @param string $orderby
+ * @param string $order
+ *
  * @return array
  */
 function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc' ) {

@@ -234,6 +234,9 @@ function wc_round_tax_total( $tax ) {
 
 /**
  * Make a refund total negative.
+ *
+ * @param float $amount
+ *
  * @return float
  */
 function wc_format_refund_total( $amount ) {
@@ -243,7 +246,9 @@ function wc_format_refund_total( $amount ) {
 /**
  * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove locale formatting, and optionally round + trim off zeros.
+ * Sanitize, remove decimals, and optionally round + trim off zeros.
+ *
+ * This function does not remove thousands - this should be done before passing a value to the function.
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
@@ -256,8 +261,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', $number ) );
-		$number = preg_replace( '/[^0-9\.,-]/', '', $number );
+		$number = str_replace( $decimals, '.', $number );
+		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
@@ -299,7 +304,7 @@ function wc_float_to_string( $float ) {
  * @return string
  */
 function wc_format_localized_price( $value ) {
-	return str_replace( '.', wc_get_price_decimal_separator(), strval( $value ) );
+	return apply_filters( 'woocommerce_format_localized_price', str_replace( '.', wc_get_price_decimal_separator(), strval( $value ) ), $value );
 }
 
 /**
@@ -309,7 +314,7 @@ function wc_format_localized_price( $value ) {
  */
 function wc_format_localized_decimal( $value ) {
 	$locale = localeconv();
-	return str_replace( '.', $locale['decimal_point'], strval( $value ) );
+	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $locale['decimal_point'], strval( $value ) ), $value );
 }
 
 /**
@@ -540,6 +545,10 @@ function wc_time_format() {
  * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
  *
  * @since  3.0.0
+ *
+ * @param string $time_string
+ * @param int|null $from_timestamp
+ *
  * @return int
  */
 function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
@@ -661,7 +670,8 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	 * Hex darker/lighter/contrast functions for colors.
 	 *
 	 * @param mixed $color
-	 * @return string
+	 *
+	 * @return array
 	 */
 	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
@@ -823,8 +833,18 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	$postcode = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $postcode ) : strtoupper( $postcode );
-	return preg_replace( '/[\s\-]/', '', trim( $postcode ) );
+	return preg_replace( '/[\s\-]/', '', trim( wc_strtoupper( $postcode ) ) );
+}
+
+/**
+ * Wrapper for mb_strtoupper which see's if supported first.
+ *
+ * @since  3.1.0
+ * @param  string $string
+ * @return string
+ */
+function wc_strtoupper( $string ) {
+	return function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $string ) : strtoupper( $string );
 }
 
 /**
@@ -1118,4 +1138,18 @@ function wc_do_oembeds( $content ) {
 	$content = $wp_embed->autoembed( $content );
 
 	return $content;
+}
+
+/**
+ * Get part of a string before :.
+ *
+ * Used for example in shipping methods ids where they take the format
+ * method_id:instance_id
+ *
+ * @since  3.2.0
+ * @param  string $string
+ * @return string
+ */
+function wc_get_string_before_colon( $string ) {
+	return trim( current( explode( ':', (string) $string ) ) );
 }

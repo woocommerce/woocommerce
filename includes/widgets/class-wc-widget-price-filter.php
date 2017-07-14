@@ -137,7 +137,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
-		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
+		if ( ! is_post_type_archive( 'product' ) && ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
 			$tax_query[] = array(
 				'taxonomy' => $args['taxonomy'],
 				'terms'    => array( $args['term'] ),

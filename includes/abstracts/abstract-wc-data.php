@@ -248,6 +248,9 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
+	 *
+	 * @param mixed $meta
+	 *
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -352,8 +355,8 @@ abstract class WC_Data {
 
 	/**
 	 * Update meta data by key or ID, if provided.
-	 *
 	 * @since  2.6.0
+	 *
 	 * @param  string $key
 	 * @param  string $value
 	 * @param  int $meta_id
@@ -375,7 +378,7 @@ abstract class WC_Data {
 	 * Delete meta data.
 	 *
 	 * @since 2.6.0
-	 * @param array $key Meta key
+	 * @param string $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
@@ -432,7 +435,8 @@ abstract class WC_Data {
 		}
 
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . 'object_meta_' . $this->get_id();
+			// Prefix by group allows invalidation by group until https://core.trac.wordpress.org/ticket/4476 is implemented.
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
 		}
 
 		if ( ! $force_read ) {
@@ -480,9 +484,9 @@ abstract class WC_Data {
 				$this->data_store->update_meta( $this, $meta );
 			}
 		}
-
 		if ( ! empty( $this->cache_group ) ) {
-			WC_Cache_Helper::incr_cache_prefix( $this->cache_group );
+			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			wp_cache_delete( $cache_key, $this->cache_group );
 		}
 	}
 
@@ -532,8 +536,11 @@ abstract class WC_Data {
 	 * Only sets using public methods.
 	 *
 	 * @since  3.0.0
+	 *
 	 * @param  array $props Key value pairs to set. Key is the prop and should map to a setter function name.
-	 * @return WP_Error|bool
+	 * @param string $context
+	 *
+	 * @return bool|WP_Error
 	 */
 	public function set_props( $props, $context = 'set' ) {
 		$errors = new WP_Error();

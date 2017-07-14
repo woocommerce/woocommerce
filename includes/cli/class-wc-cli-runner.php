@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * WC API to WC CLI Bridge.
  *
@@ -13,7 +18,7 @@
  */
 class WC_CLI_Runner {
 	/**
-	 * Endpoints to disable (meaning they will not be avaiable as CLI commands).
+	 * Endpoints to disable (meaning they will not be available as CLI commands).
 	 * Some of these can either be done via WP already, or are offered with
 	 * some other changes (like tools).
 	 */
@@ -81,7 +86,7 @@ class WC_CLI_Runner {
 
 	/**
 	 * Generates command information and tells WP CLI about all
-	 * commands avaiable from a route.
+	 * commands available from a route.
 	 *
 	 * @param string $rest_command
 	 * @param string $route
@@ -138,6 +143,7 @@ class WC_CLI_Runner {
 		foreach ( $supported_commands as $command => $endpoint_args ) {
 			$synopsis = array();
 			$arg_regs = array();
+			$ids      = array();
 
 			foreach ( $supported_ids as $id_name => $id_desc ) {
 				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
@@ -147,10 +153,10 @@ class WC_CLI_Runner {
 						'description' => $id_desc,
 						'optional'    => false,
 					);
+					$ids[] = $id_name;
 				}
 			}
-
-			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) ) {
+			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) && ! in_array( 'id', $ids )  ) {
 				$synopsis[] = array(
 					'name'		  => 'id',
 					'type'		  => 'positional',
@@ -160,7 +166,7 @@ class WC_CLI_Runner {
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
-				if ( ! in_array( $name, $positional_args ) ) {
+				if ( ! in_array( $name, $positional_args ) || strpos( $route, '<' . $id_name . '>' ) === false ) {
 					$arg_regs[] = array(
 						'name'		  => $name,
 						'type'		  => 'assoc',

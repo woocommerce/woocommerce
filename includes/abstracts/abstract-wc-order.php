@@ -546,7 +546,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_created.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_created( $date = null ) {
@@ -556,7 +556,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_modified.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception
 	 */
 	public function set_date_modified( $date = null ) {
@@ -630,6 +630,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param string $value
 	 * @param string $deprecated Function used to set different totals based on this.
+	 *
+	 * @return bool|void
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value, $deprecated = '' ) {
@@ -808,15 +810,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return 'tax_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
-		} else {
-			return '';
 		}
+		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
 
 	/**
 	 * Remove item from the order.
 	 *
 	 * @param int $item_id
+	 *
+	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
 		$item = $this->get_item( $item_id );
@@ -835,6 +838,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
+	 *
+	 * * @return false|void
 	 */
 	public function add_item( $item ) {
 		if ( ! $items_key = $this->get_items_key( $item ) ) {
@@ -998,11 +1003,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
+	 * If by default the taxes are based on the shipping address and the current order doesn't
+	 * have any, it would use the billing address rather than using the Shopping base location.
+	 *
 	 * Will use the base country unless customer addresses are set.
 	 * @param $args array Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+
+		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = 'billing';
+		}
+
 		$args         = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
 			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),
@@ -1393,6 +1406,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets shipping (formatted).
 	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
@@ -1433,6 +1448,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 * @since  2.3.0
+	 *
+	 * @param string $tax_display
+	 *
 	 * @return string
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
@@ -1574,6 +1592,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Checks the order status against a passed in status.
+	 *
+	 * @param array|string $status
 	 *
 	 * @return bool
 	 */

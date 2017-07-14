@@ -307,6 +307,105 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the outputting of the WooCommerce Services banner block.
+	 *
+	 * @param object $block
+	 */
+	public static function output_wcs_banner_block( $block = array() ) {
+		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
+		$location  = wc_get_base_location();
+
+		if (
+			! in_array( $location['country'], array( 'US', 'CA' ), true ) ||
+			$is_active ||
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$button_url = wp_nonce_url(
+			add_query_arg( array(
+				'install-addon' => 'woocommerce-services',
+			) ),
+			'install-addon_woocommerce-services'
+		);
+
+		$defaults = array(
+			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
+			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
+			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
+			'button'      => __( 'Free - Install now', 'woocommerce' ),
+			'href'        => $button_url,
+			'logos'       => array(),
+		);
+
+		switch ( $location['country'] ) {
+			case 'CA':
+				$local_defaults = array(
+					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
+					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'logos'       => array_merge( $defaults['logos'], array(
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+							'alt'  => 'Canada Post logo',
+						),
+					) ),
+				);
+				break;
+			case 'US':
+				$local_defaults = array(
+					'logos'       => array_merge( $defaults['logos'], array(
+						array(
+							'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+							'alt'  => 'USPS logo',
+						),
+					) ),
+				);
+				break;
+			default:
+				$local_defaults = array();
+		}
+
+		$block_data = array_merge( $defaults, $local_defaults, $block );
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
+				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<ul>
+					<?php foreach ( $block_data['logos'] as $logo ) : ?>
+						<li>
+							<img
+								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								class="wcs-service-logo"
+								src="<?php echo esc_url( $logo['link'] ); ?>"
+							>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<?php
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-green'
+					);
+				?>
+			</div>
+		</div>
+	<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections
@@ -331,6 +430,9 @@ class WC_Admin_Addons {
 					break;
 				case 'small_dark_block':
 					self::output_small_dark_block( $section );
+					break;
+				case 'wcs_banner_block':
+					self::output_wcs_banner_block( (array) $section );
 					break;
 			}
 		}
@@ -362,10 +464,37 @@ class WC_Admin_Addons {
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
+		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+			do_action( 'woocommerce_helper_output' );
+			return;
+		}
+
+		if ( isset( $_GET['install-addon'] ) && 'woocommerce-services' === $_GET['install-addon'] ) {
+			self::install_woocommerce_services_addon();
+		}
+
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
 		$section_keys    = array_keys( $sections );
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-addons.php' );
+	}
+
+	/**
+	 * Install WooCommerce Services from Extensions screens.
+	 */
+	public static function install_woocommerce_services_addon() {
+		check_admin_referer( 'install-addon_woocommerce-services' );
+
+		$services_plugin_id = 'woocommerce-services';
+		$services_plugin    = array(
+			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-services',
+		);
+
+		WC_Install::background_installer( $services_plugin_id, $services_plugin );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
 	}
 }

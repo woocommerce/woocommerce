@@ -31,9 +31,8 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		$this->template_html    = 'emails/customer-processing-order.php';
 		$this->template_plain   = 'emails/plain/customer-processing-order.php';
 
-		$this->set_email_strings();
-
 		// Triggers for this email
+		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_on-hold_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 
@@ -42,13 +41,23 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	}
 
 	/**
-	 * Set email strings.
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->heading = __( 'Thank you for your order', 'woocommerce' );
-		$this->subject = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
-		$this->restore_locale();
+	public function get_default_subject() {
+		return __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Thank you for your order', 'woocommerce' );
 	}
 
 	/**
@@ -77,7 +86,9 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**

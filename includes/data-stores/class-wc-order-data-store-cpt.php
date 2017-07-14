@@ -356,8 +356,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @deprecated 3.1.0 - Use wc_get_orders instead.
 	 * @see    wc_get_orders()
+	 *
 	 * @param  array $args
-	 * @return array of orders
+	 *
+	 * @return array|object
 	 */
 	public function get_orders( $args = array() ) {
 		wc_deprecated_function( 'WC_Order_Data_Store_CPT::get_orders', '3.1.0', 'Use wc_get_orders instead.' );
@@ -387,11 +389,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
-				$meta_query[] = $this->get_orders_generate_customer_meta_query( $value, 'and' );
+				$query_part = $this->get_orders_generate_customer_meta_query( $value, 'and' );
+				if ( is_wp_error( $query_part ) ) {
+					return $query_part;
+				}
+				$meta_query[] = $query_part;
 			} elseif ( is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
-			} else {
+			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
+			} else {
+				return new WP_Error( 'woocommerce_query_invalid', __( 'Invalid customer query.', 'woocommerce' ), $values );
 			}
 		}
 
@@ -411,7 +419,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get unpaid orders after a certain date,
 	 *
-	 * @param  int timestamp $date
+	 * @param  int $date timestamp
 	 * @return array
 	 */
 	public function get_unpaid_orders( $date ) {
@@ -584,15 +592,36 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function get_wp_query_args( $query_vars ) {
 
+		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
 		$key_mapping = array(
-			'customer_id' => 'customer_user',
-			'status' => 'post_status',
+			'customer_id'    => 'customer_user',
+			'status'         => 'post_status',
+			'currency'       => 'order_currency',
+			'version'        => 'order_version',
+			'discount_total' => 'cart_discount',
+			'discount_tax'   => 'cart_discount_tax',
+			'shipping_total' => 'order_shipping',
+			'shipping_tax'   => 'order_shipping_tax',
+			'cart_tax'       => 'order_tax',
+			'total'          => 'order_total',
+			'page'           => 'paged',
 		);
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
 				unset( $query_vars[ $query_key ] );
+			}
+		}
+
+		// Add the 'wc-' prefix to status if needed.
+		if ( ! empty( $query_vars['post_status'] ) ) {
+			if ( is_array( $query_vars['post_status'] ) ) {
+				foreach ( $query_vars['post_status'] as &$status ) {
+					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+				}
+			} else {
+				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
 			}
 		}
 
@@ -626,7 +655,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
 			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
-			$wp_query_args['meta_query'][] = $this->get_orders_generate_customer_meta_query( $values );
+			$customer_query = $this->get_orders_generate_customer_meta_query( $values );
+			if ( is_wp_error( $customer_query ) ) {
+				$wp_query_args['errors'][] = $customer_query;
+			} else {
+				$wp_query_args['meta_query'][] = $customer_query;
+			}
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
@@ -640,18 +674,25 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Query for Orders matching specific criteria.
 	 *
 	 * @since 3.1.0
+	 *
 	 * @param array $query_vars query vars from a WC_Order_Query
-	 * @return array of WC_Order objects or ids
+	 *
+	 * @return array|object
 	 */
 	public function query( $query_vars ) {
 		$args = $this->get_wp_query_args( $query_vars );
-		$query = new WP_Query( $args );
 
-		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
-			return $query->posts;
+		if ( ! empty( $args['errors'] ) ) {
+			$query = (object) array(
+				'posts' => array(),
+				'found_posts' => 0,
+				'max_num_pages' => 0,
+			);
+		} else {
+			$query = new WP_Query( $args );
 		}
 
-		$orders = array_filter( array_map( 'wc_get_order', $query->posts ) );
+		$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
 			return (object) array(

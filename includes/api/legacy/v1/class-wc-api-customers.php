@@ -118,7 +118,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer( $id, $fields = null ) {
 		global $wpdb;
@@ -177,7 +177,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param array $filter
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customers_count( $filter = array() ) {
 
@@ -195,7 +195,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Create a customer
 	 *
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_customer( $data ) {
 
@@ -211,7 +211,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @param int $id the customer ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_customer( $id, $data ) {
 
@@ -228,7 +228,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Delete a customer
 	 *
 	 * @param int $id the customer ID
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_customer( $id ) {
 
@@ -247,7 +247,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer_orders( $id, $fields = null ) {
 		global $wpdb;

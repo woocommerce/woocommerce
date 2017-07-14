@@ -103,7 +103,8 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 * Convert infix to postfix notation.
 		 *
 		 * @param  string $expr
-		 * @return string
+		 *
+		 * @return array|string
 		 */
 		private static function nfx( $expr ) {
 

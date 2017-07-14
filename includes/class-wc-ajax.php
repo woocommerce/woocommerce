@@ -93,6 +93,7 @@ class WC_AJAX {
 			'get_cart_totals'                                  => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
+			'remove_from_cart'                                 => true,
 			'checkout'                                         => true,
 			'get_variation'                                    => true,
 			'get_customer_location'                            => true,
@@ -127,6 +128,7 @@ class WC_AJAX {
 			'json_search_products_and_variations'              => false,
 			'json_search_downloadable_products_and_variations' => false,
 			'json_search_customers'                            => false,
+			'json_search_categories'                           => false,
 			'term_ordering'                                    => false,
 			'product_ordering'                                 => false,
 			'refund_line_items'                                => false,
@@ -379,6 +381,21 @@ class WC_AJAX {
 			);
 
 			wp_send_json( $data );
+		}
+	}
+
+	/**
+	 * AJAX add to cart.
+	 */
+	public static function remove_from_cart() {
+		ob_start();
+
+		$cart_item_key = wc_clean( $_POST['cart_item_key'] );
+
+		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			self::get_refreshed_fragments();
+		} else {
+			wp_send_json_error();
 		}
 	}
 
@@ -1267,6 +1284,53 @@ class WC_AJAX {
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_customers', $found_customers ) );
+	}
+
+	/**
+	 * Search for categories and return json.
+	 */
+	public static function json_search_categories() {
+		ob_start();
+
+		check_ajax_referer( 'search-categories', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		if ( ! $search_text = wc_clean( stripslashes( $_GET['term'] ) ) ) {
+			wp_die();
+		}
+
+		$found_categories = array();
+		$args             = array(
+			'taxonomy'   => array( 'product_cat' ),
+			'orderby'    => 'id',
+			'order'      => 'ASC',
+			'hide_empty' => true,
+			'fields'     => 'all',
+			'name__like' => $search_text,
+		);
+
+		if ( $terms = get_terms( $args ) ) {
+			foreach ( $terms as $term ) {
+				$term->formatted_name = '';
+
+				if ( $term->parent ) {
+					$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat' ) );
+					foreach ( $ancestors as $ancestor ) {
+						if ( $ancestor_term = get_term( $ancestor, 'product_cat' ) ) {
+							$term->formatted_name .= $ancestor_term->name . ' > ';
+						}
+					}
+				}
+
+				$term->formatted_name .= $term->name . ' (' . $term->count . ')';
+				$found_categories[ $term->term_id ] = $term;
+			}
+		}
+
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
 	}
 
 	/**
@@ -2361,7 +2425,8 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
-				$term_id = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$inserted_term = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
 			} else {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}

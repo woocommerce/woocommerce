@@ -421,7 +421,7 @@ class WC_Webhook {
 		// save request data
 		add_comment_meta( $delivery_id, '_request_method', $request['method'] );
 		add_comment_meta( $delivery_id, '_request_headers', array_merge( array( 'User-Agent' => $request['user-agent'] ), $request['headers'] ) );
-		add_comment_meta( $delivery_id, '_request_body', $request['body'] );
+		add_comment_meta( $delivery_id, '_request_body', wp_slash( $request['body'] ) );
 
 		// parse response
 		if ( is_wp_error( $response ) ) {
@@ -697,6 +697,8 @@ class WC_Webhook {
 		if ( 200 !== $response_code ) {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
+
+		delete_post_meta( $this->id, '_webhook_pending_delivery' );
 
 		return true;
 	}

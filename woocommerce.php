@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 3.1.0-alpha
+ * Version: 3.2.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Requires at least: 4.4
@@ -26,7 +26,7 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	3.1.0
+ * @version	3.2.0
  */
 final class WooCommerce {
 
@@ -35,7 +35,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.1.0';
+	public $version = '3.2.0';
 
 	/**
 	 * The single instance of the class.
@@ -176,6 +176,7 @@ final class WooCommerce {
 	 */
 	private function init_hooks() {
 		register_activation_hook( __FILE__, array( 'WC_Install', 'install' ) );
+		register_shutdown_function( array( $this, 'log_errors' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -183,6 +184,22 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
+	}
+
+	/**
+	 * Ensures fatal errors are logged so they can be picked up in the status report.
+	 *
+	 * @since 3.2.0
+	 */
+	public function log_errors() {
+		$error = error_get_last();
+		if ( E_ERROR === $error['type'] ) {
+			$logger = wc_get_logger();
+			$logger->critical(
+				$error['message'] . PHP_EOL,
+				array( 'source' => 'fatal-errors' )
+			);
+		}
 	}
 
 	/**
@@ -461,6 +478,7 @@ final class WooCommerce {
 		$locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
 		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
 
+		unload_textdomain( 'woocommerce' );
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . '/i18n/languages' );
 	}

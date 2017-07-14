@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 interface WC_Payment_Token_Data_Store_Interface {
 	/**
-	 * Returns an array of objects (stdObject) matching specific token critera.
+	 * Returns an array of objects (stdObject) matching specific token criteria.
 	 * Accepts token_id, user_id, gateway_id, and type.
 	 * Each object should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 * @param array $args

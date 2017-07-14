@@ -59,6 +59,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section
+	 *
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
@@ -165,6 +167,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select-nostd',
 					'css'      => 'min-width:300px;',
 					'type'     => 'single_select_page',
+					'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
 					'desc_tip' => true,
 					'autoload' => false,
 				),
@@ -358,6 +361,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
 
 		if ( ! $current_section ) {
+			// Prevent the T&Cs and checkout page from being set to the same page.
+			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
+				$_POST['woocommerce_terms_page_id'] = '';
+			}
+
 			WC_Admin_Settings::save_fields( $this->get_settings() );
 			$wc_payment_gateways->process_admin_options();
 

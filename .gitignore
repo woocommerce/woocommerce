@@ -9,6 +9,7 @@ project.properties
 
 # Grunt
 /node_modules/
+none
 
 # Sass
 .sass-cache/

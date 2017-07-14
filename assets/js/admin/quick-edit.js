@@ -1,4 +1,4 @@
-/*global inlineEditPost, woocommerce_admin */
+/*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -88,6 +88,9 @@ jQuery(function( $ ) {
 		} else {
 			$( '.stock_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
 		}
+
+		// Rename core strings
+		$( 'input[name="comment_status"]' ).parent().find( '.checkbox-title' ).text( woocommerce_quick_edit.strings.allow_reviews );
 	});
 
 	$( '#the-list' ).on( 'change', '.inline-edit-row input[name="_manage_stock"]', function() {

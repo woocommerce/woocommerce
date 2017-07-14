@@ -2,8 +2,6 @@
  * Twenty Seventeen integration styles
  */
 
-@import 'bourbon';
-
 /**
  * Fonts
  */
@@ -34,7 +32,7 @@
  */
 @mixin link() {
 	box-shadow: 0 1px 0 rgba(15, 15, 15, 1);
-	@include transition( box-shadow ease-in-out 130ms );
+	transition: box-shadow ease-in-out 130ms;
 
 	&:hover {
 		box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
@@ -44,7 +42,7 @@
 @mixin link_white() {
 	color: #fff;
 	box-shadow: 0 1px 0 rgba(#fff, 1) !important;
-	@include transition( box-shadow ease-in-out 130ms );
+	transition: box-shadow ease-in-out 130ms;
 
 	&:hover {
 		color: #fff !important;
@@ -90,7 +88,7 @@
 		float: none;
 		line-height: 1.5;
 		border-radius: 2px;
-		@include transition( background-color ease-in-out .3s );
+		transition: background-color ease-in-out .3s;
 	}
 
 	span.page-numbers {
@@ -272,7 +270,6 @@ a.remove {
 	text-align: center;
 	border-radius: 100%;
 	box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 	border: 1px solid #000;
 
 	&:hover {
@@ -827,11 +824,9 @@ button.pswp__button--zoom:hover {
 	text-align: center;
 	font-weight: 800;
 	box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 
 	&:hover {
 		box-shadow: none !important;
-		-webkit-box-shadow: none !important;
 		border-color: #999;
 	}
 
@@ -861,7 +856,7 @@ button.pswp__button--zoom:hover {
 				background: #bbb;
 				border-radius: 13em;
 				box-sizing: content-box;
-				@include transition(all,ease-in-out,.3s);
+				transition: all ease-in-out .3s;
 				position: absolute;
 				top: 4px;
 				right: 0;
@@ -877,7 +872,7 @@ button.pswp__button--zoom:hover {
 				top: 7px;
 				right: 17px;
 				border-radius: 13em;
-				@include transition(all,ease-in-out,.3s);
+				transition: all ease-in-out .3s;
 			}
 		}
 
@@ -906,11 +901,21 @@ button.pswp__button--zoom:hover {
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;
-		-webkit-box-shadow: none !important;
 	}
-
 	.select2-choice {
 		padding: .7em 0 .7em .7em;
+	}
+	.select2-container .select2-selection--single {
+		height: 48px;
+	}
+	.select2-container .select2-selection--single .select2-selection__rendered {
+		line-height: 48px;
+	}
+	.select2-container--default .select2-selection--single .select2-selection__arrow {
+		height: 46px;
+	}
+	.select2-container--focus .select2-selection {
+		border-color: black;
 	}
 }
 
@@ -973,7 +978,7 @@ button.pswp__button--zoom:hover {
 		cursor: pointer;
 	}
 
-	input[type=radio] {
+	input.input-radio[name=payment_method] {
 		display: none;
 
 		& + label {
@@ -988,7 +993,7 @@ button.pswp__button--zoom:hover {
 				margin-left: 4px;
 				margin-right: .5em;
 				border-radius: 100%;
-				@include transform(translateY(2px));
+				transform: translateY(2px);
 			}
 		}
 
@@ -1020,7 +1025,7 @@ button.pswp__button--zoom:hover {
 			.select2-results__options {
 				background:#333;
 			}
-			.select2-results__option[aria-selected="true"]{
+			.select2-results__option[data-selected="true"]{
 				color: #333;
 			}
 		}
@@ -1033,6 +1038,10 @@ button.pswp__button--zoom:hover {
 				color: #ccc;
 			}
 		}
+	}
+
+	.select2-container--focus .select2-selection {
+		border-color: white;
 	}
 }
 
