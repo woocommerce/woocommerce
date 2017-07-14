@@ -458,6 +458,14 @@ function wc_create_attribute( $args ) {
 		}
 
 		$id = $wpdb->insert_id;
+
+		/**
+		 * Attribute created.
+		 *
+		 * @param int   $id   Created attribute ID.
+		 * @param array $data Data used to create the attribute.
+		 */
+		do_action( 'woocommerce_product_attribute_created', $id, $data );
 	} else {
 		$results = $wpdb->update(
 			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
@@ -470,15 +478,15 @@ function wc_create_attribute( $args ) {
 		if ( false === $results ) {
 			return new WP_Error( 'cannot_update_attribute', __( 'Could not update the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
-	}
 
-	/**
-	 * Attribute created.
-	 *
-	 * @param int   $id   Created attribute ID.
-	 * @param array $data Data used to created the attribute.
-	 */
-	do_action( 'woocommerce_attribute_created', $id, $data );
+		/**
+		 * Attribute updated.
+		 *
+		 * @param int   $id   Updated attribute ID.
+		 * @param array $data Data used to update the attribute.
+		 */
+		do_action( 'woocommerce_product_attribute_updated', $id, $data );
+	}
 
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );

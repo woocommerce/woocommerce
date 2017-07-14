@@ -89,47 +89,37 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * See if an attribute name is valid.
-	 * @param  string $attribute_name
-	 * @return bool|WP_error result
-	 */
-	private static function valid_attribute_name( $attribute_name ) {
-		if ( strlen( $attribute_name ) > 28 ) {
-			/* translators: %s: attribute name */
-			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
-		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
-			/* translators: %s: attribute name */
-			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Add an attribute.
 	 * @return bool|WP_Error
 	 */
 	private static function process_add_attribute() {
-		global $wpdb;
 		check_admin_referer( 'woocommerce-add-new_attribute' );
 
 		$attribute = self::get_posted_attribute();
 
-		if ( empty( $attribute['attribute_name'] ) || empty( $attribute['attribute_label'] ) ) {
-			return new WP_Error( 'error', __( 'Please, provide an attribute name and slug.', 'woocommerce' ) );
-		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
-			return $valid_attribute_name;
-		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
-			/* translators: %s: attribute name */
-			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
+		$args = array(
+			'name'         => $attribute['attribute_label'],
+			'slug'         => $attribute['attribute_name'],
+			'type'         => $attribute['attribute_type'],
+			'order_by'     => $attribute['attribute_orderby'],
+			'has_archives' => $attribute['attribute_public'],
+		);
+
+		$id = wc_create_attribute( $args );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
 		}
 
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
-
-		do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
-
-		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
-		delete_transient( 'wc_attribute_taxonomies' );
+		/**
+		 * Attribute added.
+		 *
+		 * @deprecated 3.2.0
+		 *
+		 * @param int   $id        Added attribute ID.
+		 * @param array $attribute Attribute arguments.
+		 */
+		do_action( 'woocommerce_attribute_added', $id, $attribute );
 
 		return true;
 	}
@@ -145,10 +135,18 @@ class WC_Admin_Attributes {
 
 		$attribute = self::get_posted_attribute();
 
-		if ( empty( $attribute['attribute_name'] ) || empty( $attribute['attribute_label'] ) ) {
-			return new WP_Error( 'error', __( 'Please, provide an attribute name and slug.', 'woocommerce' ) );
-		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
-			return $valid_attribute_name;
+		$args = array(
+			'name'         => $attribute['attribute_label'],
+			'slug'         => $attribute['attribute_name'],
+			'type'         => $attribute['attribute_type'],
+			'order_by'     => $attribute['attribute_orderby'],
+			'has_archives' => $attribute['attribute_public'],
+		);
+
+		$id = wc_update_attribute( $attribute_id, $args );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
 		}
 
 		$taxonomy_exists    = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) );
