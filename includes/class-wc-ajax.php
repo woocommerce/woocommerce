@@ -1137,7 +1137,7 @@ class WC_AJAX {
 		$note_id = (int) $_POST['note_id'];
 
 		if ( $note_id > 0 ) {
-			wp_delete_comment( $note_id );
+			wc_delete_order_note( $note_id );
 		}
 		wp_die();
 	}

@@ -854,7 +854,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$note_id      = (int) $order->add_order_note( $note_content );
 		$expected     = array(
 			'id'            => $note_id,
-			'note'          => $note_content,
+			'content'       => $note_content,
 			'customer_note' => false,
 			'added_by'      => 'system',
 		);
