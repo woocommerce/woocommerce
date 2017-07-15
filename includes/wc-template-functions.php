@@ -1329,7 +1329,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		// Get visble related products then sort them at random.
+		// Get visible related products then sort them at random.
 		$args['related_products'] = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
 
 		// Handle orderby.
@@ -1371,7 +1371,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		$orderby                     = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
 		$limit                       = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
-		// Get visble upsells then sort them at random, then limit result set.
+		// Get visible upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
 		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 

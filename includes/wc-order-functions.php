@@ -223,7 +223,7 @@ function wc_get_order_types( $for = '' ) {
 /**
  * Get an order type by post type name.
  * @param  string post type name
- * @return bool|array of datails about the order type
+ * @return bool|array of details about the order type
  */
 function wc_get_order_type( $type ) {
 	global $wc_order_types;
