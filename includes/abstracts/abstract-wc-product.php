@@ -452,7 +452,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get upsel IDs.
+	 * Get upsell IDs.
 	 *
 	 * @since 3.0.0
 	 * @param  string $context
