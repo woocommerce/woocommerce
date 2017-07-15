@@ -49,7 +49,7 @@ class WC_Email extends WC_Settings_API {
 	 * Default heading.
 	 *
 	 * Supported for backwards compatibility but we recommend overloading the
-	 * get_default_x methods instead so localication can be done when needed.
+	 * get_default_x methods instead so localization can be done when needed.
 	 *
 	 * @var string
 	 */
@@ -59,7 +59,7 @@ class WC_Email extends WC_Settings_API {
 	 * Default subject.
 	 *
 	 * Supported for backwards compatibility but we recommend overloading the
-	 * get_default_x methods instead so localication can be done when needed.
+	 * get_default_x methods instead so localization can be done when needed.
 	 *
 	 * @var string
 	 */

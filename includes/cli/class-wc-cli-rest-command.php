@@ -94,7 +94,7 @@ class WC_CLI_REST_Command {
 	}
 
 	/**
-	 * Peturns an ID of supported ID arguments (things like product_id, order_id, etc) that we should look for in addition to id.
+	 * Returns an ID of supported ID arguments (things like product_id, order_id, etc) that we should look for in addition to id.
 	 *
 	 * @return array
 	 */
