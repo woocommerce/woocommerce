@@ -397,7 +397,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 
