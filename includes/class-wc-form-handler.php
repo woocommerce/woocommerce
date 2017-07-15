@@ -40,7 +40,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Remove key and login from querystring, set cookie, and redirect to account page to show the form.
+	 * Remove key and login from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
 		if ( is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
