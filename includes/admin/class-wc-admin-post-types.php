@@ -2003,6 +2003,7 @@ class WC_Admin_Post_Types {
 	 * Add a post display state for special WC pages in the page list table.
 	 *
 	 * @param array   $post_states An array of post display states.
+	 * @param int|WP_Post $post Post ID or post object.
 	 * @return array
 	 */
 	public function add_display_post_states( $post_states, $post ) {
