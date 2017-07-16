@@ -152,7 +152,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Create a new shipping zone method instance.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|WP_Error|mixed
 	 */
 	public function create_item( $request ) {
 		$method_id = $request['method_id'];
@@ -188,7 +188,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Delete a shipping method instance.
 	 *
 	 * @param WP_REST_Request $request Full details about the request
-	 * @return WP_Error|boolean
+	 * @return WP_Error|boolean|mixed
 	 */
 	public function delete_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -244,7 +244,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Update A Single Shipping Zone Method.
 	 *
 	 * @param WP_REST_Request $request
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|WP_Error|mixed
 	 */
 	public function update_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -283,7 +283,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @param WC_Shipping_Method $method
 	 * @param WP_REST_Request $request
 	 *
-	 * @return WC_Shipping_Method
+	 * @return WC_Shipping_Method|mixed
 	 */
 	public function update_fields( $instance_id, $method, $request ) {
 		global $wpdb;
