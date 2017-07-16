@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
- * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
+ * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compatibility. Defaults to true.
  *
  * @access public
  * @param bool $show_admin_bar
@@ -320,7 +320,7 @@ function wc_modify_editable_roles( $roles ) {
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 
 /**
- * Modify capabiltiies to prevent non-admin users editing admin users.
+ * Modify capabilities to prevent non-admin users editing admin users.
  *
  * $args[0] will be the user being edited in this case.
  *
