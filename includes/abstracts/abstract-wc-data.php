@@ -359,7 +359,7 @@ abstract class WC_Data {
 	 *
 	 * @param  string $key
 	 * @param  string $value
-	 * @param  int|string $meta_id
+	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$this->maybe_read_meta_data();

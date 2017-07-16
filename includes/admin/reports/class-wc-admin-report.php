@@ -414,7 +414,7 @@ class WC_Admin_Report {
 	/**
 	 * Prepares a sparkline to show sales in the last X days.
 	 *
-	 * @param  int|string $id ID of the product to show. Blank to get all orders.
+	 * @param  int $id ID of the product to show. Blank to get all orders.
 	 * @param  int $days Days of stats to get.
 	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
 	 * @return string

@@ -1220,7 +1220,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
-	 * @param int|string $image_id
+	 * @param int $image_id
 	 */
 	public function set_image_id( $image_id = '' ) {
 		$this->set_prop( 'image_id', $image_id );
