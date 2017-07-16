@@ -83,8 +83,10 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 * @param array $args Array of args to pass to the delete method.
+	 * @return void
 	 */
 	public function delete( &$item, $args = array() ) {
+
 		if ( $item->get_id() ) {
 			global $wpdb;
 			do_action( 'woocommerce_before_delete_order_item', $item->get_id() );

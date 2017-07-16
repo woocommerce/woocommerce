@@ -143,6 +143,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @since 3.0.0
 	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
+	 * @return void
 	 */
 	public function delete( &$customer, $args = array() ) {
 		WC()->session->set( 'customer', null );

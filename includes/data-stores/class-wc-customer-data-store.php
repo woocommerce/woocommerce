@@ -189,6 +189,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @since 3.0.0
 	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
+	 * @return void
 	 */
 	public function delete( &$customer, $args = array() ) {
 		if ( ! $customer->get_id() ) {
@@ -369,8 +370,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Search customers and return customer IDs.
 	 *
-	 * @param  string $term
-	 * @oaram  int|string $limit @since 3.0.7
+	 * @param  string     $term
+	 * @param  int|string $limit @since 3.0.7
+	 *
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {

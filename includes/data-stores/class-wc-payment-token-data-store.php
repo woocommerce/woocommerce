@@ -123,6 +123,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * @since 3.0.0
 	 * @param WC_Payment_Token $token
 	 * @param bool $force_delete
+	 * @return void
 	 */
 	public function delete( &$token, $force_delete = false ) {
 		global $wpdb;
@@ -177,8 +178,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Saves extra token data as meta.
 	 *
 	 * @since 3.0.0
-	 * @param $token WC_Token
-	 * @param $force bool
+	 *
+	 * @param object $token WC_Token
+	 * @param bool   $force bool
+	 *
 	 * @return array List of updated props.
 	 */
 	protected function save_extra_data( &$token, $force = false ) {
@@ -260,7 +263,9 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param id $user_id
+	 *
+	 * @param int $user_id
+	 *
 	 * @return object
 	 */
 	public function get_users_default_token( $user_id ) {
@@ -276,7 +281,9 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id
+	 *
+	 * @param int $token_id
+	 *
 	 * @return object
 	 */
 	public function get_token_by_id( $token_id ) {
@@ -291,7 +298,9 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Returns metadata for a specific payment token.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id
+	 *
+	 * @param int $token_id
+	 *
 	 * @return array
 	 */
 	public function get_metadata( $token_id ) {
@@ -302,7 +311,9 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Get a token's type by ID.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id
+	 *
+	 * @param int $token_id
+	 *
 	 * @return string
 	 */
 	public function get_token_type_by_id( $token_id ) {
@@ -320,10 +331,10 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param id $token_id
+	 * @param int  $token_id
 	 * @param bool $status
 	 *
-	 * @return string
+	 * @return void
 	 */
 	public function set_default_status( $token_id, $status = true ) {
 		global $wpdb;
