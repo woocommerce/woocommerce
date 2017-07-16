@@ -334,7 +334,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Is this method available?
-	 * @param array $package
+	 * @param object $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {

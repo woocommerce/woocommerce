@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract WC Data Class
+ * Abstract WC Data Class.
  *
  * Implemented by classes using the same CRUD(s) pattern.
  *
@@ -200,8 +200,8 @@ abstract class WC_Data {
 			} else {
 				$this->data_store->create( $this );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/**
@@ -359,7 +359,7 @@ abstract class WC_Data {
 	 *
 	 * @param  string $key
 	 * @param  string $value
-	 * @param  int $meta_id
+	 * @param  int|string $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
 		$this->maybe_read_meta_data();

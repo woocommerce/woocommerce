@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php' );
 
 /**
- * Abstract Product Class
+ * Abstract Product Class.
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -1220,7 +1220,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $image_id
+	 * @param int|string $image_id
 	 */
 	public function set_image_id( $image_id = '' ) {
 		$this->set_prop( 'image_id', $image_id );
@@ -1280,6 +1280,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
 	 * @since 3.0.0
+	 * @return int
 	 */
 	public function save() {
 		$this->validate_props();
@@ -1296,8 +1297,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( $this->get_parent_id() ) {
 				wc_deferred_product_sync( $this->get_parent_id() );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/*
