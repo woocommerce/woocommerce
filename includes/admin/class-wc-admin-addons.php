@@ -309,7 +309,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
 	 *
-	 * @param object $block
+	 * @param array $block
 	 */
 	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );

@@ -16,6 +16,9 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
+/**
+ * WC_Admin_Webhooks_Table_List Class.
+ */
 class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 	/**

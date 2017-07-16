@@ -156,6 +156,7 @@ class WC_Helper_Updater {
 	 * The call is cached based on the payload (product ids, file ids). If
 	 * the payload changes, the cache is going to miss.
 	 *
+	 * @param array $payload
 	 * @return array Update data for each requested product.
 	 */
 	private static function _update_check( $payload ) {

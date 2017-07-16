@@ -441,6 +441,9 @@ class WC_Helper {
 
 	/**
 	 * Various early-phase actions with possible redirects.
+	 *
+	 * @param object $screen
+	 * @return void
 	 */
 	public static function current_screen( $screen ) {
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
@@ -818,6 +821,9 @@ class WC_Helper {
 	 * Additional theme style.css and plugin file headers.
 	 *
 	 * Format: Woo: product_id:file_id
+	 *
+	 * @param array $headers
+	 * @return array
 	 */
 	public static function extra_headers( $headers ) {
 		$headers[] = 'Woo';
@@ -826,6 +832,8 @@ class WC_Helper {
 
 	/**
 	 * Obtain a list of locally installed Woo extensions.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -872,6 +880,8 @@ class WC_Helper {
 
 	/**
 	 * Get locally installed Woo themes.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_themes() {
 		$themes = wp_get_themes();
