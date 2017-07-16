@@ -316,7 +316,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get minium spend amount.
+	 * Get minimum spend amount.
 	 * @since  3.0.0
 	 * @param  string $context
 	 * @return float
