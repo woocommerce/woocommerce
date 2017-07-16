@@ -228,7 +228,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse reletive comma-delineated field and return product ID.
+	 * Parse relative comma-delineated field and return product ID.
 	 *
 	 * @param string $field Field value.
 	 * @return array
