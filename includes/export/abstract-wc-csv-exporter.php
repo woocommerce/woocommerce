@@ -101,7 +101,8 @@ abstract class WC_CSV_Exporter {
 	 * Set columns to export.
 	 *
 	 * @since 3.1.0
-	 * @param array $column_names
+	 *
+	 * @param array $columns
 	 */
 	public function set_columns_to_export( $columns ) {
 		$this->columns_to_export = array_map( 'wc_clean', $columns );
@@ -188,6 +189,8 @@ abstract class WC_CSV_Exporter {
 	 * Set the export content.
 	 *
 	 * @since 3.1.0
+	 *
+	 * @param string $csv_data
 	 */
 	public function send_content( $csv_data ) {
 		echo $csv_data;
@@ -257,7 +260,10 @@ abstract class WC_CSV_Exporter {
 	 * Export rows to an array ready for the CSV.
 	 *
 	 * @since 3.1.0
-	 * @param array $row_data
+	 *
+	 * @param array    $row_data
+	 * @param string   $key
+	 * @param resource $buffer
 	 */
 	protected function export_row( $row_data, $key, $buffer ) {
 		$columns    = $this->get_column_names();
@@ -317,11 +323,13 @@ abstract class WC_CSV_Exporter {
 	 * Additionally, Excel exposes the ability to launch arbitrary commands through
 	 * the DDE protocol.
 	 *
-	 * @see http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
-	 * @see https://hackerone.com/reports/72785
+	 * @see   http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	 * @see   https://hackerone.com/reports/72785
 	 *
 	 * @since 3.1.0
-	 * @param string $field CSV field to escape
+	 *
+	 * @param string $data CSV field to escape
+	 *
 	 * @return string
 	 */
 	public function escape_data( $data ) {
