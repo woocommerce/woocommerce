@@ -293,7 +293,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Item data.
 	 *
-	 * @return WC_Product|WP_Error
 	 * @throws Exception
 	 */
 	protected function set_product_data( &$product, $data ) {
