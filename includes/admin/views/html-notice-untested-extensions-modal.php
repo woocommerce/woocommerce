@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 					/* translators: %s: version number */
 					printf(
-						__( 'These plugins are not listed compatible with WooCommerce %s yet. This is a major update. If you upgrade without upgrading these extensions first, you may experience issues:', 'woocommerce' ),
+						__( 'These plugins are not listed compatible with WooCommerce %s yet. This is a major update. If you upgrade without updating these extensions first, you may experience issues:', 'woocommerce' ),
 						esc_html( $new_version )
 					);
 				?>

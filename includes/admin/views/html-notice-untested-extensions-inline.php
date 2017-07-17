@@ -6,10 +6,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<p class="wc_plugin_upgrade_notice extensions_warning <?php echo esc_attr( $upgrade_type ) ?>">
-	<strong><?php echo esc_html( $message ) ?></strong><br />
+<div class="wc_plugin_upgrade_notice extensions_warning <?php echo esc_attr( $upgrade_type ) ?>">
+	<p>
+		<strong><?php echo esc_html( $message ) ?></strong>
 
-	<?php foreach ( $plugins as $plugin ): ?>
-		<span><?php echo esc_html( $plugin['Name'] ); ?></span>
-	<?php endforeach ?>
-</p>
+		<ul>
+			<?php foreach ( $plugins as $plugin ) : ?>
+				<li><?php
+					/* translators: 1: plugin name 2: tested up to version */
+					echo esc_html( sprintf( __( '%1$s (tested up to %2$s)', 'woocommerce' ), $plugin['Name'], $plugin['WC tested up to'] ) );
+				?></li>
+			<?php endforeach ?>
+		</ul>
+	</p>
+</div>

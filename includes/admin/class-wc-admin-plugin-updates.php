@@ -7,7 +7,6 @@
  * @package     WooCommerce/Admin
  * @version     3.2.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -17,12 +16,40 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Plugin_Updates {
 
+	/**
+	 * This is the header used by extensions to show requirements.
+	 * @var string
+	 */
 	const VERSION_REQUIRED_HEADER = 'WC requires at least';
+
+	/**
+	 * This is the header used by extensions to show testing.
+	 * @var string
+	 */
 	const VERSION_TESTED_HEADER = 'WC tested up to';
 
+	/**
+	 * The upgrade notice shown inline.
+	 * @var string
+	 */
 	protected $upgrade_notice = '';
+
+	/**
+	 * The version for the update to WooCommerce.
+	 * @var string
+	 */
 	protected $new_version = '';
+
+	/**
+	 * Array of plugins lacking testing with the major version.
+	 * @var array
+	 */
 	protected $major_untested_plugins = array();
+
+	/**
+	 * Array of plugins lacking testing with the minor version.
+	 * @var array
+	 */
 	protected $minor_untested_plugins = array();
 
 	/**
@@ -41,7 +68,7 @@ class WC_Admin_Plugin_Updates {
 	 */
 	public function enable_wc_plugin_headers( $headers ) {
 		$headers['WCRequires'] = self::VERSION_REQUIRED_HEADER;
-		$headers['WCTested'] =  self::VERSION_TESTED_HEADER;
+		$headers['WCTested']   = self::VERSION_TESTED_HEADER;
 		return $headers;
 	}
 
@@ -51,10 +78,8 @@ class WC_Admin_Plugin_Updates {
 	 * @param array $args
 	 */
 	public function in_plugin_update_message( $args, $response ) {
-
-		$this->new_version = $response->new_version;
-		$this->upgrade_notice = $this->get_upgrade_notice( $response->new_version );
-
+		$this->new_version            = $response->new_version;
+		$this->upgrade_notice         = $this->get_upgrade_notice( $response->new_version );
 		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, 'major' );
 		$this->minor_untested_plugins = $this->get_untested_plugins( $response->new_version, 'minor' );
 
@@ -71,9 +96,12 @@ class WC_Admin_Plugin_Updates {
 			add_action( 'admin_print_footer_scripts', array( $this, 'modal_js' ) );
 		}
 
-		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $this->upgrade_notice ) );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) : '' );
 	}
 
+	/**
+	 * JS for the modal window.
+	 */
 	public function modal_js() {
 		?>
 		<script>
@@ -144,62 +172,87 @@ class WC_Admin_Plugin_Updates {
 	| Methods for getting messages.
 	*/
 
+	/**
+	 * Get the inline warning notice for minor version updates.
+	 *
+	 * @return string
+	 */
 	protected function get_extensions_inline_warning_minor() {
-		$upgrade_type = 'minor';
-		$plugins = ! empty( $this->major_untested_plugins ) ? array_diff_key( $this->minor_untested_plugins, $this->major_untested_plugins ) : $this->minor_untested_plugins;
-
+		$upgrade_type  = 'minor';
+		$plugins       = ! empty( $this->major_untested_plugins ) ? array_diff_key( $this->minor_untested_plugins, $this->major_untested_plugins ) : $this->minor_untested_plugins;
 		$version_parts = explode( '.', $this->new_version );
-		$new_version = $version_parts[0] . '.' . $version_parts[1];
+		$new_version   = $version_parts[0] . '.' . $version_parts[1];
+
+		if ( empty( $plugins ) ) {
+			return;
+		}
 
 		/* translators: %s: version number */
-		$message = sprintf( __( 'The following plugin(s) are not listed fully-compatible with WooCommerce %s yet. If possible, upgrade these plugins before upgrading WooCommerce:', 'woocommerce' ), $new_version );
+		$message = sprintf( __( 'The installed versions of the following plugin(s) are not tested with WooCommerce %s. If possible, update these plugins before updating WooCommerce:', 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the inline warning notice for major version updates.
+	 *
+	 * @return string
+	 */
 	protected function get_extensions_inline_warning_major() {
-		$upgrade_type = 'major';
-		$plugins = $this->major_untested_plugins;
-
+		$upgrade_type  = 'major';
+		$plugins       = $this->major_untested_plugins;
 		$version_parts = explode( '.', $this->new_version );
-		$new_version = $version_parts[0] . '.0';
+		$new_version   = $version_parts[0] . '.0';
+
+		if ( empty( $plugins ) ) {
+			return;
+		}
 
 		/* translators: %s: version number */
-		$message = sprintf( __( 'Heads up! The following plugin(s) are not listed compatible with WooCommerce %s yet. If you upgrade without upgrading these extensions first, you may experience issues:', 'woocommerce' ), $new_version );
+		$message = sprintf( __( 'Heads up! The installed versions of the following plugin(s) are not tested with WooCommerce %s and may not be fully-compatible. Please update these extensions or confirm they are compatible first, or you may experience issues:', 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the warning notice for the modal window.
+	 *
+	 * @return string
+	 */
 	protected function get_extensions_modal_warning() {
 		$version_parts = explode( '.', $this->new_version );
-		$new_version = $version_parts[0] . '.0';
-
-		$plugins = $this->major_untested_plugins;
+		$new_version   = $version_parts[0] . '.0';
+		$plugins       = $this->major_untested_plugins;
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-modal.php' );
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get the upgrade notice from WordPress.org.
+	 *
+	 * @param  string $version
+	 * @return string
+	 */
 	protected function get_upgrade_notice( $version ) {
 		$transient_name = 'wc_upgrade_notice_' . $version;
 
-		//if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
+		//if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) { @todo remove this for debug
 			//$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 			$response = wp_safe_remote_get( 'http://local.wordpress.dev/wp-content/plugins/woocommerce/readme.txt' );
+
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 				$upgrade_notice = $this->parse_update_notice( $response['body'], $version );
 			//	set_transient( $transient_name, $upgrade_notice, 1/*DAY_IN_SECONDS*/ );
 			}
 		//}
-
 		return $upgrade_notice;
 	}
-
 
 	/**
 	 * Parse update notice from readme file.
@@ -209,36 +262,37 @@ class WC_Admin_Plugin_Updates {
 	 * @return string
 	 */
 	private function parse_update_notice( $content, $new_version ) {
-		// Output Upgrade Notice.
-		$matches        = null;
-		$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
-		$upgrade_notice = '';
+		$version_parts     = explode( '.', $new_version );
+		$check_for_notices = array(
+			$version_parts[0] . '.0', // Major
+			$version_parts[0] . '.0.0', // Major
+			$version_parts[0] . '.' . $version_parts[1], // Minor
+			$version_parts[0] . '.' . $version_parts[1] . '.' . $version_parts[2], // Patch
+		);
 
-		if ( preg_match( $regexp, $content, $matches ) ) {
-			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
-
-			// Convert the full version strings to minor versions.
-			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
-			$current_version_parts = explode( '.', WC_VERSION );
-
-			if ( 3 !== sizeof( $notice_version_parts ) ) {
-				return;
+		foreach ( $check_for_notices as $check_version ) {
+			if ( version_compare( WC_VERSION, $check_version, '>' ) ) {
+				continue;
 			}
+			$matches        = null;
+			$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
+			$upgrade_notice = '';
 
-			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
-			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
+			if ( preg_match( $regexp, $content, $matches ) ) {
+				$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
-			// Check the latest stable version and ignore trunk.
-			if ( version_compare( $current_version, $notice_version, '<' ) ) {
+				if ( version_compare( trim( $matches[1] ), $check_version, '=' ) ) {
+					$upgrade_notice .= '<p class="wc_plugin_upgrade_notice">';
 
-				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
+					foreach ( $notices as $index => $line ) {
+						$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
+					}
 
-				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
+					$upgrade_notice .= '</p>';
 				}
+				break;
 			}
 		}
-
 		return wp_kses_post( $upgrade_notice );
 	}
 
@@ -258,11 +312,10 @@ class WC_Admin_Plugin_Updates {
 	 * @return array of plugin info arrays
 	 */
 	protected function get_untested_plugins( $version, $release ) {
-		$extensions = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
-		$untested = array();
-
+		$extensions    = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
+		$untested      = array();
 		$version_parts = explode( '.', $version );
-		$version = $version_parts[0];
+		$version       = $version_parts[0];
 
 		if ( 'minor' === $release ) {
 			$version .= '.' . $version_parts[1];
@@ -295,7 +348,7 @@ class WC_Admin_Plugin_Updates {
 		$matches = array();
 
 		foreach ( $plugins as $file => $plugin ) {
-			if ( ! empty ( $plugin[ $header ] ) ) {
+			if ( ! empty( $plugin[ $header ] ) ) {
 				$matches[ $file ] = $plugin;
 			}
 		}
