@@ -314,6 +314,7 @@ final class WooCommerce {
 		 */
 		include_once( WC_ABSPATH . 'includes/wc-core-functions.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-datetime.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-database-locks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types
 		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
