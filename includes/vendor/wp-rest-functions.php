@@ -345,13 +345,14 @@ if ( ! function_exists( 'rest_is_ip_address' ) ) {
 	}
 }
 
-/**
- * Changes a boolean-like value into the proper boolean value.
- *
- * @param bool|string|int $value The value being evaluated.
- * @return boolean Returns the proper associated boolean value.
- */
 if ( ! function_exists( 'rest_sanitize_boolean' ) ) {
+	/**
+	 * Changes a boolean-like value into the proper boolean value.
+	 *
+	 * @param bool|string|int $value The value being evaluated.
+	 *
+	 * @return boolean Returns the proper associated boolean value.
+	 */
 	function rest_sanitize_boolean( $value ) {
 		// String values are translated to `true`; make sure 'false' is false.
 		if ( is_string( $value )  ) {
@@ -366,13 +367,14 @@ if ( ! function_exists( 'rest_sanitize_boolean' ) ) {
 	}
 }
 
-/**
- * Determines if a given value is boolean-like.
- *
- * @param bool|string $maybe_bool The value being evaluated.
- * @return boolean True if a boolean, otherwise false.
- */
 if ( ! function_exists( 'rest_is_boolean' ) ) {
+	/**
+	 * Determines if a given value is boolean-like.
+	 *
+	 * @param bool|string $maybe_bool The value being evaluated.
+	 *
+	 * @return boolean True if a boolean, otherwise false.
+	 */
 	function rest_is_boolean( $maybe_bool ) {
 		if ( is_bool( $maybe_bool ) ) {
 			return true;

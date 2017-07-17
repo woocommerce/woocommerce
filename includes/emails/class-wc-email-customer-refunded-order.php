@@ -56,6 +56,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * Get email subject.
 	 *
 	 * @since  3.1.0
+	 *
+	 * @param bool $partial
+	 *
 	 * @return string
 	 */
 	public function get_default_subject( $partial = false ) {
@@ -70,6 +73,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * Get email heading.
 	 *
 	 * @since  3.1.0
+	 *
+	 * @param bool $partial
+	 *
 	 * @return string
 	 */
 	public function get_default_heading( $partial = false ) {
@@ -112,6 +118,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 	/**
 	 * Set email strings.
+	 *
+	 * @param bool $partial_refund
+	 *
 	 * @deprecated 3.1.0 Unused.
 	 */
 	public function set_email_strings( $partial_refund = false ) {}

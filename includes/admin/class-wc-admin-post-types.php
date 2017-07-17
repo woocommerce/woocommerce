@@ -805,6 +805,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * @deprecated 3.1
+	 * @param  array $views
 	 */
 	public function product_sorting_link( $views ) {
 		$this->product_views( $views );
@@ -812,6 +813,10 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Disable months dropdown on product screen.
+	 *
+	 * @param bool $bool
+	 * @param string $post_type
+	 * @return bool
 	 */
 	public function disable_months_dropdown( $bool, $post_type ) {
 		return 'product' === $post_type ? true : $bool;
@@ -1998,7 +2003,8 @@ class WC_Admin_Post_Types {
 	 * Add a post display state for special WC pages in the page list table.
 	 *
 	 * @param array   $post_states An array of post display states.
-	 * @param WP_Post $post        The current post object.
+	 * @param int|WP_Post $post Post ID or post object.
+	 * @return array
 	 */
 	public function add_display_post_states( $post_states, $post ) {
 		if ( wc_get_page_id( 'shop' ) === $post->ID ) {

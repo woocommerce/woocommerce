@@ -371,7 +371,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @param  array $values
 	 * @param  string $relation
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	private function get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
 		$meta_query = array(

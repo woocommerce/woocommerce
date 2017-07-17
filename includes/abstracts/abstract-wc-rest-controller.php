@@ -106,7 +106,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Bulk create, update and delete items.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array Of WP_Error or WP_REST_Response.
+	 * @return bool|array Of WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		/** @var WP_REST_Server $wp_rest_server */

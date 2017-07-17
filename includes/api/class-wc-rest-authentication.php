@@ -427,6 +427,7 @@ class WC_REST_Authentication {
 	 *
 	 * @see rawurlencode()
 	 * @param array $parameters Un-normalized parameters.
+	 *
 	 * @return array Normalized parameters.
 	 */
 	private function normalize_parameters( $parameters ) {

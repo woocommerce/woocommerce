@@ -210,7 +210,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Prepare attributes for save.
 	 *
-	 * @param array $data
+	 * @param bool $data
 	 *
 	 * @return array
 	 */

@@ -26,8 +26,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Initialize importer.
 	 *
-	 * @param string $file File to read.
-	 * @param array  $args Arguments for the parser.
+	 * @param string $file   File to read.
+	 * @param array  $params Arguments for the parser.
 	 */
 	public function __construct( $file, $params = array() ) {
 		$default_args = array(
@@ -185,8 +185,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * If we're not doing an update, create a placeholder product so mapping works
 	 * for rows following this one.
 	 *
-	 * @param  stirng $field
-	 * @param  array $raw_data
+	 * @param  string $field
+	 * @param  array  $raw_data
+	 *
 	 * @return int
 	 */
 	public function parse_id_field( $field, $raw_data = array() ) {

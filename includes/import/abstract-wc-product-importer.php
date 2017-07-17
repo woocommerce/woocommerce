@@ -190,7 +190,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Process a single item and save.
 	 *
 	 * @param  array $data Raw CSV data.
-	 * @return array|WC_Error
+	 * @return WC_Product|WP_Error|array
 	 */
 	protected function process_item( $data ) {
 		try {
@@ -493,6 +493,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param  string $url        Attachment URL.
 	 * @param  int    $product_id Product ID.
+	 *
+	 * @throws Exception
 	 * @return int
 	 */
 	protected function get_attachment_id_from_url( $url, $product_id ) {
@@ -567,7 +569,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
-	 * @param  string $name Attribute name.
+	 * @param  string $raw_name Attribute name.
+	 *
+	 * @throws Exception
 	 * @return int
 	 */
 	protected function get_attribute_taxonomy_id( $raw_name ) {
@@ -630,7 +634,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Memory exceeded
+	 * Memory exceeded.
 	 *
 	 * Ensures the batch process never exceeds 90%
 	 * of the maximum WordPress memory.
@@ -648,7 +652,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Get memory limit
+	 * Get memory limit.
 	 *
 	 * @return int
 	 */

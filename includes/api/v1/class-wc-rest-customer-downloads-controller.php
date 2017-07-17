@@ -99,7 +99,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single download output for response.
 	 *
-	 * @param stdObject $download Download object.
+	 * @param object $download Download object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -123,9 +123,9 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		/**
 		 * Filter customer download data returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response  The response object.
-		 * @param stdObject        $download  Download object used to create response.
-		 * @param WP_REST_Request  $request   Request object.
+		 * @param WP_REST_Response $response The response object.
+		 * @param object           $download Download object used to create response.
+		 * @param WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
 	}

@@ -47,6 +47,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @see WP_Widget->form
 	 *
 	 * @param array $instance
+	 *
+	 * @return void
 	 */
 	public function form( $instance ) {
 		$this->init_settings();

@@ -56,6 +56,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * Get email subject.
 	 *
 	 * @since  3.1.0
+	 *
+	 * @param bool $paid
+	 *
 	 * @return string
 	 */
 	public function get_default_subject( $paid = false ) {
@@ -70,6 +73,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * Get email heading.
 	 *
 	 * @since  3.1.0
+	 *
+	 * @param bool $paid
+	 *
 	 * @return string
 	 */
 	public function get_default_heading( $paid = false ) {

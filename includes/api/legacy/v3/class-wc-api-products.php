@@ -1323,7 +1323,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product
-	 * @param WP_REST_Request $request
+	 * @param array|WP_REST_Request $request
 	 * @return WC_Product
 	 */
 	protected function save_default_attributes( $product, $request ) {
@@ -2311,7 +2311,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Sets uploaded category image as attachment and returns the attachment ID.
 	 *
 	 * @since  2.5.0
-	 * @param  integer $upload Upload information from wp_upload_bits
+	 * @param  array $upload Upload information from wp_upload_bits
 	 * @return int             Attachment ID
 	 */
 	protected function set_product_category_image_as_attachment( $upload ) {

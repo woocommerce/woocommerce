@@ -858,7 +858,10 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * This function will fix this.
  *
  * @since 3.1.0
+ *
  * @param int $order_id
+ *
+ * @return int $order_id
  */
 function wc_sanitize_order_id( $order_id ) {
 	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );

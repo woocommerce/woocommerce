@@ -162,6 +162,8 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Add error message.
+	 *
+	 * @param array $error
 	 */
 	protected function add_error( $error ) {
 		$this->errors[] = $error;

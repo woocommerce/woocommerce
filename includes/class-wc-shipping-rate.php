@@ -135,7 +135,8 @@ class WC_Shipping_Rate {
 	 * Set rate label.
 	 *
 	 * @since 3.2.0
-	 * @param string $method_id
+	 *
+	 * @param string $label
 	 */
 	public function set_label( $label ) {
 		$this->data['label'] = (string) $label;

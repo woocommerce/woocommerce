@@ -35,8 +35,10 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Delete a refund - no trash is supported.
+	 *
 	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
+	 * @return void
 	 */
 	public function delete( &$order, $args = array() ) {
 		$id = $order->get_id();

@@ -54,9 +54,10 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  * Wrapper for wc_doing_it_wrong.
  *
  * @since  3.0.0
+ *
  * @param  string $function
+ * @param  string $message
  * @param  string $version
- * @param  string $replacement
  */
 function wc_doing_it_wrong( $function, $message, $version ) {
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
@@ -73,9 +74,10 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  * Wrapper for deprecated arguments so we can apply some extra logic.
  *
  * @since  3.0.0
+ *
  * @param  string $argument
  * @param  string $version
- * @param  string $replacement
+ * @param  string $message
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( is_ajax() ) {
@@ -844,7 +846,11 @@ function woocommerce_compile_less_styles() {
 /**
  * woocommerce_calc_shipping was an option used to determine if shipping was enabled prior to version 2.6.0. This has since been replaced with wc_shipping_enabled() function and
  * the woocommerce_ship_to_countries setting.
+ *
  * @since 2.6.0
+ *
+ * @param string $value
+ *
  * @return string
  */
 function woocommerce_calc_shipping_backwards_compatibility( $value ) {

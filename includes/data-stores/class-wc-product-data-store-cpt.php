@@ -224,8 +224,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Method to delete a product from the database.
+	 *
 	 * @param WC_Product $product
 	 * @param array $args Array of args to pass to the delete method.
+	 * @return void
 	 */
 	public function delete( &$product, $args = array() ) {
 		$id        = $product->get_id();

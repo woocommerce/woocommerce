@@ -335,7 +335,7 @@ abstract class WP_REST_Controller {
 	/**
 	 * Update the values of additional fields added to a data object.
 	 *
-	 * @param array  $object
+	 * @param object  $object
 	 * @param WP_REST_Request $request
 	 */
 	protected function update_additional_fields_for_object( $object, $request ) {
