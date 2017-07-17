@@ -630,7 +630,7 @@ class WC_AJAX {
 			}
 
 			$added               = 0;
-			$possible_attributes = wc_array_cartesian( $attributes );
+			$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
 
 			foreach ( $possible_attributes as $possible_attribute ) {
 				if ( in_array( $possible_attribute, $existing_attributes ) ) {
