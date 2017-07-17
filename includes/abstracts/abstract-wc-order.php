@@ -616,7 +616,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
+	 * Sets order tax (sum of cart and shipping tax). Used internally only.
 	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception

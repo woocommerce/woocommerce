@@ -471,7 +471,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-				// Re-create the attribute to CRUD save and genarate again.
+				// Re-create the attribute to CRUD save and generate again.
 				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
 				$parent_attributes[ $attribute_name ]->set_variation( 1 );
 

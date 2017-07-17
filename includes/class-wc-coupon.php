@@ -316,7 +316,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get minium spend amount.
+	 * Get minimum spend amount.
 	 * @since  3.0.0
 	 * @param  string $context
 	 * @return float
@@ -665,7 +665,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	*/
 
 	/**
-	 * Developers can programically return coupons. This function will read those values into our WC_Coupon class.
+	 * Developers can programmatically return coupons. This function will read those values into our WC_Coupon class.
 	 * @since  3.0.0
 	 * @param  string $code  Coupon code
 	 * @param  array $coupon Array of coupon properties
@@ -929,7 +929,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Cart discounts cannot be added if non-eligble product is found in cart.
+	 * Cart discounts cannot be added if non-eligible product is found in cart.
 	 */
 	private function validate_cart_excluded_items() {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {

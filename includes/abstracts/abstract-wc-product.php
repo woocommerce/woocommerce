@@ -130,7 +130,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 *
-	 * The product_type property is deprecated but is used here for BW compat with child classes which may be defining product_type and not have a get_type method.
+	 * The product_type property is deprecated but is used here for BW compatibility with child classes which may be defining product_type and not have a get_type method.
 	 *
 	 * @since 3.0.0
 	 * @return string
@@ -452,7 +452,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get upsel IDs.
+	 * Get upsell IDs.
 	 *
 	 * @since 3.0.0
 	 * @param  string $context
@@ -1331,7 +1331,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Checks the product type.
 	 *
-	 * Backwards compat with downloadable/virtual.
+	 * Backwards compatibility with downloadable/virtual.
 	 *
 	 * @param string|array $type Array or string of types
 	 * @return bool

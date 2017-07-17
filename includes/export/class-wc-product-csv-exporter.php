@@ -36,7 +36,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $enable_meta_export = false;
 
 	/**
-	 * Which product types are beign exported.
+	 * Which product types are being exported.
 	 * @var array
 	 */
 	protected $product_types_to_export = array();

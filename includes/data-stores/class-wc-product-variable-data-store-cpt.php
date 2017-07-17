@@ -227,7 +227,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 	/**
 	 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
-	 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
+	 * DEVELOPERS should filter this hash if offering conditional pricing to keep it unique.
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Product

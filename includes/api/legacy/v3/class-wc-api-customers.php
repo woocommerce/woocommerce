@@ -598,7 +598,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$query_args['order'] = $args['order'];
 		}
 
-		// Orderby
+		// Order by
 		if ( ! empty( $args['orderby'] ) ) {
 			$query_args['orderby'] = $args['orderby'];
 

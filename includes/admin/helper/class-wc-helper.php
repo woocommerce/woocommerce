@@ -374,7 +374,7 @@ class WC_Helper {
 					), admin_url( 'admin.php' ) );
 
 					/* translators: %1$s: product name, %2$s: deactivate url */
-					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactive the plugin as well.', 'woocommerce' ),
+					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactivate the plugin as well.', 'woocommerce' ),
 						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>', esc_url( $deactivate_plugin_url ) );
 				}
 
@@ -835,7 +835,7 @@ class WC_Helper {
 		$plugins = get_plugins();
 		$woo_plugins = array();
 
-		// Back-compat for woothemes_queue_update().
+		// Backwards compatibility for woothemes_queue_update().
 		$_compat = array();
 		if ( ! empty( $GLOBALS['woothemes_queued_updates'] ) ) {
 			foreach ( $GLOBALS['woothemes_queued_updates'] as $_compat_plugin ) {
@@ -880,7 +880,7 @@ class WC_Helper {
 		foreach ( $themes as $theme ) {
 			$header = $theme->get( 'Woo' );
 
-			// Back-compat for theme_info.txt
+			// Backwards compatibility for theme_info.txt
 			if ( ! $header ) {
 				$txt = $theme->get_stylesheet_directory() . '/theme_info.txt';
 				if ( is_readable( $txt ) ) {
