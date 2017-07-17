@@ -1280,6 +1280,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
 	 * @since 3.0.0
+	 * @return int
 	 */
 	public function save() {
 		$this->validate_props();
@@ -1296,8 +1297,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( $this->get_parent_id() ) {
 				wc_deferred_product_sync( $this->get_parent_id() );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/*
