@@ -93,6 +93,7 @@ class WC_AJAX {
 			'get_cart_totals'                                  => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
+			'remove_from_cart'                                 => true,
 			'checkout'                                         => true,
 			'get_variation'                                    => true,
 			'get_customer_location'                            => true,
@@ -127,6 +128,7 @@ class WC_AJAX {
 			'json_search_products_and_variations'              => false,
 			'json_search_downloadable_products_and_variations' => false,
 			'json_search_customers'                            => false,
+			'json_search_categories'                           => false,
 			'term_ordering'                                    => false,
 			'product_ordering'                                 => false,
 			'refund_line_items'                                => false,
@@ -383,6 +385,21 @@ class WC_AJAX {
 	}
 
 	/**
+	 * AJAX add to cart.
+	 */
+	public static function remove_from_cart() {
+		ob_start();
+
+		$cart_item_key = wc_clean( $_POST['cart_item_key'] );
+
+		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			self::get_refreshed_fragments();
+		} else {
+			wp_send_json_error();
+		}
+	}
+
+	/**
 	 * Process ajax checkout form.
 	 */
 	public static function checkout() {
@@ -613,7 +630,7 @@ class WC_AJAX {
 			}
 
 			$added               = 0;
-			$possible_attributes = wc_array_cartesian( $attributes );
+			$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
 
 			foreach ( $possible_attributes as $possible_attribute ) {
 				if ( in_array( $possible_attribute, $existing_attributes ) ) {
@@ -1120,7 +1137,7 @@ class WC_AJAX {
 		$note_id = (int) $_POST['note_id'];
 
 		if ( $note_id > 0 ) {
-			wp_delete_comment( $note_id );
+			wc_delete_order_note( $note_id );
 		}
 		wp_die();
 	}
@@ -1267,6 +1284,53 @@ class WC_AJAX {
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_customers', $found_customers ) );
+	}
+
+	/**
+	 * Search for categories and return json.
+	 */
+	public static function json_search_categories() {
+		ob_start();
+
+		check_ajax_referer( 'search-categories', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		if ( ! $search_text = wc_clean( stripslashes( $_GET['term'] ) ) ) {
+			wp_die();
+		}
+
+		$found_categories = array();
+		$args             = array(
+			'taxonomy'   => array( 'product_cat' ),
+			'orderby'    => 'id',
+			'order'      => 'ASC',
+			'hide_empty' => true,
+			'fields'     => 'all',
+			'name__like' => $search_text,
+		);
+
+		if ( $terms = get_terms( $args ) ) {
+			foreach ( $terms as $term ) {
+				$term->formatted_name = '';
+
+				if ( $term->parent ) {
+					$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat' ) );
+					foreach ( $ancestors as $ancestor ) {
+						if ( $ancestor_term = get_term( $ancestor, 'product_cat' ) ) {
+							$term->formatted_name .= $ancestor_term->name . ' > ';
+						}
+					}
+				}
+
+				$term->formatted_name .= $term->name . ' (' . $term->count . ')';
+				$found_categories[ $term->term_id ] = $term;
+			}
+		}
+
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
 	}
 
 	/**

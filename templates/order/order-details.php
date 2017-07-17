@@ -13,23 +13,27 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.0.0
+ * @version 3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
 if ( ! $order = wc_get_order( $order_id ) ) {
 	return;
 }
+
 $order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
 $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
+$downloads             = $order->get_downloadable_items();
+$show_downloads        = $order->has_downloadable_item() && $order->is_download_permitted();
+
+if ( $show_downloads ) {
+	wc_get_template( 'order/order-downloads.php', array( 'downloads' => $downloads, 'show_title' => true ) );
+}
 ?>
-
 <section class="woocommerce-order-details">
-
 	<h2 class="woocommerce-order-details__title"><?php _e( 'Order details', 'woocommerce' ); ?></h2>
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
@@ -70,14 +74,19 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 					<?php
 				}
 			?>
+			<?php if ( $order->get_customer_note() ) : ?>
+				<tr>
+					<th><?php _e( 'Note:', 'woocommerce' ); ?></th>
+					<td><?php echo wptexturize( $order->get_customer_note() ); ?></td>
+				</tr>
+			<?php endif; ?>
 		</tfoot>
-
 	</table>
 
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
-
-	<?php if ( $show_customer_details ) : ?>
-		<?php wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) ); ?>
-	<?php endif; ?>
-
 </section>
+
+<?php
+if ( $show_customer_details ) {
+	wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) );
+}

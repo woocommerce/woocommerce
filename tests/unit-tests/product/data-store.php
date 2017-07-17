@@ -449,17 +449,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$one_attribute_variation = new WC_Product_Variation;
 		$one_attribute_variation->set_parent_id( $product->get_id() );
-		$one_attribute_variation->set_attributes( array( 'color' => 'green' ) );
+		$one_attribute_variation->set_attributes( array( 'color' => 'Green' ) );
 		$one_attribute_variation->save();
 
 		$two_attribute_variation = new WC_Product_Variation;
 		$two_attribute_variation->set_parent_id( $product->get_id() );
-		$two_attribute_variation->set_attributes( array( 'color' => 'green', 'size' => 'large' ) );
+		$two_attribute_variation->set_attributes( array( 'color' => 'Green', 'size' => 'Large' ) );
 		$two_attribute_variation->save();
 
 		$multiword_attribute_variation = new WC_Product_Variation;
 		$multiword_attribute_variation->set_parent_id( $product->get_id() );
-		$multiword_attribute_variation->set_attributes( array( 'color' => 'green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
+		$multiword_attribute_variation->set_attributes( array( 'color' => 'Green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
 		$multiword_attribute_variation->save();
 
 		// Check the one attribute variation title.

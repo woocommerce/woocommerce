@@ -1431,7 +1431,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		if ( is_checkout() ) {
 			return;
 		}
-		// Get visble cross sells then sort them at random.
+		// Get visible cross sells then sort them at random.
 		$cross_sells                 = array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
 		$woocommerce_loop['name']    = 'cross-sells';
 		$woocommerce_loop['columns'] = apply_filters( 'woocommerce_cross_sells_columns', $columns );
@@ -1443,12 +1443,12 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
 
 		wc_get_template( 'cart/cross-sells.php', array(
-			'cross_sells'        => $cross_sells,
+			'cross_sells'    => $cross_sells,
 
 			// Not used now, but used in previous version of up-sells.php.
-			'posts_per_page'	 => $limit,
-			'orderby'			 => $orderby,
-			'columns'			 => $columns,
+			'posts_per_page' => $limit,
+			'orderby'        => $orderby,
+			'columns'        => $columns,
 		) );
 	}
 }
@@ -1873,6 +1873,23 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_order_downloads_table' ) ) {
+
+	/**
+	 * Displays order downloads in a table.
+	 *
+	 * @since 3.2.0
+	 * @param array $downloads
+	 */
+	function woocommerce_order_downloads_table( $downloads ) {
+		if ( ! $downloads ) {
+			return;
+		}
+		wc_get_template( 'order/order-downloads.php', array(
+			'downloads' => $downloads,
+		) );
+	}
+}
 
 if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 
