@@ -55,7 +55,15 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
 
-		# Test case 2 #10573
+		/**
+		 * Test case 2 #10573 modified.
+		 *
+		 * User wanted line to be 24.51, however, mathmatically without rounding
+		 * before save this is not possible.
+		 *
+		 * Actualy values are 24.5045 and 2.4505 tax. This gives 26.955.
+		 * 29.95 with 10% off is 26.955, so this actually matches up.
+		 */
 		update_post_meta( $product->get_id(), '_regular_price', '29.95' );
 		update_post_meta( $product->get_id(), '_price', '29.95' );
 		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
@@ -81,7 +89,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
-		$this->assertEquals( '24.51', number_format( $cart_item['line_total'], 2, '.', '' ) );
+		$this->assertEquals( '24.50', number_format( $cart_item['line_total'], 2, '.', '' ) );
 
 		// Cleanup
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
