@@ -96,7 +96,7 @@ class WC_Admin_Plugin_Updates {
 			add_action( 'admin_print_footer_scripts', array( $this, 'modal_js' ) );
 		}
 
-		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) : '' );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' );
 	}
 
 	/**
@@ -305,7 +305,7 @@ class WC_Admin_Plugin_Updates {
 	*/
 
 	/**
-	 * Get plugins that have a tested version lower than the input version.
+	 * Get active plugins that have a tested version lower than the input version.
 	 *
 	 * @param string $version
 	 * @param string $release 'major' or 'minor'.
@@ -329,7 +329,7 @@ class WC_Admin_Plugin_Updates {
 				$plugin_version .= '.' . $plugin_version_parts[1];
 			}
 
-			if ( version_compare( $plugin_version, $version, '<' ) ) {
+			if ( version_compare( $plugin_version, $version, '<' ) && is_plugin_active( $file ) ) {
 				$untested[ $file ] = $plugin;
 			}
 		}
