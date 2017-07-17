@@ -242,15 +242,14 @@ class WC_Admin_Plugin_Updates {
 	protected function get_upgrade_notice( $version ) {
 		$transient_name = 'wc_upgrade_notice_' . $version;
 
-		//if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) { @todo remove this for debug
-			//$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
-			$response = wp_safe_remote_get( 'http://local.wordpress.dev/wp-content/plugins/woocommerce/readme.txt' );
+		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
+			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 				$upgrade_notice = $this->parse_update_notice( $response['body'], $version );
-			//	set_transient( $transient_name, $upgrade_notice, 1/*DAY_IN_SECONDS*/ );
+				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
 			}
-		//}
+		}
 		return $upgrade_notice;
 	}
 
