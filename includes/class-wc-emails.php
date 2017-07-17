@@ -375,9 +375,8 @@ class WC_Emails {
 	 * Add order meta to email templates.
 	 *
 	 * @param mixed $order
-	 * @param bool $sent_to_admin (default: false)
-	 * @param bool $plain_text (default: false)
-	 * @return string
+	 * @param bool  $sent_to_admin (default: false)
+	 * @param bool  $plain_text    (default: false)
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
