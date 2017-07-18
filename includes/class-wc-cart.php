@@ -954,11 +954,12 @@ class WC_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item
 				$this->cart_contents[ $cart_item_key ] = apply_filters( 'woocommerce_add_cart_item', array_merge( $cart_item_data, array(
-					'product_id'	=> $product_id,
-					'variation_id'	=> $variation_id,
-					'variation' 	=> $variation,
-					'quantity' 		=> $quantity,
-					'data'			=> $product_data,
+					'key'          => $cart_item_key,
+					'product_id'   => $product_id,
+					'variation_id' => $variation_id,
+					'variation'    => $variation,
+					'quantity'     => $quantity,
+					'data'         => $product_data,
 				) ), $cart_item_key );
 			}
 

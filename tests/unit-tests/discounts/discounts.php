@@ -25,12 +25,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		// Test setting items to the cart.
 		$discounts = new WC_Discounts();
 		$discounts->set_items( WC()->cart->get_cart() );
-		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '10', 'quantity' => 1 ) ), $discounts->get_items() );
+		$this->assertEquals( 1, count( $discounts->get_items() ) );
 
 		// Test setting items to an order.
 		$discounts = new WC_Discounts();
 		$discounts->set_items( $order->get_items() );
-		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '10', 'quantity' => 1 ) ), $discounts->get_items() );
+		$this->assertEquals( 1, count( $discounts->get_items() ) );
 
 		// Empty array of items.
 		$discounts = new WC_Discounts();
@@ -55,7 +55,22 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts = new WC_Discounts();
 
 		// Create dummy content.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$coupon = new WC_Coupon;
@@ -67,13 +82,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon->set_discount_type( 'percent' );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '8', 'quantity' => 1 ) ), $discounts->get_items() );
+		$this->assertEquals( 8, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
 
 		// Apply a fixed cart coupon.
 		$coupon->set_discount_type( 'fixed_cart' );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '0', 'quantity' => 1 ) ), $discounts->get_items() );
+		$this->assertEquals( 20, $discounts->get_discount( 'cart' ) );
 
 		// Apply a fixed cart coupon.
 		$coupon->set_discount_type( 'fixed_cart' );
@@ -81,7 +96,10 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( array( (object) array( 'price' => '40', 'discounted_price' => '20', 'quantity' => 4 ) ), $discounts->get_items() );
+		$this->assertEquals( 20, $discounts->get_discount( 'cart' ) );
+
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( 40, $discounts->get_discount( 'cart' ) );
 
 		// Apply a fixed product coupon.
 		$coupon->set_discount_type( 'fixed_product' );
@@ -90,10 +108,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( array( (object) array( 'price' => '40', 'discounted_price' => '36', 'quantity' => 4 ) ), $discounts->get_items() );
+		$this->assertEquals( 36, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
 		$product->delete( true );
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 }
