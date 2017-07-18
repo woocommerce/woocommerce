@@ -23,6 +23,9 @@ class WC_API extends WC_Legacy_API {
 	public function __construct() {
 		parent::__construct();
 
+		// Wrangle long requests.
+		add_action( 'shutdown', array( $this, 'rest_send_reponse_before_shutdown' ), -1 );
+
 		// Add query vars.
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 
@@ -37,6 +40,34 @@ class WC_API extends WC_Legacy_API {
 
 		// WP REST API.
 		$this->rest_api_init();
+	}
+
+	/**
+	 * Send the response/close connection before shutdown where extra (slow)
+	 * logic, such as syncs, may be running.
+	 *
+	 * @since 3.1.2
+	 */
+	public function rest_send_reponse_before_shutdown() {
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || headers_sent() ) {
+			return;
+		}
+
+		if ( session_id() ) {
+			session_write_close();
+		}
+
+		// This is the cleanest approuch when available and is used on nginx.
+		if ( is_callable( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+
+		// For apache, send some headers.
+		} else {
+			header( 'Content-Length: ' . ob_get_length() );
+			header( 'Connection: close' );
+			ob_end_flush();
+			flush();
+		}
 	}
 
 	/**
