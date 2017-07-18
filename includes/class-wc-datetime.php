@@ -37,7 +37,11 @@ class WC_DateTime extends DateTime {
 	 * @param int $offset
 	 */
 	public function set_utc_offset( $offset ) {
-		$this->utc_offset = intval( $offset );
+		if ( ! is_numeric( $offset ) ) {
+			$type = gettype( $offset );
+			throw new InvalidArgumentException( sprintf( 'WC_DateTime::set_utc_offset method only accepts numbers. Argument was of type %s', $type ) );
+		}
+		$this->utc_offset = round( floatval( $offset ), 2 );
 	}
 
 	/**
