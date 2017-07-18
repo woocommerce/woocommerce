@@ -24,7 +24,7 @@ class WC_Discounts {
 	 * Get items.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return object[]
 	 */
 	public function get_items() {
 		return $this->items;
@@ -35,27 +35,30 @@ class WC_Discounts {
 	 *
 	 * @since 3.2.0
 	 * @param array $raw_items
-	 * @todo Create https://github.com/woocommerce/woocommerce/pull/11889/files#diff-d9e4f5367e9d615985099b0d135629b8 class.
 	 */
 	public function set_items( $raw_items ) {
-		foreach ( $raw_items as $raw_item ) {
-			$item = array(
-				'price'    => 0, // Unit price without discounts.
-				'qty'      => 0, // Line qty.
-				'discount' => 0, // Total discounts to apply.
-			);
+		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
+			foreach ( $raw_items as $raw_item ) {
+				$item = (object) array(
+					'price'    => 0, // Unit price without discounts.
+					'quantity' => 0, // Line qty.
+					'discount' => 0, // Total discounts to apply.
+				);
 
-			if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
+				if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
+					$item->quantity = $raw_item->get_quantity();
+					$item->price    = $raw_item->get_price();
+				} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
+					$item->quantity = $raw_item->get_quantity();
+					$item->price    = $raw_item->get_subtotal();
+				} else {
+					// @todo remove when we implement WC_Cart_Item. This is the old cart item schema.
+					$item->quantity = $raw_item['quantity'];
+					$item->price    = $raw_item['data']->get_price();
+				}
 
-			} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
-
-			} else {
-				// @todo remove when we implement WC_Cart_Item. This is the old cart item schema.
-				$item['qty']   = $raw_item['quantity'];
-				$item['price'] = $raw_item['data']->get_price();
+				$this->items[] = $item;
 			}
-
-			$this->items[] = $item;
 		}
 	}
 
