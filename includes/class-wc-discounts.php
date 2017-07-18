@@ -51,6 +51,8 @@ class WC_Discounts {
 	 * @param array $raw_items List of raw cart or order items.
 	 */
 	public function set_items( $raw_items ) {
+		$this->items = array();
+
 		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
 			foreach ( $raw_items as $raw_item ) {
 				$item = (object) array(
@@ -117,8 +119,11 @@ class WC_Discounts {
 			case 'percent' :
 				$this->apply_percentage_discount( $amount );
 				break;
-			case 'fixed' :
-				$this->apply_fixed_discount( $amount );
+			case 'fixed_product' :
+				$this->apply_fixed_product_discount( $amount );
+				break;
+			case 'fixed_cart' :
+				$this->apply_fixed_cart_discount( $amount );
 				break;
 		}
 	}
@@ -137,25 +142,44 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Apply fixed discount to items.
+	 * Apply fixed product discount to items.
 	 *
 	 * @param  float $amount
 	 */
-	private function apply_fixed_discount( $total_amount ) {
+	private function apply_fixed_product_discount( $discount ) {
+		foreach ( $this->items as $item ) {
+			$item->discounted_price -= $discount;
+			$item->discounted_price  = max( 0, $item->discounted_price );
+		}
+	}
+
+	private function apply_discount_to_item( &$item, $discount ) {
+		if ( $discount > $item->discounted_price ) {
+			$discount = $item->discounted_price;
+		}
+		$item->discounted_price = $item->discounted_price - $discount;
+		return $discount;
+	}
+
+	/**
+	 * Apply fixed cart discount to items.
+	 *
+	 * @param  float $amount
+	 */
+	private function apply_fixed_cart_discount( $total_amount ) {
 		// Fixed amount needs to be divided equally between items.
 		$item_count = array_sum( wp_list_pluck( $this->items, 'quantity' ) );
 		$discount   = floor( $total_amount / $item_count );
 		$discounted = 0; // Keep track of what actually gets discounted, since some products may be cheaper than the discount.
 
-		if ( $discount ) {
+		if ( 0 < $discount ) {
 			foreach ( $this->items as $item ) {
-				$discounted             += min( $discount, $item->discounted_price );
-				$item->discounted_price -= $discount;
+				$discounted += $this->apply_discount_to_item( $item, $discount );
 			}
 
 			// Anything left?
-			if ( $remaining_discount = $total_amount - $discounted ) {
-				$this->apply_fixed_discount( $remaining_discount );
+			if ( $discounted && ( $remaining_discount = $total_amount - $discounted ) ) {
+				$this->apply_fixed_cart_discount( $remaining_discount );
 			}
 
 		// Amount is too small to divide equally.

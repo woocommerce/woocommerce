@@ -56,6 +56,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		// Create dummy content.
 		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$coupon = new WC_Coupon;
 		$coupon->set_code( 'test' );
@@ -68,19 +69,29 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '8', 'quantity' => 1 ) ), $discounts->get_items() );
 
-		// Apply a fixed coupon.
-		$coupon->set_discount_type( 'fixed' );
+		// Apply a fixed cart coupon.
+		$coupon->set_discount_type( 'fixed_cart' );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
+		var_dump($discounts->get_items());
 		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '0', 'quantity' => 1 ) ), $discounts->get_items() );
 
-		// Apply a fixed coupon.
+		// Apply a fixed cart coupon.
 		$coupon->set_discount_type( 'fixed_cart' );
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( array( (object) array( 'price' => '40', 'discounted_price' => '20', 'quantity' => 4 ) ), $discounts->get_items() );
+
+		// Apply a fixed product coupon.
+		$coupon->set_discount_type( 'fixed_product' );
+		$coupon->set_amount( 1 );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 4 );
+		$discounts->set_items( WC()->cart->get_cart() );
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( array( (object) array( 'price' => '40', 'discounted_price' => '36', 'quantity' => 4 ) ), $discounts->get_items() );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
