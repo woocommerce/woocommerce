@@ -241,6 +241,36 @@ function wc_get_account_payment_methods_types() {
 }
 
 /**
+ * Get account formatted address.
+ *
+ * @since  3.2.0
+ * @param  string $name
+ * @return string
+ */
+function wc_get_account_formatted_address( $name ) {
+	$customer_id = get_current_user_id();
+	$meta_keys   = [
+		'first_name',
+		'last_name',
+		'company',
+		'address_1',
+		'address_2',
+		'city',
+		'postcode',
+		'country',
+	];
+	
+	$meta = [];
+	foreach ( $meta_keys as $key ) {
+		$meta[ $key ] = get_user_meta( $customer_id, $name . '_' . $key, true );
+	}
+	
+	$address = apply_filters( 'woocommerce_my_account_my_address_formatted_address', $meta, $customer_id, $name );
+	
+	return WC()->countries->get_formatted_address( $address );
+}
+
+/**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6
