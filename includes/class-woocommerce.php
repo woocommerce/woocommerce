@@ -404,6 +404,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-frontend-scripts.php' ); // Frontend Scripts.
 		include_once( WC_ABSPATH . 'includes/class-wc-form-handler.php' );     // Form Handlers.
 		include_once( WC_ABSPATH . 'includes/class-wc-cart.php' );             // The main cart class.
+		include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-tax.php' );              // Tax class.
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zones.php' );   // Shipping Zones class.
 		include_once( WC_ABSPATH . 'includes/class-wc-customer.php' );         // Customer class.
