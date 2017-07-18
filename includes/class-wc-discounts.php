@@ -51,8 +51,8 @@ class WC_Discounts {
 
 			} else {
 				// @todo remove when we implement WC_Cart_Item. This is the old cart item schema.
-				$item['qty']   = $values['quantity'];
-				$item['price'] = $values['data']->get_price();
+				$item['qty']   = $raw_item['quantity'];
+				$item['price'] = $raw_item['data']->get_price();
 			}
 
 			$this->items[] = $item;
