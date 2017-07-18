@@ -241,6 +241,45 @@ function wc_get_account_payment_methods_types() {
 }
 
 /**
+ * Get account orders actions.
+ *
+ * @since  3.2.0
+ * @param  int|WC_Order $order
+ * @return array
+ */
+function wc_get_account_orders_actions( $order ) {
+	if ( ! is_object( $order ) ) {
+		$order_id = absint( $order );
+		$order    = wc_get_order( $order_id );
+	}
+	
+	$actions = array(
+		'pay'    => array(
+			'url'  => $order->get_checkout_payment_url(),
+			'name' => __( 'Pay', 'woocommerce' ),
+		),
+		'view'   => array(
+			'url'  => $order->get_view_order_url(),
+			'name' => __( 'View', 'woocommerce' ),
+		),
+		'cancel' => array(
+			'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
+			'name' => __( 'Cancel', 'woocommerce' ),
+		),
+	);
+
+	if ( ! $order->needs_payment() ) {
+		unset( $actions['pay'] );
+	}
+
+	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
+		unset( $actions['cancel'] );
+	}
+	
+	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+}
+
+/**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6
