@@ -10,6 +10,8 @@
 
 /**
  * Discounts class.
+ *
+ * @todo this class will need to be called instead get_discounted_price, in the cart?
  */
 class WC_Discounts {
 
@@ -115,6 +117,27 @@ class WC_Discounts {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
 			return false;
 		}
+
+
+		/* @todo add this logic here somewhere
+		if ( null === $this->get_limit_usage_to_x_items() ) {
+			$limit_usage_qty = $cart_item_qty;
+		} else {
+			$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
+
+			$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
+		}
+		if ( $single ) {
+			$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
+		} else {
+			$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+		}*/
+
+		// @todo how can we support the old woocommerce_coupon_get_discount_amount filter?
+
+
+
+
 		switch ( $coupon->get_discount_type() ) {
 			case 'percent' :
 				$this->apply_percentage_discount( $coupon->get_amount() );
