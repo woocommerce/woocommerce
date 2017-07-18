@@ -21,6 +21,20 @@ class WC_Discounts {
 	protected $items = array();
 
 	/**
+	 * An array of coupons which have been applied.
+	 *
+	 * @var array
+	 */
+	protected $coupons = array();
+
+	/**
+	 * An array of discounts which have been applied.
+	 *
+	 * @var array
+	 */
+	protected $discounts = array();
+
+	/**
 	 * Get items.
 	 *
 	 * @since  3.2.0
@@ -34,15 +48,15 @@ class WC_Discounts {
 	 * Set cart/order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $raw_items
+	 * @param array $raw_items List of raw cart or order items.
 	 */
 	public function set_items( $raw_items ) {
 		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
 			foreach ( $raw_items as $raw_item ) {
 				$item = (object) array(
-					'price'    => 0, // Unit price without discounts.
-					'quantity' => 0, // Line qty.
-					'discount' => 0, // Total discounts to apply.
+					'price'            => 0, // Unit price without discounts.
+					'discounted_price' => 0, // Unit price with discounts.
+					'quantity'         => 0, // Line qty.
 				);
 
 				if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
@@ -57,10 +71,17 @@ class WC_Discounts {
 					$item->price    = $raw_item['data']->get_price();
 				}
 
+				$item->discounted_price = $item->price;
 				$this->items[] = $item;
 			}
 		}
 	}
+
+	public function get_discounted_totals() {}
+
+	public function get_applied_discounts() {}
+
+	public function get_applied_coupons() {}
 
 	/**
 	 * Get all discount totals.
@@ -84,10 +105,78 @@ class WC_Discounts {
 	 * @param  WC_Coupon $coupon
 	 * @return bool True if applied.
 	 */
-	public function apply_discount( $coupon ) {
+	public function apply_coupon( $coupon ) {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
 			return false;
 		}
-		// Do something to the items.
+		$items  = $this->get_items();
+		$type   = $coupon->get_discount_type();
+		$amount = $coupon->get_amount();
+
+		switch ( $type ) {
+			case 'percent' :
+				$this->apply_percentage_discount( $amount );
+				break;
+			case 'fixed' :
+				$this->apply_fixed_discount( $amount );
+				break;
+		}
+	}
+
+	/**
+	 * Apply percent discount to items.
+	 *
+	 * @param  float $amount
+	 */
+	private function apply_percentage_discount( $amount ) {
+		foreach ( $this->items as $item ) {
+			$discount                = (float) $amount * ( $item->discounted_price / 100 );
+			$item->discounted_price -= $discount;
+			$item->discounted_price  = max( 0, $item->discounted_price );
+		}
+	}
+
+	/**
+	 * Apply fixed discount to items.
+	 *
+	 * @param  float $amount
+	 */
+	private function apply_fixed_discount( $total_amount ) {
+		// Fixed amount needs to be divided equally between items.
+		$item_count = array_sum( wp_list_pluck( $this->items, 'quantity' ) );
+		$discount   = floor( $total_amount / $item_count );
+		$discounted = 0; // Keep track of what actually gets discounted, since some products may be cheaper than the discount.
+
+		if ( $discount ) {
+			foreach ( $this->items as $item ) {
+				$discounted             += min( $discount, $item->discounted_price );
+				$item->discounted_price -= $discount;
+			}
+
+			// Anything left?
+			if ( $remaining_discount = $total_amount - $discounted ) {
+				$this->apply_fixed_discount( $remaining_discount );
+			}
+
+		// Amount is too small to divide equally.
+		} elseif ( $total_amount ) {
+			$discount = $total_amount;
+
+			while ( $discount > 0 ) {
+				$did_discount = false;
+
+				foreach ( $this->items as $item ) {
+					if ( $item->discounted_price ) {
+						$item->discounted_price --;
+						$discount --;
+						$did_discount = true;
+					}
+				}
+
+				if ( ! $did_discount ) {
+					break;
+				}
+			}
+		}
 	}
 }
