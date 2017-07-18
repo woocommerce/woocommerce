@@ -135,9 +135,7 @@ class WC_Discounts {
 	 */
 	private function apply_percentage_discount( $amount ) {
 		foreach ( $this->items as $item ) {
-			$discount                = (float) $amount * ( $item->discounted_price / 100 );
-			$item->discounted_price -= $discount;
-			$item->discounted_price  = max( 0, $item->discounted_price );
+			$this->apply_discount_to_item( $item, (float) $amount * ( $item->discounted_price / 100 ) );
 		}
 	}
 
@@ -148,17 +146,8 @@ class WC_Discounts {
 	 */
 	private function apply_fixed_product_discount( $discount ) {
 		foreach ( $this->items as $item ) {
-			$item->discounted_price -= $discount;
-			$item->discounted_price  = max( 0, $item->discounted_price );
+			$this->apply_discount_to_item( $item, $discount );
 		}
-	}
-
-	private function apply_discount_to_item( &$item, $discount ) {
-		if ( $discount > $item->discounted_price ) {
-			$discount = $item->discounted_price;
-		}
-		$item->discounted_price = $item->discounted_price - $discount;
-		return $discount;
 	}
 
 	/**
@@ -190,9 +179,8 @@ class WC_Discounts {
 				$did_discount = false;
 
 				foreach ( $this->items as $item ) {
-					if ( $item->discounted_price ) {
-						$item->discounted_price --;
-						$discount --;
+					if ( $this->apply_discount_to_item( $item, 0.1 ) ) {
+						$discount     -= 0.1;
 						$did_discount = true;
 					}
 				}
@@ -202,5 +190,20 @@ class WC_Discounts {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Apply a discount amount to an item and ensure it does not go negative.
+	 *
+	 * @param  object $item
+	 * @param  float $discount
+	 * @return float
+	 */
+	private function apply_discount_to_item( &$item, $discount ) {
+		if ( $discount > $item->discounted_price ) {
+			$discount = $item->discounted_price;
+		}
+		$item->discounted_price = $item->discounted_price - $discount;
+		return $discount;
 	}
 }

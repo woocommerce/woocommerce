@@ -73,7 +73,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon->set_discount_type( 'fixed_cart' );
 		$discounts->set_items( WC()->cart->get_cart() );
 		$discounts->apply_coupon( $coupon );
-		var_dump($discounts->get_items());
 		$this->assertEquals( array( (object) array( 'price' => '10', 'discounted_price' => '0', 'quantity' => 1 ) ), $discounts->get_items() );
 
 		// Apply a fixed cart coupon.
