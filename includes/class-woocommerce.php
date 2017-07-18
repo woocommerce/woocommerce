@@ -333,6 +333,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.

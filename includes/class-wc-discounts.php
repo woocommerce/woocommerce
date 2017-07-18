@@ -14,140 +14,77 @@
 class WC_Discounts {
 
 	/**
-	 * Display name.
+	 * An array of items to discount.
 	 *
-	 * @var string
+	 * @var array
 	 */
-	protected $name = '';
+	protected $items = array();
 
 	/**
-	 * Amount of discount.
+	 * Get items.
 	 *
-	 * @var float
-	 */
-	protected $amount = 0;
-
-	/**
-	 * Type of discount.
-	 *
-	 * @var string
-	 */
-	protected $type = 'percent';
-
-	/**
-	 * Allow or not accumulate with other discounts.
-	 *
-	 * @var bool
-	 */
-	protected $individual_use = false;
-
-	/**
-	 * Coupon ID.
-	 *
-	 * @var int
-	 */
-	protected $coupon_id = 0;
-
-	/**
-	 * Get available discount types.
-	 *
+	 * @since  3.2.0
 	 * @return array
 	 */
-	public function get_available_types() {
+	public function get_items() {
+		return $this->items;
+	}
+
+	/**
+	 * Set cart/order items which will be discounted.
+	 *
+	 * @since 3.2.0
+	 * @param array $raw_items
+	 * @todo Create https://github.com/woocommerce/woocommerce/pull/11889/files#diff-d9e4f5367e9d615985099b0d135629b8 class.
+	 */
+	public function set_items( $raw_items ) {
+		foreach ( $raw_items as $raw_item ) {
+			$item = array(
+				'price'    => 0, // Unit price without discounts.
+				'qty'      => 0, // Line qty.
+				'discount' => 0, // Total discounts to apply.
+			);
+
+			if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
+
+			} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
+
+			} else {
+				// @todo remove when we implement WC_Cart_Item. This is the old cart item schema.
+				$item['qty']   = $values['quantity'];
+				$item['price'] = $values['data']->get_price();
+			}
+
+			$this->items[] = $item;
+		}
+	}
+
+	/**
+	 * Get all discount totals.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	public function get_discounts() {
 		return array(
-			'percent',
-			'fixed_cart',
-			'fixed_product',
+			'items',
+			'discount_totals' => array(
+				// 'code' => 'amount'
+			)
 		);
 	}
 
 	/**
-	 * Set name.
+	 * Apply a discount to all items using a coupon.
 	 *
-	 * @param string $name New name.
+	 * @since  3.2.0
+	 * @param  WC_Coupon $coupon
+	 * @return bool True if applied.
 	 */
-	public function set_name( $name ) {
-		$this->name = $name;
-	}
-
-	/**
-	 * Set amount.
-	 *
-	 * @param float $amount Total discount amount.
-	 */
-	public function set_amount( $amount ) {
-		$this->amount = $amount;
-	}
-
-	/**
-	 * Set type.
-	 *
-	 * @param string $type Type of discount.
-	 */
-	public function set_type( $type ) {
-		$this->type = in_array( $type, $this->get_available_types(), true ) ? $type : 'percent';
-	}
-
-	/**
-	 * Set individual use.
-	 *
-	 * @param bool $individual_use Allow individual use.
-	 */
-	public function set_individual_use( $individual_use ) {
-		$this->individual_use = $individual_use;
-	}
-
-	/**
-	 * Set coupon ID.
-	 *
-	 * @param int $coupon_id Coupon ID.
-	 */
-	public function set_coupon_id( $coupon_id ) {
-		$this->coupon_id = $coupon_id;
-	}
-
-	/**
-	 * Get name.
-	 *
-	 * @return string.
-	 */
-	public function get_name() {
-		return $this->name;
-	}
-
-	/**
-	 * Get amount.
-	 *
-	 * @return float
-	 */
-	public function get_amount() {
-		return $this->amount;
-	}
-
-	/**
-	 * Get type.
-	 *
-	 * @return string
-	 */
-	public function get_type() {
-		return $this->type;
-	}
-
-	/**
-	 * Get individual use.
-	 *
-	 * @return bool
-	 */
-	public function get_individual_use() {
-		return $this->individual_use;
-	}
-
-	/**
-	 * Get coupon ID.
-	 *
-	 * @return int
-	 */
-	public function get_coupon_id() {
-		return $this->coupon_id;
+	public function apply_discount( $coupon ) {
+		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
+			return false;
+		}
+		// Do something to the items.
 	}
 }
