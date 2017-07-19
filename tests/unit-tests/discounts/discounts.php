@@ -293,6 +293,46 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 				),
 				'expected_total_discount' => 1,
 			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'                   => 'test',
+						'discount_type'          => 'percent',
+						'amount'                 => '10',
+						'limit_usage_to_x_items' => 1,
+					)
+				),
+				'expected_total_discount' => 1,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'                   => 'test',
+						'discount_type'          => 'percent',
+						'amount'                 => '10',
+						'limit_usage_to_x_items' => 1,
+					)
+				),
+				'expected_total_discount' => 1,
+			),
 		);
 
 		foreach ( $tests as $test_index => $test ) {
