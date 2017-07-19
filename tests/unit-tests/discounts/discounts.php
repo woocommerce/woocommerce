@@ -49,12 +49,48 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test applying a coupon to a set of items.
+	 * Test applying a coupon (make sure it changes prices).
 	 */
 	public function test_apply_coupon() {
 		$discounts = new WC_Discounts();
 
 		// Create dummy content.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 10 );
+
+		// Apply a percent discount.
+		$coupon->set_discount_type( 'percent' );
+		$discounts->set_items( WC()->cart->get_cart() );
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( 9, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+
+		// Apply a fixed cart coupon.
+		$coupon->set_discount_type( 'fixed_cart' );
+		$discounts->set_items( WC()->cart->get_cart() );
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+
+		// Apply a fixed product coupon.
+		$coupon->set_discount_type( 'fixed_product' );
+		$discounts->set_items( WC()->cart->get_cart() );
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+
+		// Cleanup.
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
+	 * Test various discount calculations are working correctly and produding expected results.
+	 */
+	public function test_calculations() {
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -68,51 +104,203 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		);
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_tax_status( 'taxable' );
-		$product->save();
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$coupon = new WC_Coupon;
-		$coupon->set_code( 'test' );
-		$coupon->set_discount_type( 'percent' );
-		$coupon->set_amount( 20 );
 
-		// Apply a percent discount.
-		$coupon->set_discount_type( 'percent' );
-		$discounts->set_items( WC()->cart->get_cart() );
-		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( 8, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+		$tests = array(
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'percent',
+						'amount'        => '20',
+					)
+				),
+				'expected_total_discount' => 2,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					)
+				),
+				'expected_total_discount' => 10,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					)
+				),
+				'expected_total_discount' => 10,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					)
+				),
+				'expected_total_discount' => 10,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 3,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 2,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					)
+				),
+				'expected_total_discount' => 10,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					)
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					)
+				),
+				'expected_total_discount' => 10,
+			)
+		);
 
-		// Apply a fixed cart coupon.
-		$coupon->set_discount_type( 'fixed_cart' );
-		$discounts->set_items( WC()->cart->get_cart() );
-		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( 20, $discounts->get_discount( 'cart' ) );
+		foreach ( $tests as $test_index => $test ) {
+			$discounts = new WC_Discounts();
+			$products  = array();
 
-		// Apply a fixed cart coupon.
-		$coupon->set_discount_type( 'fixed_cart' );
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 4 );
-		$discounts->set_items( WC()->cart->get_cart() );
-		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( 20, $discounts->get_discount( 'cart' ) );
+			foreach ( $test['cart'] as $item ) {
+				$product = WC_Helper_Product::create_simple_product();
+				$product->set_regular_price( $item['price'] );
+				$product->set_tax_status( 'taxable' );
+				$product->save();
+				WC()->cart->add_to_cart( $product->get_id(), $item['qty'] );
+				$products[] = $product;
+			}
 
-		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( 40, $discounts->get_discount( 'cart' ) );
+			$discounts->set_items( WC()->cart->get_cart() );
 
-		// Apply a fixed product coupon.
-		$coupon->set_discount_type( 'fixed_product' );
-		$coupon->set_amount( 1 );
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 4 );
-		$discounts->set_items( WC()->cart->get_cart() );
-		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( 36, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+			foreach ( $test['coupons'] as $coupon_props ) {
+				$coupon = new WC_Coupon;
+				$coupon->set_props( $coupon_props );
+				$discounts->apply_coupon( $coupon );
+			}
 
-		// Cleanup.
-		WC()->cart->empty_cart();
-		$product->delete( true );
+			$this->assertEquals( $test['expected_total_discount'], array_sum( $discounts->get_discounts() ), 'Test case ' . $test_index . ' failed (' . print_r( $test, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
+
+			// Clean.
+			WC()->cart->empty_cart();
+
+			foreach ( $products as $product ) {
+				$product->delete( true );
+			}
+		}
+
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
