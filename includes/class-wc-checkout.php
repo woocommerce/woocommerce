@@ -562,7 +562,7 @@ class WC_Checkout {
 
 				switch ( $type ) {
 					case 'checkbox' :
-						$value = (int) isset( $_POST[ $key ] );
+						$value = isset( $_POST[ $key ] ) ? 1 : '';
 						break;
 					case 'multiselect' :
 						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( $_POST[ $key ] ) ) : '';
