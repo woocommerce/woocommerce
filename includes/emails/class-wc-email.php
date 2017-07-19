@@ -96,18 +96,6 @@ class WC_Email extends WC_Settings_API {
 	public $object;
 
 	/**
-	 * Strings to find in subjects/headings.
-	 * @var array
-	 */
-	public $find = array();
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 * @var array
-	 */
-	public $replace = array();
-
-	/**
 	 * Mime boundary (for multipart emails).
 	 * @var string
 	 */
@@ -196,33 +184,53 @@ class WC_Email extends WC_Settings_API {
 	);
 
 	/**
+	 * Strings to find/replace in subjects/headings.
+	 *
+	 * @var array
+	 */
+	protected $placeholders = array();
+
+	/**
+	 * Strings to find in subjects/headings.
+	 *
+	 * @deprecated 3.2.0 in favour of placeholders
+	 * @var array
+	 */
+	public $find = array();
+
+	/**
+	 * Strings to replace in subjects/headings.
+	 *
+	 * @deprecated 3.2.0 in favour of placeholders
+	 * @var array
+	 */
+	public $replace = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Find/replace
+		if ( empty( $this->placeholders ) ) {
+			$this->placeholders = array(
+				'{site_title}' => $this->get_blogname()
+			);
+		}
+
 		// Init settings
 		$this->init_form_fields();
 		$this->init_settings();
-
-		// Save settings hook
-		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		// Default template base if not declared in child constructor
 		if ( is_null( $this->template_base ) ) {
 			$this->template_base = WC()->plugin_path() . '/templates/';
 		}
 
-		// Settings
 		$this->email_type = $this->get_option( 'email_type' );
 		$this->enabled    = $this->get_option( 'enabled' );
 
-		// Find/replace
-		$this->find['blogname']      = '{blogname}';
-		$this->find['site-title']    = '{site_title}';
-		$this->replace['blogname']   = $this->get_blogname();
-		$this->replace['site-title'] = $this->get_blogname();
-
-		// For multipart messages
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**
@@ -246,7 +254,9 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
+		// handle legacy find and replace.
+		$string = str_replace( $this->find, $this->replace, $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', array_keys( $this->placeholders ), $this ), apply_filters( 'woocommerce_email_format_string_replace', array_values( $this->placeholders ), $this ), $string );
 	}
 
 	/**
@@ -538,7 +548,7 @@ class WC_Email extends WC_Settings_API {
 				'type'        => 'text',
 				'desc_tip'      => true,
 				/* translators: %s: list of placeholders */
-				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
 				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
 			),
@@ -547,7 +557,7 @@ class WC_Email extends WC_Settings_API {
 				'type'        => 'text',
 				'desc_tip'      => true,
 				/* translators: %s: list of placeholders */
-				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' ),
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
 				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
 			),

@@ -43,6 +43,11 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		$this->description    = __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
 		$this->template_html  = 'emails/customer-refunded-order.php';
 		$this->template_plain = 'emails/plain/customer-refunded-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
@@ -148,14 +153,10 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		$this->id             = $this->partial_refund ? 'customer_partially_refunded_order' : 'customer_refunded_order';
 
 		if ( $order_id ) {
-			$this->object    = wc_get_order( $order_id );
-			$this->recipient = $this->object->get_billing_email();
-
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-
-			$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
-			$this->replace['order-number'] = $this->object->get_order_number();
+			$this->object                         = wc_get_order( $order_id );
+			$this->recipient                      = $this->object->get_billing_email();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
 		if ( ! empty( $refund_id ) ) {
