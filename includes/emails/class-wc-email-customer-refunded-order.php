@@ -74,9 +74,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 */
 	public function get_default_heading( $partial = false ) {
 		if ( $partial ) {
-			return __( 'Order {order_number} details', 'woocommerce' );
-		} else {
 			return __( 'Your order has been partially refunded', 'woocommerce' );
+		} else {
+			return __( 'Order {order_number} details', 'woocommerce' );
 		}
 	}
 
@@ -90,7 +90,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		if ( $this->partial_refund ) {
 			$subject = $this->get_option( 'subject_partial', $this->get_default_subject( true ) );
 		} else {
-			$subject = $this->get_option( 'subject_full', $this->get_default_heading() );
+			$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
 		}
 		return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object );
 	}
