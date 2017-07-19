@@ -120,8 +120,9 @@ class WC_Discounts {
 	 * @param array $raw_items List of raw cart or order items.
 	 */
 	public function set_items( $raw_items ) {
-		$this->items     = array();
-		$this->discounts = array();
+		$this->items           = array();
+		$this->discounts       = array();
+		$this->applied_coupons = array();
 
 		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
 			foreach ( $raw_items as $raw_item ) {

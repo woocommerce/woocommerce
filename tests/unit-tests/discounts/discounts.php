@@ -49,6 +49,39 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * test get_applied_coupons
+	 */
+	public function test_get_applied_coupons() {
+		$discounts = new WC_Discounts();
+		$product   = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$discounts->set_items( WC()->cart->get_cart() );
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 50 );
+		$coupon->set_discount_type( 'percent' );
+		$discounts->apply_coupon( $coupon );
+
+		$this->assertEquals( array( 'test' => 5 ), $discounts->get_applied_coupons() );
+
+		$coupon2 = new WC_Coupon;
+		$coupon2->set_code( 'test2' );
+		$coupon2->set_amount( 50 );
+		$coupon2->set_discount_type( 'percent' );
+		$discounts->apply_coupon( $coupon2 );
+
+		$this->assertEquals( array( 'test' => 5, 'test2' => 2.50 ), $discounts->get_applied_coupons() );
+
+		$discounts->apply_coupon( $coupon );
+		$this->assertEquals( array( 'test' => 6.25, 'test2' => 2.50 ), $discounts->get_applied_coupons() );
+
+		// Cleanup.
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
 	 * Test applying a coupon (make sure it changes prices).
 	 */
 	public function test_apply_coupon() {
