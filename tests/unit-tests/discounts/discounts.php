@@ -91,13 +91,15 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		// Test.
 		$discounts = new WC_Discounts();
 		$discounts->set_items( WC()->cart->get_cart() );
-		$result = $discounts->apply_discount( '50%' );
 
-		echo "\n\n\n";
-		print_r( $result );
-		echo "\n\n\n";
+		$discounts->apply_discount( '50%' );
+		$all_discounts = $discounts->get_discounts();
+		$this->assertEquals( $all_discounts['discount-50%'], 10 );
 
-		$this->assertEquals( array( 'test' => 2 ), $result );
+		$discounts->apply_discount( '50%' );
+		$all_discounts = $discounts->get_discounts();
+		$this->assertEquals( $all_discounts['discount-50%'], 10, print_r( $all_discounts, true ) );
+		$this->assertEquals( $all_discounts['discount-50%-2'], 5, print_r( $all_discounts, true ) );
 
 		// Cleanup.
 		WC()->cart->empty_cart();

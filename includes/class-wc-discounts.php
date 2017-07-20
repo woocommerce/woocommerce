@@ -157,15 +157,47 @@ class WC_Discounts {
 
 	/**
 	 * Allows a discount to be applied to the items programmatically without a coupon.
-	 * @return [type] [description]
+	 *
+	 * @param  string $raw_discount Discount amount either fixed or percentage.
+	 * @return int discounted amount in cents.
 	 */
-	public function apply_discount( $discount ) {
-		if ( strstr( $discount, '%' ) ) {
-			$discount   = absint( rtrim( $discount, '%' ) );
-			$discounted = $this->apply_percentage_discount( $this->items, $discount );
+	public function apply_discount( $raw_discount ) {
+		if ( strstr( $raw_discount, '%' ) ) {
+			$discount          = absint( rtrim( $raw_discount, '%' ) );
+			$total_to_discount = 0;
 
-			return $this->remove_precision( $discounted );
+			// Get total item cost right now.
+			foreach ( $this->items as $item ) {
+				$total_to_discount += $this->get_discounted_price_in_cents( $item );
+			}
+
+			// @todo sum other manual discounts too
+			foreach ( $this->discounts as $key => $value ) {
+				if ( strstr( $key, 'discount-' ) ) {
+					$total_to_discount = $total_to_discount - $value;
+				}
+			}
+
+			$discount_total = $discount * ( $total_to_discount / 100 );
+			$discount_id    = '';
+			$index          = 1;
+
+			while ( ! $discount_id ) {
+				$discount_id = 'discount-' . $raw_discount;
+
+				if ( 1 < $index ) {
+					$discount_id .= '-' . $index;
+				}
+
+				if ( isset( $this->discounts[ $discount_id ] ) ) {
+					$index ++;
+					$discount_id = '';
+				}
+			}
+
+			return $this->discounts[ $discount_id ] = $discount_total;
 		}
+		// @todo fixed discounts
 	}
 
 	/**
