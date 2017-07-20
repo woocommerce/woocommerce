@@ -902,9 +902,20 @@ button.pswp__button--zoom:hover {
 	.select2-choice:hover {
 		box-shadow: none !important;
 	}
-
 	.select2-choice {
 		padding: .7em 0 .7em .7em;
+	}
+	.select2-container .select2-selection--single {
+		height: 48px;
+	}
+	.select2-container .select2-selection--single .select2-selection__rendered {
+		line-height: 48px;
+	}
+	.select2-container--default .select2-selection--single .select2-selection__arrow {
+		height: 46px;
+	}
+	.select2-container--focus .select2-selection {
+		border-color: black;
 	}
 }
 
@@ -1014,7 +1025,7 @@ button.pswp__button--zoom:hover {
 			.select2-results__options {
 				background:#333;
 			}
-			.select2-results__option[aria-selected="true"]{
+			.select2-results__option[data-selected="true"]{
 				color: #333;
 			}
 		}
@@ -1027,6 +1038,10 @@ button.pswp__button--zoom:hover {
 				color: #ccc;
 			}
 		}
+	}
+
+	.select2-container--focus .select2-selection {
+		border-color: white;
 	}
 }
 

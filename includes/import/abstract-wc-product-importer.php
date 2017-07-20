@@ -293,7 +293,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Item data.
 	 *
-	 * @return WC_Product|WP_Error
 	 * @throws Exception
 	 */
 	protected function set_product_data( &$product, $data ) {
@@ -471,7 +470,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-				// Re-create the attribute to CRUD save and genarate again.
+				// Re-create the attribute to CRUD save and generate again.
 				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
 				$parent_attributes[ $attribute_name ]->set_variation( 1 );
 
@@ -600,7 +599,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			throw new Exception( sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $attribute_name ), 400 );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
 			throw new Exception( sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
-		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
+		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
 			throw new Exception( sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
 		}
 
@@ -610,6 +609,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( $result->get_error_message(), 400 );
 		}
+
+		$attribute_id = absint( $wpdb->insert_id );
 
 		// Delete transient.
 		delete_transient( 'wc_attribute_taxonomies' );
@@ -621,12 +622,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$wc_product_attributes = array();
 
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
-				$wc_product_attributes[ $name ] = $tax;
-			}
+			$wc_product_attributes[ wc_attribute_taxonomy_name( $attribute_name ) ] = $tax;
 		}
 
-		return $wpdb->insert_id;
+		return $attribute_id;
 	}
 
 	/**
@@ -682,5 +681,32 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$return = true;
 		}
 		return apply_filters( 'woocommerce_product_importer_time_exceeded', $return );
+	}
+
+	/**
+	 * Explode CSV cell values using commas by default, and handling escaped
+	 * separators.
+	 *
+	 * @since  3.2.0
+	 * @param  string $value
+	 * @return array
+	 */
+	protected function explode_values( $value ) {
+		$value  = str_replace( '\\,', '::separator::', $value );
+		$values = explode( ',', $value );
+		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
+
+		return $values;
+	}
+
+	/**
+	 * Remove formatting and trim each value.
+	 *
+	 * @since  3.2.0
+	 * @param  string $value
+	 * @return string
+	 */
+	protected function explode_values_formatter( $value ) {
+		return trim( str_replace( '::separator::', ',', $value ) );
 	}
 }

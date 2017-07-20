@@ -616,7 +616,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
+	 * Sets order tax (sum of cart and shipping tax). Used internally only.
 	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
@@ -782,22 +782,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's ID. The item must belong to the current
-	 * order. If the item cannot be found or it doens't belong to current order
-	 * FALSE will be returned.
+	 * Get an order item object, based on it's type.
 	 *
 	 * @since  3.0.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
 	 */
 	public function get_item( $item_id ) {
-		$type = $this->data_store->get_order_item_type( $this, $item_id );
-		if ( ! $type ) {
-			return false;
-		}
-
-		$items = $this->get_items( $type );
-		return ! empty( $items[ $item_id ] ) ? $items[ $item_id ] : false;
+		return WC_Order_Factory::get_order_item( $item_id );
 	}
 
 	/**

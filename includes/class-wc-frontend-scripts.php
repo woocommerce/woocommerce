@@ -91,14 +91,14 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Return protocol relative asset URL.
+	 * Return asset URL.
 	 *
 	 * @param string $path
 	 *
 	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
-		return str_replace( array( 'http:', 'https:' ), '', plugins_url( $path, WC_PLUGIN_FILE ) );
+		return apply_filters( 'woocommerce_get_asset_url', plugins_url( $path, WC_PLUGIN_FILE ), $path );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class WC_Frontend_Scripts {
 			'flexslider' => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.6.1',
+				'version' => '2.6.3',
 			),
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -230,6 +230,11 @@ class WC_Frontend_Scripts {
 				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => '4.0.3',
+			),
+			'selectWoo' => array(
+				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => '1.0.0',
 			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
@@ -366,8 +371,8 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart' );
 		}
-		if ( is_checkout() || is_account_page() ) {
-			self::enqueue_script( 'select2' );
+		if ( is_cart() || is_checkout() || is_account_page() ) {
+			self::enqueue_script( 'selectWoo' );
 			self::enqueue_style( 'select2' );
 
 			// Password strength meter. Load in checkout, account login and edit account page.
@@ -476,6 +481,7 @@ class WC_Frontend_Scripts {
 						'slideshow'      => false,
 						'animationSpeed' => 500,
 						'animationLoop'  => false, // Breaks photoswipe pagination if true.
+						'allowOneSlide'  => false,
 					) ),
 					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
 					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
@@ -484,7 +490,7 @@ class WC_Frontend_Scripts {
 						'closeOnScroll'         => false,
 						'history'               => false,
 						'hideAnimationDuration' => 0,
-						'showAnimationDuration' => 0
+						'showAnimationDuration' => 0,
 					) ),
 					'flexslider_enabled' => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);

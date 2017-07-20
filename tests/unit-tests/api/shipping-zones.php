@@ -84,7 +84,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $data ), 1 );
 		$this->assertContains( array(
 			'id'     => 0,
-			'name'   => 'Rest of the World',
+			'name'   => 'Locations not covered by your other zones',
 			'order'  => 0,
 			'_links' => array(
 				'self'       => array(

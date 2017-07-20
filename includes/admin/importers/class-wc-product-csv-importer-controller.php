@@ -68,6 +68,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	public static function get_importer( $file, $args = array() ) {
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
+		$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 		return new $importer_class( $file, $args );
 	}
 
@@ -228,19 +229,19 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return string|WP_Error
 	 */
 	public function handle_upload() {
-		$valid_filetypes = apply_filters( 'woocommerce_csv_product_import_valid_filetypes', array( 'text/csv', 'text/plain' ) );
+		$valid_filetypes = apply_filters( 'woocommerce_csv_product_import_valid_filetypes', array( 'csv' => 'text/csv', 'txt' => 'text/plain' ) );
 
 		if ( empty( $_POST['file_url'] ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
-			if ( ! in_array( $_FILES['import']['type'], $valid_filetypes ) ) {
+			$filetype = wp_check_filetype( $_FILES['import']['name'], $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 
-			$overrides                 = array( 'test_form' => false, 'test_type' => false );
-			$_FILES['import']['name'] .= '.txt';
+			$overrides                 = array( 'test_form' => false, 'mimes' => $valid_filetypes );
 			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
@@ -268,7 +269,7 @@ class WC_Product_CSV_Importer_Controller {
 
 			return $upload['file'];
 		} elseif ( file_exists( ABSPATH . $_POST['file_url'] ) ) {
-			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'] );
+			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'], $valid_filetypes );
 			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
@@ -311,7 +312,8 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		if ( ! empty( $_POST['map_to'] ) ) {
-			$mapping = wp_unslash( $_POST['map_to'] );
+			$mapping_from = wp_unslash( $_POST['map_from'] );
+			$mapping_to   = wp_unslash( $_POST['map_to'] );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -319,7 +321,10 @@ class WC_Product_CSV_Importer_Controller {
 
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
 			'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
-			'mapping'         => $mapping,
+			'mapping'         => array(
+				'from' => $mapping_from,
+				'to'   => $mapping_to,
+			),
 			'file'            => $this->file,
 			'update_existing' => $this->update_existing,
 			'delimiter'       => $this->delimiter,

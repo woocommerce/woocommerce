@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Free Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version 2.4.0
@@ -216,7 +216,6 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 
 	/**
 	 * calculate_shipping function.
-	 * @return array
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$args = array(

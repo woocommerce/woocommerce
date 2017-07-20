@@ -369,19 +369,20 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Search customers and return customer IDs.
 	 *
-	 * @param  string $term
-	 * @oaram  int|string $limit @since 3.0.7
+	 * @param  string     $term
+	 * @param  int|string $limit @since 3.0.7
+	 *
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {
-		$query = new WP_User_Query( array(
+		$query = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 			'fields'         => 'ID',
 			'number'         => $limit,
-		) );
+		), $term, $limit, 'main_query' ) );
 
-		$query2 = new WP_User_Query( array(
+		$query2 = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'fields'         => 'ID',
 			'number'         => $limit,
 			'meta_query'     => array(
@@ -397,7 +398,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					'compare' => 'LIKE',
 				),
 			),
-		) );
+		), $term, $limit, 'meta_query' ) );
 
 		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
 

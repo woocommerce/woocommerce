@@ -110,7 +110,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * A list of avaiable tools for use in the system status section.
+	 * A list of available tools for use in the system status section.
 	 * 'button' becomes 'action' in the API.
 	 *
 	 * @return array
@@ -128,9 +128,14 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'delete_orphaned_variations' => array(
-				'name'      => __( 'Orphaned variations', 'woocommerce' ),
-				'button'    => __( 'Delete orphaned variations', 'woocommerce' ),
-				'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+				'name'    => __( 'Orphaned variations', 'woocommerce' ),
+				'button'  => __( 'Delete orphaned variations', 'woocommerce' ),
+				'desc'    => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+			),
+			'add_order_indexes' => array(
+				'name'    => __( 'Order address indexes', 'woocommerce' ),
+				'button'  => __( 'Add order address indexes', 'woocommerce' ),
+				'desc'    => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'    => __( 'Term counts', 'woocommerce' ),
@@ -406,6 +411,24 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
 					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';" ) );
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
+			break;
+			case 'add_order_indexes' :
+				/**
+				 * Add billing and shipping address indexes containing the customer name for orders
+				 * that don't have address indexes yet.
+				 */
+				$sql = "INSERT INTO {$wpdb->postmeta}( post_id, meta_key, meta_value )
+					SELECT post_id, '%1\$s', GROUP_CONCAT( meta_value SEPARATOR ' ' )
+					FROM {$wpdb->postmeta}
+					WHERE meta_key IN ( '%2\$s', '%3\$s' )
+					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%1\$s' )
+						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%3\$s' ) )
+					GROUP BY post_id";
+				$rows = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name' ) );
+				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name' ) );
+
+				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 			break;
 			case 'reset_roles' :
 				// Remove then re-add caps and roles

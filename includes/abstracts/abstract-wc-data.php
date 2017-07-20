@@ -200,8 +200,8 @@ abstract class WC_Data {
 			} else {
 				$this->data_store->create( $this );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/**
@@ -644,7 +644,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Sets a date prop whilst handling formatting and datatime objects.
+	 * Sets a date prop whilst handling formatting and datetime objects.
 	 *
 	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
