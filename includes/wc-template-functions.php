@@ -2460,7 +2460,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
 	 * @since  3.0.0
-	 * @param  WC_Item $item
+	 * @param  WC_Order_Item $item
 	 * @param  array   $args
 	 * @return string|void
 	 */
@@ -2498,7 +2498,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
 	 * Display item download links.
 	 * @since  3.0.0
-	 * @param  WC_Item $item
+	 * @param  WC_Order_Item $item
 	 * @param  array   $args
 	 * @return string|void
 	 */
