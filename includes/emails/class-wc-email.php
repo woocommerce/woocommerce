@@ -213,7 +213,7 @@ class WC_Email extends WC_Settings_API {
 		// Find/replace
 		if ( empty( $this->placeholders ) ) {
 			$this->placeholders = array(
-				'{site_title}' => $this->get_blogname()
+				'{site_title}' => $this->get_blogname(),
 			);
 		}
 
