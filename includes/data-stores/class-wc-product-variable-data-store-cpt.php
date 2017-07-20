@@ -29,6 +29,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected function read_product_data( &$product ) {
 		parent::read_product_data( $product );
 
+		// Make sure data which does not apply to variables is unset.
+		$product->set_regular_price( '' );
+		$product->set_sale_price( '' );
+
 		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
 		$children = $this->read_children( $product );
 		$product->set_children( $children['all'] );
