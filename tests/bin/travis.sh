@@ -18,8 +18,6 @@ if [ $1 == 'before' ]; then
 	composer self-update
 	composer install --no-interaction
 
-elif [ $1 == 'during' ]; then
-
 elif [ $1 == 'after' ]; then
 
 	## Only run on latest stable PHP box (defined in .travis.yml).
