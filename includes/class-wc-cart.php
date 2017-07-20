@@ -619,7 +619,7 @@ class WC_Cart {
 			}
 		}
 		$cross_sells = array_diff( $cross_sells, $in_cart );
-		return wp_parse_id_list( $cross_sells );
+		return apply_filters( 'woocommerce_cart_crosssell_ids', wp_parse_id_list( $cross_sells ), $this );
 	}
 
 	/**
@@ -1339,7 +1339,7 @@ class WC_Cart {
 
 			/**
 			 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
-			 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
+			 * values "add up" when viewing the order in admin. This does have the disadvantage of not being able to
 			 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
 			 *
 			 * Tax exclusive prices are not affected.
@@ -1458,8 +1458,8 @@ class WC_Cart {
 		}
 
 		// Get totals for the chosen shipping method
-		$this->shipping_total 		= WC()->shipping->shipping_total;	// Shipping Total
-		$this->shipping_taxes		= WC()->shipping->shipping_taxes;	// Shipping Taxes
+		$this->shipping_total = WC()->shipping->shipping_total; // Shipping Total
+		$this->shipping_taxes = WC()->shipping->shipping_taxes; // Shipping Taxes
 	}
 
 	/**
@@ -1515,6 +1515,7 @@ class WC_Cart {
 						'address'   => WC()->customer->get_shipping_address(),
 						'address_2' => WC()->customer->get_shipping_address_2(),
 					),
+					'cart_subtotal'       => $this->get_displayed_subtotal(),
 				),
 			)
 		);
@@ -1735,6 +1736,13 @@ class WC_Cart {
 
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
+
+		// Prevent adding coupons by post ID.
+		if ( $the_coupon->get_code() !== $coupon_code ) {
+			$the_coupon->set_code( $coupon_code );
+			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			return false;
+		}
 
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
@@ -1986,6 +1994,10 @@ class WC_Cart {
 	 *
 	 * Fee is an amount of money charged for a particular piece of work
 	 * or for a particular right or service, and not supposed to be negative.
+	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
+	 * persist.
 	 *
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).

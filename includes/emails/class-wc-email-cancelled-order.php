@@ -23,11 +23,16 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'cancelled_order';
-		$this->title            = __( 'Cancelled order', 'woocommerce' );
-		$this->description      = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
-		$this->template_html    = 'emails/admin-cancelled-order.php';
-		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
+		$this->id             = 'cancelled_order';
+		$this->title          = __( 'Cancelled order', 'woocommerce' );
+		$this->description    = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
+		$this->template_html  = 'emails/admin-cancelled-order.php';
+		$this->template_plain = 'emails/plain/admin-cancelled-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
@@ -72,11 +77,9 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		}
 
 		if ( is_a( $order, 'WC_Order' ) ) {
-			$this->object                  = $order;
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
-			$this->replace['order-number'] = $this->object->get_order_number();
+			$this->object                         = $order;
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {

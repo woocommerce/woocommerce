@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Flat Rate Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version		2.4.0

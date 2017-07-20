@@ -888,6 +888,10 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),
+			_x( 'Terms and conditions', 'Page setting', 'woocommerce' ) => array(
+				'option'    => 'woocommerce_terms_page_id',
+				'shortcode' => '',
+			),
 		);
 
 		$pages_output = array();

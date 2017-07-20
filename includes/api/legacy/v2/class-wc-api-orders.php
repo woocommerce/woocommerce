@@ -1444,7 +1444,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// Force delete since trashed order notes could not be managed through comments list table
-			$result = wp_delete_comment( $note->comment_ID, true );
+			$result = wc_delete_order_note( $note->comment_ID );
 
 			if ( ! $result ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), 500 );

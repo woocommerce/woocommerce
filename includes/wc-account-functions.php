@@ -202,7 +202,7 @@ function wc_get_account_downloads_columns() {
 		'download-product'   => __( 'Product', 'woocommerce' ),
 		'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
-		'download-file'      => __( 'File', 'woocommerce' ),
+		'download-file'      => __( 'Download', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
 

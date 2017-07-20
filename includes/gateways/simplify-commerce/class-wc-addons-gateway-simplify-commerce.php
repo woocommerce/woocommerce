@@ -393,7 +393,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * @since  2.4
 	 * @param  string $payment_method_id The ID of the payment method to validate
 	 * @param  array $payment_meta associative array of meta data required for automatic payments
-	 * @return array
 	 * @throws Exception
 	 */
 	public function validate_subscription_payment_meta( $payment_method_id, $payment_meta ) {

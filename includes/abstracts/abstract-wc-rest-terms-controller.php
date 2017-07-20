@@ -326,7 +326,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		$response = rest_ensure_response( $response );
 
-		// Store pagation values for headers then unset for count query.
+		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 

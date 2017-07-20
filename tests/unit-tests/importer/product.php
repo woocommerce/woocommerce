@@ -146,7 +146,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'2017-01-01',
-				'2030-01-01',
+				'2030-01-01 0:00:00',
 				'taxable',
 				'standard',
 				'1',
@@ -240,7 +240,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_get_parsed_data() {
 		$args = array(
 			'mapping' => $this->get_csv_mapped_items(),
-			'parse'   => true
+			'parse'   => true,
 		);
 
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
@@ -421,7 +421,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 					array(
 						'value'   => array( 'M', 'L' ),
 						'name'    => 'Size',
-						'default' => 'L'
+						'default' => 'L',
 					),
 				),
 			),
@@ -509,8 +509,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 					),
 					array(
 						'value' => array( 'L' ),
-						'name'  => 'Size'
-					)
+						'name'  => 'Size',
+					),
 				),
 			),
 			array(

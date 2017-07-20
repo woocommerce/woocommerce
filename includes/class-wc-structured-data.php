@@ -91,15 +91,22 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+			if ( 1 < count( $value ) ) {
+				$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + array( '@graph' => $value );
+			} else {
+				$data[ $type ] = $value[0];
+			}
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
 		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
 		if ( ! empty( $data ) ) {
-			$data = count( $data ) > 1 ? array( '@graph' => $data ) : $data[0];
+			if ( 1 < count( $data ) ) {
+				$data = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, '', '' ) + array( '@graph' => $data );
+			} else {
+				$data = $data[0];
+			}
 		}
 
 		return $data;
@@ -217,20 +224,24 @@ class WC_Structured_Data {
 
 			if ( $product->is_type( 'variable' ) ) {
 				$prices = $product->get_variation_prices();
+				$lowest = reset( $prices['price'] );
+				$highest = end( $prices['price'] );
 
-				if ( current( $prices['price'] ) === end( $prices['price'] ) ) {
+				if ( $lowest === $highest ) {
 					$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
 				} else {
 					$markup_offer['priceSpecification'] = array(
 						'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-						'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
-						'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+						'minPrice'      => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'maxPrice'      => wc_format_decimal( $highest, wc_get_price_decimals() ),
 						'priceCurrency' => $currency,
 					);
 				}
 			} else {
 				$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
 			}
+
+			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
 		if ( $product->get_rating_count() ) {

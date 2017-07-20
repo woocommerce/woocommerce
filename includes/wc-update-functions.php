@@ -995,8 +995,6 @@ function wc_update_300_webhooks() {
 /**
  * Add an index to the field comment_type to improve the response time of the query
  * used by WC_Comments::wp_count_comments() to get the number of comments by type.
- *
- * @return null
  */
 function wc_update_300_comment_type_index() {
 	global $wpdb;
@@ -1126,4 +1124,83 @@ function wc_update_310_old_comments() {
  */
 function wc_update_310_db_version() {
 	WC_Install::update_db_version( '3.1.0' );
+}
+
+/**
+ * Update state codes for Mexico.
+ */
+function wc_update_320_mexican_states() {
+	global $wpdb;
+
+	$mx_states = array(
+		'Distrito Federal'    => 'CMX',
+		'Jalisco'             => 'JAL',
+		'Nuevo Leon'          => 'NLE',
+		'Aguascalientes'      => 'AGS',
+		'Baja California'     => 'BCN',
+		'Baja California Sur' => 'BCS',
+		'Campeche'            => 'CAM',
+		'Chiapas'             => 'CHP',
+		'Chihuahua'           => 'CHH',
+		'Coahuila'            => 'COA',
+		'Colima'              => 'COL',
+		'Durango'             => 'DGO',
+		'Guanajuato'          => 'GTO',
+		'Guerrero'            => 'GRO',
+		'Hidalgo'             => 'HGO',
+		'Estado de Mexico'    => 'MEX',
+		'Michoacan'           => 'MIC',
+		'Morelos'             => 'MOR',
+		'Nayarit'             => 'NAY',
+		'Oaxaca'              => 'OAX',
+		'Puebla'              => 'PUE',
+		'Queretaro'           => 'QRO',
+		'Quintana Roo'        => 'ROO',
+		'San Luis Potosi'     => 'SLP',
+		'Sinaloa'             => 'SIN',
+		'Sonora'              => 'SON',
+		'Tabasco'             => 'TAB',
+		'Tamaulipas'          => 'TMP',
+		'Tlaxcala'            => 'TLA',
+		'Veracruz'            => 'VER',
+		'Yucatan'             => 'YUC',
+		'Zacatecas'           => 'ZAC',
+	);
+
+	foreach ( $mx_states as $old => $new ) {
+		$wpdb->update(
+			$wpdb->postmeta,
+			array(
+				'meta_value' => $new,
+			),
+			array(
+				'meta_value' => $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			array(
+				'location_code' => 'MX:' . $new,
+			),
+			array(
+				'location_code' => 'MX:' . $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_tax_rates",
+			array(
+				'tax_rate_state' => strtoupper( $new ),
+			),
+			array(
+				'tax_rate_state' => strtoupper( $old ),
+			)
+		);
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_320_db_version() {
+	WC_Install::update_db_version( '3.2.0' );
 }

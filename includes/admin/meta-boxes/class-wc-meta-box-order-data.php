@@ -234,6 +234,7 @@ class WC_Meta_Box_Order_Data {
 						</select></p>
 
 						<p class="form-field form-field-wide wc-customer-user">
+							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
@@ -265,6 +266,7 @@ class WC_Meta_Box_Order_Data {
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
 								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?></option>
 							</select>
+							<!--/email_off-->
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
@@ -463,7 +465,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Get order object.
 		$order = wc_get_order( $order_id );
-		$props = array( 'status' => wc_clean( $_POST['order_status'] ) );
+		$props = array();
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
@@ -543,6 +545,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Save order data.
 		$order->set_props( $props );
+		$order->set_status( wc_clean( $_POST['order_status'] ), '', true );
 		$order->save();
 	}
 }

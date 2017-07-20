@@ -27,7 +27,6 @@ class WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_API_Server $server
-	 * @return WC_API_Resource
 	 */
 	public function __construct( WC_API_Server $server ) {
 

@@ -379,7 +379,7 @@ class WC_Auth {
 		} catch ( Exception $e ) {
 			$this->maybe_delete_key( $consumer_data );
 
-			/* translators: %s: error messase */
+			/* translators: %s: error message */
 			wp_die( sprintf( __( 'Error: %s.', 'woocommerce' ), $e->getMessage() ), __( 'Access denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}

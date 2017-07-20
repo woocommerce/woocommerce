@@ -89,7 +89,6 @@ abstract class WC_Settings_API {
 	 * on the gateway's settings screen.
 	 *
 	 * @since  1.0.0
-	 * @return string
 	 */
 	public function init_form_fields() {}
 

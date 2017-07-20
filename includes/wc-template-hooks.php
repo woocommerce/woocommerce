@@ -250,6 +250,13 @@ add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
 
 /**
+ * Order downloads.
+ *
+ * @see woocommerce_order_downloads_table()
+ */
+add_action( 'woocommerce_available_downloads', 'woocommerce_order_downloads_table', 10 );
+
+/**
  * Auth.
  *
  * @see woocommerce_output_auth_header()
