@@ -15,9 +15,6 @@ if [ $1 == 'before' ]; then
 		composer global require "phpunit/phpunit=6.2.*"
 	fi
 
-	composer self-update
-	composer install --no-interaction
-
 elif [ $1 == 'after' ]; then
 
 	# Only run on master, not pull requests, latest stable PHP box (defined in .travis.yml).
