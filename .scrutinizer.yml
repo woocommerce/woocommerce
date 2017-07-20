@@ -1,17 +1,30 @@
-filter:
-  excluded_paths:
-  - tests/*
-  - apigen/*
-  - dummy-data/*
-  - i18n/*
-  - includes/api/legacy/*
-  - includes/legacy/*
-  - includes/libraries/*
-  - includes/updates/*
-  - includes/gateways/simplify-commerce/*
-  - includes/shipping/legacy-*
-  - includes/wc-deprecated-functions.php
-  - includes/class-wc-legacy-api.php
+build:
+  environment:
+    php: '7.1'
+    mysql: true
+    postgresql: false
+    redis: false
+    node: false
+    apache2:
+      modules: ['rewrite']
+    variables:
+      WP_VERSION: 'latest'
+  dependencies:
+    before:
+    - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+  tests:
+    override:
+    -
+      command: 'vendor/bin/phpunit --coverage-clover=results'
+      coverage:
+        file: 'results'
+        format: 'clover'
+
+tools:
+  sensiolabs_security_checker: true
+  php_code_sniffer:
+    config:
+      standard: "WordPress"
 
 checks:
   php:
@@ -28,26 +41,17 @@ checks:
     avoid_superglobals: false
     avoid_closing_tag: false
 
-tools:
-  sensiolabs_security_checker: true
-
-build:
-  environment:
-    php: '7.1'
-    mysql: true
-    apache2:
-      modules: ['rewrite']
-    variables:
-      WP_VERSION: 'latest'
-  dependencies:
-    before:
-    - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-    - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install
-  tests:
-    override:
-    -
-      command: 'vendor/bin/phpunit --coverage-clover=results'
-      coverage:
-        file: 'results'
-        format: 'clover'
+filter:
+  excluded_paths:
+  - tests/*
+  - apigen/*
+  - dummy-data/*
+  - i18n/*
+  - includes/api/legacy/*
+  - includes/legacy/*
+  - includes/libraries/*
+  - includes/updates/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
