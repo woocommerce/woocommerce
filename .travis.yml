@@ -8,9 +8,6 @@ php:
   - 7.0
   - 7.1
 
-cache:
-  apt: true
-
 env:
   - WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
 
@@ -21,8 +18,10 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=1 PHP_LATEST_STABLE=7.1
   - php: 5.3
     env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
+    dist: precise
   - php: 5.2
     env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
+    dist: precise
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -31,7 +30,6 @@ before_script:
 
 script:
   - bash tests/bin/phpunit.sh
-  - bash tests/bin/travis.sh during
 
 after_script:
   - bash tests/bin/travis.sh after

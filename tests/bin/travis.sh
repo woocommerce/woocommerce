@@ -9,10 +9,10 @@ if [ $1 == 'before' ]; then
 	# No Xdebug and therefore no coverage in PHP 5.3
 	[[ ${TRAVIS_PHP_VERSION} == '5.3' ]] && exit;
 
-	if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
-		composer global require "phpunit/phpunit=5.7.*"
-	else
+	if [[ ${TRAVIS_PHP_VERSION:0:2} == "5." ]]; then
 		composer global require "phpunit/phpunit=4.8.*"
+	else
+		composer global require "phpunit/phpunit=5.7.*"
 	fi
 
 	composer self-update
