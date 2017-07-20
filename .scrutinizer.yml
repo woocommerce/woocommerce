@@ -4,7 +4,6 @@ build:
     mysql: true
     postgresql: false
     redis: false
-    node: false
     apache2:
       modules: ['rewrite']
     variables:
@@ -24,7 +23,7 @@ tools:
   sensiolabs_security_checker: true
   php_code_sniffer:
     config:
-      standard: "WordPress"
+      standard: WordPress
 
 checks:
   php:
@@ -40,6 +39,8 @@ checks:
     no_exit: false
     avoid_superglobals: false
     avoid_closing_tag: false
+    coding_standard:
+      name: WordPress
 
 filter:
   excluded_paths:
