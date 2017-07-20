@@ -162,42 +162,43 @@ class WC_Discounts {
 	 * @return int discounted amount in cents.
 	 */
 	public function apply_discount( $raw_discount ) {
-		if ( strstr( $raw_discount, '%' ) ) {
-			$discount          = absint( rtrim( $raw_discount, '%' ) );
-			$total_to_discount = 0;
+		// Get total item cost after any extra discounts.
+		$total_to_discount = 0;
 
-			// Get total item cost right now.
-			foreach ( $this->items as $item ) {
-				$total_to_discount += $this->get_discounted_price_in_cents( $item );
-			}
-
-			// @todo sum other manual discounts too
-			foreach ( $this->discounts as $key => $value ) {
-				if ( strstr( $key, 'discount-' ) ) {
-					$total_to_discount = $total_to_discount - $value;
-				}
-			}
-
-			$discount_total = $discount * ( $total_to_discount / 100 );
-			$discount_id    = '';
-			$index          = 1;
-
-			while ( ! $discount_id ) {
-				$discount_id = 'discount-' . $raw_discount;
-
-				if ( 1 < $index ) {
-					$discount_id .= '-' . $index;
-				}
-
-				if ( isset( $this->discounts[ $discount_id ] ) ) {
-					$index ++;
-					$discount_id = '';
-				}
-			}
-
-			return $this->discounts[ $discount_id ] = $discount_total;
+		foreach ( $this->items as $item ) {
+			$total_to_discount += $this->get_discounted_price_in_cents( $item );
 		}
-		// @todo fixed discounts
+
+		foreach ( $this->discounts as $key => $value ) {
+			if ( strstr( $key, 'discount-' ) ) {
+				$total_to_discount = $total_to_discount - $value;
+			}
+		}
+
+		if ( strstr( $raw_discount, '%' ) ) {
+			$discount       = absint( rtrim( $raw_discount, '%' ) );
+			$discount_total = $discount * ( $total_to_discount / 100 );
+		} else {
+			$discount_total = min( absint( $raw_discount * $this->precision ), $total_to_discount );
+		}
+
+		$discount_id    = '';
+		$index          = 1;
+
+		while ( ! $discount_id ) {
+			$discount_id = 'discount-' . $raw_discount;
+
+			if ( 1 < $index ) {
+				$discount_id .= '-' . $index;
+			}
+
+			if ( isset( $this->discounts[ $discount_id ] ) ) {
+				$index ++;
+				$discount_id = '';
+			}
+		}
+
+		return $this->discounts[ $discount_id ] = $discount_total;
 	}
 
 	/**
