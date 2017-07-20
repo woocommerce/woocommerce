@@ -156,6 +156,19 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Allows a discount to be applied to the items programmatically without a coupon.
+	 * @return [type] [description]
+	 */
+	public function apply_discount( $discount ) {
+		if ( strstr( $discount, '%' ) ) {
+			$discount   = absint( rtrim( $discount, '%' ) );
+			$discounted = $this->apply_percentage_discount( $this->items, $discount );
+
+			return $this->remove_precision( $discounted );
+		}
+	}
+
+	/**
 	 * Apply a discount to all items using a coupon.
 	 *
 	 * @todo Coupon class has lots of WC()->cart calls and needs decoupling. This makes 'is valid' hard to use here.

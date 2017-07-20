@@ -48,6 +48,66 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$order->delete( true );
 	}
 
+	public function test_apply_discount() {
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$tax_rate2 = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'reduced-rate',
+		);
+		$tax_rate_id  = WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id2 = WC_Tax::_insert_tax_rate( $tax_rate2 );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$product  = WC_Helper_Product::create_simple_product();
+		$product2 = WC_Helper_Product::create_simple_product();
+
+		$product->set_tax_class( '' );
+		$product2->set_tax_class( 'reduced-rate' );
+
+		$product->save();
+		$product2->save();
+
+		// Add product to the cart.
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+
+		// Test.
+		$discounts = new WC_Discounts();
+		$discounts->set_items( WC()->cart->get_cart() );
+		$result = $discounts->apply_discount( '50%' );
+
+		echo "\n\n\n";
+		print_r( $result );
+		echo "\n\n\n";
+
+		$this->assertEquals( array( 'test' => 2 ), $result );
+
+		// Cleanup.
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$product2->delete( true );
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		WC_Tax::_delete_tax_rate( $tax_rate_id2 );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
 	/**
 	 * test get_applied_coupons
 	 */
