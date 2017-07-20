@@ -20,6 +20,8 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'during' ]; then
 
+elif [ $1 == 'after' ]; then
+
 	## Only run on latest stable PHP box (defined in .travis.yml).
 	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		# WordPress Coding Standards.
@@ -37,8 +39,6 @@ elif [ $1 == 'during' ]; then
 		./vendor/bin/phpcs -p -s -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php --ignore=./tests/**/**/*.php
 		./vendor/bin/phpcs -p -s -n ./**/**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php --ignore=./tests/**/**/*.php
 	fi
-
-elif [ $1 == 'after' ]; then
 
 	## Only run on master, not pull requests, latest stable PHP box (defined in .travis.yml).
 	if [[ ${TRAVIS_BRANCH} == 'master' ]] && [[ ${TRAVIS_EVENT_TYPE} != 'pull_request' ]] && [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
