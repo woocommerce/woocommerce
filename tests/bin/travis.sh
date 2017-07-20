@@ -20,25 +20,7 @@ if [ $1 == 'before' ]; then
 
 elif [ $1 == 'after' ]; then
 
-	## Only run on latest stable PHP box (defined in .travis.yml).
-	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
-		# WordPress Coding Standards.
-		# @link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
-		# @link http://pear.php.net/package/PHP_CodeSniffer/
-		# -p flag: Show progress of the run.
-		# -s flag: Show sniff codes in all reports.
-		# -v flag: Print verbose output.
-		# -n flag: Do not print warnings. (shortcut for --warning-severity=0)
-		# --standard: Use WordPress as the standard.
-		# --extensions: Only sniff PHP files.
-		./vendor/bin/phpcs -p -s -n ./*.php --standard=./phpcs.ruleset.xml --extensions=php
-		./vendor/bin/phpcs -p -s -n ./**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/*.php --ignore=./tests/*.php
-		./vendor/bin/phpcs -p -s -n ./**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/*.php --ignore=./tests/**/*.php
-		./vendor/bin/phpcs -p -s -n ./**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php --ignore=./tests/**/**/*.php
-		./vendor/bin/phpcs -p -s -n ./**/**/**/**/*.php --standard=./phpcs.ruleset.xml --extensions=php --ignore=./vendor/**/**/*.php --ignore=./tests/**/**/*.php
-	fi
-
-	## Only run on master, not pull requests, latest stable PHP box (defined in .travis.yml).
+	# Only run on master, not pull requests, latest stable PHP box (defined in .travis.yml).
 	if [[ ${TRAVIS_BRANCH} == 'master' ]] && [[ ${TRAVIS_EVENT_TYPE} != 'pull_request' ]] && [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		wget https://scrutinizer-ci.com/ocular.phar
 		chmod +x ocular.phar
