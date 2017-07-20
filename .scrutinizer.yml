@@ -30,5 +30,24 @@ checks:
 
 tools:
   sensiolabs_security_checker: true
-  external_code_coverage:
-    timeout: 600 # Wait 10 minutes for Travis send coverage file.
+
+build:
+  environment:
+    php: '7.1'
+    mysql: true
+    apache2:
+      modules: ['rewrite']
+    variables:
+      WP_VERSION: 'latest'
+  dependencies:
+    before:
+    - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install
+  tests:
+    override:
+    -
+      command: 'vendor/bin/phpunit --coverage-clover=results'
+      coverage:
+        file: 'results'
+        format: 'clover'

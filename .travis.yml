@@ -29,7 +29,7 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  - bash tests/bin/phpunit.sh
+  - phpunit -c phpunit.xml.dist
 
 after_script:
   - bash tests/bin/travis.sh after
