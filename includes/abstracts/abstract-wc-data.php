@@ -200,8 +200,8 @@ abstract class WC_Data {
 			} else {
 				$this->data_store->create( $this );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/**

@@ -916,7 +916,6 @@ class WC_Tax {
 	 *
 	 * @param  int $tax_rate_id
 	 * @param  string $postcodes String of postcodes separated by ; characters
-	 * @return string
 	 */
 	public static function _update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
 		if ( ! is_array( $postcodes ) ) {
@@ -939,7 +938,6 @@ class WC_Tax {
 	 *
 	 * @param  int $tax_rate_id
 	 * @param  string $cities
-	 * @return string
 	 */
 	public static function _update_tax_rate_cities( $tax_rate_id, $cities ) {
 		if ( ! is_array( $cities ) ) {
@@ -961,8 +959,6 @@ class WC_Tax {
 	 * @param int $tax_rate_id
 	 * @param array $values
 	 * @param string $type
-	 *
-	 * @return string
 	 */
 	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {
 		global $wpdb;
