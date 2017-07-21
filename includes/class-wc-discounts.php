@@ -132,10 +132,10 @@ class WC_Discounts {
 					'product'  => false,
 				);
 				if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
-					//$item->quantity   = $raw_item->get_quantity();
-					//$item->price      = $raw_item->get_price() * $raw_item->get_quantity();
-					//$item->is_taxable = $raw_item->is_taxable();
-					//$item->tax_class  = $raw_item->get_tax_class();
+					// $item->quantity   = $raw_item->get_quantity();
+					// $item->price      = $raw_item->get_price() * $raw_item->get_quantity();
+					// $item->is_taxable = $raw_item->is_taxable();
+					// $item->tax_class  = $raw_item->get_tax_class();
 					// @todo
 				} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
 					$item->key      = $raw_item->get_id();
@@ -163,7 +163,7 @@ class WC_Discounts {
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon
-	 * @return bool True if applied.
+	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
 	public function apply_coupon( $coupon ) {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
@@ -177,6 +177,25 @@ class WC_Discounts {
 		// @todo how can we support the old woocommerce_coupon_get_discount_amount filter?
 		// @todo is valid for product - filter items here and pass to function?
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
+
+		// Set items to valid coupon.
+		$items = array();
+		foreach ( $items_to_apply as $item ) {
+			$is_variable = $item->product->is_type( 'variation' );
+			$items[ $item->key ] = array(
+				'key'          => $item->key,
+				'product_id'   => $is_variable ? $item->product->get_parent_id() : $item->product->get_id(),
+				'variation_id' => $is_variable ? $item->product->get_id() : 0,
+				'variation'    => $is_variable ? $item->product->get_variation_attributes() : array(),
+				'quantity'     => $item->quantity,
+				'data'         => $item->product,
+			);
+		}
+		$coupon->set_items( $items );
+
+		if ( ! $coupon->is_valid() ) {
+			return new WP_Error( 'invalid_coupon', $coupon->get_error_message() );
+		}
 
 		switch ( $coupon->get_discount_type() ) {
 			case 'percent' :
@@ -210,7 +229,7 @@ class WC_Discounts {
 	 */
 	protected function sort_by_price( $a, $b ) {
 		$price_1 = $a->price * $a->quantity;
-		$price_2 = $b->price * $b->quantity;;
+		$price_2 = $b->price * $b->quantity;
 		if ( $price_1 === $price_2 ) {
 			return 0;
 		}
