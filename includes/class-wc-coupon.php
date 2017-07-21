@@ -767,13 +767,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				// 'data'         => $raw_item->get_product(),
 				// );
 			} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
-				$item = array(
+				$product = $raw_item->get_product();
+				$item    = array(
 					'key'          => $raw_item->get_id(),
 					'product_id'   => $raw_item->get_product_id(),
 					'variation_id' => $raw_item->get_variation_id(),
-					'variation'    => 0 < $raw_item->get_variation_id() ? $raw_item->get_variation_attributes() : array(),
+					'variation'    => 0 < $raw_item->get_variation_id() ? $product->get_variation_attributes() : array(),
 					'quantity'     => $raw_item->get_quantity(),
-					'data'         => $raw_item->get_product(),
+					'data'         => $product,
 				);
 			} else {
 				$item = array(
