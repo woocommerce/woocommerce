@@ -179,10 +179,10 @@ class WC_Discounts {
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
 
 		// Set items to valid coupon.
-		$items = array();
+		$items_to_validate = array();
 		foreach ( $items_to_apply as $item ) {
 			$is_variable = $item->product->is_type( 'variation' );
-			$items[ $item->key ] = array(
+			$items_to_validate[ $item->key ] = array(
 				'key'          => $item->key,
 				'product_id'   => $is_variable ? $item->product->get_parent_id() : $item->product->get_id(),
 				'variation_id' => $is_variable ? $item->product->get_id() : 0,
@@ -191,9 +191,8 @@ class WC_Discounts {
 				'data'         => $item->product,
 			);
 		}
-		$coupon->set_items( $items );
 
-		if ( ! $coupon->is_valid() ) {
+		if ( ! $coupon->is_valid( $items_to_validate ) ) {
 			return new WP_Error( 'invalid_coupon', $coupon->get_error_message() );
 		}
 
