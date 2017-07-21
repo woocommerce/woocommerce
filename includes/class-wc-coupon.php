@@ -74,6 +74,30 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Items to validate.
+	 *
+	 * @since 3.2.0
+	 * @var   array
+	 */
+	protected $items_to_validate = array();
+
+	/**
+	 * Items total.
+	 *
+	 * @since 3.2.0
+	 * @var   float|null
+	 */
+	protected $items_total = null;
+
+	/**
+	 * Items total excluding tax.
+	 *
+	 * @since 3.2.0
+	 * @var   float|null
+	 */
+	protected $items_total_ex_tax = null;
+
+	/**
 	 * Coupon constructor. Loads coupon data.
 	 * @param mixed $data Coupon data, object, ID or code.
 	 */
@@ -368,7 +392,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		if ( $this->is_type( array( 'percent' ) ) ) {
 			$discount = (float) $this->get_amount() * ( $discounting_amount / 100 );
-		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
+		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && $this->get_items_total_ex_tax() ) {
 			/**
 			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
 			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
@@ -379,9 +403,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			 * Uses price inc tax if prices include tax to work around https://github.com/woocommerce/woocommerce/issues/7669 and https://github.com/woocommerce/woocommerce/issues/8074.
 			 */
 			if ( wc_prices_include_tax() ) {
-				$discount_percent = ( wc_get_price_including_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal;
+				$discount_percent = ( wc_get_price_including_tax( $cart_item['data'] ) * $cart_item_qty ) / $this->get_items_total();
 			} else {
-				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / $this->get_items_total_ex_tax();
 			}
 			$discount = ( (float) $this->get_amount() * $discount_percent ) / $cart_item_qty;
 
@@ -413,6 +437,67 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$discount = round( $discount, wc_get_rounding_precision() );
 
 		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
+	}
+
+	/**
+	 * Get items to validate.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	private function get_items_to_validate() {
+		// Fallback for backwards compatibility.
+		if ( ! $this->items_to_validate && ! WC()->cart->is_empty() ) {
+			$this->set_items_to_validate( WC()->cart->get_cart() );
+		}
+
+		return $this->items_to_validate;
+	}
+
+	/**
+	 * Get items total.
+	 *
+	 * @since  3.2.0
+	 * @return float
+	 */
+	private function get_items_total() {
+		// Fallback for backwards compatibility.
+		if ( is_null( $this->items_total ) ) {
+			$this->set_items_total( WC()->cart->subtotal );
+		}
+
+		return $this->items_total;
+	}
+
+	/**
+	 * Get items total excluding tax.
+	 *
+	 * @since  3.2.0
+	 * @return float
+	 */
+	private function get_items_total_ex_tax() {
+		// Fallback for backwards compatibility.
+		if ( is_null( $this->items_total_ex_tax ) ) {
+			$this->set_items_total_ex_tax( WC()->cart->subtotal_ex_tax );
+		}
+
+		return $this->items_total_ex_tax;
+	}
+
+	/**
+	 * Get items displayed total.
+	 *
+	 * @since  3.2.0
+	 * @return string
+	 */
+	private function get_items_displayed_total() {
+		$tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
+
+		if ( 'incl' === $tax_display_cart ) {
+			return wc_format_decimal( $this->get_items_total() );
+		} elseif ( 'excl' === $tax_display_cart ) {
+			return wc_format_decimal( $this->get_items_total_ex_tax() );
+		}
 	}
 
 	/*
@@ -658,6 +743,72 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_prop( 'used_by', array_filter( $used_by ) );
 	}
 
+	/**
+	 * Set items.
+	 *
+	 * @since 3.2.0
+	 * @param array $items List of items.
+	 */
+	private function set_items_to_validate( $raw_items ) {
+		$this->items_to_validate = array();
+
+		foreach ( $raw_items as $raw_item ) {
+			$item = array();
+
+			if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
+				// $item = array(
+				// 'key'          => $raw_item->get_id(),
+				// 'product_id'   => $raw_item->get_product_id(),
+				// 'variation_id' => $raw_item->variation_id,
+				// 'variation'    => $raw_item->get_variation(),
+				// 'quantity'     => $raw_item->get_quantity(),
+				// 'data'         => $raw_item->get_product(),
+				// );
+			} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
+				$product = $raw_item->get_product();
+				$item    = array(
+					'key'          => $raw_item->get_id(),
+					'product_id'   => $raw_item->get_product_id(),
+					'variation_id' => $raw_item->get_variation_id(),
+					'variation'    => 0 < $raw_item->get_variation_id() ? $product->get_variation_attributes() : array(),
+					'quantity'     => $raw_item->get_quantity(),
+					'data'         => $product,
+				);
+			} else {
+				$item = array(
+					'key'          => $raw_item['key'],
+					'product_id'   => $raw_item['product_id'],
+					'variation_id' => $raw_item['variation_id'],
+					'variation'    => $raw_item['variation'],
+					'quantity'     => $raw_item['quantity'],
+					'data'         => $raw_item['data'],
+				);
+			}
+
+			$this->items_to_validate[ $item['key'] ] = $item;
+		}
+	}
+
+	/**
+	 * Set items total.
+	 *
+	 * @since 3.2.0
+	 * @param float $total Items total.
+	 */
+	public function set_items_total( $total ) {
+		$this->items_total = $total;
+	}
+
+	/**
+	 * Set items total excluding tax.
+	 *
+	 * @since 3.2.0
+	 * @param float Items total excluding tax.
+	 */
+	public function set_items_total_ex_tax( $total ) {
+		$this->items_total_ex_tax = $total;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Other Actions
@@ -820,7 +971,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_minimum_amount() {
-		if ( $this->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $this->get_minimum_amount() > WC()->cart->get_displayed_subtotal(), $this ) ) {
+		if ( $this->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $this->get_minimum_amount() > $this->get_items_displayed_total(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
 		}
 	}
@@ -831,7 +982,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() < WC()->cart->get_displayed_subtotal(), $this ) ) {
+		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() < $this->get_items_displayed_total(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
@@ -844,11 +995,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	private function validate_product_ids() {
 		if ( sizeof( $this->get_product_ids() ) > 0 ) {
 			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_product_ids() ) ) {
-						$valid_for_cart = true;
-					}
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+				if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_product_ids() ) ) {
+					$valid_for_cart = true;
 				}
 			}
 			if ( ! $valid_for_cart ) {
@@ -865,17 +1014,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	private function validate_product_categories() {
 		if ( sizeof( $this->get_product_categories() ) > 0 ) {
 			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
-						continue;
-					}
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+				if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
+					continue;
+				}
+				$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
-					// If we find an item with a cat in our allowed cat list, the coupon is valid
-					if ( sizeof( array_intersect( $product_cats, $this->get_product_categories() ) ) > 0 ) {
-						$valid_for_cart = true;
-					}
+				// If we find an item with a cat in our allowed cat list, the coupon is valid
+				if ( sizeof( array_intersect( $product_cats, $this->get_product_categories() ) ) > 0 ) {
+					$valid_for_cart = true;
 				}
 			}
 			if ( ! $valid_for_cart ) {
@@ -893,13 +1040,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $this->get_exclude_sale_items() ) {
 			$valid_for_cart = false;
 
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					$product = $cart_item['data'];
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+				$product = $cart_item['data'];
 
-					if ( ! $product->is_on_sale() ) {
-						$valid_for_cart = true;
-					}
+				if ( ! $product->is_on_sale() ) {
+					$valid_for_cart = true;
 				}
 			}
 			if ( ! $valid_for_cart ) {
@@ -912,10 +1057,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * All exclusion rules must pass at the same time for a product coupon to be valid.
 	 */
 	private function validate_excluded_items() {
-		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
+		if ( ! $this->get_items_to_validate() && $this->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
-			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
 				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
 					$valid = true;
 					break;
@@ -947,11 +1092,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		// Exclude Products
 		if ( sizeof( $this->get_excluded_product_ids() ) > 0 ) {
 			$valid_for_cart = true;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
-						$valid_for_cart = false;
-					}
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+				if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
+					$valid_for_cart = false;
 				}
 			}
 			if ( ! $valid_for_cart ) {
@@ -968,16 +1111,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	private function validate_cart_excluded_product_categories() {
 		if ( sizeof( $this->get_excluded_product_categories() ) > 0 ) {
 			$valid_for_cart = true;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
-						continue;
-					}
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+			foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+				if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
+					continue;
+				}
+				$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
-					if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
-						$valid_for_cart = false;
-					}
+				if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
+					$valid_for_cart = false;
 				}
 			}
 			if ( ! $valid_for_cart ) {
@@ -989,10 +1130,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Check if a coupon is valid.
 	 *
-	 * @return boolean validity
-	 * @throws Exception
+	 * @param  array $items_to_validate Items to be validated.
+	 * @return bool Validity.
 	 */
-	public function is_valid() {
+	public function is_valid( $items_to_validate = array() ) {
+		if ( ! $items_to_validate ) {
+			$this->set_items_to_validate( $items_to_validate );
+		}
+
 		try {
 			$this->validate_exists();
 			$this->validate_usage_limit();
@@ -1167,11 +1312,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
 				// Store excluded products that are in cart in $products
 				$products = array();
-				if ( ! WC()->cart->is_empty() ) {
-					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-						if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
-							$products[] = $cart_item['data']->get_name();
-						}
+				foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
+						$products[] = $cart_item['data']->get_name();
 					}
 				}
 
@@ -1181,16 +1324,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			case self::E_WC_COUPON_EXCLUDED_CATEGORIES:
 				// Store excluded categories that are in cart in $categories
 				$categories = array();
-				if ( ! WC()->cart->is_empty() ) {
-					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-						$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+				foreach ( $this->get_items_to_validate() as $cart_item_key => $cart_item ) {
+					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
-						if ( sizeof( $intersect = array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
+					if ( sizeof( $intersect = array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
 
-							foreach ( $intersect as $cat_id ) {
-								$cat = get_term( $cat_id, 'product_cat' );
-								$categories[] = $cat->name;
-							}
+						foreach ( $intersect as $cat_id ) {
+							$cat = get_term( $cat_id, 'product_cat' );
+							$categories[] = $cat->name;
 						}
 					}
 				}
