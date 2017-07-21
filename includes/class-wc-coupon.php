@@ -480,7 +480,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function get_items_total_ex_tax() {
 		// Fallback for backwards compatibility.
 		if ( is_null( $this->items_total_ex_tax ) ) {
-			$this->set_items_total( WC()->cart->subtotal_ex_tax );
+			$this->set_items_total_ex_tax( WC()->cart->subtotal_ex_tax );
 		}
 
 		return $this->items_total_ex_tax;
@@ -496,9 +496,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
 		if ( 'incl' === $tax_display_cart ) {
-			return wc_format_decimal( $this->items_total );
+			return wc_format_decimal( $this->get_items_total() );
 		} elseif ( 'excl' === $tax_display_cart ) {
-			return wc_format_decimal( $this->items_total_ex_tax );
+			return wc_format_decimal( $this->get_items_total_ex_tax() );
 		}
 	}
 
