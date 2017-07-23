@@ -18,35 +18,55 @@ class WC_Totals {
 	 *
 	 * @var array
 	 */
-	protected $items          = array();
+	protected $items     = array();
 
 	/**
 	 * Coupons to calculate.
 	 *
 	 * @var array
 	 */
-	protected $coupons        = array();
+	protected $coupons   = array();
+
+	/**
+	 * Discounts to calculate.
+	 *
+	 * @var array
+	 */
+	protected $discounts = array();
 
 	/**
 	 * Fees to calculate.
 	 *
 	 * @var array
 	 */
-	protected $fees           = array();
+	protected $fees      = array();
 
 	/**
 	 * Shipping to calculate.
 	 *
 	 * @var array
 	 */
-	protected $shipping_lines = array();
+	protected $shipping  = array();
 
 	/**
 	 * Stores totals.
 	 *
 	 * @var array
 	 */
-	protected $totals         = null;
+	protected $totals = array(
+		'fees_total'         => 0,
+		'fees_total_tax'     => 0,
+		'items_subtotal'     => 0,
+		'items_subtotal_tax' => 0,
+		'items_total'        => 0,
+		'items_total_tax'    => 0,
+		'item_totals'        => array(),
+		'total'              => 0,
+		'taxes'              => array(),
+		'tax_total'          => 0,
+		'shipping_total'     => 0,
+		'shipping_tax_total' => 0,
+	);
 
 	/**
 	 * Precision so we can work in cents.
@@ -56,11 +76,21 @@ class WC_Totals {
 	protected $precision = 1;
 
 	/**
-	 * Constructor.
+	 * Sets up the items provided, and calculate totals.
 	 */
-	public function __construct() {
+	public function __construct( $cart = null ) {
 		$this->precision = pow( 10, wc_get_price_decimals() );
-		$this->set_totals( $this->get_default_totals() );
+		$this->set_cart( $cart );
+		$this->calculate();
+	}
+
+	/**
+	 * Hadnles a cart or order object passed in for calculation. Normalises data.
+	 */
+	protected function set_cart( $cart ) {
+		if ( is_a( $cart, 'WC_Cart' ) ) {
+
+		}
 	}
 
 	/**
@@ -71,27 +101,6 @@ class WC_Totals {
 	 */
 	protected function remove_precision( $value ) {
 		return wc_format_decimal( $value / $this->precision, wc_get_price_decimals() );
-	}
-
-	/**
-	 * Get default totals.
-	 * @return array
-	 */
-	protected function get_default_totals() {
-		return array(
-			'fees_total'         => 0,
-			'fees_total_tax'     => 0,
-			'items_subtotal'     => 0,
-			'items_subtotal_tax' => 0,
-			'items_total'        => 0,
-			'items_total_tax'    => 0,
-			'item_totals'        => array(),
-			'total'              => 0,
-			'taxes'              => array(),
-			'tax_total'          => 0,
-			'shipping_total'     => 0,
-			'shipping_tax_total' => 0,
-		);
 	}
 
 	/**
@@ -120,6 +129,7 @@ class WC_Totals {
 			'count'     => 0,
 			'total'     => 0,
 			'total_tax' => 0,
+			'object'    => false,
 		);
 	}
 
@@ -188,8 +198,14 @@ class WC_Totals {
 
 	/**
 	 * Run all calculations methods on the given items.
+	 *
+	 * @uses WC_Totals::calculate_item_subtotals
+	 * @uses WC_Totals::calculate_item_totals
+	 * @uses WC_Totals::calculate_fee_totals
+	 * @uses WC_Totals::calculate_shipping_totals
+	 * @uses WC_Totals::calculate_totals
 	 */
-	public function calculate() {
+	protected function calculate() {
 		$this->calculate_item_subtotals();
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
@@ -236,7 +252,7 @@ class WC_Totals {
 	/**
 	 * Totals are costs after discounts.
 	 */
-	public function calculate_item_totals() {
+	protected function calculate_item_totals() {
 		foreach ( $this->items as $item ) {
 
 
@@ -297,9 +313,9 @@ class WC_Totals {
 	/**
 	 * Main cart totals.
 	 */
-	public function calculate_totals() {
+	protected function calculate_totals() {
 
-		$this->set_shipping_total( array_sum( array_values( wp_list_pluck( $this->shipping_lines, 'total' ) ) ) );
+		$this->set_shipping_total( array_sum( array_values( wp_list_pluck( $this->shipping, 'total' ) ) ) );
 		$this->set_taxes( $this->get_merged_taxes() );
 
 		// Total up/round taxes and shipping taxes
@@ -325,21 +341,12 @@ class WC_Totals {
 	*/
 
 	/**
-	 * Set all totals.
-	 * @param array $value
-	 */
-	public function set_totals( $value ) {
-		$value = wp_parse_args( $value, $this->get_default_totals() );
-		$this->totals = $value;
-	}
-
-	/**
 	 * Set cart/order items which will be discounted.
 	 *
 	 * @since 3.2.0
 	 * @param array $raw_items List of raw cart or order items.
 	 */
-	public function set_items( $raw_items ) {
+	protected function set_items( $raw_items ) {
 		$this->items           = array();
 
 		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
@@ -375,7 +382,7 @@ class WC_Totals {
 	 * Set coupons.
 	 * @param array $coupons
 	 */
-	public function set_coupons( $coupons ) {
+	protected function set_coupons( $coupons ) {
 		foreach ( $coupons as $code => $coupon_object ) {
 			$coupon                 = $this->get_default_coupon_props();
 			$coupon->coupon         = $coupon_object;
@@ -387,7 +394,7 @@ class WC_Totals {
 	 * Set fees.
 	 * @param array $fees
 	 */
-	public function set_fees( $fees ) {
+	protected function set_fees( $fees ) {
 		foreach ( $fees as $fee_key => $fee_object ) {
 			$fee                    = $this->get_default_fee_props();
 			$fee->total             = $fee_object->amount;
@@ -401,8 +408,8 @@ class WC_Totals {
 	 * Set shipping lines.
 	 * @param array
 	 */
-	public function set_shipping( $shipping_objects ) {
-		$this->shipping_lines = array();
+	protected function set_shipping( $shipping_objects ) {
+		$this->shipping = array();
 
 		if ( is_array( $shipping_objects ) ) {
 			foreach ( $shipping_objects as $key => $shipping_object ) {
@@ -410,7 +417,7 @@ class WC_Totals {
 				$shipping->total              = $shipping_object->cost;
 				$shipping->taxes              = $shipping_object->taxes;
 				$shipping->total_tax          = array_sum( $shipping_object->taxes );
-				$this->shipping_lines[ $key ] = $shipping;
+				$this->shipping[ $key ] = $shipping;
 			}
 		}
 	}
@@ -648,7 +655,7 @@ class WC_Totals {
 			}
 		}
 
-		foreach ( $this->shipping_lines as $item ) {
+		foreach ( $this->shipping as $item ) {
 			foreach ( $item->taxes as $rate_id => $rate ) {
 				if ( ! isset( $taxes[ $rate_id ] ) ) {
 					$taxes[ $rate_id ] = new WC_Item_Tax();
