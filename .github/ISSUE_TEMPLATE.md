@@ -6,6 +6,8 @@
 
 <!-- Please be as descriptive as possible; issues lacking the below details, or for any other reason than to report a bug, may be closed without action. -->
 
+
+
 ## Prerequisites
 
 <!-- Mark completed items with an [x] -->
@@ -15,6 +17,8 @@
 - [ ] I have attempted to find the simplest possible steps to reproduce the issue
 - [ ] I have included a failing test as a pull request (Optional)
 
+
+
 ## Steps to reproduce the issue
 
 <!-- We need to be able to reproduce the bug in order to fix it so please be descriptive! -->
@@ -23,11 +27,15 @@
 2.
 3.
 
+
+
 ## Expected/actual behavior
 
 When I follow those steps, I see...
 
 I was expecting to see...
+
+
 
 ## Isolating the problem
 
@@ -36,6 +44,8 @@ I was expecting to see...
 - [ ] This bug happens with only WooCommerce plugin active
 - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/storefront/)
 - [ ] I can reproduce this bug consistently using the steps above
+
+
 
 ## WordPress Environment
 
