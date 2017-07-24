@@ -1273,7 +1273,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'page'     => 'paged',
 			'include'  => 'post__in',
 		);
-
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
@@ -1281,12 +1280,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// Map boolean queries that are stored as 'yes'/'no' in the DB.
+		$boolean_queries = array(
+			'virtual',
+			'downloadable',
+			'featured',
+			'sold_individually',
+			'manage_stock',
+			'reviews_allowed',
+		);
+		foreach ( $boolean_queries as $boolean_query ) {
+			if ( isset( $query_vars[ $boolean_query ] ) && is_bool( $query_vars[ $boolean_query ] ) ) {
+				$query_vars[ $boolean_query ] = $query_vars[ $boolean_query ] ? 'yes' : 'no';
+			}
+		}
+
+
 		// SKU needs special handling because it works with partial matches.
 		// Don't auto-generate meta query args for it.
 		$sku_query = false;
 		if ( isset( $query_vars['sku'] ) ) {
 			$sku_query = $query_vars['sku'];
 			unset( $query_vars['sku'] );
+		}
+
+		// total_sales needs special handline because the meta key doesn't have the underscore prefix.
+		// Don't auto generate meta query args for it.
+		$total_sales_query = false;
+		if ( isset( $query_vars['total_sales'] ) ) {
+			$total_sales_query = $query_vars['total_sales'];
+			unset( $query_vars['total_sales'] );
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
@@ -1304,6 +1327,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'key'     => '_sku',
 				'value'   => $sku_query,
 				'compare' => 'LIKE',
+			);
+		}
+
+		// Manually build the total_sales query if needed.
+		if ( $total_sales_query ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => 'total_sales',
+				'value'   => $total_sales_query,
+				'compare' => '=',
 			);
 		}
 
