@@ -1,8 +1,8 @@
 <!-- Hi there! This form is for reporting bugs and issues specific to the WooCommerce plugin. This is not a support portal. If you need technical support from a human being, please submit a ticket via the helpdesk instead: https://woocommerce.com/contact-us/ -->
 
-<!-- If you have a usage or support question, you can also use the public support forum (https://wordpress.org/support/plugin/woocommerce), unless this is a question about a premium plugin in which case you should use the helpdesk (https://woocommerce.com/my-account/tickets/) for official extensions or contact the author of 3rd party extensions directly. -->
+<!-- Usage questions can also be directed to the public support forum here: (https://wordpress.org/support/plugin/woocommerce), unless this is a question about a premium extension in which case you should use the helpdesk: https://woocommerce.com/my-account/tickets/ -->
 
-<!-- If you have a feature request, submit it here: http://ideas.woocommerce.com/forums/133476-woocommerce -->
+<!-- If you have a feature request, submit it to: http://ideas.woocommerce.com/forums/133476-woocommerce -->
 
 <!-- Please be as descriptive as possible; issues lacking the below details, or for any other reason than to report a bug, may be closed without action. -->
 
