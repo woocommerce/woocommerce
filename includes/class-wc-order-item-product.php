@@ -165,9 +165,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @param array $data Key/Value pairs
 	 */
-	public function set_variation( $data ) {
-		foreach ( $data as $key => $value ) {
-			$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+	public function set_variation( $data = array() ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+			}
 		}
 	}
 
