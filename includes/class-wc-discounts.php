@@ -46,8 +46,9 @@ class WC_Discounts {
 	/**
 	 * Constructor.
 	 */
-	public function __construct() {
+	public function __construct( $items ) {
 		$this->precision = pow( 10, wc_get_price_decimals() );
+		$this->set_items( $items );
 	}
 
 	/**
@@ -71,13 +72,13 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Get all discount totals without precision.
+	 * Get all discount totals with precision.
 	 *
 	 * @since  3.2.0
 	 * @return array
 	 */
 	public function get_discounts() {
-		return array_map( array( $this, 'remove_precision' ), $this->discounts );
+		return $this->discounts;
 	}
 
 	/**
@@ -117,42 +118,19 @@ class WC_Discounts {
 	 * Set cart/order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $raw_items List of raw cart or order items.
+	 * @param array $items List items, normailised, by WC_Totals.
 	 */
-	public function set_items( $raw_items ) {
+	public function set_items( $items ) {
 		$this->items           = array();
 		$this->discounts       = array();
 		$this->applied_coupons = array();
 
-		if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
-			foreach ( $raw_items as $raw_item ) {
-				$item = (object) array(
-					'price'    => 0, // Line price without discounts, in cents.
-					'quantity' => 0, // Line qty.
-					'product'  => false,
-				);
-				if ( is_a( $raw_item, 'WC_Cart_Item' ) ) {
-					//$item->quantity   = $raw_item->get_quantity();
-					//$item->price      = $raw_item->get_price() * $raw_item->get_quantity();
-					//$item->is_taxable = $raw_item->is_taxable();
-					//$item->tax_class  = $raw_item->get_tax_class();
-					// @todo
-				} elseif ( is_a( $raw_item, 'WC_Order_Item_Product' ) ) {
-					$item->key      = $raw_item->get_id();
-					$item->quantity = $raw_item->get_quantity();
-					$item->price    = $raw_item->get_subtotal() * $this->precision;
-					$item->product  = $raw_item->get_product();
-				} else {
-					$item->key      = $raw_item['key'];
-					$item->quantity = $raw_item['quantity'];
-					$item->price    = $raw_item['data']->get_price() * $this->precision * $raw_item['quantity'];
-					$item->product  = $raw_item['data'];
-				}
-				$this->items[ $item->key ]     = $item;
-				$this->discounts[ $item->key ] = 0;
-			}
-			uasort( $this->items, array( $this, 'sort_by_price' ) );
+		if ( ! empty( $items ) && is_array( $items ) ) {
+			$this->items     = $items;
+			$this->discounts = array_fill_keys( array_keys( $items ), 0 );
 		}
+
+		uasort( $this->items, array( $this, 'sort_by_price' ) );
 	}
 
 	/**

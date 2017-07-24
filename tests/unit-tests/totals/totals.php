@@ -51,7 +51,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->add_fee( "test fee", 10, true );
 		WC()->cart->add_fee( "test fee 2", 20, true );
 		WC()->cart->add_fee( "test fee non-taxable", 10, false );
-		WC()->cart->add_discount( 'test-coupon-10' );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		// @todo manual discounts
 		$this->totals = new WC_Totals( WC()->cart );
@@ -81,22 +81,20 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Test get and set items.
 	 */
 	public function test_get_totals() {
-		$this->assertEquals( array(), $this->totals->get_totals() );
+		$this->assertEquals( array(
+			'fees_total'          => 40.00,
+			'fees_total_tax'      => 6.00,
+			'items_subtotal'      => 30.00,
+			'items_subtotal_tax'  => 6.00,
+			'items_total'         => 27.00,
+			'items_total_tax'     => 5.40,
+			'total'               => 72.40,
+			'taxes'               => array(), // @todo ?
+			'tax_total'           => 11.40,
+			'shipping_total'      => 0, // @todo ?
+			'shipping_tax_total'  => 0, // @todo ?
+			'discounts_total'     => 3.00,
+			'discounts_tax_total' => 0, // @todo ?
+		), $this->totals->get_totals() );
 	}
-
-	/**
-	 * Test get and set items.
-	 */
-	public function test_get_taxes() {
-
-	}
-
-	/**
-	 * Test get and set items.
-	 */
-	public function test_get_tax_total() {
-
-	}
-
-	//... @todo test all public methods
 }
