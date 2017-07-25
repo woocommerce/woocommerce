@@ -48,7 +48,7 @@ class WC_Discounts {
 	 *
 	 * @param array $items Items to discount.
 	 */
-	public function __construct( $items ) {
+	public function __construct( $items = array() ) {
 		$this->precision = pow( 10, wc_get_price_decimals() );
 		$this->set_items( $items );
 	}
