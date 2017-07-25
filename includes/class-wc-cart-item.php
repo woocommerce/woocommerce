@@ -51,7 +51,7 @@ class WC_Cart_Item implements ArrayAccess {
 	}
 
 	/**
-	 * Gets price of the product.
+	 * Gets weight of the product.
 	 * @return float
 	 */
 	public function get_weight() {
@@ -59,7 +59,7 @@ class WC_Cart_Item implements ArrayAccess {
 	}
 
 	/**
-	 * Gets price of the product.
+	 * Gets tax class of the product.
 	 * @return float
 	 */
 	public function get_tax_class() {

@@ -448,8 +448,8 @@ class WC_Totals {
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
-		$this->object->subtotal = array_sum( wp_list_pluck( $this->items, 'total' ) ) + array_sum( wp_list_pluck( $this->items, 'total_tax' ) );
-		$this->object->subtotal_ex_tax = array_sum( wp_list_pluck( $this->items, 'total' ) );
+		$this->object->subtotal = $this->get_total( 'items_total' ) + $this->get_total( 'items_total_tax' );
+		$this->object->subtotal_ex_tax = $this->get_total( 'items_total' );
 	}
 
 	/**
@@ -519,5 +519,10 @@ class WC_Totals {
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'shipping_tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
+
+		$this->object->total = $this->get_total( 'total' );
+		$this->object->tax_total = $this->get_total( 'tax_total' );
+		$this->object->shipping_total = $this->get_total( 'shipping_total' );
+		$this->object->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
 	}
 }
