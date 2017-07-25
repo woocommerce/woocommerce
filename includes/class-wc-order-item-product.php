@@ -198,7 +198,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
 
