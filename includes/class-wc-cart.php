@@ -18,6 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Cart {
 
+	/**
+	 * This stores the chosen shipping methods for the cart item packages.
+	 * @var array
+	 */
+	protected $shipping_methods;
+
 	/** @var array Contains an array of cart items. */
 	public $cart_contents = array();
 
@@ -295,6 +301,7 @@ class WC_Cart {
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
 		$this->cart_contents = array();
+		$this->shipping_methods = null;
 		$this->reset( true );
 
 		unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->coupon_discount_tax_amounts, WC()->session->cart );
@@ -1452,15 +1459,32 @@ class WC_Cart {
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		if ( $this->needs_shipping() && $this->show_shipping() ) {
-			WC()->shipping->calculate_shipping( $this->get_shipping_packages() );
-		} else {
-			WC()->shipping->reset_shipping();
-		}
+		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
-		// Get totals for the chosen shipping method
-		$this->shipping_total = WC()->shipping->shipping_total; // Shipping Total
-		$this->shipping_taxes = WC()->shipping->shipping_taxes; // Shipping Taxes
+		// Set legacy totals for backwards compatibility with versions prior to 3.2.
+		$this->shipping_total = WC()->shipping->shipping_total = array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) );
+		$this->shipping_taxes = WC()->shipping->shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
+
+		return $this->shipping_methods;
+	}
+
+	/**
+	 * Given a set of packages with rates, get the chosen ones only.
+	 *
+	 * @since 3.2.0
+	 * @param array $calculated_shipping_packages
+	 * @return array
+	 */
+	protected function get_chosen_shipping_methods( $calculated_shipping_packages = array() ) {
+		$chosen_methods = array();
+		// Get chosen methods for each package to get our totals.
+		foreach ( $calculated_shipping_packages as $key => $package ) {
+			$chosen_method          = wc_get_chosen_shipping_method_for_package( $key, $package );
+			if ( $chosen_method ) {
+				$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
+			}
+		}
+		return $chosen_methods;
 	}
 
 	/**

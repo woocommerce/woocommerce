@@ -50,6 +50,14 @@ class WC_Totals {
 	private $fees = array();
 
 	/**
+	 * Shipping costs.
+	 *
+	 * @since 3.2.0
+	 * @var array
+	 */
+	private $shipping = array();
+
+	/**
 	 * Discount amounts in cents after calculation for the cart.
 	 *
 	 * @since 3.2.0
@@ -112,11 +120,29 @@ class WC_Totals {
 				$item                          = $this->get_default_item_props();
 				$item->key                     = $cart_item_key;
 				$item->quantity                = $cart_item['quantity'];
-				$item->price                   = $cart_item['data']->get_price() * $this->precision * $cart_item['quantity'];
+				$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 				$item->product                 = $cart_item['data'];
 				$this->items[ $cart_item_key ] = $item;
 			}
 		}
+	}
+
+	/**
+	 * Add precision (deep) to a price.
+	 *
+	 * @since  3.2.0
+	 * @param  int|array $value Value to remove precision from.
+	 * @return float
+	 */
+	private function add_precision( $value ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $subvalue ) {
+				$value[ $key ] = $this->add_precision( $subvalue );
+			}
+		} else {
+			$value = $value * $this->precision;
+		}
+		return $value;
 	}
 
 	/**
@@ -168,6 +194,20 @@ class WC_Totals {
 	 */
 	private function get_default_fee_props() {
 		return (object) array(
+			'total_tax' => 0,
+			'taxes'     => array(),
+		);
+	}
+
+	/**
+	 * Get default blank set of props used per shipping row.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	private function get_default_shipping_props() {
+		return (object) array(
+			'total'     => 0,
 			'total_tax' => 0,
 			'taxes'     => array(),
 		);
@@ -233,27 +273,6 @@ class WC_Totals {
 	}
 
 	/**
-	 * Return array of shipping costs.
-	 *
-	 * @since  3.2.0
-	 * @return array
-	 */
-	private function get_shipping() {
-		// @todo get this somehow. Where does calc occur?
-		return array();
-	}
-
-	/**
-	 * Get discounts.
-	 *
-	 * @return array
-	 */
-	private function get_discounts() {
-		// @todo fee style API for discounts in cart/checkout.
-		return array();
-	}
-
-	/**
 	 * Get a single total with or without precision (in cents).
 	 *
 	 * @since  3.2.0
@@ -291,33 +310,25 @@ class WC_Totals {
 	/**
 	 * Get all tax rows from items (including shipping and product line items).
 	 *
-	 * @todo consider an item object instead of array here
-	 *
 	 * @since  3.2.0
 	 * @return array
 	 */
 	private function get_merged_taxes() {
 		$taxes = array();
 
-		foreach ( array_merge( $this->items, $this->fees, $this->get_shipping() ) as $item ) {
+		foreach ( array_merge( $this->items, $this->fees, $this->shipping ) as $item ) {
 			foreach ( $item->taxes as $rate_id => $rate ) {
 				$taxes[ $rate_id ] = array( 'tax_total' => 0, 'shipping_tax_total' => 0 );
 			}
 		}
 
-		foreach ( $this->items as $item ) {
+		foreach ( $this->items + $this->fees as $item ) {
 			foreach ( $item->taxes as $rate_id => $rate ) {
 				$taxes[ $rate_id ]['tax_total'] = $taxes[ $rate_id ]['tax_total'] + $rate;
 			}
 		}
 
-		foreach ( $this->fees as $fee ) {
-			foreach ( $fee->taxes as $rate_id => $rate ) {
-				$taxes[ $rate_id ]['tax_total'] = $taxes[ $rate_id ]['tax_total'] + $rate;
-			}
-		}
-
-		foreach ( $this->get_shipping() as $item ) {
+		foreach ( $this->shipping as $item ) {
 			foreach ( $item->taxes as $rate_id => $rate ) {
 				$taxes[ $rate_id ]['shipping_tax_total'] = $taxes[ $rate_id ]['shipping_tax_total'] + $rate;
 			}
@@ -385,6 +396,7 @@ class WC_Totals {
 	 * Calculate all discount and coupon amounts.
 	 *
 	 * @todo Manual discounts.
+	 * @todo record coupon totals and counts for cart.
 	 *
 	 * @since 3.2.0
 	 * @uses  WC_Discounts class.
@@ -398,11 +410,18 @@ class WC_Totals {
 
 		$this->discount_totals           = $discounts->get_discounts();
 		$this->totals['discounts_total'] = array_sum( $this->discount_totals );
-		// @todo $this->totals['discounts_tax_total'] = $value;
 
-		/*$this->set_coupon_totals( wp_list_pluck( $this->coupons, 'total' ) );
-		//$this->set_coupon_tax_totals( wp_list_pluck( $this->coupons, 'total_tax' ) );
-		//$this->set_coupon_counts( wp_list_pluck( $this->coupons, 'count' ) );*/
+		// See how much tax was 'discounted'.
+		if ( wc_tax_enabled() ) {
+			foreach ( $this->discount_totals as $cart_item_key => $discount ) {
+				$item = $this->items[ $cart_item_key ];
+				if ( $item->product->is_taxable() ) {
+					$tax_rates                            = $this->get_item_tax_rates( $item );
+					$taxes                                = WC_Tax::calc_tax( $discount, $tax_rates, false );
+					$this->totals['discounts_tax_total'] += array_sum( $taxes );
+				}
+			}
+		}
 	}
 
 	/**
@@ -442,12 +461,13 @@ class WC_Totals {
 	 * @todo logic is unqiue to carts.
 	 */
 	private function calculate_fee_totals() {
+		$this->fees = array();
 		$this->object->calculate_fees();
 
 		foreach ( $this->object->get_fees() as $fee_key => $fee_object ) {
 			$fee         = $this->get_default_fee_props();
 			$fee->object = $fee_object;
-			$fee->total  = $fee->object->amount * $this->precision;
+			$fee->total  = $this->add_precision( $fee->object->amount );
 
 			if ( wc_tax_enabled() && $fee->object->taxable ) {
 				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class ), false );
@@ -475,7 +495,18 @@ class WC_Totals {
 	 * @since 3.2.0
 	 */
 	private function calculate_shipping_totals() {
-		//$this->set_shipping_total( array_sum( array_values( wp_list_pluck( $this->shipping, 'total' ) ) ) );
+		$this->shipping = array();
+
+		foreach ( $this->object->calculate_shipping() as $key => $shipping_object ) {
+			$shipping_line            = $this->get_default_shipping_props();
+			$shipping_line->total     = $this->add_precision( $shipping_object->cost );
+			$shipping_line->taxes     = array_map( array( $this, 'add_precision' ), $shipping_object->taxes );
+			$shipping_line->total_tax = array_sum( $shipping_object->taxes );
+			$this->shipping[ $key ]   = $shipping_line;
+		}
+
+		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
+		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
 	}
 
 	/**

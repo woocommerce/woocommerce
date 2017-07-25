@@ -140,7 +140,7 @@ class WC_Discounts {
 	 * @todo is_valid_for_product accepts values - how can we deal with that?
 	 *
 	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon
+	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @return bool True if applied.
 	 */
 	public function apply_coupon( $coupon ) {

@@ -1,18 +1,28 @@
 <?php
-
 /**
  * Tests for the totals class.
+ *
  * @package WooCommerce\Tests\Discounts
+ */
+
+/**
+ * WC_Tests_Totals
  */
 class WC_Tests_Totals extends WC_Unit_Test_Case {
 
-	// Totals class for getter tests.
+	/**
+	 * Totals class for getter tests.
+	 *
+	 * @var object
+	 */
 	protected $totals;
 
-	// ID tracking for cleanup.
-	protected $products = array();
-	protected $coupons = array();
-	protected $tax_rate_ids = array();
+	/**
+	 * ID tracking for cleanup.
+	 *
+	 * @var array
+	 */
+	protected $ids = array();
 
 	/**
 	 * Setup the cart for totals calculation.
@@ -44,10 +54,10 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$coupon->set_discount_type( 'percent' );
 		$coupon->save();
 
-		$this->tax_rate_ids[] = $tax_rate_id;
-		$this->products[]     = $product;
-		$this->products[]     = $product2;
-		$this->coupons[]      = $coupon;
+		$this->ids['tax_rate_ids'][] = $tax_rate_id;
+		$this->ids['products'][]     = $product;
+		$this->ids['products'][]     = $product2;
+		$this->ids['coupons'][]      = $coupon;
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_to_cart( $product2->get_id(), 2 );
@@ -63,9 +73,9 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Add fees when the fees API is called.
 	 */
 	public function add_cart_fees_callback() {
-		WC()->cart->add_fee( "test fee", 10, true );
-		WC()->cart->add_fee( "test fee 2", 20, true );
-		WC()->cart->add_fee( "test fee non-taxable", 10, false );
+		WC()->cart->add_fee( 'test fee', 10, true );
+		WC()->cart->add_fee( 'test fee 2', 20, true );
+		WC()->cart->add_fee( 'test fee non-taxable', 10, false );
 	}
 
 	/**
@@ -78,15 +88,15 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
-		foreach ( $this->products as $product ) {
+		foreach ( $this->ids['products'] as $product ) {
 			$product->delete( true );
 		}
 
-		foreach ( $this->coupons as $coupon ) {
+		foreach ( $this->ids['coupons'] as $coupon ) {
 			$coupon->delete( true );
 		}
 
-		foreach ( $this->tax_rate_ids as $tax_rate_id ) {
+		foreach ( $this->ids['tax_rate_ids'] as $tax_rate_id ) {
 			WC_Tax::_delete_tax_rate( $tax_rate_id );
 		}
 	}
@@ -102,18 +112,18 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'items_subtotal_tax'  => 6.00,
 			'items_total'         => 27.00,
 			'items_total_tax'     => 5.40,
-			'total'               => 78.40,
+			'total'               => 90.40,
 			'taxes'               => array(
 				1 => array(
 					'tax_total'          => 11.40,
-					'shipping_tax_total' => 0.00,
-				)
+					'shipping_tax_total' => 2.00,
+				),
 			),
 			'tax_total'           => 11.40,
-			'shipping_total'      => 0, // @todo ?
-			'shipping_tax_total'  => 0, // @todo ?
+			'shipping_total'      => 10,
+			'shipping_tax_total'  => 2,
 			'discounts_total'     => 3.00,
-			'discounts_tax_total' => 0, // @todo ?
+			'discounts_tax_total' => 0.60,
 		), $this->totals->get_totals() );
 	}
 }
