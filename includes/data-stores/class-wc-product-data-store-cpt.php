@@ -1295,21 +1295,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-
 		// SKU needs special handling because it works with partial matches.
 		// Don't auto-generate meta query args for it.
 		$sku_query = false;
 		if ( isset( $query_vars['sku'] ) ) {
 			$sku_query = $query_vars['sku'];
 			unset( $query_vars['sku'] );
-		}
-
-		// total_sales needs special handline because the meta key doesn't have the underscore prefix.
-		// Don't auto generate meta query args for it.
-		$total_sales_query = false;
-		if ( isset( $query_vars['total_sales'] ) ) {
-			$total_sales_query = $query_vars['total_sales'];
-			unset( $query_vars['total_sales'] );
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
@@ -1331,10 +1322,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		// Manually build the total_sales query if needed.
-		if ( $total_sales_query ) {
+		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
+		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
 			$wp_query_args['meta_query'][] = array(
 				'key'     => 'total_sales',
-				'value'   => $total_sales_query,
+				'value'   => absint( $query_vars['total_sales'] ),
 				'compare' => '=',
 			);
 		}
