@@ -408,7 +408,7 @@ class WC_Totals {
 			$discounts->apply_coupon( $coupon );
 		}
 
-		$this->discount_totals           = $discounts->get_discounts();
+		$this->discount_totals           = $discounts->get_discounts( true );
 		$this->totals['discounts_total'] = array_sum( $this->discount_totals );
 
 		// See how much tax was 'discounted'.

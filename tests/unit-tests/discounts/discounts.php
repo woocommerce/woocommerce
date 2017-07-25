@@ -6,8 +6,9 @@
  */
 class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
-	protected function get_items_for_discounts_class( $items ) {
-		$items = array();
+	protected function get_items_for_discounts_class() {
+		$items     = array();
+		$precision = pow( 10, wc_get_price_decimals() );
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 			$item                          = (object) array(
 				'key'                => '',
@@ -25,7 +26,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			);
 			$item->key                     = $cart_item_key;
 			$item->quantity                = $cart_item['quantity'];
-			$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->price                   = $cart_item['data']->get_price() * $precision * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
 			$items[ $cart_item_key ] = $item;
 		}

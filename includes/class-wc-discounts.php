@@ -78,10 +78,11 @@ class WC_Discounts {
 	 * Get all discount totals with precision.
 	 *
 	 * @since  3.2.0
+	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
 	 * @return array
 	 */
-	public function get_discounts() {
-		return $this->discounts;
+	public function get_discounts( $in_cents = false ) {
+		return $in_cents ? $this->discounts : array_map( array( $this, 'remove_precision' ), $this->discounts );
 	}
 
 	/**
@@ -173,13 +174,39 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Remove precision from a price.
+	 * Add precision (deep) to a price.
 	 *
-	 * @param  int $value Value to remove precision from.
+	 * @since  3.2.0
+	 * @param  int|array $value Value to remove precision from.
+	 * @return float
+	 */
+	protected function add_precision( $value ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $subvalue ) {
+				$value[ $key ] = $this->add_precision( $subvalue );
+			}
+		} else {
+			$value = $value * $this->precision;
+		}
+		return $value;
+	}
+
+	/**
+	 * Remove precision (deep) from a price.
+	 *
+	 * @since  3.2.0
+	 * @param  int|array $value Value to remove precision from.
 	 * @return float
 	 */
 	protected function remove_precision( $value ) {
-		return wc_format_decimal( $value / $this->precision, wc_get_price_decimals() );
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $subvalue ) {
+				$value[ $key ] = $this->remove_precision( $subvalue );
+			}
+		} else {
+			$value = wc_format_decimal( $value / $this->precision, wc_get_price_decimals() );
+		}
+		return $value;
 	}
 
 	/**
