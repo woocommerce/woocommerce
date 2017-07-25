@@ -35,6 +35,9 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_simple_product();
 		$product2 = WC_Helper_Product::create_simple_product();
 
+		WC_Helper_Shipping::create_simple_flat_rate();
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+
 		$coupon = new WC_Coupon;
 		$coupon->set_code( 'test-coupon-10' );
 		$coupon->set_amount( 10 );
@@ -48,13 +51,21 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_to_cart( $product2->get_id(), 2 );
-		WC()->cart->add_fee( "test fee", 10, true );
-		WC()->cart->add_fee( "test fee 2", 20, true );
-		WC()->cart->add_fee( "test fee non-taxable", 10, false );
 		WC()->cart->add_discount( $coupon->get_code() );
+
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
 		// @todo manual discounts
 		$this->totals = new WC_Totals( WC()->cart );
+	}
+
+	/**
+	 * Add fees when the fees API is called.
+	 */
+	public function add_cart_fees_callback() {
+		WC()->cart->add_fee( "test fee", 10, true );
+		WC()->cart->add_fee( "test fee 2", 20, true );
+		WC()->cart->add_fee( "test fee non-taxable", 10, false );
 	}
 
 	/**
@@ -62,7 +73,10 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		WC()->cart->empty_cart();
+		WC()->session->set( 'chosen_shipping_methods', array() );
+		WC_Helper_Shipping::delete_simple_flat_rate();
 		update_option( 'woocommerce_calc_taxes', 'no' );
+		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
 		foreach ( $this->products as $product ) {
 			$product->delete( true );
@@ -88,8 +102,13 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'items_subtotal_tax'  => 6.00,
 			'items_total'         => 27.00,
 			'items_total_tax'     => 5.40,
-			'total'               => 72.40,
-			'taxes'               => array(), // @todo ?
+			'total'               => 78.40,
+			'taxes'               => array(
+				1 => array(
+					'tax_total'          => 11.40,
+					'shipping_tax_total' => 0.00,
+				)
+			),
 			'tax_total'           => 11.40,
 			'shipping_total'      => 0, // @todo ?
 			'shipping_tax_total'  => 0, // @todo ?
