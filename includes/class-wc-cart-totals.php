@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Cart_Totals class.
  *
+ * @todo woocommerce_calculate_totals action for carts.
+ * @todo woocommerce_calculated_total filter for carts.
+ * @todo record coupon totals and counts for cart.
+ *
  * @since 3.2.0
  */
 final class WC_Cart_Totals extends WC_Totals {
@@ -24,12 +28,11 @@ final class WC_Cart_Totals extends WC_Totals {
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param object $cart Cart or order object to calculate totals for.
+	 * @param object $object Cart or order object to calculate totals for.
 	 */
-	public function __construct( &$cart = null ) {
-		parent::__construct( $cart );
-
-		if ( is_a( $cart, 'WC_Cart' ) ) {
+	public function __construct( &$object = null ) {
+		if ( is_a( $object, 'WC_Cart' ) ) {
+			parent::__construct( $object );
 			$this->calculate();
 		}
 	}
@@ -48,10 +51,12 @@ final class WC_Cart_Totals extends WC_Totals {
 	 * @since 3.2.0
 	 */
 	protected function set_items() {
+		$this->items = array();
+
 		foreach ( $this->object->get_cart() as $cart_item_key => $cart_item ) {
 			$item                          = $this->get_default_item_props();
 			$item->key                     = $cart_item_key;
-			$item->cart_item               = $cart_item;
+			$item->object                  = $cart_item;
 			$item->quantity                = $cart_item['quantity'];
 			$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
@@ -93,9 +98,10 @@ final class WC_Cart_Totals extends WC_Totals {
 
 		foreach ( $this->object->calculate_shipping() as $key => $shipping_object ) {
 			$shipping_line            = $this->get_default_shipping_props();
+			$shipping_line->object    = $shipping_object;
 			$shipping_line->total     = $this->add_precision( $shipping_object->cost );
-			$shipping_line->taxes     = array_map( array( $this, 'add_precision' ), $shipping_object->taxes );
-			$shipping_line->total_tax = array_sum( $shipping_object->taxes );
+			$shipping_line->taxes     = $this->add_precision( $shipping_object->taxes );
+			$shipping_line->total_tax = $this->add_precision( array_sum( $shipping_object->taxes ) );
 			$this->shipping[ $key ]   = $shipping_line;
 		}
 	}
@@ -105,7 +111,6 @@ final class WC_Cart_Totals extends WC_Totals {
 	 * into the same format for use by this class.
 	 *
 	 * @since  3.2.0
-	 * @return array
 	 */
 	protected function set_coupons() {
 		$this->coupons = $this->object->get_coupons();
@@ -160,9 +165,7 @@ final class WC_Cart_Totals extends WC_Totals {
 	protected function calculate_totals() {
 		parent::calculate_totals();
 
-		$this->object->total              = $this->get_total( 'total' );
-		$this->object->tax_total          = $this->get_total( 'tax_total' );
-		$this->object->shipping_total     = $this->get_total( 'shipping_total' );
-		$this->object->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
+		$this->object->tax_total = $this->get_total( 'tax_total' );
+		$this->object->total     = $this->get_total( 'total' );
 	}
 }

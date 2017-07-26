@@ -17,8 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Totals class.
  *
  * @todo woocommerce_tax_round_at_subtotal option - how should we handle this with precision?
- * @todo woocommerce_calculate_totals action for carts.
- * @todo woocommerce_calculated_total filter for carts.
+ * @todo Manual discounts.
  * @since   3.2.0
  */
 abstract class WC_Totals {
@@ -105,11 +104,11 @@ abstract class WC_Totals {
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param object $cart Cart or order object to calculate totals for.
+	 * @param object $object Cart or order object to calculate totals for.
 	 */
-	public function __construct( &$cart = null ) {
+	public function __construct( &$object = null ) {
 		$this->precision = pow( 10, wc_get_price_decimals() );
-		$this->object    = $cart;
+		$this->object    = $object;
 	}
 
 	/**
@@ -194,6 +193,7 @@ abstract class WC_Totals {
 	protected function get_default_item_props() {
 		return (object) array(
 			'key'                => '',
+			'object'             => null,
 			'quantity'           => 0,
 			'price'              => 0,
 			'product'            => false,
@@ -433,9 +433,6 @@ abstract class WC_Totals {
 	/**
 	 * Calculate all discount and coupon amounts.
 	 *
-	 * @todo Manual discounts.
-	 * @todo record coupon totals and counts for cart.
-	 *
 	 * @since 3.2.0
 	 * @uses  WC_Discounts class.
 	 */
@@ -496,7 +493,6 @@ abstract class WC_Totals {
 	protected function calculate_totals() {
 		$this->set_total( 'taxes', $this->get_merged_taxes() );
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
-		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'shipping_tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
 	}
 }

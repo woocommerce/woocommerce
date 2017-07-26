@@ -261,7 +261,7 @@ class WC_Discounts {
 			if ( 0 === $this->get_discounted_price_in_cents( $item ) ) {
 				continue;
 			}
-			if ( ! $coupon->is_valid_for_product( $item->product, $item->cart_item ) && ! $coupon->is_valid_for_cart() ) {
+			if ( ! $coupon->is_valid_for_product( $item->product, $item->object ) && ! $coupon->is_valid_for_cart() ) {
 				continue;
 			}
 			if ( $limit_usage_qty && $applied_count > $limit_usage_qty ) {
@@ -603,7 +603,7 @@ class WC_Discounts {
 			$valid = false;
 
 			foreach ( $this->items as $item ) {
-				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->cart_item ) ) {
+				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->object ) ) {
 					$valid = true;
 					break;
 				}
