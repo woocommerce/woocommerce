@@ -126,7 +126,7 @@ abstract class WC_Totals {
 	 * @param bool $calculate_taxes Whether to calculate taxes (optional).
 	 */
 	public function calculate( $calculate_taxes = true ) {
-		$this->calculate_taxes = boolval( $calculate_taxes );
+		$this->calculate_taxes = (bool) $calculate_taxes;
 
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
