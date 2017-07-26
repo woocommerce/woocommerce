@@ -28,6 +28,8 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Setup the cart for totals calculation.
 	 */
 	public function setUp() {
+		$this->ids = array();
+
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -93,6 +95,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		foreach ( $this->ids['coupons'] as $coupon ) {
 			$coupon->delete( true );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
 		}
 
 		foreach ( $this->ids['tax_rate_ids'] as $tax_rate_id ) {
@@ -124,5 +127,24 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'discounts_total'     => 3.00,
 			'discounts_tax_total' => 0.60,
 		), $this->totals->get_totals() );
+	}
+
+	/**
+	 * Test that cart totals get updated.
+	 */
+	public function test_cart_totals() {
+		$cart = WC()->cart;
+
+		$this->assertEquals( 40.00, $cart->fee_total );
+		$this->assertEquals( 27.00, $cart->cart_contents_total );
+		$this->assertEquals( 90.40, $cart->total );
+		$this->assertEquals( 32.40, $cart->subtotal );
+		$this->assertEquals( 27.00, $cart->subtotal_ex_tax );
+		$this->assertEquals( 11.40, $cart->tax_total );
+		$this->assertEquals( 3.00, $cart->discount_cart );
+		$this->assertEquals( 0.60, $cart->discount_cart_tax );
+		$this->assertEquals( 40.00, $cart->fee_total );
+		$this->assertEquals( 10, $cart->shipping_total );
+		$this->assertEquals( 2, $cart->shipping_tax_total );
 	}
 }
