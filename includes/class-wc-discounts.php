@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Discounts class.
- *
- * @todo this class will need to be called instead get_discounted_price, in the cart?
  */
 class WC_Discounts {
 
@@ -126,7 +124,7 @@ class WC_Discounts {
 	 * Set cart/order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $items List items, normailised, by WC_Totals.
+	 * @param array $items List items.
 	 */
 	public function set_items( $items ) {
 		$this->items           = array();
@@ -134,7 +132,11 @@ class WC_Discounts {
 		$this->applied_coupons = array();
 
 		if ( ! empty( $items ) && is_array( $items ) ) {
-			$this->items     = $items;
+			foreach ( $items as $key => $item ) {
+				$this->items[ $key ]        = $item;
+				$this->items[ $key ]->key   = $key;
+				$this->items[ $key ]->price = $item->subtotal;
+			}
 			$this->discounts = array_fill_keys( array_keys( $items ), 0 );
 		}
 
@@ -263,7 +265,7 @@ class WC_Discounts {
 			if ( 0 === $this->get_discounted_price_in_cents( $item ) ) {
 				continue;
 			}
-			if ( ! $coupon->is_valid_for_product( $item->product, $item->cart_item ) && ! $coupon->is_valid_for_cart() ) {
+			if ( ! $coupon->is_valid_for_product( $item->product, $item->object ) && ! $coupon->is_valid_for_cart() ) {
 				continue;
 			}
 			if ( $limit_usage_qty && $applied_count > $limit_usage_qty ) {
@@ -605,7 +607,7 @@ class WC_Discounts {
 			$valid = false;
 
 			foreach ( $this->items as $item ) {
-				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->cart_item ) ) {
+				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->object ) ) {
 					$valid = true;
 					break;
 				}

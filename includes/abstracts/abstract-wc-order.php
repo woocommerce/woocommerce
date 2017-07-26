@@ -1174,7 +1174,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_taxes();
 		}
 
-		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal     += $item->get_subtotal();
 			$cart_total        += $item->get_total();
