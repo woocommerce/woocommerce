@@ -303,6 +303,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php' );
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-totals.php' );
 
 		/**
 		 * Core classes.
@@ -334,7 +335,8 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-totals.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-order-totals.php' );
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.

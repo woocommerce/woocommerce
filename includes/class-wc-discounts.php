@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Discounts class.
- *
- * @todo this class will need to be called instead get_discounted_price, in the cart?
  */
 class WC_Discounts {
 
