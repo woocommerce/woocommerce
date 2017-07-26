@@ -79,6 +79,14 @@ abstract class WC_Totals {
 	protected $precision = 1;
 
 	/**
+	 * Whether to calculate taxes when calculating totals.
+	 *
+	 * @since 3.2.0
+	 * @var bool
+	 */
+	protected $calculate_taxes = true;
+
+	/**
 	 * Stores totals.
 	 *
 	 * @since 3.2.0
@@ -115,8 +123,11 @@ abstract class WC_Totals {
 	 * Run all calculations methods on the given items in sequence. @todo More documentation, and add other calculation methods for taxes and totals only?
 	 *
 	 * @since 3.2.0
+	 * @param bool $calculate_taxes Whether to calculate taxes (optional).
 	 */
-	public function calculate() {
+	public function calculate( $calculate_taxes = true ) {
+		$this->calculate_taxes = boolval( $calculate_taxes );
+
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
 		$this->calculate_shipping_totals();
@@ -374,7 +385,7 @@ abstract class WC_Totals {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
 			$item->total_tax = 0;
 
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
+			if ( $this->calculate_taxes && wc_tax_enabled() && $item->product->is_taxable() ) {
 				$item->taxes     = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
 				$item->total_tax = array_sum( $item->taxes );
 
@@ -387,7 +398,9 @@ abstract class WC_Totals {
 		}
 
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
-		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
+		if ( $this->calculate_taxes ) {
+			$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
+		}
 	}
 
 	/**
@@ -409,7 +422,7 @@ abstract class WC_Totals {
 			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 				$item           = $this->adjust_non_base_location_price( $item );
 			}
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
+			if ( $this->calculate_taxes && wc_tax_enabled() && $item->product->is_taxable() ) {
 				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
 				$item->subtotal_tax = array_sum( $subtotal_taxes );
 
@@ -419,7 +432,9 @@ abstract class WC_Totals {
 			}
 		}
 		$this->set_total( 'items_subtotal', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
-		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+		if ( $this->calculate_taxes ) {
+			$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+		}
 	}
 
 	/**
@@ -441,7 +456,7 @@ abstract class WC_Totals {
 		$this->totals['discounts_total'] = array_sum( $this->discount_totals );
 
 		// See how much tax was 'discounted'.
-		if ( wc_tax_enabled() ) {
+		if ( $this->calculate_taxes && wc_tax_enabled() ) {
 			foreach ( $this->discount_totals as $cart_item_key => $discount ) {
 				$item = $this->items[ $cart_item_key ];
 				if ( $item->product->is_taxable() ) {
@@ -463,7 +478,9 @@ abstract class WC_Totals {
 	protected function calculate_fee_totals() {
 		$this->set_fees();
 		$this->set_total( 'fees_total', array_sum( wp_list_pluck( $this->fees, 'total' ) ) );
-		$this->set_total( 'fees_total_tax', array_sum( wp_list_pluck( $this->fees, 'total_tax' ) ) );
+		if ( $this->calculate_taxes ) {
+			$this->set_total( 'fees_total_tax', array_sum( wp_list_pluck( $this->fees, 'total_tax' ) ) );
+		}
 	}
 
 	/**
@@ -474,7 +491,9 @@ abstract class WC_Totals {
 	protected function calculate_shipping_totals() {
 		$this->set_shipping();
 		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
-		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
+		if ( $this->calculate_taxes ) {
+			$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
+		}
 	}
 
 	/**
@@ -483,8 +502,10 @@ abstract class WC_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'taxes', $this->get_merged_taxes() );
-		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
+		if ( $this->calculate_taxes ) {
+			$this->set_total( 'taxes', $this->get_merged_taxes() );
+			$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
+			$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
+		}
 	}
 }

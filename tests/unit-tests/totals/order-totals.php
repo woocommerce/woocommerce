@@ -130,5 +130,32 @@ class WC_Tests_Order_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 6.00, $this->order->get_cart_tax() );
 		$this->assertEquals( 8.00, $this->order->get_total_tax() );
 		$this->assertEquals( 0, $this->order->get_discount_total() );
+
+		// Calculating ex tax shouldn't modify existing tax fields.
+		$this->totals->calculate( false );
+
+		$this->assertEquals( 48.00, $this->order->get_total() );
+		$this->assertEquals( 10.00, $this->order->get_shipping_total() );
+		$this->assertEquals( 2.00, $this->order->get_shipping_tax() );
+		$this->assertEquals( 6.00, $this->order->get_cart_tax() );
+		$this->assertEquals( 8.00, $this->order->get_total_tax() );
+		$this->assertEquals( 0, $this->order->get_discount_total() );
+	}
+
+	/**
+	 * Test that non-tax order fields get updated in ex tax calculate.
+	 */
+	public function test_order_totals_ex_taxes() {
+		$this->totals->calculate( false );
+
+		$this->assertEquals( 10.00, $this->order->get_shipping_total() );
+		$this->assertEquals( 40.00, $this->order->get_subtotal() );
+		$this->assertEquals( 0, $this->order->get_discount_total() );
+
+		// These don't get calculated when not calculating taxes.
+		$this->assertEquals( 0, $this->order->get_shipping_tax() );
+		$this->assertEquals( 0, $this->order->get_cart_tax() );
+		$this->assertEquals( 0, $this->order->get_total_tax() );
+		$this->assertEquals( 0, $this->order->get_total() );
 	}
 }
