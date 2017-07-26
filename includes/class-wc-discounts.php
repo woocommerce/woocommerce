@@ -141,11 +141,10 @@ class WC_Discounts {
 	 * Apply a discount to all items using a coupon.
 	 *
 	 * @todo Coupon class has lots of WC()->cart calls and needs decoupling. This makes 'is valid' hard to use here.
-	 * @todo is_valid_for_product accepts values - how can we deal with that?
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
-	 * @return bool True if applied.
+	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
 	public function apply_coupon( $coupon ) {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
@@ -156,8 +155,12 @@ class WC_Discounts {
 			$this->applied_coupons[ $coupon->get_code() ] = 0;
 		}
 
+		$is_coupon_valid = $this->is_coupon_valid( $coupon );
+		if ( is_wp_error( $is_coupon_valid ) ) {
+			return $is_coupon_valid;
+		}
+
 		// @todo how can we support the old woocommerce_coupon_get_discount_amount filter?
-		// @todo is valid for product - filter items here and pass to function?
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
 
 		switch ( $coupon->get_discount_type() ) {
@@ -251,11 +254,13 @@ class WC_Discounts {
 			$limit_usage_qty = $coupon->get_limit_usage_to_x_items();
 		}
 
+		$cart_items = $this->get_cart_items_backwards_compatibility();
+
 		foreach ( $this->items as $item ) {
 			if ( 0 === $this->get_discounted_price_in_cents( $item ) ) {
 				continue;
 			}
-			if ( ! $coupon->is_valid_for_product( $item->product ) && ! $coupon->is_valid_for_cart() ) { // @todo is this enough?
+			if ( ! $coupon->is_valid_for_product( $item->product, $cart_items[ $item->key ] ) && ! $coupon->is_valid_for_cart() ) { // @todo is this enough?
 				continue;
 			}
 			if ( $limit_usage_qty && $applied_count > $limit_usage_qty ) {
@@ -375,5 +380,407 @@ class WC_Discounts {
 		}
 
 		return $amount_discounted;
+	}
+
+	/*
+	 |--------------------------------------------------------------------------
+	 | Validation & Error Handling
+	 |--------------------------------------------------------------------------
+	 */
+
+	/**
+	 * Ensure coupon exists or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_exists( $coupon ) {
+		if ( ! $coupon->get_id() ) {
+			/* translators: %s: coupon code */
+			throw new Exception( sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $coupon->get_code() ), 105 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon usage limit is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_usage_limit( $coupon ) {
+		if ( $coupon->get_usage_limit() > 0 && $coupon->get_usage_count() >= $coupon->get_usage_limit() ) {
+			throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon user usage limit is valid or throw exception.
+	 *
+	 * Per user usage limit - check here if user is logged in (against user IDs).
+	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon  Coupon data.
+	 * @param  int       $user_id User ID.
+	 * @return bool
+	 */
+	protected function validate_coupon_user_usage_limit( $coupon, $user_id = 0 ) {
+		if ( empty( $user_id ) ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $coupon->get_usage_limit_per_user() > 0 && is_user_logged_in() && $coupon->get_id() && $coupon->get_data_store() ) {
+			$date_store  = $coupon->get_data_store();
+			$usage_count = $date_store->get_usage_by_user_id( $coupon, $user_id );
+			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
+				throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon date is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_expiry_date( $coupon ) {
+		if ( $coupon->get_date_expires() && current_time( 'timestamp', true ) > $coupon->get_date_expires()->getTimestamp() ) {
+			throw new Exception( __( 'This coupon has expired.', 'woocommerce' ), 107 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon amount is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon   Coupon data.
+	 * @param  float     $subtotal Items subtotal.
+	 * @return bool
+	 */
+	protected function validate_coupon_minimum_amount( $coupon, $subtotal = 0 ) {
+		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
+			/* translators: %s: coupon minimum amount */
+			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon amount is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon   Coupon data.
+	 * @param  float     $subtotal Items subtotal.
+	 * @return bool
+	 */
+	protected function validate_coupon_maximum_amount( $coupon, $subtotal = 0 ) {
+		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
+			/* translators: %s: coupon maximum amount */
+			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon is valid for products in the list is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_product_ids( $coupon ) {
+		if ( count( $coupon->get_product_ids() ) > 0 ) {
+			$valid = false;
+
+			foreach ( $this->items as $item ) {
+				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( __( 'Sorry, this coupon is not applicable to selected products.', 'woocommerce' ), 109 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon is valid for product categories in the list is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_product_categories( $coupon ) {
+		if ( count( $coupon->get_product_categories() ) > 0 ) {
+			$valid = false;
+
+			foreach ( $this->items as $item ) {
+				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
+					continue;
+				}
+
+				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
+
+				// If we find an item with a cat in our allowed cat list, the coupon is valid.
+				if ( count( array_intersect( $product_cats, $coupon->get_product_categories() ) ) > 0 ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( __( 'Sorry, this coupon is not applicable to selected products.', 'woocommerce' ), 109 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Ensure coupon is valid for sale items in the list is valid or throw exception.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_sale_items( $coupon ) {
+		if ( $coupon->get_exclude_sale_items() ) {
+			$valid = false;
+
+			foreach ( $this->items as $item ) {
+				if ( $item->product && ! $item->product->is_on_sale() ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' ), 110 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * All exclusion rules must pass at the same time for a product coupon to be valid.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_excluded_items( $coupon ) {
+		if ( ! $this->items && $coupon->is_type( wc_get_product_coupon_types() ) ) {
+			$valid = false;
+
+			$cart_items = $this->get_cart_items_backwards_compatibility();
+			foreach ( $this->items as $item ) {
+				if ( $item->product && $coupon->is_valid_for_product( $item->product, $cart_items[ $item->key ] ) ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( __( 'Sorry, this coupon is not applicable to selected products.', 'woocommerce' ), 109 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Cart discounts cannot be added if non-eligible product is found.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_eligible_items( $coupon ) {
+		if ( ! $coupon->is_type( wc_get_product_coupon_types() ) ) {
+			$this->validate_coupon_excluded_product_ids( $coupon );
+			$this->validate_coupon_excluded_product_categories( $coupon );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Exclude products.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_excluded_product_ids( $coupon ) {
+		// Exclude Products.
+		if ( count( $coupon->get_excluded_product_ids() ) > 0 ) {
+			$products = array();
+
+			foreach ( $this->items as $item ) {
+				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_excluded_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_excluded_product_ids(), true ) ) {
+					$products[] = $item->product->get_name();
+				}
+			}
+
+			if ( ! empty( $products ) ) {
+				/* translators: %s: products list */
+				throw new Exception( sprintf( __( 'Sorry, this coupon is not applicable to the products: %s.', 'woocommerce' ), implode( ', ', $products ) ), 113 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Exclude categories from product list.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_excluded_product_categories( $coupon ) {
+		if ( count( $coupon->get_excluded_product_categories() ) > 0 ) {
+			$categories = array();
+
+			foreach ( $this->items as $item ) {
+				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
+					continue;
+				}
+
+				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
+				$cat_id_list  = array_intersect( $product_cats, $coupon->get_excluded_product_categories() );
+				if ( count( $cat_id_list ) > 0 ) {
+					foreach ( $cat_id_list as $cat_id ) {
+						$cat          = get_term( $cat_id, 'product_cat' );
+						$categories[] = $cat->name;
+					}
+				}
+			}
+
+			if ( ! empty( $categories ) ) {
+				/* translators: %s: categories list */
+				throw new Exception( sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', array_unique( $categories ) ) ), 114 );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a coupon is valid.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool|WP_Error
+	 */
+	public function is_coupon_valid( $coupon ) {
+		try {
+			$this->validate_coupon_exists( $coupon );
+			$this->validate_coupon_usage_limit( $coupon );
+			$this->validate_coupon_user_usage_limit( $coupon );
+			$this->validate_coupon_expiry_date( $coupon );
+			$this->validate_coupon_minimum_amount( $coupon );
+			$this->validate_coupon_maximum_amount( $coupon );
+			$this->validate_coupon_product_ids( $coupon );
+			$this->validate_coupon_product_categories( $coupon );
+			$this->validate_coupon_sale_items( $coupon );
+			$this->validate_coupon_excluded_items( $coupon );
+			$this->validate_coupon_eligible_items( $coupon );
+
+			if ( ! apply_filters( 'woocommerce_discount_is_coupon_valid', true, $coupon, $this ) ) {
+				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
+			}
+		} catch ( Exception $e ) {
+			$error_message = $e->getMessage();
+			$error_code    = $e->getCode();
+
+			/**
+			 * Coupon error message.
+			 *
+			 * Codes:
+			 * - 100: Invalid filtered.
+			 * - 101: Invalid removed.
+			 * - 102: Not yours removed.
+			 * - 103: Already applied.
+			 * - 104: Individual use only.
+			 * - 105: Not exists.
+			 * - 106: Usage limit reached.
+			 * - 107: Expired.
+			 * - 108: Minimum spend limit not met.
+			 * - 109: Not applicable.
+			 * - 110: Not valid for sale items.
+			 * - 111: Missing coupon code.
+			 * - 112: Maximum spend limit met.
+			 * - 113: Excluded products.
+			 * - 114: Excluded categories.
+			 *
+			 * @param string    $error_message Error message.
+			 * @param int       $error_code    Error code.
+			 * @param WC_Coupon $coupon        Coupon data.
+			 */
+			$message = apply_filters( 'woocommerce_coupon_error', $error_message, $error_code, $coupon );
+
+			return new WP_Error( 'invalid_coupon', $message, array(
+				'status' => 400,
+			) );
+		} // End try().
+
+		return true;
+	}
+
+	/**
+	 * Backwards compatibility method to get cart items.
+	 *
+	 * @return array
+	 */
+	protected function get_cart_items_backwards_compatibility() {
+		$items = array();
+
+		foreach ( $this->items as $item ) {
+			$is_variable = $item->product->is_type( 'variation' );
+			$items[ $item->key ] = array(
+				'key'          => $item->key,
+				'product_id'   => $is_variable ? $item->product->get_parent_id() : $item->product->get_id(),
+				'variation_id' => $is_variable ? $item->product->get_id() : 0,
+				'variation'    => $is_variable ? $item->product->get_variation_attributes() : array(),
+				'quantity'     => $item->quantity,
+				'data'         => $item->product,
+			);
+		}
+
+		return $items;
 	}
 }
