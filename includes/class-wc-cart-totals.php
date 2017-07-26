@@ -56,11 +56,10 @@ final class WC_Cart_Totals extends WC_Totals {
 
 		foreach ( $this->object->get_cart() as $cart_item_key => $cart_item ) {
 			$item                          = $this->get_default_item_props();
-			$item->key                     = $cart_item_key;
 			$item->object                  = $cart_item;
 			$item->price_includes_tax      = wc_prices_include_tax();
 			$item->quantity                = $cart_item['quantity'];
-			$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->subtotal                = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
 			$this->items[ $cart_item_key ] = $item;
 		}

@@ -30,7 +30,11 @@ final class WC_Order_Totals extends WC_Totals {
 		parent::__construct( $object );
 
 		if ( is_a( $object, 'WC_Order' ) ) {
-			$this->calculate();
+			// Get items from the order. @todo call calculate or make it manual?
+			$this->set_items();
+			$this->set_fees();
+			$this->set_shipping();
+			$this->set_coupons();
 		}
 	}
 
@@ -44,11 +48,9 @@ final class WC_Order_Totals extends WC_Totals {
 
 		foreach ( $this->object->get_items() as $item_key => $item_object ) {
 			$item                     = $this->get_default_item_props();
-			$item->key                = $item_key;
 			$item->object             = $item_object;
 			$item->product            = $item_object->get_product();
 			$item->quantity           = $item_object->get_quantity();
-			$item->price              = $this->add_precision( $item_object->get_subtotal() );
 			$item->subtotal           = $this->add_precision( $item_object->get_subtotal() );
 			$item->subtotal_tax       = $this->add_precision( $item_object->get_subtotal_tax() );
 			$item->total              = $this->add_precision( $item_object->get_total() );

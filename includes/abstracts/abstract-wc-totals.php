@@ -112,6 +112,18 @@ abstract class WC_Totals {
 	}
 
 	/**
+	 * Run all calculations methods on the given items in sequence. @todo More documentation, and add other calculation methods for taxes and totals only?
+	 *
+	 * @since 3.2.0
+	 */
+	public function calculate() {
+		$this->calculate_item_totals();
+		$this->calculate_fee_totals();
+		$this->calculate_shipping_totals();
+		$this->calculate_totals();
+	}
+
+	/**
 	 * Handles a cart or order object passed in for calculation. Normalises data
 	 * into the same format for use by this class.
 	 *
@@ -192,10 +204,8 @@ abstract class WC_Totals {
 	 */
 	protected function get_default_item_props() {
 		return (object) array(
-			'key'                => '',
 			'object'             => null,
 			'quantity'           => 0,
-			'price'              => 0,
 			'product'            => false,
 			'price_includes_tax' => false,
 			'subtotal'           => 0,
@@ -249,10 +259,10 @@ abstract class WC_Totals {
 
 		if ( $item_tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax.
-			$taxes                    = WC_Tax::calc_tax( $item->price, $base_tax_rates, true, true );
+			$taxes                    = WC_Tax::calc_tax( $item->subtotal, $base_tax_rates, true, true );
 
 			// Now we have a new item price (excluding TAX).
-			$item->price              = $item->price - array_sum( $taxes );
+			$item->subtotal           = $item->subtotal - array_sum( $taxes );
 			$item->price_includes_tax = false;
 		}
 		return $item;
@@ -262,11 +272,11 @@ abstract class WC_Totals {
 	 * Get discounted price of an item with precision (in cents).
 	 *
 	 * @since  3.2.0
-	 * @param  object $item Item to get the price of.
+	 * @param  object $item_key Item to get the price of.
 	 * @return int
 	 */
-	protected function get_discounted_price_in_cents( $item ) {
-		return $item->price - $this->discount_totals[ $item->key ];
+	protected function get_discounted_price_in_cents( $item_key ) {
+		return $item->subtotal - $this->discount_totals[ $item_key ];
 	}
 
 	/**
@@ -351,18 +361,6 @@ abstract class WC_Totals {
 	*/
 
 	/**
-	 * Run all calculations methods on the given items in sequence.
-	 *
-	 * @since 3.2.0
-	 */
-	protected function calculate() {
-		$this->calculate_item_totals();
-		$this->calculate_fee_totals();
-		$this->calculate_shipping_totals();
-		$this->calculate_totals();
-	}
-
-	/**
 	 * Calculate item totals.
 	 *
 	 * @since 3.2.0
@@ -372,8 +370,8 @@ abstract class WC_Totals {
 		$this->calculate_item_subtotals();
 		$this->calculate_discounts();
 
-		foreach ( $this->items as $item ) {
-			$item->total     = $this->get_discounted_price_in_cents( $item );
+		foreach ( $this->items as $item_key => $item ) {
+			$item->total     = $this->get_discounted_price_in_cents( $item_key );
 			$item->total_tax = 0;
 
 			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
@@ -411,10 +409,6 @@ abstract class WC_Totals {
 			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 				$item           = $this->adjust_non_base_location_price( $item );
 			}
-
-			$item->subtotal     = $item->price;
-			$item->subtotal_tax = 0;
-
 			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
 				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
 				$item->subtotal_tax = array_sum( $subtotal_taxes );

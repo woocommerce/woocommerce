@@ -24,7 +24,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 				'taxes'              => array(),
 				'discounted_price'   => 0,
 			);
-			$item->key                     = $cart_item_key;
 			$item->cart_item               = $cart_item;
 			$item->quantity                = $cart_item['quantity'];
 			$item->price                   = $cart_item['data']->get_price() * $precision * $cart_item['quantity'];

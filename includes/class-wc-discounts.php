@@ -124,7 +124,7 @@ class WC_Discounts {
 	 * Set cart/order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $items List items, normailised, by WC_Totals.
+	 * @param array $items List items.
 	 */
 	public function set_items( $items ) {
 		$this->items           = array();
@@ -132,7 +132,11 @@ class WC_Discounts {
 		$this->applied_coupons = array();
 
 		if ( ! empty( $items ) && is_array( $items ) ) {
-			$this->items     = $items;
+			foreach ( $items as $key => $item ) {
+				$this->items[ $key ]        = $item;
+				$this->items[ $key ]->key   = $key;
+				$this->items[ $key ]->price = $item->subtotal;
+			}
 			$this->discounts = array_fill_keys( array_keys( $items ), 0 );
 		}
 
