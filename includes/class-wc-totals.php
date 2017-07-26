@@ -112,6 +112,13 @@ class WC_Totals {
 	 * Handles a cart or order object passed in for calculation. Normalises data
 	 * into the same format for use by this class.
 	 *
+	 * Each item is made up of the following props, in addition to those returned by get_default_item_props() for totals.
+	 * 	- key: An identifier for the item (cart item key or line item ID).
+	 *  - cart_item: For carts, the cart item from the cart which may include custom data.
+	 *  - quantity: The qty for this line.
+	 *  - price: The line price in cents.
+	 *  - product: The product object this cart item is for.
+	 *
 	 * @since 3.2.0
 	 */
 	private function set_items() {
@@ -119,6 +126,7 @@ class WC_Totals {
 			foreach ( $this->object->get_cart() as $cart_item_key => $cart_item ) {
 				$item                          = $this->get_default_item_props();
 				$item->key                     = $cart_item_key;
+				$item->cart_item               = $cart_item;
 				$item->quantity                = $cart_item['quantity'];
 				$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 				$item->product                 = $cart_item['data'];
