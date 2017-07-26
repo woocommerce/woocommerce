@@ -303,6 +303,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php' );
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php' );
+		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-totals.php' );
 
 		/**
 		 * Core classes.
@@ -333,6 +334,9 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-order-totals.php' );
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -403,6 +407,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-frontend-scripts.php' ); // Frontend Scripts.
 		include_once( WC_ABSPATH . 'includes/class-wc-form-handler.php' );     // Form Handlers.
 		include_once( WC_ABSPATH . 'includes/class-wc-cart.php' );             // The main cart class.
+		include_once( WC_ABSPATH . 'includes/class-wc-cart-item.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-tax.php' );              // Tax class.
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zones.php' );   // Shipping Zones class.
 		include_once( WC_ABSPATH . 'includes/class-wc-customer.php' );         // Customer class.
