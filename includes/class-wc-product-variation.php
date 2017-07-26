@@ -427,16 +427,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Returns array of attribute name value pairs. Keys are prefixed with attribute_, as stored.
-	 *
-	 * @param  string $context
-	 * @return array
-	 */
-	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
-	}
-
-	/**
 	 * Returns whether or not the product has any visible attributes.
 	 *
 	 * Variations are mapped to specific attributes unlike products, and the return
