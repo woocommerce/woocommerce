@@ -8,6 +8,10 @@
  * @since   3.2.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Discounts class.
  *
@@ -140,8 +144,6 @@ class WC_Discounts {
 	/**
 	 * Apply a discount to all items using a coupon.
 	 *
-	 * @todo Coupon class has lots of WC()->cart calls and needs decoupling. This makes 'is valid' hard to use here.
-	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
@@ -215,6 +217,7 @@ class WC_Discounts {
 	/**
 	 * Sort by price.
 	 *
+	 * @since  3.2.0
 	 * @param  array $a First element.
 	 * @param  array $b Second element.
 	 * @return int
@@ -232,6 +235,7 @@ class WC_Discounts {
 	 * Filter out all products which have been fully discounted to 0.
 	 * Used as array_filter callback.
 	 *
+	 * @since  3.2.0
 	 * @param  object $item Get data for this item.
 	 * @return bool
 	 */
@@ -242,6 +246,7 @@ class WC_Discounts {
 	/**
 	 * Get items which the coupon should be applied to.
 	 *
+	 * @since  3.2.0
 	 * @param  object $coupon Coupon object.
 	 * @return array
 	 */
@@ -701,6 +706,23 @@ class WC_Discounts {
 	/**
 	 * Check if a coupon is valid.
 	 *
+	 * Error Codes:
+	 * - 100: Invalid filtered.
+	 * - 101: Invalid removed.
+	 * - 102: Not yours removed.
+	 * - 103: Already applied.
+	 * - 104: Individual use only.
+	 * - 105: Not exists.
+	 * - 106: Usage limit reached.
+	 * - 107: Expired.
+	 * - 108: Minimum spend limit not met.
+	 * - 109: Not applicable.
+	 * - 110: Not valid for sale items.
+	 * - 111: Missing coupon code.
+	 * - 112: Maximum spend limit met.
+	 * - 113: Excluded products.
+	 * - 114: Excluded categories.
+	 *
 	 * @since  3.2.0
 	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon Coupon data.
@@ -724,40 +746,19 @@ class WC_Discounts {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
 			}
 		} catch ( Exception $e ) {
-			$error_message = $e->getMessage();
-			$error_code    = $e->getCode();
-
 			/**
-			 * Coupon error message.
-			 *
-			 * Codes:
-			 * - 100: Invalid filtered.
-			 * - 101: Invalid removed.
-			 * - 102: Not yours removed.
-			 * - 103: Already applied.
-			 * - 104: Individual use only.
-			 * - 105: Not exists.
-			 * - 106: Usage limit reached.
-			 * - 107: Expired.
-			 * - 108: Minimum spend limit not met.
-			 * - 109: Not applicable.
-			 * - 110: Not valid for sale items.
-			 * - 111: Missing coupon code.
-			 * - 112: Maximum spend limit met.
-			 * - 113: Excluded products.
-			 * - 114: Excluded categories.
+			 * Filter the coupon error message.
 			 *
 			 * @param string    $error_message Error message.
 			 * @param int       $error_code    Error code.
 			 * @param WC_Coupon $coupon        Coupon data.
 			 */
-			$message = apply_filters( 'woocommerce_coupon_error', $error_message, $error_code, $coupon );
+			$message = apply_filters( 'woocommerce_coupon_error', $e->getMessage(), $e->getCode(), $coupon );
 
 			return new WP_Error( 'invalid_coupon', $message, array(
 				'status' => 400,
 			) );
-		} // End try().
-
+		}
 		return true;
 	}
 
