@@ -259,13 +259,11 @@ class WC_Discounts {
 			$limit_usage_qty = $coupon->get_limit_usage_to_x_items();
 		}
 
-		$cart_items = $this->get_cart_items_backwards_compatibility();
-
 		foreach ( $this->items as $item ) {
 			if ( 0 === $this->get_discounted_price_in_cents( $item ) ) {
 				continue;
 			}
-			if ( ! $coupon->is_valid_for_product( $item->product, $cart_items[ $item->key ] ) && ! $coupon->is_valid_for_cart() ) { // @todo is this enough?
+			if ( ! $coupon->is_valid_for_product( $item->product, $item->cart_item ) && ! $coupon->is_valid_for_cart() ) {
 				continue;
 			}
 			if ( $limit_usage_qty && $applied_count > $limit_usage_qty ) {
@@ -606,9 +604,8 @@ class WC_Discounts {
 		if ( ! $this->items && $coupon->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
-			$cart_items = $this->get_cart_items_backwards_compatibility();
 			foreach ( $this->items as $item ) {
-				if ( $item->product && $coupon->is_valid_for_product( $item->product, $cart_items[ $item->key ] ) ) {
+				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->cart_item ) ) {
 					$valid = true;
 					break;
 				}
@@ -760,28 +757,5 @@ class WC_Discounts {
 			) );
 		}
 		return true;
-	}
-
-	/**
-	 * Backwards compatibility method to get cart items.
-	 *
-	 * @return array
-	 */
-	protected function get_cart_items_backwards_compatibility() {
-		$items = array();
-
-		foreach ( $this->items as $item ) {
-			$is_variable = $item->product->is_type( 'variation' );
-			$items[ $item->key ] = array(
-				'key'          => $item->key,
-				'product_id'   => $is_variable ? $item->product->get_parent_id() : $item->product->get_id(),
-				'variation_id' => $is_variable ? $item->product->get_id() : 0,
-				'variation'    => $is_variable ? $item->product->get_variation_attributes() : array(),
-				'quantity'     => $item->quantity,
-				'data'         => $item->product,
-			);
-		}
-
-		return $items;
 	}
 }
