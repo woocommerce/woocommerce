@@ -276,7 +276,7 @@ abstract class WC_Totals {
 	 * @return int
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
-		return $item->subtotal - $this->discount_totals[ $item_key ];
+		return $this->items[ $item_key ]->subtotal - $this->discount_totals[ $item_key ];
 	}
 
 	/**
