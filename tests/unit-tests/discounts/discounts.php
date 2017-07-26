@@ -58,15 +58,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->set_items( WC()->cart->get_cart() );
 
 		// Test applying multiple coupons and getting totals.
-		$coupon = new WC_Coupon;
-		$coupon->set_code( 'test' );
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 		$coupon->set_amount( 50 );
 		$coupon->set_discount_type( 'percent' );
 		$discounts->apply_coupon( $coupon );
 
 		$this->assertEquals( array( 'test' => 5 ), $discounts->get_applied_coupons() );
 
-		$coupon2 = new WC_Coupon;
+		$coupon2 = WC_Helper_Coupon::create_coupon( 'test2' );
 		$coupon2->set_code( 'test2' );
 		$coupon2->set_amount( 50 );
 		$coupon2->set_discount_type( 'percent' );
@@ -94,6 +93,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		// Cleanup.
 		WC()->cart->empty_cart();
 		$product->delete( true );
+		$coupon->delete( true );
+		$coupon2->delete( true );
 	}
 
 	/**
@@ -108,8 +109,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product->save();
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$coupon = new WC_Coupon;
-		$coupon->set_code( 'test' );
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 		$coupon->set_amount( 10 );
 
 		// Apply a percent discount.
@@ -133,6 +133,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		// Cleanup.
 		WC()->cart->empty_cart();
 		$product->delete( true );
+		$coupon->delete( true );
 	}
 
 	/**
@@ -160,14 +161,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 1,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'percent',
 						'amount'        => '20',
-					)
+					),
 				),
 				'expected_total_discount' => 2,
 			),
@@ -177,35 +178,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 2,
-					)
-				),
-				'coupons' => array(
-					array(
-						'code'          => 'test',
-						'discount_type' => 'fixed_cart',
-						'amount'        => '10',
-					)
-				),
-				'expected_total_discount' => 10,
-			),
-			array(
-				'prices_include_tax' => false,
-				'cart' => array(
-					array(
-						'price' => 10,
-						'qty'   => 1,
 					),
-					array(
-						'price' => 10,
-						'qty'   => 1,
-					)
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'fixed_cart',
 						'amount'        => '10',
-					)
+					),
 				),
 				'expected_total_discount' => 10,
 			),
@@ -220,17 +200,38 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'price' => 10,
 						'qty'   => 1,
 					),
-					array(
-						'price' => 10,
-						'qty'   => 1,
-					)
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'fixed_cart',
 						'amount'        => '10',
-					)
+					),
+				),
+				'expected_total_discount' => 10,
+			),
+			array(
+				'prices_include_tax' => false,
+				'cart' => array(
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+					array(
+						'price' => 10,
+						'qty'   => 1,
+					),
+				),
+				'coupons' => array(
+					array(
+						'code'          => 'test',
+						'discount_type' => 'fixed_cart',
+						'amount'        => '10',
+					),
 				),
 				'expected_total_discount' => 10,
 			),
@@ -248,14 +249,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 2,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'fixed_cart',
 						'amount'        => '10',
-					)
+					),
 				),
 				'expected_total_discount' => 10,
 			),
@@ -305,14 +306,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 1,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'fixed_cart',
 						'amount'        => '10',
-					)
+					),
 				),
 				'expected_total_discount' => 10,
 			),
@@ -330,14 +331,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 1,
 						'qty'   => 1,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
 						'code'          => 'test',
 						'discount_type' => 'fixed_cart',
 						'amount'        => '1',
-					)
+					),
 				),
 				'expected_total_discount' => 1,
 			),
@@ -347,7 +348,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 2,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
@@ -355,7 +356,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'discount_type'          => 'percent',
 						'amount'                 => '10',
 						'limit_usage_to_x_items' => 1,
-					)
+					),
 				),
 				'expected_total_discount' => 1,
 			),
@@ -369,7 +370,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					array(
 						'price' => 10,
 						'qty'   => 2,
-					)
+					),
 				),
 				'coupons' => array(
 					array(
@@ -377,11 +378,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'discount_type'          => 'percent',
 						'amount'                 => '10',
 						'limit_usage_to_x_items' => 1,
-					)
+					),
 				),
 				'expected_total_discount' => 1,
 			),
 		);
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 
 		foreach ( $tests as $test_index => $test ) {
 			$discounts = new WC_Discounts();
@@ -399,7 +402,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			$discounts->set_items( WC()->cart->get_cart() );
 
 			foreach ( $test['coupons'] as $coupon_props ) {
-				$coupon = new WC_Coupon;
 				$coupon->set_props( $coupon_props );
 				$discounts->apply_coupon( $coupon );
 			}
@@ -416,5 +418,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		update_option( 'woocommerce_calc_taxes', 'no' );
+		$coupon->delete( true );
 	}
 }
