@@ -27,8 +27,9 @@ final class WC_Order_Totals extends WC_Totals {
 	 * @param object $object Cart or order object to calculate totals for.
 	 */
 	public function __construct( &$object = null ) {
+		parent::__construct( $object );
+
 		if ( is_a( $object, 'WC_Order' ) ) {
-			parent::__construct( $object );
 			$this->calculate();
 		}
 	}
@@ -41,14 +42,19 @@ final class WC_Order_Totals extends WC_Totals {
 	protected function set_items() {
 		$this->items = array();
 
-		foreach ( $this->object->get_items() as $order_item_id => $order_item ) {
-			$item                          = $this->get_default_item_props();
-			$item->key                     = $order_item_id;
-			$item->object                  = $order_item;
-			$item->product                 = $order_item->get_product();
-			$item->quantity                = $order_item->get_quantity();
-			$item->price                   = $this->add_precision( $order_item->get_subtotal() );
-			$this->items[ $order_item_id ] = $item;
+		foreach ( $this->object->get_items() as $item_key => $item_object ) {
+			$item                     = $this->get_default_item_props();
+			$item->key                = $item_key;
+			$item->object             = $item_object;
+			$item->product            = $item_object->get_product();
+			$item->quantity           = $item_object->get_quantity();
+			$item->price              = $this->add_precision( $item_object->get_subtotal() );
+			$item->subtotal           = $this->add_precision( $item_object->get_subtotal() );
+			$item->subtotal_tax       = $this->add_precision( $item_object->get_subtotal_tax() );
+			$item->total              = $this->add_precision( $item_object->get_total() );
+			$item->total_tax          = $this->add_precision( $item_object->get_total_tax() );
+			$item->taxes              = $this->add_precision( $item_object->get_taxes() );
+			$this->items[ $item_key ] = $item;
 		}
 	}
 
@@ -61,11 +67,11 @@ final class WC_Order_Totals extends WC_Totals {
 		$this->fees = array();
 
 		foreach ( $this->object->get_fees() as $fee_key => $fee_object ) {
-			$fee            = $this->get_default_fee_props();
-			$fee->object    = $fee_object;
-			$fee->total     = $this->add_precision( $fee_object->get_total() );
-			$fee->taxes     = $this->add_precision( $fee_object->get_taxes() );
-			$fee->total_tax = $this->add_precision( $fee_object->get_total_tax() );
+			$fee                    = $this->get_default_fee_props();
+			$fee->object            = $fee_object;
+			$fee->total             = $this->add_precision( $fee_object->get_total() );
+			$fee->taxes             = $this->add_precision( $fee_object->get_taxes() );
+			$fee->total_tax         = $this->add_precision( $fee_object->get_total_tax() );
 			$this->fees[ $fee_key ] = $fee;
 		}
 	}
@@ -95,7 +101,7 @@ final class WC_Order_Totals extends WC_Totals {
 	 * @since  3.2.0
 	 */
 	protected function set_coupons() {
-		//$this->coupons = $this->object->get_coupons(); @todo
+		//$this->coupons = $this->object->get_coupons(); @todo get_used_coupons = codes
 	}
 
 	/**
@@ -106,6 +112,8 @@ final class WC_Order_Totals extends WC_Totals {
 	protected function calculate_totals() {
 		parent::calculate_totals();
 
+		$this->object->set_discount_total( $this->get_total( 'discounts_total' ) );
+		$this->object->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
 		$this->object->set_shipping_total( $this->get_total( 'shipping_total' ) );
 		$this->object->set_shipping_tax( $this->get_total( 'shipping_tax_total' ) );
 		$this->object->set_cart_tax( $this->get_total( 'tax_total' ) );

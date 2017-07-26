@@ -197,14 +197,12 @@ abstract class WC_Totals {
 			'quantity'           => 0,
 			'price'              => 0,
 			'product'            => false,
-			'price_includes_tax' => wc_prices_include_tax(),
+			'price_includes_tax' => false,
 			'subtotal'           => 0,
 			'subtotal_tax'       => 0,
-			'subtotal_taxes'     => array(),
 			'total'              => 0,
 			'total_tax'          => 0,
 			'taxes'              => array(),
-			'discounted_price'   => 0,
 		);
 	}
 
@@ -418,8 +416,8 @@ abstract class WC_Totals {
 			$item->subtotal_tax = 0;
 
 			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
-				$item->subtotal_taxes = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
-				$item->subtotal_tax      = array_sum( $item->subtotal_taxes );
+				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+				$item->subtotal_tax = array_sum( $subtotal_taxes );
 
 				if ( $item->price_includes_tax ) {
 					$item->subtotal = $item->subtotal - $item->subtotal_tax;

@@ -31,8 +31,9 @@ final class WC_Cart_Totals extends WC_Totals {
 	 * @param object $object Cart or order object to calculate totals for.
 	 */
 	public function __construct( &$object = null ) {
+		parent::__construct( $object );
+
 		if ( is_a( $object, 'WC_Cart' ) ) {
-			parent::__construct( $object );
 			$this->calculate();
 		}
 	}
@@ -57,6 +58,7 @@ final class WC_Cart_Totals extends WC_Totals {
 			$item                          = $this->get_default_item_props();
 			$item->key                     = $cart_item_key;
 			$item->object                  = $cart_item;
+			$item->price_includes_tax      = wc_prices_include_tax();
 			$item->quantity                = $cart_item['quantity'];
 			$item->price                   = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
