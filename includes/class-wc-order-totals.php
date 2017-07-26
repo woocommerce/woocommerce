@@ -48,6 +48,7 @@ final class WC_Order_Totals extends WC_Totals {
 
 		foreach ( $this->object->get_items() as $item_key => $item_object ) {
 			$item                     = $this->get_default_item_props();
+			$item_taxes               = $item_object->get_taxes();
 			$item->object             = $item_object;
 			$item->product            = $item_object->get_product();
 			$item->quantity           = $item_object->get_quantity();
@@ -55,7 +56,7 @@ final class WC_Order_Totals extends WC_Totals {
 			$item->subtotal_tax       = $this->add_precision( $item_object->get_subtotal_tax() );
 			$item->total              = $this->add_precision( $item_object->get_total() );
 			$item->total_tax          = $this->add_precision( $item_object->get_total_tax() );
-			$item->taxes              = $this->add_precision( $item_object->get_taxes() );
+			$item->taxes              = $this->add_precision( $item_taxes['total'] );
 			$this->items[ $item_key ] = $item;
 		}
 	}
@@ -88,9 +89,10 @@ final class WC_Order_Totals extends WC_Totals {
 
 		foreach ( $this->object->get_shipping_methods() as $key => $shipping_object ) {
 			$shipping_line            = $this->get_default_shipping_props();
+			$shipping_line_taxes      = $shipping_object->get_taxes();
 			$shipping_line->object    = $shipping_object;
 			$shipping_line->total     = $this->add_precision( $shipping_object->get_total() );
-			$shipping_line->taxes     = $this->add_precision( $shipping_object->get_taxes() );
+			$shipping_line->taxes     = $this->add_precision( $shipping_line_taxes['total'] );
 			$shipping_line->total_tax = $this->add_precision( $shipping_object->get_total_tax() );
 			$this->shipping[ $key ]   = $shipping_line;
 		}

@@ -55,6 +55,18 @@ class WC_Tests_Order_Totals extends WC_Unit_Test_Case {
 		$product2 = WC_Helper_Product::create_simple_product();
 
 		WC_Helper_Shipping::create_simple_flat_rate();
+		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
+		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
+		$shipping_item   = new WC_Order_Item_Shipping();
+		$shipping_item->set_props( array(
+			'method_title' => $rate->label,
+			'method_id'    => $rate->id,
+			'total'        => wc_format_decimal( $rate->cost ),
+			'taxes'        => $rate->taxes,
+		) );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$shipping_item->add_meta_data( $key, $value, true );
+		}
 
 		$coupon = new WC_Coupon;
 		$coupon->set_code( 'test-coupon-10' );
@@ -70,6 +82,7 @@ class WC_Tests_Order_Totals extends WC_Unit_Test_Case {
 		$this->order = new WC_Order();
 		$this->order->add_product( $product, 1 );
 		$this->order->add_product( $product2, 2 );
+		$this->order->add_item( $shipping_item );
 
 		// @todo add coupon
 		// @todo add fee
@@ -103,9 +116,19 @@ class WC_Tests_Order_Totals extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that cart totals get updated.
+	 * Test that order totals get updated.
 	 */
 	public function test_order_totals() {
-		$this->assertEquals( 90.40, $this->order->get_total() );
+		$this->totals->calculate();
+
+		// $10 item + ($10*2) item + $10 shipping + (.2*$40) tax = $48.00
+		// These tests will need to be updated when coupons + fees get added.
+
+		$this->assertEquals( 48.00, $this->order->get_total() );
+		$this->assertEquals( 10.00, $this->order->get_shipping_total() );
+		$this->assertEquals( 2.00, $this->order->get_shipping_tax() );
+		$this->assertEquals( 6.00, $this->order->get_cart_tax() );
+		$this->assertEquals( 8.00, $this->order->get_total_tax() );
+		$this->assertEquals( 0, $this->order->get_discount_total() );
 	}
 }
