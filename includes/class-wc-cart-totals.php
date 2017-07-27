@@ -103,7 +103,7 @@ final class WC_Cart_Totals {
 	 * @param object $cart Cart object to calculate totals for.
 	 */
 	public function __construct( &$cart = null ) {
-		$this->object = $object;
+		$this->object = $cart;
 
 		if ( is_a( $cart, 'WC_Cart' ) ) {
 			$this->calculate();
@@ -393,6 +393,7 @@ final class WC_Cart_Totals {
 
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
+
 		$this->object->subtotal        = $this->get_total( 'items_total' ) + $this->get_total( 'items_total_tax' );
 		$this->object->subtotal_ex_tax = $this->get_total( 'items_total' );
 	}
@@ -427,6 +428,7 @@ final class WC_Cart_Totals {
 		}
 		$this->set_total( 'items_subtotal', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
 		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+
 		$this->object->subtotal        = $this->get_total( 'items_total' ) + $this->get_total( 'items_total_tax' );
 		$this->object->subtotal_ex_tax = $this->get_total( 'items_total' );
 	}
@@ -490,6 +492,7 @@ final class WC_Cart_Totals {
 		$this->set_shipping();
 		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
+
 		$this->object->shipping_total     = $this->get_total( 'shipping_total' );
 		$this->object->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
 	}
@@ -503,5 +506,8 @@ final class WC_Cart_Totals {
 		$this->set_total( 'taxes', $this->get_merged_taxes() );
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
+
+		$this->object->tax_total = $this->get_total( 'tax_total' );
+		$this->object->total     = $this->get_total( 'total' );
 	}
 }
