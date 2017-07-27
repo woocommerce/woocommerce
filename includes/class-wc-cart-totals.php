@@ -409,6 +409,19 @@ final class WC_Cart_Totals {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
 			$item->total_tax = 0;
 
+			if ( has_filter( 'woocommerce_get_discounted_price' ) ) {
+				/**
+				 * Allow plugins to filter this price like in the legacy cart class.
+				 *
+				 * This is legacy and should probably be deprecated in the future.
+				 * $item->object is the cart item object.
+				 * $this->object is the cart object.
+				 */
+				$item->total = wc_add_number_precision(
+					apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->object )
+				);
+			}
+
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
 				$item->taxes     = WC_Tax::calc_tax( $item->total, $item->tax_rates, $item->price_includes_tax );
 				$item->total_tax = array_sum( $item->taxes );
