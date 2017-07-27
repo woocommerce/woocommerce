@@ -263,7 +263,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_get_products_visibility() {
+		$product_1 = new WC_Product_Simple;
+		$product_1->set_catalog_visibility( 'visible' );
+		$product_1->save();
 
+		$product_2 = new WC_Product_Simple;
+		$product_2->set_catalog_visibility( 'hidden' );
+		$product_2->save();
+
+		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => 'visible' ) );
+		$this->assertEquals( array( $product_1->get_id() ), $products );
+		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => array( 'visible', 'hidden' ) ) );
+		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
 	}
 
 	/**
