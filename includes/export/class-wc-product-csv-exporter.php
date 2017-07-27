@@ -124,7 +124,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
-		$products = wc_get_products( array(
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
 			'status'   => array( 'private', 'publish' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
@@ -135,6 +135,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'return'   => 'objects',
 			'paginate' => true,
 		) );
+		$products = wc_get_products( $args );
 
 		$this->total_rows = $products->total;
 		$this->row_data   = array();
