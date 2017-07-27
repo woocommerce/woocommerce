@@ -190,7 +190,7 @@ final class WC_Cart_Totals {
 			$item->object                  = $cart_item;
 			$item->price_includes_tax      = wc_prices_include_tax();
 			$item->quantity                = $cart_item['quantity'];
-			$item->subtotal                = $this->add_precision( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->subtotal                = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
 			$this->items[ $cart_item_key ] = $item;
 		}
@@ -209,7 +209,7 @@ final class WC_Cart_Totals {
 		foreach ( $this->object->get_fees() as $fee_key => $fee_object ) {
 			$fee         = $this->get_default_fee_props();
 			$fee->object = $fee_object;
-			$fee->total  = $this->add_precision( $fee->object->amount );
+			$fee->total  = wc_add_number_precision_deep( $fee->object->amount );
 
 			if ( wc_tax_enabled() && $fee->object->taxable ) {
 				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class ), false );
@@ -231,9 +231,9 @@ final class WC_Cart_Totals {
 		foreach ( $this->object->calculate_shipping() as $key => $shipping_object ) {
 			$shipping_line            = $this->get_default_shipping_props();
 			$shipping_line->object    = $shipping_object;
-			$shipping_line->total     = $this->add_precision( $shipping_object->cost );
-			$shipping_line->taxes     = $this->add_precision( $shipping_object->taxes );
-			$shipping_line->total_tax = $this->add_precision( array_sum( $shipping_object->taxes ) );
+			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
+			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes );
+			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ) );
 			$this->shipping[ $key ]   = $shipping_line;
 		}
 	}
@@ -327,7 +327,7 @@ final class WC_Cart_Totals {
 	 * @return array.
 	 */
 	public function get_totals( $in_cents = false ) {
-		return $in_cents ? $this->totals : array_map( array( $this, 'remove_precision' ), $this->totals );
+		return $in_cents ? $this->totals : wc_remove_number_precision_deep( $this->totals );
 	}
 
 	/**
@@ -475,10 +475,10 @@ final class WC_Cart_Totals {
 		$this->set_total( 'fees_total_tax', array_sum( wp_list_pluck( $this->fees, 'total_tax' ) ) );
 
 		foreach ( $this->fees as $fee_key => $fee ) {
-			$this->object->fees[ $fee_key ]->tax      = $this->remove_precision( $fee->total_tax );
-			$this->object->fees[ $fee_key ]->tax_data = $this->remove_precision( $fee->taxes );
+			$this->object->fees[ $fee_key ]->tax      = wc_remove_number_precision_deep( $fee->total_tax );
+			$this->object->fees[ $fee_key ]->tax_data = wc_remove_number_precision_deep( $fee->taxes );
 		}
-		$this->object->fee_total = $this->remove_precision( array_sum( wp_list_pluck( $this->fees, 'total' ) ) );
+		$this->object->fee_total = wc_remove_number_precision_deep( array_sum( wp_list_pluck( $this->fees, 'total' ) ) );
 	}
 
 	/**
