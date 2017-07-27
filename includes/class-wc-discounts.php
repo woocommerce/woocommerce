@@ -159,7 +159,7 @@ class WC_Discounts {
 			$discount       = absint( rtrim( $raw_discount, '%' ) );
 			$discount_total = $discount * ( $total_to_discount / 100 );
 		} else {
-			$discount_total = min( absint( $raw_discount * $this->precision ), $total_to_discount );
+			$discount_total = min( absint( wc_add_number_precision( $raw_discount ) ), $total_to_discount );
 		}
 
 		$discount_id    = '';
