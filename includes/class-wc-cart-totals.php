@@ -100,7 +100,6 @@ final class WC_Cart_Totals {
 		'taxes'               => array(),
 		'tax_total'           => 0,
 		'shipping_total'      => 0,
-		'shipping_taxes'      => array(),
 		'shipping_tax_total'  => 0,
 		'discounts_total'     => 0,
 		'discounts_tax_total' => 0,
@@ -514,8 +513,8 @@ final class WC_Cart_Totals {
 		}
 
 		$applied_coupons                           = $discounts->get_applied_coupons();
-		$this->object->coupon_discount_amounts     = $applied_coupons['discount'];
-		$this->object->coupon_discount_tax_amounts = $applied_coupons['discount_tax'];
+		$this->object->coupon_discount_amounts     = wp_list_pluck( $applied_coupons, 'discount' );
+		$this->object->coupon_discount_tax_amounts = wp_list_pluck( $applied_coupons, 'discount_tax' );
 	}
 
 	/**
@@ -545,11 +544,9 @@ final class WC_Cart_Totals {
 	protected function calculate_shipping_totals() {
 		$this->set_shipping();
 		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
-		$this->set_total( 'shipping_taxes', array_sum( wp_list_pluck( $this->shipping, 'taxes' ) ) );
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
 
 		$this->object->shipping_total     = $this->get_total( 'shipping_total' );
-		$this->object->shipping_taxes     = $this->get_total( 'shipping_taxes' );
 		$this->object->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
 	}
 
@@ -564,8 +561,8 @@ final class WC_Cart_Totals {
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
 
 		// Add totals to cart object.
-		$this->object->taxes          = $this->get_total( 'taxes' );
-		$this->object->shipping_taxes = $this->get_total( 'shipping_taxes' );
+		$this->object->taxes          = wp_list_pluck( $this->get_total( 'taxes' ), 'shipping_tax_total' );
+		$this->object->shipping_taxes = wp_list_pluck( $this->get_total( 'taxes' ), 'tax_total' );
 		$this->object->tax_total      = $this->get_total( 'tax_total' );
 		$this->object->total          = $this->get_total( 'total' );
 
