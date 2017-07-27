@@ -99,14 +99,6 @@ class WC_Discount extends WC_Data {
 		return $this->get_prop( 'discount_type', $context );
 	}
 
-	public function get_discount_amount( $total ) {
-		if ( 'percent' === $this->get_discount_type() ) {
-			return $this->get_amount() * ( $total / 100 );
-		} else {
-			return min( absint( wc_add_number_precision( $this->get_amount() ) ), $total );
-		}
-	}
-
 	/**
 	 * Set discount type.
 	 *
@@ -121,9 +113,22 @@ class WC_Discount extends WC_Data {
 	}
 
 	/**
-	 * Amount of discount this has given in total. @todo should this be here?
+	 * Amount of discount this has given in total cents.
+	 *
+	 * @param int $total
 	 */
-	public function set_discount_total() {}
+	public function set_discount_total( $total ) {
+		$this->set_prop( 'discount', absint( $total ) );
+	}
+
+	/**
+	 * Get amount of discount this has in cents.
+	 *
+	 * @return int
+	 */
+	public function get_discount_total( $context = 'view' ) {
+		return $this->get_prop( 'discount', $context );
+	}
 
 	/**
 	 * Array of negative taxes. @todo should this be here?

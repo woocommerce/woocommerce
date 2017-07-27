@@ -39,6 +39,13 @@ class WC_Discounts {
 	protected $applied_coupons = array();
 
 	/**
+	 * An array of applied WC_Discount objects.
+	 *
+	 * @var array
+	 */
+	protected $manual_discounts = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $items Items to discount.
@@ -76,7 +83,19 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts( $in_cents = false ) {
-		return $in_cents ? $this->discounts : wc_remove_number_precision_deep ( $this->discounts );
+
+		$discounts = $in_cents ? $this->discounts : wc_remove_number_precision_deep ( $this->discounts );
+
+		$manual = array();
+		foreach ( $this->manual_discounts as $manual_discount ) {
+			$manual[ $manual_discount->get_id() ] = $in_cents ? $manual_discount->get_discount_total() : wc_remove_number_precision_deep( $manual_discount->get_discount_total() );
+		}
+
+		return array_merge( $discounts, $manual );
+	}
+
+	public function get_manual_discounts() {
+		return $this->manual_discounts;
 	}
 
 	/**
@@ -149,10 +168,8 @@ class WC_Discounts {
 			$total_to_discount += $this->get_discounted_price_in_cents( $item );
 		}
 
-		foreach ( $this->discounts as $key => $value ) {
-			if ( strstr( $key, 'discount-' ) ) {
-				$total_to_discount = $total_to_discount - $value;
-			}
+		foreach ( $this->manual_discounts as $key => $value ) {
+			$total_to_discount = $total_to_discount - $value->get_discount_total();
 		}
 
 		if ( is_a( $raw_discount, 'WC_Discount' ) ) {
@@ -162,25 +179,32 @@ class WC_Discounts {
 			$discount->set_amount( $raw_discount );
 		}
 
-		$discount_total = $discount->get_discount_amount( $total_to_discount );
+		if ( 'percent' === $discount->get_discount_type() ) {
+			$discount_total =  $discount->get_amount() * ( $total_to_discount / 100 );
+		} else {
+			$discount_total =  min( absint( wc_add_number_precision( $discount->get_amount() ) ), $total_to_discount );
+		}
+		$discount->set_discount_total( $discount_total );
 
 		$discount_id    = '';
 		$index          = 1;
-
 		while ( ! $discount_id ) {
-			$discount_id = 'discount-' . $raw_discount;
+			$discount_id = 'discount-' . $discount->get_amount() . ( 'percent' === $discount->get_discount_type() ? '%' : '' );
 
 			if ( 1 < $index ) {
 				$discount_id .= '-' . $index;
 			}
 
-			if ( isset( $this->discounts[ $discount_id ] ) ) {
+			if ( isset( $this->manual_discounts[ $discount_id ] ) ) {
 				$index ++;
 				$discount_id = '';
 			}
 		}
 
-		return $this->discounts[ $discount_id ] = $discount_total;
+		$discount->set_id( $discount_id );
+		$this->manual_discounts[ $discount_id ] = $discount;
+
+		return $discount->get_discount_total();
 	}
 
 	/**
@@ -244,6 +268,8 @@ class WC_Discounts {
 				}
 				break;
 		}
+
+		return true;
 	}
 
 	/**

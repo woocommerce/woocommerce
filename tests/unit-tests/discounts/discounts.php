@@ -501,12 +501,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$discounts->apply_discount( '50%' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( $all_discounts['discount-50%'], 10 );
+		$this->assertEquals( 10, $all_discounts['discount-50%'] );
 
 		$discounts->apply_discount( '50%' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( $all_discounts['discount-50%'], 10, print_r( $all_discounts, true ) );
-		$this->assertEquals( $all_discounts['discount-50%-2'], 5, print_r( $all_discounts, true ) );
+		$this->assertEquals( 10, $all_discounts['discount-50%'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-50%-2'], print_r( $all_discounts, true ) );
 
 		// Test fixed discounts.
 		$discounts = new WC_Discounts();
@@ -514,18 +514,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$discounts->apply_discount( '5' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( $all_discounts['discount-5'], 5 );
+		$this->assertEquals( 5, $all_discounts['discount-5'] );
 
 		$discounts->apply_discount( '5' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( $all_discounts['discount-5'], 5, print_r( $all_discounts, true ) );
-		$this->assertEquals( $all_discounts['discount-5-2'], 5, print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-5'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-5-2'], print_r( $all_discounts, true ) );
 
 		$discounts->apply_discount( '15' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( $all_discounts['discount-5'], 5, print_r( $all_discounts, true ) );
-		$this->assertEquals( $all_discounts['discount-5-2'], 5, print_r( $all_discounts, true ) );
-		$this->assertEquals( $all_discounts['discount-15'], 10, print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-5'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-5-2'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 10, $all_discounts['discount-15'], print_r( $all_discounts, true ) );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
