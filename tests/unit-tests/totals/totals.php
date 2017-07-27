@@ -67,7 +67,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
-		$this->totals = new WC_Totals( WC()->cart );
+		$this->totals = new WC_Cart_Totals( WC()->cart, WC()->customer );
 	}
 
 	/**
