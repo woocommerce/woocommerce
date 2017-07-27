@@ -390,29 +390,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
-		$discount = (float) min( $discount, $discounting_amount );
-
-		// Handle the limit_usage_to_x_items option
-		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {
-			if ( $discounting_amount ) {
-				if ( null === $this->get_limit_usage_to_x_items() ) {
-					$limit_usage_qty = $cart_item_qty;
-				} else {
-					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
-
-					$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
-				}
-				if ( $single ) {
-					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-				} else {
-					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
-				}
-			}
-		}
-
-		$discount = round( $discount, wc_get_rounding_precision() );
-
-		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', round( min( $discount, $discounting_amount ), wc_get_rounding_precision() ), $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/*
@@ -763,6 +741,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon exists or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_exists.
 	 * @throws Exception
 	 */
 	private function validate_exists() {
@@ -774,6 +753,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon usage limit is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_usage_limit.
 	 * @throws Exception
 	 */
 	private function validate_usage_limit() {
@@ -788,6 +768,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Per user usage limit - check here if user is logged in (against user IDs).
 	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_user_usage_limit.
 	 * @param  int  $user_id
 	 * @throws Exception
 	 */
@@ -806,6 +787,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon date is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_expiry_date.
 	 * @throws Exception
 	 */
 	private function validate_expiry_date() {
@@ -817,6 +799,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon amount is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_minimum_amount.
 	 * @throws Exception
 	 */
 	private function validate_minimum_amount() {
@@ -828,6 +811,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon amount is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_maximum_amount.
 	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
@@ -839,6 +823,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon is valid for products in the cart is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_product_ids.
 	 * @throws Exception
 	 */
 	private function validate_product_ids() {
@@ -860,6 +845,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_product_categories.
 	 * @throws Exception
 	 */
 	private function validate_product_categories() {
@@ -887,6 +873,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_sale_items.
 	 * @throws Exception
 	 */
 	private function validate_sale_items() {
@@ -910,6 +897,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
 	 * All exclusion rules must pass at the same time for a product coupon to be valid.
+	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_excluded_items.
+	 * @throws Exception
 	 */
 	private function validate_excluded_items() {
 		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
@@ -930,6 +920,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
 	 * Cart discounts cannot be added if non-eligible product is found in cart.
+	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_eligible_items.
 	 */
 	private function validate_cart_excluded_items() {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
@@ -941,10 +933,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Exclude products from cart.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_excluded_product_ids.
 	 * @throws Exception
 	 */
 	private function validate_cart_excluded_product_ids() {
-		// Exclude Products
+		// Exclude Products.
 		if ( sizeof( $this->get_excluded_product_ids() ) > 0 ) {
 			$valid_for_cart = true;
 			if ( ! WC()->cart->is_empty() ) {
@@ -963,6 +956,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Exclude categories from cart.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->validate_coupon_excluded_product_categories.
 	 * @throws Exception
 	 */
 	private function validate_cart_excluded_product_categories() {
@@ -989,10 +983,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Check if a coupon is valid.
 	 *
-	 * @return boolean validity
+	 * @deprecated 3.2.0 In favor of WC_Discounts->is_coupon_valid.
 	 * @throws Exception
+	 * @return bool Validity.
 	 */
 	public function is_valid() {
+		wc_deprecated_function( 'is_valid', '3.2', 'WC_Discounts->is_coupon_valid' );
+
 		try {
 			$this->validate_exists();
 			$this->validate_usage_limit();
