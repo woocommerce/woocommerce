@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Discounts class.
+ *
+ * @todo Manual discounts.
  */
 class WC_Discounts {
 
@@ -73,7 +75,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discount( $key ) {
-		return isset( $this->discounts[ $key ] ) ? $this->remove_precision( $this->discounts[ $key ] ) : 0;
+		return isset( $this->discounts[ $key ] ) ? wc_remove_number_precision_deep( $this->discounts[ $key ] ) : 0;
 	}
 
 	/**
@@ -84,7 +86,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts( $in_cents = false ) {
-		return $in_cents ? $this->discounts : array_map( array( $this, 'remove_precision' ), $this->discounts );
+		return $in_cents ? $this->discounts : wc_remove_number_precision_deep ( $this->discounts );
 	}
 
 	/**
@@ -95,7 +97,7 @@ class WC_Discounts {
 	 * @return float
 	 */
 	public function get_discounted_price( $item ) {
-		return $this->remove_precision( $this->get_discounted_price_in_cents( $item ) );
+		return wc_remove_number_precision_deep( $this->get_discounted_price_in_cents( $item ) );
 	}
 
 	/**
@@ -117,7 +119,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_applied_coupons() {
-		return array_map( array( $this, 'remove_precision' ), $this->applied_coupons );
+		return wc_remove_number_precision_deep( $this->applied_coupons );
 	}
 
 	/**
@@ -156,7 +158,10 @@ class WC_Discounts {
 		}
 
 		if ( ! isset( $this->applied_coupons[ $coupon->get_code() ] ) ) {
-			$this->applied_coupons[ $coupon->get_code() ] = 0;
+			$this->applied_coupons[ $coupon->get_code() ] = array(
+				'discount'     => 0,
+				'discount_tax' => 0,
+			);
 		}
 
 		$is_coupon_valid = $this->is_coupon_valid( $coupon );
@@ -166,54 +171,24 @@ class WC_Discounts {
 
 		// @todo how can we support the old woocommerce_coupon_get_discount_amount filter?
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
+		$result         = false;
 
 		switch ( $coupon->get_discount_type() ) {
 			case 'percent' :
-				$this->applied_coupons[ $coupon->get_code() ] += $this->apply_percentage_discount( $items_to_apply, $coupon->get_amount() );
+				$result = $this->apply_percentage_discount( $items_to_apply, $coupon->get_amount() );
 				break;
 			case 'fixed_product' :
-				$this->applied_coupons[ $coupon->get_code() ] += $this->apply_fixed_product_discount( $items_to_apply, $coupon->get_amount() * $this->precision );
+				$result = $this->apply_fixed_product_discount( $items_to_apply, $coupon->get_amount() * $this->precision );
 				break;
 			case 'fixed_cart' :
-				$this->applied_coupons[ $coupon->get_code() ] += $this->apply_fixed_cart_discount( $items_to_apply, $coupon->get_amount() * $this->precision );
+				$result = $this->apply_fixed_cart_discount( $items_to_apply, $coupon->get_amount() * $this->precision );
 				break;
 		}
-	}
 
-	/**
-	 * Add precision (deep) to a price.
-	 *
-	 * @since  3.2.0
-	 * @param  int|array $value Value to remove precision from.
-	 * @return float
-	 */
-	protected function add_precision( $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $key => $subvalue ) {
-				$value[ $key ] = $this->add_precision( $subvalue );
-			}
-		} else {
-			$value = $value * $this->precision;
+		if ( $result ) {
+			$this->applied_coupons[ $coupon->get_code() ]['discount']     += $result['discount'];
+			$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $result['discount_tax'];
 		}
-		return $value;
-	}
-
-	/**
-	 * Remove precision (deep) from a price.
-	 *
-	 * @since  3.2.0
-	 * @param  int|array $value Value to remove precision from.
-	 * @return float
-	 */
-	protected function remove_precision( $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $key => $subvalue ) {
-				$value[ $key ] = $this->remove_precision( $subvalue );
-			}
-		} else {
-			$value = wc_format_decimal( $value / $this->precision, wc_get_price_decimals() );
-		}
-		return $value;
 	}
 
 	/**
@@ -306,16 +281,21 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  array $items_to_apply Array of items to apply the coupon to.
 	 * @param  int   $amount Amount of discount.
-	 * @return int   total discounted in cents
+	 * @return array totals discounted in cents
 	 */
 	protected function apply_percentage_discount( $items_to_apply, $amount ) {
-		$total_discounted = 0;
+		$return = array(
+			'discount'     => 0,
+			'discount_tax' => 0,
+		);
 
 		foreach ( $items_to_apply as $item ) {
-			$total_discounted += $this->add_item_discount( $item, $amount * ( $this->get_discounted_price_in_cents( $item ) / 100 ) );
+			$discounted_amount      =  $this->add_item_discount( $item, $amount * ( $this->get_discounted_price_in_cents( $item ) / 100 ) );
+			$return['discount']     += $discounted_amount;
+			$return['discount_tax'] += $this->get_item_discount_tax( $item, $discounted_amount );
 		}
 
-		return $total_discounted;
+		return $return;
 	}
 
 	/**
@@ -324,16 +304,21 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  array $items_to_apply Array of items to apply the coupon to.
 	 * @param  int   $discount Amount of discout.
-	 * @return int total discounted in cents
+	 * @return array totals discounted in cents
 	 */
 	protected function apply_fixed_product_discount( $items_to_apply, $discount ) {
-		$total_discounted = 0;
+		$return = array(
+			'discount'     => 0,
+			'discount_tax' => 0,
+		);
 
 		foreach ( $items_to_apply as $item ) {
-			$total_discounted += $this->add_item_discount( $item, $discount * $item->quantity );
+			$discounted_amount      =  $this->add_item_discount( $item, $discount * $item->quantity );
+			$return['discount']     += $discounted_amount;
+			$return['discount_tax'] += $this->get_item_discount_tax( $item, $discounted_amount );
 		}
 
-		return $total_discounted;
+		return $return;
 	}
 
 	/**
@@ -342,29 +327,38 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  array $items_to_apply Array of items to apply the coupon to.
 	 * @param  int   $cart_discount Fixed discount amount to apply.
-	 * @return int total discounted in cents
+	 * @return array totals discounted in cents
 	 */
 	protected function apply_fixed_cart_discount( $items_to_apply, $cart_discount ) {
+		$return = array(
+			'discount'     => 0,
+			'discount_tax' => 0,
+		);
 		$items_to_apply   = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
 
 		if ( ! $item_count = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) ) ) {
-			return 0;
+			return $return;
 		}
 
 		$per_item_discount = floor( $cart_discount / $item_count ); // round it down to the nearest cent number.
-		$amount_discounted = 0;
 
 		if ( $per_item_discount > 0 ) {
+
 			foreach ( $items_to_apply as $item ) {
-				$amount_discounted += $this->add_item_discount( $item, $per_item_discount * $item->quantity );
+				$discounted_amount      =  $this->add_item_discount( $item, $per_item_discount * $item->quantity );
+				$return['discount']     += $discounted_amount;
+				$return['discount_tax'] += $this->get_item_discount_tax( $item, $discounted_amount );
 			}
 
 			/**
 			 * If there is still discount remaining, repeat the process.
 			 */
-			if ( $amount_discounted > 0 && $amount_discounted < $cart_discount ) {
-				$amount_discounted += $this->apply_fixed_cart_discount( $items_to_apply, $cart_discount - $amount_discounted );
+			if ( $return['discount'] > 0 && $return['discount'] < $cart_discount ) {
+				$discounted_amounts     =  $this->apply_fixed_cart_discount( $items_to_apply, $cart_discount - $return['discount'] );
+				$return['discount']     += array_sum( wp_list_pluck( $discounted_amounts, 'discount' ) );
+				$return['discount_tax'] += array_sum( wp_list_pluck( $discounted_amounts, 'discount_tax' ) );
 			}
+
 		} elseif ( $cart_discount > 0 ) {
 			/**
 			 * Deal with remaining fractional discounts by splitting it over items
@@ -372,19 +366,36 @@ class WC_Discounts {
 			 */
 			foreach ( $items_to_apply as $item ) {
 				for ( $i = 0; $i < $item->quantity; $i ++ ) {
-					$amount_discounted += $this->add_item_discount( $item, 1 );
+					$discounted_amount      =  $this->add_item_discount( $item, 1 );
+					$return['discount']     += $discounted_amount;
+					$return['discount_tax'] += $this->get_item_discount_tax( $item, $discounted_amount );
 
-					if ( $amount_discounted >= $cart_discount ) {
+					if ( $return['discount'] >= $cart_discount ) {
 						break 2;
 					}
 				}
-				if ( $amount_discounted >= $cart_discount ) {
+				if ( $return['discount'] >= $cart_discount ) {
 					break;
 				}
 			}
 		}
 
-		return $amount_discounted;
+		return $return;
+	}
+
+	/**
+	 * Return discounted tax amount for an item.
+	 *
+	 * @param  object $item
+	 * @param  int $discount_amount
+	 * @return int
+	 */
+	protected function get_item_discount_tax( $item, $discount_amount ) {
+		if ( $item->product->is_taxable() ) {
+			$taxes = WC_Tax::calc_tax( $discount_amount, $item->tax_rates, false );
+			return array_sum( $taxes );
+		}
+		return 0;
 	}
 
 	/*

@@ -16,23 +16,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Cart_Totals class.
  *
- * @todo woocommerce_calculate_totals action for carts.
- * @todo woocommerce_calculated_total filter for carts.
- * @todo record coupon totals and counts for cart.
- * @todo woocommerce_tax_round_at_subtotal option - how should we handle this with precision?
- * @todo Manual discounts.
- *
  * @since 3.2.0
  */
 final class WC_Cart_Totals {
 
 	/**
-	 * Reference to cart or order object.
+	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
 	 * @var array
 	 */
 	protected $object;
+
+	/**
+	 * Reference to customer object.
+	 *
+	 * @since 3.2.0
+	 * @var array
+	 */
+	protected $customer;
 
 	/**
 	 * Line items to calculate.
@@ -75,6 +77,13 @@ final class WC_Cart_Totals {
 	protected $discount_totals = array();
 
 	/**
+	 * Should taxes be calculated?
+	 *
+	 * @var boolean
+	 */
+	protected $calculate_tax = true;
+
+	/**
 	 * Stores totals.
 	 *
 	 * @since 3.2.0
@@ -91,6 +100,7 @@ final class WC_Cart_Totals {
 		'taxes'               => array(),
 		'tax_total'           => 0,
 		'shipping_total'      => 0,
+		'shipping_taxes'      => array(),
 		'shipping_tax_total'  => 0,
 		'discounts_total'     => 0,
 		'discounts_tax_total' => 0,
@@ -101,9 +111,11 @@ final class WC_Cart_Totals {
 	 *
 	 * @since 3.2.0
 	 * @param object $cart Cart object to calculate totals for.
+	 * @param object $customer Customer who owns this cart.
 	 */
-	public function __construct( &$cart = null ) {
-		$this->object = $cart;
+	public function __construct( &$cart = null, &$customer = null ) {
+		$this->object        = $cart;
+		$this->calculate_tax = wc_tax_enabled() && ! $customer->get_is_vat_exempt();
 
 		if ( is_a( $cart, 'WC_Cart' ) ) {
 			$this->calculate();
@@ -111,7 +123,7 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Run all calculations methods on the given items in sequence. @todo More documentation, and add other calculation methods for taxes and totals only?
+	 * Run all calculations methods on the given items in sequence.
 	 *
 	 * @since 3.2.0
 	 */
@@ -170,6 +182,15 @@ final class WC_Cart_Totals {
 	}
 
 	/**
+	 * Should we round at subtotal level only?
+	 *
+	 * @return bool
+	 */
+	protected function round_at_subtotal() {
+		return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+	}
+
+	/**
 	 * Handles a cart or order object passed in for calculation. Normalises data
 	 * into the same format for use by this class.
 	 *
@@ -192,6 +213,7 @@ final class WC_Cart_Totals {
 			$item->quantity                = $cart_item['quantity'];
 			$item->subtotal                = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
 			$item->product                 = $cart_item['data'];
+			$item->tax_rates               = $this->get_item_tax_rates( $item );
 			$this->items[ $cart_item_key ] = $item;
 		}
 	}
@@ -211,9 +233,13 @@ final class WC_Cart_Totals {
 			$fee->object = $fee_object;
 			$fee->total  = wc_add_number_precision_deep( $fee->object->amount );
 
-			if ( wc_tax_enabled() && $fee->object->taxable ) {
-				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class ), false );
+			if ( $this->calculate_tax && $fee->object->taxable ) {
+				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class, $this->customer ), false );
 				$fee->total_tax = array_sum( $fee->taxes );
+
+				if ( ! $this->round_at_subtotal() ) {
+					$fee->total_tax = wc_round_tax_total( $fee->total_tax, 0 );
+				}
 			}
 
 			$this->fees[ $fee_key ] = $fee;
@@ -234,7 +260,12 @@ final class WC_Cart_Totals {
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes );
 			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ) );
-			$this->shipping[ $key ]   = $shipping_line;
+
+			if ( ! $this->round_at_subtotal() ) {
+				$shipping_line->total_tax = wc_round_tax_total( $shipping_line->total_tax, 0 );
+			}
+
+			$this->shipping[ $key ] = $shipping_line;
 		}
 	}
 
@@ -260,9 +291,8 @@ final class WC_Cart_Totals {
 	 */
 	protected function adjust_non_base_location_price( $item ) {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->tax_class );
-		$item_tax_rates = $this->get_item_tax_rates( $item );
 
-		if ( $item_tax_rates !== $base_tax_rates ) {
+		if ( $item->tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax.
 			$taxes                    = WC_Tax::calc_tax( $item->subtotal, $base_tax_rates, true, true );
 
@@ -292,7 +322,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function get_item_tax_rates( $item ) {
 		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class() );
+		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->customer );
 	}
 
 	/**
@@ -379,9 +409,13 @@ final class WC_Cart_Totals {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
 			$item->total_tax = 0;
 
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
-				$item->taxes     = WC_Tax::calc_tax( $item->total, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+			if ( $this->calculate_tax && $item->product->is_taxable() ) {
+				$item->taxes     = WC_Tax::calc_tax( $item->total, $item->tax_rates, $item->price_includes_tax );
 				$item->total_tax = array_sum( $item->taxes );
+
+				if ( ! $this->round_at_subtotal() ) {
+					$item->total_tax = wc_round_tax_total( $item->total_tax, 0 );
+				}
 
 				if ( $item->price_includes_tax ) {
 					$item->total = $item->total - $item->total_tax;
@@ -417,9 +451,13 @@ final class WC_Cart_Totals {
 			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 				$item           = $this->adjust_non_base_location_price( $item );
 			}
-			if ( wc_tax_enabled() && $item->product->is_taxable() ) {
-				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $this->get_item_tax_rates( $item ), $item->price_includes_tax );
+			if ( $this->calculate_tax && $item->product->is_taxable() ) {
+				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
 				$item->subtotal_tax = array_sum( $subtotal_taxes );
+
+				if ( ! $this->round_at_subtotal() ) {
+					$item->subtotal_tax = wc_round_tax_total( $item->subtotal_tax, 0 );
+				}
 
 				if ( $item->price_includes_tax ) {
 					$item->subtotal = $item->subtotal - $item->subtotal_tax;
@@ -452,16 +490,19 @@ final class WC_Cart_Totals {
 		$this->totals['discounts_total'] = array_sum( $this->discount_totals );
 
 		// See how much tax was 'discounted'.
-		if ( wc_tax_enabled() ) {
+		if ( $this->calculate_tax ) {
 			foreach ( $this->discount_totals as $cart_item_key => $discount ) {
 				$item = $this->items[ $cart_item_key ];
 				if ( $item->product->is_taxable() ) {
-					$tax_rates                            = $this->get_item_tax_rates( $item );
-					$taxes                                = WC_Tax::calc_tax( $discount, $tax_rates, false );
-					$this->totals['discounts_tax_total'] += array_sum( $taxes );
+					$taxes                                = WC_Tax::calc_tax( $discount, $item->tax_rates, false );
+					$this->totals['discounts_tax_total'] += $this->round_at_subtotal() ? array_sum( $taxes ) : wc_round_tax_total( array_sum( $taxes ), 0 );
 				}
 			}
 		}
+
+		$applied_coupons                           = $discounts->get_applied_coupons();
+		$this->object->coupon_discount_amounts     = $applied_coupons['discount'];
+		$this->object->coupon_discount_tax_amounts = $applied_coupons['discount_tax'];
 	}
 
 	/**
@@ -491,9 +532,11 @@ final class WC_Cart_Totals {
 	protected function calculate_shipping_totals() {
 		$this->set_shipping();
 		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
+		$this->set_total( 'shipping_taxes', array_sum( wp_list_pluck( $this->shipping, 'taxes' ) ) );
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
 
 		$this->object->shipping_total     = $this->get_total( 'shipping_total' );
+		$this->object->shipping_taxes     = $this->get_total( 'shipping_taxes' );
 		$this->object->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
 	}
 
@@ -507,7 +550,19 @@ final class WC_Cart_Totals {
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) ) );
 
-		$this->object->tax_total = $this->get_total( 'tax_total' );
-		$this->object->total     = $this->get_total( 'total' );
+		// Add totals to cart object.
+		$this->object->taxes          = $this->get_total( 'taxes' );
+		$this->object->shipping_taxes = $this->get_total( 'shipping_taxes' );
+		$this->object->tax_total      = $this->get_total( 'tax_total' );
+		$this->object->total          = $this->get_total( 'total' );
+
+		// Allow plugins to hook and alter totals before final total is calculated.
+		if ( has_action( 'woocommerce_calculate_totals' ) ) {
+			do_action( 'woocommerce_calculate_totals', $this->object );
+		}
+
+		// Allow plugins to filter the grand total, and sum the cart totals in case of modifications.
+		$totals_to_sum       = wc_add_number_precision_deep( array( $this->object->cart_contents_total, $this->object->tax_total, $this->object->shipping_tax_total, $this->object->shipping_total, $this->object->fee_total ) );
+		$this->object->total = max( 0, apply_filters( 'woocommerce_calculated_total', wc_remove_number_precision( round( array_sum( $totals_to_sum ) ) ), $this->object ) );
 	}
 }

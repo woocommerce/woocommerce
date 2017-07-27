@@ -216,11 +216,12 @@ function wc_trim_zeros( $price ) {
 /**
  * Round a tax amount.
  *
- * @param mixed $tax
+ * @param  double $tax Amount to round.
+ * @param  int    $dp DP to round. Defaults to wc_get_price_decimals.
  * @return double
  */
-function wc_round_tax_total( $tax ) {
-	$dp = wc_get_price_decimals();
+function wc_round_tax_total( $tax, $dp = null ) {
+	$dp = is_null( $dp ) ? wc_get_price_decimals() : absint( $dp );
 
 	// @codeCoverageIgnoreStart
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
