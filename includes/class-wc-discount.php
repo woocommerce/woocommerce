@@ -85,7 +85,7 @@ class WC_Discount extends WC_Data {
 			$this->set_prop( 'amount', $amount );
 			$this->set_discount_type( 'percent' );
 		} else {
-			$this->set_prop( 'amount', wc_format_decimal( $amount ) );
+			$this->set_prop( 'amount', wc_format_decimal( $raw_amount ) );
 		}
 	}
 
@@ -99,6 +99,14 @@ class WC_Discount extends WC_Data {
 		return $this->get_prop( 'discount_type', $context );
 	}
 
+	public function get_discount_amount( $total ) {
+		if ( 'percent' === $this->get_discount_type() ) {
+			return $this->get_amount() * ( $total / 100 );
+		} else {
+			return min( absint( wc_add_number_precision( $this->get_amount() ) ), $total );
+		}
+	}
+
 	/**
 	 * Set discount type.
 	 *
@@ -106,7 +114,7 @@ class WC_Discount extends WC_Data {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_discount_type( $discount_type ) {
-		if ( ! in_array( $discount_type, array( 'percent', 'fixed_cart' ) ) {
+		if ( ! in_array( $discount_type, array( 'percent', 'fixed_cart' ) ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
 		}
 		$this->set_prop( 'discount_type', $discount_type );

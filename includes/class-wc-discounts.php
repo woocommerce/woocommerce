@@ -155,12 +155,14 @@ class WC_Discounts {
 			}
 		}
 
-		if ( strstr( $raw_discount, '%' ) ) {
-			$discount       = absint( rtrim( $raw_discount, '%' ) );
-			$discount_total = $discount * ( $total_to_discount / 100 );
+		if ( is_a( $raw_discount, 'WC_Discount' ) ) {
+			$discount = $raw_discount;
 		} else {
-			$discount_total = min( absint( wc_add_number_precision( $raw_discount ) ), $total_to_discount );
+			$discount = new WC_Discount;
+			$discount->set_amount( $raw_discount );
 		}
+
+		$discount_total = $discount->get_discount_amount( $total_to_discount );
 
 		$discount_id    = '';
 		$index          = 1;
