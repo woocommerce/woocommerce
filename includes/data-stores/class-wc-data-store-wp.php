@@ -418,4 +418,14 @@ class WC_Data_Store_WP {
 
 		return $wp_query_args;
 	}
+
+	/**
+	 * Return list of internal meta keys.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_internal_meta_keys() {
+		return $this->internal_meta_keys;
+	}
 }
