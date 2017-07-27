@@ -24,9 +24,9 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 				'taxes'              => array(),
 				'discounted_price'   => 0,
 			);
-			$item->cart_item         = $cart_item;
+			$item->object            = $cart_item;
 			$item->quantity          = $cart_item['quantity'];
-			$item->price             = $cart_item['data']->get_price() * $precision * $cart_item['quantity'];
+			$item->subtotal          = $cart_item['data']->get_price() * $precision * $cart_item['quantity'];
 			$item->product           = $cart_item['data'];
 			$item->tax_rates         = WC_Tax::get_rates( $item->product->get_tax_class() );
 			$items[ $cart_item_key ] = $item;
@@ -104,7 +104,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->assertEquals( array( 'test' => array( 'discount' => 5, 'discount_tax' => 0 ), 'test2' => array( 'discount' => 2.50, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
 
 		$discounts->apply_coupon( $coupon );
-		$this->assertEquals( array( 'test' => array( 'discount' => 6.25, 'discount_tax' => 0 ), 'test2' => array( 'discount' => 5, 'discount_tax' => 2.50 ) ), $discounts->get_applied_coupons() );
+		$this->assertEquals( array( 'test' => array( 'discount' => 6.25, 'discount_tax' => 0 ), 'test2' => array( 'discount' => 2.50, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
 
 		// Test different coupon types.
 		WC()->cart->empty_cart();

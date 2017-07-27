@@ -188,8 +188,10 @@ class WC_Discounts {
 
 						// Store totals.
 						$this->discounts[ $item->key ]                                += $discount;
-						$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
-						$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+						if ( $coupon ) {
+							$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
+							$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+						}
 					}
 				}
 				break;
@@ -277,8 +279,6 @@ class WC_Discounts {
 	protected function apply_percentage_discount( $items_to_apply, $amount, $coupon = null ) {
 		$total_discount = 0;
 
-		var_dump($items_to_apply);
-
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
 			$discounted_price  = $this->get_discounted_price_in_cents( $item );
@@ -294,8 +294,10 @@ class WC_Discounts {
 			// Store totals.
 			$total_discount                                               += $discount;
 			$this->discounts[ $item->key ]                                += $discount;
-			$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
-			$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+			if ( $coupon ) {
+				$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
+				$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+			}
 		}
 		return $total_discount;
 	}
@@ -327,8 +329,10 @@ class WC_Discounts {
 			// Store totals.
 			$total_discount                                               += $discount;
 			$this->discounts[ $item->key ]                                += $discount;
-			$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
-			$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+			if ( $coupon ) {
+				$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
+				$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+			}
 		}
 		return $total_discount;
 	}
@@ -363,7 +367,7 @@ class WC_Discounts {
 			}
 
 		} elseif ( $cart_discount > 0 ) {
-			$total_discounted = $this->apply_fixed_cart_discount_remainder( $items_to_apply, $cart_discount );
+			$total_discounted = $this->apply_fixed_cart_discount_remainder( $items_to_apply, $cart_discount, $coupon );
 		}
 		return $total_discount;
 	}
@@ -373,11 +377,12 @@ class WC_Discounts {
 	 * until the amount is expired, discounting 1 cent at a time.
 	 *
 	 * @since 3.2.0
-	 * @param array $items_to_apply Array of items to apply the coupon to.
-	 * @param int   $cart_discount Fixed discount amount to apply.
+	 * @param  array     $items_to_apply Array of items to apply the coupon to.
+	 * @param  int       $cart_discount Fixed discount amount to apply.
+	 * @param  WC_Coupon $coupon Coupon object if appliable. Passed through filters.
 	 * @return int Total discounted.
 	 */
-	protected function apply_fixed_cart_discount_remainder( $items_to_apply, $remaining_discount ) {
+	protected function apply_fixed_cart_discount_remainder( $items_to_apply, $remaining_discount, $coupon = null ) {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {
@@ -395,14 +400,16 @@ class WC_Discounts {
 				// Store totals.
 				$total_discount                                               += $discount;
 				$this->discounts[ $item->key ]                                += $discount;
-				$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
-				$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+				if ( $coupon ) {
+					$this->applied_coupons[ $coupon->get_code() ]['discount']     += $discount;
+					$this->applied_coupons[ $coupon->get_code() ]['discount_tax'] += $discount_tax;
+				}
 
-				if ( $total_discount >= $cart_discount ) {
+				if ( $total_discount >= $remaining_discount ) {
 					break 2;
 				}
 			}
-			if ( $total_discount >= $cart_discount ) {
+			if ( $total_discount >= $remaining_discount ) {
 				break;
 			}
 		}
