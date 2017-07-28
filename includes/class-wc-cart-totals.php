@@ -513,7 +513,7 @@ final class WC_Cart_Totals {
 					$item = $this->items[ $item_key ];
 
 					if ( $item->product->is_taxable() ) {
-						$item_tax                                     = array_sum( WC_Tax::calc_tax( $discount, $item->tax_rates, false ) );
+						$item_tax                                     = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, false ) );
 						$item_taxes                                  += $item_tax;
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
 					}
