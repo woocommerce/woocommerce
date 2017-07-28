@@ -859,7 +859,7 @@ class WC_Discounts {
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 
-			if ( ! apply_filters( 'woocommerce_discount_is_coupon_valid', true, $coupon, $this ) ) {
+			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
 			}
 		} catch ( Exception $e ) {
