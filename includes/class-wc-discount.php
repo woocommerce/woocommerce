@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version 3.2.0
  * @since   3.2.0
  */
-class WC_Discount extends WC_Data {
+class WC_Discount {
 
 	/**
 	 * Data array, with defaults.
@@ -21,135 +21,62 @@ class WC_Discount extends WC_Data {
 	 * @var array
 	 */
 	protected $data = array(
-		'coupon_code' => '',
-		'discounts' => array(), // Array of discounts. Keys for item ids, values for the discount amount.
-		'amount'        => 0,
-		'discount'      => 0,
-		'type' => 'fixed',
+		'amount'         => 0, // Discount amount.
+		'discount_type'           => 'fixed', // Fixed, percent, or coupon.
+		'discount_total' => 0,
 	);
-
-	/**
-	 * Checks the coupon type.
-	 * @param  string $type Array or string of types
-	 * @return bool
-	 */
-	public function is_type( $type ) {
-		return ( $this->get_discount_type() === $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
-	}
-
-	/**
-	 * Valid discount types.
-	 *
-	 * @return array
-	 */
-	protected function get_valid_discount_types() {
-		return array( 'fixed', 'percent', 'coupon' );
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_discount_get_';
-	}
-
-	/**
-	 * Returns the ID of this dicount.
-	 *
-	 * @return string
-	 */
-	public function get_id() {
-		return $this->id;
-	}
-
-	/**
-	 * Discount ID.
-	 *
-	 * @param string $id
-	 */
-	public function set_id( $id ) {
-		$this->id = $id;
-	}
 
 	/**
 	 * Get discount amount.
 	 *
-	 * @param  string $context
-	 * @return float
+	 * @return int
 	 */
-	public function get_amount( $context = 'view' ) {
-		return $this->get_prop( 'amount', $context );
+	public function get_amount() {
+		return $this->data['amount'];
 	}
 
 	/**
 	 * Discount amount - either fixed or percentage.
 	 *
-	 * @param string $raw_amount
+	 * @param string $raw_amount Amount discount gives.
 	 */
 	public function set_amount( $raw_amount ) {
-		if ( strstr( $raw_amount, '%' ) ) {
-			$amount = absint( rtrim( $raw_amount, '%' ) );
-			$this->set_prop( 'amount', $amount );
-			$this->set_discount_type( 'percent' );
-		} else {
-			$this->set_prop( 'amount', wc_format_decimal( $raw_amount ) );
-		}
+		$this->data['amount'] = wc_format_decimal( $raw_amount );
 	}
 
 	/**
 	 * Get discount type.
 	 *
-	 * @param  string $context
 	 * @return string
 	 */
-	public function get_type( $context = 'view' ) {
-		return $this->get_prop( 'type', $context );
+	public function get_discount_type() {
+		return $this->data['discount_type'];
 	}
 
 	/**
 	 * Set discount type.
 	 *
-	 * @param  string $discount_type
-	 * @throws WC_Data_Exception
+	 * @param string $discount_type Type of discount.
 	 */
-	public function set_type( $discount_type ) {
-		if ( ! in_array( $discount_type, $this->get_valid_discount_types() ) ) {
-			$this->error( 'invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
-		}
-		$this->set_prop( 'type', $discount_type );
+	public function set_discount_type( $discount_type ) {
+		$this->data['discount_type'] = $discount_type;
 	}
 
 	/**
-	 * Amount of discount this has given in total cents.
-	 *
-	 * @param int $total
-	 */
-	public function set_discount_total( $total ) {
-		$this->set_prop( 'discount', absint( $total ) );
-	}
-
-	/**
-	 * Get amount of discount this has in cents.
+	 * Get discount total.
 	 *
 	 * @return int
 	 */
-	public function get_discount_total( $context = 'view' ) {
-		return $this->get_prop( 'discount', $context );
+	public function get_discount_total() {
+		return $this->data['discount_total'];
 	}
 
 	/**
-	 * Calculates the amount of negative tax to apply for this discount, since
-	 * discounts are applied before tax.
+	 * Discount total.
 	 *
-	 * For percent discounts this is simply a percent of each cart item's tax.
-	 *
-	 * For fixed discounts, the taxes are calculated proportionally so the
-	 * discount is fairly split between items.
-	 *
-	 * @todo Should this bere here?
+	 * @param string $total Total discount applied.
 	 */
-	public function calculate_negative_taxes() {}
-
+	public function set_discount_total( $total ) {
+		$this->data['discount_total'] = wc_format_decimal( $total );
+	}
 }

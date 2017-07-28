@@ -497,35 +497,47 @@ final class WC_Cart_Totals {
 			$discounts->apply_discount( $coupon );
 		}
 
-		$this->discount_totals           = $discounts->get_discounts( true );
-		$this->totals['discounts_total'] = array_sum( $this->discount_totals );
+		$this->discount_totals                 = $discounts->get_discounts_by_item( true );
+		$this->totals['discounts_total']       = array_sum( $this->discount_totals );
+		$this->object->coupon_discount_amounts = $discounts->get_discounts_by_coupon();
 
-		// See how much tax was 'discounted'.
+		// See how much tax was 'discounted' per item and per coupon.
 		if ( $this->calculate_tax ) {
-			foreach ( $this->discount_totals as $cart_item_key => $discount ) {
-				$item = $this->items[ $cart_item_key ];
-				if ( $item->product->is_taxable() ) {
-					$taxes                                = WC_Tax::calc_tax( $discount, $item->tax_rates, false );
-					$this->totals['discounts_tax_total'] += $this->round_at_subtotal() ? array_sum( $taxes ) : wc_round_tax_total( array_sum( $taxes ), 0 );
+			$coupon_discount_tax_amounts = array();
+			$item_taxes                  = 0;
+
+			foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
+				$coupon_discount_tax_amounts[ $coupon_code ] = 0;
+
+				foreach ( $coupon_discounts as $item_key => $item_discount ) {
+					$item = $this->items[ $item_key ];
+
+					if ( $item->product->is_taxable() ) {
+						$item_tax                                     = array_sum( WC_Tax::calc_tax( $discount, $item->tax_rates, false ) );
+						$item_taxes                                  += $item_tax;
+						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
+					}
 				}
 			}
+
+			$this->totals['discounts_tax_total']       = $item_taxes;
+			$this->object->coupon_discount_tax_amounts = $coupon_discount_tax_amounts;
 		}
+	}
 
-		$applied_coupons                           = $discounts->get_applied_coupons();
-		$this->object->coupon_discount_amounts     = wp_list_pluck( $applied_coupons, 'discount' );
-
-
-
-
-
-
-
-
-
-
-
-
-		$this->object->coupon_discount_tax_amounts = wp_list_pluck( $applied_coupons, 'discount_tax' );
+	/**
+	 * Return discounted tax amount for an item.
+	 *
+	 * @param  object $item
+	 * @param  int $discount_amount
+	 * @return int
+	 */
+	protected function get_item_discount_tax( $item, $discount_amount ) {
+		if ( $item->product->is_taxable() ) {
+			$taxes = WC_Tax::calc_tax( $discount_amount, $item->tax_rates, false );
+			return array_sum( $taxes );
+		}
+		return 0;
 	}
 
 	/**

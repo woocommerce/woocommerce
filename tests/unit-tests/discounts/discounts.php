@@ -49,59 +49,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * test get_applied_coupons
-	 */
-	public function test_get_applied_coupons() {
-		$discounts = new WC_Discounts();
-		$product   = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$discounts->set_items_from_cart( WC()->cart );
-
-		// Test applying multiple coupons and getting totals.
-		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
-		$coupon->set_amount( 50 );
-		$coupon->set_discount_type( 'percent' );
-		$coupon->save();
-		$discounts->apply_discount( $coupon );
-
-		$this->assertEquals( array( 'test' => array( 'discount' => 5, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
-
-		$coupon2 = WC_Helper_Coupon::create_coupon( 'test2' );
-		$coupon2->set_code( 'test2' );
-		$coupon2->set_amount( 50 );
-		$coupon2->set_discount_type( 'percent' );
-		$coupon->save();
-		$discounts->apply_discount( $coupon2 );
-
-		$this->assertEquals( array( 'test' => array( 'discount' => 5, 'discount_tax' => 0 ), 'test2' => array( 'discount' => 2.50, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
-
-		$discounts->apply_discount( $coupon );
-		$this->assertEquals( array( 'test' => array( 'discount' => 6.25, 'discount_tax' => 0 ), 'test2' => array( 'discount' => 2.50, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
-
-		// Test different coupon types.
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 2 );
-		$coupon->set_discount_type( 'fixed_product' );
-		$coupon->set_amount( 2 );
-		$coupon->save();
-		$discounts->set_items_from_cart( WC()->cart );
-		$discounts->apply_discount( $coupon );
-		$this->assertEquals( array( 'test' => array( 'discount' => 4, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
-
-		$coupon->set_discount_type( 'fixed_cart' );
-		$coupon->save();
-		$discounts->set_items_from_cart( WC()->cart );
-		$discounts->apply_discount( $coupon );
-		$this->assertEquals( array( 'test' => array( 'discount' => 2, 'discount_tax' => 0 ) ), $discounts->get_applied_coupons() );
-
-		// Cleanup.
-		WC()->cart->empty_cart();
-		$product->delete( true );
-		$coupon->delete( true );
-		$coupon2->delete( true );
-	}
-
-	/**
 	 * Test applying a coupon (make sure it changes prices).
 	 */
 	public function test_apply_coupon() {
