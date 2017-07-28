@@ -357,7 +357,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 				$discounts->apply_discount( $coupon );
 			}
 
-			$this->assertEquals( $test['expected_total_discount'], array_sum( $discounts->get_discounts_by_item() ), 'Test case ' . $test_index . ' failed (' . print_r( $test, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
+			$all_discounts = $discounts->get_discounts();
+			$this->assertEquals( $test['expected_total_discount'], array_sum( $all_discounts['test'] ), 'Test case ' . $test_index . ' failed (' . print_r( $test, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
 
 			// Clean.
 			WC()->cart->empty_cart();
@@ -434,18 +435,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$discounts->apply_discount( '5' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-5'] );
+		$this->assertEquals( 5, $all_discounts['discount-500'] );
 
 		$discounts->apply_discount( '5' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-5'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 5, $all_discounts['discount-5-2'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-500'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-500-2'], print_r( $all_discounts, true ) );
 
 		$discounts->apply_discount( '15' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-5'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 5, $all_discounts['discount-5-2'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 10, $all_discounts['discount-15'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-500'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 5, $all_discounts['discount-500-2'], print_r( $all_discounts, true ) );
+		$this->assertEquals( 10, $all_discounts['discount-1500'], print_r( $all_discounts, true ) );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
