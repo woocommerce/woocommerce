@@ -4,11 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A single discount.
+ * A discount.
  *
- * Represents a fixed or percent based discount at cart level. Extended by cart
- * and order discounts since they share the same logic for things like tax
- * calculation.
+ * Represents a fixed, percent or coupon based discount calculated by WC_Discounts class.
  *
  * @author  Automattic
  * @package WooCommerce/Classes
@@ -23,9 +21,11 @@ class WC_Discount extends WC_Data {
 	 * @var array
 	 */
 	protected $data = array(
+		'coupon_code' => '',
+		'discounts' => array(), // Array of discounts. Keys for item ids, values for the discount amount.
 		'amount'        => 0,
 		'discount'      => 0,
-		'discount_type' => 'fixed_cart',
+		'type' => 'fixed',
 	);
 
 	/**
@@ -35,6 +35,15 @@ class WC_Discount extends WC_Data {
 	 */
 	public function is_type( $type ) {
 		return ( $this->get_discount_type() === $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
+	}
+
+	/**
+	 * Valid discount types.
+	 *
+	 * @return array
+	 */
+	protected function get_valid_discount_types() {
+		return array( 'fixed', 'percent', 'coupon' );
 	}
 
 	/**
@@ -95,8 +104,8 @@ class WC_Discount extends WC_Data {
 	 * @param  string $context
 	 * @return string
 	 */
-	public function get_discount_type( $context = 'view' ) {
-		return $this->get_prop( 'discount_type', $context );
+	public function get_type( $context = 'view' ) {
+		return $this->get_prop( 'type', $context );
 	}
 
 	/**
@@ -105,11 +114,11 @@ class WC_Discount extends WC_Data {
 	 * @param  string $discount_type
 	 * @throws WC_Data_Exception
 	 */
-	public function set_discount_type( $discount_type ) {
-		if ( ! in_array( $discount_type, array( 'percent', 'fixed_cart' ) ) ) {
-			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
+	public function set_type( $discount_type ) {
+		if ( ! in_array( $discount_type, $this->get_valid_discount_types() ) ) {
+			$this->error( 'invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
 		}
-		$this->set_prop( 'discount_type', $discount_type );
+		$this->set_prop( 'type', $discount_type );
 	}
 
 	/**
@@ -129,11 +138,6 @@ class WC_Discount extends WC_Data {
 	public function get_discount_total( $context = 'view' ) {
 		return $this->get_prop( 'discount', $context );
 	}
-
-	/**
-	 * Array of negative taxes. @todo should this be here?
-	 */
-	public function set_taxes() {}
 
 	/**
 	 * Calculates the amount of negative tax to apply for this discount, since

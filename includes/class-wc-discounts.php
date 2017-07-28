@@ -27,7 +27,7 @@ class WC_Discounts {
 	/**
 	 * An array of discounts which have been applied to items.
 	 *
-	 * @var array
+	 * @var WC_Discount[]
 	 */
 	protected $discounts = array();
 
@@ -48,10 +48,40 @@ class WC_Discounts {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $items Items to discount.
+	 * @param array $object Cart or order object.
 	 */
-	public function __construct( $items = array() ) {
-		$this->set_items( $items );
+	public function __construct( $object = array() ) {
+		if ( is_a( $object, 'WC_Cart' ) ) {
+			$this->set_items_from_cart( $object );
+		} else {
+			// @todo accept order objects.
+		}
+	}
+
+	/**
+	 * Normalise cart/order items which will be discounted.
+	 *
+	 * @since 3.2.0
+	 * @param array $cart Cart object.
+	 */
+	public function set_items_from_cart( $cart ) {
+		$this->items = array();
+
+		foreach ( $cart->get_cart() as $key => $cart_item ) {
+			$item                = new stdClass();
+			$item->key           = $key;
+			$item->object        = $cart_item;
+			$item->product       = $cart_item['data'];
+			$item->quantity      = $cart_item['quantity'];
+			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
+			$item->tax_class     = $item->product->get_tax_class();
+			$item->tax_rates     = WC_Tax::get_rates( $item->tax_class, $cart->get_customer() );
+			$this->items[ $key ] = $item;
+		}
+
+		uasort( $this->items, array( $this, 'sort_by_price' ) );
+
+		$this->discounts = array_merge( array_fill_keys( array_keys( $this->items ), 0 ), $this->discounts );
 	}
 
 	/**
@@ -84,7 +114,7 @@ class WC_Discounts {
 	 */
 	public function get_discounts( $in_cents = false ) {
 
-		$discounts = $in_cents ? $this->discounts : wc_remove_number_precision_deep ( $this->discounts );
+		$discounts = $in_cents ? $this->discounts : wc_remove_number_precision_deep( $this->discounts );
 
 		$manual = array();
 		foreach ( $this->manual_discounts as $manual_discount ) {
@@ -132,35 +162,45 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Set cart/order items which will be discounted.
+	 * Apply a discount to all items.
 	 *
-	 * @since 3.2.0
-	 * @param array $items List items.
-	 */
-	public function set_items( $items ) {
-		$this->items           = array();
-		$this->discounts       = array();
-		$this->applied_coupons = array();
-
-		if ( ! empty( $items ) && is_array( $items ) ) {
-			foreach ( $items as $key => $item ) {
-				$this->items[ $key ]        = $item;
-				$this->items[ $key ]->key   = $key;
-				$this->items[ $key ]->price = $item->subtotal;
-			}
-			$this->discounts = array_fill_keys( array_keys( $items ), 0 );
-		}
-
-		uasort( $this->items, array( $this, 'sort_by_price' ) );
-	}
-
-	/**
-	 * Allows a discount to be applied to the items programmatically without a coupon.
-	 *
-	 * @param  string $raw_discount Discount amount either fixed or percentage.
-	 * @return int discounted amount in cents.
+	 * @param  string|object $raw_discount Accepts a string (fixed or percent discounts), WC_Discount object, or WC_Coupon object.
+	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
 	public function apply_discount( $raw_discount ) {
+		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
+			return $this->apply_coupon( $raw_discount );
+		}
+
+		$discount = false;
+
+		if ( is_a( $raw_discount, 'WC_Discount' ) ) {
+			$discount = $raw_discount;
+		} elseif ( strstr( $raw_discount, '%' ) ) {
+			$discount = new WC_Discount;
+			$discount->set_type( 'percent' );
+			$discount->set_amount( trim( $raw_discount, '%' ) );
+		} elseif ( 0 < absint( $raw_discount ) ) {
+			$discount = new WC_Discount;
+			$discount->set_type( 'fixed' );
+			$discount->set_amount( absint( $raw_discount ) );
+		}
+
+		if ( ! $discount ) {
+			return new WP_Error( 'invalid_coupon', __( 'Invalid discount', 'woocommerce' ) );
+		}
+
+
+
+
+
+
+
+
+
+
+
+
 		// Get total item cost after any extra discounts.
 		$total_to_discount = 0;
 
@@ -214,11 +254,7 @@ class WC_Discounts {
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	public function apply_coupon( $coupon ) {
-		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
-			return false;
-		}
-
+	protected function apply_coupon( $coupon ) {
 		$is_coupon_valid = $this->is_coupon_valid( $coupon );
 
 		if ( is_wp_error( $is_coupon_valid ) ) {

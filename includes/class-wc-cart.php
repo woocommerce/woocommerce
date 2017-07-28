@@ -1099,6 +1099,16 @@ class WC_Cart {
 	}
 
 	/**
+	 * Get cart's owner.
+	 *
+	 * @since  3.2.0
+	 * @return WC_Customer
+	 */
+	public function get_customer() {
+		return WC()->customer;
+	}
+
+	/**
 	 * Calculate totals for the items in the cart.
 	 */
 	public function calculate_totals() {
@@ -1396,7 +1406,7 @@ class WC_Cart {
 			}
 
 			// VAT exemption done at this point - so all totals are correct before exemption
-			if ( WC()->customer->get_is_vat_exempt() ) {
+			if ( $this->get_customer()->get_is_vat_exempt() ) {
 				$this->remove_taxes();
 			}
 
@@ -1412,7 +1422,7 @@ class WC_Cart {
 			$this->tax_total = WC_Tax::get_tax_total( $this->taxes );
 
 			// VAT exemption done at this point - so all totals are correct before exemption
-			if ( WC()->customer->get_is_vat_exempt() ) {
+			if ( $this->get_customer()->get_is_vat_exempt() ) {
 				$this->remove_taxes();
 			}
 		}
@@ -1533,12 +1543,12 @@ class WC_Cart {
 						'ID' => get_current_user_id(),
 					),
 					'destination'     => array(
-						'country'   => WC()->customer->get_shipping_country(),
-						'state'     => WC()->customer->get_shipping_state(),
-						'postcode'  => WC()->customer->get_shipping_postcode(),
-						'city'      => WC()->customer->get_shipping_city(),
-						'address'   => WC()->customer->get_shipping_address(),
-						'address_2' => WC()->customer->get_shipping_address_2(),
+						'country'   => $this->get_customer()->get_shipping_country(),
+						'state'     => $this->get_customer()->get_shipping_state(),
+						'postcode'  => $this->get_customer()->get_shipping_postcode(),
+						'city'      => $this->get_customer()->get_shipping_city(),
+						'address'   => $this->get_customer()->get_shipping_address(),
+						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'       => $this->get_displayed_subtotal(),
 				),
@@ -1596,8 +1606,8 @@ class WC_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! WC()->customer->has_calculated_shipping() ) {
-				if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
+			if ( ! $this->get_customer()->has_calculated_shipping() ) {
+				if ( ! $this->get_customer()->get_shipping_country() || ( ! $this->get_customer()->get_shipping_state() && ! $this->get_customer()->get_shipping_postcode() ) ) {
 					return false;
 				}
 			}

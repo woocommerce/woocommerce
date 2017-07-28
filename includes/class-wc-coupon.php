@@ -753,6 +753,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->error_message = $valid->get_error_message();
 			return false;
 		}
+
+		return $valid;
 	}
 
 	/**

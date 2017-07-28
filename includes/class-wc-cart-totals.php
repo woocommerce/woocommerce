@@ -110,11 +110,10 @@ final class WC_Cart_Totals {
 	 *
 	 * @since 3.2.0
 	 * @param object $cart Cart object to calculate totals for.
-	 * @param object $customer Customer who owns this cart.
 	 */
-	public function __construct( &$cart = null, &$customer = null ) {
+	public function __construct( &$cart = null ) {
 		$this->object        = $cart;
-		$this->calculate_tax = wc_tax_enabled() && ! $customer->get_is_vat_exempt();
+		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
 
 		if ( is_a( $cart, 'WC_Cart' ) ) {
 			$this->calculate();
@@ -233,7 +232,7 @@ final class WC_Cart_Totals {
 			$fee->total  = wc_add_number_precision_deep( $fee->object->amount );
 
 			if ( $this->calculate_tax && $fee->object->taxable ) {
-				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class, $this->customer ), false );
+				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class, $this->object->get_customer() ), false );
 				$fee->total_tax = array_sum( $fee->taxes );
 
 				if ( ! $this->round_at_subtotal() ) {
@@ -321,7 +320,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function get_item_tax_rates( $item ) {
 		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->customer );
+		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->object->get_customer() );
 	}
 
 	/**
@@ -492,10 +491,10 @@ final class WC_Cart_Totals {
 	protected function calculate_discounts() {
 		$this->set_coupons();
 
-		$discounts = new WC_Discounts( $this->items );
+		$discounts = new WC_Discounts( $this->object );
 
 		foreach ( $this->coupons as $coupon ) {
-			$discounts->apply_coupon( $coupon );
+			$discounts->apply_discount( $coupon );
 		}
 
 		$this->discount_totals           = $discounts->get_discounts( true );
@@ -514,6 +513,18 @@ final class WC_Cart_Totals {
 
 		$applied_coupons                           = $discounts->get_applied_coupons();
 		$this->object->coupon_discount_amounts     = wp_list_pluck( $applied_coupons, 'discount' );
+
+
+
+
+
+
+
+
+
+
+
+
 		$this->object->coupon_discount_tax_amounts = wp_list_pluck( $applied_coupons, 'discount_tax' );
 	}
 
