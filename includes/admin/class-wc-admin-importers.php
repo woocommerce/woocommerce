@@ -230,8 +230,16 @@ class WC_Admin_Importers {
 		if ( 100 === $percent_complete ) {
 			// Clear temp meta.
 			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-			$wpdb->delete( $wpdb->posts, array( 'post_status' => 'importing', 'post_type' => 'product' ) );
-			$wpdb->delete( $wpdb->posts, array( 'post_status' => 'importing', 'post_type' => 'product_variation' ) );
+			$wpdb->query( "
+				DELETE {$wpdb->posts}, {$wpdb->postmeta}, {$wpdb->term_relationships}
+				FROM {$wpdb->posts}
+				LEFT JOIN {$wpdb->term_relationships} ON ( {$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id )
+				LEFT JOIN {$wpdb->postmeta} ON ( {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )
+				LEFT JOIN {$wpdb->term_taxonomy} ON ( {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id )
+				LEFT JOIN {$wpdb->terms} ON ( {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id )
+				WHERE {$wpdb->posts}.post_type IN ( 'product', 'product_variation' )
+				AND {$wpdb->posts}.post_status = 'importing'
+			" );
 
 			// Send success.
 			wp_send_json_success( array(

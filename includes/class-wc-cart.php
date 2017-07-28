@@ -1339,7 +1339,7 @@ class WC_Cart {
 
 			/**
 			 * Store costs + taxes for lines. For tax inclusive prices, we do some extra rounding logic so the stored
-			 * values "add up" when viewing the order in admin. This does have the disadvatage of not being able to
+			 * values "add up" when viewing the order in admin. This does have the disadvantage of not being able to
 			 * recalculate the tax total/subtotal accurately in the future, but it does ensure the data looks correct.
 			 *
 			 * Tax exclusive prices are not affected.

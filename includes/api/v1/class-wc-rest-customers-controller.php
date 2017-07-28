@@ -279,7 +279,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 
 		$response = rest_ensure_response( $users );
 
-		// Store pagation values for headers then unset for count query.
+		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 

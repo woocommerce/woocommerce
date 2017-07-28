@@ -40,7 +40,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'delimiter'        => ',', // CSV delimiter.
 			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
 			'enclosure'        => '"', // The character used to wrap text in the CSV.
-			'escape'           => '\\',
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -55,12 +54,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Read file.
-	 *
-	 * @return array
 	 */
 	protected function read_file() {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
-			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] );
+			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] );
 
 			// Remove BOM signature from the first item.
 			if ( isset( $this->raw_keys[0] ) ) {
@@ -71,7 +68,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				fseek( $handle, (int) $this->params['start_pos'] );
 			}
 
-			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ) ) {
+			while ( false !== ( $row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ) ) ) {
 				$this->raw_data[]                                 = $row;
 				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
@@ -108,8 +105,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Set file mapped keys.
-	 *
-	 * @return array
 	 */
 	protected function set_mapped_keys() {
 		$mapping = $this->params['mapping'];
@@ -186,6 +181,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * If we're not doing an update, create a placeholder product so mapping works
 	 * for rows following this one.
 	 *
+	 * @param  stirng $field
 	 * @return int
 	 */
 	public function parse_id_field( $field ) {
@@ -206,10 +202,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
+			// If row has a SKU, make sure placeholder was not made already.
+			if ( isset( $this->raw_data['sku'] ) && $id = wc_get_product_id_by_sku( $this->raw_data['sku'] ) ) {
+				return $id;
+			}
+
 			$product = new WC_Product_Simple();
 			$product->set_name( 'Import placeholder for ' . $id );
 			$product->set_status( 'importing' );
 			$product->add_meta_data( '_original_id', $id, true );
+
+			// If row has a SKU, make sure placeholder has it too.
+			if ( isset( $this->raw_data['sku'] ) ) {
+				$product->set_sku( $this->raw_data['sku'] );
+			}
 			$id = $product->save();
 		}
 
@@ -217,7 +223,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse reletive comma-delineated field and return product ID.
+	 * Parse relative comma-delineated field and return product ID.
 	 *
 	 * @param string $field Field value.
 	 * @return array
@@ -658,8 +664,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Map and format raw data to known fields.
-	 *
-	 * @return array
 	 */
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formating_callback();

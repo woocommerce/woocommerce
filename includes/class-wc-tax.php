@@ -558,7 +558,7 @@ class WC_Tax {
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-				// If multiple classes are found, use the first one found unless a standard rate item is found. This will be the first listed in the 'additonal tax class' section.
+				// If multiple classes are found, use the first one found unless a standard rate item is found. This will be the first listed in the 'additional tax class' section.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
 					$tax_classes = self::get_tax_class_slugs();
 
@@ -916,7 +916,6 @@ class WC_Tax {
 	 *
 	 * @param  int $tax_rate_id
 	 * @param  string $postcodes String of postcodes separated by ; characters
-	 * @return string
 	 */
 	public static function _update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
 		if ( ! is_array( $postcodes ) ) {
@@ -939,7 +938,6 @@ class WC_Tax {
 	 *
 	 * @param  int $tax_rate_id
 	 * @param  string $cities
-	 * @return string
 	 */
 	public static function _update_tax_rate_cities( $tax_rate_id, $cities ) {
 		if ( ! is_array( $cities ) ) {
@@ -961,8 +959,6 @@ class WC_Tax {
 	 * @param int $tax_rate_id
 	 * @param array $values
 	 * @param string $type
-	 *
-	 * @return string
 	 */
 	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {
 		global $wpdb;

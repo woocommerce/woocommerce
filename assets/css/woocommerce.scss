@@ -1410,6 +1410,46 @@ p.demo_store,
 		font-weight: bold;
 	}
 
+	.woocommerce-order-downloads,
+	.woocommerce-customer-details,
+	.woocommerce-order-details {
+		margin-bottom: 2em;
+
+		*:last-child {
+			margin-bottom: 0;
+		}
+	}
+	.woocommerce-customer-details {
+		address {
+			font-style: normal;
+			margin-bottom: 0;
+			border: 1px solid rgba(0, 0, 0, 0.1);
+			border-bottom-width: 2px;
+			border-right-width: 2px;
+			text-align: left;
+			width: 100%;
+			border-radius: 5px;
+			padding: 6px 12px;
+		}
+		.woocommerce-customer-details--phone,
+		.woocommerce-customer-details--email {
+			margin-bottom: 0;
+			padding-left: 1.5em;
+		}
+		.woocommerce-customer-details--phone::before {
+			@include iconbefore( '\e037' );
+			margin-left: -1.5em;
+			line-height: 1.75;
+			position: absolute;
+		}
+		.woocommerce-customer-details--email::before {
+			@include iconbefore( '\e02d' );
+			margin-left: -1.5em;
+			line-height: 1.75;
+			position: absolute;
+		}
+	}
+
 	/**
 	 * Layered nav widget
 	 */

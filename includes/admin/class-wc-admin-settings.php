@@ -110,7 +110,6 @@ class WC_Admin_Settings {
 
 	/**
 	 * Output messages + errors.
-	 * @return string
 	 */
 	public static function show_messages() {
 		if ( sizeof( self::$errors ) > 0 ) {

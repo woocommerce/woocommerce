@@ -220,7 +220,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
 			WHERE " . implode( ' ', $criteria ) . "
-			ORDER BY zone_order ASC LIMIT 1
+			ORDER BY zone_order ASC, zone_id ASC LIMIT 1
 		" );
 	}
 
@@ -232,7 +232,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	public function get_zones() {
 		global $wpdb;
-		return $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
+		return $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC, zone_id ASC;" );
 	}
 
 

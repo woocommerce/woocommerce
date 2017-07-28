@@ -219,7 +219,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

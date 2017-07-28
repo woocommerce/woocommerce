@@ -293,7 +293,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Item data.
 	 *
-	 * @return WC_Product|WP_Error
 	 * @throws Exception
 	 */
 	protected function set_product_data( &$product, $data ) {
@@ -471,7 +470,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-				// Re-create the attribute to CRUD save and genarate again.
+				// Re-create the attribute to CRUD save and generate again.
 				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
 				$parent_attributes[ $attribute_name ]->set_variation( 1 );
 

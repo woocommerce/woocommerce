@@ -1306,6 +1306,37 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get downloads from all line items for this order.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	public function get_downloadable_items() {
+		$downloads = array();
+
+		foreach ( $this->get_items() as $item ) {
+			if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $item_downloads = $item->get_item_downloads() ) ) {
+				if ( $product = $item->get_product() ) {
+					foreach ( $item_downloads as $file ) {
+						$downloads[] = array(
+							'download_url'        => $file['download_url'],
+							'download_id'         => $file['id'],
+							'product_id'          => $product->get_id(),
+							'product_name'        => $product->get_name(),
+							'download_name'       => $file['name'],
+							'order_id'            => $this->get_id(),
+							'order_key'           => $this->get_order_key(),
+							'downloads_remaining' => $file['downloads_remaining'],
+							'access_expires'      => $file['access_expires'],
+						);
+					}
+				}
+			}
+		}
+		return $downloads;
+ 	}
+
+	/**
 	 * Checks if an order needs payment, based on status and order total.
 	 *
 	 * @return bool

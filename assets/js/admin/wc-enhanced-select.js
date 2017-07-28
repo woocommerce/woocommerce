@@ -196,6 +196,47 @@ jQuery( function( $ ) {
 						});
 					}
 				});
+
+				// Ajax category search boxes
+				$( ':input.wc-category-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = $.extend( {
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   'woocommerce_json_search_categories',
+									security: wc_enhanced_select_params.search_categories_nonce
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id:   term.slug,
+											text: term.formatted_name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					}, getEnhancedSelectFormatString() );
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
+				});
 			})
 
 			// WooCommerce Backbone Modal

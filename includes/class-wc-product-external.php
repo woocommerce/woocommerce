@@ -122,7 +122,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * xternal products cannot be backordered.
+	 * External products cannot be backordered.
 	 *
 	 * @since 3.0.0
 	 * @param string $backorders Options: 'yes', 'no' or 'notify'.

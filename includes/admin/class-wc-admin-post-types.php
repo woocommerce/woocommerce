@@ -586,26 +586,19 @@ class WC_Admin_Post_Types {
 
 				if ( $post->comment_count ) {
 
-					// check the status of the post
-					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
-
-					remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-					$latest_notes = get_comments( array(
-						'post_id'   => $post->ID,
-						'number'    => 1,
-						'status'    => $status,
+					$latest_notes = wc_get_order_notes( array(
+						'order_id' => $post->ID,
+						'limit'    => 1,
+						'orderby'  => 'date_created_gmt',
 					) );
-
-					add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 					$latest_note = current( $latest_notes );
 
-					if ( isset( $latest_note->comment_content ) && 1 == $post->comment_count ) {
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					} elseif ( isset( $latest_note->comment_content ) ) {
+					if ( isset( $latest_note->content ) && 1 == $post->comment_count ) {
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					} elseif ( isset( $latest_note->content ) ) {
 						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} else {
 						/* translators: %d: notes count */
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -1469,7 +1462,15 @@ class WC_Admin_Post_Types {
 		global $wp_query;
 
 		// Category Filtering
-		wc_product_dropdown_categories( array( 'option_select_text' => __( 'Filter by category', 'woocommerce' ) ) );
+		$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( $_GET['product_cat'] ) : false;
+		$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
+		?>
+		<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
+			<?php if ( $current_category_slug && $current_category ) : ?>
+				<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
+			<?php endif; ?>
+		</select>
+		<?php
 
 		// Type filtering
 		$terms   = get_terms( 'product_type' );
@@ -1673,16 +1674,6 @@ class WC_Admin_Post_Types {
 					$query->query_vars['meta_value']    = 'yes';
 					$query->query_vars['meta_key']      = '_virtual';
 				}
-			}
-
-			// Categories
-			if ( isset( $_GET['product_cat'] ) && '0' === $_GET['product_cat'] ) {
-				$query->query_vars['tax_query'][] = array(
-					'taxonomy' => 'product_cat',
-					'field'    => 'id',
-					'terms'    => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
-					'operator' => 'NOT IN',
-				);
 			}
 
 			// Shipping classes
