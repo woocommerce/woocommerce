@@ -28,24 +28,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                             paginate is true, or just an array of values.
  */
 function wc_get_products( $args ) {
-	$args = wp_parse_args( $args, array(
-		'status'         => array( 'draft', 'pending', 'private', 'publish' ),
-		'type'           => array_merge( array_keys( wc_get_product_types() ) ),
-		'parent'         => null,
-		'sku'            => '',
-		'category'       => array(),
-		'tag'            => array(),
-		'limit'          => get_option( 'posts_per_page' ),
-		'offset'         => null,
-		'page'           => 1,
-		'include'        => array(),
-		'exclude'        => array(),
-		'orderby'        => 'date',
-		'order'          => 'DESC',
-		'return'         => 'objects',
-		'paginate'       => false,
-		'shipping_class' => array(),
-	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
 	$map_legacy = array(
