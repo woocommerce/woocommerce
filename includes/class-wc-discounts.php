@@ -128,7 +128,7 @@ class WC_Discounts {
 		$discounts            = $this->discounts;
 		$item_discount_totals = array_shift( $discounts );
 
-		foreach ( $this->discounts as $item_discounts ) {
+		foreach ( $discounts as $item_discounts ) {
 			foreach ( $item_discounts as $item_key => $item_discount ) {
 				$item_discount_totals[ $item_key ] += $item_discount;
 			}

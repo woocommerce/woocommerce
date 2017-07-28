@@ -67,19 +67,19 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon->set_discount_type( 'percent' );
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_discount( $coupon );
-		$this->assertEquals( 9, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+		$this->assertEquals( 9, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Apply a fixed cart coupon.
 		$coupon->set_discount_type( 'fixed_cart' );
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_discount( $coupon );
-		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Apply a fixed product coupon.
 		$coupon->set_discount_type( 'fixed_product' );
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_discount( $coupon );
-		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ) );
+		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
@@ -412,6 +412,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product2->save();
 
 		// Add product to the cart.
+		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 
