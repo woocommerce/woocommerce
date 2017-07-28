@@ -39,15 +39,13 @@ class WC_Discounts {
 	protected $manual_discounts = array();
 
 	/**
-	 * Constructor.
+	 * Constructor. @todo accept order objects.
 	 *
 	 * @param array $object Cart or order object.
 	 */
 	public function __construct( $object = array() ) {
 		if ( is_a( $object, 'WC_Cart' ) ) {
 			$this->set_items_from_cart( $object );
-		} else {
-			// @todo accept order objects.
 		}
 	}
 
@@ -101,7 +99,7 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Get all discount totals. @todo manual - should they just be stored in same array?
+	 * Get all discount totals.
 	 *
 	 * @since  3.2.0
 	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
@@ -150,7 +148,12 @@ class WC_Discounts {
 		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
 	}
 
-	// @todo.
+	/**
+	 * Get an array of manual discounts which have been applied.
+	 *
+	 * @since  3.2.0
+	 * @return WC_Discount[]
+	 */
 	public function get_manual_discounts() {
 		return $this->manual_discounts;
 	}
@@ -200,7 +203,8 @@ class WC_Discounts {
 	/**
 	 * Generate a unique ID for a discount.
 	 *
-	 * @return void
+	 * @param  WC_Discount $discount Discount object.
+	 * @return string
 	 */
 	protected function generate_discount_id( $discount ) {
 		$discount_id    = '';
@@ -379,7 +383,7 @@ class WC_Discounts {
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  int       $amount Amount of discount.
+	 * @param  array     $items_to_apply Array of items to apply the coupon to.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
@@ -463,7 +467,6 @@ class WC_Discounts {
 			if ( $total_discounted > 0 && $total_discounted < $amount ) {
 				$total_discounted = $total_discounted + $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discounted );
 			}
-
 		} elseif ( $amount > 0 ) {
 			$total_discounted = $this->apply_coupon_fixed_cart_remainder( $coupon, $items_to_apply, $amount );
 		}
