@@ -497,7 +497,7 @@ final class WC_Cart_Totals {
 		}
 
 		$this->discount_totals                 = $discounts->get_discounts_by_item( true );
-		$this->totals['discounts_total']       = array_sum( $this->discount_totals );
+		$this->totals['discounts_total']       = ! empty( $this->discount_totals ) ? array_sum( $this->discount_totals ) : 0;
 		$this->object->coupon_discount_amounts = $discounts->get_discounts_by_coupon();
 
 		// See how much tax was 'discounted' per item and per coupon.

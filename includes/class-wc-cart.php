@@ -1126,107 +1126,6 @@ class WC_Cart {
 		$shop_tax_rates = array();
 		$cart           = $this->get_cart();
 
-		/**
-		 * Calculate subtotals for items. This is done first so that discount logic can use the values.
-		 */
-		foreach ( $cart as $cart_item_key => $values ) {
-			$product           = $values['data'];
-			$line_price        = $product->get_price() * $values['quantity'];
-			$line_subtotal     = 0;
-			$line_subtotal_tax = 0;
-
-			/**
-			 * No tax to calculate.
-			 */
-			if ( ! $product->is_taxable() ) {
-
-				// Subtotal is the undiscounted price
-				$this->subtotal += $line_price;
-				$this->subtotal_ex_tax += $line_price;
-
-			/**
-			 * Prices include tax.
-			 *
-			 * To prevent rounding issues we need to work with the inclusive price where possible.
-			 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
-			 * be 8.325 leading to totals being 1p off.
-			 *
-			 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
-			 * afterwards.
-			 *
-			 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
-			 */
-			} elseif ( $this->prices_include_tax ) {
-
-				// Get base tax rates
-				if ( empty( $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] ) ) {
-					$shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-				}
-
-				// Get item tax rates
-				if ( empty( $tax_rates[ $product->get_tax_class() ] ) ) {
-					$tax_rates[ $product->get_tax_class() ] = WC_Tax::get_rates( $product->get_tax_class() );
-				}
-
-				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ];
-				$item_tax_rates = $tax_rates[ $product->get_tax_class() ];
-
-				/**
-				 * ADJUST TAX - Calculations when base tax is not equal to the item tax.
-				 *
-					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
-					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
-					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
-					 */
-				if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-
-					// Work out a new base price without the shop's base tax
-					$taxes                 = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
-
-					// Now we have a new item price (excluding TAX)
-					$line_subtotal         = $line_price - array_sum( $taxes );
-
-					// Now add modified taxes
-					$tax_result            = WC_Tax::calc_tax( $line_subtotal, $item_tax_rates );
-					$line_subtotal_tax     = array_sum( $tax_result );
-
-				/**
-				 * Regular tax calculation (customer inside base and the tax class is unmodified.
-				 */
-				} else {
-
-					// Calc tax normally
-					$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates, true );
-					$line_subtotal_tax     = array_sum( $taxes );
-					$line_subtotal         = $line_price - array_sum( $taxes );
-				}
-
-			/**
-			 * Prices exclude tax.
-			 *
-			 * This calculation is simpler - work with the base, untaxed price.
-			 */
-			} else {
-
-				// Get item tax rates
-				if ( empty( $tax_rates[ $product->get_tax_class() ] ) ) {
-					$tax_rates[ $product->get_tax_class() ] = WC_Tax::get_rates( $product->get_tax_class() );
-				}
-
-				$item_tax_rates        = $tax_rates[ $product->get_tax_class() ];
-
-				// Base tax for line before discount - we will store this in the order data
-				$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates );
-				$line_subtotal_tax     = array_sum( $taxes );
-
-				$line_subtotal         = $line_price;
-			}
-
-			// Add to main subtotal
-			$this->subtotal        += $line_subtotal + $line_subtotal_tax;
-			$this->subtotal_ex_tax += $line_subtotal;
-		}
-
 		// Order cart items by price so coupon logic is 'fair' for customers and not based on order added to cart.
 		uasort( $cart, apply_filters( 'woocommerce_sort_by_subtotal_callback', array( $this, 'sort_by_subtotal' ) ) );
 
@@ -1261,6 +1160,14 @@ class WC_Cart {
 			 * Prices include tax.
 			 */
 			} elseif ( $this->prices_include_tax ) {
+
+				if ( empty( $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] ) ) {
+					$shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ] = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
+				}
+
+				if ( empty( $tax_rates[ $product->get_tax_class() ] ) ) {
+					$tax_rates[ $product->get_tax_class() ] = WC_Tax::get_rates( $product->get_tax_class() );
+				}
 
 				$base_tax_rates = $shop_tax_rates[ $product->get_tax_class( 'unfiltered' ) ];
 				$item_tax_rates = $tax_rates[ $product->get_tax_class() ];
@@ -1329,6 +1236,9 @@ class WC_Cart {
 			 * Prices exclude tax.
 			 */
 			} else {
+				if ( empty( $tax_rates[ $product->get_tax_class() ] ) ) {
+					$tax_rates[ $product->get_tax_class() ] = WC_Tax::get_rates( $product->get_tax_class() );
+				}
 
 				$item_tax_rates        = $tax_rates[ $product->get_tax_class() ];
 
@@ -1391,30 +1301,7 @@ class WC_Cart {
 				return $this->calculate_totals();
 			}
 
-			// Trigger the fees API where developers can add fees to the cart
-			$this->calculate_fees();
-
-			// Total up/round taxes and shipping taxes
-			if ( $this->round_at_subtotal ) {
-				$this->tax_total          = WC_Tax::get_tax_total( $this->taxes );
-				$this->shipping_tax_total = WC_Tax::get_tax_total( $this->shipping_taxes );
-				$this->taxes              = array_map( array( 'WC_Tax', 'round' ), $this->taxes );
-				$this->shipping_taxes     = array_map( array( 'WC_Tax', 'round' ), $this->shipping_taxes );
-			} else {
-				$this->tax_total          = array_sum( $this->taxes );
-				$this->shipping_tax_total = array_sum( $this->shipping_taxes );
-			}
-
-			// VAT exemption done at this point - so all totals are correct before exemption
-			if ( $this->get_customer()->get_is_vat_exempt() ) {
-				$this->remove_taxes();
-			}
-
-			// Allow plugins to hook and alter totals before final total is calculated
-			do_action( 'woocommerce_calculate_totals', $this );
-
-			// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
-			$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp ), $this ) );
+			new WC_Cart_Totals( $this );
 
 		} else {
 
