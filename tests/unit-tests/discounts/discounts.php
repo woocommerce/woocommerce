@@ -357,7 +357,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 				$discounts->apply_discount( $coupon );
 			}
 
-			$this->assertEquals( $test['expected_total_discount'], array_sum( $discounts->get_discounts() ), 'Test case ' . $test_index . ' failed (' . print_r( $test, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
+			$this->assertEquals( $test['expected_total_discount'], array_sum( $discounts->get_discounts_by_item() ), 'Test case ' . $test_index . ' failed (' . print_r( $test, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
 
 			// Clean.
 			WC()->cart->empty_cart();

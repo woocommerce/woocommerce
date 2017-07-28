@@ -465,7 +465,7 @@ class WC_Discounts {
 			}
 
 		} elseif ( $amount > 0 ) {
-			$total_discounted = $this->apply_fixed_cart_discount_remainder( $coupon, $items_to_apply, $amount );
+			$total_discounted = $this->apply_coupon_fixed_cart_remainder( $coupon, $items_to_apply, $amount );
 		}
 		return $total_discount;
 	}
