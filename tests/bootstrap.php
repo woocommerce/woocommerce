@@ -24,7 +24,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-
 		ini_set( 'display_errors','on' );
 		error_reporting( E_ALL );
 
@@ -32,6 +31,10 @@ class WC_Unit_Tests_Bootstrap {
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
 			$_SERVER['SERVER_NAME'] = 'localhost';
 		}
+
+		$_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+		$_SERVER['SERVER_NAME']     = '';
+		$PHP_SELF                   = $GLOBALS['PHP_SELF'] = $_SERVER['PHP_SELF'] = '/index.php';
 
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
@@ -43,11 +46,15 @@ class WC_Unit_Tests_Bootstrap {
 		// load WC
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
-		// install WC
-		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
+		echo 'Loading WordPress bootstrap...' . PHP_EOL;
 
 		// load the WP testing environment
 		require_once( $this->wp_tests_dir . '/includes/bootstrap.php' );
+
+		// Activate + install
+		activate_plugin( 'woocommerce/woocommerce.php' );
+
+		$this->install_wc();
 
 		// load WC testing framework
 		$this->includes();
@@ -68,7 +75,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function install_wc() {
-
 		// Clean existing install first.
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		define( 'WC_REMOVE_ALL_DATA', true );
