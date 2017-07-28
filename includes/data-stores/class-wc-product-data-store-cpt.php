@@ -1259,6 +1259,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 	}
 
+	/**
+	 * Add ability to get products by 'reviews_allowed' in WC_Product_Query.
+	 *
+	 * @since 3.2.0
+	 * @param string $where where clause
+	 * @param WP_Query $wp_query
+	 */
 	public function reviews_allowed_query_where( $where, $wp_query ) {
 		global $wpdb;
 
@@ -1298,7 +1305,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		// Map boolean queries that are stored as 'yes'/'no' in the DB.
+		// Map boolean queries that are stored as 'yes'/'no' in the DB to 'yes' or 'no'.
 		$boolean_queries = array(
 			'virtual',
 			'downloadable',
@@ -1360,6 +1367,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
+		// Handle product categories.
 		if ( ! empty( $query_vars['category'] ) ) {
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
@@ -1368,6 +1376,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
+		// Handle product tags.
 		if ( ! empty( $query_vars['tag'] ) ) {
 			unset( $wp_query_args['tag'] );
 			$wp_query_args['tax_query'][] = array(
@@ -1377,6 +1386,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
+		// Handle shipping classes.
 		if ( ! empty( $query_vars['shipping_class'] ) ) {
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_shipping_class',
@@ -1385,7 +1395,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
-		// Add total_sales query if needed.
+		// Handle total_sales.
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
 			$wp_query_args['meta_query'][] = array(
@@ -1395,7 +1405,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
-		// Add the special SKU query if needed.
+		// Handle SKU.
 		if ( $manual_queries['sku'] ) {
 			$wp_query_args['meta_query'][] = array(
 				'key'     => '_sku',
@@ -1404,7 +1414,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
-		// Add the special featured query if needed.
+		// Handle featured.
 		if ( '' !== $manual_queries['featured'] ) {
 			$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 			if ( $manual_queries['featured'] ) {
@@ -1429,7 +1439,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		// Add the special visibility query if needed.
+		// Handle visibility.
 		if ( $manual_queries['visibility'] ) {
 			switch ( $manual_queries['visibility'] ) {
 				case 'search':
@@ -1467,6 +1477,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// Handle date queries.
 		$date_queries = array(
 			'date_created'      => 'post_date',
 			'date_modified'     => 'post_modified',
@@ -1486,10 +1497,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// Handle paginate.
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
 		}
 
+		// Handle reviews_allowed.
 		if ( isset( $query_vars['reviews_allowed'] ) && is_bool( $query_vars['reviews_allowed'] ) ) {
 			add_filter( 'posts_where', array( $this, 'reviews_allowed_query_where' ), 10, 2 );
 		}
