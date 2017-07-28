@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class for parameter-based Product querying.
- * Args and usage: {wiki link here}
+ * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
  *
  * @version  3.2.0
  * @since    3.2.0

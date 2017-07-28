@@ -1311,19 +1311,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		// SKU needs special handling because it works with partial matches.
-		// Don't auto-generate meta query args for it.
-		$sku_query = false;
-		if ( isset( $query_vars['sku'] ) ) {
-			$sku_query = $query_vars['sku'];
-			unset( $query_vars['sku'] );
-		}
-
-		// Featured needs special handling because it's stored in terms not meta.
-		$featured_query = '';
-		if ( isset( $query_vars['featured'] ) ) {
-			$featured_query = $query_vars['featured'];
-			unset( $query_vars['featured'] );
+		// These queries cannot be auto-generated so we have to remove them and build them manually.
+		$manual_queries = array(
+			'sku' => '',
+			'featured' => '',
+			'visibility' => '',
+		);
+		foreach ( $manual_queries as $key => $manual_query ) {
+			if ( isset( $query_vars[ $key ] ) ) {
+				$manual_queries[ $key ] = $query_vars[ $key ];
+				unset( $query_vars[ $key ] );
+			}
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
@@ -1379,16 +1377,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
-		// Add the special SKU query if needed.
-		if ( $sku_query ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $sku_query,
-				'compare' => 'LIKE',
+		if ( ! empty( $query_vars['shipping_class'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_shipping_class',
+				'field'    => 'slug',
+				'terms'   => $query_vars['shipping_class'],
 			);
 		}
 
-		// Manually build the total_sales query if needed.
+		// Add total_sales query if needed.
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
 			$wp_query_args['meta_query'][] = array(
@@ -1398,17 +1395,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
-		if ( ! empty( $query_vars['shipping_class'] ) ) {
-			$wp_query_args['tax_query'][] = array(
-				'taxonomy' => 'product_shipping_class',
-				'field'    => 'slug',
-				'terms'   => $query_vars['shipping_class'],
+		// Add the special SKU query if needed.
+		if ( $manual_queries['sku'] ) {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => $manual_queries['sku'],
+				'compare' => 'LIKE',
 			);
 		}
 
-		if ( '' !== $featured_query ) {
+		// Add the special featured query if needed.
+		if ( '' !== $manual_queries['featured'] ) {
 			$product_visibility_term_ids = wc_get_product_visibility_term_ids();
-			if ( $featured_query ) {
+			if ( $manual_queries['featured'] ) {
 				$wp_query_args['tax_query'][] = array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
@@ -1427,6 +1426,44 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'terms'    => array( $product_visibility_term_ids['featured'] ),
 					'operator' => 'NOT IN',
 				);
+			}
+		}
+
+		// Add the special visibility query if needed.
+		if ( $manual_queries['visibility'] ) {
+			switch ( $manual_queries['visibility'] ) {
+				case 'search':
+					$wp_query_args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field' => 'slug',
+						'terms' => array( 'exclude-from-search' ),
+						'operator' => 'NOT IN',
+					);
+				break;
+				case 'catalog':
+					$wp_query_args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field' => 'slug',
+						'terms' => array( 'exclude-from-catalog' ),
+						'operator' => 'NOT IN',
+					);
+				break;
+				case 'visible':
+					$wp_query_args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field' => 'slug',
+						'terms' => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'operator' => 'NOT IN',
+					);
+				break;
+				case 'hidden':
+					$wp_query_args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field' => 'slug',
+						'terms' => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'operator' => 'AND',
+					);
+				break;
 			}
 		}
 

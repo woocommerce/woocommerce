@@ -15,35 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 
 /**
- * Products wrapper for get_posts.
+ * Standard way of retrieving products based on certain parameters.
  *
  * This function should be used for product retrieval so that we have a data agnostic
  * way to get a list of products.
  *
- * Args:
- *      status array|string List of statuses to find. Default: any. Options: any, draft, pending, private and publish.
- *      type array|string Product type, e.g. Default: all. Options: all, simple, external, variable, variation, grouped.
- *      parent int post/product parent
- *      sku string Limit result set to products with specific SKU.
- *      category array Limit result set to products assigned to specific categories by slug
- *                     e.g. array('hoodie', 'cap', 't-shirt').
- *      tag array Limit result set to products assigned to specific tags (by slug)
- *                e.g. array('funky', 'retro', 'designer')
- *      shipping_class array Limit results set to products in specific shipping classes (by slug)
- *                           e.g. array('standard', 'next-day')
- *      limit int Maximum of products to retrieve.
- *      offset int Offset of products to retrieve.
- *      page int Page of products to retrieve. Ignored when using the 'offset' arg.
- *      exclude array Product IDs to exclude from the query.
- *      orderby string Order by date, title, id, modified, rand etc
- *      order string ASC or DESC
- *      return string Type of data to return. Allowed values:
- *          ids array of Product ids
- *          objects array of product objects (default)
- *      paginate bool If true, the return value will be an array with values:
- *          'products'      => array of data (return value above),
- *          'total'         => total number of products matching the query
- *          'max_num_pages' => max number of pages found
+ * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
  *
  * @since  3.0.0
  * @param  array $args Array of args (above)

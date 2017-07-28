@@ -148,6 +148,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 
 		$products = wc_get_products( array( 'return' => 'ids', 'height' => 5.0 ) );
+		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
 
 		$products = wc_get_products( array( 'return' => 'ids', 'weight' => 15 ) );
@@ -178,6 +179,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $product_2->get_id() ), $products );
 
 		$products = wc_get_products( array( 'return' => 'ids', 'price' => 12.5 ) );
+		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
 	}
 
@@ -271,10 +273,17 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_2->set_catalog_visibility( 'hidden' );
 		$product_2->save();
 
+		$product_3 = new WC_Product_Simple;
+		$product_3->set_catalog_visibility( 'search' );
+		$product_3->save();
+
 		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => 'visible' ) );
 		$this->assertEquals( array( $product_1->get_id() ), $products );
-		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => array( 'visible', 'hidden' ) ) );
-		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
+		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => 'hidden' ) );
+		$this->assertEquals( array( $product_2->get_id() ), $products );
+		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => 'search' ) );
+		sort( $products );
+		$this->assertEquals( array( $product_1->get_id(), $product_3->get_id() ), $products );
 	}
 
 	/**
