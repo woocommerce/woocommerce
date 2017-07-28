@@ -22,7 +22,7 @@ class WC_Discount {
 	 */
 	protected $data = array(
 		'amount'         => 0, // Discount amount.
-		'discount_type'           => 'fixed', // Fixed, percent, or coupon.
+		'discount_type'  => 'fixed', // Fixed, percent, or coupon.
 		'discount_total' => 0,
 	);
 

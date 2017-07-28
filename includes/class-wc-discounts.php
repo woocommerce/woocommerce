@@ -134,7 +134,7 @@ class WC_Discounts {
 			}
 		}
 
-		return $in_cents ? wc_remove_number_precision_deep( $item_discount_totals ) : $item_discount_totals;
+		return $in_cents ? $item_discount_totals : wc_remove_number_precision_deep( $item_discount_totals );
 	}
 
 	/**
@@ -147,7 +147,7 @@ class WC_Discounts {
 	public function get_discounts_by_coupon( $in_cents = false ) {
 		$coupon_discount_totals = array_map( 'array_sum', $this->discounts );
 
-		return $in_cents ? wc_remove_number_precision_deep( $coupon_discount_totals ) : $coupon_discount_totals;
+		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
 	}
 
 	// @todo.

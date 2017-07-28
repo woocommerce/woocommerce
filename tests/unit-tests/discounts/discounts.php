@@ -420,7 +420,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$discounts->apply_discount( '50%' );
 		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 10, $all_discounts['discount-50%'] );
+		$this->assertEquals( 10, $all_discounts['discount-50%'], print_r( $all_discounts, true ) );
 
 		$discounts->apply_discount( '50%' );
 		$all_discounts = $discounts->get_discounts();
