@@ -112,10 +112,9 @@ final class WC_Cart_Totals {
 	 * @param object $cart Cart object to calculate totals for.
 	 */
 	public function __construct( &$cart = null ) {
-		$this->object        = $cart;
-		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
-
 		if ( is_a( $cart, 'WC_Cart' ) ) {
+			$this->object        = $cart;
+			$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
 			$this->calculate();
 		}
 	}

@@ -30,6 +30,10 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function setUp() {
 		$this->ids = array();
 
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', 1 );
+		}
+
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -42,7 +46,10 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
 
 		$product  = WC_Helper_Product::create_simple_product();
 		$product2 = WC_Helper_Product::create_simple_product();
@@ -67,7 +74,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
-		$this->totals = new WC_Cart_Totals( WC()->cart, WC()->customer );
+		$this->totals = new WC_Cart_Totals( WC()->cart );
 	}
 
 	/**
@@ -101,6 +108,8 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		foreach ( $this->ids['tax_rate_ids'] as $tax_rate_id ) {
 			WC_Tax::_delete_tax_rate( $tax_rate_id );
 		}
+
+		$this->ids = array();
 	}
 
 	/**
