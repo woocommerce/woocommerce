@@ -195,7 +195,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get user id.
+	 * Set user id.
 	 *
 	 * @param int $value
 	 */
@@ -204,7 +204,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get user_email.
+	 * Set user_email.
 	 *
 	 * @param int $value
 	 */
@@ -213,7 +213,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get order_id.
+	 * Set order_id.
 	 *
 	 * @param int $value
 	 */
@@ -222,7 +222,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get order_key.
+	 * Set order_key.
 	 *
 	 * @param string $value
 	 */
@@ -231,7 +231,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get downloads_remaining.
+	 * Set downloads_remaining.
 	 *
 	 * @param integer|string $value
 	 */
@@ -240,7 +240,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get access_granted.
+	 * Set access_granted.
 	 *
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
@@ -249,7 +249,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get access_expires.
+	 * Set access_expires.
 	 *
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
@@ -258,7 +258,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Get download_count.
+	 * Set download_count.
 	 *
 	 * @param int $value
 	 */
