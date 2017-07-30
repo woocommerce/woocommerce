@@ -266,6 +266,46 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		$this->set_prop( 'download_count', absint( $value ) );
 	}
 
+	/**
+	 * Track a download on this permission.
+	 *
+	 * @since 3.3.0
+	 * @param int user_id Id of the user performing the download
+	 * @param string user_ip_address IP Address of the user performing the download
+	 */
+	public function track_download( $user_id = null, $user_ip_address = null ) {
+		// Must have a permission_id to track download log
+		if ( ! ( $this->get_id() > 0 ) ) {
+			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
+		}
+
+		// Track download in download log
+		$download_log = new WC_Customer_Download_Log();
+		$download_log->set_timestamp( current_time( 'timestamp', true ) );
+		$download_log->set_permission_id( $this->get_id() );
+
+		if ( ! is_null( $user_id ) ) {
+			$download_log->set_user_id( $user_id );
+		}
+
+		if ( ! is_null( $user_ip_address ) ) {
+			$download_log->set_user_ip_address( $user_ip_address );
+		}
+
+		$download_log->save();
+
+		// Increment download count on parameter
+		$count	 = $this->get_download_count();
+		$remaining = $this->get_downloads_remaining();
+		$this->set_download_count( $count + 1 );
+		if ( '' !== $remaining ) {
+			$this->set_downloads_remaining( $remaining - 1 );
+		}
+
+		// Save the download at this point to ensure the download log matches the param count
+		$this->save();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods

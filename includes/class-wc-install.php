@@ -87,7 +87,7 @@ class WC_Install {
 		'3.2.0' => array(
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
-		),
+        ),
 	);
 
 	/** @var object Background update class */
@@ -623,6 +623,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   context longtext NULL,
   PRIMARY KEY (log_id),
   KEY level (level)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_download_log (
+  download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  permission_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NULL,
+  user_ip_address VARCHAR(100) NULL DEFAULT '',
+  PRIMARY KEY (download_log_id),
+  KEY permission_id (permission_id),
+  KEY timestamp (timestamp)
 ) $collate;
 		";
 
