@@ -435,7 +435,7 @@ final class WC_Cart_Totals {
 			}
 
 			$this->object->cart_contents[ $item_key ]['line_total'] = wc_remove_number_precision( $item->total );
-			$this->object->cart_contents[ $item_key ]['line_tax'] = wc_remove_number_precision( $item->total_tax );
+			$this->object->cart_contents[ $item_key ]['line_tax']   = wc_remove_number_precision( $item->total_tax );
 		}
 
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
@@ -477,7 +477,7 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$this->object->cart_contents[ $item_key ]['line_subtotal'] = wc_remove_number_precision( $item->subtotal );
+			$this->object->cart_contents[ $item_key ]['line_subtotal']     = wc_remove_number_precision( $item->subtotal );
 			$this->object->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
 		$this->set_total( 'items_subtotal', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
@@ -602,9 +602,8 @@ final class WC_Cart_Totals {
 			do_action( 'woocommerce_calculate_totals', $this->object );
 		}
 
-		// @TODO: Fix logic bug. Currently totals are always 0.
 		// Allow plugins to filter the grand total, and sum the cart totals in case of modifications.
-		// $totals_to_sum       = wc_add_number_precision_deep( array( $this->object->cart_contents_total, $this->object->tax_total, $this->object->shipping_tax_total, $this->object->shipping_total, $this->object->fee_total ) );
-		// $this->object->total = max( 0, apply_filters( 'woocommerce_calculated_total', wc_remove_number_precision( round( array_sum( $totals_to_sum ) ) ), $this->object ) );
+		$totals_to_sum       = wc_add_number_precision_deep( array( $this->object->cart_contents_total, $this->object->tax_total, $this->object->shipping_tax_total, $this->object->shipping_total, $this->object->fee_total ) );
+		$this->object->total = max( 0, apply_filters( 'woocommerce_calculated_total', wc_remove_number_precision( round( array_sum( $totals_to_sum ) ) ), $this->object ) );
 	}
 }
