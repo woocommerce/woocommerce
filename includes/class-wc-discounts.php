@@ -68,7 +68,7 @@ class WC_Discounts {
 			$item->object        = $cart_item;
 			$item->product       = $cart_item['data'];
 			$item->quantity      = $cart_item['quantity'];
-			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
+			$item->price         = wc_add_number_precision_deep( $cart_item['line_subtotal'] );
 			$this->items[ $key ] = $item;
 		}
 
