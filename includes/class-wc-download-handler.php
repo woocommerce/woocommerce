@@ -72,12 +72,12 @@ class WC_Download_Handler {
 			$download->get_download_id(),
 			$download->get_order_id()
 		);
-        $download->save();
+	     $download->save();
 
-        // Track the download in logs and change remaining/counts
-        $current_user_id = get_current_user_id();
-        $ip_address = WC_Geolocation::get_ip_address();
-        $download->track_download( $current_user_id > 0 ? $current_user_id : null, !empty( $ip_address ) ? $ip_address : null );
+		// Track the download in logs and change remaining/counts
+		$current_user_id = get_current_user_id();
+		$ip_address = WC_Geolocation::get_ip_address();
+		$download->track_download( $current_user_id > 0 ? $current_user_id : null, !empty( $ip_address ) ? $ip_address : null );
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
 	}

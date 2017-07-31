@@ -6,10 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class for customer download logs.
  *
- * @version     3.3.0
- * @since       3.3.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * @version		3.3.0
+ * @since		3.3.0
+ * @package		WooCommerce/Classes
+ * @author		WooThemes
  */
 class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 
@@ -25,10 +25,10 @@ class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'timestamp'        => null,
-		'permission_id'    => '',
-		'user_id'          => null,
-		'user_ip_address'  => null,
+		'timestamp'			=> null,
+		'permission_id'		=> 0,
+		'user_id'			=> null,
+		'user_ip_address'	=> null,
 	);
 
 	/**
@@ -115,9 +115,9 @@ class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 	 *
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
-    public function set_timestamp( $date = null ) {
+	public function set_timestamp( $date = null ) {
 		$this->set_date_prop( 'timestamp', $date );
-    }
+	}
 
 	/**
 	 * Set permission id.
@@ -153,8 +153,8 @@ class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 	*/
 
 	/**
-     * Save data to the database.
-     *
+	 * Save data to the database.
+	 *
 	 * @return int Log ID
 	 */
 	public function save() {

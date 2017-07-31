@@ -145,7 +145,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		$query[] = "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_download_log WHERE 1=1";
 
 		if ( $args['permission_id'] ) {
-			$query[] = $wpdb->prepare( "AND permission_id = %d", sanitize_email( $args['permission_id'] ) );
+			$query[] = $wpdb->prepare( "AND permission_id = %d", $args['permission_id'] );
 		}
 
 		if ( $args['user_id'] ) {
@@ -177,23 +177,15 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	}
 
 	/**
-	 * Get logs for a specific download permission.
+	 * Get download logs for a given download permission.
 	 *
 	 * @param  int $permission_id
 	 * @return array
 	 */
 	public function get_download_logs_for_permission( $permission_id ) {
-		global $wpdb;
-
-		return $wpdb->get_results(
-			$wpdb->prepare( "
-				SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_download_log as logs
-				WHERE permission_id = %d
-				ORDER BY logs.timestamp DESC;
-				",
-				$permission_id
-			)
-		);
+		return $this->get_download_logs( array(
+			'permission_id'   => $permission_id
+		) );
 	}
 
 }
