@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+include_once( 'legacy/class-wc-legacy-cart.php' );
+
 /**
  * WooCommerce cart
  *
@@ -16,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Cart {
+class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * This stores the chosen shipping methods for the cart item packages.
@@ -38,9 +40,6 @@ class WC_Cart {
 
 	/** @var array Contains an array of coupon code discount taxes. Used for tax incl pricing. */
 	public $coupon_discount_tax_amounts = array();
-
-	/** @var array Contains an array of coupon usage counts after they have been applied. */
-	public $coupon_applied_count = array();
 
 	/** @var array Array of coupons */
 	public $coupons = array();
@@ -1891,20 +1890,6 @@ class WC_Cart {
 	private function increase_coupon_discount_amount( $code, $amount, $tax ) {
 		$this->coupon_discount_amounts[ $code ]     = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] + $amount : $amount;
 		$this->coupon_discount_tax_amounts[ $code ] = isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] + $tax : $tax;
-	}
-
-	/**
-	 * Store how many times each coupon is applied to cart/items.
-	 *
-	 * @access private
-	 * @param string $code
-	 * @param int    $count
-	 */
-	private function increase_coupon_applied_count( $code, $count = 1 ) {
-		if ( empty( $this->coupon_applied_count[ $code ] ) ) {
-			$this->coupon_applied_count[ $code ] = 0;
-		}
-		$this->coupon_applied_count[ $code ] += $count;
 	}
 
 	/*
