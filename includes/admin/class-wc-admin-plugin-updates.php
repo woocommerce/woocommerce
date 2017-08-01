@@ -139,6 +139,7 @@ class WC_Admin_Plugin_Updates {
 		?>
 		<script>
 			( function( $ ) {
+				// Initialize thickbox.
 				tb_init( '.wc-thickbox' );
 
 				var old_tb_position = false;
@@ -185,7 +186,7 @@ class WC_Admin_Plugin_Updates {
 				var $update_link = $update_box.find('a.update-link').first();
 				var update_url = $update_link.attr( 'href' );
 
-				// Initialize thickbox.
+				// Set up thickbox.
 				$update_link.removeClass( 'update-link' );
 				$update_link.addClass( 'wc-thickbox' );
 				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
