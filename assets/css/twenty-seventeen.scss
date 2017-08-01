@@ -102,7 +102,17 @@
 		color: #fff;
 	}
 }
-
+.colors-dark {
+	.woocommerce-pagination {
+		span.page-numbers.current {
+			background-color: #fff;
+		}
+		.next.page-numbers,.prev.page-numbers,a.page-numbers,span.page-numbers{
+			background: #505050;
+		}	
+		
+	}
+}
 .onsale {
 	background-color: #fff;
 	position: absolute;
