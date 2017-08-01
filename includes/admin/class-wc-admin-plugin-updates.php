@@ -183,9 +183,7 @@ class WC_Admin_Plugin_Updates {
 			( function( $ ) {
 				var $update_box = $( '#woocommerce-update' );
 				var $update_link = $update_box.find('a.update-link').first();
-
 				var update_url = $update_link.attr( 'href' );
-				var old_tb_position = false;
 
 				// Initialize thickbox.
 				$update_link.removeClass( 'update-link' );
@@ -215,7 +213,7 @@ class WC_Admin_Plugin_Updates {
 	/**
 	 * JS for the modal window on the updates screen.
 	 */
-	public function update_screen_modal_js() {
+	protected function update_screen_modal_js() {
 		?>
 		<script>
 			( function( $ ) {
