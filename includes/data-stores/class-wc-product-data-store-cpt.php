@@ -1320,8 +1320,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// These queries cannot be auto-generated so we have to remove them and build them manually.
 		$manual_queries = array(
-			'sku' => '',
-			'featured' => '',
+			'sku'        => '',
+			'featured'   => '',
 			'visibility' => '',
 		);
 		foreach ( $manual_queries as $key => $manual_query ) {
@@ -1372,7 +1372,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
 				'field'    => 'slug',
-				'terms'   => $query_vars['category'],
+				'terms'    => $query_vars['category'],
 			);
 		}
 
@@ -1382,7 +1382,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_tag',
 				'field'    => 'slug',
-				'terms'   => $query_vars['tag'],
+				'terms'    => $query_vars['tag'],
 			);
 		}
 
@@ -1391,7 +1391,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['tax_query'][] = array(
 				'taxonomy' => 'product_shipping_class',
 				'field'    => 'slug',
-				'terms'   => $query_vars['shipping_class'],
+				'terms'    => $query_vars['shipping_class'],
 			);
 		}
 
@@ -1445,32 +1445,32 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'search':
 					$wp_query_args['tax_query'][] = array(
 						'taxonomy' => 'product_visibility',
-						'field' => 'slug',
-						'terms' => array( 'exclude-from-search' ),
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-search' ),
 						'operator' => 'NOT IN',
 					);
 				break;
 				case 'catalog':
 					$wp_query_args['tax_query'][] = array(
 						'taxonomy' => 'product_visibility',
-						'field' => 'slug',
-						'terms' => array( 'exclude-from-catalog' ),
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog' ),
 						'operator' => 'NOT IN',
 					);
 				break;
 				case 'visible':
 					$wp_query_args['tax_query'][] = array(
 						'taxonomy' => 'product_visibility',
-						'field' => 'slug',
-						'terms' => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
 						'operator' => 'NOT IN',
 					);
 				break;
 				case 'hidden':
 					$wp_query_args['tax_query'][] = array(
 						'taxonomy' => 'product_visibility',
-						'field' => 'slug',
-						'terms' => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
 						'operator' => 'AND',
 					);
 				break;
