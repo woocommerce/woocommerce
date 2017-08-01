@@ -1313,7 +1313,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'manage_stock',
 		);
 		foreach ( $boolean_queries as $boolean_query ) {
-			if ( isset( $query_vars[ $boolean_query ] ) && is_bool( $query_vars[ $boolean_query ] ) ) {
+			if ( isset( $query_vars[ $boolean_query ] ) && '' !== $query_vars[ $boolean_query ] ) {
 				$query_vars[ $boolean_query ] = $query_vars[ $boolean_query ] ? 'yes' : 'no';
 			}
 		}
