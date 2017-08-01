@@ -57,7 +57,19 @@ class WC_Admin_Plugin_Updates {
 	 */
 	public function __construct() {
 		add_filter( 'extra_plugin_headers', array( $this, 'enable_wc_plugin_headers' ) );
-		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ), 10, 2 );
+
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return;
+		}
+
+		if ( 'plugins' === $screen->id ) {
+			add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ), 10, 2 );
+		}
+
+		if ( 'update-core' === $screen->id ) {
+			add_action( 'admin_print_footer_scripts', array( $this, 'update_screen_modal' ) );
+		}
 	}
 
 	/**
@@ -73,7 +85,7 @@ class WC_Admin_Plugin_Updates {
 	}
 
 	/**
-	 * Show plugin changes. Code adapted from W3 Total Cache.
+	 * Show plugin changes on the plugins screen. Code adapted from W3 Total Cache.
 	 *
 	 * @param array $args
 	 */
@@ -93,33 +105,46 @@ class WC_Admin_Plugin_Updates {
 
 		if ( ! empty( $this->major_untested_plugins ) ) {
 			$this->upgrade_notice .= $this->get_extensions_modal_warning();
-			add_action( 'admin_print_footer_scripts', array( $this, 'modal_js' ) );
+			add_action( 'admin_print_footer_scripts', array( $this, 'plugin_screen_modal_js' ) );
 		}
 
 		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' );
 	}
 
 	/**
-	 * JS for the modal window.
+	 * Show a warning message on the upgrades screen if the user tries to upgrade and has untested plugins.
 	 */
-	public function modal_js() {
+	public function update_screen_modal() {
+		$updateable_plugins = get_plugin_updates();
+		if ( empty( $updateable_plugins['woocommerce/woocommerce.php'] )
+			|| empty( $updateable_plugins['woocommerce/woocommerce.php']->update )
+			|| empty( $updateable_plugins['woocommerce/woocommerce.php']->update->new_version ) ) {
+			return;
+		}
+
+		$this->new_version = wc_clean( $updateable_plugins['woocommerce/woocommerce.php']->update->new_version );
+		$this->major_untested_plugins = $this->get_untested_plugins( $this->new_version, 'major' );
+		if ( empty( $this->major_untested_plugins ) ) {
+			return;
+		}
+
+		echo $this->get_extensions_modal_warning();
+		$this->update_screen_modal_js();
+	}
+
+	/**
+	 * Common JS for initializing and managing the modals.
+	 */
+	protected function generic_modal_js() {
 		?>
 		<script>
 			( function( $ ) {
-				var $update_box = $( '#woocommerce-update' );
-				var $update_link = $update_box.find('a.update-link').first();
-
-				var update_url = $update_link.attr( 'href' );
-				var old_tb_position = false;
-
-				// Initialize thickbox.
-				$update_link.removeClass( 'update-link' );
-				$update_link.addClass( 'wc-thickbox' );
-				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
 				tb_init( '.wc-thickbox' );
 
-				// Set up a custom thickbox overlay.
-				$update_link.on( 'click', function( evt ) {
+				var old_tb_position = false;
+
+				// Make the WC thickboxes look good when opened.
+				$( '.wc-thickbox' ).on( 'click', function( evt ) {
 					var $overlay = $( '#TB_overlay' );
 					if ( ! $overlay.length ) {
 						$( 'body' ).append( '<div id="TB_overlay"></div><div id="TB_window" class="wc_untested_extensions_modal_container"></div>' );
@@ -144,6 +169,28 @@ class WC_Admin_Plugin_Updates {
 						tb_position = old_tb_position;
 					}
 				});
+			})( jQuery );
+		</script>
+		<?php
+	}
+
+	/**
+	 * JS for the modal window on the plugins screen.
+	 */
+	public function plugin_screen_modal_js() {
+		?>
+		<script>
+			( function( $ ) {
+				var $update_box = $( '#woocommerce-update' );
+				var $update_link = $update_box.find('a.update-link').first();
+
+				var update_url = $update_link.attr( 'href' );
+				var old_tb_position = false;
+
+				// Initialize thickbox.
+				$update_link.removeClass( 'update-link' );
+				$update_link.addClass( 'wc-thickbox' );
+				$update_link.attr( 'href', '#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal' );
 
 				// Trigger the update if the user accepts the modal's warning.
 				$( '#wc_untested_extensions_modal .accept' ).on( 'click', function( evt ) {
@@ -162,6 +209,53 @@ class WC_Admin_Plugin_Updates {
 			})( jQuery );
 		</script>
 		<?php
+		$this->generic_modal_js();
+	}
+
+	/**
+	 * JS for the modal window on the updates screen.
+	 */
+	public function update_screen_modal_js() {
+		?>
+		<script>
+			( function( $ ) {
+				var modal_dismissed = false;
+
+				// Show the modal if the WC upgrade checkbox is checked.
+				var show_modal_if_checked = function() {
+					if ( modal_dismissed ) {
+						return;
+					}
+					var $checkbox = $( 'input[value="woocommerce/woocommerce.php"]' );
+					if ( $checkbox.prop( 'checked' ) ) {
+						$( '#wc-upgrade-warning' ).click();
+					}
+				}
+
+				$( '#plugins-select-all, input[value="woocommerce/woocommerce.php"]' ).on( 'change', function() {
+					show_modal_if_checked();
+				} );
+
+				// Add a hidden thickbox link to use for bringing up the modal.
+				$('body').append( '<a href="#TB_inline?height=600&width=550&inlineId=wc_untested_extensions_modal" class="wc-thickbox" id="wc-upgrade-warning" style="display:none"></a>' );
+
+				// Don't show the modal again once it's been accepted.
+				$( '#wc_untested_extensions_modal .accept' ).on( 'click', function( evt ) {
+					evt.preventDefault();
+					modal_dismissed = true;
+					tb_remove();
+				});
+
+				// Uncheck the WC update checkbox if the modal is canceled.
+				$( '#wc_untested_extensions_modal .cancel a' ).on( 'click', function( evt ) {
+					evt.preventDefault();
+					$( 'input[value="woocommerce/woocommerce.php"]' ).prop( 'checked', false );
+					tb_remove();
+				});
+			})( jQuery );
+		</script>
+		<?php
+		$this->generic_modal_js();
 	}
 
 	/*
