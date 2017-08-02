@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * My Account Shortcodes
  *
@@ -51,9 +56,13 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-		 } else {
+		} else {
 			// Start output buffer since the html may need discarding for BW compatibility
 			ob_start();
+
+			if ( isset( $wp->query_vars['customer-logout'] ) ) {
+				wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
+			}
 
 			// Collect notices before output
 			$notices = wc_get_notices();
@@ -228,8 +237,6 @@ class WC_Shortcode_My_Account {
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		global $wpdb, $wp_hasher;
-
 		$login = trim( $_POST['user_login'] );
 
 		if ( empty( $login ) ) {
@@ -333,6 +340,8 @@ class WC_Shortcode_My_Account {
 
 	/**
 	 * Set or unset the cookie.
+	 *
+	 * @param string $value
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;

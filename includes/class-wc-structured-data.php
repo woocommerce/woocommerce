@@ -91,15 +91,22 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
-			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
+			if ( 1 < count( $value ) ) {
+				$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + array( '@graph' => $value );
+			} else {
+				$data[ $type ] = $value[0];
+			}
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
 		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
 		if ( ! empty( $data ) ) {
-			$data = count( $data ) > 1 ? array( '@graph' => $data ) : $data[0];
+			if ( 1 < count( $data ) ) {
+				$data = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, '', '' ) + array( '@graph' => $data );
+			} else {
+				$data = $data[0];
+			}
 		}
 
 		return $data;
@@ -200,34 +207,42 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$markup_offer = array(
-			'@type'         => 'Offer',
-			'priceCurrency' => $currency,
-			'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-			'sku'           => $product->get_sku(),
-			'image'         => wp_get_attachment_url( $product->get_image_id() ),
-			'description'   => $product->get_description(),
-			'seller'        => array(
-				'@type' => 'Organization',
-				'name'  => $shop_name,
-				'url'   => $shop_url,
-			),
-		);
-
-		if ( $product->is_type( 'variable' ) ) {
-			$prices = $product->get_variation_prices();
-
-			$markup_offer['priceSpecification'] = array(
-				'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-				'minPrice'      => wc_format_decimal( current( $prices['price'] ), wc_get_price_decimals() ),
-				'maxPrice'      => wc_format_decimal( end( $prices['price'] ), wc_get_price_decimals() ),
+		if ( '' !== $product->get_price() ) {
+			$markup_offer = array(
+				'@type'         => 'Offer',
 				'priceCurrency' => $currency,
+				'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+				'sku'           => $product->get_sku(),
+				'image'         => wp_get_attachment_url( $product->get_image_id() ),
+				'description'   => $product->get_description(),
+				'seller'        => array(
+					'@type' => 'Organization',
+					'name'  => $shop_name,
+					'url'   => $shop_url,
+				),
 			);
-		} else {
-			$markup_offer['price']    = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
-		}
 
-		$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+			if ( $product->is_type( 'variable' ) ) {
+				$prices = $product->get_variation_prices();
+				$lowest = reset( $prices['price'] );
+				$highest = end( $prices['price'] );
+
+				if ( $lowest === $highest ) {
+					$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+				} else {
+					$markup_offer['priceSpecification'] = array(
+						'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'minPrice'      => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'maxPrice'      => wc_format_decimal( $highest, wc_get_price_decimals() ),
+						'priceCurrency' => $currency,
+					);
+				}
+			} else {
+				$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+			}
+
+			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+		}
 
 		if ( $product->get_rating_count() ) {
 			$markup['aggregateRating'] = array(
@@ -256,7 +271,7 @@ class WC_Structured_Data {
 		$markup['description']   = get_comment_text( $comment->comment_ID );
 		$markup['itemReviewed']  = array(
 			'@type' => 'Product',
-			'name'  => get_the_title( $comment->post_ID ),
+			'name'  => get_the_title( $comment->comment_post_ID ),
 		);
 		if ( $rating = get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
 			$markup['reviewRating']  = array(
@@ -398,7 +413,7 @@ class WC_Structured_Data {
 		$markup                       = array();
 		$markup['@type']              = 'Order';
 		$markup['url']                = $order_url;
-		$markup['orderStatus']        = isset( $order_status[ $order->get_status() ] ) ? $order_status[ $order->get_status() ] : '';
+		$markup['orderStatus']        = isset( $order_statuses[ $order->get_status() ] ) ? $order_statuses[ $order->get_status() ] : '';
 		$markup['orderNumber']        = $order->get_order_number();
 		$markup['orderDate']          = $order->get_date_created()->format( 'c' );
 		$markup['acceptedOffer']      = $markup_offers;

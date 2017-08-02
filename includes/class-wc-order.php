@@ -218,10 +218,13 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set order status.
 	 * @since 3.0.0
+	 *
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual_update is this a manual order status change?
 	 * @param array details of change
+	 *
+	 * @return array
 	 */
 	public function set_status( $new_status, $note = '', $manual_update = false ) {
 		$result = parent::set_status( $new_status );
@@ -255,7 +258,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
@@ -276,6 +279,11 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
+	 *
+	 * @param string $new_status
+	 * @param string $note
+	 * @param bool $manual
+	 *
 	 * @return bool success
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
@@ -730,7 +738,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_date_paid( $context = 'view' ) {
 		$date_paid = $this->get_prop( 'date_paid', $context );
 
-		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id() ) ) ) {
+		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}
@@ -1224,6 +1232,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * See if order matches cart_hash.
+	 *
+	 * @param string $cart_hash
+	 *
 	 * @return bool
 	 */
 	public function has_cart_hash( $cart_hash = '' ) {
@@ -1293,6 +1304,37 @@ class WC_Order extends WC_Abstract_Order {
 		}
 		return false;
 	}
+
+	/**
+	 * Get downloads from all line items for this order.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	public function get_downloadable_items() {
+		$downloads = array();
+
+		foreach ( $this->get_items() as $item ) {
+			if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $item_downloads = $item->get_item_downloads() ) ) {
+				if ( $product = $item->get_product() ) {
+					foreach ( $item_downloads as $file ) {
+						$downloads[] = array(
+							'download_url'        => $file['download_url'],
+							'download_id'         => $file['id'],
+							'product_id'          => $product->get_id(),
+							'product_name'        => $product->get_name(),
+							'download_name'       => $file['name'],
+							'order_id'            => $this->get_id(),
+							'order_key'           => $this->get_order_key(),
+							'downloads_remaining' => $file['downloads_remaining'],
+							'access_expires'      => $file['access_expires'],
+						);
+					}
+				}
+			}
+		}
+		return $downloads;
+ 	}
 
 	/**
 	 * Checks if an order needs payment, based on status and order total.

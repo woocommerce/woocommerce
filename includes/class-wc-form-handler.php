@@ -40,7 +40,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Remove key and login from querystring, set cookie, and redirect to account page to show the form.
+	 * Remove key and login from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
 		if ( is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
@@ -140,8 +140,21 @@ class WC_Form_Handler {
 
 		if ( 0 === wc_notice_count( 'error' ) ) {
 
-			foreach ( $address as $key => $field ) {
-				update_user_meta( $user_id, $key, $_POST[ $key ] );
+			$customer = new WC_Customer( $user_id );
+
+			if ( $customer ) {
+				foreach ( $address as $key => $field ) {
+					if ( is_callable( array( $customer, "set_$key" ) ) ) {
+						$customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					} else {
+						$customer->update_meta_data( $key, wc_clean( $_POST[ $key ] ) );
+					}
+
+					if ( WC()->customer && is_callable( array( WC()->customer, "set_$key" ) ) ) {
+						WC()->customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
+					}
+				}
+				$customer->save();
 			}
 
 			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
@@ -462,7 +475,7 @@ class WC_Form_Handler {
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
-					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
+					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
@@ -506,8 +519,9 @@ class WC_Form_Handler {
 					// Sanitize
 					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', wc_stock_amount( preg_replace( "/[^0-9\.]/", '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
-					if ( '' === $quantity || $quantity == $values['quantity'] )
+					if ( '' === $quantity || $quantity == $values['quantity'] ) {
 						continue;
+					}
 
 					// Update cart validation
 					$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
@@ -555,8 +569,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		// Clear current cart
-		WC()->cart->empty_cart();
+		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
@@ -587,7 +602,8 @@ class WC_Form_Handler {
 
 			foreach ( $item->get_meta_data() as $meta ) {
 				if ( taxonomy_is_product_attribute( $meta->key ) ) {
-					$variations[ $meta->key ] = $meta->value;
+					$term = get_term_by( 'slug', $meta->value, $meta->key );
+					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
 				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
 				}
@@ -757,16 +773,22 @@ class WC_Form_Handler {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
+				// Suppress total recalculation until finished.
+				remove_action( 'woocommerce_add_to_cart', array( WC()->cart, 'calculate_totals' ), 20, 0 );
+
 				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
 					$added_to_cart[ $item ] = $quantity;
 				}
+
+				add_action( 'woocommerce_add_to_cart', array( WC()->cart, 'calculate_totals' ), 20, 0 );
 			}
 
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
 				wc_add_notice( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ), 'error' );
 			} elseif ( $was_added_to_cart ) {
 				wc_add_to_cart_message( $added_to_cart );
+				WC()->cart->calculate_totals();
 				return true;
 			}
 		} elseif ( $product_id ) {
@@ -824,7 +846,10 @@ class WC_Form_Handler {
 					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
-					if ( '' === $valid_value || $valid_value === $value ) {
+					if ( $valid_value === $value ) {
+						$variations[ $taxonomy ] = $value;
+					// If valid values are empty, this is an 'any' variation so get all possible values.
+					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs() ) ) {
 						$variations[ $taxonomy ] = $value;
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
@@ -882,6 +907,10 @@ class WC_Form_Handler {
 				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 					$user = get_user_by( 'email', $username );
 
+					if ( ! $user ) {
+						$user = get_user_by( 'login', $username );
+					}
+
 					if ( isset( $user->user_login ) ) {
 						$creds['user_login'] = $user->user_login;
 					} else {
@@ -911,13 +940,13 @@ class WC_Form_Handler {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = $_POST['redirect'];
-					} elseif ( wp_get_referer() ) {
-						$redirect = wp_get_referer();
+					} elseif ( wc_get_raw_referer() ) {
+						$redirect = wc_get_raw_referer();
 					} else {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ), wc_get_page_permalink( 'myaccount' ) ) );
 					exit;
 				}
 			} catch ( Exception $e ) {
@@ -934,9 +963,9 @@ class WC_Form_Handler {
 		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
 			$success = WC_Shortcode_My_Account::retrieve_password();
 
-			// If successful, redirect to my account with query arg set
+			// If successful, redirect to my account with query arg set.
 			if ( $success ) {
-				wp_redirect( add_query_arg( 'reset-link-sent', 'true', remove_query_arg( array( 'key', 'login', 'reset' ) ) ) );
+				wp_redirect( add_query_arg( 'reset-link-sent', 'true', wc_get_account_endpoint_url( 'lost-password' ) ) );
 				exit;
 			}
 		}

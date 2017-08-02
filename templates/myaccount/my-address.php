@@ -41,7 +41,9 @@ $col    = 1;
 	<?php echo apply_filters( 'woocommerce_my_account_my_address_description', __( 'The following addresses will be used on the checkout page by default.', 'woocommerce' ) ); ?>
 </p>
 
-<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) echo '<div class="u-columns woocommerce-Addresses col2-set addresses">'; ?>
+<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) : ?>
+	<div class="u-columns woocommerce-Addresses col2-set addresses">
+<?php endif; ?>
 
 <?php foreach ( $get_addresses as $name => $title ) : ?>
 
@@ -66,14 +68,17 @@ $col    = 1;
 
 				$formatted_address = WC()->countries->get_formatted_address( $address );
 
-				if ( ! $formatted_address )
+				if ( ! $formatted_address ) {
 					_e( 'You have not set up this type of address yet.', 'woocommerce' );
-				else
+				} else {
 					echo $formatted_address;
+				}
 			?>
 		</address>
 	</div>
 
 <?php endforeach; ?>
 
-<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) echo '</div>'; ?>
+<?php if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) : ?>
+	</div>
+<?php endif;

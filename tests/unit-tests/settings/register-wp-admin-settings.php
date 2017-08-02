@@ -3,7 +3,7 @@
 /**
  * Settings API: WP-Admin Helper Tests
  * Tests the helper class that makes settings (currently present in wp-admin)
- * avaiable to the REST API.
+ * available to the REST API.
  *
  * @package WooCommerce\Tests\Settings
  * @since 3.0.0

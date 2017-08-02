@@ -234,6 +234,7 @@ class WC_Meta_Box_Order_Data {
 						</select></p>
 
 						<p class="form-field form-field-wide wc-customer-user">
+							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
@@ -265,6 +266,7 @@ class WC_Meta_Box_Order_Data {
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
 								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?></option>
 							</select>
+							<!--/email_off-->
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
@@ -299,7 +301,13 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
-									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
+									if ( 'billing_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
+									} else {
+										$field_value = make_clickable( esc_html( $field_value ) );
+									}
+
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
 								}
 
 							echo '</div>';
@@ -427,7 +435,7 @@ class WC_Meta_Box_Order_Data {
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
 								?>
 								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ) ?>:</label>
-								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
+								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
 								<?php
 							}
 
@@ -449,8 +457,6 @@ class WC_Meta_Box_Order_Data {
 	 * @param int $order_id Order ID.
 	 */
 	public static function save( $order_id ) {
-		global $wpdb;
-
 		self::init_address_fields();
 
 		// Ensure gateways are loaded in case they need to insert data into the emails.
@@ -459,7 +465,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Get order object.
 		$order = wc_get_order( $order_id );
-		$props = array( 'status' => wc_clean( $_POST['order_status'] ) );
+		$props = array();
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
@@ -467,7 +473,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		// Update customer.
-		$customer_id = absint( $_POST['customer_user'] );
+		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
 		if ( $customer_id !== $order->get_customer_id() ) {
 			$props['customer_id'] = $customer_id;
 		}
@@ -539,6 +545,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Save order data.
 		$order->set_props( $props );
+		$order->set_status( wc_clean( $_POST['order_status'] ), '', true );
 		$order->save();
 	}
 }

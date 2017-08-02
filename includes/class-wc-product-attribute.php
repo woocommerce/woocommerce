@@ -73,6 +73,7 @@ class WC_Product_Attribute implements ArrayAccess {
 			if ( is_int( $option ) ) {
 				$term = get_term_by( 'id', $option, $this->get_name() );
 			} else {
+				// Term names get escaped in WP. See sanitize_term_field.
 				$term = get_term_by( 'name', $option, $this->get_name() );
 
 				if ( ! $term || is_wp_error( $term ) ) {

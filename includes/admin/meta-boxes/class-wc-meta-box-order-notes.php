@@ -26,18 +26,10 @@ class WC_Meta_Box_Order_Notes {
 		global $post;
 
 		$args = array(
-			'post_id'   => $post->ID,
-			'orderby'   => 'comment_ID',
-			'order'     => 'DESC',
-			'approve'   => 'approve',
-			'type'      => 'order_note',
+			'order_id' => $post->ID,
 		);
 
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-		$notes = get_comments( $args );
-
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+		$notes = wc_get_order_notes( $args );
 
 		echo '<ul class="order_notes">';
 
@@ -46,20 +38,20 @@ class WC_Meta_Box_Order_Notes {
 			foreach ( $notes as $note ) {
 
 				$note_classes   = array( 'note' );
-				$note_classes[] = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? 'customer-note' : '';
-				$note_classes[] = ( __( 'WooCommerce', 'woocommerce' ) === $note->comment_author ) ? 'system-note' : '';
+				$note_classes[] = $note->customer_note ? 'customer-note' : '';
+				$note_classes[] = 'system' === $note->added_by ? 'system-note' : '';
 				$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 				?>
-				<li rel="<?php echo absint( $note->comment_ID ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
+				<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 					<div class="note_content">
-						<?php echo wpautop( wptexturize( wp_kses_post( $note->comment_content ) ) ); ?>
+						<?php echo wpautop( wptexturize( wp_kses_post( $note->content ) ) ); ?>
 					</div>
 					<p class="meta">
-						<abbr class="exact-date" title="<?php echo $note->comment_date; ?>"><?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $note->comment_date ) ), date_i18n( wc_time_format(), strtotime( $note->comment_date ) ) ); ?></abbr>
+						<abbr class="exact-date" title="<?php echo $note->date_created->date( 'y-m-d h:i:s' ); ?>"><?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), $note->date_created->date_i18n( wc_date_format() ), $note->date_created->date_i18n( wc_time_format() ) ); ?></abbr>
 						<?php
-						if ( __( 'WooCommerce', 'woocommerce' ) !== $note->comment_author ) :
+						if ( 'system' !== $note->added_by ) :
 							/* translators: %s: note author */
-							printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author );
+							printf( ' ' . __( 'by %s', 'woocommerce' ), $note->added_by );
 						endif;
 						?>
 						<a href="#" class="delete_note" role="button"><?php _e( 'Delete note', 'woocommerce' ); ?></a>

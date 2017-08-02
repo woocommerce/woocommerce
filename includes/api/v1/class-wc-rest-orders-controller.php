@@ -125,8 +125,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( $post );
 		$dp    = $request['dp'];
 
@@ -187,17 +185,15 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				$product_sku  = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
 			$item_meta = array();
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $formatted_meta->key,
+					'label' => $formatted_meta->display_key,
+					'value' => wc_clean( $formatted_meta->display_value ),
 				);
 			}
 
@@ -407,7 +403,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}
@@ -500,7 +496,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -517,7 +513,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Only reutrn writeable props from schema.
+	 * Only return writable props from schema.
 	 * @param  array $schema
 	 * @return bool
 	 */
@@ -603,8 +599,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Gets the product ID from the SKU or posted ID.
+	 *
 	 * @param array $posted Request data
+	 *
 	 * @return int
+	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -648,6 +647,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
@@ -675,6 +676,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_shipping_lines( $posted, $action ) {
@@ -696,6 +699,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_fee_lines( $posted, $action ) {
@@ -717,6 +722,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action ) {

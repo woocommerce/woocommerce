@@ -29,6 +29,8 @@ function wc_get_screen_ids() {
 		$wc_screen_id . '_page_wc-addons',
 		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
+		'product_page_product_exporter',
+		'product_page_product_importer',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',
@@ -42,6 +44,12 @@ function wc_get_screen_ids() {
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+	}
+
+	if ( $attributes = wc_get_attribute_taxonomies() ) {
+		foreach ( $attributes as $attribute ) {
+			$screen_ids[] = 'edit-' . wc_attribute_taxonomy_name( $attribute->attribute_name );
+		}
 	}
 
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );

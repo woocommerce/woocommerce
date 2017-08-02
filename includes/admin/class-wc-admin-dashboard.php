@@ -33,7 +33,7 @@ class WC_Admin_Dashboard {
 	 * Init dashboard widgets.
 	 */
 	public function init() {
-		if ( current_user_can( 'publish_shop_orders' ) ) {
+		if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 			wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce recent reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 		}
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
@@ -246,16 +246,21 @@ class WC_Admin_Dashboard {
 	 */
 	public function recent_reviews() {
 		global $wpdb;
-		$comments = $wpdb->get_results( "
-			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, SUBSTRING(comments.comment_content,1,100) AS comment_excerpt
-			FROM $wpdb->comments comments
-			LEFT JOIN $wpdb->posts posts ON (comments.comment_post_ID = posts.ID)
+
+		$query_from = apply_filters( 'woocommerce_report_recent_reviews_query_from', "FROM {$wpdb->comments} comments
+			LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
 			WHERE comments.comment_approved = '1'
 			AND comments.comment_type = ''
 			AND posts.post_password = ''
 			AND posts.post_type = 'product'
+			AND comments.comment_parent = 0
 			ORDER BY comments.comment_date_gmt DESC
 			LIMIT 5
+		" );
+
+		$comments = $wpdb->get_results( "
+			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content
+			{$query_from};
 		" );
 
 		if ( $comments ) {
@@ -273,7 +278,7 @@ class WC_Admin_Dashboard {
 
 				/* translators: %s: review author */
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( __( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
-				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
+				echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
 			}
 			echo '</ul>';

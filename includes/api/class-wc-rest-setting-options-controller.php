@@ -171,19 +171,49 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
-				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
+				$setting['value']    = $admin_setting_value;
 			}
 
 			if ( 'multi_select_countries' === $setting['type'] ) {
 				$setting['options'] = WC()->countries->get_countries();
 				$setting['type']    = 'multiselect';
+			} elseif ( 'single_select_country' === $setting['type'] ) {
+				$setting['type']    = 'select';
+				$setting['options'] = $this->get_countries_and_states();
 			}
 
 			$filtered_settings[] = $setting;
 		}
 
 		return $filtered_settings;
+	}
+
+	/**
+	 * Returns a list of countries and states for use in the base location setting.
+	 *
+	 * @since  3.0.7
+	 * @return array Array of states and countries.
+	 */
+	private function get_countries_and_states() {
+		$countries = WC()->countries->get_countries();
+		if ( ! $countries ) {
+			return array();
+		}
+
+		$output = array();
+
+		foreach ( $countries as $key => $value ) {
+			if ( $states = WC()->countries->get_states( $key ) ) {
+				foreach ( $states as $state_key => $state_value ) {
+					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
+				}
+			} else {
+				$output[ $key ] = $value;
+			}
+		}
+
+		return $output;
 	}
 
 	/**

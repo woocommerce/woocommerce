@@ -61,8 +61,9 @@ function wc_update_200_permalinks() {
 			}
 		}
 
-		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' )
+		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
 			$product_base .= trailingslashit( '%product_cat%' );
+		}
 
 		$permalinks = array(
 			'product_base' 		=> untrailingslashit( $product_base ),
@@ -101,7 +102,7 @@ function wc_update_200_taxrates() {
 	$loop = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
-	if ( $tax_rates )
+	if ( $tax_rates ) {
 		foreach ( $tax_rates as $tax_rate ) {
 
 			foreach ( $tax_rate['countries'] as $country => $states ) {
@@ -133,10 +134,11 @@ function wc_update_200_taxrates() {
 				}
 			}
 		}
+	}
 
 	$local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-	if ( $local_tax_rates )
+	if ( $local_tax_rates ) {
 		foreach ( $local_tax_rates as $tax_rate ) {
 
 			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
@@ -179,6 +181,7 @@ function wc_update_200_taxrates() {
 
 			$loop++;
 		}
+	}
 
 	update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 	update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
@@ -279,8 +282,9 @@ function wc_update_200_line_items() {
 		if ( ! empty( $order_taxes ) ) {
 			foreach ( $order_taxes as $order_tax ) {
 
-				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
+				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) ) {
 					continue;
+				}
 
 				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 			 		'order_item_name' 		=> $order_tax['label'],
@@ -612,7 +616,6 @@ function wc_update_240_options() {
 }
 
 function wc_update_240_shipping_methods() {
-	global $wpdb;
 	/**
 	 * Flat Rate Shipping.
 	 * Update legacy options to new math based options.
@@ -722,7 +725,6 @@ function wc_update_240_api_keys() {
 }
 
 function wc_update_240_webhooks() {
-	global $wpdb;
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
@@ -993,8 +995,6 @@ function wc_update_300_webhooks() {
 /**
  * Add an index to the field comment_type to improve the response time of the query
  * used by WC_Comments::wp_count_comments() to get the number of comments by type.
- *
- * @return null
  */
 function wc_update_300_comment_type_index() {
 	global $wpdb;
@@ -1095,4 +1095,112 @@ function wc_update_300_product_visibility() {
  */
 function wc_update_300_db_version() {
 	WC_Install::update_db_version( '3.0.0' );
+}
+
+/**
+ * Add an index to the downloadable product permissions table to improve performance of update_user_by_order_id.
+ */
+function wc_update_310_downloadable_products() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE column_name = 'order_id' and key_name = 'order_id'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX order_id (order_id)" );
+	}
+}
+
+/**
+ * Find old order notes and ensure they have the correct type for exclusion.
+ */
+function wc_update_310_old_comments() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE $wpdb->comments comments LEFT JOIN $wpdb->posts as posts ON comments.comment_post_ID = posts.ID SET comment_type = 'order_note' WHERE posts.post_type = 'shop_order' AND comment_type = '';" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_310_db_version() {
+	WC_Install::update_db_version( '3.1.0' );
+}
+
+/**
+ * Update state codes for Mexico.
+ */
+function wc_update_320_mexican_states() {
+	global $wpdb;
+
+	$mx_states = array(
+		'Distrito Federal'    => 'CMX',
+		'Jalisco'             => 'JAL',
+		'Nuevo Leon'          => 'NLE',
+		'Aguascalientes'      => 'AGS',
+		'Baja California'     => 'BCN',
+		'Baja California Sur' => 'BCS',
+		'Campeche'            => 'CAM',
+		'Chiapas'             => 'CHP',
+		'Chihuahua'           => 'CHH',
+		'Coahuila'            => 'COA',
+		'Colima'              => 'COL',
+		'Durango'             => 'DGO',
+		'Guanajuato'          => 'GTO',
+		'Guerrero'            => 'GRO',
+		'Hidalgo'             => 'HGO',
+		'Estado de Mexico'    => 'MEX',
+		'Michoacan'           => 'MIC',
+		'Morelos'             => 'MOR',
+		'Nayarit'             => 'NAY',
+		'Oaxaca'              => 'OAX',
+		'Puebla'              => 'PUE',
+		'Queretaro'           => 'QRO',
+		'Quintana Roo'        => 'ROO',
+		'San Luis Potosi'     => 'SLP',
+		'Sinaloa'             => 'SIN',
+		'Sonora'              => 'SON',
+		'Tabasco'             => 'TAB',
+		'Tamaulipas'          => 'TMP',
+		'Tlaxcala'            => 'TLA',
+		'Veracruz'            => 'VER',
+		'Yucatan'             => 'YUC',
+		'Zacatecas'           => 'ZAC',
+	);
+
+	foreach ( $mx_states as $old => $new ) {
+		$wpdb->update(
+			$wpdb->postmeta,
+			array(
+				'meta_value' => $new,
+			),
+			array(
+				'meta_value' => $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			array(
+				'location_code' => 'MX:' . $new,
+			),
+			array(
+				'location_code' => 'MX:' . $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_tax_rates",
+			array(
+				'tax_rate_state' => strtoupper( $new ),
+			),
+			array(
+				'tax_rate_state' => strtoupper( $old ),
+			)
+		);
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_320_db_version() {
+	WC_Install::update_db_version( '3.2.0' );
 }

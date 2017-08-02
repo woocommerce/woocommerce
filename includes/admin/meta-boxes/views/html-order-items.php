@@ -218,10 +218,12 @@ if ( wc_tax_enabled() ) {
 <?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
-		<tr style="display:none;">
-			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-			<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
-		</tr>
+		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
+			<tr>
+				<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
+			</tr>
+		<?php endif; ?>
 		<tr>
 			<td class="label"><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
 			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
@@ -233,14 +235,14 @@ if ( wc_tax_enabled() ) {
 		<tr>
 			<td class="label"><label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
 			<td class="total">
-				<input type="text" class="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
+				<input type="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
 				<div class="clear"></div>
 			</td>
 		</tr>
 		<tr>
 			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?> <?php _e( 'Reason for refund (optional):', 'woocommerce' ); ?></label></td>
 			<td class="total">
-				<input type="text" class="text" id="refund_reason" name="refund_reason" />
+				<input type="text" id="refund_reason" name="refund_reason" />
 				<div class="clear"></div>
 			</td>
 		</tr>

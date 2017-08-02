@@ -16,7 +16,9 @@
  * @version 2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Load colors
 $bg              = get_option( 'woocommerce_email_background_color' );
@@ -128,6 +130,12 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 }
 
+.address {
+	padding:12px 12px 0;
+	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
+	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+}
+
 .text {
 	color: <?php echo esc_attr( $text ); ?>;
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
@@ -161,7 +169,7 @@ h2 {
 	font-size: 18px;
 	font-weight: bold;
 	line-height: 130%;
-	margin: 16px 0 8px;
+	margin: 0 0 18px;
 	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 

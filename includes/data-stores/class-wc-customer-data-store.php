@@ -36,6 +36,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'last_update',
 		'first_name',
 		'last_name',
+		'display_name',
 		'show_admin_bar_front',
 		'use_ssl',
 		'admin_color',
@@ -43,7 +44,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'comment_shortcuts',
 		'dismissed_wp_pointers',
 		'show_welcome_panel',
-		'_woocommerce_persistent_cart',
 		'session_tokens',
 		'nickname',
 		'description',
@@ -54,6 +54,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'billing_email',
 		'shipping_first_name',
 		'shipping_last_name',
+		'shipping_company',
 		'wptests_capabilities',
 		'wptests_user_level',
 		'_order_count',
@@ -79,6 +80,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$table_prefix = $wpdb->prefix ? $wpdb->prefix : 'wp_';
 
 		return ! in_array( $meta->meta_key, $this->internal_meta_keys )
+			&& 0 !== strpos( $meta->meta_key, '_woocommerce_persistent_cart' )
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
 			&& 0 !== strpos( $meta->meta_key, 'manageedit-' )
@@ -90,7 +92,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Method to create a new customer in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 *
+	 * @param WC_Data $customer
+	 *
+	 * @throws WC_Data_Exception
 	 */
 	public function create( &$customer ) {
 		$id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
@@ -101,6 +106,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$customer->set_id( $id );
 		$this->update_user_meta( $customer );
+
+		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email
+		$customer->set_password( '' );
+
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'role'         => $customer->get_role(),
@@ -118,12 +127,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Method to read a customer object.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @throws Exception
 	 */
 	public function read( &$customer ) {
-		global $wpdb;
-
 		// User object is required.
 		if ( ! $customer->get_id() || ! ( $user_object = get_user_by( 'id', $customer->get_id() ) ) || empty( $user_object->ID ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
@@ -142,6 +149,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'is_paying_customer' => get_user_meta( $customer_id, 'paying_customer', true ),
 			'email'              => $user_object->user_email,
 			'username'           => $user_object->user_login,
+			'display_name'       => $user_object->display_name,
 			'date_created'       => $user_object->user_registered, // Mysql string in local format.
 			'date_modified'      => get_user_meta( $customer_id, 'last_update', true ),
 			'role'               => ! empty( $user_object->roles[0] ) ? $user_object->roles[0] : 'customer',
@@ -155,13 +163,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Updates a customer in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function update( &$customer ) {
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'user_email'   => $customer->get_email(),
-			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+			'display_name' => $customer->get_display_name(),
 		), $customer ) );
 		// Only update password if a new one was set with set_password.
 		if ( $customer->get_password() ) {
@@ -179,7 +187,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
@@ -332,13 +340,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		$spent = get_user_meta( $customer->get_id(), '_money_spent', true );
+		$spent = apply_filters( 'woocommerce_customer_get_total_spent', get_user_meta( $customer->get_id(), '_money_spent', true ), $customer );
 
 		if ( '' === $spent ) {
 			global $wpdb;
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-			$spent    = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+			$spent    = $wpdb->get_var( apply_filters( 'woocommerce_customer_get_total_spent_query', "SELECT SUM(meta2.meta_value)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
@@ -347,7 +355,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				AND     posts.post_type     = 'shop_order'
 				AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
 				AND     meta2.meta_key      = '_order_total'
-			" );
+			", $customer ) );
 
 			if ( ! $spent ) {
 				$spent = 0;
@@ -361,18 +369,22 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Search customers and return customer IDs.
 	 *
-	 * @param  string $term
+	 * @param  string     $term
+	 * @param  int|string $limit @since 3.0.7
+	 *
 	 * @return array
 	 */
-	public function search_customers( $term ) {
-		$query = new WP_User_Query( array(
+	public function search_customers( $term, $limit = '' ) {
+		$query = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 			'fields'         => 'ID',
-		) );
+			'number'         => $limit,
+		), $term, $limit, 'main_query' ) );
 
-		$query2 = new WP_User_Query( array(
+		$query2 = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'fields'         => 'ID',
+			'number'         => $limit,
 			'meta_query'     => array(
 				'relation' => 'OR',
 				array(
@@ -386,7 +398,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					'compare' => 'LIKE',
 				),
 			),
-		) );
-		return wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+		), $term, $limit, 'meta_query' ) );
+
+		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+
+		if ( $limit && count( $results ) > $limit ) {
+			$results = array_slice( $results, 0, $limit );
+		}
+
+		return $results;
 	}
 }

@@ -54,6 +54,8 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
@@ -73,6 +75,14 @@ class WC_Admin {
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		}
+
+		// Helper
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-options.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-api.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper.php' );
 	}
 
 	/**
@@ -166,8 +176,6 @@ class WC_Admin {
 
 	/**
 	 * Preview email template.
-	 *
-	 * @return string
 	 */
 	public function preview_emails() {
 

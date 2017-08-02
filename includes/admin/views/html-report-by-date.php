@@ -50,9 +50,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 								}
 							?>
 							<input type="hidden" name="range" value="custom" />
-							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ); ?>" name="start_date" class="range_datepicker from" />
+							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( $_GET['start_date'] ) : ''; ?>" name="start_date" class="range_datepicker from" />
 							<span>&ndash;</span>
-							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" name="end_date" class="range_datepicker to" />
+							<input type="text" size="11" placeholder="yyyy-mm-dd" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( $_GET['end_date'] ) : ''; ?>" name="end_date" class="range_datepicker to" />
 							<input type="submit" class="button" value="<?php esc_attr_e( 'Go', 'woocommerce' ); ?>" />
 							<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
 						</div>
@@ -66,6 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php if ( $legends = $this->get_chart_legend() ) : ?>
 						<ul class="chart-legend">
 							<?php foreach ( $legends as $legend ) : ?>
+								<?php // @codingStandardsIgnoreLine ?>
 								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series ' . ( isset( $legend['placeholder'] ) ? 'tips' : '' ) . '" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?> data-tip="<?php echo isset( $legend['placeholder'] ) ? $legend['placeholder'] : ''; ?>">
 									<?php echo $legend['title']; ?>
 								</li>

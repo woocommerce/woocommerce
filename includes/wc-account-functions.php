@@ -184,7 +184,7 @@ function wc_get_account_orders_columns() {
 		'order-date'    => __( 'Date', 'woocommerce' ),
 		'order-status'  => __( 'Status', 'woocommerce' ),
 		'order-total'   => __( 'Total', 'woocommerce' ),
-		'order-actions' => '&nbsp;',
+		'order-actions' => __( 'Actions', 'woocommerce' ),
 	) );
 
 	// Deprecated filter since 2.6.0.
@@ -202,7 +202,7 @@ function wc_get_account_downloads_columns() {
 		'download-product'   => __( 'Product', 'woocommerce' ),
 		'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
-		'download-file'      => __( 'File', 'woocommerce' ),
+		'download-file'      => __( 'Download', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
 

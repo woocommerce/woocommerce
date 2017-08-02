@@ -229,7 +229,9 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @param array
 	 */
 	public function set_zone_locations( $locations ) {
-		$this->set_prop( 'zone_locations', $locations );
+		if ( 0 !== $this->get_id() ) {
+			$this->set_prop( 'zone_locations', $locations );
+		}
 	}
 
 	/*
@@ -332,7 +334,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @param string $type state or postcode
 	 */
 	public function add_location( $code, $type ) {
-		if ( $this->is_valid_location_type( $type ) ) {
+		if ( 0 !== $this->get_id() && $this->is_valid_location_type( $type ) ) {
 			if ( 'postcode' === $type ) {
 				$code = trim( strtoupper( str_replace( chr( 226 ) . chr( 128 ) . chr( 166 ), '...', $code ) ) ); // No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
 			}
@@ -418,8 +420,13 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			return false;
 		}
 
-		$this->data_store->delete_method( $instance_id );
-		do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $this->get_id() );
+		// Get method details.
+		$method = $this->data_store->get_method( $instance_id );
+
+		if ( $method ) {
+			$this->data_store->delete_method( $instance_id );
+			do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method->method_id, $this->get_id() );
+		}
 
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 

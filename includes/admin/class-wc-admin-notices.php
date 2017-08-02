@@ -146,6 +146,10 @@ class WC_Admin_Notices {
 
 		if ( ! empty( $notices ) ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+
+			// Add RTL support
+			wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
+
 			foreach ( $notices as $notice ) {
 				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 					add_action( 'admin_notices', array( __CLASS__, self::$core_notices[ $notice ] ) );
@@ -283,8 +287,6 @@ class WC_Admin_Notices {
 	 */
 	public static function no_shipping_methods_notice() {
 		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
-			global $wpdb;
-
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 

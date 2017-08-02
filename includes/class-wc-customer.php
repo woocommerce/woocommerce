@@ -27,6 +27,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		'email'              => '',
 		'first_name'         => '',
 		'last_name'          => '',
+		'display_name'       => '',
 		'role'               => 'customer',
 		'username'           => '',
 		'billing'            => array(
@@ -169,16 +170,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	public function get_avatar_url() {
-		$avatar_html = get_avatar( $this->get_email() );
-
-		// Get the URL of the avatar from the provided HTML
-		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			return esc_url( $matches[1] );
-		}
-
-		return '';
+		return get_avatar_url( $this->get_email() );
 	}
 
 	/**
@@ -266,7 +258,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Has customer calculated shipping?
 	 *
-	 * @param  string $context
 	 * @return bool
 	 */
 	public function get_calculated_shipping() {
@@ -380,6 +371,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_last_name( $context = 'view' ) {
 		return $this->get_prop( 'last_name', $context );
+	}
+
+	/**
+	 * Return customer's display name.
+	 *
+	 * @since  3.1.0
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_display_name( $context = 'view' ) {
+		return $this->get_prop( 'display_name', $context );
 	}
 
 	/**
@@ -719,6 +721,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_last_name( $last_name ) {
 		$this->set_prop( 'last_name', $last_name );
+	}
+
+	/**
+	 * Set customer's display name.
+	 *
+	 * @since 3.1.0
+	 * @param string $display_name
+	 * @throws WC_Data_Exception
+	 */
+	public function set_display_name( $display_name ) {
+		$this->set_prop( 'display_name', $display_name );
 	}
 
 	/**
