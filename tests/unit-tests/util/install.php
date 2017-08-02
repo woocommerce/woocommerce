@@ -103,14 +103,4 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertNull( get_role( 'customer' ) );
 		$this->assertNull( get_role( 'shop_manager' ) );
 	}
-
-	/**
-	 * Test - in_plugin_update_message.
-	 */
-	public function test_in_plugin_update_message() {
-		ob_start();
-		WC_install::in_plugin_update_message( array( 'Version' => '2.0.0', 'new_version' => '2.0.0' ) );
-		$result = ob_get_clean();
-		$this->assertTrue( is_string( $result ) );
-	}
 }
