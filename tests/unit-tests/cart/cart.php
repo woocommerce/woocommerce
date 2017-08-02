@@ -141,6 +141,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product_id );
 		}
 
+		// @TODO TEST CASE #4
+
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
