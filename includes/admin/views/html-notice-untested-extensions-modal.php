@@ -44,5 +44,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</p>
 				</div>
 			<?php endif ?>
+		</div>
 	</div>
 </div>
