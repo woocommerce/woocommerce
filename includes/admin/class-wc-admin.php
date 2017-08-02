@@ -101,8 +101,10 @@ class WC_Admin {
 				include( 'class-wc-admin-permalink-settings.php' );
 			break;
 			case 'plugins' :
+				include ( 'plugin-updates/class-wc-plugins-screen-updates.php' );
+			break;
 			case 'update-core' :
-				include( 'class-wc-admin-plugin-updates.php' );
+				include( 'plugin-updates/class-wc-updates-screen-updates.php' );
 			break;
 			case 'users' :
 			case 'user' :

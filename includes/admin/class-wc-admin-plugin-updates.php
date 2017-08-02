@@ -132,6 +132,14 @@ class WC_Admin_Plugin_Updates {
 		$this->update_screen_modal_js();
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Modal JS
+	|--------------------------------------------------------------------------
+	|
+	| JS snippets for handling modals.
+	*/
+
 	/**
 	 * Common JS for initializing and managing the modals.
 	 */
