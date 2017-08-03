@@ -47,25 +47,6 @@ class WC_Plugin_Updates {
 	protected $minor_untested_plugins = array();
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		add_filter( 'extra_plugin_headers', array( $this, 'enable_wc_plugin_headers' ) );
-	}
-
-	/**
-	 * Read in WooCommerce headers when reading plugin headers.
-	 *
-	 * @param array $headers
-	 * @return array $headers
-	 */
-	public function enable_wc_plugin_headers( $headers ) {
-		$headers['WCRequires'] = self::VERSION_REQUIRED_HEADER;
-		$headers['WCTested']   = self::VERSION_TESTED_HEADER;
-		return $headers;
-	}
-
-	/**
 	 * Common JS for initializing and managing thickbox-based modals.
 	 */
 	protected function generic_modal_js() {

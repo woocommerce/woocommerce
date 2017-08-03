@@ -24,8 +24,10 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	 */
 	protected $upgrade_notice = '';
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
-		parent::__construct();
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ), 10, 2 );
 	}
 
