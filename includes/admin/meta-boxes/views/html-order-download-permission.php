@@ -43,6 +43,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<a href="' . esc_url( $download_link ) . '">' . esc_html( $file_count ) . '</a>';
 					?>
 				</td>
+				<td>
+					<?php
+						$report_url = add_query_arg(
+							'permission_id',
+							$download->get_id(),
+							admin_url( 'admin.php?page=wc-reports&tab=products&report=downloads' )
+						);
+						echo '<a href="' . esc_attr( $report_url ) . '">';
+						_e( 'View download logs', 'woocommerce' );
+						echo '</a>';
+					?>
+				</td>
 			</tr>
 		</tbody>
 	</table>

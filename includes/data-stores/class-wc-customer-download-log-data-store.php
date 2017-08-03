@@ -183,6 +183,11 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	 * @return array
 	 */
 	public function get_download_logs_for_permission( $permission_id ) {
+		// If no permission_id is passed, return an empty array
+		if ( empty( $permission_id ) ) {
+			return array();
+		}
+
 		return $this->get_download_logs( array(
 			'permission_id'   => $permission_id
 		) );

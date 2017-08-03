@@ -110,6 +110,17 @@ class WC_Admin_Reports {
 					),
 				),
 			),
+			'products'     => array(
+				'title'  => __( 'Products', 'woocommerce' ),
+				'reports' => array(
+					"downloads" => array(
+						'title'       => __( 'Product Downloads', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => false,
+						'callback'    => array( __CLASS__, 'get_report' ),
+					),
+				),
+			),
 		);
 
 		if ( wc_tax_enabled() ) {
