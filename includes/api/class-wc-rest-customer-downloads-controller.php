@@ -82,7 +82,7 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V
 			'type'       => 'object',
 			'properties' => array(
 				'download_id' => array(
-					'description' => __( 'Download ID (MD5).', 'woocommerce' ),
+					'description' => __( 'Download ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

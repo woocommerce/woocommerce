@@ -468,21 +468,7 @@ class WC_Post_Data {
 	 * @param array $downloads newly set files
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
-		if ( $variation_id ) {
-			$product_id = $variation_id;
-		}
-		$data_store = WC_Data_Store::load( 'customer-download' );
-
-		if ( $downloads ) {
-			foreach ( $downloads as $download ) {
-				$new_hash = md5( $download->get_file() );
-
-				if ( $download->get_previous_hash() && $download->get_previous_hash() !== $new_hash ) {
-					// Update permissions.
-					$data_store->update_download_id( $product_id, $download->get_previous_hash(), $new_hash );
-				}
-			}
-		}
+		// No action is necessary on changes to download paths since download_id is no longer based on file hash.
 	}
 
 	/**

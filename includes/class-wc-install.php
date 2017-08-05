@@ -514,7 +514,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id BIGINT UNSIGNED NOT NULL auto_increment,
-  download_id varchar(32) NOT NULL,
+  download_id varchar(36) NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   order_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
   order_key varchar(200) NOT NULL,

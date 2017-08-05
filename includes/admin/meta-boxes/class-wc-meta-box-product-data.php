@@ -191,7 +191,7 @@ class WC_Meta_Box_Product_Data {
 					$downloads[] = array(
 						'name'          => wc_clean( $file_names[ $i ] ),
 						'file'          => wp_unslash( trim( $file_urls[ $i ] ) ),
-						'previous_hash' => wc_clean( $file_hashes[ $i ] ),
+						'download_id'	=> wc_clean( $file_hashes[ $i ] ),
 					);
 				}
 			}
