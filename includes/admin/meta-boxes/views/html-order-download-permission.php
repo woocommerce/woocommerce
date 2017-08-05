@@ -44,6 +44,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</td>
 				<td>
+					<label><?php _e( 'Downloads completed', 'woocommerce' ); ?></label>
+					<?php echo esc_html( $download->get_download_count() ); ?>
+				</td>
+				<td>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
