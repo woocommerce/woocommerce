@@ -670,6 +670,35 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		);
 	}
 
+	public function get_database_table_sizes() {
+		global $wpdb;
+
+		$database_table_sizes = $wpdb->get_results( $wpdb->prepare( "
+			SELECT 
+			    table_name AS 'name', 
+			    round( ( data_length / 1024 / 1024 ), 2 ) 'data',
+			    round( ( index_length / 1024 / 1024 ), 2 ) 'index'
+			FROM information_schema.TABLES 
+			WHERE table_schema = %s
+			ORDER BY name ASC;
+		", DB_NAME ) );
+
+		return is_array( $database_table_sizes ) ? $database_table_sizes : array();
+	}
+
+	/**
+	 * Get array of counts of objects. Orders, products, etc.
+	 *
+	 * @return array
+	 */
+	public function get_post_type_counts() {
+		global $wpdb;
+
+		$post_type_counts = $wpdb->get_results( "SELECT post_type AS 'type', count(1) AS 'count' FROM {$wpdb->posts} GROUP BY post_type;" );
+
+		return is_array( $post_type_counts ) ? $post_type_counts : array();
+	}
+
 	/**
 	 * Get a list of plugins active on the site.
 	 *
