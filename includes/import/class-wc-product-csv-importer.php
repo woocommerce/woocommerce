@@ -411,6 +411,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Format text from csv
+	 *
+	 * @param  string $field Field value.
+	 * @return string
+	 */
+	public function format_text_field( $field ){
+
+		$post_text = esc_html( wp_unslash( $field  ));
+
+		return $post_text;
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param  string $field Field value.
@@ -450,9 +463,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
-			'name'              => 'wp_filter_post_kses',
-			'short_description' => 'wp_filter_post_kses',
-			'description'       => 'wp_filter_post_kses',
+			'name'              => array( $this, 'format_text_field'),
+			'short_description' => array( $this, 'format_text_field'),
+			'description'       => array( $this, 'format_text_field'),
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
