@@ -333,7 +333,9 @@ class WC_Comments {
 
 		$count = $wpdb->get_var( $wpdb->prepare("
 			SELECT COUNT(*) FROM $wpdb->comments
-			WHERE comment_parent = 0
+			LEFT JOIN $wpdb->commentmeta ON $wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id
+			WHERE meta_key = 'rating'
+			AND comment_parent = 0
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
 		", $product->get_id() ) );
