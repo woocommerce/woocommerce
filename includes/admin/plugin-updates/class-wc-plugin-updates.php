@@ -185,6 +185,14 @@ class WC_Plugin_Updates {
 
 		foreach ( $extensions as $file => $plugin ) {
 			$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
+
+			if ( ! is_numeric( $plugin_version_parts[0] )
+				|| ( 'minor' === $release && ! isset( $plugin_version_parts[1] ) )
+				|| ( 'minor' === $release && ! is_numeric( $plugin_version_parts[1] ) )
+				) {
+				continue;
+			}
+
 			$plugin_version = $plugin_version_parts[0];
 
 			if ( 'minor' === $release ) {
@@ -215,6 +223,6 @@ class WC_Plugin_Updates {
 			}
 		}
 
-		return $matches;
+		return apply_filters( 'woocommerce_get_plugins_with_header', $matches, $header, $plugins );
 	}
 }
