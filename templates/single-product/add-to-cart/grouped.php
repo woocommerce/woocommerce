@@ -34,7 +34,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					$post_object        = get_post( $grouped_product->get_id() );
 					$quantites_required = $quantites_required || ( $grouped_product->is_purchasable() && ! $grouped_product->has_options() );
 
-					setup_postdata( $post =& $post_object );
+					setup_postdata( $post = $post_object );
 					?>
 					<tr id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<td>
@@ -81,7 +81,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					<?php
 				}
 				// Return data to original post.
-				setup_postdata( $post =& $previous_post );
+				setup_postdata( $post = $previous_post );
 			?>
 		</tbody>
 	</table>

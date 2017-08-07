@@ -91,11 +91,8 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			if ( 1 < count( $value ) ) {
-				$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + array( '@graph' => $value );
-			} else {
-				$data[ $type ] = $value[0];
-			}
+			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
@@ -214,7 +211,7 @@ class WC_Structured_Data {
 				'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 				'sku'           => $product->get_sku(),
 				'image'         => wp_get_attachment_url( $product->get_image_id() ),
-				'description'   => $product->get_description(),
+				'description'   => wpautop( do_shortcode( $product->get_description() ) ),
 				'seller'        => array(
 					'@type' => 'Organization',
 					'name'  => $shop_name,
