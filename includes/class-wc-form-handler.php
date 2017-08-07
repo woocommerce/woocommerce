@@ -382,24 +382,39 @@ class WC_Form_Handler {
 			nocache_headers();
 			ob_start();
 
-			$payment_method = wc_clean( $_POST['payment_method'] );
-
+			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-			// Validate
-			$available_gateways[ $payment_method ]->validate_fields();
 
-			// Process
-			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
-				$result = $available_gateways[ $payment_method ]->add_payment_method();
-				// Redirect to success/confirmation/payment page
+			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
+				$gateway = $available_gateways[ $payment_method_id ];
+
+				if ( ! $gateway->supports( 'add_payment_method' ) && ! $gateway->supports( 'tokenization' ) ) {
+					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
+					return;
+				}
+
+				$gateway->validate_fields();
+
+				if ( wc_notice_count( 'error' ) > 0 ) {
+					return;
+				}
+
+				$result = $gateway->add_payment_method();
+
 				if ( 'success' === $result['result'] ) {
-					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
+					wc_add_notice( __( 'Payment method successfully added.', 'woocommerce' ) );
+				}
+
+				if ( 'failure' === $result['result'] ) {
+					wc_add_notice( __( 'Unable to add payment method to your account.', 'woocommerce' ), 'error' );
+				}
+
+				if ( ! empty( $result['redirect'] ) ) {
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
 			}
 		}
-
 	}
 
 	/**
