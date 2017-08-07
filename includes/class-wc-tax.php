@@ -553,10 +553,15 @@ class WC_Tax {
 					'tax_class' => $tax_class,
 				) );
 
-			} else {
+			} elseif ( WC()->cart->get_cart() ) {
 
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
+
+				// No tax classes = no taxable items.
+				if ( empty( $cart_tax_classes ) ) {
+					return array();
+				}
 
 				// If multiple classes are found, use the first one found unless a standard rate item is found. This will be the first listed in the 'additional tax class' section.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
