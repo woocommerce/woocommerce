@@ -156,7 +156,7 @@ class WC_Cache_Helper {
 			return;
 		}
 		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
-		
+
 		if ( isset( $_GET['download_file'] ) || is_page( $page_ids ) ) {
 			self::nocache();
 		}
