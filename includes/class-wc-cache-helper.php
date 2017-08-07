@@ -155,10 +155,9 @@ class WC_Cache_Helper {
 		if ( ! is_blog_installed() ) {
 			return;
 		}
-		$page_ids        = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
-		$current_page_id = get_queried_object_id();
+		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
 
-		if ( isset( $_GET['download_file'] ) || in_array( $current_page_id, $page_ids ) ) {
+		if ( isset( $_GET['download_file'] ) || is_page( $page_ids ) ) {
 			self::nocache();
 		}
 	}
