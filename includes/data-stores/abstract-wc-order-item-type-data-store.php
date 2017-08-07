@@ -143,5 +143,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 */
 	public function clear_cache( &$item ) {
 		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'order-items-' . $item->get_order_id(), 'orders' );
 	}
 }
