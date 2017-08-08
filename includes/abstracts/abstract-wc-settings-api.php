@@ -295,7 +295,9 @@ abstract class WC_Settings_API {
 		foreach ( $form_fields as $k => $v ) {
 			$type = $this->get_field_type( $v );
 
-			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
+			if( has_filter( 'wc_settings_generate_' . $type . '_html' ) ){
+				$html .= apply_filters( 'wc_settings_generate_' . $type . '_html', '', $k, $v, $this );
+			} else if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
 			} else {
 				$html .= $this->generate_text_html( $k, $v );
@@ -407,6 +409,72 @@ abstract class WC_Settings_API {
 		<?php
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Generate Upload Input HTML.
+	 *
+	 * @param  mixed $key
+	 * @param  mixed $data
+	 * @since  2.7.0
+	 * @return string
+	 */
+	public function generate_upload_html( $key, $data ) {
+
+        wp_enqueue_media();
+
+        $field_key = $this->get_field_key( $key );
+        $defaults  = array(
+            'title'             => '',
+            'disabled'          => false,
+            'class'             => '',
+            'css'               => '',
+            'placeholder'       => '',
+            'type'              => 'text',
+            'desc_tip'          => false,
+            'description'       => '',
+            'custom_attributes' => array(),
+            'media_frame_title' => __( 'Select Media', 'woocommerce' ),
+            'media_button_text' => __( 'Select', 'woocommerce' )
+        );
+
+        $data = wp_parse_args( $data, $defaults );
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+                <?php echo $this->get_tooltip_html( $data ); ?>
+            </th>
+            <td class="forminp">
+                <fieldset>
+                    <legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+
+                    <div class="wc-settings-media-preview-wrapper">
+                        <?php $attachment_id = $this->get_option( $key );
+                        
+                        $remove_button_class = $attachment_id > 0 ? '' : 'hidden';
+
+                        if( $attachment_id > 0 ){
+                            echo wp_get_attachment_image( $attachment_id, 'thumbnail', true ); 
+                            echo '<p class="description">' . basename( get_attached_file( $attachment_id ) ) . '</p>';
+                        } ?>
+                    </div>
+                    
+                    <button class="wc-settings-media-upload button" data-media_frame_title="<?php echo esc_attr( $data['media_frame_title'] ); ?>" data-media_button_text="<?php echo esc_attr( $data['media_button_text'] ); ?>"><?php _e( "Upload", "wc-legal-docs" ); ?></button>
+
+                    <input class="wc-settings-media-id input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="hidden" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+
+                    <button class="wc-settings-media-remove button <?php echo $remove_button_class;?>"><?php _e( "Remove", "wc-legal-docs" ); ?></button>
+
+                    <?php echo $this->get_description_html( $data ); ?>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
 	}
 
 	/**
