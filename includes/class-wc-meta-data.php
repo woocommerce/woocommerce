@@ -1,43 +1,47 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Wraps an array (meta data for now) and tells if there was any changes.
  *
  * The main idea behind this class is to avoid doing unneeded
  * SQL updates if nothing changed.
  *
- * @version 3.0.x
+ * @version 3.2.0
  * @package WooCommerce
  * @category Class
  * @author crodas
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Meta_Data class.
+ */
 class WC_Meta_Data {
+
 	/**
 	 * Current data for metadata
 	 *
-	 * @since 3.1.0
-	 * @var arrray
+	 * @since 3.2.0
+	 * @var array
 	 */
 	protected $current_data;
 
 	/**
 	 * Metadata data
 	 *
-	 * @since 3.1.0
-	 * @var arrray
+	 * @since 3.2.0
+	 * @var array
 	 */
 	protected $data;
 
 	/**
-	 * Default constructor
+	 * Constructor.
 	 *
-	 * @param Array	meta data to wrap behind this function
+	 * @param array	$meta Data to wrap behind this function.
 	 */
-	public function __construct( Array $meta ) {
+	public function __construct( $meta = array() ) {
 		$this->current_data = $meta;
 		$this->apply_changes();
 	}
@@ -52,9 +56,8 @@ class WC_Meta_Data {
 	/**
 	 * Creates or updates a property in the metadata object.
 	 *
-	 * @param string $key
-	 * @param mixed $value
-	 *
+	 * @param string $key Key to set.
+	 * @param mixed  $value Value to set.
 	 */
 	public function __set( $key, $value ) {
 		$this->current_data[ $key ] = $value;
@@ -64,7 +67,7 @@ class WC_Meta_Data {
 	 * Checks if a given key exists in our data. This is called internally
 	 * by `empty` and `isset`.
 	 *
-	 * @param string $key
+	 * @param string $key Key to check if set.
 	 */
 	public function __isset( $key ) {
 		return array_key_exists( $key, $this->current_data );
@@ -73,8 +76,7 @@ class WC_Meta_Data {
 	/**
 	 * Returns the value of any property.
 	 *
-	 * @param string $key
-	 *
+	 * @param string $key Key to get.
 	 * @return mixed Property value or NULL if it does not exists
 	 */
 	public function __get( $key ) {
@@ -96,7 +98,6 @@ class WC_Meta_Data {
 				$changes[ $id ] = $value;
 			}
 		}
-
 		return $changes;
 	}
 
