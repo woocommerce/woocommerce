@@ -505,8 +505,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$base_url   = $upload_dir['baseurl'] . '/';
 
 		// Check first if attachment is on WordPress uploads directory.
-		if ( false !== strpos( $url, $base_url ) ) {
-			// Search for yyyy/mm/slug.extension
+		if ( false === strpos( $url, $base_url ) ) {
+			// Search for yyyy/mm/slug.extension.
 			$file = str_replace( $base_url, '', $url );
 			$args = array(
 				'post_type'   => 'attachment',
@@ -516,11 +516,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					array(
 						'value'   => $file,
 						'compare' => 'LIKE',
-						'key'     => '_wp_attachment_metadata',
+						'key'     => '_wp_attached_file',
 					),
 				),
 			);
-
 			if ( $ids = get_posts( $args ) ) {
 				$id = current( $ids );
 			}
@@ -536,14 +535,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					),
 				),
 			);
-
 			if ( $ids = get_posts( $args ) ) {
 				$id = current( $ids );
 			}
 		}
 
 		// Upload if attachment does not exists.
-		if ( ! $id ) {
+		if ( ! $id && stristr( $url, '://' ) ) {
 			$upload = wc_rest_upload_image_from_url( $url );
 
 			if ( is_wp_error( $upload ) ) {
@@ -558,6 +556,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Save attachment source for future reference.
 			update_post_meta( $id, '_wc_attachment_source', $url );
+		}
+
+		if ( ! $id ) {
+			throw new Exception( sprintf( __( 'Unable to use image "%s".', 'woocommerce' ), $url ), 400 );
 		}
 
 		return $id;
