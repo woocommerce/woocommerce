@@ -606,6 +606,7 @@ function wc_delete_attribute( $id ) {
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		return true;
