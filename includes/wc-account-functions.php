@@ -241,6 +241,24 @@ function wc_get_account_payment_methods_types() {
 }
 
 /**
+ * Get account formatted address.
+ *
+ * @since  3.2.0
+ * @param  string $address_type billing or shipping.
+ * @return string
+ */
+function wc_get_account_formatted_address( $address_type ) {
+	$getter   = "get_{$address_type}";
+	$customer = new WC_Customer( get_current_user_id() );
+
+	if ( is_callable( array( $customer, $getter ) ) ) {
+		$address = $customer->$getter();
+		unset( $address['email'], $address['tel'] );
+	}
+	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
+}
+
+/**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6
