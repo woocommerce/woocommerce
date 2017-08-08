@@ -238,6 +238,15 @@ jQuery( function( $ ) {
 	}).change();
 
 	// DATE PICKER FIELDS.
+	function date_picker_select( datepicker ) {
+		var option         = $( datepicker ).next().is( '.hasDatepicker' ) ? 'minDate' : 'maxDate',
+			otherDateField = 'minDate' === option ? $( datepicker ).next() : $( datepicker ).prev(),
+			date           = $( datepicker ).datepicker( 'getDate' );
+
+		$( otherDateField ).datepicker( 'option', option, date );
+		$( datepicker ).change();
+	}
+
 	$( '.sale_price_dates_fields' ).each( function() {
 		$( this ).find( 'input' ).datepicker({
 			defaultDate: '',
@@ -245,14 +254,10 @@ jQuery( function( $ ) {
 			numberOfMonths: 1,
 			showButtonPanel: true,
 			onSelect: function() {
-				var option = $( this ).next().is('.hasDatepicker') ? 'minDate' : 'maxDate',
-					dates  = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
-					date   = $( this ).datepicker( 'getDate' );
-
-				dates.not( this ).datepicker( 'option', option, date );
-				$( this ).change();
+				date_picker_select( $( this ) );
 			}
 		});
+		$( this ).find( 'input' ).each( function() { date_picker_select( $( this ) ) } );
 	});
 
 	// ATTRIBUTE TABLES.
