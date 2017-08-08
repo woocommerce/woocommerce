@@ -191,7 +191,6 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
  * Get the subtotal.
  *
  * @access public
- * @return string
  */
 function wc_cart_totals_subtotal_html() {
 	echo WC()->cart->get_cart_subtotal();

@@ -1750,5 +1750,17 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed value sanitized by wc_clean
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( isset( $_POST[ $key ] ) ? $_POST[ $key ] : $default );
+	return wc_clean( wc_get_var( $_POST[ $key ], $default ) );
+}
+
+/**
+ * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
+ *
+ * @since  3.2.0
+ * @param  mixed $var
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_var( &$var, $default = null ) {
+	return isset( $var ) ? $var : $default;
 }

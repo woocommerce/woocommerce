@@ -796,7 +796,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		$found_tax_classes = array();
 
 		foreach ( WC()->cart->get_cart() as $item ) {
-			$found_tax_classes[] = $item['data']->get_tax_class();
+			if ( $item['data'] && ( $item['data']->is_taxable() || $item['data']->is_shipping_taxable() ) ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
 		}
 
 		return array_unique( $found_tax_classes );

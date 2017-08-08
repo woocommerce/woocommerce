@@ -546,7 +546,12 @@ class WC_Admin_Post_Types {
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) ) );
+				printf(
+					'<time datetime="%1$s" title="%2$s">%3$s</time>',
+					esc_attr( $the_order->get_date_created()->date( 'c' ) ),
+					esc_html( $the_order->get_date_created()->date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ),
+					esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) )
+				);
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -1027,39 +1032,32 @@ class WC_Admin_Post_Types {
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
 		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_REQUEST['_stock'] ) : '';
 
+		$product->set_manage_stock( $manage_stock );
+		$product->set_backorders( $backorders );
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-
-			// Apply product type constraints to stock status
-			if ( $product->is_type( 'external' ) ) {
-				// External always in stock
-				$stock_status = 'instock';
-			} elseif ( $product->is_type( 'variable' ) ) {
-				// Stock status is always determined by children
-				foreach ( $product->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! $product->get_manage_stock() ) {
-						$child->set_stock_status( $stock_status );
-						$child->save();
-					}
-				}
-
-				$product = WC_Product_Variable::sync( $product, false );
-			}
-
-			$product->set_manage_stock( $manage_stock );
-			$product->set_backorders( $backorders );
-			$product->save();
-
-			if ( ! $product->is_type( 'variable' ) ) {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
-
-			wc_update_product_stock( $post_id, $stock_amount );
-
-		} else {
-			$product->save();
-			wc_update_product_stock_status( $post_id, $stock_status );
+			$product->set_stock_quantity( $stock_amount );
 		}
+
+		// Apply product type constraints to stock status.
+		if ( $product->is_type( 'external' ) ) {
+			// External products are always in stock.
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			// Stock status is determined by children.
+			foreach ( $product->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( ! $product->get_manage_stock() ) {
+					$child->set_stock_status( $stock_status );
+					$child->save();
+				}
+			}
+			$product = WC_Product_Variable::sync( $product, false );
+		} else {
+			$product->set_stock_status( $stock_status );
+		}
+
+		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
 	}
@@ -1238,51 +1236,43 @@ class WC_Admin_Post_Types {
 		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
 		$stock_status       = $product->get_stock_status();
 		$backorders         = $product->get_backorders();
-
-		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
-		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
+		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
+		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
-			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
 		} else {
 			$manage_stock = $was_managing_stock;
 		}
 
 		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
+		$product->set_manage_stock( $manage_stock );
+		$product->set_backorders( $backorders );
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-
-			// Apply product type constraints to stock status
-			if ( $product->is_type( 'external' ) ) {
-				// External always in stock
-				$stock_status = 'instock';
-			} elseif ( $product->is_type( 'variable' ) ) {
-				// Stock status is always determined by children
-				foreach ( $product->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! $product->get_manage_stock() ) {
-						$child->set_stock_status( $stock_status );
-						$child->save();
-					}
-				}
-
-				$product = WC_Product_Variable::sync( $product, false );
-			}
-
-			$product->set_manage_stock( $manage_stock );
-			$product->set_backorders( $backorders );
-			$product->save();
-
-			if ( ! $product->is_type( 'variable' ) ) {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
-
-			wc_update_product_stock( $post_id, $stock_amount );
-
-		} else {
-			$product->save();
-			wc_update_product_stock_status( $post_id, $stock_status );
+			$product->set_stock_quantity( $stock_amount );
 		}
+
+		// Apply product type constraints to stock status.
+		if ( $product->is_type( 'external' ) ) {
+			// External products are always in stock.
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			// Stock status is determined by children.
+			foreach ( $product->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( ! $product->get_manage_stock() ) {
+					$child->set_stock_status( $stock_status );
+					$child->save();
+				}
+			}
+			$product = WC_Product_Variable::sync( $product, false );
+		} else {
+			$product->set_stock_status( $stock_status );
+		}
+
+		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 	}

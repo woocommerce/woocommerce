@@ -456,4 +456,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_html__( 'Save to account', 'woocommerce' )
 		);
 	}
+
+	/**
+	 * Add payment method via account screen. This should be extended by gateway plugins.
+	 *
+	 * @since 3.2.0 Included here from 3.2.0, but supported from 3.0.0.
+	 * @return array
+	 */
+	public function add_payment_method() {
+		return array(
+			'result'   => 'failure',
+			'redirect' => wc_get_endpoint_url( 'payment-methods' ),
+		);
+	}
 }
