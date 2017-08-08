@@ -390,29 +390,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
-		$discount = (float) min( $discount, $discounting_amount );
-
-		// Handle the limit_usage_to_x_items option
-		if ( ! $this->is_type( array( 'fixed_cart' ) ) ) {
-			if ( $discounting_amount ) {
-				if ( null === $this->get_limit_usage_to_x_items() ) {
-					$limit_usage_qty = $cart_item_qty;
-				} else {
-					$limit_usage_qty = min( $this->get_limit_usage_to_x_items(), $cart_item_qty );
-
-					$this->set_limit_usage_to_x_items( max( 0, ( $this->get_limit_usage_to_x_items() - $limit_usage_qty ) ) );
-				}
-				if ( $single ) {
-					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-				} else {
-					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
-				}
-			}
-		}
-
-		$discount = round( $discount, wc_get_rounding_precision() );
-
-		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', round( min( $discount, $discounting_amount ), wc_get_rounding_precision() ), $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/*
@@ -761,260 +739,22 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Ensure coupon exists or throw exception.
+	 * Check if a coupon is valid for the cart.
 	 *
+	 * @deprecated 3.2.0 In favor of WC_Discounts->is_coupon_valid.
 	 * @throws Exception
-	 */
-	private function validate_exists() {
-		if ( ! $this->get_id() ) {
-			throw new Exception( self::E_WC_COUPON_NOT_EXIST );
-		}
-	}
-
-	/**
-	 * Ensure coupon usage limit is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_usage_limit() {
-		if ( $this->get_usage_limit() > 0 && $this->get_usage_count() >= $this->get_usage_limit() ) {
-			throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
-		}
-	}
-
-	/**
-	 * Ensure coupon user usage limit is valid or throw exception.
-	 *
-	 * Per user usage limit - check here if user is logged in (against user IDs).
-	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
-	 *
-	 * @param  int  $user_id
-	 * @throws Exception
-	 */
-	private function validate_user_usage_limit( $user_id = 0 ) {
-		if ( empty( $user_id ) ) {
-			$user_id = get_current_user_id();
-		}
-		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->get_id() && $this->data_store ) {
-			$usage_count = $this->data_store->get_usage_by_user_id( $this, $user_id );
-			if ( $usage_count >= $this->get_usage_limit_per_user() ) {
-				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
-			}
-		}
-	}
-
-	/**
-	 * Ensure coupon date is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_expiry_date() {
-		if ( $this->get_date_expires() && current_time( 'timestamp', true ) > $this->get_date_expires()->getTimestamp() ) {
-			throw new Exception( $error_code = self::E_WC_COUPON_EXPIRED );
-		}
-	}
-
-	/**
-	 * Ensure coupon amount is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_minimum_amount() {
-		if ( $this->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $this->get_minimum_amount() > WC()->cart->get_displayed_subtotal(), $this ) ) {
-			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
-		}
-	}
-
-	/**
-	 * Ensure coupon amount is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_maximum_amount() {
-		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() < WC()->cart->get_displayed_subtotal(), $this ) ) {
-			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
-		}
-	}
-
-	/**
-	 * Ensure coupon is valid for products in the cart is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_product_ids() {
-		if ( sizeof( $this->get_product_ids() ) > 0 ) {
-			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_product_ids() ) ) {
-						$valid_for_cart = true;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
-			}
-		}
-	}
-
-	/**
-	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_product_categories() {
-		if ( sizeof( $this->get_product_categories() ) > 0 ) {
-			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
-						continue;
-					}
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
-
-					// If we find an item with a cat in our allowed cat list, the coupon is valid
-					if ( sizeof( array_intersect( $product_cats, $this->get_product_categories() ) ) > 0 ) {
-						$valid_for_cart = true;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
-			}
-		}
-	}
-
-	/**
-	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_sale_items() {
-		if ( $this->get_exclude_sale_items() ) {
-			$valid_for_cart = false;
-
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					$product = $cart_item['data'];
-
-					if ( ! $product->is_on_sale() ) {
-						$valid_for_cart = true;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
-			}
-		}
-	}
-
-	/**
-	 * All exclusion rules must pass at the same time for a product coupon to be valid.
-	 */
-	private function validate_excluded_items() {
-		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
-			$valid = false;
-
-			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
-					$valid = true;
-					break;
-				}
-			}
-
-			if ( ! $valid ) {
-				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
-			}
-		}
-	}
-
-	/**
-	 * Cart discounts cannot be added if non-eligible product is found in cart.
-	 */
-	private function validate_cart_excluded_items() {
-		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
-			$this->validate_cart_excluded_product_ids();
-			$this->validate_cart_excluded_product_categories();
-		}
-	}
-
-	/**
-	 * Exclude products from cart.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_cart_excluded_product_ids() {
-		// Exclude Products
-		if ( sizeof( $this->get_excluded_product_ids() ) > 0 ) {
-			$valid_for_cart = true;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( in_array( $cart_item['product_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['variation_id'], $this->get_excluded_product_ids() ) || in_array( $cart_item['data']->get_parent_id(), $this->get_excluded_product_ids() ) ) {
-						$valid_for_cart = false;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_EXCLUDED_PRODUCTS );
-			}
-		}
-	}
-
-	/**
-	 * Exclude categories from cart.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_cart_excluded_product_categories() {
-		if ( sizeof( $this->get_excluded_product_categories() ) > 0 ) {
-			$valid_for_cart = true;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( $this->get_exclude_sale_items() && $cart_item['data'] && $cart_item['data']->is_on_sale() ) {
-						continue;
-					}
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
-
-					if ( sizeof( array_intersect( $product_cats, $this->get_excluded_product_categories() ) ) > 0 ) {
-						$valid_for_cart = false;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_EXCLUDED_CATEGORIES );
-			}
-		}
-	}
-
-	/**
-	 * Check if a coupon is valid.
-	 *
-	 * @return boolean validity
-	 * @throws Exception
+	 * @return bool Validity.
 	 */
 	public function is_valid() {
-		try {
-			$this->validate_exists();
-			$this->validate_usage_limit();
-			$this->validate_user_usage_limit();
-			$this->validate_expiry_date();
-			$this->validate_minimum_amount();
-			$this->validate_maximum_amount();
-			$this->validate_product_ids();
-			$this->validate_product_categories();
-			$this->validate_sale_items();
-			$this->validate_excluded_items();
-			$this->validate_cart_excluded_items();
+		$discounts = new WC_Discounts( WC()->cart );
+		$valid     = $discounts->is_coupon_valid( $this );
 
-			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $this ) ) {
-				throw new Exception( self::E_WC_COUPON_INVALID_FILTERED );
-			}
-		} catch ( Exception $e ) {
-			$this->error_message = $this->get_coupon_error( $e->getMessage() );
+		if ( is_wp_error( $valid ) ) {
+			$this->error_message = $valid->get_error_message();
 			return false;
 		}
 
-		return true;
+		return $valid;
 	}
 
 	/**

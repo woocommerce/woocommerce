@@ -32,16 +32,12 @@
 				<directory suffix=".php">./includes/shipping/legacy-local-delivery/</directory>
 				<directory suffix=".php">./includes/shipping/legacy-local-pickup/</directory>
 				<directory suffix=".php">./includes/updates/</directory>
-				<directory suffix=".php">./includes/vendor/</directory>
 				<directory suffix=".php">./includes/widgets/</directory>
 				<directory suffix=".php">./templates/</directory>
 				<directory>./tests/</directory>
 				<directory>./vendor/</directory>
 				<directory>./.*/</directory>
 				<directory>./tmp/</directory>
-				<directory suffix=".php">./tests/</directory>
-				<directory suffix=".php">./tmp/</directory>
-				<directory suffix=".php">./vendor/</directory>
 			</exclude>
 		</whitelist>
 	</filter>

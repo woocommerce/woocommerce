@@ -1444,6 +1444,66 @@ function wc_get_rounding_precision() {
 }
 
 /**
+ * Add precision to a number and return an int.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return $value * $precision;
+}
+
+/**
+ * Remove precision from a number and return a float.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return float
+ */
+function wc_remove_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+}
+
+/**
+ * Add precision to an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_add_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_add_number_precision( $value );
+	}
+	return $value;
+}
+
+/**
+ * Remove precision from an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_remove_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_remove_number_precision( $value );
+	}
+	return $value;
+}
+
+/**
  * Get a shared logger instance.
  *
  * Use the woocommerce_logging_class filter to change the logging class. You may provide one of the following:
@@ -1690,5 +1750,17 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed value sanitized by wc_clean
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( isset( $_POST[ $key ] ) ? $_POST[ $key ] : $default );
+	return wc_clean( wc_get_var( $_POST[ $key ], $default ) );
+}
+
+/**
+ * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
+ *
+ * @since  3.2.0
+ * @param  mixed $var
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_var( &$var, $default = null ) {
+	return isset( $var ) ? $var : $default;
 }

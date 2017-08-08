@@ -67,6 +67,8 @@ class WC_Form_Handler {
 			return;
 		}
 
+		nocache_headers();
+
 		$user_id = get_current_user_id();
 
 		if ( $user_id <= 0 ) {
@@ -179,6 +181,8 @@ class WC_Form_Handler {
 			return;
 		}
 
+		nocache_headers();
+
 		$errors       = new WP_Error();
 		$user         = new stdClass();
 
@@ -274,6 +278,7 @@ class WC_Form_Handler {
 	 */
 	public static function checkout_action() {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
+			nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
 				wp_redirect( wc_get_page_permalink( 'cart' ) );
@@ -295,7 +300,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
-
+			nocache_headers();
 			ob_start();
 
 			// Pay for existing order
@@ -374,27 +379,42 @@ class WC_Form_Handler {
 	 */
 	public static function add_payment_method_action() {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
-
+			nocache_headers();
 			ob_start();
 
-			$payment_method = wc_clean( $_POST['payment_method'] );
-
+			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-			// Validate
-			$available_gateways[ $payment_method ]->validate_fields();
 
-			// Process
-			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
-				$result = $available_gateways[ $payment_method ]->add_payment_method();
-				// Redirect to success/confirmation/payment page
+			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
+				$gateway = $available_gateways[ $payment_method_id ];
+
+				if ( ! $gateway->supports( 'add_payment_method' ) && ! $gateway->supports( 'tokenization' ) ) {
+					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
+					return;
+				}
+
+				$gateway->validate_fields();
+
+				if ( wc_notice_count( 'error' ) > 0 ) {
+					return;
+				}
+
+				$result = $gateway->add_payment_method();
+
 				if ( 'success' === $result['result'] ) {
-					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
+					wc_add_notice( __( 'Payment method successfully added.', 'woocommerce' ) );
+				}
+
+				if ( 'failure' === $result['result'] ) {
+					wc_add_notice( __( 'Unable to add payment method to your account.', 'woocommerce' ), 'error' );
+				}
+
+				if ( ! empty( $result['redirect'] ) ) {
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -404,6 +424,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
+			nocache_headers();
 
 			$token_id = absint( $wp->query_vars['delete-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -428,6 +449,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
+			nocache_headers();
 
 			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -449,20 +471,19 @@ class WC_Form_Handler {
 	 * Remove from cart/update.
 	 */
 	public static function update_cart_action() {
+		if ( ! ( isset( $_REQUEST['apply_coupon'] ) || isset( $_REQUEST['remove_coupon'] ) || isset( $_REQUEST['remove_item'] ) || isset( $_REQUEST['undo_item'] ) || isset( $_REQUEST['update_cart'] ) || isset( $_REQUEST['proceed'] ) ) ) {
+			return;
+		}
+
+		nocache_headers();
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-
-			// Add Discount
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-
-			// Remove Coupon Codes
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
 
-		} elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-
-			// Remove from cart
+		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( wc_get_var( $_REQUEST['_wpnonce'] ), 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
 
 			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
@@ -501,7 +522,7 @@ class WC_Form_Handler {
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form
-		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( wc_get_var( $_POST['_wpnonce'] ), 'woocommerce-cart' ) ) {
 
 			$cart_updated = false;
 			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
@@ -563,11 +584,12 @@ class WC_Form_Handler {
 	 * Place a previous order again.
 	 */
 	public static function order_again() {
-
 		// Nothing to do
 		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) ) {
 			return;
 		}
+
+		nocache_headers();
 
 		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
 			WC()->cart->empty_cart();
@@ -648,6 +670,7 @@ class WC_Form_Handler {
 	 */
 	public static function cancel_order() {
 		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
+			nocache_headers();
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
@@ -693,6 +716,8 @@ class WC_Form_Handler {
 		if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) ) {
 			return;
 		}
+
+		nocache_headers();
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
@@ -773,16 +798,22 @@ class WC_Form_Handler {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
+				// Suppress total recalculation until finished.
+				remove_action( 'woocommerce_add_to_cart', array( WC()->cart, 'calculate_totals' ), 20, 0 );
+
 				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
 					$added_to_cart[ $item ] = $quantity;
 				}
+
+				add_action( 'woocommerce_add_to_cart', array( WC()->cart, 'calculate_totals' ), 20, 0 );
 			}
 
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
 				wc_add_notice( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ), 'error' );
 			} elseif ( $was_added_to_cart ) {
 				wc_add_to_cart_message( $added_to_cart );
+				WC()->cart->calculate_totals();
 				return true;
 			}
 		} elseif ( $product_id ) {

@@ -1006,6 +1006,14 @@ button.pswp__button--zoom:hover {
 }
 
 .colors-dark {
+	.page-numbers {
+		color: #444;
+
+		&.next, &.prev {
+			color: #ddd;
+		}
+	}
+
 	.checkout-button {
 		border: 2px solid #555;
 
