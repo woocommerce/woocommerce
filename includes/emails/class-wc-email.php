@@ -263,7 +263,7 @@ class WC_Email extends WC_Settings_API {
 	 * Set the locale to the store locale for customer emails to make sure emails are in the store language.
 	 */
 	public function setup_locale() {
-		if ( $this->is_customer_email() ) {
+		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_setup_locale', true ) ) {
 			wc_switch_to_site_locale();
 		}
 	}
@@ -272,7 +272,7 @@ class WC_Email extends WC_Settings_API {
 	 * Restore the locale to the default locale. Use after finished with setup_locale.
 	 */
 	public function restore_locale() {
-		if ( $this->is_customer_email() ) {
+		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_restore_locale', true ) ) {
 			wc_restore_locale();
 		}
 	}
