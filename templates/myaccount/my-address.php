@@ -52,12 +52,10 @@ $col    = 1;
 			<h3><?php echo $title; ?></h3>
 			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 		</header>
-		<address>
-			<?php
+		<address><?php
 			$address = wc_get_account_formatted_address( $name );
-			echo $address ? $address : __( 'You have not set up this type of address yet.', 'woocommerce' );
-			?>
-		</address>
+			echo $address ? wp_kses_post( $address ) : esc_html_e( 'You have not set up this type of address yet.', 'woocommerce' );
+		?></address>
 	</div>
 
 <?php endforeach; ?>
