@@ -479,7 +479,7 @@ function wc_create_attribute( $args ) {
 			return new WP_Error( 'cannot_update_attribute', __( 'Could not update the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		// Set old_slug to check for database chances.
+		// Set old_slug to check for database changes.
 		$args['old_slug'] = ! empty( $args['old_slug'] ) ? $args['old_slug'] : $args['slug'];
 
 		/**
@@ -582,7 +582,7 @@ function wc_delete_attribute( $id ) {
 	$taxonomy = wc_attribute_taxonomy_name( $name );
 
 	/**
-	 * Before delete an attribute.
+	 * Before deleting an attribute.
 	 *
 	 * @param int    $id       Attribute ID.
 	 * @param string $name     Attribute name.
@@ -599,7 +599,7 @@ function wc_delete_attribute( $id ) {
 		}
 
 		/**
-		 * After delete an attribute.
+		 * After deleting an attribute.
 		 *
 		 * @param int    $id       Attribute ID.
 		 * @param string $name     Attribute name.
