@@ -158,15 +158,13 @@ class WC_Admin_Importers {
 
 								// Create the taxonomy
 								if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies() ) ) {
-									$attribute = array(
-										'attribute_label'   => $attribute_name,
-										'attribute_name'    => $attribute_name,
-										'attribute_type'    => 'select',
-										'attribute_orderby' => 'menu_order',
-										'attribute_public'  => 0,
-									);
-									$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
-									delete_transient( 'wc_attribute_taxonomies' );
+									wc_create_attribute( array(
+										'name'         => $attribute_name,
+										'slug'         => $attribute_name,
+										'type'         => 'select',
+										'order_by'     => 'menu_order',
+										'has_archives' => false,
+									) );
 								}
 
 								// Register the taxonomy now so that the import works!
