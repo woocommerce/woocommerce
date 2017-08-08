@@ -174,10 +174,10 @@ class WC_Discounts {
 	 *
 	 * @since  3.2.0
 	 * @param  object $item Get data for this item.
-	 * @return float
+	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return $item->price - $this->get_discount( $item->key, true );
+		return absint( $item->price - $this->get_discount( $item->key, true ) );
 	}
 
 	/**
@@ -388,6 +388,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
 		$total_discount = 0;
+		$cart_total     = 0;
 
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
@@ -396,14 +397,25 @@ class WC_Discounts {
 			// Get the price we actually want to discount, based on settings.
 			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
 
+			// Total up.
+			$cart_total += $price_to_discount;
+
 			// Run coupon calculations.
-			$discount       = $coupon->get_amount() * ( $price_to_discount / 100 );
+			$discount       = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
 			$discount       = min( $discounted_price, apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $price_to_discount, $item->object, false, $coupon ) );
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
+
+		// Work out how much discount would have been given to the cart has a whole and compare to what was discounted on all line items.
+		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon->get_amount() / 100 ), 0 );
+
+		if ( $total_discount < $cart_total_discount ) {
+			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
+		}
+
 		return $total_discount;
 	}
 
@@ -449,26 +461,26 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
-		$amount         = $amount ? $amount: wc_add_number_precision( $coupon->get_amount() );
+		$amount         = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
 		$items_to_apply = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
 
 		if ( ! $item_count = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) ) ) {
 			return $total_discount;
 		}
 
-		$per_item_discount = floor( $amount / $item_count ); // round it down to the nearest cent.
+		$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
 
 		if ( $per_item_discount > 0 ) {
-			$total_discounted = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
+			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
 
 			/**
 			 * If there is still discount remaining, repeat the process.
 			 */
-			if ( $total_discounted > 0 && $total_discounted < $amount ) {
-				$total_discounted = $total_discounted + $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discounted );
+			if ( $total_discount > 0 && $total_discount < $amount ) {
+				$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
 			}
 		} elseif ( $amount > 0 ) {
-			$total_discounted = $this->apply_coupon_fixed_cart_remainder( $coupon, $items_to_apply, $amount );
+			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 		}
 		return $total_discount;
 	}
@@ -483,7 +495,7 @@ class WC_Discounts {
 	 * @param  int       $amount Fixed discount amount to apply.
 	 * @return int Total discounted.
 	 */
-	protected function apply_coupon_fixed_cart_remainder( $coupon, $items_to_apply, $amount ) {
+	protected function apply_coupon_remainder( $coupon, $items_to_apply, $amount ) {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {

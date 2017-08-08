@@ -235,7 +235,7 @@ final class WC_Cart_Totals {
 				$fee->total_tax = array_sum( $fee->taxes );
 
 				if ( ! $this->round_at_subtotal() ) {
-					$fee->total_tax = wc_round_tax_total( $fee->total_tax, 0 );
+					$fee->total_tax = wc_round_tax_total( $fee->total_tax, wc_get_rounding_precision() );
 				}
 			}
 
@@ -259,7 +259,7 @@ final class WC_Cart_Totals {
 			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ) );
 
 			if ( ! $this->round_at_subtotal() ) {
-				$shipping_line->total_tax = wc_round_tax_total( $shipping_line->total_tax, 0 );
+				$shipping_line->total_tax = wc_round_tax_total( $shipping_line->total_tax, wc_get_rounding_precision() );
 			}
 
 			$this->shipping[ $key ] = $shipping_line;
@@ -282,12 +282,14 @@ final class WC_Cart_Totals {
 	 * If the customer is outside of the base location, this removes the base
 	 * taxes. This is off by default unless the filter is used.
 	 *
+	 * Uses edit context so unfiltered tax class is returned.
+	 *
 	 * @since 3.2.0
 	 * @param object $item Item to adjust the prices of.
 	 * @return object
 	 */
 	protected function adjust_non_base_location_price( $item ) {
-		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->tax_class );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'edit' ) );
 
 		if ( $item->tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax.
@@ -308,8 +310,9 @@ final class WC_Cart_Totals {
 	 * @return int
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
-		$item = $this->items[ $item_key ];
+		$item  = $this->items[ $item_key ];
 		$price = $item->subtotal - $this->discount_totals[ $item_key ];
+
 		if ( $item->price_includes_tax ) {
 			$price += $item->subtotal_tax;
 		}
@@ -429,7 +432,7 @@ final class WC_Cart_Totals {
 				$item->total_tax = array_sum( $item->taxes );
 
 				if ( ! $this->round_at_subtotal() ) {
-					$item->total_tax = wc_round_tax_total( $item->total_tax, 0 );
+					$item->total_tax = wc_round_tax_total( $item->total_tax, wc_get_rounding_precision() );
 				}
 
 				if ( $item->price_includes_tax ) {
@@ -445,9 +448,6 @@ final class WC_Cart_Totals {
 
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
-
-		$this->object->subtotal        = $this->get_total( 'items_total' ) + $this->get_total( 'items_total_tax' );
-		$this->object->subtotal_ex_tax = $this->get_total( 'items_total' );
 	}
 
 	/**
@@ -467,14 +467,15 @@ final class WC_Cart_Totals {
 	protected function calculate_item_subtotals() {
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-				$item           = $this->adjust_non_base_location_price( $item );
+				$item = $this->adjust_non_base_location_price( $item );
 			}
+
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
 				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
 				$item->subtotal_tax = array_sum( $subtotal_taxes );
 
 				if ( ! $this->round_at_subtotal() ) {
-					$item->subtotal_tax = wc_round_tax_total( $item->subtotal_tax, 0 );
+					$item->subtotal_tax = wc_round_tax_total( $item->subtotal_tax, wc_get_rounding_precision() );
 				}
 
 				if ( $item->price_includes_tax ) {
@@ -488,8 +489,8 @@ final class WC_Cart_Totals {
 		$this->set_total( 'items_subtotal', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
 		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
 
-		$this->object->subtotal        = $this->get_total( 'items_total' ) + $this->get_total( 'items_total_tax' );
-		$this->object->subtotal_ex_tax = $this->get_total( 'items_total' );
+		$this->object->subtotal        = $this->get_total( 'items_subtotal' ) + $this->get_total( 'items_subtotal_tax' );
+		$this->object->subtotal_ex_tax = $this->get_total( 'items_subtotal' );
 	}
 
 	/**
@@ -507,15 +508,11 @@ final class WC_Cart_Totals {
 			$discounts->apply_discount( $coupon );
 		}
 
-		$this->discount_totals                 = $discounts->get_discounts_by_item( true );
-		$this->totals['discounts_total']       = ! empty( $this->discount_totals ) ? array_sum( $this->discount_totals ) : 0;
-		$this->object->coupon_discount_amounts = $discounts->get_discounts_by_coupon();
+		$coupon_discount_amounts     = $discounts->get_discounts_by_coupon( true );
+		$coupon_discount_tax_amounts = array();
 
 		// See how much tax was 'discounted' per item and per coupon.
 		if ( $this->calculate_tax ) {
-			$coupon_discount_tax_amounts = array();
-			$item_taxes                  = 0;
-
 			foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
 				$coupon_discount_tax_amounts[ $coupon_code ] = 0;
 
@@ -523,16 +520,21 @@ final class WC_Cart_Totals {
 					$item = $this->items[ $item_key ];
 
 					if ( $item->product->is_taxable() ) {
-						$item_tax                                     = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, false ) );
-						$item_taxes                                  += $item_tax;
+						$item_tax                                     = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, $item->price_includes_tax ) );
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
 					}
 				}
-			}
 
-			$this->totals['discounts_tax_total']       = $item_taxes;
-			$this->object->coupon_discount_tax_amounts = $coupon_discount_tax_amounts;
+				$coupon_discount_amounts[ $coupon_code ] -= $coupon_discount_tax_amounts[ $coupon_code ];
+			}
 		}
+
+		$this->discount_totals                     = $discounts->get_discounts_by_item( true );
+		$this->object->coupon_discount_amounts     = wc_remove_number_precision_deep( $coupon_discount_amounts );
+		$this->object->coupon_discount_tax_amounts = wc_remove_number_precision_deep( $coupon_discount_tax_amounts );
+
+		$this->set_total( 'discounts_total', ! empty( $this->discount_totals ) ? array_sum( $this->discount_totals ) : 0 );
+		$this->set_total( 'discounts_tax_total', array_sum( $coupon_discount_tax_amounts ) );
 	}
 
 	/**
@@ -599,7 +601,7 @@ final class WC_Cart_Totals {
 		$this->object->cart_contents_total = $this->get_total( 'items_total' );
 		$this->object->tax_total           = $this->get_total( 'tax_total' );
 		$this->object->total               = $this->get_total( 'total' );
-		$this->object->discount_cart       = $this->get_total( 'discounts_total' );
+		$this->object->discount_cart       = $this->get_total( 'discounts_total' ) - $this->get_total( 'discounts_tax_total' );
 		$this->object->discount_cart_tax   = $this->get_total( 'discounts_tax_total' );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
