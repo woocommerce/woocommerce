@@ -80,7 +80,7 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 				});
 
 				// Uncheck the WC update checkbox if the modal is canceled.
-				$( '#wc_untested_extensions_modal .cancel a' ).on( 'click', function( evt ) {
+				$( '#wc_untested_extensions_modal .cancel' ).on( 'click', function( evt ) {
 					evt.preventDefault();
 					$( 'input[value="woocommerce/woocommerce.php"]' ).prop( 'checked', false );
 					tb_remove();
