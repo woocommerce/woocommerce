@@ -31,13 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endforeach ?>
 			</ul>
 
-			<p><?php
-					/* translators: %s: version number */
-					printf(
-						__( 'This is a major update. Please update these extensions before proceeding or you may experience issues. We also recommend making a site backup.', 'woocommerce' ),
-						esc_html( $new_version )
-					);
-			?></p>
+			<p><?php esc_html_e( 'This is a major update. Please update these extensions before proceeding or you may experience issues. We also recommend making a site backup.', 'woocommerce' ); ?></p>
 
 			<?php if ( current_user_can( 'update_plugins' ) ): ?>
 				<div class="actions">
