@@ -283,17 +283,27 @@ function wc_get_account_orders_actions( $order ) {
  * Get account formatted address.
  *
  * @since  3.2.0
- * @param  string $address_type billing or shipping.
+ * @param  string $address_type Address type.
+ *                              Accepts: 'billing' or 'shipping'.
+ *                              Default to 'billing'.
+ * @param  int    $customer_id  Customer ID.
+ *                              Default to 0.
  * @return string
  */
-function wc_get_account_formatted_address( $address_type ) {
-	$getter   = "get_{$address_type}";
-	$customer = new WC_Customer( get_current_user_id() );
+function wc_get_account_formatted_address( $address_type = 'billing', $customer_id = 0 ) {
+	$getter = "get_{$address_type}";
+
+	if ( 0 === $customer_id ) {
+		$customer_id = get_current_user_id();
+	}
+
+	$customer = new WC_Customer( $customer_id );
 
 	if ( is_callable( array( $customer, $getter ) ) ) {
 		$address = $customer->$getter();
 		unset( $address['email'], $address['tel'] );
 	}
+
 	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
 }
 
