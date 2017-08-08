@@ -377,7 +377,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse images list from a CSV.
+	 * Parse images list from a CSV. Images can be filenames or URLs.
 	 *
 	 * @param  string $field Field value.
 	 * @return array
@@ -387,7 +387,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_map( 'esc_url_raw', $this->explode_values( $field ) );
+		$images = array();
+
+		foreach ( $this->explode_values( $field ) as $image ) {
+			if ( stristr( $image, '://' ) ) {
+				$images[] = esc_url_raw( $image );
+			} else {
+				$images[] = sanitize_file_name( $image );
+			}
+		}
+
+		return $images;
 	}
 
 	/**
