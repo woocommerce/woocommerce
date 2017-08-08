@@ -408,7 +408,7 @@ function wc_create_attribute( $args ) {
 
 	// Name is required.
 	if ( empty( $args['name'] ) ) {
-		return new WP_Error( 'missing_attribute_name', __( 'Missing attribute name', 'woocommerce' ), array( 'status' => 400 ) );
+		return new WP_Error( 'missing_attribute_name', __( 'Please, provide an attribute name.', 'woocommerce' ), array( 'status' => 400 ) );
 	}
 
 	// Set the attribute slug.
@@ -423,7 +423,7 @@ function wc_create_attribute( $args ) {
 		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 		return new WP_Error( 'invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
-	} elseif ( 0 === $id && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+	} elseif ( ( 0 === $id && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) || ( isset( $args['old_slug'] ) && $args['old_slug'] !== $args['slug'] && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) ) {
 		return new WP_Error( 'invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 	}
 
@@ -442,7 +442,7 @@ function wc_create_attribute( $args ) {
 		'attribute_name'    => $slug,
 		'attribute_type'    => $args['type'],
 		'attribute_orderby' => $args['order_by'],
-		'attribute_public'  => isset( $args['has_archives'] ) ? (bool) $args['has_archives'] : false,
+		'attribute_public'  => isset( $args['has_archives'] ) ? (int) $args['has_archives'] : 0,
 	);
 
 	// Create or update.
@@ -458,6 +458,14 @@ function wc_create_attribute( $args ) {
 		}
 
 		$id = $wpdb->insert_id;
+
+		/**
+		 * Attribute added.
+		 *
+		 * @param int   $id   Added attribute ID.
+		 * @param array $data Attribute data.
+		 */
+		do_action( 'woocommerce_attribute_added', $id, $data );
 	} else {
 		$results = $wpdb->update(
 			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
@@ -470,15 +478,52 @@ function wc_create_attribute( $args ) {
 		if ( false === $results ) {
 			return new WP_Error( 'cannot_update_attribute', __( 'Could not update the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
-	}
 
-	/**
-	 * Attribute created.
-	 *
-	 * @param int   $id   Created attribute ID.
-	 * @param array $data Data used to created the attribute.
-	 */
-	do_action( 'woocommerce_attribute_created', $id, $data );
+		// Set old_slug to check for database chances.
+		$args['old_slug'] = ! empty( $args['old_slug'] ) ? $args['old_slug'] : $args['slug'];
+
+		/**
+		 * Attribute updated.
+		 *
+		 * @param int    $id        Added attribute ID.
+		 * @param array  $data      Attribute data.
+		 * @param string $old_slug  Attribute old name.
+		 */
+		do_action( 'woocommerce_attribute_updated', $id, $data, $args['old_slug'] );
+
+		if ( $args['old_slug'] !== $args['slug'] ) {
+			// Update taxonomies in the wp term taxonomy table.
+			$wpdb->update(
+				$wpdb->term_taxonomy,
+				array( 'taxonomy' => wc_attribute_taxonomy_name( $data['attribute_name'] ) ),
+				array( 'taxonomy' => 'pa_' . $args['old_slug'] )
+			);
+
+			// Update taxonomy ordering term meta.
+			$table_name = get_option( 'db_version' ) < 34370 ? $wpdb->prefix . 'woocommerce_termmeta' : $wpdb->termmeta;
+			$wpdb->update(
+				$table_name,
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $data['attribute_name'] ) ),
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $args['old_slug'] ) )
+			);
+
+			// Update product attributes which use this taxonomy.
+			$old_attribute_name_length = strlen( $args['old_slug'] ) + 3;
+			$attribute_name_length     = strlen( $data['attribute_name'] ) + 3;
+
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_product_attributes'",
+				's:' . $old_attribute_name_length . ':"pa_' . $args['old_slug'] . '"',
+				's:' . $attribute_name_length . ':"pa_' . $data['attribute_name'] . '"'
+			) );
+
+			// Update variations which use this taxonomy.
+			$wpdb->update(
+				$wpdb->postmeta,
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ),
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $args['old_slug'] ) )
+			);
+		}
+	}
 
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
@@ -495,9 +540,11 @@ function wc_create_attribute( $args ) {
  * @since  3.2.0
  * @param  int $id Attribute ID.
  * @param  array $args Attribute arguments.
- * @return int|WP_Error]
+ * @return int|WP_Error
  */
 function wc_update_attribute( $id, $args ) {
+	global $wpdb;
+
 	$attribute = wc_get_attribute( $id );
 
 	$args['id'] = $attribute ? $attribute->id : 0;
@@ -505,6 +552,13 @@ function wc_update_attribute( $id, $args ) {
 	if ( $args['id'] && empty( $args['name'] ) ) {
 		$args['name'] = $attribute->name;
 	}
+
+	$args['old_slug'] = $wpdb->get_var( $wpdb->prepare( "
+		SELECT attribute_name
+		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+		WHERE attribute_id = %d
+	", $args['id']
+	) );
 
 	return wc_create_attribute( $args );
 }
@@ -519,18 +573,43 @@ function wc_update_attribute( $id, $args ) {
 function wc_delete_attribute( $id ) {
 	global $wpdb;
 
-	$deleted = $wpdb->delete(
-		$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-		array( 'attribute_id' => $id ),
-		array( '%d' )
-	);
+	$name = $wpdb->get_var( $wpdb->prepare( "
+		SELECT attribute_name
+		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+		WHERE attribute_id = %d
+	", $id ) );
 
-	if ( in_array( $deleted, array( 0, false ), true ) ) {
-		return false;
+	$taxonomy = wc_attribute_taxonomy_name( $name );
+
+	/**
+	 * Before delete an attribute.
+	 *
+	 * @param int    $id       Attribute ID.
+	 * @param string $name     Attribute name.
+	 * @param string $taxonomy Attribute taxonomy name.
+	 */
+	do_action( 'woocommerce_before_attribute_delete', $id, $name, $taxonomy );
+
+	if ( $name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $id" ) ) {
+		if ( taxonomy_exists( $taxonomy ) ) {
+			$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+			foreach ( $terms as $term ) {
+				wp_delete_term( $term->term_id, $taxonomy );
+			}
+		}
+
+		/**
+		 * After delete an attribute.
+		 *
+		 * @param int    $id       Attribute ID.
+		 * @param string $name     Attribute name.
+		 * @param string $taxonomy Attribute taxonomy name.
+		 */
+		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return true;
 	}
 
-	// Clear transients.
-	delete_transient( 'wc_attribute_taxonomies' );
-
-	return true;
+	return false;
 }
