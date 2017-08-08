@@ -322,7 +322,11 @@ class WC_Admin_Setup_Wizard {
 			$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
 		}
 
-		// Defaults
+		if ( empty( $state ) ) {
+			$state = '*';
+		}
+
+		// Defaults.
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
@@ -334,39 +338,34 @@ class WC_Admin_Setup_Wizard {
 			<table class="form-table">
 				<tr>
 					<tr>
-						<th scope="row"><label for="store_address"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+						<th scope="row"><label for="store_address"><?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_address" name="store_address" value="<?php echo esc_attr( $address ); ?>" />
-							<span class="description"> <?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_address_2" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
-							<span class="description"> <?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
-							<span class="description"> <?php esc_html_e( 'City', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_location"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label></th>
 						<td>
 							<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 							</select>
-							<span class="description"> <?php esc_html_e( 'Country / State', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
-					<th scope="row">&nbsp;</th>
+					<th scope="row"><label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
-						<span class="description"> <?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 				<tr>
