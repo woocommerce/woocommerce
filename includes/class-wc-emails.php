@@ -72,7 +72,7 @@ class WC_Emails {
 			'woocommerce_product_on_backorder',
 			'woocommerce_order_status_pending_to_processing',
 			'woocommerce_order_status_pending_to_completed',
-			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_processing_to_cancelled',
 			'woocommerce_order_status_pending_to_failed',
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
@@ -165,6 +165,7 @@ class WC_Emails {
 		// Email Header, Footer and content hooks
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_details', array( $this, 'order_downloads' ), 10, 4 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
@@ -341,12 +342,41 @@ class WC_Emails {
 	}
 
 	/**
+	 * Show order downloads in a table.
+	 *
+	 * @since 3.2.0
+	 * @param WC_Order $order
+	 * @param bool $sent_to_admin
+	 * @param bool $plain_text
+	 * @param string $email
+	 */
+	public function order_downloads( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
+		$show_downloads = $order->has_downloadable_item() && $order->is_download_permitted();
+
+		if ( ! $show_downloads ) {
+			return;
+		}
+
+		$downloads = $order->get_downloadable_items();
+		$columns   = apply_filters( 'woocommerce_email_downloads_columns', array(
+			'download-product' => __( 'Product', 'woocommerce' ),
+			'download-expires' => __( 'Expires', 'woocommerce' ),
+			'download-file'    => __( 'Download', 'woocommerce' ),
+		) );
+
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-downloads.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email, 'downloads' => $downloads, 'columns' => $columns ) );
+		} else {
+			wc_get_template( 'emails/email-downloads.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email, 'downloads' => $downloads, 'columns' => $columns ) );
+		}
+	}
+
+	/**
 	 * Add order meta to email templates.
 	 *
 	 * @param mixed $order
-	 * @param bool $sent_to_admin (default: false)
-	 * @param bool $plain_text (default: false)
-	 * @return string
+	 * @param bool  $sent_to_admin (default: false)
+	 * @param bool  $plain_text    (default: false)
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
@@ -401,7 +431,9 @@ class WC_Emails {
 	}
 
 	/**
-	 * Add customer details to email templates.
+	 * Allows developers to add additional customer details to templates.
+	 *
+	 * In versions prior to 3.2 this was used for notes, phone and email but this data has moved.
 	 *
 	 * @param WC_Order $order
 	 * @param bool $sent_to_admin (default: false)
@@ -412,35 +444,15 @@ class WC_Emails {
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
-		$fields = array();
 
-		if ( $order->get_customer_note() ) {
-			$fields['customer_note'] = array(
-				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->get_customer_note() ),
-			);
-		}
+		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', array(), $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
-		if ( $order->get_billing_email() ) {
-			$fields['billing_email'] = array(
-				'label' => __( 'Email address', 'woocommerce' ),
-				'value' => wptexturize( $order->get_billing_email() ),
-			);
-		}
-
-		if ( $order->get_billing_phone() ) {
-			$fields['billing_phone'] = array(
-				'label' => __( 'Phone', 'woocommerce' ),
-				'value' => wptexturize( $order->get_billing_phone() ),
-			);
-		}
-
-		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
-
-		if ( $plain_text ) {
-			wc_get_template( 'emails/plain/email-customer-details.php', array( 'fields' => $fields ) );
-		} else {
-			wc_get_template( 'emails/email-customer-details.php', array( 'fields' => $fields ) );
+		if ( ! empty( $fields ) ) {
+			if ( $plain_text ) {
+				wc_get_template( 'emails/plain/email-customer-details.php', array( 'fields' => $fields ) );
+			} else {
+				wc_get_template( 'emails/email-customer-details.php', array( 'fields' => $fields ) );
+			}
 		}
 	}
 

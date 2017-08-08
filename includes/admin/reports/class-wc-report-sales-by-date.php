@@ -373,14 +373,14 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$refunded_orders = array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds );
 
 		foreach ( $refunded_orders as $key => $value ) {
-			$this->report_data->total_tax_refunded          += ( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
-			$this->report_data->total_refunds               += $value->total_refund;
-			$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
-			$this->report_data->total_shipping_refunded     += ( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
+			$this->report_data->total_tax_refunded          += floatval( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
+			$this->report_data->total_refunds               += floatval( $value->total_refund );
+			$this->report_data->total_shipping_tax_refunded += floatval( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
+			$this->report_data->total_shipping_refunded     += floatval( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
 
 			// Only applies to parial.
 			if ( isset( $value->order_item_count ) ) {
-				$this->report_data->refunded_order_items    += ( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
+				$this->report_data->refunded_order_items    += floatval( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
 			}
 		}
 
@@ -400,10 +400,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		// Total orders and discounts also includes those which have been refunded at some point
 		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2, '.', '' );
 		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
-		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) ) - $this->report_data->total_refunded_orders;
 
-		// Item counts
-		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
+		// Total orders in this period, even if refunded.
+		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
+
+		// Item items ordered in this period, even if refunded.
+		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
 		// 3rd party filtering of report data
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
@@ -605,8 +607,6 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {
 		global $wp_locale;

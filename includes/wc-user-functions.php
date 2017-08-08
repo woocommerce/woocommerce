@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
- * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
+ * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compatibility. Defaults to true.
  *
  * @access public
  * @param bool $show_admin_bar
@@ -50,7 +50,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ) );
 		}
 
 		// Handle username creation.
@@ -320,7 +320,7 @@ function wc_modify_editable_roles( $roles ) {
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 
 /**
- * Modify capabiltiies to prevent non-admin users editing admin users.
+ * Modify capabilities to prevent non-admin users editing admin users.
  *
  * $args[0] will be the user being edited in this case.
  *
@@ -411,7 +411,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
-				$_product->get_name() . ' &ndash; ' . $download_file['name'],
+				$download_file['name'],
 				$_product,
 				$result->download_id,
 				$file_number
@@ -507,7 +507,7 @@ function wc_disable_author_archives_for_customers() {
 	if ( is_author() ) {
 		$user = get_user_by( 'id', $author );
 
-		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+		if ( user_can( $user, 'customer' ) && ! user_can( $user, 'edit_posts' ) ) {
 			wp_redirect( wc_get_page_permalink( 'shop' ) );
 		}
 	}
@@ -601,27 +601,4 @@ function wc_get_customer_last_order( $customer_id ) {
 	" );
 
 	return wc_get_order( $id );
-}
-
-/**
- * Wrapper for @see get_avatar() which doesn't simply return
- * the URL so we need to pluck it from the HTML img tag.
- *
- * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
- *
- * @since 2.6.0
- * @param string $email the customer's email.
- * @return string the URL to the customer's avatar.
- */
-function wc_get_customer_avatar_url( $email ) {
-	$avatar_html = get_avatar( $email );
-
-	// Get the URL of the avatar from the provided HTML.
-	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-		return esc_url_raw( $matches[1] );
-	}
-
-	return null;
 }

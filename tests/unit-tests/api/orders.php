@@ -206,7 +206,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
 
-		// non-existant customer
+		// non-existent customer
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
 		$request->set_body_params( array(
 			'payment_method'       => 'bacs',

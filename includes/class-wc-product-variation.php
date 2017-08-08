@@ -20,7 +20,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Post type.
 	 * @var string
 	 */
-	public $post_type = 'product_variation';
+	protected $post_type = 'product_variation';
 
 	/**
 	 * Parent data.
@@ -76,6 +76,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_title() {
 		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
+	}
+
+	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @return string Formatted product name
+	 */
+	public function get_formatted_name() {
+		if ( $this->get_sku() ) {
+			$identifier = $this->get_sku();
+		} else {
+			$identifier = '#' . $this->get_id();
+		}
+
+		$formatted_variation_list = wc_get_formatted_variation( $this, true, true );
+
+		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() ) . '<span class="description">' . $formatted_variation_list . '</span>';
 	}
 
 	/**
@@ -354,6 +371,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return $shipping_class_id;
 	}
 
+	/**
+	 * Get catalog visibility.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_catalog_visibility( $context = 'view' ) {
+		return apply_filters( $this->get_hook_prefix() . 'catalog_visibility', $this->parent_data['catalog_visibility'], $this );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -397,16 +424,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$attributes[ $key ] = $value;
 		}
 		$this->set_prop( 'attributes', $attributes );
-	}
-
-	/**
-	 * Returns array of attribute name value pairs. Keys are prefixed with attribute_, as stored.
-	 *
-	 * @param  string $context
-	 * @return array
-	 */
-	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
 	}
 
 	/**

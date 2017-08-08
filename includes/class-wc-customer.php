@@ -170,16 +170,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return string
 	 */
 	public function get_avatar_url() {
-		$avatar_html = get_avatar( $this->get_email() );
-
-		// Get the URL of the avatar from the provided HTML
-		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			return esc_url( $matches[1] );
-		}
-
-		return '';
+		return get_avatar_url( $this->get_email() );
 	}
 
 	/**
@@ -449,6 +440,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Get billing.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_billing( $context = 'view' ) {
+		return $this->get_prop( 'billing', $context );
+	}
+
+	/**
 	 * Get billing_first_name.
 	 *
 	 * @param  string $context
@@ -566,6 +568,17 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function get_billing_phone( $context = 'view' ) {
 		return $this->get_address_prop( 'phone', 'billing', $context );
+	}
+
+	/**
+	 * Get shipping.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context
+	 * @return array
+	 */
+	public function get_shipping( $context = 'view' ) {
+		return $this->get_prop( 'shipping', $context );
 	}
 
 	/**

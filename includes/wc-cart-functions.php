@@ -48,7 +48,7 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true ) ) ) {
+	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
 		return;
 	}
 
@@ -191,7 +191,6 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
  * Get the subtotal.
  *
  * @access public
- * @return string
  */
 function wc_cart_totals_subtotal_html() {
 	echo WC()->cart->get_cart_subtotal();
@@ -221,7 +220,7 @@ function wc_cart_totals_shipping_html() {
 			'package'                  => $package,
 			'available_methods'        => $package['rates'],
 			'show_package_details'     => sizeof( $packages ) > 1,
-			'show_shipping_calculator' => $first,
+			'show_shipping_calculator' => is_cart() && $first,
 			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
 			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),

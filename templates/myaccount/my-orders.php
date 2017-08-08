@@ -1,8 +1,8 @@
 <?php
 /**
- * My Orders
+ * My Orders - Deprecated
  *
- * @deprecated  2.6.0 this template file is no longer used. My Account shortcode uses orders.php.
+ * @deprecated 2.6.0 this template file is no longer used. My Account shortcode uses orders.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,34 +69,13 @@ if ( $customer_orders ) : ?>
 
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
-									$actions = array(
-										'pay'    => array(
-											'url'  => $order->get_checkout_payment_url(),
-											'name' => __( 'Pay', 'woocommerce' ),
-										),
-										'view'   => array(
-											'url'  => $order->get_view_order_url(),
-											'name' => __( 'View', 'woocommerce' ),
-										),
-										'cancel' => array(
-											'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
-											'name' => __( 'Cancel', 'woocommerce' ),
-										),
-									);
-
-									if ( ! $order->needs_payment() ) {
-										unset( $actions['pay'] );
+								$actions = wc_get_account_orders_actions( $order );
+								
+								if ( ! empty( $actions ) ) {
+									foreach ( $actions as $key => $action ) {
+										echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
 									}
-
-									if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
-										unset( $actions['cancel'] );
-									}
-
-									if ( $actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order ) ) {
-										foreach ( $actions as $key => $action ) {
-											echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
-										}
-									}
+								}
 								?>
 							<?php endif; ?>
 						</td>

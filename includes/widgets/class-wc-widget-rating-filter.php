@@ -56,7 +56,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link = add_query_arg( 'max_price', wc_clean( $_GET['max_price'] ), $link );
 		}
 
-		// Orderby
+		// Order by
 		if ( isset( $_GET['orderby'] ) ) {
 			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
 		}
@@ -178,19 +178,12 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				$link_ratings = implode( ',', array_merge( $rating_filter, array( $rating ) ) );
 			}
 
-			$link  = $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' );
+			$class       = in_array( $rating, $rating_filter ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' ) );
+			$rating_html = wc_get_star_rating_html( $rating );
+			$count_html  = esc_html( apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ) );
 
-			echo '<li class="wc-layered-nav-rating ' . ( in_array( $rating, $rating_filter ) ? 'chosen' : '' ) . '">';
-
-			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
-
-			echo '<span class="star-rating">';
-			echo wc_get_star_rating_html( $rating );
-			echo '</span> (' . esc_html( $count ) . ')';
-
-			echo '</a>';
-
-			echo '</li>';
+			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html );
 		}
 
 		echo '</ul>';

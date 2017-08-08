@@ -329,34 +329,16 @@ class WC_Query {
 
 		$this->product_query( $q );
 
-		if ( is_search() ) {
-			add_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
-			add_filter( 'wp', array( $this, 'remove_posts_where' ) );
-		}
-
 		// And remove the pre_get_posts hook
 		$this->remove_product_query();
 	}
 
 	/**
 	 * Search post excerpt.
-	 *
-	 * @access public
-	 * @param string $where (default: '')
-	 * @return string (modified where clause)
+	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
 	 */
 	public function search_post_excerpt( $where = '' ) {
-		global $wp_the_query;
-
-		// If this is not a WC Query, do not modify the query
-		if ( empty( $wp_the_query->query_vars['wc_query'] ) || empty( $wp_the_query->query_vars['s'] ) ) {
-			return $where;
-		}
-
-		$where = preg_replace(
-			"/post_title\s+LIKE\s*(\'\%[^\%]+\%\')/",
-			"post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
-
+		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.2.0', 'Excerpt added to search query by default since WordPress 4.5.' );
 		return $where;
 	}
 
@@ -432,9 +414,10 @@ class WC_Query {
 
 	/**
 	 * Remove the posts_where filter.
+	 * @deprecated 3.2.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
 	 */
 	public function remove_posts_where() {
-		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
+		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.2.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
 	}
 
 	/**
@@ -450,7 +433,7 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 			// Get order + orderby args from string
 			$orderby_value = explode( '-', $orderby_value );
@@ -533,7 +516,7 @@ class WC_Query {
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - https://core.trac.wordpress.org/ticket/17065.
+	 * WP Core doens't let us change the sort direction for individual orderby params - https://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *

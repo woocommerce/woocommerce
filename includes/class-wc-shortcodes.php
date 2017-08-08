@@ -101,6 +101,9 @@ class WC_Shortcodes {
 		ob_start();
 
 		if ( $products->have_posts() ) {
+
+			// Prime caches before grabbing objects.
+			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
 			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop", $atts ); ?>
@@ -397,7 +400,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts, null ) );
 
 		if ( $products->have_posts() ) : ?>
 
@@ -727,6 +730,9 @@ class WC_Shortcodes {
 			</script>
 		<?php
 		}
+
+		// For "is_single" to always make load comments_template() for reviews.
+		$single_product->is_single = true;
 
 		ob_start();
 

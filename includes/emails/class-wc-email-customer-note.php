@@ -30,17 +30,17 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id             = 'customer_note';
 		$this->customer_email = true;
-
 		$this->title          = __( 'Customer note', 'woocommerce' );
 		$this->description    = __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-note.php';
 		$this->template_plain = 'emails/plain/customer-note.php';
-
-		$this->set_email_strings();
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers
 		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
@@ -50,13 +50,23 @@ class WC_Email_Customer_Note extends WC_Email {
 	}
 
 	/**
-	 * Set email strings.
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function set_email_strings() {
-		$this->setup_locale();
-		$this->subject = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
-		$this->heading = __( 'A note has been added to your order', 'woocommerce' );
-		$this->restore_locale();
+	public function get_default_subject() {
+		return __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'A note has been added to your order', 'woocommerce' );
 	}
 
 	/**
@@ -65,9 +75,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @param array $args
 	 */
 	public function trigger( $args ) {
-
 		if ( ! empty( $args ) ) {
-
 			$defaults = array(
 				'order_id'      => '',
 				'customer_note' => '',
@@ -78,14 +86,10 @@ class WC_Email_Customer_Note extends WC_Email {
 			extract( $args );
 
 			if ( $order_id && ( $this->object = wc_get_order( $order_id ) ) ) {
-				$this->recipient               = $this->object->get_billing_email();
-				$this->customer_note           = $customer_note;
-
-				$this->find['order-date']      = '{order_date}';
-				$this->find['order-number']    = '{order_number}';
-
-				$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
-				$this->replace['order-number'] = $this->object->get_order_number();
+				$this->recipient                      = $this->object->get_billing_email();
+				$this->customer_note                  = $customer_note;
+				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			} else {
 				return;
 			}
@@ -95,7 +99,9 @@ class WC_Email_Customer_Note extends WC_Email {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**

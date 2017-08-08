@@ -209,6 +209,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		'orderby'            => 'name',
 		'selected'           => $current_product_cat,
 		'menu_order'         => false,
+		'option_select_text' => __( 'Select a category', 'woocommerce' ),
 	);
 
 	$args = wp_parse_args( $args, $defaults );
@@ -225,7 +226,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	}
 
 	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
-	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . esc_html__( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . esc_html( $args['option_select_text'] ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
 	if ( $args['show_uncategorized'] ) {
 		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . esc_html__( 'Uncategorized', 'woocommerce' ) . '</option>';
@@ -506,12 +507,14 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	// WordPress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
 	$found = false;
+
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) {
 			$found = true;
 			break;
 		}
 	}
+
 	if ( ! $found ) {
 		return $clauses;
 	}
@@ -533,9 +536,6 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	}
 
-	// Grouping.
-	$clauses['where'] .= ' GROUP BY t.term_id ';
-
 	// Default to ASC.
 	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) {
 		$args['menu_order'] = 'ASC';
@@ -549,10 +549,17 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		$clauses['orderby'] = $order;
 	}
 
+	// Grouping.
+	if ( strstr( $clauses['fields'], 'tr.object_id' ) ) {
+		$clauses['orderby'] = ' GROUP BY t.term_id, tr.object_id ' . $clauses['orderby'];
+	} else {
+		$clauses['orderby'] = ' GROUP BY t.term_id ' . $clauses['orderby'];
+	}
+
 	return $clauses;
 }
 
-add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
+add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
@@ -774,6 +781,10 @@ add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
  * @return int[]
  */
 function wc_get_product_visibility_term_ids() {
+	if ( ! taxonomy_exists( 'product_visibility' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, 'wc_get_product_visibility_term_ids should not be called before taxonomies are registered (woocommerce_after_register_post_type action).', '3.1' );
+		return array();
+	}
 	return array_map( 'absint', wp_parse_args(
 		wp_list_pluck(
 			get_terms( array(

@@ -150,44 +150,17 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// Check methods
+		// Only apply if all packages are being shipped via chosen method, or order is virtual.
 		if ( ! empty( $this->enable_for_methods ) && $needs_shipping ) {
-
-			// Only apply if all packages are being shipped via chosen methods, or order is virtual
-			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
-
-			if ( isset( $chosen_shipping_methods_session ) ) {
-				$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
-			} else {
-				$chosen_shipping_methods = array();
-			}
-
-			$check_method = false;
+			$chosen_shipping_methods = array();
 
 			if ( is_object( $order ) ) {
-				if ( $order->shipping_method ) {
-					$check_method = $order->shipping_method;
-				}
-			} elseif ( empty( $chosen_shipping_methods ) || sizeof( $chosen_shipping_methods ) > 1 ) {
-				$check_method = false;
-			} elseif ( sizeof( $chosen_shipping_methods ) == 1 ) {
-				$check_method = $chosen_shipping_methods[0];
+				$chosen_shipping_methods = array_unique( array_map( 'wc_get_string_before_colon', $order->get_shipping_methods() ) );
+			} elseif ( $chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' ) ) {
+				$chosen_shipping_methods = array_unique( array_map( 'wc_get_string_before_colon', $chosen_shipping_methods_session ) );
 			}
 
-			if ( ! $check_method ) {
-				return false;
-			}
-
-			$found = false;
-
-			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $check_method, $method_id ) === 0 ) {
-					$found = true;
-					break;
-				}
-			}
-
-			if ( ! $found ) {
+			if ( 0 < count( array_diff( $chosen_shipping_methods, $this->enable_for_methods ) ) ) {
 				return false;
 			}
 		}
@@ -239,7 +212,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param  WC_Order $order
 	 * @return string
 	 */
-	public function change_payment_complete_order_status( $status, $order_id, $order ) {
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
 		if ( $order && 'cod' === $order->get_payment_method() ) {
 			$status = 'completed';
 		}

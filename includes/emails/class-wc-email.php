@@ -46,6 +46,26 @@ class WC_Email extends WC_Settings_API {
 	public $description;
 
 	/**
+	 * Default heading.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localization can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $heading = '';
+
+	/**
+	 * Default subject.
+	 *
+	 * Supported for backwards compatibility but we recommend overloading the
+	 * get_default_x methods instead so localization can be done when needed.
+	 *
+	 * @var string
+	 */
+	public $subject = '';
+
+	/**
 	 * Plain text template path.
 	 * @var string
 	 */
@@ -70,34 +90,10 @@ class WC_Email extends WC_Settings_API {
 	public $recipient;
 
 	/**
-	 * Heading for the email content.
-	 * @var string
-	 */
-	public $heading;
-
-	/**
-	 * Subject for the email.
-	 * @var string
-	 */
-	public $subject;
-
-	/**
 	 * Object this email is for, for example a customer, product, or email.
 	 * @var object|bool
 	 */
 	public $object;
-
-	/**
-	 * Strings to find in subjects/headings.
-	 * @var array
-	 */
-	public $find = array();
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 * @var array
-	 */
-	public $replace = array();
 
 	/**
 	 * Mime boundary (for multipart emails).
@@ -188,35 +184,53 @@ class WC_Email extends WC_Settings_API {
 	);
 
 	/**
+	 * Strings to find/replace in subjects/headings.
+	 *
+	 * @var array
+	 */
+	protected $placeholders = array();
+
+	/**
+	 * Strings to find in subjects/headings.
+	 *
+	 * @deprecated 3.2.0 in favour of placeholders
+	 * @var array
+	 */
+	public $find = array();
+
+	/**
+	 * Strings to replace in subjects/headings.
+	 *
+	 * @deprecated 3.2.0 in favour of placeholders
+	 * @var array
+	 */
+	public $replace = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Find/replace
+		if ( empty( $this->placeholders ) ) {
+			$this->placeholders = array(
+				'{site_title}' => $this->get_blogname(),
+			);
+		}
+
 		// Init settings
 		$this->init_form_fields();
 		$this->init_settings();
-
-		// Save settings hook
-		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		// Default template base if not declared in child constructor
 		if ( is_null( $this->template_base ) ) {
 			$this->template_base = WC()->plugin_path() . '/templates/';
 		}
 
-		// Settings
-		$this->heading     = $this->get_option( 'heading', $this->heading );
-		$this->subject     = $this->get_option( 'subject', $this->subject );
-		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' );
+		$this->email_type = $this->get_option( 'email_type' );
+		$this->enabled    = $this->get_option( 'enabled' );
 
-		// Find/replace
-		$this->find['blogname']      = '{blogname}';
-		$this->find['site-title']    = '{site_title}';
-		$this->replace['blogname']   = $this->get_blogname();
-		$this->replace['site-title'] = $this->get_blogname();
-
-		// For multipart messages
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**
@@ -240,15 +254,17 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
+		// handle legacy find and replace.
+		$string = str_replace( $this->find, $this->replace, $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', array_keys( $this->placeholders ), $this ), apply_filters( 'woocommerce_email_format_string_replace', array_values( $this->placeholders ), $this ), $string );
 	}
 
 	/**
 	 * Set the locale to the store locale for customer emails to make sure emails are in the store language.
 	 */
 	public function setup_locale() {
-		if ( function_exists( 'switch_to_locale' ) && $this->is_customer_email() ) {
-			switch_to_locale( get_locale() );
+		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_setup_locale', true ) ) {
+			wc_switch_to_site_locale();
 		}
 	}
 
@@ -256,9 +272,29 @@ class WC_Email extends WC_Settings_API {
 	 * Restore the locale to the default locale. Use after finished with setup_locale.
 	 */
 	public function restore_locale() {
-		if ( function_exists( 'restore_previous_locale' ) && $this->is_customer_email() ) {
-			restore_previous_locale();
+		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_restore_locale', true ) ) {
+			wc_restore_locale();
 		}
+	}
+
+	/**
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return $this->subject;
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return $this->heading;
 	}
 
 	/**
@@ -267,7 +303,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->subject ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object );
 	}
 
 	/**
@@ -276,7 +312,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->heading ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object );
 	}
 
 	/**
@@ -406,7 +442,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
-		$this->setup_locale();
 		$this->sending = true;
 
 		if ( 'plain' === $this->get_email_type() ) {
@@ -414,7 +449,6 @@ class WC_Email extends WC_Settings_API {
 		} else {
 			$email_content = $this->get_content_html();
 		}
-		$this->restore_locale();
 
 		return wordwrap( $email_content, 70 );
 	}
@@ -510,22 +544,22 @@ class WC_Email extends WC_Settings_API {
 				'default'     => 'yes',
 			),
 			'subject'         => array(
-				'title'       => __( 'Email subject', 'woocommerce' ),
+				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default subject */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'heading'         => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				/* translators: %s: default heading */
-				'description' => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder' => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
-				'desc_tip'    => true,
 			),
 			'email_type'      => array(
 				'title'       => __( 'Email type', 'woocommerce' ),

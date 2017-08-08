@@ -247,7 +247,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Variable Product', $product->get_name() );
 
 		$variation = new WC_Product_Variation;
-		$variation->set_name( 'Variation #1 of Dummy Variable CRUD Product' );
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_regular_price( 10 );
 		$variation->set_sku( 'CRUD DUMMY SKU VARIABLE GREEN' );
@@ -258,7 +257,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->set_attributes( array( 'pa_color' => 'green' ) );
 		$variation->save();
 
-		$this->assertEquals( 'Variation #1 of Dummy Variable CRUD Product', $variation->get_name() );
 		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE GREEN', $variation->get_sku() );
 		$this->assertEquals( 10, $variation->get_price() );
 
@@ -270,7 +268,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 
 		$variation_2 = new WC_Product_Variation;
-		$variation_2->set_name( 'Variation #2 of Dummy Variable CRUD Product' );
 		$variation_2->set_parent_id( $product->get_id() );
 		$variation_2->set_regular_price( 10 );
 		$variation_2->set_sku( 'CRUD DUMMY SKU VARIABLE RED' );
@@ -281,7 +278,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation_2->set_attributes( array( 'pa_color' => 'red' ) );
 		$variation_2->save();
 
-		$this->assertEquals( 'Variation #2 of Dummy Variable CRUD Product', $variation_2->get_name() );
 		$this->assertEquals( 'CRUD DUMMY SKU VARIABLE RED', $variation_2->get_sku() );
 		$this->assertEquals( 10, $variation_2->get_price() );
 
@@ -293,7 +289,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$expected_attributes = array( 'pa_color' => array( 'green', 'red' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 
-		$variation_2->set_name( 'UPDATED - Variation #2 of Dummy Variable CRUD Product' );
 		$variation_2->set_regular_price( 15 );
 		$variation_2->set_sale_price( 9.99 );
 		$variation_2->set_date_on_sale_to( '32532537600' );
@@ -308,7 +303,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$expected_prices['sale_price'][ $children[1] ] = 9.99;
 
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
-		$this->assertEquals( 'UPDATED - Variation #2 of Dummy Variable CRUD Product', $variation_2->get_name() );
 
 		$product->set_name( 'Renamed Variable Product' );
 		$product->save();
@@ -455,30 +449,27 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$one_attribute_variation = new WC_Product_Variation;
 		$one_attribute_variation->set_parent_id( $product->get_id() );
-		$one_attribute_variation->set_attributes( array( 'color' => 'green' ) );
+		$one_attribute_variation->set_attributes( array( 'color' => 'Green' ) );
 		$one_attribute_variation->save();
 
 		$two_attribute_variation = new WC_Product_Variation;
 		$two_attribute_variation->set_parent_id( $product->get_id() );
-		$two_attribute_variation->set_attributes( array( 'color' => 'green', 'size' => 'large' ) );
+		$two_attribute_variation->set_attributes( array( 'color' => 'Green', 'size' => 'Large' ) );
 		$two_attribute_variation->save();
 
 		$multiword_attribute_variation = new WC_Product_Variation;
 		$multiword_attribute_variation->set_parent_id( $product->get_id() );
-		$multiword_attribute_variation->set_attributes( array( 'color' => 'green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
+		$multiword_attribute_variation->set_attributes( array( 'color' => 'Green', 'mounting-plate' => 'galaxy-s6', 'support' => 'one-year' ) );
 		$multiword_attribute_variation->save();
 
 		// Check the one attribute variation title.
-		$loaded_variation = wc_get_product( $one_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product - Green", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green", $one_attribute_variation->get_name() );
 
 		// Check the two attribute variation title.
-		$loaded_variation = wc_get_product( $two_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product - Green, Large", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product - Green, Large", $two_attribute_variation->get_name() );
 
 		// Check the variation with a multiword attribute name.
-		$loaded_variation = wc_get_product( $multiword_attribute_variation->get_id() );
-		$this->assertEquals( "Test Product", $loaded_variation->get_name() );
+		$this->assertEquals( "Test Product", $multiword_attribute_variation->get_name() );
 	}
 
 	function test_generate_product_title_disable() {
