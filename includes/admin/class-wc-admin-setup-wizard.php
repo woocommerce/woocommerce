@@ -911,6 +911,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
+		$current_user = wp_get_current_user();
 		shuffle( $this->tweets );
 		?>
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://woocommerce.com/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooCommerce" data-size="large">Tweet</a>
@@ -928,6 +929,13 @@ class WC_Admin_Setup_Wizard {
 			</div>
 		<?php endif; ?>
 
+		<div class="woocommerce-message woocommerce-newsletter">
+			<p><?php esc_html_e( 'Join our mailing list to get regular updates on WooCommerce, tips for managing your store and inspiration from the wide world of Woo!', 'woocommerce' ); ?></p>
+			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
+				<input type="email" value="<?php echo esc_attr( $current_user->user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+			</form>
+		</div>
+
 		<div class="wc-setup-next-steps">
 			<div class="wc-setup-next-steps-first">
 				<h2><?php esc_html_e( 'Next steps', 'woocommerce' ); ?></h2>
@@ -940,8 +948,8 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php _e( 'Learn more', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Watch the Guided Tour videos', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="learn-more"><a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>
