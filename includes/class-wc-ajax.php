@@ -1411,7 +1411,7 @@ class WC_AJAX {
 
 		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
 
-		do_action( 'woocommerce_after_product_ordering' );
+		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
 	}
 

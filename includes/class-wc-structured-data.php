@@ -91,11 +91,8 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			if ( 1 < count( $value ) ) {
-				$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + array( '@graph' => $value );
-			} else {
-				$data[ $type ] = $value[0];
-			}
+			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
 		// If requested types, pick them up... Finally change the associative array to an indexed one.
@@ -211,7 +208,7 @@ class WC_Structured_Data {
 		}
 
 		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = $product->get_short_description() ?: $product->get_description();
+		$markup['description'] = wpautop( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
 		$markup['sku']         = $product->get_sku();
 
 		if ( '' !== $product->get_price() ) {

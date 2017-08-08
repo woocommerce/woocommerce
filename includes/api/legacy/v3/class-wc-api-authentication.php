@@ -19,7 +19,6 @@ class WC_API_Authentication {
 	 * Setup class
 	 *
 	 * @since 2.1
-	 * @return WC_API_Authentication
 	 */
 	public function __construct() {
 
