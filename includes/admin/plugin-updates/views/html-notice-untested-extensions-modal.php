@@ -8,40 +8,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div id="wc_untested_extensions_modal">
 	<div class="wc_untested_extensions_modal--content">
+		<h1><?php _e( 'Are you sure you want to update?', 'woocommerce' ); ?></h1>
 		<div class="wc_plugin_upgrade_notice extensions_warning">
-			<h1><?php _e( 'Warning', 'woocommerce' ); ?></h1>
-
-			<h4>
-				<?php
+			<p><?php
 					/* translators: %s: version number */
 					printf(
-						__( 'These plugins are not listed compatible with WooCommerce %s yet. This is a major update. If you upgrade without updating these extensions first, you may experience issues:', 'woocommerce' ),
+						__( 'The following plugins have not declared compatibility with WooCommerce %s yet:', 'woocommerce' ),
 						esc_html( $new_version )
 					);
-				?>
-			</h4>
+			?></p>
 
-			<?php foreach ( $plugins as $plugin ): ?>
-				<div class="plugin-details">
-					<?php echo esc_html( $plugin['Name'] ); ?>
-					&mdash;
-					<?php
-					/* translators: %s: version number */
-					echo esc_html( sprintf( __( 'Tested up to WooCommerce %s', 'woocommerce' ), wc_clean( $plugin['WC tested up to'] ) ) );
-					?>
-				</div>
-			<?php endforeach ?>
+			<ul class="plugin-details-list">
+				<?php foreach ( $plugins as $plugin ): ?>
+					<li class="plugin-details">
+						<?php echo esc_html( $plugin['Name'] ); ?>
+						&mdash;
+						<?php
+						/* translators: %s: version number */
+						echo esc_html( sprintf( __( 'Tested up to %s', 'woocommerce' ), wc_clean( $plugin['WC tested up to'] ) ) );
+						?>
+					</li>
+				<?php endforeach ?>
+			</ul>
+
+			<p><?php esc_html_e( 'This is a major update. Please update these extensions before proceeding or you may experience issues. We also recommend making a site backup.', 'woocommerce' ); ?></p>
 
 			<?php if ( current_user_can( 'update_plugins' ) ): ?>
 				<div class="actions">
-					<p class="woocommerce-actions cancel">
-						<a href="#"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
-					</p>
-					<p class="woocommerce-actions update-anyways">
-						<a class="button-primary accept" href="#">
-							<?php _e( 'I understand and wish to update', 'woocommerce' ); ?>
-						</a>
-					</p>
+					<a href="#" class="button button-secondary cancel"><?php esc_html_e( 'Cancel update', 'woocommerce' ); ?></a>
+					<a class="button button-primary accept" href="#"><?php esc_html_e( 'Continue to update', 'woocommerce' ); ?></a>
 				</div>
 			<?php endif ?>
 		</div>

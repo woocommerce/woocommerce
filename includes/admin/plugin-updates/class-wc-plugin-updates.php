@@ -174,7 +174,12 @@ class WC_Plugin_Updates {
 	 * @return array of plugin info arrays
 	 */
 	public function get_untested_plugins( $version, $release ) {
-		$extensions    = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
+		$extensions = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
+
+		if ( 'major' === $release ) {
+			$extensions = array_merge( $extensions, $this->get_plugins_for_woocommerce() );
+		}
+
 		$untested      = array();
 		$version_parts = explode( '.', $version );
 		$version       = $version_parts[0];
@@ -184,22 +189,27 @@ class WC_Plugin_Updates {
 		}
 
 		foreach ( $extensions as $file => $plugin ) {
-			$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
+			if ( ! empty( $plugin[ self::VERSION_TESTED_HEADER ] ) ) {
+				$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
 
-			if ( ! is_numeric( $plugin_version_parts[0] )
-				|| ( 'minor' === $release && ! isset( $plugin_version_parts[1] ) )
-				|| ( 'minor' === $release && ! is_numeric( $plugin_version_parts[1] ) )
-				) {
-				continue;
-			}
+				if ( ! is_numeric( $plugin_version_parts[0] )
+					|| ( 'minor' === $release && ! isset( $plugin_version_parts[1] ) )
+					|| ( 'minor' === $release && ! is_numeric( $plugin_version_parts[1] ) )
+					) {
+					continue;
+				}
 
-			$plugin_version = $plugin_version_parts[0];
+				$plugin_version = $plugin_version_parts[0];
 
-			if ( 'minor' === $release ) {
-				$plugin_version .= '.' . $plugin_version_parts[1];
-			}
+				if ( 'minor' === $release ) {
+					$plugin_version .= '.' . $plugin_version_parts[1];
+				}
 
-			if ( version_compare( $plugin_version, $version, '<' ) && is_plugin_active( $file ) ) {
+				if ( version_compare( $plugin_version, $version, '<' ) && is_plugin_active( $file ) ) {
+					$untested[ $file ] = $plugin;
+				}
+			} else {
+				$plugin[ self::VERSION_TESTED_HEADER ] = __( 'unknown', 'woocommerce' );
 				$untested[ $file ] = $plugin;
 			}
 		}
@@ -224,5 +234,23 @@ class WC_Plugin_Updates {
 		}
 
 		return apply_filters( 'woocommerce_get_plugins_with_header', $matches, $header, $plugins );
+	}
+
+	/**
+	 * Get plugins which "maybe" are for WooCommerce.
+	 *
+	 * @return array of plugin info arrays
+	 */
+	protected function get_plugins_for_woocommerce() {
+		$plugins = get_plugins();
+		$matches = array();
+
+		foreach ( $plugins as $file => $plugin ) {
+			if ( $plugin['Name'] !== 'WooCommerce' && ( stristr( $plugin['Name'], 'woocommerce' ) || stristr( $plugin['Description'], 'woocommerce' ) ) ) {
+				$matches[ $file ] = $plugin;
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_plugins_for_woocommerce', $matches, $plugins );
 	}
 }

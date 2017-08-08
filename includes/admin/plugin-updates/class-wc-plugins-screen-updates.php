@@ -146,7 +146,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 					$update_link.click();
 				});
 
-				$( '#wc_untested_extensions_modal .cancel a' ).on( 'click', function( evt ) {
+				$( '#wc_untested_extensions_modal .cancel' ).on( 'click', function( evt ) {
 					evt.preventDefault();
 					tb_remove();
 				});
