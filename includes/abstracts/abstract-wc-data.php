@@ -349,11 +349,11 @@ abstract class WC_Data {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
-					$this->meta_data[] = (object) array(
+					$this->meta_data[] = new WC_Meta_Data( array(
 						'id'    => $meta['id'],
 						'key'   => $meta['key'],
 						'value' => $meta['value'],
-					);
+					) );
 				}
 			}
 		}
@@ -380,10 +380,10 @@ abstract class WC_Data {
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
-		$this->meta_data[] = (object) array(
+		$this->meta_data[] = new WC_Meta_Data( array(
 			'key'   => $key,
 			'value' => $value,
-		);
+		) );
 	}
 
 	/**
@@ -404,14 +404,13 @@ abstract class WC_Data {
 		}
 
 		$this->maybe_read_meta_data();
+
 		$array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '';
 
 		if ( $array_key ) {
-			$this->meta_data[ current( $array_key ) ] = (object) array(
-				'id'    => $meta_id,
-				'key'   => $key,
-				'value' => $value,
-			);
+			$meta = $this->meta_data[ current( $array_key ) ];
+			$meta->key = $key;
+			$meta->value = $value;
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
@@ -496,11 +495,11 @@ abstract class WC_Data {
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
 		if ( $raw_meta_data ) {
 			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = (object) array(
+				$this->meta_data[] = new WC_Meta_Data( array(
 					'id'    => (int) $meta->meta_id,
 					'key'   => $meta->meta_key,
 					'value' => maybe_unserialize( $meta->meta_value ),
-				);
+				) );
 			}
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
@@ -525,10 +524,13 @@ abstract class WC_Data {
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
-				$this->meta_data[ $array_key ]->id = $new_meta_id;
+				$meta->id = $this->data_store->add_meta( $this, $meta );
+				$meta->apply_changes();
 			} else {
-				$this->data_store->update_meta( $this, $meta );
+				if ( $meta->get_changes() ) {
+					$this->data_store->update_meta( $this, $meta );
+					$meta->apply_changes();
+				}
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
