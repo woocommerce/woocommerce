@@ -115,10 +115,9 @@ jQuery(function( $ ) {
 		showButtonPanel: true,
 		showOn: 'focus',
 		buttonImageOnly: true,
-		onSelect: function( selectedDate ) {
+		onSelect: function() {
 			var option = $( this ).is( '.from' ) ? 'minDate' : 'maxDate',
-				instance = $( this ).data( 'datepicker' ),
-				date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+				date   = $( this ).datepicker( 'getDate' );
 
 			dates.not( this ).datepicker( 'option', option, date );
 		}

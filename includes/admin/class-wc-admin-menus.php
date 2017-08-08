@@ -86,8 +86,31 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
+		global $current_tab, $current_section;
+
 		WC()->payment_gateways();
 		WC()->shipping();
+
+		// Include settings pages
+		WC_Admin_Settings::get_settings_pages();
+
+		// Get current tab/section
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
+
+		// Save settings if data has been posted
+		if ( ! empty( $_POST ) ) {
+			WC_Admin_Settings::save();
+		}
+
+		// Add any posted messages
+		if ( ! empty( $_GET['wc_error'] ) ) {
+			WC_Admin_Settings::add_error( stripslashes( $_GET['wc_error'] ) );
+		}
+
+		if ( ! empty( $_GET['wc_message'] ) ) {
+			WC_Admin_Settings::add_message( stripslashes( $_GET['wc_message'] ) );
+		}
 	}
 
 	/**

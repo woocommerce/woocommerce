@@ -252,7 +252,7 @@ function wc_get_account_orders_actions( $order ) {
 		$order_id = absint( $order );
 		$order    = wc_get_order( $order_id );
 	}
-	
+
 	$actions = array(
 		'pay'    => array(
 			'url'  => $order->get_checkout_payment_url(),
@@ -275,8 +275,26 @@ function wc_get_account_orders_actions( $order ) {
 	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
 		unset( $actions['cancel'] );
 	}
-	
+
 	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+}
+
+/**
+ * Get account formatted address.
+ *
+ * @since  3.2.0
+ * @param  string $address_type billing or shipping.
+ * @return string
+ */
+function wc_get_account_formatted_address( $address_type ) {
+	$getter   = "get_{$address_type}";
+	$customer = new WC_Customer( get_current_user_id() );
+
+	if ( is_callable( array( $customer, $getter ) ) ) {
+		$address = $customer->$getter();
+		unset( $address['email'], $address['tel'] );
+	}
+	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
 }
 
 /**

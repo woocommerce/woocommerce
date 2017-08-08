@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="options_group reviews">
 			<?php
 				woocommerce_wp_checkbox( array(
-					'id'      => '_reviews_allowed',
+					'id'      => 'comment_status',
 					'value'   => $product_object->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
 					'label'   => __( 'Enable reviews', 'woocommerce' ),
 					'cbvalue' => 'open',

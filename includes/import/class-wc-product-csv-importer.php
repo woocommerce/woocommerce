@@ -54,8 +54,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Read file.
-	 *
-	 * @return array
 	 */
 	protected function read_file() {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
@@ -107,8 +105,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Set file mapped keys.
-	 *
-	 * @return array
 	 */
 	protected function set_mapped_keys() {
 		$mapping = $this->params['mapping'];
@@ -668,8 +664,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Map and format raw data to known fields.
-	 *
-	 * @return array
 	 */
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formating_callback();
