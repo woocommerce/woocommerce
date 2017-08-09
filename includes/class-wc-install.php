@@ -88,6 +88,10 @@ class WC_Install {
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
 		),
+		'4.0.0' => array(
+			'wc_update_400_table_names',
+			'wc_update_400_db_version',
+		),
 	);
 
 	/** @var object Background update class */
@@ -467,6 +471,9 @@ class WC_Install {
 	 *
 	 * Changing indexes may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
 	 * indexes first causes too much load on some servers/larger DB.
+	 *
+	 * Table names should be < 32 chars. Max allowable length is 64 for MySql - we need to leave room for the prefix.
+	 * WooCommerce prefix should be wc_.
 	 *
 	 * @return string
 	 */
