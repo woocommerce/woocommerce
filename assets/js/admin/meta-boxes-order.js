@@ -234,6 +234,7 @@ jQuery( function ( $ ) {
 
 			$( '#woocommerce-order-items' )
 				.on( 'click', 'button.add-line-item', this.add_line_item )
+				.on( 'click', 'button.add-discount', this.add_discount )
 				.on( 'click', 'button.refund-items', this.refund_items )
 				.on( 'click', '.cancel-action', this.cancel )
 				.on( 'click', 'button.add-order-item', this.add_item )
@@ -373,6 +374,36 @@ jQuery( function ( $ ) {
 		add_line_item: function() {
 			$( 'div.wc-order-add-item' ).slideDown();
 			$( 'div.wc-order-data-row-toggle' ).not( 'div.wc-order-add-item' ).slideUp();
+			return false;
+		},
+
+		add_discount: function() {
+			var value = window.prompt( 'Enter a coupon code, percentage, or fixed discount amount.' );
+
+			if ( value != null ) {
+				wc_meta_boxes_order_items.block();
+
+				var data = {
+					action   : 'woocommerce_add_order_discount',
+					dataType : 'json',
+					order_id : woocommerce_admin_meta_boxes.post_id,
+					security : woocommerce_admin_meta_boxes.order_item_nonce,
+					discount : value
+				};
+
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					if ( response.success ) {
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.unblock();
+							wc_meta_boxes_order_items.stupidtable.init();
+					} else {
+						window.alert( response.data.error );
+					}
+					wc_meta_boxes_order_items.unblock();
+				});
+			}
 			return false;
 		},
 
