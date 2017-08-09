@@ -33,6 +33,7 @@ class WC_Query {
 	 * @access public
 	 */
 	public function __construct() {
+		add_filter( 'query', array( $this, 'adjust_query_table_names' ) );
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
@@ -43,6 +44,32 @@ class WC_Query {
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
 		}
 		$this->init_query_vars();
+	}
+
+	/**
+	 * Maintains compatibility with old table names used in queries after they were renamed in 4.0.0.
+	 *
+	 * @since  4.0.0
+	 * @return string
+	 */
+	public function adjust_query_table_names( $query ) {
+		$tables = array(
+			"{$wpdb->prefix}woocommerce_sessions"                         => "{$wpdb->prefix}wc_sessions",
+			"{$wpdb->prefix}woocommerce_api_keys"                         => "{$wpdb->prefix}wc_api_keys",
+			"{$wpdb->prefix}woocommerce_attribute_taxonomies"             => "{$wpdb->prefix}wc_attributes",
+			"{$wpdb->prefix}woocommerce_downloadable_product_permissions" => "{$wpdb->prefix}wc_customer_downloads",
+			"{$wpdb->prefix}woocommerce_order_items"                      => "{$wpdb->prefix}wc_order_items",
+			"{$wpdb->prefix}woocommerce_order_itemmeta"                   => "{$wpdb->prefix}wc_order_itemmeta",
+			"{$wpdb->prefix}woocommerce_tax_rates"                        => "{$wpdb->prefix}wc_tax_rates",
+			"{$wpdb->prefix}woocommerce_tax_rate_locations"               => "{$wpdb->prefix}wc_tax_rate_locations",
+			"{$wpdb->prefix}woocommerce_shipping_zones"                   => "{$wpdb->prefix}wc_shipping_zones",
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations"          => "{$wpdb->prefix}wc_shipping_zone_locations",
+			"{$wpdb->prefix}woocommerce_shipping_zone_methods"            => "{$wpdb->prefix}wc_shipping_zone_methods",
+			"{$wpdb->prefix}woocommerce_payment_tokens"                   => "{$wpdb->prefix}wc_payment_tokens",
+			"{$wpdb->prefix}woocommerce_payment_tokenmeta"                => "{$wpdb->prefix}wc_payment_tokenmeta",
+			"{$wpdb->prefix}woocommerce_log"                              => "{$wpdb->prefix}wc_log",
+		);
+		return str_replace( array_keys( $tables ), array_values( $tables ), $query );
 	}
 
 	/**
