@@ -12,14 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
+<tr class="discount <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
 		<div class="view">
 			<?php
 				/* translators: %1$s: shipping method, %2$s: Discount amount. */
-				echo wp_kses_post( sprintf( __( '%1$s &mdash; %2$s off', 'woocomerce' ), $item->get_name() ? $item->get_name() : __( 'Discount', 'woocommerce' ), 'fixed' === $item->get_discount_type() ? wc_price( $item->get_amount() ) : $item->get_amount() . '% off' ) );
+				echo wp_kses_post( sprintf( __( '%1$s &mdash; %2$s off', 'woocomerce' ), $item->get_name() ? $item->get_name() : __( 'Discount', 'woocommerce' ), 'fixed' === $item->get_discount_type() ? wc_price( $item->get_amount() ) : $item->get_amount() . '%' ) );
 			?>
 		</div>
 		<div class="edit" style="display: none;">

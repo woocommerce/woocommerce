@@ -913,9 +913,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			// Add WC_Order_Item_Discount object.
 			$item = new WC_Order_Item_Discount();
-			$item->set_amount( $discount );
-			$item->save();
-			$this->add_item( $item );
+			if ( strstr( $discount, '%' ) ) {
+				$item->set_amount( trim( $discount, '%' ) );
+				$item->set_discount_type( 'percent' );
+				$item->save();
+				$this->add_item( $item );
+			} elseif ( is_numeric( $discount ) && 0 < absint( $discount ) ) {
+				$item->set_amount( absint( $discount ) );
+				$this->set_discount_type( 'fixed' );
+				$item->save();
+				$this->add_item( $item );
+			} else {
+				// Invalid.
+			}
 		}
 
 		$this->calculate_totals( true );

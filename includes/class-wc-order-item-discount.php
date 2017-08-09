@@ -68,16 +68,10 @@ class WC_Order_Item_Discount extends WC_Order_Item {
 	/**
 	 * Set amount.
 	 *
-	 * @param string $raw_discount Value to set.
+	 * @param string $value Value to set.
 	 */
-	public function set_amount( $raw_discount ) {
-		if ( strstr( $raw_discount, '%' ) ) {
-			$this->set_prop( 'amount', trim( $raw_discount, '%' ) );
-			$this->set_discount_type( 'percent' );
-		} elseif ( is_numeric( $raw_discount ) && 0 < absint( $raw_discount ) ) {
-			$this->set_prop( 'amount', absint( $raw_discount ) );
-			$this->set_discount_type( 'fixed' );
-		}
+	public function set_amount( $value ) {
+		$this->set_prop( 'amount', $value );
 	}
 
 	/**
