@@ -369,7 +369,19 @@ function wc_cart_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {
-		return round( $value, $precision );
+		// Fake it in PHP 5.2.
+		if ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
+			$value    = (string) $value;
+			$value    = explode( '.', $value );
+			$value[1] = substr( $value[1], 0, $precision + 1 );
+			$value    = implode( '.', $value );
+
+			if ( substr( $value, -1 ) === '5' ) {
+				$value = substr( $value, 0, -1 ) . '4';
+			}
+			$value = floatval( $value );
+		}
+    	return round( $value, $precision );
 	}
 }
 
