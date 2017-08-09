@@ -39,18 +39,20 @@ class WC_Discounts {
 	protected $manual_discounts = array();
 
 	/**
-	 * Constructor. @todo accept order objects.
+	 * Constructor.
 	 *
 	 * @param array $object Cart or order object.
 	 */
 	public function __construct( $object = array() ) {
 		if ( is_a( $object, 'WC_Cart' ) ) {
 			$this->set_items_from_cart( $object );
+		} elseif ( is_a( $object, 'WC_Order' ) ) {
+			$this->set_items_from_order( $object );
 		}
 	}
 
 	/**
-	 * Normalise cart/order items which will be discounted.
+	 * Normalise cart items which will be discounted.
 	 *
 	 * @since 3.2.0
 	 * @param array $cart Cart object.
@@ -70,6 +72,32 @@ class WC_Discounts {
 			$item->quantity      = $cart_item['quantity'];
 			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
 			$this->items[ $key ] = $item;
+		}
+
+		uasort( $this->items, array( $this, 'sort_by_price' ) );
+	}
+
+	/**
+	 * Normalise order items which will be discounted.
+	 *
+	 * @since 3.2.0
+	 * @param array $order Cart object.
+	 */
+	public function set_items_from_order( $order ) {
+		$this->items = $this->discounts = $this->manual_discounts = array();
+
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		foreach ( $order->get_items() as $order_item ) {
+			$item                = new stdClass();
+			$item->key           = $order_item->get_id();
+			$item->object        = $order_item;
+			$item->product       = $order_item->get_product();
+			$item->quantity      = $order_item->get_quantity();
+			$item->price         = wc_add_number_precision_deep( $order_item->get_total() );
+			$this->items[ $order_item->get_id() ] = $item;
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
@@ -124,7 +152,7 @@ class WC_Discounts {
 	 */
 	public function get_discounts_by_item( $in_cents = false ) {
 		$discounts            = $this->discounts;
-		$item_discount_totals = array_shift( $discounts );
+		$item_discount_totals = (array) array_shift( $discounts );
 
 		foreach ( $discounts as $item_discounts ) {
 			foreach ( $item_discounts as $item_key => $item_discount ) {
@@ -240,7 +268,7 @@ class WC_Discounts {
 		if ( strstr( $raw_discount, '%' ) ) {
 			$discount->set_discount_type( 'percent' );
 			$discount->set_amount( trim( $raw_discount, '%' ) );
-		} elseif ( 0 < absint( $raw_discount ) ) {
+		} elseif ( is_numeric( $raw_discount ) && 0 < absint( $raw_discount ) ) {
 			$discount->set_discount_type( 'fixed' );
 			$discount->set_amount( wc_add_number_precision( absint( $raw_discount ) ) );
 		}
