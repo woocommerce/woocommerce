@@ -11,6 +11,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
 // Get line items
 $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
@@ -18,7 +19,7 @@ if ( wc_tax_enabled() ) {
 	$order_taxes      = $order->get_taxes();
 	$tax_classes      = WC_Tax::get_tax_classes();
 	$classes_options  = wc_get_product_tax_class_options();
-	$show_tax_columns = sizeof( $order_taxes ) === 1;
+	$show_tax_columns = count( $order_taxes ) === 1;
 }
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
@@ -60,6 +61,14 @@ if ( wc_tax_enabled() ) {
 				do_action( 'woocommerce_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );
 			}
 			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_id() );
+		?>
+		</tbody>
+		<tbody id="order_discount_line_items">
+		<?php
+			foreach ( $discounts as $item_id => $item ) {
+				include( 'html-order-discount.php' );
+			}
+			do_action( 'woocommerce_admin_order_items_after_discounts', $order->get_id() );
 		?>
 		</tbody>
 		<tbody id="order_shipping_line_items">
@@ -186,11 +195,12 @@ if ( wc_tax_enabled() ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
+			<?php if ( wc_tax_enabled() ) : ?>
+				<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
+			<?php endif; ?>
+			<button type="button" class="button add-discount"><?php _e( 'Apply discount', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description"><?php echo wc_help_tip( __( 'To edit this order change the status back to "Pending"', 'woocommerce' ) ); ?> <?php _e( 'This order is no longer editable.', 'woocommerce' ); ?></span>
-		<?php endif; ?>
-		<?php if ( wc_tax_enabled() && $order->is_editable() ) : ?>
-			<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
