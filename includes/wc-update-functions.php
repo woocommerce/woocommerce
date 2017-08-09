@@ -1204,3 +1204,31 @@ function wc_update_320_mexican_states() {
 function wc_update_320_db_version() {
 	WC_Install::update_db_version( '3.2.0' );
 }
+
+/**
+ * Rename long tables.
+ */
+function wc_update_400_table_names() {
+	global $wpdb;
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_sessions TO {$wpdb->prefix}wc_sessions;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_api_keys TO {$wpdb->prefix}wc_api_keys;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies TO {$wpdb->prefix}wc_attributes;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions TO {$wpdb->prefix}wc_customer_downloads;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_order_items TO {$wpdb->prefix}wc_order_items;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_order_itemmeta TO {$wpdb->prefix}wc_order_itemmeta;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_tax_rates TO {$wpdb->prefix}wc_tax_rates;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_tax_rate_locations TO {$wpdb->prefix}wc_tax_rate_locations;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_shipping_zones TO {$wpdb->prefix}wc_shipping_zones;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations TO {$wpdb->prefix}wc_shipping_zone_locations;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods TO {$wpdb->prefix}wc_shipping_zone_methods;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_payment_tokens TO {$wpdb->prefix}wc_payment_tokens;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta TO {$wpdb->prefix}wc_payment_tokenmeta;" );
+	$wpdb->query( "RENAME TABLE {$wpdb->prefix}woocommerce_log TO {$wpdb->prefix}wc_log;" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_400_db_version() {
+	WC_Install::update_db_version( '4.0.0' );
+}
