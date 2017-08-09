@@ -123,10 +123,10 @@ jQuery( function( $ ) {
 				dateFormat:      'yy-mm-dd',
 				numberOfMonths:  1,
 				showButtonPanel: true,
-				onSelect:        function( selectedDate, instance ) {
+				onSelect:        function() {
 					var option = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
 						dates  = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
-						date   = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+						date   = $( this ).datepicker( 'getDate' );
 
 					dates.not( this ).datepicker( 'option', option, date );
 					$( this ).change();

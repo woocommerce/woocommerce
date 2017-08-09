@@ -592,7 +592,7 @@ class WC_AJAX {
 		$variation_object->set_parent_id( $product_id );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
-		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
+		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
 		include( 'admin/meta-boxes/views/html-variation-admin.php' );
 		wp_die();
 	}
@@ -1040,7 +1040,7 @@ class WC_AJAX {
 		// Save order items first
 		wc_save_order_items( $order_id, $items );
 
-		// Grab the order and recalc taxes
+		// Grab the order and recalculate taxes
 		$order = wc_get_order( $order_id );
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
@@ -1411,7 +1411,7 @@ class WC_AJAX {
 
 		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
 
-		do_action( 'woocommerce_after_product_ordering' );
+		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
 	}
 
@@ -1654,7 +1654,7 @@ class WC_AJAX {
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
 				$variation      = get_post( $variation_id );
-				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compat.
+				$variation_data = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 				$loop++;
 			}

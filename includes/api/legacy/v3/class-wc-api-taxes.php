@@ -297,7 +297,7 @@ class WC_API_Taxes extends WC_API_Resource {
 					continue;
 				}
 
-				// Fix compund and shipping values
+				// Fix compound and shipping values
 				if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
 					$value = $value ? 1 : 0;
 				}

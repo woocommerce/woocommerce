@@ -111,7 +111,6 @@ class WC_API_Server {
 	 *
 	 * @since 2.1
 	 * @param $path
-	 * @return WC_API_Server
 	 */
 	public function __construct( $path ) {
 

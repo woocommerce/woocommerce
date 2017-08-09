@@ -28,6 +28,27 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		),
 	);
 
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'], $calculate_tax_for['tax_class'] ) ) {
+			return false;
+		}
+		if ( wc_tax_enabled() ) {
+			$tax_rates = WC_Tax::find_shipping_rates( $calculate_tax_for );
+			$taxes     = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+			$this->set_taxes( array( 'total' => $taxes ) );
+		} else {
+			$this->set_taxes( false );
+		}
+		return true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -205,7 +226,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

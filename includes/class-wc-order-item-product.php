@@ -165,9 +165,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @param array $data Key/Value pairs
 	 */
-	public function set_variation( $data ) {
-		foreach ( $data as $key => $value ) {
-			$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+	public function set_variation( $data = array() ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+			}
 		}
 	}
 
@@ -198,7 +200,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
 
@@ -397,7 +399,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

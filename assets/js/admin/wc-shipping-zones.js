@@ -102,9 +102,11 @@
 
 					if ( _.size( zones ) ) {
 						// Sort zones
-						zones = _.sortBy( zones, function( zone ) {
-							return parseInt( zone.zone_order, 10 );
-						} );
+						zones = _( zones )
+							.chain()
+							.sortBy( function ( zone ) { return parseInt( zone.zone_id, 10 ); } )
+							.sortBy( function ( zone ) { return parseInt( zone.zone_order, 10 ); } )
+							.value();
 
 						// Populate $tbody with the current zones
 						$.each( zones, function( id, rowData ) {

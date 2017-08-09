@@ -180,7 +180,7 @@ class WC_Admin_Help {
 				'title'     => __( 'Guided Tour', 'woocommerce' ),
 				'content'   =>
 					'<h2><a href="https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=helptab&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin">' . __( 'Guided Tour', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
-					'<script src="//fast.wistia.net/assets/external/E-v1.js" aync></script>
+					'<script src="//fast.wistia.net/assets/external/E-v1.js" async></script>
 					<div class="wistia_embed wistia_async_' . esc_attr( $video_map[ $video_key ]['id'] ) . ' videoFoam=true seo=false" style="width:640px;height:360px;">&nbsp;</div>
 				',
 			) );

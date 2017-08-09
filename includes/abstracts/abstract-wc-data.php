@@ -200,8 +200,8 @@ abstract class WC_Data {
 			} else {
 				$this->data_store->create( $this );
 			}
-			return $this->get_id();
 		}
+		return $this->get_id();
 	}
 
 	/**
@@ -269,6 +269,23 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Check if the key is an internal one.
+	 *
+	 * @since  3.2.0
+	 * @param  string $key
+	 * @return bool   true if it's an internal key, false otherwise
+	 */
+	protected function is_internal_meta_key( $key ) {
+		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.2.0' );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get Meta Data by Key.
 	 *
 	 * @since  2.6.0
@@ -278,6 +295,14 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
+			$function = 'get_' . $key;
+
+			if ( is_callable( array( $this, $function ) ) ) {
+				return $this->{$function}();
+			}
+		}
+
 		$this->maybe_read_meta_data();
 		$meta_data  = $this->get_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $meta_data, 'key' ), $key );
@@ -324,11 +349,11 @@ abstract class WC_Data {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
-					$this->meta_data[] = (object) array(
+					$this->meta_data[] = new WC_Meta_Data( array(
 						'id'    => $meta['id'],
 						'key'   => $meta['key'],
 						'value' => $meta['value'],
-					);
+					) );
 				}
 			}
 		}
@@ -343,14 +368,22 @@ abstract class WC_Data {
 	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
+			$function = 'set_' . $key;
+
+			if ( is_callable( array( $this, $function ) ) ) {
+				return $this->{$function}( $value );
+			}
+		}
+
 		$this->maybe_read_meta_data();
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
-		$this->meta_data[] = (object) array(
+		$this->meta_data[] = new WC_Meta_Data( array(
 			'key'   => $key,
 			'value' => $value,
-		);
+		) );
 	}
 
 	/**
@@ -362,13 +395,22 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
+		if ( $this->is_internal_meta_key( $key ) ) {
+			$function = 'set_' . $key;
+
+			if ( is_callable( array( $this, $function ) ) ) {
+				return $this->{$function}( $value );
+			}
+		}
+
 		$this->maybe_read_meta_data();
-		if ( $array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '' ) {
-			$this->meta_data[ current( $array_key ) ] = (object) array(
-				'id'    => $meta_id,
-				'key'   => $key,
-				'value' => $value,
-			);
+
+		$array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '';
+
+		if ( $array_key ) {
+			$meta = $this->meta_data[ current( $array_key ) ];
+			$meta->key = $key;
+			$meta->value = $value;
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
@@ -382,7 +424,9 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
-		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key ) ) {
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key );
+
+		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -397,7 +441,9 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
 		$this->maybe_read_meta_data();
-		if ( $array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid ) ) {
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
+
+		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
 			}
@@ -449,11 +495,11 @@ abstract class WC_Data {
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
 		if ( $raw_meta_data ) {
 			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = (object) array(
+				$this->meta_data[] = new WC_Meta_Data( array(
 					'id'    => (int) $meta->meta_id,
 					'key'   => $meta->meta_key,
 					'value' => maybe_unserialize( $meta->meta_value ),
-				);
+				) );
 			}
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
@@ -478,10 +524,13 @@ abstract class WC_Data {
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
-				$new_meta_id                       = $this->data_store->add_meta( $this, $meta );
-				$this->meta_data[ $array_key ]->id = $new_meta_id;
+				$meta->id = $this->data_store->add_meta( $this, $meta );
+				$meta->apply_changes();
 			} else {
-				$this->data_store->update_meta( $this, $meta );
+				if ( $meta->get_changes() ) {
+					$this->data_store->update_meta( $this, $meta );
+					$meta->apply_changes();
+				}
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
@@ -509,7 +558,7 @@ abstract class WC_Data {
 		$this->data        = $this->default_data;
 		$this->changes     = array();
 		$this->set_object_read( false );
- 	}
+	}
 
 	/**
 	 * Set object read property.
@@ -644,7 +693,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Sets a date prop whilst handling formatting and datatime objects.
+	 * Sets a date prop whilst handling formatting and datetime objects.
 	 *
 	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.

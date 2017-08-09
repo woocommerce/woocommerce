@@ -54,8 +54,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Read file.
-	 *
-	 * @return array
 	 */
 	protected function read_file() {
 		if ( false !== ( $handle = fopen( $this->file, 'r' ) ) ) {
@@ -107,8 +105,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Set file mapped keys.
-	 *
-	 * @return array
 	 */
 	protected function set_mapped_keys() {
 		$mapping = $this->params['mapping'];
@@ -186,10 +182,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * for rows following this one.
 	 *
 	 * @param  stirng $field
-	 * @param  array $raw_data
 	 * @return int
 	 */
-	public function parse_id_field( $field, $raw_data = array() ) {
+	public function parse_id_field( $field ) {
 		global $wpdb;
 
 		$id = absint( $field );
@@ -208,7 +203,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
 			// If row has a SKU, make sure placeholder was not made already.
-			if ( isset( $raw_data['sku'] ) && $id = wc_get_product_id_by_sku( $raw_data['sku'] ) ) {
+			if ( isset( $this->raw_data['sku'] ) && $id = wc_get_product_id_by_sku( $this->raw_data['sku'] ) ) {
 				return $id;
 			}
 
@@ -218,8 +213,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$product->add_meta_data( '_original_id', $id, true );
 
 			// If row has a SKU, make sure placeholder has it too.
-			if ( isset( $raw_data['sku'] ) ) {
-				$product->set_sku( $raw_data['sku'] );
+			if ( isset( $this->raw_data['sku'] ) ) {
+				$product->set_sku( $this->raw_data['sku'] );
 			}
 			$id = $product->save();
 		}
@@ -228,7 +223,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse reletive comma-delineated field and return product ID.
+	 * Parse relative comma-delineated field and return product ID.
 	 *
 	 * @param string $field Field value.
 	 * @return array
@@ -382,7 +377,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse images list from a CSV.
+	 * Parse images list from a CSV. Images can be filenames or URLs.
 	 *
 	 * @param  string $field Field value.
 	 * @return array
@@ -392,7 +387,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		return array_map( 'esc_url_raw', $this->explode_values( $field ) );
+		$images = array();
+
+		foreach ( $this->explode_values( $field ) as $image ) {
+			if ( stristr( $image, '://' ) ) {
+				$images[] = esc_url_raw( $image );
+			} else {
+				$images[] = sanitize_file_name( $image );
+			}
+		}
+
+		return $images;
 	}
 
 	/**
@@ -669,8 +674,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Map and format raw data to known fields.
-	 *
-	 * @return array
 	 */
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formating_callback();
@@ -705,7 +708,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$value = wp_check_invalid_utf8( $value, true );
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value, array_combine( $mapped_keys, $row ) );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
 			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );

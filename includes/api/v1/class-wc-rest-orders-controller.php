@@ -496,7 +496,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -513,7 +513,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Only reutrn writeable props from schema.
+	 * Only return writable props from schema.
 	 * @param  array $schema
 	 * @return bool
 	 */

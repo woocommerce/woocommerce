@@ -25,26 +25,26 @@ if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateway
 		<div id="payment" class="woocommerce-Payment">
 			<ul class="woocommerce-PaymentMethods payment_methods methods">
 				<?php
-					// Chosen Method.
-					if ( count( $available_gateways ) ) {
-						current( $available_gateways )->set_current();
-					}
+				// Chosen Method.
+				if ( count( $available_gateways ) ) {
+					current( $available_gateways )->set_current();
+				}
 
-					foreach ( $available_gateways as $gateway ) {
-						?>
-						<li class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo $gateway->id; ?> payment_method_<?php echo $gateway->id; ?>">
-							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
-							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
-							<?php
-								if ( $gateway->has_fields() || $gateway->get_description() ) {
-									echo '<div class="woocommerce-PaymentBox woocommerce-PaymentBox--' . $gateway->id . ' payment_box payment_method_' . $gateway->id . '" style="display: none;">';
-									$gateway->payment_fields();
-									echo '</div>';
-								}
-							?>
-						</li>
+				foreach ( $available_gateways as $gateway ) {
+					?>
+					<li class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo $gateway->id; ?> payment_method_<?php echo $gateway->id; ?>">
+						<input id="payment_method_<?php echo esc_attr( $gateway->id ); ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
+						<label for="payment_method_<?php echo esc_attr( $gateway->id ); ?>"><?php echo wp_kses_post( $gateway->get_title() ); ?> <?php echo wp_kses_post( $gateway->get_icon() ); ?></label>
 						<?php
-					}
+						if ( $gateway->has_fields() || $gateway->get_description() ) {
+							echo '<div class="woocommerce-PaymentBox woocommerce-PaymentBox--' . esc_attr( $gateway->id ) . ' payment_box payment_method_' . esc_attr( $gateway->id ) . '" style="display: none;">';
+							$gateway->payment_fields();
+							echo '</div>';
+						}
+						?>
+					</li>
+					<?php
+				}
 				?>
 			</ul>
 
@@ -55,6 +55,4 @@ if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateway
 			</div>
 		</div>
 	</form>
-<?php else : ?>
-	<p class="woocommerce-notice woocommerce-notice--info woocommerce-info"><?php esc_html_e( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ); ?></p>
 <?php endif; ?>
