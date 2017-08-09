@@ -13,31 +13,30 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.2.0
+ * @version 3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
 ?>
 
 <ul class="order_details">
 	<li class="order">
-		<?php _e( 'Order number:', 'woocommerce' ); ?>
-		<strong><?php echo $order->get_order_number(); ?></strong>
+		<?php esc_html_e( 'Order number:', 'woocommerce' ); ?>
+		<strong><?php echo esc_html( $order->get_order_number() ); ?></strong>
 	</li>
 	<li class="date">
-		<?php _e( 'Date:', 'woocommerce' ); ?>
-		<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
+		<?php esc_html_e( 'Date:', 'woocommerce' ); ?>
+		<strong><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></strong>
 	</li>
 	<li class="total">
-		<?php _e( 'Total:', 'woocommerce' ); ?>
-		<strong><?php echo $order->get_formatted_order_total(); ?></strong>
+		<?php esc_html_e( 'Total:', 'woocommerce' ); ?>
+		<strong><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></strong>
 	</li>
 	<?php if ( $order->get_payment_method_title() ) : ?>
 	<li class="method">
-		<?php _e( 'Payment method:', 'woocommerce' ); ?>
+		<?php esc_html_e( 'Payment method:', 'woocommerce' ); ?>
 		<strong><?php
 			echo wp_kses_post( $order->get_payment_method_title() );
 		?></strong>
