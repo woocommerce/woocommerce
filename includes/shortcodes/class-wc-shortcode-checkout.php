@@ -157,35 +157,8 @@ class WC_Shortcode_Checkout {
 
 				if ( $order->needs_payment() ) {
 
-					?>
-					<ul class="order_details">
-						<li class="order">
-							<?php _e( 'Order number:', 'woocommerce' ); ?>
-							<strong><?php echo $order->get_order_number(); ?></strong>
-						</li>
-						<li class="date">
-							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
-						</li>
-						<li class="total">
-							<?php _e( 'Total:', 'woocommerce' ); ?>
-							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
-						</li>
-						<?php if ( $order->get_payment_method_title() ) : ?>
-						<li class="method">
-							<?php _e( 'Payment method:', 'woocommerce' ); ?>
-							<strong><?php
-								echo wp_kses_post( $order->get_payment_method_title() );
-							?></strong>
-						</li>
-						<?php endif; ?>
-					</ul>
-
-					<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
-
-					<div class="clear"></div>
-					<?php
-
+					wc_get_template( 'checkout/order-receipt.php', array( 'order' => $order ) );
+					
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
