@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="view">
 			<?php
 				/* translators: %1$s: shipping method, %2$s: Discount amount. */
-				echo wp_kses_post( sprintf( __( '%1$s &mdash; %2$s off', 'woocomerce' ), $item->get_name() ? $item->get_name() : __( 'Discount', 'woocommerce' ), 'fixed' === $item->get_discount_type() ? wc_price( $item->get_amount() ) : $item->get_amount() . '%' ) );
+				echo wp_kses_post( sprintf( __( '%1$s &mdash; %2$s', 'woocomerce' ), $item->get_name() ? $item->get_name() : __( 'Discount', 'woocommerce' ), 'fixed' === $item->get_discount_type() ? wc_price( $item->get_amount() ) : $item->get_amount() . '%' ) );
 			?>
 		</div>
 		<div class="edit" style="display: none;">
