@@ -1154,3 +1154,18 @@ function wc_do_oembeds( $content ) {
 function wc_get_string_before_colon( $string ) {
 	return trim( current( explode( ':', (string) $string ) ) );
 }
+
+/**
+ * Round discount.
+ *
+ * @param  float $value
+ * @param  int $precision
+ * @return float
+ */
+function wc_cart_round_discount( $value, $precision ) {
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
+	} else {
+		return round( $value, $precision );
+	}
+}
