@@ -870,7 +870,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Add a discount/coupon to this order and recalculate totals.
 	 *
 	 * @since  3.2.0
-	 * @param  string|object $discount Discount amount or coupon object.
+	 * @param  string $discount Discount amount or coupon code.
 	 * @return void
 	 */
 	public function add_discount( $discount ) {
@@ -929,6 +929,44 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->calculate_totals( true );
+	}
+
+	/**
+	 * Remove a coupon from the order and recalculate totals.
+	 *
+	 * @since 3.2
+	 * @param string $code Coupon code
+	 * @return void
+	 */
+	public function remove_coupon( $code ) {
+		// Reset totals.
+		foreach ( $this->get_items() as $item ) {
+			$item->set_total( $item->get_subtotal() );
+			$item->set_total_tax( $item->get_subtotal_tax() );
+			$item->save();
+		}
+		$this->calculate_totals( true );
+
+		// Apply discounts again.
+		$discounts = $this->get_items( 'discount' );
+		$this->remove_order_items( 'discount' );
+		foreach ( $discounts as $discount ) {
+			$type = $discount->get_discount_type();
+			$amount = $discount->get_amount();
+			$amount .= 'percent' === $type ? '%' : '';
+
+			$this->add_discount( $amount );
+		}
+
+		// Apply coupons again.
+		$coupons = $this->get_items( 'coupon' );
+		$this->remove_order_items( 'coupon' );
+		foreach ( $coupons as $coupon ) {
+			if ( $coupon->get_code() === $code ) {
+				continue;
+			}
+			$this->add_discount( $coupon->get_code() );
+		}
 	}
 
 	/**

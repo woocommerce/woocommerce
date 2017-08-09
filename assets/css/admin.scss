@@ -802,6 +802,8 @@ ul.wc_coupon_list li {
 
 	&.code {
 		display: inline-block;
+		position: relative;
+		padding-right: 2em;
 
 		&::after {
 			content: ', ';
@@ -813,6 +815,29 @@ ul.wc_coupon_list li {
 
 		.tips {
 			cursor: pointer;
+		}
+
+		.remove-coupon {
+			display: none;
+			text-decoration: none;
+			color: #888;
+			font-size: 1.25em;
+			position: absolute;
+			top: 5px;
+			right: 1em;
+
+			&::before {
+				@include icon_dashicons( '\f158' );
+			}
+			&:hover::before {
+				color: $red;
+			}
+		}
+
+		&:hover {
+			.remove-coupon {
+				display: inline-block;
+			}
 		}
 	}
 }
