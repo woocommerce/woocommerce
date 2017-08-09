@@ -874,64 +874,51 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function add_discount( $discount ) {
-		$discounts = new WC_Discounts( $this );
-
 		// See if we have a coupon code.
 		$coupon_code = wc_format_coupon_code( $discount );
 		$coupon      = new WC_Coupon( $coupon_code );
 
 		if ( $coupon->get_code() === $coupon_code && $coupon->is_valid() ) {
-			$applied = $discounts->apply_discount( $coupon );
+			$discounts = new WC_Discounts( $this );
+			$applied   = $discounts->apply_discount( $coupon );
+
+			if ( $applied && ! is_wp_error( $applied ) ) {
+				$item_discounts   = $discounts->get_discounts_by_item();
+				$coupon_discounts = $discounts->get_discounts_by_coupon();
+
+				// Add discounts to line items.
+				if ( $item_discounts ) {
+					foreach ( $item_discounts as $item_id => $amount ) {
+						$item = $this->get_item( $item_id );
+						$item->set_total( $amount );
+						$item->save();
+					}
+					unset( $this->items['line_items'] ); // Remove read line items variable so new totals are loaded from DB.
+				}
+
+				// Add WC_Order_Item_Coupon objects for applied coupons.
+				if ( $coupon_discounts ) {
+					foreach ( $coupon_discounts as $coupon_code => $amount ) {
+						$item = new WC_Order_Item_Coupon();
+						$item->set_props( array(
+							'code'         => $coupon_code,
+							'discount'     => $amount,
+							'discount_tax' => '', // @todo This needs to be calculated somehow like the cart class does. Maybe we need an order calculation class?
+						) );
+						$item->save();
+						$this->add_item( $item );
+					}
+				}
+			}
 		} else {
-			$applied = $discounts->apply_discount( $discount );
+			// Add WC_Order_Item_Discount object.
+			$item = new WC_Order_Item_Discount();
+			$item->set_amount( $discount );
+			$item->save();
+			$this->add_item( $item );
 		}
 
-		if ( $applied && ! is_wp_error( $applied ) ) {
-			$item_discounts   = $discounts->get_discounts_by_item();
-			$coupon_discounts = $discounts->get_discounts_by_coupon();
-			$manual_discounts = $discounts->get_manual_discounts();
-
-			// Add discounts to line items.
-			if ( $item_discounts ) {
-				foreach ( $item_discounts as $item_id => $amount ) {
-					$item = $this->get_item( $item_id );
-					$item->set_total( $amount );
-					$item->save();
-				}
-				unset( $this->items['line_items'] ); // Remove read line items variable so new totals are loaded from DB.
-			}
-
-			// Add WC_Order_Item_Coupon objects for applied coupons.
-			if ( $coupon_discounts ) {
-				foreach ( $coupon_discounts as $coupon_code => $amount ) {
-					$item = new WC_Order_Item_Coupon();
-					$item->set_props( array(
-						'code'         => $coupon_code,
-						'discount'     => $amount,
-						'discount_tax' => '', // @todo This needs to be calculated somehow like the cart class does. Maybe we need an order calculation class?
-					) );
-					$this->add_item( $item );
-				}
-			}
-
-			// Add WC_Order_Item_Discount objects for applied discounts.
-			if ( $manual_discounts ) {
-				foreach ( $manual_discounts as $manual_discount_key => $manual_discount ) {
-					$item = new WC_Order_Item_Discount();
-					$item->set_props( array(
-						'amount'         => wc_remove_number_precision( $manual_discount->get_amount() ),
-						'discount_type'  => $manual_discount->get_discount_type(),
-						'discount_total' => wc_remove_number_precision( $manual_discount->get_discount_total() ),
-					) );
-					$this->add_item( $item );
-				}
-			}
-
-			// @todo we need to work out if manual discounts get calculated here, during calculate_totals, or inside a dedicated class.
-
-			// Total recalc.
-			$this->calculate_totals( true );
-		}
+		$this->calculate_totals( true );
 	}
 
 	/**
@@ -1069,7 +1056,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		return array_unique( $found_tax_classes );
+		return $found_tax_classes;
 	}
 
 	/**
@@ -1120,11 +1107,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
 		if ( 'inherit' === $shipping_tax_class ) {
-			$shipping_tax_class = current( array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() ) );
+			$shipping_tax_class = current( array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), array_unique( $this->get_items_tax_classes() ) ) );
 		}
 
 		// Trigger tax recalculation for all items.
-		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
 			$item->calculate_taxes( $calculate_tax_for );
 			$item->save();
 		}
@@ -1146,7 +1133,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$existing_taxes = $this->get_taxes();
 		$saved_rate_ids = array();
 
-		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
 				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
@@ -1197,16 +1184,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
-		$fee_total         = 0;
-		$cart_subtotal_tax = 0;
-		$cart_total_tax    = 0;
+		$cart_subtotal      = 0;
+		$cart_total         = 0;
+		$fee_total          = 0;
+		$discount_total     = 0;
+		$discount_total_tax = 0;
+		$cart_subtotal_tax  = 0;
+		$cart_total_tax     = 0;
 
+		// Discounts are recalculated first based on the latest item costs.
+		$this->calculate_discounts();
+
+		// Calculate taxes for items, shipping, discounts.
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
 
+		// Prepare the totals.
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal     += $item->get_subtotal();
 			$cart_total        += $item->get_total();
@@ -1220,14 +1214,41 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total += $item->get_total();
 		}
 
-		$grand_total = round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
+		foreach ( $this->get_items( 'discount' ) as $item ) {
+			$discount_total     += $item->get_total();
+			$discount_total_tax += $item->get_total_tax();
+		}
 
-		$this->set_discount_total( $cart_subtotal - $cart_total );
-		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
+		$grand_total = round( $cart_total + $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
+
+		$this->set_discount_total( $cart_subtotal - $cart_total + $discount_total );
+		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax + $discount_total_tax );
 		$this->set_total( $grand_total );
 		$this->save();
 
 		return $grand_total;
+	}
+
+	/**
+	 * Calculate actual discount amounts for each discount row from line items.
+	 *
+	 * @todo consider moving to totals class.
+	 */
+	protected function calculate_discounts() {
+		$discounts      = new WC_Discounts( $this );
+		$discount_items = $this->get_items( 'discount' );
+
+		// Re-calc manual discounts based on new line items.
+		foreach ( $discount_items as $discount ) {
+			$result = $discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount->get_id() );
+		}
+
+		// Set discount totals.
+		foreach ( $discounts->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
+			$discount_item = $discount_items[ $manual_discount_key ];
+			$discount_item->set_total( wc_remove_number_precision( $manual_discount->get_discount_total() ) * -1 );
+			$discount_item->save();
+		}
 	}
 
 	/**

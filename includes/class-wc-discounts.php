@@ -256,9 +256,10 @@ class WC_Discounts {
 	 * Apply a discount to all items.
 	 *
 	 * @param  string|object $raw_discount Accepts a string (fixed or percent discounts), or WC_Coupon object.
+	 * @param  string        $discount_id Optional ID for the discount. Generated if not defined.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	public function apply_discount( $raw_discount ) {
+	public function apply_discount( $raw_discount, $discount_id = null ) {
 		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
 			return $this->apply_coupon( $raw_discount );
 		}
@@ -285,7 +286,9 @@ class WC_Discounts {
 			$discount->set_discount_total( min( $discount->get_amount(), $total_to_discount ) );
 		}
 
-		$this->manual_discounts[ $this->generate_discount_id( $discount ) ] = $discount;
+		$discount_id = $discount_id ? $discount_id : $this->generate_discount_id( $discount );
+
+		$this->manual_discounts[ $discount_id ] = $discount;
 
 		return true;
 	}
