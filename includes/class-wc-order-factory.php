@@ -89,6 +89,9 @@ class WC_Order_Factory {
 				case 'tax' :
 					$classname = 'WC_Order_Item_Tax';
 				break;
+				case 'discount' :
+					$classname = 'WC_Order_Item_Discount';
+				break;
 			}
 
 			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
