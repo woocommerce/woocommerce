@@ -113,6 +113,7 @@ class WC_AJAX {
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
+			'add_order_discount'                               => false,
 			'remove_order_item'                                => false,
 			'remove_order_tax'                                 => false,
 			'reduce_order_item_stock'                          => false,
@@ -879,6 +880,33 @@ class WC_AJAX {
 			$item->set_rate( $rate_id );
 			$item->set_order_id( $order_id );
 			$item->save();
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Add order discount via ajax.
+	 */
+	public static function add_order_discount() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$order    = wc_get_order( $order_id );
+
+			$order->add_discount( wc_clean( $_POST['discount'] ) );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
