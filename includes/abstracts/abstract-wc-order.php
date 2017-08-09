@@ -920,7 +920,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->add_item( $item );
 			} elseif ( is_numeric( $discount ) && 0 < absint( $discount ) ) {
 				$item->set_amount( absint( $discount ) );
-				$this->set_discount_type( 'fixed' );
+				$item->set_discount_type( 'fixed' );
 				$item->save();
 				$this->add_item( $item );
 			} else {
@@ -1225,11 +1225,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		foreach ( $this->get_items( 'discount' ) as $item ) {
-			$discount_total     += $item->get_total();
-			$discount_total_tax += $item->get_total_tax();
+			$discount_total     += $item->get_total() * -1;
+			$discount_total_tax += $item->get_total_tax() * -1;
 		}
 
-		$grand_total = round( $cart_total + $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
+		$grand_total = round( $cart_total - $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
 		$this->set_discount_total( $cart_subtotal - $cart_total + $discount_total );
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax + $discount_total_tax );
