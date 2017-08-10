@@ -1028,7 +1028,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 
 		// Reset line item totals.
-		foreach ( $this->get_items() as &$item ) {
+		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
 			$item->set_total_tax( $item->get_subtotal_tax() );
 		}
@@ -1271,11 +1271,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Trigger tax recalculation for all items.
-		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => &$item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
 			$item->calculate_taxes( $calculate_tax_for );
 		}
 
-		foreach ( $this->get_shipping_methods() as $item_id => &$item ) {
+		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
 		}
 
