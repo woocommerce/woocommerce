@@ -1271,14 +1271,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Trigger tax recalculation for all items.
-		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => &$item ) {
 			$item->calculate_taxes( $calculate_tax_for );
-			$item->save();
 		}
 
-		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
+		foreach ( $this->get_shipping_methods() as $item_id => &$item ) {
 			$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
-			$item->save();
 		}
 
 		$this->update_taxes();
