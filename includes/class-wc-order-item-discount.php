@@ -42,7 +42,7 @@ class WC_Order_Item_Discount extends WC_Order_Item {
 		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
 			// Apportion taxes to order items.
 			$order            = $this->get_order();
-			$tax_class_counts = array_count_values( $order->get_items_tax_classes() );
+			$tax_class_counts = $order->get_item_tax_class_counts();
 			$item_count       = $order->get_item_count();
 			$discount_taxes   = array();
 
@@ -105,7 +105,8 @@ class WC_Order_Item_Discount extends WC_Order_Item {
 	 * Set taxes.
 	 *
 	 * This is an array of tax ID keys with total amount values.
-	 * @param array $raw_tax_data
+	 *
+	 * @param array $raw_tax_data Array of taxes.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );

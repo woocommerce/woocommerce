@@ -108,7 +108,7 @@ if ( wc_tax_enabled() ) {
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
-		$coupons = $order->get_items( array( 'coupon' ) );
+		$coupons = $order->get_items( 'coupon' );
 		if ( $coupons ) {
 			?>
 			<div class="wc-used-coupons">
