@@ -311,7 +311,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
 		$item  = $this->items[ $item_key ];
-		$price = $item->subtotal - $this->discount_totals[ $item_key ];
+		$price = isset( $this->discount_totals[ $item_key ] ) ? $item->subtotal - $this->discount_totals[ $item_key ] : $item->subtotal;
 
 		if ( $item->price_includes_tax ) {
 			$price += $item->subtotal_tax;
