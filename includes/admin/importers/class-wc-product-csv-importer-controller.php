@@ -402,7 +402,7 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'External URL', 'woocommerce' )                            => 'product_url',
 			__( 'Button text', 'woocommerce' )                             => 'button_text',
-		) );
+		), $raw_headers );
 
 		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
 			array(
@@ -415,7 +415,7 @@ class WC_Product_CSV_Importer_Controller {
 				__( 'Download %d URL', 'woocommerce' )       => 'downloads:url',
 				__( 'Meta: %s', 'woocommerce' )              => 'meta:',
 			)
-		) );
+		), $raw_headers );
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
@@ -490,6 +490,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
+			'slug'               => __( 'Slug', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
 			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
