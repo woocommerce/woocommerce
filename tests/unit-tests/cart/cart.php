@@ -429,7 +429,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$cart_id = WC()->cart->generate_cart_id( $product->get_id() );
 
 		// Set quantity of product in cart to 2
-		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 2 ) );
+		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 2 ), $cart_id );
 
 		// Check if there are 2 items in cart now
 		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );

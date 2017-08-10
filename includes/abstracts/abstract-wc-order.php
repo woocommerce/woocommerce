@@ -822,7 +822,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Remove item from the order.
 	 *
 	 * @param int $item_id
-	 *
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
@@ -934,39 +933,86 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove a coupon from the order and recalculate totals.
 	 *
-	 * @since 3.2
-	 * @param string $code Coupon code
+	 * Coupons affect line item totals, but there is no relationship between
+	 * coupon and line total, so to remove a coupon we need to work from the
+	 * line subtotal (price before discount) and re-apply all coupons in this
+	 * order.
+	 *
+	 * Manual discounts are not affected; those are separate and do not affect
+	 * stored line totals.
+	 *
+	 * @since  3.2
+	 * @param  string $code Coupon code
 	 * @return void
 	 */
 	public function remove_coupon( $code ) {
-		// Reset totals.
-		foreach ( $this->get_items() as $item ) {
+		$coupons = $this->get_items( 'coupon' );
+
+		// Remove the coupon line.
+		foreach ( $coupons as $item_id => $coupon ) {
+			if ( $coupon->get_code() === $code ) {
+				$this->remove_item( $item_id );
+				break;
+			}
+		}
+
+		// Reset line item totals.
+		$this->recalculate_coupons();
+	}
+
+	/**
+	 * Apply all coupons in this order again to all line items.
+	 *
+	 * @since  3.2.0
+	 */
+	protected function recalculate_coupons() {
+		$coupons = $this->get_items( 'coupon' );
+		$items   = $this->get_items();
+
+		// Reset line item totals.
+		foreach ( $items as $item ) {
 			$item->set_total( $item->get_subtotal() );
 			$item->set_total_tax( $item->get_subtotal_tax() );
 			$item->save();
 		}
-		$this->calculate_totals( true );
 
-		// Apply discounts again.
-		$discounts = $this->get_items( 'discount' );
-		$this->remove_order_items( 'discount' );
-		foreach ( $discounts as $discount ) {
-			$type = $discount->get_discount_type();
-			$amount = $discount->get_amount();
-			$amount .= 'percent' === $type ? '%' : '';
+		// Remove items so they are refreshed.
+		unset( $this->items['line_items'], $this->items['coupon_lines'] );
 
-			$this->add_discount( $amount );
-		}
+		// Apply coupon discounts.
+		$discounts = new WC_Discounts( $this );
 
-		// Apply coupons again.
-		$coupons = $this->get_items( 'coupon' );
-		$this->remove_order_items( 'coupon' );
 		foreach ( $coupons as $coupon ) {
-			if ( $coupon->get_code() === $code ) {
-				continue;
+			$applied = $discounts->apply_discount( $coupon->get_code(), $coupon->get_id() );
+
+			if ( $applied && ! is_wp_error( $applied ) ) {
+				$item_discounts   = $discounts->get_discounts_by_item();
+				$coupon_discounts = $discounts->get_discounts_by_coupon();
+
+				// Add discounts to line items.
+				if ( $item_discounts ) {
+					foreach ( $item_discounts as $item_id => $amount ) {
+						$item = $items[ $item_id ];
+						$item->set_total( $amount );
+						$item->save();
+					}
+				}
+
+				if ( $coupon_discounts ) {
+					foreach ( $coupon_discounts as $item_id => $amount ) {
+						$item = $items[ $item_id ];
+						$item->set_discount( $amount ); // @todo discount tax.
+						$item->save();
+					}
+				}
 			}
-			$this->add_discount( $coupon->get_code() );
 		}
+
+		// Remove items so they are refreshed.
+		unset( $this->items['line_items'], $this->items['coupon_lines'] );
+
+		// Recalculate totals and taxes.
+		$this->calculate_totals( true );
 	}
 
 	/**

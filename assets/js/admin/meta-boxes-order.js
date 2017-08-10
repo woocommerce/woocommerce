@@ -422,7 +422,11 @@ jQuery( function ( $ ) {
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
-					$this.parent().remove();
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+						wc_meta_boxes_order.init_tiptip();
+						wc_meta_boxes_order_items.unblock();
+						wc_meta_boxes_order_items.stupidtable.init();
 				} else {
 					window.alert( response.data.error );
 				}
