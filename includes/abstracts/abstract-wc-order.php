@@ -971,6 +971,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		$coupon->increase_usage_count( $this->get_user_id() );
 		$this->calculate_totals( true );
 
 		return true;
@@ -998,6 +999,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $coupons as $item_id => $coupon ) {
 			if ( $coupon->get_code() === $code ) {
 				$this->remove_item( $item_id );
+				$coupon_object = new WC_Coupon( $code );
+				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				break;
 			}
 		}
