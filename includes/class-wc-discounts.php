@@ -261,7 +261,7 @@ class WC_Discounts {
 	 */
 	public function apply_discount( $raw_discount, $discount_id = null ) {
 		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
-			return $this->apply_coupon( $raw_discount, $discount_id );
+			return $this->apply_coupon( $raw_discount );
 		}
 
 		$discount = new WC_Discount;
@@ -298,20 +298,17 @@ class WC_Discounts {
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
-	 * @param  string    $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	protected function apply_coupon( $coupon, $discount_id = null ) {
+	protected function apply_coupon( $coupon ) {
 		$is_coupon_valid = $this->is_coupon_valid( $coupon );
 
 		if ( is_wp_error( $is_coupon_valid ) ) {
 			return $is_coupon_valid;
 		}
 
-		$discount_id = $discount_id ? $discount_id : $coupon->get_code();
-
-		if ( ! isset( $this->discounts[ $discount_id ] ) ) {
-			$this->discounts[ $discount_id ] = array_fill_keys( array_keys( $this->items ), 0 );
+		if ( ! isset( $this->discounts[ $coupon->get_code() ] ) ) {
+			$this->discounts[ $coupon->get_code() ] = array_fill_keys( array_keys( $this->items ), 0 );
 		}
 
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
@@ -320,13 +317,13 @@ class WC_Discounts {
 		// Core discounts are handled here as of 3.2.
 		switch ( $coupon->get_discount_type() ) {
 			case 'percent' :
-				$this->apply_coupon_percent( $coupon, $items_to_apply, $discount_id );
+				$this->apply_coupon_percent( $coupon, $items_to_apply );
 				break;
 			case 'fixed_product' :
-				$this->apply_coupon_fixed_product( $coupon, $items_to_apply, $discount_id );
+				$this->apply_coupon_fixed_product( $coupon, $items_to_apply );
 				break;
 			case 'fixed_cart' :
-				$this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $discount_id );
+				$this->apply_coupon_fixed_cart( $coupon, $items_to_apply );
 				break;
 			default :
 				foreach ( $items_to_apply as $item ) {
@@ -335,7 +332,7 @@ class WC_Discounts {
 					$discount          = min( $discounted_price, wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount ), $item->object ) );
 
 					// Store code and discount amount per item.
-					$this->discounts[ $discount_id ][ $item->key ] += $discount;
+					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 				}
 				break;
 		}
@@ -418,10 +415,9 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  string    $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
 	 * @return int Total discounted.
 	 */
-	protected function apply_coupon_percent( $coupon, $items_to_apply, $discount_id = null ) {
+	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
 		$total_discount = 0;
 		$cart_total     = 0;
 
@@ -441,14 +437,14 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->discounts[ $discount_id ][ $item->key ] += $discount;
+			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
 		// Work out how much discount would have been given to the cart has a whole and compare to what was discounted on all line items.
 		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon->get_amount() / 100 ), 0 );
 
 		if ( $total_discount < $cart_total_discount ) {
-			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $discount_id, $cart_total_discount - $total_discount );
+			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
 		}
 
 		return $total_discount;
@@ -460,11 +456,10 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  string    $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
 	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
 	 * @return int Total discounted.
 	 */
-	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $discount_id = null, $amount = null ) {
+	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
 		$amount         = $amount ? $amount: wc_add_number_precision( $coupon->get_amount() );
 
@@ -481,7 +476,7 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->discounts[ $discount_id ][ $item->key ] += $discount;
+			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 		return $total_discount;
 	}
@@ -492,11 +487,10 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  string    $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
 	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
 	 * @return int Total discounted.
 	 */
-	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $discount_id = null, $amount = null ) {
+	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
 		$amount         = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
 		$items_to_apply = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
@@ -508,16 +502,16 @@ class WC_Discounts {
 		$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
 
 		if ( $per_item_discount > 0 ) {
-			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $discount_id, $per_item_discount );
+			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
 
 			/**
 			 * If there is still discount remaining, repeat the process.
 			 */
 			if ( $total_discount > 0 && $total_discount < $amount ) {
-				$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $discount_id, $amount - $total_discount );
+				$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
 			}
 		} elseif ( $amount > 0 ) {
-			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $discount_id, $amount );
+			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 		}
 		return $total_discount;
 	}
@@ -529,11 +523,10 @@ class WC_Discounts {
 	 * @since 3.2.0
 	 * @param  WC_Coupon $coupon Coupon object if appliable. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  string    $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
 	 * @param  int       $amount Fixed discount amount to apply.
 	 * @return int Total discounted.
 	 */
-	protected function apply_coupon_remainder( $coupon, $items_to_apply, $discount_id = null, $amount ) {
+	protected function apply_coupon_remainder( $coupon, $items_to_apply, $amount ) {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {
@@ -551,7 +544,7 @@ class WC_Discounts {
 				$total_discount += $discount;
 
 				// Store code and discount amount per item.
-				$this->discounts[ $discount_id ][ $item->key ] += $discount;
+				$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 
 				if ( $total_discount >= $amount ) {
 					break 2;

@@ -889,7 +889,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( $item_discounts ) {
 					foreach ( $item_discounts as $item_id => $amount ) {
 						$item = $this->get_item( $item_id );
-						$item->set_total( $amount );
+						$item->set_total( max( 0, $item->get_total() - $amount ) );
 						$item->save();
 					}
 					unset( $this->items['line_items'] ); // Remove read line items variable so new totals are loaded from DB.
@@ -966,8 +966,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since  3.2.0
 	 */
 	protected function recalculate_coupons() {
-		$coupons = $this->get_items( 'coupon' );
-		$items   = $this->get_items();
+		$coupons           = $this->get_items( 'coupon' );
+		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
+		$items             = $this->get_items();
 
 		// Reset line item totals.
 		foreach ( $items as $item ) {
@@ -983,28 +984,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$discounts = new WC_Discounts( $this );
 
 		foreach ( $coupons as $coupon ) {
-			$applied = $discounts->apply_discount( $coupon->get_code(), $coupon->get_id() );
+			$discounts->apply_discount( $coupon->get_code(), $coupon->get_id() );
+		}
 
-			if ( $applied && ! is_wp_error( $applied ) ) {
-				$item_discounts   = $discounts->get_discounts_by_item();
-				$coupon_discounts = $discounts->get_discounts_by_coupon();
+		$item_discounts   = $discounts->get_discounts_by_item();
+		$coupon_discounts = $discounts->get_discounts_by_coupon();
 
-				// Add discounts to line items.
-				if ( $item_discounts ) {
-					foreach ( $item_discounts as $item_id => $amount ) {
-						$item = $items[ $item_id ];
-						$item->set_total( $amount );
-						$item->save();
-					}
-				}
+		// Add discounts to line items.
+		if ( $item_discounts ) {
+			foreach ( $item_discounts as $item_id => $amount ) {
+				$item = $items[ $item_id ];
+				$item->set_total( $amount );
+				$item->save();
+			}
+		}
 
-				if ( $coupon_discounts ) {
-					foreach ( $coupon_discounts as $item_id => $amount ) {
-						$item = $items[ $item_id ];
-						$item->set_discount( $amount ); // @todo discount tax.
-						$item->save();
-					}
-				}
+		if ( $coupon_discounts ) {
+			foreach ( $coupon_discounts as $coupon_code => $amount ) {
+				$item_id = $coupon_code_to_id[ $coupon_code ];
+				$item    = $items[ $item_id ];
+				$item->set_discount( $amount ); // @todo discount tax.
+				$item->save();
 			}
 		}
 
