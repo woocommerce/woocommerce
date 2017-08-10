@@ -713,8 +713,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param  int      $order_item_id Order item id.
 	 * @return string Order Item type
 	 */
-	public function get_order_item_type( WC_Order $order, $order_item_id ) {
+	public function get_order_item_type( $order, $order_item_id ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d and order_item_id = %d", $order->get_id(), $order_item_id ) );
+		return $wpdb->get_var( $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d and order_item_id = %d;", $order->get_id(), $order_item_id ) );
 	}
 }

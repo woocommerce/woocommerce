@@ -701,10 +701,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $types as $type ) {
 			if ( $group = $this->type_to_group( $type ) ) {
 				if ( ! isset( $this->items[ $group ] ) ) {
-					$this->items[ $group ] = $this->data_store->read_items( $this, $type );
+					$this->items[ $group ] = array_filter( $this->data_store->read_items( $this, $type ) );
 				}
 				// Don't use array_merge here because keys are numeric
-				$items = array_filter( $items + $this->items[ $group ] );
+				$items = $items + $this->items[ $group ];
 			}
 		}
 
@@ -795,6 +795,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $load_from_db ) {
 			return WC_Order_Factory::get_order_item( $item_id );
 		}
+
+		// Search for item id.
+		if ( $this->items ) {
+			foreach ( $this->items as $group => $items ) {
+				if ( isset( $items[ $item_id ] ) ) {
+					return $items[ $item_id ];
+				}
+			}
+		}
+
+		// Load all items of type and cache.
 		$type = $this->data_store->get_order_item_type( $this, $item_id );
 
 		if ( ! $type ) {
@@ -854,7 +865,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 3.0.0
 	 * @param WC_Order_Item Order item object (product, shipping, fee, coupon, tax)
 	 *
-	 * * @return false|void
+	 * @return false|void
 	 */
 	public function add_item( $item ) {
 		if ( ! $items_key = $this->get_items_key( $item ) ) {
@@ -869,7 +880,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Set parent.
 		$item->set_order_id( $this->get_id() );
 
-		// Append new row with generated temporary ID
+		// Append new row with generated temporary ID.
 		if ( $item_id = $item->get_id() ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
@@ -890,20 +901,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $coupon->get_code() === wc_format_coupon_code( $discount ) && $coupon->is_valid() ) {
 			$this->apply_coupon( $coupon );
 		} else {
-			// Add WC_Order_Item_Discount object.
 			$item = new WC_Order_Item_Discount();
+
 			if ( strstr( $discount, '%' ) ) {
 				$item->set_amount( trim( $discount, '%' ) );
 				$item->set_discount_type( 'percent' );
-				$item->save();
 				$this->add_item( $item );
 			} elseif ( is_numeric( $discount ) && 0 < absint( $discount ) ) {
 				$item->set_amount( absint( $discount ) );
 				$item->set_discount_type( 'fixed' );
-				$item->save();
 				$this->add_item( $item );
-			} else {
-				// Invalid. @todo
 			}
 
 			$this->calculate_totals( true );
@@ -918,9 +925,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	protected function apply_coupon( $coupon ) {
-		if ( ! is_a( 'WC_Coupon', $coupon ) ) {
+		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
 			$code   = wc_format_coupon_code( $coupon );
-			$coupon = new WC_Coupon( wc_format_coupon_code( $code ) );
+			$coupon = new WC_Coupon( $code );
 
 			if ( $coupon->get_code() !== $code || ! $coupon->is_valid() ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
@@ -945,15 +952,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		error_log( print_r( $coupon_discounts, true ));
+
 		// Add WC_Order_Item_Coupon objects for applied coupons.
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
 				$item = new WC_Order_Item_Coupon();
-				$item->set_props( array(
-					'code'         => $coupon_code,
-					'discount'     => $amount,
-					'discount_tax' => '', // @todo This needs to be calculated somehow like the cart class does. Maybe we need an order calculation class?
-				) );
+				$item->set_code( $coupon_code );
+				$item->set_discount( $amount ); // @todo This needs to be calculated somehow like the cart class does. Maybe we need an order calculation class?
 				$this->add_item( $item );
 			}
 		}
@@ -1002,8 +1008,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$discounts = new WC_Discounts( $this );
 
 		// Re-calc manual discounts based on new line items.
-		foreach ( $this->get_items( 'discount' ) as $discount ) {
-			$result = $discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount->get_id() );
+		foreach ( $this->get_items( 'discount' ) as $discount_key => $discount ) {
+			$result = $discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount_key );
 		}
 
 		// Set discount totals.
@@ -1023,7 +1029,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 
 		// Reset line item totals.
-		foreach ( $this->get_items() as $item ) {
+		foreach ( $this->get_items() as &$item ) {
 			$item->set_total( $item->get_subtotal() );
 			$item->set_total_tax( $item->get_subtotal_tax() );
 		}
