@@ -19,11 +19,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$coupon->set_amount( 10 );
 		$coupon->save();
 
+		$this->assertEquals( 50, $order->get_total() );
+
 		$order->add_discount( 'test' );
 		$this->assertEquals( 40, $order->get_total() );
 
 		$order->remove_coupon( 'test' );
 		$this->assertEquals( 50, $order->get_total() );
+
+		$coupon->delete( true );
+		$order->delete( true );
 	}
 
 	/**
