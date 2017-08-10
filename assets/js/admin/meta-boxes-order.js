@@ -418,7 +418,7 @@ jQuery( function ( $ ) {
 				order_id : woocommerce_admin_meta_boxes.post_id,
 				security : woocommerce_admin_meta_boxes.order_item_nonce,
 				coupon : $this.data( 'code' )
-			}
+			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
@@ -536,17 +536,26 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.block();
 
 				var data = {
+					order_id      : woocommerce_admin_meta_boxes.post_id,
 					order_item_ids: order_item_id,
-					action:         'woocommerce_remove_order_item',
-					security:       woocommerce_admin_meta_boxes.order_item_nonce
+					action        : 'woocommerce_remove_order_item',
+					security      : woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
 				$.ajax({
 					url:     woocommerce_admin_meta_boxes.ajax_url,
 					data:    data,
 					type:    'POST',
-					success: function() {
-						$item.remove();
+					success: function( response ) {
+						if ( response.success ) {
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.unblock();
+							wc_meta_boxes_order_items.stupidtable.init();
+						} else {
+							window.alert( response.data.error );
+						}
 						wc_meta_boxes_order_items.unblock();
 					}
 				});
@@ -570,11 +579,16 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
-						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-						wc_meta_boxes_order.init_tiptip();
+						if ( response.success ) {
+							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+								$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+								wc_meta_boxes_order.init_tiptip();
+								wc_meta_boxes_order_items.unblock();
+								wc_meta_boxes_order_items.stupidtable.init();
+						} else {
+							window.alert( response.data.error );
+						}
 						wc_meta_boxes_order_items.unblock();
-						wc_meta_boxes_order_items.stupidtable.init();
 					}
 				});
 			}

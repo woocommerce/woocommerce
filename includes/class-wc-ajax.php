@@ -957,18 +957,32 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$order_item_ids = $_POST['order_item_ids'];
+		try {
+			$order_id       = absint( $_POST['order_id'] );
+			$order_item_ids = $_POST['order_item_ids'];
 
-		if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
-			$order_item_ids = array( $order_item_ids );
-		}
-
-		if ( sizeof( $order_item_ids ) > 0 ) {
-			foreach ( $order_item_ids as $id ) {
-				wc_delete_order_item( absint( $id ) );
+			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
+				$order_item_ids = array( $order_item_ids );
 			}
+
+			if ( sizeof( $order_item_ids ) > 0 ) {
+				foreach ( $order_item_ids as $id ) {
+					wc_delete_order_item( absint( $id ) );
+				}
+			}
+
+			$order = wc_get_order( $order_id );
+			$order->calculate_totals( true );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-		wp_die();
 	}
 
 	/**
@@ -981,15 +995,24 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$order_id = absint( $_POST['order_id'] );
-		$rate_id  = absint( $_POST['rate_id'] );
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$rate_id  = absint( $_POST['rate_id'] );
 
-		wc_delete_order_item( $rate_id );
+			wc_delete_order_item( $rate_id );
 
-		// Return HTML items
-		$order = wc_get_order( $order_id );
-		include( 'admin/meta-boxes/views/html-order-items.php' );
-		wp_die();
+			$order = wc_get_order( $order_id );
+			$order->calculate_totals( true );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 	}
 
 	/**
