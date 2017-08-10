@@ -797,46 +797,55 @@ ul.wc_coupon_list,
 	clear: both;
 }
 
-ul.wc_coupon_list li {
-	margin: 0;
+ul.wc_coupon_list {
+	padding-bottom: 5px;
 
-	&.code {
-		display: inline-block;
-		position: relative;
-		padding-right: 2em;
+	li {
+		margin: 0;
 
-		&::after {
-			content: ', ';
-		}
+		&.code {
+			display: inline-block;
+			position: relative;
+			padding-right: 2em;
+			padding-left: .5em;
+			background-color: #fff;
+			border: 1px solid #aaa;
+			-webkit-box-shadow: 0 1px 0 #dfdfdf;
+			box-shadow: 0 1px 0 #dfdfdf;
 
-		&:last-of-type::after {
-			display: none;
-		}
+			border-radius: 4px;
+			margin-right: 5px;
+			margin-top: 5px;
 
-		.tips {
-			cursor: pointer;
-		}
+			.tips {
+				cursor: pointer;
 
-		.remove-coupon {
-			display: none;
-			text-decoration: none;
-			color: #888;
-			font-size: 1.25em;
-			position: absolute;
-			top: 5px;
-			right: 1em;
+				span {
+					color: #888;
 
-			&::before {
-				@include icon_dashicons( '\f158' );
+					&:hover {
+						color: #000;
+					}
+				}
 			}
-			&:hover::before {
-				color: $red;
-			}
-		}
 
-		&:hover {
 			.remove-coupon {
-				display: inline-block;
+				text-decoration: none;
+				color: #888;
+				position: absolute;
+				top: 7px;
+				right: 20px;
+
+				/*rtl:raw:
+				left: 7px;
+				*/
+
+				&::before {
+					@include icon_dashicons( '\f158' );
+				}
+				&:hover::before {
+					color: $red;
+				}
 			}
 		}
 	}
