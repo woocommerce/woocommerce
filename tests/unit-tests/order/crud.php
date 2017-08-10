@@ -7,31 +7,6 @@
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
-	 * @todo move this to the bottom of this class.
-	 */
-	function test_remove_coupon() {
-		$order = WC_Helper_Order::create_order();
-		$order->calculate_totals( true );
-
-		$coupon = new WC_Coupon;
-		$coupon->set_code( 'test' );
-		$coupon->set_discount_type( 'fixed_cart' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
-
-		$this->assertEquals( 50, $order->get_total() );
-
-		$order->add_discount( 'test' );
-		$this->assertEquals( 40, $order->get_total() );
-
-		$order->remove_coupon( 'test' );
-		$this->assertEquals( 50, $order->get_total() );
-
-		$coupon->delete( true );
-		$order->delete( true );
-	}
-
-	/**
 	 * Test: get_type
 	 */
 	function test_get_type() {
@@ -1588,5 +1563,32 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_remaining_refund_items() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 4, $object->get_remaining_refund_items() );
+	}
+
+	/**
+	 * Test add_discount and remove_coupon.
+	 *
+	 * @since 3.2.0
+	 */
+	function test_add_remove_coupon() {
+		$order = WC_Helper_Order::create_order();
+		$order->calculate_totals( true );
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertEquals( 50, $order->get_total() );
+
+		$order->add_discount( 'test' );
+		$this->assertEquals( 40, $order->get_total() );
+
+		$order->remove_coupon( 'test' );
+		$this->assertEquals( 50, $order->get_total() );
+
+		$coupon->delete( true );
+		$order->delete( true );
 	}
 }

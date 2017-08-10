@@ -5,7 +5,6 @@
  * @since 3.2.0
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed
- * @todo This needs to show discount amount (negative) and negative taxes.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
