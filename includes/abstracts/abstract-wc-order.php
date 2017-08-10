@@ -190,7 +190,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
 			if ( is_array( $items ) ) {
-				foreach ( array_filter( $items ) as $item_key => $item ) {
+				$items = array_filter( $items );
+				foreach ( $items as $item_key => $item ) {
 					$item->set_order_id( $this->get_id() );
 					$item_id = $item->save();
 
@@ -952,8 +953,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		error_log( print_r( $coupon_discounts, true ));
-
 		// Add WC_Order_Item_Coupon objects for applied coupons.
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
@@ -1281,8 +1280,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
 			$item->save();
 		}
-
-		$this->items = array(); // clear so saved values are reloaded.
 
 		$this->update_taxes();
 	}
