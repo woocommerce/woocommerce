@@ -443,6 +443,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Just skip current field.
+	 *
+	 * By default is applied wc_clean() to all not listed fields
+	 * in self::get_formating_callback(), use this method to skip any formating.
+	 *
+	 * @param  string $value Field value.
+	 * @return string
+	 */
+	public function parse_skip_field( $value ) {
+		return $value;
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -460,9 +473,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
-			'name'              => 'wp_filter_post_kses',
-			'short_description' => 'wp_filter_post_kses',
-			'description'       => 'wp_filter_post_kses',
+			'name'              => array( $this, 'parse_skip_field' ),
+			'short_description' => array( $this, 'parse_skip_field' ),
+			'description'       => array( $this, 'parse_skip_field' ),
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
