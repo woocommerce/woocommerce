@@ -274,6 +274,39 @@ final class WC_Cart_Totals {
 	 */
 	protected function set_coupons() {
 		$this->coupons = $this->object->get_coupons();
+
+		foreach ( $this->coupons as $coupon ) {
+			switch ( $coupon->get_discount_type() ) {
+				case 'fixed_product' :
+					$coupon->sort = 1;
+					break;
+				case 'percent' :
+					$coupon->sort = 2;
+					break;
+				case 'fixed_cart' :
+					$coupon->sort = 3;
+					break;
+				default:
+					$coupon->sort = 0;
+					break;
+			}
+		}
+
+		uasort( $this->coupons, array( $this, 'sort_coupons' ) );
+	}
+
+	/**
+	 * Sort coupons so discounts apply consistently.
+	 *
+	 * @param WC_Coupon $a
+	 * @param WC_Coupon $b
+	 * @return int
+	 */
+	protected function sort_coupons( $a, $b ) {
+		if ( $a->sort === $b->sort ) {
+			return $a->get_id() - $b->get_id();
+		}
+		return ( $a->sort < $b->sort ) ? -1 : 1;
 	}
 
 	/**

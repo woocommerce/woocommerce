@@ -216,21 +216,32 @@ function wc_trim_zeros( $price ) {
 /**
  * Round a tax amount.
  *
- * @param  double $tax Amount to round.
- * @param  int    $dp DP to round. Defaults to wc_get_price_decimals.
+ * @param  double $value Amount to round.
+ * @param  int    $precision DP to round. Defaults to wc_get_price_decimals.
  * @return double
  */
-function wc_round_tax_total( $tax, $dp = null ) {
-	$dp = is_null( $dp ) ? wc_get_price_decimals() : absint( $dp );
+function wc_round_tax_total( $value, $precision = null ) {
+	$precision = is_null( $precision ) ? wc_get_price_decimals() : absint( $precision );
 
-	// @codeCoverageIgnoreStart
-	if ( version_compare( phpversion(), '5.3', '<' ) ) {
-		$rounded_tax = round( $tax, $dp );
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		$rounded_tax = round( $value, $precision, WC_TAX_ROUNDING_MODE );
 	} else {
-		// @codeCoverageIgnoreEnd
-		$rounded_tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
+		// Fake it in PHP 5.2.
+		if ( 2 === WC_TAX_ROUNDING_MODE && strstr( $value, '.' ) ) {
+			$value    = (string) $value;
+			$value    = explode( '.', $value );
+			$value[1] = substr( $value[1], 0, $precision + 1 );
+			$value    = implode( '.', $value );
+
+			if ( substr( $value, -1 ) === '5' ) {
+				$value = substr( $value, 0, -1 ) . '4';
+			}
+			$value = floatval( $value );
+		}
+		$rounded_tax = round( $value, $precision );
 	}
-	return apply_filters( 'wc_round_tax_total', $rounded_tax, $tax, $dp, WC_TAX_ROUNDING_MODE );
+
+	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
 }
 
 /**
