@@ -1599,7 +1599,7 @@ ul.wc_coupon_list_block {
 				font-size: 1.5em;
 				line-height: 1em;
 				vertical-align: middle;
-				margin: 0;
+				margin: 0 auto;
 
 				&::before {
 					@include icon( '\e007' );
@@ -1612,7 +1612,7 @@ ul.wc_coupon_list_block {
 				font-size: 1.5em;
 				line-height: 1em;
 				vertical-align: middle;
-				margin: 0;
+				margin: 0 auto;
 
 				&::before {
 					@include icon( '\e600' );
@@ -1625,7 +1625,7 @@ ul.wc_coupon_list_block {
 				font-size: 1.5em;
 				line-height: 1em;
 				vertical-align: middle;
-				margin: 0;
+				margin: 0 auto;
 
 				&::before {
 					@include icon( '\e014' );
@@ -1639,7 +1639,7 @@ ul.wc_coupon_list_block {
 					font-size: 1.5em;
 					line-height: 1em;
 					vertical-align: middle;
-					margin: 0;
+					margin: 0 auto;
 
 					&::before {
 						@include icon( '\e01a' );
