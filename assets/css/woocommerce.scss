@@ -169,6 +169,8 @@ p.demo_store,
 
 			.woocommerce-product-gallery__wrapper {
 				transition: all cubic-bezier(0.795, -0.035, 0.000, 1.000) .5s;
+				margin: 0;
+				padding: 0;
 			}
 
 			.woocommerce-product-gallery__wrapper .zoomImg {

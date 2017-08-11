@@ -610,11 +610,11 @@ class WC_Webhook {
 		$topic_hooks = array(
 			'coupon.created' => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_create_coupon',
+				'woocommerce_new_coupon',
 			),
 			'coupon.updated' => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_edit_coupon',
+				'woocommerce_update_coupon',
 			),
 			'coupon.deleted' => array(
 				'wp_trash_post',
@@ -625,26 +625,22 @@ class WC_Webhook {
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
-				'woocommerce_api_create_customer',
+				'woocommerce_new_customer',
 			),
 			'customer.updated' => array(
 				'profile_update',
-				'woocommerce_api_edit_customer',
-				'woocommerce_customer_save_address',
+				'woocommerce_update_customer',
 			),
 			'customer.deleted' => array(
 				'delete_user',
 			),
 			'order.created'    => array(
-				'woocommerce_checkout_order_processed',
 				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_create_order',
+				'woocommerce_new_order',
 			),
 			'order.updated' => array(
 				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_edit_order',
-				'woocommerce_order_edit_status',
-				'woocommerce_order_status_changed',
+				'woocommerce_update_order',
 			),
 			'order.deleted' => array(
 				'wp_trash_post',
@@ -654,13 +650,13 @@ class WC_Webhook {
 			),
 			'product.created' => array(
 				'woocommerce_process_product_meta',
-				'woocommerce_api_create_product',
+				'woocommerce_new_product',
+				'woocommerce_new_product_variation',
 			),
 			'product.updated' => array(
 				'woocommerce_process_product_meta',
-				'woocommerce_api_edit_product',
-				'woocommerce_product_quick_edit_save',
-				'woocommerce_product_bulk_edit_save',
+				'woocommerce_update_product',
+				'woocommerce_update_product_variation',
 			),
 			'product.deleted' => array(
 				'wp_trash_post',
