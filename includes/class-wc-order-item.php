@@ -77,7 +77,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @since 3.2.0
 	 */
 	public function apply_changes() {
-		$this->data    = array_replace( $this->data, $this->changes );
+		$this->data    = array_merge( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
