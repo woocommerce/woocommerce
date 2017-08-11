@@ -1048,7 +1048,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$discounts = new WC_Discounts( $this );
 
 		foreach ( $coupons as $coupon ) {
-			$discounts->apply_discount( $coupon->get_code(), $coupon->get_id() );
+			$coupon_object = new WC_Coupon( $coupon->get_code() );
+			$discounts->apply_coupon( $coupon_object );
 		}
 
 		$item_discounts   = $discounts->get_discounts_by_item();
