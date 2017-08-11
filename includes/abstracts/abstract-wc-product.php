@@ -1145,7 +1145,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$download_object = $download;
 			} else {
 				$download_object           = new WC_Product_Download();
-			
+
 				// If we don't have a previous hash, generate UUID for download
 				if ( ! isset( $download['download_id'] ) || empty( $download['download_id'] ) ) {
 					$download['download_id'] = wp_generate_uuid4();

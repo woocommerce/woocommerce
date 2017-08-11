@@ -87,7 +87,7 @@ class WC_Install {
 		'3.2.0' => array(
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
-        ),
+		),
 	);
 
 	/** @var object Background update class */
