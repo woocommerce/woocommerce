@@ -68,6 +68,19 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 	}
 
+	/**
+	 * Merge changes with data and clear.
+	 * Overrides WC_Data::apply_changes.
+	 * array_replace_recursive does not work well for order items because it merges taxes instead
+	 * of replacing them.
+	 *
+	 * @since 3.2.0
+	 */
+	public function apply_changes() {
+		$this->data    = array_replace( $this->data, $this->changes );
+		$this->changes = array();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
