@@ -40,10 +40,10 @@ class WC_Order_Item_Discount extends WC_Order_Item {
 			return false;
 		}
 		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
-			// Apportion taxes to order items.
+			// Apportion taxes to order items, shipping, and fees.
 			$order            = $this->get_order();
-			$tax_class_counts = $order->get_item_tax_class_counts();
-			$item_count       = $order->get_item_count();
+			$tax_class_counts = $order->get_tax_class_counts_for_items( array( 'line_item', 'fee', 'shipping' ) );
+			$item_count       = $order->get_item_count( array( 'line_item', 'fee', 'shipping' ) );
 			$discount_taxes   = array();
 
 			foreach ( $tax_class_counts as $tax_class => $tax_class_count ) {
