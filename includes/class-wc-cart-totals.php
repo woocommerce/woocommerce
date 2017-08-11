@@ -408,7 +408,7 @@ final class WC_Cart_Totals {
 	protected function calculate_item_totals() {
 		$this->set_items();
 		$this->calculate_item_subtotals();
-		$this->calculate_discounts();
+		$this->calculate_item_discounts();
 
 		foreach ( $this->items as $item_key => $item ) {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
@@ -494,18 +494,18 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Calculate all discount and coupon amounts.
+	 * Calculate coupon based discounts which change item prices.
 	 *
 	 * @since 3.2.0
 	 * @uses  WC_Discounts class.
 	 */
-	protected function calculate_discounts() {
+	protected function calculate_item_discounts() {
 		$this->set_coupons();
 
 		$discounts = new WC_Discounts( $this->object );
 
 		foreach ( $this->coupons as $coupon ) {
-			$discounts->apply_discount( $coupon );
+			$discounts->apply_coupon( $coupon );
 		}
 
 		$coupon_discount_amounts     = $discounts->get_discounts_by_coupon( true );
