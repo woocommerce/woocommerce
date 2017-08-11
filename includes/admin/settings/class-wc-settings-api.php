@@ -26,11 +26,8 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 		$this->id    = 'api';
 		$this->label = __( 'API', 'woocommerce' );
 
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
-		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 		add_action( 'woocommerce_settings_form_method_tab_' . $this->id, array( $this, 'form_method' ) );
-		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+		parent::__construct();
 
 		$this->notices();
 	}

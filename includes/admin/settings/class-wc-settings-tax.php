@@ -20,17 +20,12 @@ if ( ! class_exists( 'WC_Settings_Tax', false ) ) :
 class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
-	 * Setting page id.
-	 *
-	 * @var string
-	 */
-	protected $id = 'tax';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->id = 'tax';
 		$this->label = __( 'Tax', 'woocommerce' );
+
 		parent::__construct();
 	}
 
