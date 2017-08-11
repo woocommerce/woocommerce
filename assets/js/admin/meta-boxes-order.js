@@ -957,6 +957,7 @@ jQuery( function ( $ ) {
 						deferred.push( $.ajax({
 							url : woocommerce_admin_meta_boxes.ajax_url,
 							data: {
+								order_id      : woocommerce_admin_meta_boxes.post_id,
 								order_item_ids: delete_items,
 								action:         'woocommerce_remove_order_item',
 								security:       woocommerce_admin_meta_boxes.order_item_nonce
