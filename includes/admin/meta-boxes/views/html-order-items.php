@@ -63,14 +63,6 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_id() );
 		?>
 		</tbody>
-		<tbody id="order_discount_line_items">
-		<?php
-			foreach ( $discounts as $item_id => $item ) {
-				include( 'html-order-discount.php' );
-			}
-			do_action( 'woocommerce_admin_order_items_after_discounts', $order->get_id() );
-		?>
-		</tbody>
 		<tbody id="order_shipping_line_items">
 		<?php
 			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
@@ -86,6 +78,14 @@ if ( wc_tax_enabled() ) {
 				include( 'html-order-fee.php' );
 			}
 			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
+		?>
+		</tbody>
+		<tbody id="order_discount_line_items">
+		<?php
+			foreach ( $discounts as $item_id => $item ) {
+				include( 'html-order-discount.php' );
+			}
+			do_action( 'woocommerce_admin_order_items_after_discounts', $order->get_id() );
 		?>
 		</tbody>
 		<tbody id="order_refunds">

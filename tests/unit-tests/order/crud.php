@@ -1639,7 +1639,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 
 		$order->add_discount( '50%' );
-		$this->assertEquals( 30, $order->get_total() );
+		$this->assertEquals( 25, $order->get_total() );
 
 		$discount = current( $order->get_items( 'discount' ) );
 		$order->remove_item( $discount->get_id() );

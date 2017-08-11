@@ -221,6 +221,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		return $this->get_prop( 'taxes', $context );
 	}
 
+	/**
+	 * Get tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class( $context = 'view' ) {
+		return get_option( 'woocommerce_shipping_tax_class' );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Array Access Methods

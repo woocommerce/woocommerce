@@ -1650,7 +1650,10 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 	 */
 	$newlist = array();
 	foreach ( $list as $value ) {
-		if ( isset( $value->$index_key ) ) {
+		// Get index. @since 3.2.0 this supports a callback.
+		if ( is_callable( array( $value, $index_key ) ) ) {
+			$newlist[ $value->{$index_key}() ] = $value->{$callback_or_field}();
+		} elseif ( isset( $value->$index_key ) ) {
 			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
 		} else {
 			$newlist[] = $value->{$callback_or_field}();

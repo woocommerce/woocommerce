@@ -25,6 +25,20 @@ class WC_Discounts {
 	protected $items = array();
 
 	/**
+	 * Stores fee total from cart/order. Manual discounts can discount this.
+	 *
+	 * @var int
+	 */
+	protected $fee_total = 0;
+
+	/**
+	 * Stores shipping total from cart/order. Manual discounts can discount this.
+	 *
+	 * @var int
+	 */
+	protected $shipping_total = 0;
+
+	/**
 	 * An array of discounts which have been applied to items.
 	 *
 	 * @var array[] Code => Item Key => Value
@@ -84,7 +98,8 @@ class WC_Discounts {
 	 * @param array $order Cart object.
 	 */
 	public function set_items_from_order( $order ) {
-		$this->items = $this->discounts = $this->manual_discounts = array();
+		$this->items     = $this->discounts      = $this->manual_discounts = array();
+		$this->fee_total = $this->shipping_total = 0;
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
@@ -101,6 +116,12 @@ class WC_Discounts {
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
+
+		foreach ( $order->get_fees() as $item ) {
+			$this->fee_total += wc_add_number_precision( $item->get_total() );
+		}
+
+		$this->shipping_total = wc_add_number_precision( $order->get_shipping_total() );
 	}
 
 	/**
@@ -217,10 +238,15 @@ class WC_Discounts {
 	protected function get_total_after_discounts() {
 		$total_to_discount = 0;
 
+		// Sum line item costs.
 		foreach ( $this->items as $item ) {
 			$total_to_discount += $this->get_discounted_price_in_cents( $item );
 		}
 
+		// Manual discounts can also discount shipping and fees.
+		$total_to_discount += $this->shipping_total + $this->fee_total;
+
+		// Remove existing discount amounts.
 		foreach ( $this->manual_discounts as $key => $value ) {
 			$total_to_discount = $total_to_discount - $value->get_discount_total();
 		}
@@ -275,7 +301,7 @@ class WC_Discounts {
 		}
 
 		if ( ! $discount->get_amount() ) {
-			return new WP_Error( 'invalid_coupon', __( 'Invalid discount', 'woocommerce' ) );
+			return new WP_Error( 'invalid_discount', __( 'Invalid discount', 'woocommerce' ) );
 		}
 
 		$total_to_discount = $this->get_total_after_discounts();
@@ -300,7 +326,11 @@ class WC_Discounts {
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	protected function apply_coupon( $coupon ) {
+	public function apply_coupon( $coupon ) {
+		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
+			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
+		}
+
 		$is_coupon_valid = $this->is_coupon_valid( $coupon );
 
 		if ( is_wp_error( $is_coupon_valid ) ) {
