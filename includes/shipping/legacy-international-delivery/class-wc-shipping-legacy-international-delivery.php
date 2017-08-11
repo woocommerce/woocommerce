@@ -73,6 +73,6 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 				return false;
 			}
 		}
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package, $this );
 	}
 }
