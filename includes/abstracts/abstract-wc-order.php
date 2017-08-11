@@ -1215,25 +1215,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get count of all tax classes for items in the order.
-	 *
-	 * @since  3.2.0
-	 * @param  array $item_types Type of items to count.
-	 * @return array
-	 */
-	public function get_tax_class_counts_for_items( $item_types = array( 'line_item' ) ) {
-		$tax_classes = array_fill_keys( $this->get_items_tax_classes(), 0 );
-
-		foreach ( $this->get_items( $item_types ) as $item ) {
-			if ( 'taxable' === $item->get_tax_status() ) {
-				$tax_classes[ $item->get_tax_class() ] += $item->get_quantity();
-			}
-		}
-
-		return $tax_classes;
-	}
-
-	/**
 	 * Get tax location for this order.
 	 *
 	 * @since  3.2.0
