@@ -22,8 +22,11 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	function test_get_timestamp() {
 		$object = new WC_Customer_Download_Log();
 		$set_to = current_time( 'timestamp', true );
-		$wc_timestamp = new WC_DateTime;
-		$wc_timestamp->setTimestamp( $set_to );
+
+		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat
+		$dtStr = date("c", $set_to);
+		$wc_timestamp = new WC_DateTime($dtStr);
+
 		$object->set_timestamp( $set_to );
 		$this->assertEquals( $wc_timestamp, $object->get_timestamp() );
 	}
@@ -73,8 +76,10 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 
 		// Create download log
 		$timestamp = current_time( 'timestamp', true );
-		$wc_timestamp = new WC_DateTime;
-		$wc_timestamp->setTimestamp( $timestamp );
+
+		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat
+		$dtStr = date("c", $timestamp);
+		$wc_timestamp = new WC_DateTime($dtStr);
 
 		$download_log = new WC_Customer_Download_Log;
 		$download_log->set_timestamp( $timestamp );
