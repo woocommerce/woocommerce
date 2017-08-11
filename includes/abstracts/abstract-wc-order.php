@@ -193,6 +193,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$items = array_filter( $items );
 				foreach ( $items as $item_key => $item ) {
 					$item->set_order_id( $this->get_id() );
+
 					$item_id = $item->save();
 
 					// If ID changed (new item saved to DB)...
@@ -1217,14 +1218,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get count of all tax classes for items in the order.
 	 *
 	 * @since  3.2.0
+	 * @param  array $item_types Type of items to count.
 	 * @return array
 	 */
-	public function get_item_tax_class_counts() {
+	public function get_tax_class_counts_for_items( $item_types = array( 'line_item' ) ) {
 		$tax_classes = array_fill_keys( $this->get_items_tax_classes(), 0 );
 
-		foreach ( $this->get_items() as $item ) {
-			if ( ( $product = $item->get_product() ) && ( $product->is_taxable() || $product->is_shipping_taxable() ) ) {
-				$tax_classes[ $product->get_tax_class() ] += $item->get_quantity();
+		foreach ( $this->get_items( $item_types ) as $item ) {
+			if ( 'taxable' === $item->get_tax_status() ) {
+				$tax_classes[ $item->get_tax_class() ] += $item->get_quantity();
 			}
 		}
 
@@ -1357,46 +1359,58 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_subtotal      = 0;
 		$cart_total         = 0;
 		$fee_total          = 0;
+		$shipping_total     = 0;
 		$discount_total     = 0;
 		$discount_total_tax = 0;
 		$cart_subtotal_tax  = 0;
 		$cart_total_tax     = 0;
 
-		// Discounts are recalculated first based on the latest item costs.
+		// Sum line item costs.
+		foreach ( $this->get_items() as $item ) {
+			$cart_subtotal += $item->get_subtotal();
+			$cart_total    += $item->get_total();
+		}
+
+		// Sum fee costs.
+		foreach ( $this->get_fees() as $item ) {
+			$fee_total += $item->get_total();
+		}
+
+		// Sum shipping costs.
+		foreach ( $this->get_shipping_methods() as $shipping ) {
+			$shipping_total += $shipping->get_total();
+		}
+
+		$this->set_shipping_total( $shipping_total );
+
+		// Calculate manual discounts.
 		$this->calculate_discounts();
+
+		foreach ( $this->get_items( 'discount' ) as $item ) {
+			$discount_total += $item->get_total() * -1;
+		}
 
 		// Calculate taxes for items, shipping, discounts.
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
 
-		// Prepare the totals.
+		// Sum taxes.
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal     += $item->get_subtotal();
-			$cart_total        += $item->get_total();
 			$cart_subtotal_tax += $item->get_subtotal_tax();
 			$cart_total_tax    += $item->get_total_tax();
 		}
 
-		$this->calculate_shipping();
-
-		foreach ( $this->get_fees() as $item ) {
-			$fee_total += $item->get_total();
-		}
-
 		foreach ( $this->get_items( 'discount' ) as $item ) {
-			$discount_total     += $item->get_total() * -1;
 			$discount_total_tax += $item->get_total_tax() * -1;
 		}
 
-		$grand_total = round( $cart_total - $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
-
 		$this->set_discount_total( $cart_subtotal - $cart_total + $discount_total );
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax + $discount_total_tax );
-		$this->set_total( $grand_total );
+		$this->set_total( round( $cart_total - $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 		$this->save();
 
-		return $grand_total;
+		return $this->get_total();
 	}
 
 	/**
