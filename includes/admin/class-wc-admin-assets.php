@@ -112,7 +112,8 @@ class WC_Admin_Assets {
 		wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), WC_VERSION );
 		wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
+		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
 			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 			'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
@@ -127,6 +128,7 @@ class WC_Admin_Assets {
 			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 			'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
+			'search_categories_nonce'   => wp_create_nonce( 'search-categories' ),
 		) );
 
 		// Accounting

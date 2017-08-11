@@ -279,7 +279,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 
 		$response = rest_ensure_response( $users );
 
-		// Store pagation values for headers then unset for count query.
+		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
@@ -338,14 +338,12 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			$customer->set_username( $request['username'] );
 			$customer->set_password( $request['password'] );
 			$customer->set_email( $request['email'] );
+			$this->update_customer_meta_fields( $customer, $request );
 			$customer->save();
 
 			if ( ! $customer->get_id() ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
 			}
-
-			$this->update_customer_meta_fields( $customer, $request );
-			$customer->save();
 
 			$user_data = get_userdata( $customer->get_id() );
 			$this->update_additional_fields_for_object( $user_data, $request );

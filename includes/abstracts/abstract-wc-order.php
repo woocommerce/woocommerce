@@ -616,7 +616,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
+	 * Sets order tax (sum of cart and shipping tax). Used internally only.
 	 *
 	 * @param string $value
 	 * @throws WC_Data_Exception
@@ -992,8 +992,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$found_tax_classes = array();
 
 		foreach ( $this->get_items() as $item ) {
-			if ( $_product = $item->get_product() ) {
-				$found_tax_classes[] = $_product->get_tax_class();
+			if ( ( $product = $item->get_product() ) && ( $product->is_taxable() || $product->is_shipping_taxable() ) ) {
+				$found_tax_classes[] = $product->get_tax_class();
 			}
 		}
 
@@ -1001,22 +1001,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
+	 * Get tax location for this order.
 	 *
-	 * If by default the taxes are based on the shipping address and the current order doesn't
-	 * have any, it would use the billing address rather than using the Shopping base location.
-	 *
-	 * Will use the base country unless customer addresses are set.
-	 * @param $args array Added in 3.0.0 to pass things like location.
+	 * @since  3.2.0
+	 * @param $args array Override the location.
+	 * @return array
 	 */
-	public function calculate_taxes( $args = array() ) {
+	protected function get_tax_location( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
 			$tax_based_on = 'billing';
 		}
 
-		$args         = wp_parse_args( $args, array(
+		$args = wp_parse_args( $args, array(
 			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
 			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),
 			'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
@@ -1032,75 +1030,38 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = '';
 		}
 
-		// Calc taxes for line items
+		return $args;
+	}
+
+	/**
+	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
+	 *
+	 * If by default the taxes are based on the shipping address and the current order doesn't
+	 * have any, it would use the billing address rather than using the Shopping base location.
+	 *
+	 * Will use the base country unless customer addresses are set.
+	 *
+	 * @param array $args Added in 3.0.0 to pass things like location.
+	 */
+	public function calculate_taxes( $args = array() ) {
+		$calculate_tax_for  = $this->get_tax_location( $args );
+		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+
+		if ( 'inherit' === $shipping_tax_class ) {
+			$shipping_tax_class = current( array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() ) );
+		}
+
+		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
-			$tax_class           = $item->get_tax_class();
-			$tax_status          = $item->get_tax_status();
-
-			if ( '0' !== $tax_class && 'taxable' === $tax_status && wc_tax_enabled() ) {
-				$tax_rates = WC_Tax::find_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
-					'tax_class' => $tax_class,
-				) );
-
-				$total = $item->get_total();
-				$taxes = WC_Tax::calc_tax( $total, $tax_rates, false );
-
-				if ( $item->is_type( 'line_item' ) ) {
-					$subtotal       = $item->get_subtotal();
-					$subtotal_taxes = WC_Tax::calc_tax( $subtotal, $tax_rates, false );
-					$item->set_taxes( array( 'total' => $taxes, 'subtotal' => $subtotal_taxes ) );
-				} else {
-					$item->set_taxes( array( 'total' => $taxes ) );
-				}
-			} else {
-				$item->set_taxes( false );
-			}
+			$item->calculate_taxes( $calculate_tax_for );
 			$item->save();
 		}
 
-		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
-			if ( wc_tax_enabled() ) {
-				$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
-
-				// Inherit tax class from items
-				if ( 'inherit' === $shipping_tax_class ) {
-					$tax_rates         = array();
-					$tax_classes       = array_merge( array( '' ), WC_Tax::get_tax_class_slugs() );
-					$found_tax_classes = $this->get_items_tax_classes();
-
-					foreach ( $tax_classes as $tax_class ) {
-						if ( in_array( $tax_class, $found_tax_classes ) ) {
-							$tax_rates = WC_Tax::find_shipping_rates( array(
-								'country'   => $args['country'],
-								'state'     => $args['state'],
-								'postcode'  => $args['postcode'],
-								'city'      => $args['city'],
-								'tax_class' => $tax_class,
-							) );
-							break;
-						}
-					}
-				} else {
-					$tax_rates = WC_Tax::find_shipping_rates( array(
-						'country'   => $args['country'],
-						'state'     => $args['state'],
-						'postcode'  => $args['postcode'],
-						'city'      => $args['city'],
-						'tax_class' => $shipping_tax_class,
-					) );
-				}
-
-				$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
-			} else {
-				$item->set_taxes( false );
-			}
+			$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
 			$item->save();
 		}
+
 		$this->update_taxes();
 	}
 
@@ -1150,7 +1111,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		// Save tax totals
+		// Save tax totals.
 		$this->set_shipping_tax( WC_Tax::round( array_sum( $shipping_taxes ) ) );
 		$this->set_cart_tax( WC_Tax::round( array_sum( $cart_taxes ) ) );
 		$this->save();
@@ -1174,7 +1135,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_taxes();
 		}
 
-		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal     += $item->get_subtotal();
 			$cart_total        += $item->get_total();

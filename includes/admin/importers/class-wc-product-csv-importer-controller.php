@@ -68,6 +68,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	public static function get_importer( $file, $args = array() ) {
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
+		$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 		return new $importer_class( $file, $args );
 	}
 
@@ -311,7 +312,8 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		if ( ! empty( $_POST['map_to'] ) ) {
-			$mapping = wp_unslash( $_POST['map_to'] );
+			$mapping_from = wp_unslash( $_POST['map_from'] );
+			$mapping_to   = wp_unslash( $_POST['map_to'] );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -319,7 +321,10 @@ class WC_Product_CSV_Importer_Controller {
 
 		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
 			'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
-			'mapping'         => $mapping,
+			'mapping'         => array(
+				'from' => $mapping_from,
+				'to'   => $mapping_to,
+			),
 			'file'            => $this->file,
 			'update_existing' => $this->update_existing,
 			'delimiter'       => $this->delimiter,

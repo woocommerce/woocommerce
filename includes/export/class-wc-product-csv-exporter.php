@@ -36,7 +36,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $enable_meta_export = false;
 
 	/**
-	 * Which product types are beign exported.
+	 * Which product types are being exported.
 	 * @var array
 	 */
 	protected $product_types_to_export = array();
@@ -124,7 +124,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
-		$products = wc_get_products( array(
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
 			'status'   => array( 'private', 'publish' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
@@ -135,6 +135,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'return'   => 'objects',
 			'paginate' => true,
 		) );
+		$products = wc_get_products( $args );
 
 		$this->total_rows = $products->total;
 		$this->row_data   = array();
@@ -152,7 +153,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				// Filter for 3rd parties.
 				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product );
+					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
 
 				// Handle special columns which don't map 1:1 to product data.
 				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {

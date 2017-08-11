@@ -176,8 +176,6 @@ class WC_Admin {
 
 	/**
 	 * Preview email template.
-	 *
-	 * @return string
 	 */
 	public function preview_emails() {
 

@@ -151,6 +151,75 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that calculation rounding is done correctly with and without taxes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/16305
+	 * @since 3.2
+	 */
+	public function test_discount_cart_rounding() {
+		global $wpdb;
+
+		# Test with no taxes.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		$product = new WC_Product_Simple;
+		$product->set_regular_price( 51.86 );
+		$product->save();
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'testpercent' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 40 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '31.12', number_format( $cart_item['line_total'], 2, '.', '' ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		# Test with taxes.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '8.2500',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '33.69', number_format( $cart_item['line_total'] + $cart_item['line_tax'], 2, '.', '' ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
 	 * Test get_remove_url.
 	 *
 	 * @since 2.3

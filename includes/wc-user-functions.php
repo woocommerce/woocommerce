@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
- * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
+ * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compatibility. Defaults to true.
  *
  * @access public
  * @param bool $show_admin_bar
@@ -320,7 +320,7 @@ function wc_modify_editable_roles( $roles ) {
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 
 /**
- * Modify capabiltiies to prevent non-admin users editing admin users.
+ * Modify capabilities to prevent non-admin users editing admin users.
  *
  * $args[0] will be the user being edited in this case.
  *
@@ -411,7 +411,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
-				$_product->get_name() . ' &ndash; ' . $download_file['name'],
+				$download_file['name'],
 				$_product,
 				$result->download_id,
 				$file_number

@@ -37,7 +37,7 @@ class WC_Order_Item_Meta {
 	public function __construct( $item = array(), $product = null ) {
 		wc_deprecated_function( 'WC_Order_Item_Meta::__construct', '3.1', 'WC_Order_Item_Product' );
 
-		// Backwards (pre 2.4) compat
+		// Backwards (pre 2.4) compatibility
 		if ( ! isset( $item['item_meta'] ) ) {
 			$this->legacy = true;
 			$this->meta   = array_filter( (array) $item );

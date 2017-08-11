@@ -322,7 +322,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Ouput custom columns for products.
+	 * Output custom columns for products.
 	 *
 	 * @param string $column
 	 */
@@ -546,7 +546,12 @@ class WC_Admin_Post_Types {
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
 			break;
 			case 'order_date' :
-				printf( '<time datetime="%s">%s</time>', esc_attr( $the_order->get_date_created()->date( 'c' ) ), esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) ) );
+				printf(
+					'<time datetime="%1$s" title="%2$s">%3$s</time>',
+					esc_attr( $the_order->get_date_created()->date( 'c' ) ),
+					esc_html( $the_order->get_date_created()->date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ),
+					esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) )
+				);
 			break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
@@ -586,26 +591,19 @@ class WC_Admin_Post_Types {
 
 				if ( $post->comment_count ) {
 
-					// check the status of the post
-					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
-
-					remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-					$latest_notes = get_comments( array(
-						'post_id'   => $post->ID,
-						'number'    => 1,
-						'status'    => $status,
+					$latest_notes = wc_get_order_notes( array(
+						'order_id' => $post->ID,
+						'limit'    => 1,
+						'orderby'  => 'date_created_gmt',
 					) );
-
-					add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 					$latest_note = current( $latest_notes );
 
-					if ( isset( $latest_note->comment_content ) && 1 == $post->comment_count ) {
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					} elseif ( isset( $latest_note->comment_content ) ) {
+					if ( isset( $latest_note->content ) && 1 == $post->comment_count ) {
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					} elseif ( isset( $latest_note->content ) ) {
 						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} else {
 						/* translators: %d: notes count */
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -1034,39 +1032,32 @@ class WC_Admin_Post_Types {
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
 		$stock_amount = 'yes' === $manage_stock ? wc_stock_amount( $_REQUEST['_stock'] ) : '';
 
+		$product->set_manage_stock( $manage_stock );
+		$product->set_backorders( $backorders );
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-
-			// Apply product type constraints to stock status
-			if ( $product->is_type( 'external' ) ) {
-				// External always in stock
-				$stock_status = 'instock';
-			} elseif ( $product->is_type( 'variable' ) ) {
-				// Stock status is always determined by children
-				foreach ( $product->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! $product->get_manage_stock() ) {
-						$child->set_stock_status( $stock_status );
-						$child->save();
-					}
-				}
-
-				$product = WC_Product_Variable::sync( $product, false );
-			}
-
-			$product->set_manage_stock( $manage_stock );
-			$product->set_backorders( $backorders );
-			$product->save();
-
-			if ( ! $product->is_type( 'variable' ) ) {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
-
-			wc_update_product_stock( $post_id, $stock_amount );
-
-		} else {
-			$product->save();
-			wc_update_product_stock_status( $post_id, $stock_status );
+			$product->set_stock_quantity( $stock_amount );
 		}
+
+		// Apply product type constraints to stock status.
+		if ( $product->is_type( 'external' ) ) {
+			// External products are always in stock.
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			// Stock status is determined by children.
+			foreach ( $product->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( ! $product->get_manage_stock() ) {
+					$child->set_stock_status( $stock_status );
+					$child->save();
+				}
+			}
+			$product = WC_Product_Variable::sync( $product, false );
+		} else {
+			$product->set_stock_status( $stock_status );
+		}
+
+		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
 	}
@@ -1245,51 +1236,43 @@ class WC_Admin_Post_Types {
 		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
 		$stock_status       = $product->get_stock_status();
 		$backorders         = $product->get_backorders();
-
-		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
-		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
+		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
+		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
-			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->product_type ? 'yes' : 'no';
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
 		} else {
 			$manage_stock = $was_managing_stock;
 		}
 
 		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
+		$product->set_manage_stock( $manage_stock );
+		$product->set_backorders( $backorders );
+
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-
-			// Apply product type constraints to stock status
-			if ( $product->is_type( 'external' ) ) {
-				// External always in stock
-				$stock_status = 'instock';
-			} elseif ( $product->is_type( 'variable' ) ) {
-				// Stock status is always determined by children
-				foreach ( $product->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! $product->get_manage_stock() ) {
-						$child->set_stock_status( $stock_status );
-						$child->save();
-					}
-				}
-
-				$product = WC_Product_Variable::sync( $product, false );
-			}
-
-			$product->set_manage_stock( $manage_stock );
-			$product->set_backorders( $backorders );
-			$product->save();
-
-			if ( ! $product->is_type( 'variable' ) ) {
-				wc_update_product_stock_status( $post_id, $stock_status );
-			}
-
-			wc_update_product_stock( $post_id, $stock_amount );
-
-		} else {
-			$product->save();
-			wc_update_product_stock_status( $post_id, $stock_status );
+			$product->set_stock_quantity( $stock_amount );
 		}
+
+		// Apply product type constraints to stock status.
+		if ( $product->is_type( 'external' ) ) {
+			// External products are always in stock.
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			// Stock status is determined by children.
+			foreach ( $product->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( ! $product->get_manage_stock() ) {
+					$child->set_stock_status( $stock_status );
+					$child->save();
+				}
+			}
+			$product = WC_Product_Variable::sync( $product, false );
+		} else {
+			$product->set_stock_status( $stock_status );
+		}
+
+		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 	}
@@ -1469,7 +1452,15 @@ class WC_Admin_Post_Types {
 		global $wp_query;
 
 		// Category Filtering
-		wc_product_dropdown_categories( array( 'option_select_text' => __( 'Filter by category', 'woocommerce' ) ) );
+		$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( $_GET['product_cat'] ) : false;
+		$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
+		?>
+		<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
+			<?php if ( $current_category_slug && $current_category ) : ?>
+				<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
+			<?php endif; ?>
+		</select>
+		<?php
 
 		// Type filtering
 		$terms   = get_terms( 'product_type' );
@@ -1673,16 +1664,6 @@ class WC_Admin_Post_Types {
 					$query->query_vars['meta_value']    = 'yes';
 					$query->query_vars['meta_key']      = '_virtual';
 				}
-			}
-
-			// Categories
-			if ( isset( $_GET['product_cat'] ) && '0' === $_GET['product_cat'] ) {
-				$query->query_vars['tax_query'][] = array(
-					'taxonomy' => 'product_cat',
-					'field'    => 'id',
-					'terms'    => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
-					'operator' => 'NOT IN',
-				);
 			}
 
 			// Shipping classes

@@ -616,8 +616,10 @@ jQuery( function( $ ) {
 		},
 
 		toggle_terms: function() {
-			$( '.woocommerce-terms-and-conditions' ).slideToggle();
-			return false;
+			if ( $( '.woocommerce-terms-and-conditions' ).length ) {
+				$( '.woocommerce-terms-and-conditions' ).slideToggle();
+				return false;
+			}
 		}
 	};
 

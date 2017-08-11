@@ -76,7 +76,8 @@ class WC_Data_Store_WP {
 		", $object->get_id() ) );
 
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
-		return array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
+		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
+		return apply_filters( "woocommerce_data_store_wp_{$this->meta_type}_read_meta", $meta_data, $object, $this );
 	}
 
 	/**
@@ -85,7 +86,6 @@ class WC_Data_Store_WP {
 	 * @since  3.0.0
 	 * @param  WC_Data
 	 * @param  stdClass (containing at least ->id)
-	 * @return array
 	 */
 	public function delete_meta( &$object, $meta ) {
 		delete_metadata_by_mid( $this->meta_type, $meta->id );
@@ -100,7 +100,7 @@ class WC_Data_Store_WP {
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, wp_slash( $meta->value ), false );
+		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
 	}
 
 	/**
@@ -360,7 +360,7 @@ class WC_Data_Store_WP {
 		}
 
 		// Meta dates are stored as timestamps in the db.
-		// Check against begining/end-of-day timestamps when using 'day' precision.
+		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
 			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
@@ -417,5 +417,15 @@ class WC_Data_Store_WP {
 		}
 
 		return $wp_query_args;
+	}
+
+	/**
+	 * Return list of internal meta keys.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_internal_meta_keys() {
+		return $this->internal_meta_keys;
 	}
 }
