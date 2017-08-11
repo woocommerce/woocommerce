@@ -297,6 +297,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_emails'] ) ) );
 
 			do_action( 'woocommerce_api_create_coupon', $id, $data );
+			do_action( 'woocommerce_new_coupon', $id );
 
 			$this->server->send_status( 201 );
 
@@ -432,6 +433,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			do_action( 'woocommerce_api_edit_coupon', $id, $data );
+			do_action( 'woocommerce_update_coupon', $id );
 
 			return $this->get_coupon( $id );
 		} catch ( WC_API_Exception $e ) {
