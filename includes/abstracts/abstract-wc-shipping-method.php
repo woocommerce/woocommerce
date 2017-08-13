@@ -358,7 +358,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $available, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $available, $package, $this );
 	}
 
 	/**
