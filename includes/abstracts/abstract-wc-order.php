@@ -951,29 +951,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $applied;
 		}
 
-		$item_discounts   = $discounts->get_discounts_by_item();
-		$coupon_discounts = $discounts->get_discounts_by_coupon();
+		$this->set_coupon_discount_amounts( $discounts );
 
 		// Add discounts to line items.
-		if ( $item_discounts ) {
+		if ( $item_discounts = $discounts->get_discounts_by_item() ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
 				$item = $this->get_item( $item_id, false );
 				$item->set_total( max( 0, $item->get_total() - $amount ) );
 			}
 		}
 
-		// Add WC_Order_Item_Coupon objects for applied coupons.
-		if ( $coupon_discounts ) {
-			foreach ( $coupon_discounts as $coupon_code => $amount ) {
-				$item = new WC_Order_Item_Coupon();
-				$item->set_code( $coupon_code );
-				$item->set_discount( $amount ); // @todo This needs to be calculated somehow like the cart class does. Maybe we need an order calculation class?
-				$this->add_item( $item );
-			}
+		// Recalculate totals and taxes.
+		$this->calculate_totals( true );
+
+		// Record usage so counts and validation is correct.
+		if ( ! $used_by = $this->get_user_id() ) {
+			$used_by = $this->get_billing_email();
 		}
 
-		$coupon->increase_usage_count( $this->get_user_id() );
-		$this->calculate_totals( true );
+		$coupon->increase_usage_count( $used_by );
 
 		return true;
 	}
@@ -1036,16 +1032,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since  3.2.0
 	 */
 	protected function recalculate_coupons() {
-		$coupons           = $this->get_items( 'coupon' );
-		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
-
-		// Reset line item totals.
-		foreach ( $this->get_items() as $item ) {
-			$item->set_total( $item->get_subtotal() );
-			$item->set_total_tax( $item->get_subtotal_tax() );
-		}
-
-		// Apply coupon discounts.
 		$discounts = new WC_Discounts( $this );
 
 		foreach ( $coupons as $coupon ) {
@@ -1053,27 +1039,67 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$discounts->apply_coupon( $coupon_object );
 		}
 
-		$item_discounts   = $discounts->get_discounts_by_item();
-		$coupon_discounts = $discounts->get_discounts_by_coupon();
+		$this->set_coupon_discount_amounts( $discounts );
 
-		// Add discounts to line items.
-		if ( $item_discounts ) {
-			foreach ( $item_discounts as $item_id => $amount ) {
-				$item = $this->get_item( $item_id, false );
-				$item->set_total( $amount );
-			}
+		// Reset line item totals.
+		foreach ( $this->get_items() as $item ) {
+			$item->set_total( $item->get_subtotal() );
+			$item->set_total_tax( $item->get_subtotal_tax() );
 		}
 
-		if ( $coupon_discounts ) {
-			foreach ( $coupon_discounts as $coupon_code => $amount ) {
-				$item_id = $coupon_code_to_id[ $coupon_code ];
-				$item    = $this->get_item( $item_id, false );
-				$item->set_discount( $amount ); // @todo discount tax.
+		// Add discounts to line items.
+		if ( $item_discounts = $discounts->get_discounts_by_item() ) {
+			foreach ( $item_discounts as $item_id => $amount ) {
+				$item = $this->get_item( $item_id, false );
+				$item->set_total( max( 0, $item->get_total() - $amount ) );
 			}
 		}
 
 		// Recalculate totals and taxes.
 		$this->calculate_totals( true );
+	}
+
+	/**
+	 * After applying coupons via the WC_Disounts class, update or create coupon items.
+	 *
+	 * @since 3.2.0
+	 * @param WC_Discounts $discounts Discounts class.
+	 */
+	protected function set_coupon_discount_amounts( $discounts ) {
+		$coupons           = $this->get_items( 'coupon' );
+		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
+		$all_discounts     = $discounts->get_discounts();
+		$item_discounts    = $discounts->get_discounts_by_item();
+		$coupon_discounts  = $discounts->get_discounts_by_coupon();
+
+		if ( $coupon_discounts ) {
+			foreach ( $coupon_discounts as $coupon_code => $amount ) {
+				$item_id = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
+
+				if ( ! $item_id ) {
+					$coupon_item = new WC_Order_Item_Coupon();
+					$coupon_item->set_code( $coupon_code );
+				} else {
+					$coupon_item = $this->get_item( $item_id, false );
+				}
+
+				$coupon_item->set_discount( $amount );
+
+				// Work out how much tax has been removed as a result of the discount from this coupon.
+				if ( wc_tax_enabled() && isset( $all_discounts[ $coupon_code ] ) ) {
+					$discount_tax = 0;
+
+					foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
+						$item          = $this->get_item( $item_id, false );
+						$discount_tax += array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) ) );
+					}
+
+					$coupon_item->set_discount_tax( $discount_tax );
+				}
+
+				$this->add_item( $coupon_item );
+			}
+		}
 	}
 
 	/**
