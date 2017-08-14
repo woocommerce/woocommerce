@@ -1367,19 +1367,24 @@ class WC_Cart extends WC_Legacy_Cart {
 						// Check usage against emails.
 						foreach ( $check_emails as $check_email ) {
 							$usage_count      += count( array_keys( $used_by, $check_email, true ) );
-							$user_id_matches[] = get_user_by( 'email', $check_email );
+							$user              = get_user_by( 'email', $check_email );
+							$user_id_matches[] = $user ? $user->ID : 0;
 						}
 
 						// Check against billing emails of existing users.
-						$user_id_matches = array_unique( array_filter( array_merge( $user_id_matches, get_users( array(
+						$users_query = new WP_User_Query( array(
 							'fields'       => 'ID',
-							'meta_key'     => '_billing_email',
-							'meta_value'   => $check_emails,
-							'meta_compare' => 'IN',
-						) ) ) ) );
+							'meta_query'   => array(
+								'key'      => '_billing_email',
+								'value'    => $check_emails,
+								'compare'  => 'IN',
+							),
+						) );
+
+						$user_id_matches = array_unique( array_filter( array_merge( $user_id_matches, $users_query->get_results() ) ) );
 
 						foreach ( $user_id_matches as $user_id ) {
-							$usage_count += count( array_keys( $user_id, get_current_user_id() ) );
+							$usage_count += count( array_keys( $used_by, $user_id ) );
 						}
 
 						if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
