@@ -459,9 +459,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $coupon->is_valid() ) {
 				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
 				$this->remove_coupon( $code );
-
-				// Flag totals for refresh.
-				WC()->session->set( 'refresh_totals', true );
 			}
 		}
 	}
@@ -1344,54 +1341,50 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				if ( $coupon->is_valid() ) {
 
+					// Get user and posted emails to compare.
+					$current_user = wp_get_current_user();
+					$check_emails = array_unique( array_filter( array_map( 'strtolower', array_map( 'sanitize_email', array(
+						$posted['billing_email'],
+						$current_user->user_email,
+					) ) ) ) );
+
 					// Limit to defined email addresses.
-					if ( is_array( $coupon->get_email_restrictions() ) && count( $coupon->get_email_restrictions() ) > 0 ) {
-						$check_emails           = array();
-						if ( is_user_logged_in() ) {
-							$current_user   = wp_get_current_user();
-							$check_emails[] = $current_user->user_email;
-						}
-						$check_emails[] = $posted['billing_email'];
-						$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
+					$restrictions = $coupon->get_email_restrictions();
 
-						if ( 0 === count( array_intersect( $check_emails, $coupon->get_email_restrictions() ) ) ) {
-							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
-							$this->remove_coupon( $code );
-
-							// Flag totals for refresh.
-							WC()->session->set( 'refresh_totals', true );
-						}
+					if ( is_array( $restrictions ) && 0 < count( $restrictions ) && 0 === count( array_intersect( $check_emails, $restrictions ) ) ) {
+						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
+						$this->remove_coupon( $code );
 					}
 
 					// Usage limits per user - check against billing and user email and user ID.
-					if ( $coupon->get_usage_limit_per_user() > 0 ) {
-						$check_emails = array();
-						$used_by      = $coupon->get_used_by();
+					$limit_per_user = $coupon->get_usage_limit_per_user();
 
-						if ( is_user_logged_in() ) {
-							$current_user   = wp_get_current_user();
-							$check_emails[] = sanitize_email( $current_user->user_email );
-							$usage_count    = count( array_keys( $used_by, get_current_user_id(), true ) );
-						} else {
-							$check_emails[] = sanitize_email( $posted['billing_email'] );
-							$user           = get_user_by( 'email', $posted['billing_email'] );
-							if ( $user ) {
-								$usage_count = count( array_keys( $used_by, $user->ID, true ) );
-							} else {
-								$usage_count = 0;
-							}
+					if ( 0 < $limit_per_user ) {
+						$used_by         = $coupon->get_used_by();
+						$usage_count     = 0;
+						$user_id_matches = array( get_current_user_id() );
+
+						// Check usage against emails.
+						foreach ( $check_emails as $check_email ) {
+							$usage_count      += count( array_keys( $used_by, $check_email, true ) );
+							$user_id_matches[] = get_user_by( 'email', $check_email );
 						}
 
-						foreach ( $check_emails as $check_email ) {
-							$usage_count = $usage_count + count( array_keys( $used_by, $check_email, true ) );
+						// Check against billing emails of existing users.
+						$user_id_matches = array_unique( array_filter( array_merge( $user_id_matches, get_users( array(
+							'fields'       => 'ID',
+							'meta_key'     => '_billing_email',
+							'meta_value'   => $check_emails,
+							'meta_compare' => 'IN',
+						) ) ) ) );
+
+						foreach ( $user_id_matches as $user_id ) {
+							$usage_count += count( array_keys( $user_id, get_current_user_id() ) );
 						}
 
 						if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
 							$this->remove_coupon( $code );
-
-							// Flag totals for refresh.
-							WC()->session->set( 'refresh_totals', true );
 						}
 					}
 				}
@@ -1589,6 +1582,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		WC()->session->set( 'applied_coupons', $this->applied_coupons );
+		WC()->session->set( 'refresh_totals', true );
 
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
 
