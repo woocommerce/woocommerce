@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.8
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.1.2 - 2017-08-15 =
+* Fix - Importer: Prevent multiple placeholders being created when mixing IDs and SKUs.
+* Fix - Importer: correctly set stock management props.
+* Fix - Importer: Allow "unfiltered_html" for name, description and short description fields.
+* Fix - Fix filename image handling.
+* Fix - Rest API: Allow OPTIONS requests.
+* Fix - Fixed missing reviews in product_page shortcode when querying by SKU.
+* Fix - Don't subtract negative taxes in net sales report.
+* Fix - Sort by order + zone ID as a fallback in shipping zones so the zones always match in the same order.
+* Fix - Corrected subject and heading in customer refunded email.
+* Fix - Corrected handling of custom checkbox fields in checkout get_posted_data method.
+* Fix - Fix admin help videos async property.
+* Fix - Fixed price filters by introducing precision.
+* Fix - Improved customer IP address detection.
+* Fix - Fix dark theme readability.
+* Fix - Various notices/warnings.
+* Dev - Correctly invalidate cache after saving order items.
+* Dev - Added `woocommerce_data_store_wp_{$this->meta_type}_read_meta` filter.
 
 = 3.1.1 - 2017-07-11 =
 * Fix - Product importer: fixed handling of non UTF8 characters in descriptions.
