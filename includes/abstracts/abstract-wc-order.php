@@ -1033,6 +1033,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function recalculate_coupons() {
 		$discounts = new WC_Discounts( $this );
+		$coupons   = $this->get_items( 'coupon' );
 
 		foreach ( $coupons as $coupon ) {
 			$coupon_object = new WC_Coupon( $coupon->get_code() );
