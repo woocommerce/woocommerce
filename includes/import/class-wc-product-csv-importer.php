@@ -327,6 +327,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$term_id = $term['term_id'];
 				} else {
 					$term    = wp_insert_term( $_term, 'product_cat', array( 'parent' => intval( $parent ) ) );
+
+					if ( is_wp_error( $term ) ) {
+						break; // We cannot continue if the term cannot be inserted.
+					}
+
 					$term_id = $term['term_id'];
 				}
 
@@ -364,7 +369,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$term = (object) wp_insert_term( $name, 'product_tag' );
 			}
 
-			$tags[] = $term->term_id;
+			if ( ! is_wp_error( $term ) ) {
+				$tags[] = $term->term_id;
+			}
 		}
 
 		return $tags;
@@ -385,6 +392,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		if ( ! $term || is_wp_error( $term ) ) {
 			$term = (object) wp_insert_term( $value, 'product_shipping_class' );
+		}
+
+		if ( is_wp_error( $term ) ) {
+			return 0;
 		}
 
 		return $term->term_id;
