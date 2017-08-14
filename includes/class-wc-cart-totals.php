@@ -127,6 +127,8 @@ final class WC_Cart_Totals {
 	protected function calculate() {
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
+		// @todo? make this use a WC_Cart_Totals method.
+		$this->object->calculate_manual_discounts();
 		$this->calculate_shipping_totals();
 		$this->calculate_totals();
 	}

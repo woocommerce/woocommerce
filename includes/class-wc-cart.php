@@ -51,6 +51,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
+	 * Contains an array of discount objects applied to the cart.
+	 *
+	 * @var array
+	 */
+	protected $manual_discounts = array();
+
+	/**
 	 * Contains an array of coupon code discounts after they have been applied.
 	 *
 	 * @var array
@@ -133,6 +140,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var float
 	 */
 	public $fee_total;
+
+	/**
+	 * Total for manual discounts.
+	 *
+	 * @var float
+	 */
+	protected $manual_discounts_total;
 
 	/**
 	 * Shipping cost.
@@ -1670,6 +1684,61 @@ class WC_Cart extends WC_Legacy_Cart {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Add additional discount to the cart.
+	 *
+	 * A discount is a percentage or fixed value amount to deduct from the cart total and should
+	 * not be a negative number. Fixed value discounts should be a numeric value (e.g. 6.50) and percent value
+	 * discounts should be a numeric value followed by the '%' character (e.g. '10%').
+	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_manual_discounts action during cart/checkout. Discounts do not
+	 * persist.
+	 *
+	 * @param float|string  $amount  Fixed or percent discount amount (do not enter negative amounts).
+	 */
+	public function add_manual_discount( $amount ) {
+		$discount = new WC_Discount;
+
+		if ( strstr( $amount, '%' ) ) {
+			$discount->set_amount( trim( $amount, '%' ) );
+			$discount->set_discount_type( 'percent' );
+		} elseif ( is_numeric( $amount ) && 0 < absint( $amount ) ) {
+			$discount->set_amount( absint( $amount ) );
+			$discount->set_discount_type( 'fixed' );
+		} else {
+			return;
+		}
+
+		$this->manual_discounts[] = $discount;
+	}
+
+	/**
+	 * Get manual discounts.
+	 *
+	 * @return array of WC_Discount objects.
+	 */
+	public function get_manual_discounts() {
+		return array_filter( (array) $this->manual_discounts );
+	}
+
+	/**
+	 * Calculate manual discounts.
+	 */
+	public function calculate_manual_discounts() {
+		// Reset discounts before calculation.
+		$this->manual_discounts_total = 0;
+		$this->manual_discounts       = array();
+
+		// Fire an action where developers can add their discounts.
+		do_action( 'woocommerce_cart_calculate_manual_discounts', $this );
+
+		// If discounts were added, total them and calculate tax.
+		if ( ! empty( $this->manual_discounts ) ) {
+			/* @todo Calculate discounts */
 		}
 	}
 
