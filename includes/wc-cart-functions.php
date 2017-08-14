@@ -359,6 +359,33 @@ function wc_cart_totals_shipping_method_label( $method ) {
 }
 
 /**
+ * Round discount.
+ *
+ * @param  float $value
+ * @param  int $precision
+ * @return float
+ */
+function wc_cart_round_discount( $value, $precision ) {
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
+	} else {
+		// Fake it in PHP 5.2.
+		if ( 2 === WC_DISCOUNT_ROUNDING_MODE && strstr( $value, '.' ) ) {
+			$value    = (string) $value;
+			$value    = explode( '.', $value );
+			$value[1] = substr( $value[1], 0, $precision + 1 );
+			$value    = implode( '.', $value );
+
+			if ( substr( $value, -1 ) === '5' ) {
+				$value = substr( $value, 0, -1 ) . '4';
+			}
+			$value = floatval( $value );
+		}
+    	return round( $value, $precision );
+	}
+}
+
+/**
  * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
  * @since  2.6.2
  * @return string[]

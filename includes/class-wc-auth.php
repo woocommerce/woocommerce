@@ -374,7 +374,7 @@ class WC_Auth {
 					exit;
 				}
 			} else {
-				throw new Exception( __( 'You do not have permissions to access this page!', 'woocommerce' ) );
+				throw new Exception( __( 'You do not have permission to access this page', 'woocommerce' ) );
 			}
 		} catch ( Exception $e ) {
 			$this->maybe_delete_key( $consumer_data );

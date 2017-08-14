@@ -255,6 +255,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @since 3.0.0
 	 */
 	protected function update_version_and_type( &$product ) {
+		wp_set_object_terms( $product->get_id(), '', 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
 	}
 
