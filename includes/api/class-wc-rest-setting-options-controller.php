@@ -1,13 +1,13 @@
 <?php
 /**
- * REST API Settings Options controller
+ * REST API Setting Options controller
  *
  * Handles requests to the /settings/$group/$setting endpoints.
  *
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * REST API Settings Options controller class.
+ * REST API Setting Options controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
+class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
@@ -32,15 +32,15 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings';
+	protected $rest_base = 'settings/(?P<group_id>[\w-]+)';
 
 	/**
 	 * Register routes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			'args' => array(
 				'group' => array(
 					'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -55,7 +55,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/batch', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
 			'args' => array(
 				'group' => array(
 					'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -71,7 +71,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<id>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
 			'args' => array(
 				'group' => array(
 					'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -100,12 +100,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Return a single setting.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['id'] );
+		$setting = $this->get_setting( $request['group_id'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -119,12 +119,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Return all settings in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$settings = $this->get_group_settings( $request['group'] );
+		$settings = $this->get_group_settings( $request['group_id'] );
 
 		if ( is_wp_error( $settings ) ) {
 			return $settings;
@@ -146,7 +146,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @return array|WP_Error
 	 */
@@ -171,13 +171,16 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
-				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
+				$setting['value']    = $admin_setting_value;
 			}
 
 			if ( 'multi_select_countries' === $setting['type'] ) {
 				$setting['options'] = WC()->countries->get_countries();
 				$setting['type']    = 'multiselect';
+			} elseif ( 'single_select_country' === $setting['type'] ) {
+				$setting['type']    = 'select';
+				$setting['options'] = $this->get_countries_and_states();
 			}
 
 			$filtered_settings[] = $setting;
@@ -187,9 +190,36 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Returns a list of countries and states for use in the base location setting.
+	 *
+	 * @since  3.0.7
+	 * @return array Array of states and countries.
+	 */
+	private function get_countries_and_states() {
+		$countries = WC()->countries->get_countries();
+		if ( ! $countries ) {
+			return array();
+		}
+
+		$output = array();
+
+		foreach ( $countries as $key => $value ) {
+			if ( $states = WC()->countries->get_states( $key ) ) {
+				foreach ( $states as $state_key => $state_value ) {
+					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
+				}
+			} else {
+				$output[ $key ] = $value;
+			}
+		}
+
+		return $output;
+	}
+
+	/**
 	 * Get setting data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @param string $setting_id Setting ID.
 	 * @return stdClass|WP_Error
@@ -223,7 +253,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
@@ -250,12 +280,12 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Update a single setting in a group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['id'] );
+		$setting = $this->get_setting( $request['group_id'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -292,7 +322,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single setting object for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param object $item Setting object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -303,26 +333,26 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $data['id'], $request['group'] ) );
+		$response->add_links( $this->prepare_links( $data['id'], $request['group_id'] ) );
 		return $response;
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param string $setting_id Setting ID.
 	 * @param string $group_id Group ID.
 	 * @return array Links for the given setting.
 	 */
 	protected function prepare_links( $setting_id, $group_id ) {
-		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $group_id;
+		$base     = str_replace( '(?P<group_id>[\w-]+)', $group_id, $this->rest_base );
 		$links = array(
 			'self' => array(
-				'href' => rest_url( trailingslashit( $base ) . $setting_id ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $base, $setting_id ) ),
 			),
 			'collection' => array(
-				'href' => rest_url( $base ),
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 		);
 
@@ -332,7 +362,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -347,7 +377,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -363,7 +393,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * Filters out bad values from the settings array/filter so we
 	 * only return known values via the API.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array
 	 */
@@ -388,7 +418,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	 * For image_width, Crop can return "0" instead of false -- so we want
 	 * to make sure we return these consistently the same we accept them.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array
 	 */
@@ -406,7 +436,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each setting response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
@@ -428,7 +458,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Boolean for if a setting type is a valid supported setting type.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $type
 	 * @return bool
 	 */
@@ -451,7 +481,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 	/**
 	 * Get the settings schema, conforming to JSON Schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {
@@ -470,7 +500,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'readonly'     => true,
 				),
 				'label'            => array(
-					'description'  => __( 'A human readable translation wrapped label. Meant to be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -479,7 +509,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'readonly'     => true,
 				),
 				'description'      => array(
-					'description'  => __( 'A human readable translation wrapped description. Meant to be used in interfaces.', 'woocommerce' ),
+					'description'  => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -499,7 +529,7 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'readonly'     => true,
 				),
 				'tip'              => array(
-					'description'  => __( 'Extra help text explaining the setting.', 'woocommerce' ),
+					'description'  => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -517,12 +547,13 @@ class WC_REST_Settings_Options_Controller extends WC_REST_Controller {
 					'readonly'     => true,
 				),
 				'type'             => array(
-					'description'  => __( 'Type of setting. Allowed values: text, email, number, color, password, textarea, select, multiselect, radio, image_width, checkbox.', 'woocommerce' ),
+					'description'  => __( 'Type of setting.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'context'      => array( 'view', 'edit' ),
+					'enum'         => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 					'readonly'     => true,
 				),
 				'options'          => array(

@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     2.5.0
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
-echo date_i18n( __( 'jS F Y', 'woocommerce' ), $order->get_date_created() ) . "\n";
+echo wc_format_datetime( $order->get_date_created() ) . "\n";
 echo "\n" . wc_get_email_order_items( $order, array(
 	'show_sku'      => $sent_to_admin,
 	'show_image'    => false,
@@ -38,6 +38,10 @@ if ( $totals = $order->get_order_item_totals() ) {
 	foreach ( $totals as $total ) {
 		echo $total['label'] . "\t " . $total['value'] . "\n";
 	}
+}
+
+if ( $order->get_customer_note() ) {
+	echo __( 'Note:', 'woocommerce' ) . "\t " . wptexturize( $order->get_customer_note() ) . "\n";
 }
 
 if ( $sent_to_admin ) {

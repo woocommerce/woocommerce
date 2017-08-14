@@ -15,22 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include core functions (available in both admin and frontend).
-include( 'wc-conditional-functions.php' );
-include( 'wc-coupon-functions.php' );
-include( 'wc-user-functions.php' );
-include( 'wc-deprecated-functions.php' );
-include( 'wc-formatting-functions.php' );
-include( 'wc-order-functions.php' );
-include( 'wc-order-item-functions.php' );
-include( 'wc-page-functions.php' );
-include( 'wc-product-functions.php' );
-include( 'wc-stock-functions.php' );
-include( 'wc-account-functions.php' );
-include( 'wc-term-functions.php' );
-include( 'wc-attribute-functions.php' );
-include( 'wc-rest-functions.php' );
-include( 'wc-widget-functions.php' );
-include( 'wc-webhook-functions.php' );
+include( WC_ABSPATH . 'includes/wc-conditional-functions.php' );
+include( WC_ABSPATH . 'includes/wc-coupon-functions.php' );
+include( WC_ABSPATH . 'includes/wc-user-functions.php' );
+include( WC_ABSPATH . 'includes/wc-deprecated-functions.php' );
+include( WC_ABSPATH . 'includes/wc-formatting-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-item-functions.php' );
+include( WC_ABSPATH . 'includes/wc-page-functions.php' );
+include( WC_ABSPATH . 'includes/wc-product-functions.php' );
+include( WC_ABSPATH . 'includes/wc-stock-functions.php' );
+include( WC_ABSPATH . 'includes/wc-account-functions.php' );
+include( WC_ABSPATH . 'includes/wc-term-functions.php' );
+include( WC_ABSPATH . 'includes/wc-attribute-functions.php' );
+include( WC_ABSPATH . 'includes/wc-rest-functions.php' );
+include( WC_ABSPATH . 'includes/wc-widget-functions.php' );
+include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.
@@ -51,11 +51,13 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
+add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 
 /**
  * Define a constant if it is not already defined.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  string $name
  * @param  string $value
  */
@@ -205,18 +207,24 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
 }
 
+
 /**
  * Like wc_get_template, but returns the HTML instead of outputting.
+ *
  * @see wc_get_template
  * @since 2.5.0
  * @param string $template_name
+ * @param array $args
+ * @param string $template_path
+ * @param string $default_path
+ *
+ * @return string
  */
 function wc_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	ob_start();
 	wc_get_template( $template_name, $args, $template_path, $default_path );
 	return ob_get_clean();
 }
-
 /**
  * Locate a template and return the path for inclusion.
  *
@@ -462,7 +470,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'AOA' => 'Kz',
 		'ARS' => '&#36;',
 		'AUD' => '&#36;',
-		'AWG' => '&fnof;',
+		'AWG' => 'Afl.',
 		'AZN' => 'AZN',
 		'BAM' => 'KM',
 		'BBD' => '&#36;',
@@ -643,7 +651,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  *
  * Variable is filtered by woocommerce_get_image_size_{image_size}.
  *
- * @param mixed $image_size
+ * @param array|string $image_size
  * @return array
  */
 function wc_get_image_size( $image_size ) {
@@ -724,7 +732,7 @@ function wc_print_js() {
  * @param  string  $name   Name of the cookie being set.
  * @param  string  $value  Value of the cookie.
  * @param  integer $expire Expiry of the cookie.
- * @param  string  $secure Whether the cookie should be served only over https.
+ * @param  bool    $secure Whether the cookie should be served only over https.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
@@ -792,13 +800,28 @@ function wc_get_page_children( $page_id ) {
 /**
  * Flushes rewrite rules when the shop page (or it's children) gets saved.
  */
-function flush_rewrite_rules_on_shop_page_save( $post_id ) {
+function flush_rewrite_rules_on_shop_page_save() {
+	$screen    = get_current_screen();
+	$screen_id = $screen ? $screen->id : '';
+
+	// Check if this is the edit page.
+	if ( 'page' !== $screen_id ) {
+		return;
+	}
+
+	// Check if page is edited.
+	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) {
+		return;
+	}
+
+	$post_id      = intval( $_GET['post'] );
 	$shop_page_id = wc_get_page_id( 'shop' );
+
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
-add_action( 'save_post', 'flush_rewrite_rules_on_shop_page_save' );
+add_action( 'admin_footer', 'flush_rewrite_rules_on_shop_page_save' );
 
 /**
  * Various rewrite rule fixes.
@@ -853,8 +876,6 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
-	global $wp_rewrite;
-
 	$post = get_post( $post_id );
 	if ( 'product' === get_post_type( $post->post_parent ) ) {
 		$permalinks = wc_get_permalink_structure();
@@ -986,7 +1007,7 @@ function wc_get_customer_default_location() {
 
 /**
  * Get user agent string.
- * @since  2.7.0
+ * @since  3.0.0
  * @return string
  */
 function wc_get_user_agent() {
@@ -1210,7 +1231,7 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '-', ' ', $type );
 	$type = str_replace( '_', ' ', $type );
 
-	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+	$labels = apply_filters( 'woocommerce_credit_card_type_labels', array(
 		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
 		'visa'             => __( 'Visa', 'woocommerce' ),
 		'discover'         => __( 'Discover', 'woocommerce' ),
@@ -1365,6 +1386,8 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 /**
  * Wrapper for set_time_limit to see if it is enabled.
  * @since 2.6.0
+ *
+ * @param int $limit
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
@@ -1375,6 +1398,11 @@ function wc_set_time_limit( $limit = 0 ) {
 /**
  * Used to sort products attributes with uasort.
  * @since 2.6.0
+ *
+ * @param array $a
+ * @param array $b
+ *
+ * @return int
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
 	if ( $a['position'] === $b['position'] ) {
@@ -1385,7 +1413,12 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
 
 /**
  * Used to sort shipping zone methods with uasort.
- * @since 2.7.0
+ * @since 3.0.0
+ *
+ * @param array $a
+ * @param array $b
+ *
+ * @return int
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 	if ( $a->method_order === $b->method_order ) {
@@ -1408,6 +1441,66 @@ function wc_get_rounding_precision() {
 		$precision = absint( WC_ROUNDING_PRECISION );
 	}
 	return $precision;
+}
+
+/**
+ * Add precision to a number and return an int.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return $value * $precision;
+}
+
+/**
+ * Remove precision from a number and return a float.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return float
+ */
+function wc_remove_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+}
+
+/**
+ * Add precision to an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_add_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_add_number_precision( $value );
+	}
+	return $value;
+}
+
+/**
+ * Remove precision from an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_remove_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_remove_number_precision( $value );
+	}
+	return $value;
 }
 
 /**
@@ -1440,7 +1533,7 @@ function wc_get_logger() {
 					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
 					esc_html( is_object( $class ) ? get_class( $class ) : $class )
 				),
-				'2.7'
+				'3.0'
 			);
 			$logger = new WC_Logger();
 		}
@@ -1454,7 +1547,7 @@ function wc_get_logger() {
  * Some server environments blacklist some debugging functions. This function provides a safe way to
  * turn an expression into a printable, readable form without calling blacklisted functions.
  *
- * @since 2.7
+ * @since 3.0
  *
  * @param mixed $expression The expression to be printed.
  * @param bool $return Optional. Default false. Set to true to return the human-readable string.
@@ -1489,7 +1582,7 @@ function wc_print_r( $expression, $return = false ) {
 /**
  * Registers the default log handler.
  *
- * @since 2.7
+ * @since 3.0
  * @param array $handlers
  * @return array
  */
@@ -1510,7 +1603,10 @@ add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handle
 
 /**
  * Store user agents. Used for tracker.
- * @since 2.7.0
+ * @since 3.0.0
+ *
+ * @param string     $user_login
+ * @param int|object $user
  */
 function wc_maybe_store_user_agent( $user_login, $user ) {
 	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
@@ -1524,7 +1620,7 @@ add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
 /**
  * Based on wp_list_pluck, this calls a method instead of returning a property.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param array      $list      List of objects or arrays
  * @param int|string $callback_or_field     Callback method from the object to place instead of the entire object
  * @param int|string $index_key Optional. Field from the object to use as keys for the new array.
@@ -1566,12 +1662,12 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 /**
  * Get permalink settings for WooCommerce independent of the user locale.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( function_exists( 'switch_to_locale' ) && did_action( 'admin_init' ) ) {
-		switch_to_locale( get_locale() );
+	if ( did_action( 'admin_init' ) ) {
+		wc_switch_to_site_locale();
 	}
 
 	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
@@ -1588,8 +1684,83 @@ function wc_get_permalink_structure() {
 	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
 	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
 
-	if ( function_exists( 'restore_current_locale' ) && did_action( 'admin_init' ) ) {
-		restore_current_locale();
+	if ( did_action( 'admin_init' ) ) {
+		wc_restore_locale();
 	}
 	return $permalinks;
+}
+
+/**
+ * Switch WooCommerce to site language.
+ *
+ * @since 3.1.0
+ */
+function wc_switch_to_site_locale() {
+	if ( function_exists( 'switch_to_locale' ) ) {
+		switch_to_locale( get_locale() );
+
+		// Filter on plugin_locale so load_plugin_textdomain loads the correct locale.
+		add_filter( 'plugin_locale', 'get_locale' );
+
+		// Init WC locale.
+		WC()->load_plugin_textdomain();
+	}
+}
+
+/**
+ * Switch WooCommerce language to original.
+ *
+ * @since 3.1.0
+ */
+function wc_restore_locale() {
+	if ( function_exists( 'restore_previous_locale' ) ) {
+		restore_previous_locale();
+
+		// Remove filter.
+		remove_filter( 'plugin_locale', 'get_locale' );
+
+		// Init WC locale.
+		WC()->load_plugin_textdomain();
+	}
+}
+
+/**
+ * Convert plaintext phone number to clickable phone number.
+ *
+ * Remove formatting and allow "+".
+ * Example and specs: https://developer.mozilla.org/en/docs/Web/HTML/Element/a#Creating_a_phone_link
+ *
+ * @since 3.1.0
+ *
+ * @param string $phone Content to convert phone number.
+ * @return string Content with converted phone number.
+ */
+function wc_make_phone_clickable( $phone ) {
+	$number = trim( preg_replace( '/[^\d|\+]/', '', $phone ) );
+
+	return '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>';
+}
+
+/**
+ * Get an item of post data if set, otherwise return a default value.
+ *
+ * @since  3.0.9
+ * @param  string $key
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_post_data_by_key( $key, $default = '' ) {
+	return wc_clean( wc_get_var( $_POST[ $key ], $default ) );
+}
+
+/**
+ * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
+ *
+ * @since  3.2.0
+ * @param  mixed $var
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_var( &$var, $default = null ) {
+	return isset( $var ) ? $var : $default;
 }

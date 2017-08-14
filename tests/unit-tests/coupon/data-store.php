@@ -8,7 +8,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Make sure the coupon store loads.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_store_loads() {
 		$store = new WC_Data_Store( 'coupon' );
@@ -18,7 +18,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon create.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_create() {
 		$code = 'coupon-' . time();
@@ -33,7 +33,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon deletion.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_delete() {
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -46,7 +46,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon update.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_update() {
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -60,7 +60,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon reading from the DB.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_read() {
 		$code = 'coupon-' . time();
@@ -80,7 +80,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon saving.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_save() {
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -100,8 +100,24 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test coupon date saving/loading.
+	 * @since 3.0.0
+	 */
+	function test_coupon_date_saving() {
+		$expiry_date = time() - 10;
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'coupon-' . time() );
+		$coupon->set_date_expires( $expiry_date );
+		$coupon->save();
+
+		$coupon_read = new WC_Coupon( $coupon->get_id() );
+
+		$this->assertEquals( date( 'Y-m-d', $expiry_date ), date( 'Y-m-d', $coupon_read->get_date_expires()->getTimestamp() ) );
+	}
+
+	/**
 	 * Test coupon increase, decrease, user usage count methods.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_coupon_usage_magic_methods() {
 		$coupon  = WC_Helper_Coupon::create_coupon();

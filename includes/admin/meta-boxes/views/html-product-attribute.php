@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>" class="woocommerce_attribute wc-metabox closed <?php echo esc_attr( implode( ' ', $metabox_class ) ); ?>" rel="<?php echo esc_attr( $attribute->get_position() ); ?>">
 	<h3>
 		<a href="#" class="remove_row delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
@@ -56,7 +61,7 @@
 								?>" placeholder="<?php
 
 									/* translators: %s: WC_DELIMITER */
-									echo esc_attr( sprintf( __( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER ) );
+									printf( esc_attr__( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER );
 
 								?>" />
 
@@ -66,7 +71,7 @@
 
 						<?php else : ?>
 
-							<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php echo esc_attr( sprintf( __( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ) ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
+							<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
 
 						<?php endif; ?>
 					</td>

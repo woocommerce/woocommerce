@@ -4,11 +4,6 @@
  */
 
 /**
- * Imports
- */
-@import 'bourbon';
-
-/**
  * Styling begins
  */
 div.woocommerce-message {
@@ -25,7 +20,6 @@ p.woocommerce-actions,
 	a.button-primary {
 		background: #bb77ae;
 		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		color: #fff;
 		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
@@ -33,7 +27,6 @@ p.woocommerce-actions,
 		&:hover, &:focus, &:active {
 			background: #a36597;
 			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
 	}
@@ -50,7 +43,6 @@ p.woocommerce-actions,
 			position: absolute;
 			top: 8px;
 			left: 0;
-			-webkit-transition: all 0.1s ease-in-out;
 			transition: all 0.1s ease-in-out;
 		}
 	}

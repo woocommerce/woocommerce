@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.7.0
+ * @version     3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,23 +24,22 @@ global $post, $product;
 
 $attachment_ids = $product->get_gallery_image_ids();
 
-if ( $attachment_ids ) {
+if ( $attachment_ids && has_post_thumbnail() ) {
 	foreach ( $attachment_ids as $attachment_id ) {
-		$full_size_image  = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail        = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
-		$thumbnail_post   = get_post( $attachment_id );
-		$image_title      = $thumbnail_post->post_content;
-
-		$attributes = array(
-			'title'                   => $image_title,
-			'data-large-image'        => $full_size_image[0],
-			'data-large-image-width'  => $full_size_image[1],
-			'data-large-image-height' => $full_size_image[2],
+		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$attributes      = array(
+			'title'                   => get_post_field( 'post_title', $attachment_id ),
+			'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
+			'data-src'                => $full_size_image[0],
+			'data-large_image'        => $full_size_image[0],
+			'data-large_image_width'  => $full_size_image[1],
+			'data-large_image_height' => $full_size_image[2],
 		);
 
-		$html  = '<figure data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';
+		$html  = '<div data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';
 		$html .= wp_get_attachment_image( $attachment_id, 'shop_single', false, $attributes );
- 		$html .= '</a></figure>';
+ 		$html .= '</a></div>';
 
 		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id );
 	}

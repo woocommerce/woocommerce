@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </table>
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
-	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
+	<tr class="tips" data-tip="<?php printf( esc_attr__( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ); ?>" data-id="{{ data.tax_rate_id }}">
 		<td class="country">
 			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" style="text-transform:uppercase" />
 		</td>

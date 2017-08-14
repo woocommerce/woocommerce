@@ -48,7 +48,7 @@ class WC_Helper_Product {
 	/**
 	 * Create external product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_External
 	 */
@@ -73,7 +73,7 @@ class WC_Helper_Product {
 	/**
 	 * Create grouped product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @return WC_Product_Grouped
 	 */
@@ -277,6 +277,15 @@ class WC_Helper_Product {
 		);
 		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
 
+		// Set product attributes global.
+		global $wc_product_attributes;
+		$wc_product_attributes = array();
+		foreach ( wc_get_attribute_taxonomies() as $tax ) {
+			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
+				$wc_product_attributes[ $name ] = $tax;
+			}
+		}
+
 		return $return;
 	}
 
@@ -298,7 +307,7 @@ class WC_Helper_Product {
 	/**
 	 * Creates a new product review on a specific product.
 	 *
-	 * @since 2.7
+	 * @since 3.0
 	 * @param $product_id integer Product ID that the review is for
 	 * @param $revieww_content string Content to use for the product review
 	 * @return integer Product Review ID
@@ -316,5 +325,13 @@ class WC_Helper_Product {
 		);
 
 		return wp_insert_comment( $data );
+	}
+
+	/**
+	 * A helper function for hooking into save_post during the test_product_meta_save_post test.
+	 * @since 3.0.1
+	 */
+	public static function save_post_test_update_meta_data_direct( $id ) {
+		update_post_meta( $id, '_test2', 'world' );
 	}
 }

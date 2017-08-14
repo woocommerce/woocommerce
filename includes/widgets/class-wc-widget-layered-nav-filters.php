@@ -62,7 +62,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			$link = add_query_arg( 'max_price', wc_clean( $_GET['max_price'] ), $link );
 		}
 
-		// Orderby
+		// Order by
 		if ( isset( $_GET['orderby'] ) ) {
 			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
 		}
@@ -163,7 +163,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 				foreach ( $rating_filter as $rating ) {
 					$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );
 					$link         = $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter', $base_link );
-					echo '<li class="chosen"><a aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</a></li>';
+					echo '<li class="chosen"><a aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</a></li>';
 				}
 			}
 

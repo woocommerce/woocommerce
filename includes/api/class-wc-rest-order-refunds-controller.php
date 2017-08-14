@@ -120,7 +120,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -129,12 +129,56 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	}
 
 	/**
+	 * Get formatted item data.
+	 *
+	 * @since  3.0.0
+	 * @param  WC_Data $object WC_Data instance.
+	 * @return array
+	 */
+	protected function get_formatted_item_data( $object ) {
+		$data              = $object->get_data();
+		$format_decimal    = array( 'amount' );
+		$format_date       = array( 'date_created' );
+		$format_line_items = array( 'line_items' );
+
+		// Format decimal values.
+		foreach ( $format_decimal as $key ) {
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+		}
+
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			$datetime              = $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
+		}
+
+		// Format line items.
+		foreach ( $format_line_items as $key ) {
+			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
+		}
+
+		return array(
+			'id'               => $object->get_id(),
+			'date_created'     => $data['date_created'],
+			'date_created_gmt' => $data['date_created_gmt'],
+			'amount'           => $data['amount'],
+			'reason'           => $data['reason'],
+			'refunded_by'      => $data['refunded_by'],
+			'meta_data'        => $data['meta_data'],
+			'line_items'       => $data['line_items'],
+		);
+	}
+
+	/**
 	 * Prepare a single order output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
+	 *
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 *
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request = $request;
@@ -148,35 +192,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
-		$data              = $object->get_data();
-		$format_decimal    = array( 'amount' );
-		$format_date       = array( 'date_created' );
-		$format_line_items = array( 'line_items' );
-
-		// Format decimal values.
-		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
-		}
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$data[ $key ] = $data[ $key ] ? wc_rest_prepare_date_response( get_gmt_from_date( date( 'Y-m-d H:i:s', $data[ $key ] ) ) ) : false;
-		}
-
-		// Format line items.
-		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
-		}
-
-		// Unset unwanted data.
-		unset(
-			$data['parent_id'], $data['status'], $data['currency'], $data['prices_include_tax'],
-			$data['version'], $data['date_modified'], $data['discount_total'], $data['discount_tax'],
-			$data['shipping_total'], $data['shipping_tax'], $data['cart_tax'], $data['cart_total'],
-			$data['total'], $data['total_tax'], $data['tax_lines'], $data['shipping_lines'],
-			$data['fee_lines'], $data['coupon_lines']
-	 	);
-
+		$data    = $this->get_formatted_item_data( $object );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -226,7 +242,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -242,7 +258,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Prepares one object for create or update operation.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
@@ -292,7 +308,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Save an object data.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
@@ -336,6 +352,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'date_created_gmt' => array(
+					'description' => __( "The date the order refund was created, as GMT.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'amount' => array(
 					'description' => __( 'Refund amount.', 'woocommerce' ),
 					'type'        => 'string',
@@ -349,7 +371,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 				'refunded_by' => array(
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'meta_data' => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
@@ -503,6 +525,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 							),
 						),
 					),
+				),
+				'api_refund' => array(
+					'description' => __( 'When true, the payment gateway API is used to generate the refund.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'edit' ),
+					'default'     => true,
 				),
 			),
 		);

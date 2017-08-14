@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Data Store
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -14,7 +14,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'order_item';
@@ -30,7 +30,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Create a new order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function create( &$item ) {
@@ -53,17 +53,21 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Update a order item in the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function update( &$item ) {
 		global $wpdb;
 
-		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $item->get_name(),
-			'order_item_type' => $item->get_type(),
-			'order_id'        => $item->get_order_id(),
-		), array( 'order_item_id' => $item->get_id() ) );
+		$changes = $item->get_changes();
+
+		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
+			$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
+				'order_item_name' => $item->get_name(),
+				'order_item_type' => $item->get_type(),
+				'order_id'        => $item->get_order_id(),
+			), array( 'order_item_id' => $item->get_id() ) );
+		}
 
 		$this->save_item_data( $item );
 		$item->save_meta_data();
@@ -76,7 +80,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Remove an order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -93,15 +97,24 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	/**
 	 * Read a order item from the database.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param WC_Order_Item $item
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$item ) {
 		global $wpdb;
 
 		$item->set_defaults();
 
-		$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+		// Get from cache if available.
+		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
+
+		if ( false === $data ) {
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
+		}
 
 		if ( ! $data ) {
 			throw new Exception( __( 'Invalid order item.', 'woocommerce' ) );
@@ -110,7 +123,6 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->set_props( array(
 			'order_id' => $data->order_id,
 			'name'     => $data->order_item_name,
-			'type'     => $data->order_item_type,
 		) );
 		$item->read_meta_data();
 	}
@@ -119,15 +131,18 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * Saves an item's data to the database / item meta.
 	 * Ran after both create and update, so $item->get_id() will be set.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Order_Item $item
 	 */
 	public function save_item_data( &$item ) {}
 
 	/**
-	 * Clear meta cachce.
+	 * Clear meta cache.
+	 *
+	 * @param WC_Order_Item $item
 	 */
 	public function clear_cache( &$item ) {
-		wp_cache_delete( 'object-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'order-items-' . $item->get_order_id(), 'orders' );
 	}
 }

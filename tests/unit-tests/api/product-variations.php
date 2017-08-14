@@ -3,7 +3,7 @@
  * Tests for Variations API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Product_Variations_API extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -34,7 +34,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting variations.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_variations() {
 		wp_set_current_user( $this->user );
@@ -51,7 +51,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting variations without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_variations_without_permission() {
 		wp_set_current_user( 0 );
@@ -64,7 +64,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_variation() {
 		wp_set_current_user( $this->user );
@@ -84,7 +84,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting single variation without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_variation_without_permission() {
 		wp_set_current_user( 0 );
@@ -99,7 +99,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_variation() {
 		wp_set_current_user( $this->user );
@@ -121,7 +121,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single variation without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_variation_without_permission() {
 		wp_set_current_user( 0 );
@@ -139,7 +139,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single variation with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_variation_with_invalid_id() {
 		wp_set_current_user( 0 );
@@ -154,7 +154,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test editing a single variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_variation() {
 		wp_set_current_user( $this->user );
@@ -175,7 +175,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			'sku'         => 'FIXED-SKU',
 			'sale_price'  => '8',
 			'description' => 'O_O',
-			'image'       => array( array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ) ),
+			'image'       => array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ),
 			'attributes'  => array( array( 'name' => 'pa_size', 'option' => 'medium' ) ),
 		) );
 		$response  = $this->server->dispatch( $request );
@@ -187,16 +187,15 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10', $variation['regular_price'] );
 		$this->assertEquals( 'FIXED-SKU', $variation['sku'] );
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
-
-		$this->assertContains( 'Dr1Bczxq4q', $variation['image'][0]['src'] );
-		$this->assertContains( 'test upload image', $variation['image'][0]['alt'] );
+		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'] );
+		$this->assertContains( 'test upload image', $variation['image']['alt'] );
 		$product->delete( true );
 	}
 
 	/**
 	 * Test updating a single variation without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_variation_without_permission() {
 		wp_set_current_user( 0 );
@@ -216,7 +215,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single variation with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_variation_with_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -233,7 +232,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single variation.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_variation() {
 		wp_set_current_user( $this->user );
@@ -269,7 +268,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single variation without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_variation_without_permission() {
 		wp_set_current_user( 0 );
@@ -300,7 +299,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				array(
 					'id'          => $children[0],
 					'description' => 'Updated description.',
-					'image'       => array( array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ) ),
+					'image'       => array( 'position' => 0, 'src' => 'https://cldup.com/Dr1Bczxq4q.png', 'alt' => 'test upload image' ),
 				),
 			),
 			'delete' => array(
@@ -334,7 +333,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test variation schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_variation_schema() {
 		wp_set_current_user( $this->user );
@@ -344,7 +343,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 35, count( $properties ) );
+		$this->assertEquals( 37, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );

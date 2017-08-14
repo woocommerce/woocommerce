@@ -13,7 +13,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.7.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +37,6 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 			do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 			wc_display_item_meta( $item );
-			wc_display_item_downloads( $item );
 
 			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 		?>

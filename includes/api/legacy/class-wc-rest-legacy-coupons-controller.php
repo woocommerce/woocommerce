@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param array $args Query args
 	 * @param WP_REST_Request $request Request data.
@@ -43,7 +43,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single coupon output for response.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_Post $post Post object.
 	 * @param WP_REST_Request $request Request object.
@@ -94,7 +94,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single coupon for create or update.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|stdClass $data Post object.

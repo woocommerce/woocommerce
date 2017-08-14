@@ -23,7 +23,6 @@ class WC_Meta_Box_Order_Downloads {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
-		global $post, $wpdb;
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
 

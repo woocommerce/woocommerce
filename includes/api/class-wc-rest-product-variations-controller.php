@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -135,7 +135,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	/**
 	 * Get object.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  int $id Object ID.
 	 * @return WC_Data
 	 */
@@ -146,52 +146,56 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	/**
 	 * Prepare a single variation output for response.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$data = array(
-			'id'                 => $object->get_id(),
-			'date_created'       => wc_rest_prepare_date_response( $object->get_date_created() ),
-			'date_modified'      => wc_rest_prepare_date_response( $object->get_date_modified() ),
-			'description'        => $object->get_description(),
-			'permalink'          => $object->get_permalink(),
-			'sku'                => $object->get_sku(),
-			'price'              => $object->get_price(),
-			'regular_price'      => $object->get_regular_price(),
-			'sale_price'         => $object->get_sale_price(),
-			'date_on_sale_from'  => $object->get_date_on_sale_from() ? date( 'Y-m-d', $object->get_date_on_sale_from() ) : '',
-			'date_on_sale_to'    => $object->get_date_on_sale_to() ? date( 'Y-m-d', $object->get_date_on_sale_to() ) : '',
-			'on_sale'            => $object->is_on_sale(),
-			'visible'            => $object->is_visible(),
-			'purchasable'        => $object->is_purchasable(),
-			'virtual'            => $object->is_virtual(),
-			'downloadable'       => $object->is_downloadable(),
-			'downloads'          => $this->get_downloads( $object ),
-			'download_limit'     => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
-			'download_expiry'    => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
-			'tax_status'         => $object->get_tax_status(),
-			'tax_class'          => $object->get_tax_class(),
-			'manage_stock'       => $object->managing_stock(),
-			'stock_quantity'     => $object->get_stock_quantity(),
-			'in_stock'           => $object->is_in_stock(),
-			'backorders'         => $object->get_backorders(),
-			'backorders_allowed' => $object->backorders_allowed(),
-			'backordered'        => $object->is_on_backorder(),
-			'weight'             => $object->get_weight(),
-			'dimensions'         => array(
-				'length' => $object->get_length(),
-				'width'  => $object->get_width(),
-				'height' => $object->get_height(),
+			'id'                    => $object->get_id(),
+			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
+			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
+			'date_modified'         => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
+			'date_modified_gmt'     => wc_rest_prepare_date_response( $object->get_date_modified() ),
+			'description'           => wc_format_content( $object->get_description() ),
+			'permalink'             => $object->get_permalink(),
+			'sku'                   => $object->get_sku(),
+			'price'                 => $object->get_price(),
+			'regular_price'         => $object->get_regular_price(),
+			'sale_price'            => $object->get_sale_price(),
+			'date_on_sale_from'     => wc_rest_prepare_date_response( $object->get_date_on_sale_from(), false ),
+			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $object->get_date_on_sale_from() ),
+			'date_on_sale_to'       => wc_rest_prepare_date_response( $object->get_date_on_sale_to(), false ),
+			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $object->get_date_on_sale_to() ),
+			'on_sale'               => $object->is_on_sale(),
+			'visible'               => $object->is_visible(),
+			'purchasable'           => $object->is_purchasable(),
+			'virtual'               => $object->is_virtual(),
+			'downloadable'          => $object->is_downloadable(),
+			'downloads'             => $this->get_downloads( $object ),
+			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
+			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
+			'tax_status'            => $object->get_tax_status(),
+			'tax_class'             => $object->get_tax_class(),
+			'manage_stock'          => $object->managing_stock(),
+			'stock_quantity'        => $object->get_stock_quantity(),
+			'in_stock'              => $object->is_in_stock(),
+			'backorders'            => $object->get_backorders(),
+			'backorders_allowed'    => $object->backorders_allowed(),
+			'backordered'           => $object->is_on_backorder(),
+			'weight'                => $object->get_weight(),
+			'dimensions'            => array(
+				'length'            => $object->get_length(),
+				'width'             => $object->get_width(),
+				'height'            => $object->get_height(),
 			),
-			'shipping_class'     => $object->get_shipping_class(),
-			'shipping_class_id'  => $object->get_shipping_class_id(),
-			'image'              => $this->get_images( $object ),
-			'attributes'         => $this->get_attributes( $object ),
-			'menu_order'         => $object->get_menu_order(),
-			'meta_data'          => $object->get_meta_data(),
+			'shipping_class'        => $object->get_shipping_class(),
+			'shipping_class_id'     => $object->get_shipping_class_id(),
+			'image'                 => current( $this->get_images( $object ) ),
+			'attributes'            => $this->get_attributes( $object ),
+			'menu_order'            => $object->get_menu_order(),
+			'meta_data'             => $object->get_meta_data(),
 		);
 
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -213,12 +217,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
 
-
-
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
@@ -257,14 +259,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		}
 
 		// Thumbnail.
-		if ( isset( $request['image'] ) && is_array( $request['image'] ) ) {
-			$image = $request['image'];
-			$image = current( $image );
-			if ( is_array( $image ) ) {
-				$image['position'] = 0;
-			}
+		if ( isset( $request['image'] ) ) {
+			if ( is_array( $request['image'] ) ) {
+				$image = $request['image'];
+				if ( is_array( $image ) ) {
+					$image['position'] = 0;
+				}
 
-			$variation = $this->set_product_images( $variation, array( $image ) );
+				$variation = $this->set_product_images( $variation, array( $image ) );
+			} else {
+				$variation->set_image_id( '' );
+			}
 		}
 
 		// Virtual variation.
@@ -338,8 +343,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			$variation->set_date_on_sale_from( $request['date_on_sale_from'] );
 		}
 
+		if ( isset( $request['date_on_sale_from_gmt'] ) ) {
+			$variation->set_date_on_sale_from( $request['date_on_sale_from_gmt'] ? strtotime( $request['date_on_sale_from_gmt'] ) : null );
+		}
+
 		if ( isset( $request['date_on_sale_to'] ) ) {
 			$variation->set_date_on_sale_to( $request['date_on_sale_to'] );
+		}
+
+		if ( isset( $request['date_on_sale_to_gmt'] ) ) {
+			$variation->set_date_on_sale_to( $request['date_on_sale_to_gmt'] ? strtotime( $request['date_on_sale_to_gmt'] ) : null );
 		}
 
 		// Tax class.
@@ -437,10 +450,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * Delete a variation.
 	 *
 	 * @param WP_REST_Request $request Full details about the request
-	 * @return WP_Error|boolean
+	 *
+	 * @return bool|WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		$id     = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;
@@ -517,7 +530,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
@@ -632,13 +645,23 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from' => array(
-					'description' => __( 'Start date of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_from_gmt' => array(
+					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_on_sale_to_gmt' => array(
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'on_sale' => array(
@@ -698,13 +721,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					),
 				),
 				'download_limit' => array(
-					'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
-					'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
@@ -815,8 +838,20 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
+						'date_created_gmt' => array(
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'date_modified' => array(
 							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'date_modified_gmt' => array(
+							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

@@ -110,7 +110,6 @@ class WC_Admin_Settings {
 
 	/**
 	 * Output messages + errors.
-	 * @return string
 	 */
 	public static function show_messages() {
 		if ( sizeof( self::$errors ) > 0 ) {
@@ -136,32 +135,11 @@ class WC_Admin_Settings {
 
 		do_action( 'woocommerce_settings_start' );
 
-		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'select2' ), WC()->version, true );
+		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
 			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 		) );
-
-		// Include settings pages
-		self::get_settings_pages();
-
-		// Get current tab/section
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
-
-		// Save settings if data has been posted
-		if ( ! empty( $_POST ) ) {
-			self::save();
-		}
-
-		// Add any posted messages
-		if ( ! empty( $_GET['wc_error'] ) ) {
-			self::add_error( stripslashes( $_GET['wc_error'] ) );
-		}
-
-		if ( ! empty( $_GET['wc_message'] ) ) {
-			self::add_message( stripslashes( $_GET['wc_message'] ) );
-		}
 
 		// Get tabs for the settings page
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
@@ -172,8 +150,10 @@ class WC_Admin_Settings {
 	/**
 	 * Get a setting from the settings API.
 	 *
-	 * @param mixed $option_name
-	 * @return string
+	 * @param string $option_name
+	 * @param mixed $default
+	 *
+	 * @return mixed
 	 */
 	public static function get_option( $option_name, $default = '' ) {
 		// Array value
@@ -214,7 +194,7 @@ class WC_Admin_Settings {
 	 *
 	 * Loops though the woocommerce options array and outputs each field.
 	 *
-	 * @param array $options Opens array to output
+	 * @param array[] $options Opens array to output
 	 */
 	public static function output_fields( $options ) {
 		foreach ( $options as $value ) {
@@ -291,17 +271,8 @@ class WC_Admin_Settings {
 				case 'text':
 				case 'email':
 				case 'number':
-				case 'color' :
 				case 'password' :
-
-					$type         = $value['type'];
 					$option_value = self::get_option( $value['id'], $value['default'] );
-
-					if ( 'color' === $value['type'] ) {
-						$type = 'text';
-						$value['class'] .= 'colorpick';
-						$description .= '<div id="colorPickerDiv_' . esc_attr( $value['id'] ) . '" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>';
-					}
 
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
@@ -309,21 +280,43 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
-							<?php
-							if ( 'color' == $value['type'] ) {
-								echo '<span class="colorpickpreview" style="background: ' . esc_attr( $option_value ) . ';"></span>';
-							}
-							?>
 							<input
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
-								type="<?php echo esc_attr( $type ); ?>"
+								type="<?php echo esc_attr( $value['type'] ); ?>"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								value="<?php echo esc_attr( $option_value ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
 								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
 								/> <?php echo $description; ?>
+						</td>
+					</tr><?php
+					break;
+
+				// Color picker.
+				case 'color' :
+					$option_value = self::get_option( $value['id'], $value['default'] );
+
+					?><tr valign="top">
+						<th scope="row" class="titledesc">
+							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+							<?php echo $tooltip_html; ?>
+						</th>
+						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">&lrm;
+							<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>"></span>
+							<input
+								name="<?php echo esc_attr( $value['id'] ); ?>"
+								id="<?php echo esc_attr( $value['id'] ); ?>"
+								type="text"
+								dir="ltr"
+								style="<?php echo esc_attr( $value['css'] ); ?>"
+								value="<?php echo esc_attr( $option_value ); ?>"
+								class="<?php echo esc_attr( $value['class'] ); ?>colorpick"
+								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
+								<?php echo implode( ' ', $custom_attributes ); ?>
+								/>&lrm; <?php echo $description; ?>
+								<div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>
 						</td>
 					</tr><?php
 					break;
@@ -616,7 +609,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Helper function to get the formated description and tip HTML for a
+	 * Helper function to get the formatted description and tip HTML for a
 	 * given form field. Plugins can call this when implementing their own custom
 	 * settings types.
 	 *

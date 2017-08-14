@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract Order Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -22,7 +22,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -50,12 +50,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function create( &$order ) {
 		$order->set_version( WC_VERSION );
-		$order->set_date_created( current_time( 'timestamp' ) );
+		$order->set_date_created( current_time( 'timestamp', true ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
 		$id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-			'post_date'     => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			'post_type'     => $order->get_type( 'edit' ),
 			'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 			'ping_status'   => 'closed',
@@ -77,7 +77,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 	/**
 	 * Method to read an order from the database.
-	 * @param WC_Order
+	 *
+	 * @param WC_Data $order
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$order ) {
 		$order->set_defaults();
@@ -86,13 +89,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$id = $order->get_id();
 		$order->set_props( array(
-			'parent_id'          => $post_object->post_parent,
-			'date_created'       => $post_object->post_date,
-			'date_modified'      => $post_object->post_modified,
-			'status'             => $post_object->post_status,
+			'parent_id'     => $post_object->post_parent,
+			'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'date_modified' => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+			'status'        => $post_object->post_status,
 		) );
+
 		$this->read_order_data( $order, $post_object );
 		$order->read_meta_data();
 		$order->set_object_read( true );
@@ -112,32 +115,47 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order
 	 */
 	public function update( &$order ) {
+		$order->save_meta_data();
 		$order->set_version( WC_VERSION );
 
 		$changes = $order->get_changes();
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
-			wp_update_post( array(
-				'ID'                => $order->get_id(),
-				'post_date'         => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ),
-				'post_date_gmt'     => get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' ) ) ),
+			$post_data = array(
+				'post_date'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 				'post_parent'       => $order->get_parent_id(),
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
-				'post_modified'     => isset( $changes['date_modified'] ) ? date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) : current_time( 'mysql' ),
-				'post_modified_gmt' => isset( $changes['date_modified'] ) ? get_gmt_from_date( date( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' ) ) ) : current_time( 'mysql', 1 ),
-			) );
+				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
+				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
+			);
+
+			/**
+			 * When updating this object, to prevent infinite loops, use $wpdb
+			 * to update data, since wp_update_post spawns more calls to the
+			 * save_post action.
+			 *
+			 * This ensures hooks are fired by either WP itself (admin screen save),
+			 * or an update purely from CRUD.
+			 */
+			if ( doing_action( 'save_post' ) ) {
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $order->get_id() ) );
+				clean_post_cache( $order->get_id() );
+			} else {
+				wp_update_post( array_merge( array( 'ID' => $order->get_id() ), $post_data ) );
+			}
+			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 		$this->update_post_meta( $order );
-		$order->save_meta_data();
 		$order->apply_changes();
 		$this->clear_caches( $order );
 	}
 
 	/**
 	 * Method to delete an order from the database.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
@@ -145,6 +163,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$args = wp_parse_args( $args, array(
 			'force_delete' => false,
 		) );
+
+		if ( ! $id ) {
+			return;
+		}
 
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
@@ -190,7 +212,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order
 	 * @param object $post_object
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
@@ -219,8 +241,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order
-	 * @since 2.7.0
+	 * @param $order WC_Order
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
 		$updated_props     = array();
@@ -257,12 +279,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Clear any caches.
 	 *
 	 * @param WC_Order
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$order ) {
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
-		wp_cache_delete( 'object-' . $order->get_id(), 'orders' );
+		wp_cache_delete( 'order-items-' . $order->get_id(), 'orders' );
 	}
 
 	/**
@@ -275,8 +297,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read_items( $order, $type ) {
 		global $wpdb;
 
-		$get_items_sql = $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s ORDER BY order_item_id;", $order->get_id(), $type );
-		$items         = $wpdb->get_results( $get_items_sql );
+		// Get from cache if available.
+		$items = wp_cache_get( 'order-items-' . $order->get_id(), 'orders' );
+
+		if ( false === $items ) {
+			$get_items_sql = $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id;", $order->get_id() );
+			$items         = $wpdb->get_results( $get_items_sql );
+			foreach ( $items as $item ) {
+				wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
+			}
+			wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+		}
+
+		$items = wp_list_filter( $items, array( 'order_item_type' => $type ) );
 
 		if ( ! empty( $items ) ) {
 			$items = array_map( array( 'WC_Order_Factory', 'get_order_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
@@ -302,6 +335,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order->get_id() ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order->get_id() ) );
 		}
+		$this->clear_caches( $order );
 	}
 
 	/**

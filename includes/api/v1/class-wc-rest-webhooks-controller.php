@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -134,6 +134,16 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get the default REST API version.
+	 *
+	 * @since  3.0.0
+	 * @return string
+	 */
+	protected function get_default_api_version() {
+		return 'wp_api_v2';
+	}
+
+	/**
 	 * Create a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -185,8 +195,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 		// Set secret.
 		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : '' );
 
-		// Set API version to WP API integration v1.
-		$webhook->set_api_version( 'wp_api_v1' );
+		// Set API version to WP API integration.
+		$webhook->set_api_version( $this->get_default_api_version() );
 
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
@@ -354,8 +364,6 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		global $wpdb;
-
 		$data = new stdClass;
 
 		// Post ID.
@@ -408,7 +416,9 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
+	 * @param object $post
 	 * @param WP_REST_Request $request Request object.
+	 *
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $post, $request ) {

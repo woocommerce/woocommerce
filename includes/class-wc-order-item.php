@@ -9,28 +9,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A class which represents an item within an order and handles CRUD.
  * Uses ArrayAccess to be BW compatible with WC_Orders::get_items().
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
 		'order_id' => 0,
 		'name'     => '',
 	);
-
-	/**
-	 * May store an order to prevent retriving it multiple times.
-	 * @var object
-	 */
-	protected $order;
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -41,7 +35,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'order_item';
@@ -119,13 +113,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Get parent order object.
-	 * @return int
+	 * @return WC_Order
 	 */
 	public function get_order() {
-		if ( ! $this->order ) {
-		 	$this->order = wc_get_order( $this->get_order_id() );
-		}
-		return $this->order;
+		return wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -161,12 +152,41 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	*/
 
 	/**
-	 * Type checking
-	 * @param  string|array  $Type
+	 * Type checking.
+	 *
+	 * @param  string|array  $type
 	 * @return boolean
 	 */
 	public function is_type( $type ) {
 		return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
+	}
+
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
+			return false;
+		}
+		if ( '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
+			$calculate_tax_for['tax_class'] = $this->get_tax_class();
+			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
+			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+
+			if ( method_exists( $this, 'get_subtotal' ) ) {
+				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, false );
+				$this->set_taxes( array( 'total' => $taxes, 'subtotal' => $subtotal_taxes ) );
+			} else {
+				$this->set_taxes( array( 'total' => $taxes ) );
+			}
+		} else {
+			$this->set_taxes( false );
+		}
+		return true;
 	}
 
 	/*
@@ -177,30 +197,25 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Expands things like term slugs before return.
-	 * @param string $hideprefix (default: _)
+	 *
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
 	 * @return array
 	 */
-	public function get_formatted_meta_data( $hideprefix = '_' ) {
+	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta    = array();
 		$meta_data         = $this->get_meta_data();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
+		$order_item_name   = $this->get_name();
 
 		foreach ( $meta_data as $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
+			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
 			}
 
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
-
-			// Skip items with values already in the product details area of the product name
-			$value_in_product_name_regex = "/&ndash;.*" . preg_quote( $meta->value, '/' ) . "/i";
-
-			if ( $product && preg_match( $value_in_product_name_regex, $product->get_name() ) ) {
-				continue;
-			}
-
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
 			$display_value = $meta->value;
@@ -212,15 +227,20 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
+			// Skip items with values already in the product details area of the product name.
+			if ( ! $include_all && $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+				continue;
+			}
+
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
-				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key ),
-				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value ) ) ),
+				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key, $meta, $this ),
+				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value, $meta, $this ) ) ),
 			);
 		}
 
-		return $formatted_meta;
+		return apply_filters( 'woocommerce_order_item_get_formatted_meta_data', $formatted_meta, $this );
 	}
 
 	/*
@@ -228,7 +248,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 
@@ -250,6 +270,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			if ( is_callable( array( $this, $setter ) ) ) {
 				$this->$setter( $value );
 			}
+			return;
 		}
 
 		$this->update_meta_data( $offset, $value );

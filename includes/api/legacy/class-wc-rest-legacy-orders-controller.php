@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Query args.
 	 *
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 *
 	 * @param array $args
 	 * @param WP_REST_Request $request
@@ -91,7 +91,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single order output for response.
 	 *
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 *
 	 * @param WP_Post $post Post object.
 	 * @param WP_REST_Request $request Request object.
@@ -156,7 +156,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
-	 * @deprecated 2.7
+	 * @deprecated 3.0
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
@@ -215,7 +215,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The Order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -224,7 +224,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Create base WC Order object.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param array $data
 	 * @return WC_Order
@@ -236,7 +236,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Create order.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return int|WP_Error
@@ -270,7 +270,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Update order.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return int|WP_Error

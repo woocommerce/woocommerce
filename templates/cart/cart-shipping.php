@@ -15,7 +15,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.5.0
+ * @version     3.1.0
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo '<p class="woocommerce-shipping-contents"><small>' . esc_html( $package_details ) . '</small></p>'; ?>
 		<?php endif; ?>
 
-		<?php if ( is_cart() && ! $index ) : ?>
+		<?php if ( ! empty( $show_shipping_calculator ) ) : ?>
 			<?php woocommerce_shipping_calculator(); ?>
 		<?php endif; ?>
 	</td>

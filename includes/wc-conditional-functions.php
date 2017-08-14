@@ -351,7 +351,7 @@ function wc_is_webhook_valid_topic( $topic ) {
 	}
 
 	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
-	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted' ) );
+	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted', 'restored' ) );
 
 	if ( in_array( $resource, $valid_resources ) && in_array( $event, $valid_events ) ) {
 		return true;

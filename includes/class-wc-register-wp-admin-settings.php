@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Take settings registered for WP-Admin and hooks them up to the REST API.
  *
- * @version  2.7.0
- * @since    2.7.0
+ * @version  3.0.0
+ * @since    3.0.0
  * @package  WooCommerce/Classes
  * @category Class
  */
@@ -19,12 +19,17 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Hooks into the settings API and starts registering our settings.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Email|WC_Settings_Page $object The object that contains the settings to register.
 	 * @param string                    $type   Type of settings to register (email or page).
 	 */
 	public function __construct( $object, $type ) {
+		if ( ! is_object( $object ) ) {
+			return;
+		}
+
 		$this->object = $object;
+
 		if ( 'page' === $type ) {
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_page_group' ) );
 			add_filter( 'woocommerce_settings-' . $this->object->get_id(),  array( $this, 'register_page_settings' ) );
@@ -38,7 +43,7 @@ class WC_Register_WP_Admin_Settings {
 	 * Register's all of our different notification emails as sub groups
 	 * of email settings.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $groups Existing registered groups.
 	 * @return array
 	 */
@@ -55,7 +60,7 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Registers all of the setting form fields for emails to each email type's group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $settings Existing registered settings.
 	 * @return array
 	 */
@@ -74,7 +79,7 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Registers a setting group, based on admin page ID & label as parent group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $groups Array of previously registered groups.
 	 * @return array
 	 */
@@ -89,7 +94,7 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Registers settings to a specific group.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  array $settings Existing registered settings
 	 * @return array
 	 */
@@ -125,7 +130,7 @@ class WC_Register_WP_Admin_Settings {
 	/**
 	 * Register a setting into the format expected for the Settings REST API.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array|bool
 	 */

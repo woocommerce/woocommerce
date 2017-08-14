@@ -12,7 +12,7 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
  * examples: Credit Card, eCheck.
  *
  * @class 		WC_Payment_Token
- * @version     2.7.0
+ * @version     3.0.0
  * @since		2.6.0
  * @package		WooCommerce/Abstracts
  * @category	Abstract Class
@@ -33,6 +33,12 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	);
 
 	/**
+	 * Token Type (CC, eCheck, or a custom type added by an extension).
+	 * Set by child classes.
+	 */
+	protected $type = '';
+
+	/**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:
@@ -45,10 +51,7 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	 * @param mixed $token
 	 */
 	public function __construct( $token = '' ) {
-		// Set token type (cc, echeck)
-		if ( ! empty( $this->type ) ) {
-			$this->set_type( $this->type );
-		}
+		parent::__construct( $token );
 
 		if ( is_numeric( $token ) ) {
 			$this->set_id( $token );
@@ -86,13 +89,14 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 
 	/**
 	 * Returns the type of this payment token (CC, eCheck, or something else).
+	 * Overwritten by child classes.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
-	public function get_type( $context = 'view' ) {
-		return $this->get_prop( 'type', $context );
+	public function get_type( $deprecated = '' ) {
+		return $this->type;
 	}
 
 	/**
@@ -100,11 +104,11 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	 * Get's overwritten by child classes.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0
 	 * @return string
 	 */
-	public function get_display_name( $context = 'view' ) {
-		return $this->get_type( $context );
+	public function get_display_name( $deprecated = '' ) {
+		return $this->get_type();
 	}
 
 	/**
@@ -154,16 +158,6 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 	 */
 	public function set_token( $token ) {
 		$this->set_prop( 'token', $token );
-	}
-
-	/**
-	 * Sets the type of this payment token (CC, eCheck, or something else).
-	 *
-	 * @since 2.7.0
-	 * @param string Payment Token Type (CC, eCheck)
-	 */
-	public function set_type( $type ) {
-		return $this->set_prop( 'type', $type );
 	}
 
 	/**
@@ -221,12 +215,6 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php
 		if ( empty( $token ) ) {
 			return false;
 		}
-
-		$type = $this->get_prop( 'type', 'edit' );
-		if ( empty( $type ) ) {
-			return false;
-		}
-
 		return true;
 	}
 

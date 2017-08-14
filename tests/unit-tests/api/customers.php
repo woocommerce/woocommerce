@@ -3,7 +3,7 @@
  * Tests for the Customers REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Customers extends WC_REST_Unit_Test_Case {
@@ -19,7 +19,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -32,7 +32,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting customers.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_customers() {
 		wp_set_current_user( 1 );
@@ -51,15 +51,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 2, count( $customers ) );
 
 		$this->assertContains( array(
-			'id'            => $customer_1->get_id(),
-			'date_created'  => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_created() ) ),
-			'date_modified' => wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer_1->get_date_modified() ) ),
-			'email'         => 'test@woo.local',
-			'first_name'    => 'Justin',
-			'last_name'     => '',
-			'role'          => 'customer',
-			'username'      => 'testcustomer',
-			'billing' => array(
+			'id'                 => $customer_1->get_id(),
+			'date_created'       => wc_rest_prepare_date_response( $customer_1->get_date_created(), false ),
+			'date_created_gmt'   => wc_rest_prepare_date_response( $customer_1->get_date_created() ),
+			'date_modified'      => wc_rest_prepare_date_response( $customer_1->get_date_modified(), false ),
+			'date_modified_gmt'  => wc_rest_prepare_date_response( $customer_1->get_date_modified() ),
+			'email'              => 'test@woo.local',
+			'first_name'         => 'Justin',
+			'last_name'          => '',
+			'role'               => 'customer',
+			'username'           => 'testcustomer',
+			'billing'            => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -72,7 +74,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'email'      => '',
 				'phone'      => '',
 			),
-			'shipping' => array(
+			'shipping'           => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -84,11 +86,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'orders_count'  => 0,
-			'total_spent'   => '0.00',
-			'avatar_url'    => $customer_1->get_avatar_url(),
-			'meta_data' => array(),
-			'_links' => array(
+			'orders_count'       => 0,
+			'total_spent'        => '0.00',
+			'avatar_url'         => $customer_1->get_avatar_url(),
+			'meta_data'          => array(),
+			'_links'             => array(
 				'self'       => array(
 					array(
 						'href' => rest_url( '/wc/v2/customers/' . $customer_1->get_id() . '' ),
@@ -106,7 +108,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting customers without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_customers_without_permission() {
 		wp_set_current_user( 0 );
@@ -117,7 +119,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a new customer.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_customer() {
 		wp_set_current_user( 1 );
@@ -134,15 +136,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( array(
-			'id'            => $data['id'],
-			'date_created'  => $data['date_created'],
-			'date_modified' => $data['date_modified'],
-			'email'         => 'create_customer_test@woo.local',
-			'first_name'    => '',
-			'last_name'     => '',
-			'role'          => 'customer',
-			'username'      => 'create_customer_test',
-			'billing' => array(
+			'id'                 => $data['id'],
+			'date_created'       => $data['date_created'],
+			'date_created_gmt'   => $data['date_created_gmt'],
+			'date_modified'      => $data['date_modified'],
+			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'email'              => 'create_customer_test@woo.local',
+			'first_name'         => '',
+			'last_name'          => '',
+			'role'               => 'customer',
+			'username'           => 'create_customer_test',
+			'billing'            => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -155,7 +159,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'email'      => '',
 				'phone'      => '',
 			),
-			'shipping' => array(
+			'shipping'           => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -167,10 +171,10 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => '',
 			),
 			'is_paying_customer' => false,
-			'meta_data' => array(),
-			'orders_count'  => 0,
-			'total_spent'   => '0.00',
-			'avatar_url'    => $data['avatar_url'],
+			'meta_data'          => array(),
+			'orders_count'       => 0,
+			'total_spent'        => '0.00',
+			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
 		// Test extra data
@@ -195,15 +199,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( array(
-			'id'            => $data['id'],
-			'date_created'  => $data['date_created'],
-			'date_modified' => $data['date_modified'],
-			'email'         => 'create_customer_test2@woo.local',
-			'first_name'    => 'Test',
-			'last_name'     => 'McTestFace',
-			'role'          => 'customer',
-			'username'      => 'create_customer_test2',
-			'billing' => array(
+			'id'                 => $data['id'],
+			'date_created'       => $data['date_created'],
+			'date_created_gmt'   => $data['date_created_gmt'],
+			'date_modified'      => $data['date_modified'],
+			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'email'              => 'create_customer_test2@woo.local',
+			'first_name'         => 'Test',
+			'last_name'          => 'McTestFace',
+			'role'               => 'customer',
+			'username'           => 'create_customer_test2',
+			'billing'            => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -216,7 +222,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'email'      => '',
 				'phone'      => '',
 			),
-			'shipping' => array(
+			'shipping'           => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -228,10 +234,10 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'meta_data' => array(),
-			'orders_count'  => 0,
-			'total_spent'   => '0.00',
-			'avatar_url'    => $data['avatar_url'],
+			'meta_data'          => array(),
+			'orders_count'       => 0,
+			'total_spent'        => '0.00',
+			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
 		// Test without required field
@@ -250,7 +256,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating customers without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -267,7 +273,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_customer() {
 		wp_set_current_user( 1 );
@@ -276,12 +282,14 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( array(
-			'id'            => $data['id'],
-			'date_created'  => $data['date_created'],
-			'date_modified' => $data['date_modified'],
-			'email'         => 'get_customer_test@woo.local',
-			'first_name'    => 'Justin',
-			'billing' => array(
+			'id'                 => $data['id'],
+			'date_created'       => $data['date_created'],
+			'date_created_gmt'   => $data['date_created_gmt'],
+			'date_modified'      => $data['date_modified'],
+			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'email'              => 'get_customer_test@woo.local',
+			'first_name'         => 'Justin',
+			'billing'            => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -294,7 +302,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'email'      => '',
 				'phone'      => '',
 			),
-			'shipping' => array(
+			'shipping'           => array(
 				'first_name' => '',
 				'last_name'  => '',
 				'company'    => '',
@@ -306,20 +314,20 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'meta_data' => array(),
-			'last_name'     => '',
-			'role'          => 'customer',
-			'username'      => 'get_customer_test',
-			'orders_count'  => 0,
-			'total_spent'   => '0.00',
-			'avatar_url'    => $data['avatar_url'],
+			'meta_data'          => array(),
+			'last_name'          => '',
+			'role'               => 'customer',
+			'username'           => 'get_customer_test',
+			'orders_count'       => 0,
+			'total_spent'        => '0.00',
+			'avatar_url'         => $data['avatar_url'],
 		), $data );
 	}
 
 	/**
 	 * Test getting a single customer without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -331,7 +339,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -342,7 +350,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_customer() {
 		wp_set_current_user( 1 );
@@ -368,7 +376,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -380,7 +388,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -392,7 +400,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_customer() {
 		wp_set_current_user( 1 );
@@ -406,7 +414,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -419,7 +427,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -433,7 +441,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer batch endpoint.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_batch_customer() {
 		wp_set_current_user( 1 );
@@ -482,7 +490,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_customer_schema() {
 		wp_set_current_user( 1 );
@@ -491,10 +499,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 16, count( $properties ) );
+		$this->assertEquals( 18, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
+		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
+		$this->assertArrayHasKey( 'date_modified_gmt', $properties );
 		$this->assertArrayHasKey( 'email', $properties );
 		$this->assertArrayHasKey( 'first_name', $properties );
 		$this->assertArrayHasKey( 'last_name', $properties );

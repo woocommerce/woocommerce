@@ -74,10 +74,10 @@ jQuery( function( $ ) {
 						}
 					}
 
-					if ( thislocale[ key ].sort ) {
-						field.data( 'priority', thislocale[ key ].sort );
-					} else if ( locale['default'][ key ].sort ) {
-						field.data( 'priority', locale['default'][ key ].sort );
+					if ( thislocale[ key ].priority ) {
+						field.data( 'priority', thislocale[ key ].priority );
+					} else if ( locale['default'][ key ].priority ) {
+						field.data( 'priority', locale['default'][ key ].priority );
 					}
 
 				} else if ( locale['default'][ key ] ) {
@@ -106,8 +106,8 @@ jQuery( function( $ ) {
 						}
 					}
 
-					if ( locale['default'][ key ].sort ) {
-						field.data( 'priority', locale['default'][ key ].sort );
+					if ( locale['default'][ key ].priority ) {
+						field.data( 'priority', locale['default'][ key ].priority );
 					}
 				}
 

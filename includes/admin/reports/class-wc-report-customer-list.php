@@ -24,8 +24,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	public function __construct() {
 
 		parent::__construct( array(
-			'singular'  => __( 'Customer', 'woocommerce' ),
-			'plural'    => __( 'Customers', 'woocommerce' ),
+			'singular'  => 'customer',
+			'plural'    => 'customers',
 			'ajax'      => false,
 		) );
 	}
@@ -78,8 +78,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_default( $user, $column_name ) {
-		global $wpdb;
-
 		switch ( $column_name ) {
 
 			case 'customer_name' :
@@ -133,7 +131,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 				if ( ! empty( $orders ) ) {
 					$order = $orders[0];
-					return '<a href="' . admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), $order->get_date_created() );
+					return '<a href="' . admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . wc_format_datetime( $order->get_date_created() );
 				} else {
 					return '-';
 				}
@@ -222,6 +220,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Order users by name.
 	 *
 	 * @param WP_User_Query $query
+	 *
+	 * @return WP_User_Query
 	 */
 	public function order_by_last_name( $query ) {
 		global $wpdb;
@@ -245,8 +245,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Prepare customer list items.
 	 */
 	public function prepare_items() {
-		global $wpdb;
-
 		$current_page = absint( $this->get_pagenum() );
 		$per_page     = 20;
 

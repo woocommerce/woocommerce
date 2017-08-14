@@ -92,7 +92,7 @@ class WC_Meta_Box_Coupon_Data {
 				}
 
 				// Expiry date
-				$expiry_date = $coupon->get_date_expires() ? date( 'Y-m-d', $coupon->get_date_expires() ) : '';
+				$expiry_date = $coupon->get_date_expires() ? $coupon->get_date_expires()->date( 'Y-m-d' ) : '';
 				woocommerce_wp_text_input( array(
 					'id'                => 'expiry_date',
 					'value'             => esc_attr( $expiry_date ),
@@ -143,7 +143,7 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox( array(
 					'id'          => 'exclude_sale_items',
 					'label'       => __( 'Exclude sale items', 'woocommerce' ),
-					'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart.', 'woocommerce' ),
+					'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are items in the cart that are not on sale.', 'woocommerce' ),
 				) );
 
 				echo '</div><div class="options_group">';
@@ -162,7 +162,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Products that the coupon will be applied to, or that need to be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				// Exclude Product ids
@@ -179,7 +179,7 @@ class WC_Meta_Box_Coupon_Data {
 							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Products that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				echo '</div><div class="options_group">';
@@ -192,11 +192,13 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'A product must be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will be discounted.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will be applied to, or that need to be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				// Exclude Categories
@@ -207,11 +209,13 @@ class WC_Meta_Box_Coupon_Data {
 						$category_ids = $coupon->get_excluded_product_categories();
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
-						if ( $categories ) foreach ( $categories as $cat ) {
-							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						if ( $categories ) {
+							foreach ( $categories as $cat ) {
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+							}
 						}
 					?>
-				</select> <?php echo wc_help_tip( __( 'Product must not be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will not be discounted.', 'woocommerce' ) ); ?></p>
+				</select> <?php echo wc_help_tip( __( 'Product categories that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?></p>
 				<?php
 
 				echo '</div><div class="options_group">';
@@ -221,8 +225,8 @@ class WC_Meta_Box_Coupon_Data {
 					'id'                => 'customer_email',
 					'label'             => __( 'Email restrictions', 'woocommerce' ),
 					'placeholder'       => __( 'No restrictions', 'woocommerce' ),
-					'description'       => __( 'List of allowed emails to check against the customer\'s billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
-					'value'             => implode( ', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ),
+					'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
+					'value'             => implode( ', ', (array) $coupon->get_email_restrictions() ),
 					'desc_tip'          => true,
 					'type'              => 'email',
 					'class'             => '',
@@ -306,8 +310,6 @@ class WC_Meta_Box_Coupon_Data {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
 		// Check for dupe coupons
 		$coupon_code  = wc_format_coupon_code( $post->post_title );
 		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );

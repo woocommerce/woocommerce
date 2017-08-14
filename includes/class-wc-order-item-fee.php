@@ -9,16 +9,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Fee is an amount of money charged for a particular piece of work
  * or for a particular right or service, and not supposed to be negative.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Fee extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -188,7 +188,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

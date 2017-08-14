@@ -23,13 +23,16 @@ class WC_Email_New_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'new_order';
-		$this->title            = __( 'New order', 'woocommerce' );
-		$this->description      = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
-		$this->heading          = __( 'New customer order', 'woocommerce' );
-		$this->subject          = __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
-		$this->template_html    = 'emails/admin-new-order.php';
-		$this->template_plain   = 'emails/plain/admin-new-order.php';
+		$this->id             = 'new_order';
+		$this->title          = __( 'New order', 'woocommerce' );
+		$this->description    = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
+		$this->template_html  = 'emails/admin-new-order.php';
+		$this->template_plain = 'emails/plain/admin-new-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
@@ -47,6 +50,26 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'New customer order', 'woocommerce' );
+	}
+
+	/**
 	 * Trigger the sending of this email.
 	 *
 	 * @param int $order_id The order ID.
@@ -58,18 +81,18 @@ class WC_Email_New_Order extends WC_Email {
 		}
 
 		if ( is_a( $order, 'WC_Order' ) ) {
-			$this->object                  = $order;
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
-			$this->replace['order-number'] = $this->object->get_order_number();
+			$this->object                         = $order;
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
 			return;
 		}
 
+		$this->setup_locale();
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**
@@ -126,18 +149,20 @@ class WC_Email_New_Order extends WC_Email {
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: %s.', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_subject(),
+				'default'       => '',
 			),
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: %s.', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_heading(),
+				'default'       => '',
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),

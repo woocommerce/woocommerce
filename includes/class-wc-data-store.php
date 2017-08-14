@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Data Store.
  *
- * @since    2.7.0
- * @version  2.7.0
+ * @since    3.0.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -22,8 +22,8 @@ class WC_Data_Store {
 	 * Contains an array of default WC supported data stores.
 	 * Format of object name => class name.
 	 * Example: 'product' => 'WC_Product_Data_Store_CPT'
-	 * You can aso pass something like product_<type> for product stores and
-	 * that type will be used first when avaiable, if a store is requested like
+	 * You can also pass something like product_<type> for product stores and
+	 * that type will be used first when available, if a store is requested like
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
 	 */
@@ -54,12 +54,22 @@ class WC_Data_Store {
 	private $current_class_name = '';
 
 	/**
+	 * The object type this store works with.
+	 * @var string
+	 */
+	private $object_type = '';
+
+
+	/**
 	 * Tells WC_Data_Store which object (coupon, product, order, etc)
 	 * store we want to work with.
 	 *
 	 * @param string $object_type Name of object.
+	 *
+	 * @throws Exception
 	 */
 	public function __construct( $object_type ) {
+		$this->object_type = $object_type;
 		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
 		// If this object type can't be found, check to see if we can load one
@@ -90,10 +100,28 @@ class WC_Data_Store {
 	}
 
 	/**
+	 * Only store the object type to avoid serializing the data store instance.
+	 *
+	 * @return array
+	 */
+	public function __sleep() {
+		return array( 'object_type' );
+	}
+
+	/**
+	 * Re-run the constructor with the object type.
+	 */
+	public function __wakeup() {
+		$this->__construct( $this->object_type );
+	}
+
+	/**
 	 * Loads a data store.
 	 *
 	 * @param string $object_type Name of object.
-	 * @since 2.7.0
+	 *
+	 * @since 3.0.0
+	 * @return WC_Data_Store
 	 */
 	public static function load( $object_type ) {
 		return new WC_Data_Store( $object_type );
@@ -102,7 +130,7 @@ class WC_Data_Store {
 	/**
 	 * Returns the class name of the current data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_current_class_name() {
@@ -112,7 +140,7 @@ class WC_Data_Store {
 	/**
 	 * Reads an object from the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function read( &$data ) {
@@ -122,7 +150,7 @@ class WC_Data_Store {
 	/**
 	 * Create an object in the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function create( &$data ) {
@@ -132,7 +160,7 @@ class WC_Data_Store {
 	/**
 	 * Update an object in the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 */
 	public function update( &$data ) {
@@ -142,7 +170,7 @@ class WC_Data_Store {
 	/**
 	 * Delete an object from the data store.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param WC_Data
 	 * @param array $args Array of args to pass to the delete method.
 	 */
@@ -155,9 +183,12 @@ class WC_Data_Store {
 	 * some helper methods for increasing or decreasing usage). This passes
 	 * through to the instance if that function exists.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
+	 *
 	 * @param $method
 	 * @param $parameters
+	 *
+	 * @return mixed
 	 */
 	public function __call( $method, $parameters ) {
 		if ( is_callable( array( $this->instance, $method ) ) ) {

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Item Coupon Data Store
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooCommerce
  */
@@ -14,7 +14,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 
 	/**
 	 * Data stored in meta keys.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array( 'discount_amount', 'discount_amount_tax' );
@@ -22,8 +22,8 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	/**
 	 * Read/populate data properties specific to this order item.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Order_Item $item
+	 * @since 3.0.0
+	 * @param WC_Order_Item_Coupon $item
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
@@ -39,8 +39,8 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	 * Saves an item's data to the database / item meta.
 	 * Ran after both create and update, so $item->get_id() will be set.
 	 *
-	 * @since 2.7.0
-	 * @param WC_Order_Item $item
+	 * @since 3.0.0
+	 * @param WC_Order_Item_Coupon $item
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();

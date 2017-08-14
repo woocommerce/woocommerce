@@ -5,7 +5,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Classes
- * @version  2.4.1
+ * @version  3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -72,12 +72,21 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
-		'2.7.0' => array(
-			'wc_update_270_webhooks',
-			'wc_update_270_grouped_products',
-			'wc_update_270_settings',
-			'wc_update_270_product_visibility',
-			'wc_update_270_db_version',
+		'3.0.0' => array(
+			'wc_update_300_webhooks',
+			'wc_update_300_grouped_products',
+			'wc_update_300_settings',
+			'wc_update_300_product_visibility',
+			'wc_update_300_db_version',
+		),
+		'3.1.0' => array(
+			'wc_update_310_downloadable_products',
+			'wc_update_310_old_comments',
+			'wc_update_310_db_version',
+		),
+		'3.2.0' => array(
+			'wc_update_320_mexican_states',
+			'wc_update_320_db_version',
 		),
 	);
 
@@ -97,6 +106,7 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+		add_action( 'woocommerce_theme_background_installer', array( __CLASS__, 'theme_background_installer' ), 10, 1 );
 	}
 
 	/**
@@ -110,7 +120,7 @@ class WC_Install {
 	/**
 	 * Check WooCommerce version and run the updater is required.
 	 *
-	 * This check is done on all requests and runs if he versions do not match.
+	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
@@ -228,7 +238,7 @@ class WC_Install {
 	/**
 	 * Get list of DB update callbacks.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return array
 	 */
 	public static function get_db_update_callbacks() {
@@ -309,7 +319,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Create pages that the plugin relies on, storing page id's in variables.
+	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
 		include_once( dirname( __FILE__ ) . '/admin/wc-admin-functions.php' );
@@ -375,7 +385,7 @@ class WC_Install {
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
 	 */
-	private static function create_terms() {
+	public static function create_terms() {
 		$taxonomies = array(
 			'product_type' => array(
 				'simple',
@@ -516,12 +526,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   download_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
-  KEY download_order_product (download_id,order_id,product_id)
+  KEY download_order_product (download_id,order_id,product_id),
+  KEY order_id (order_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
   order_item_name TEXT NOT NULL,
-  order_item_type varchar(20) NOT NULL DEFAULT '',
+  order_item_type varchar(200) NOT NULL DEFAULT '',
   order_id BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (order_item_id),
   KEY order_id (order_id)
@@ -825,6 +836,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
+	 *
+	 * @param array $args
 	 */
 	public static function in_plugin_update_message( $args ) {
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
@@ -838,7 +851,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			}
 		}
 
-		echo wp_kses_post( $upgrade_notice );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $upgrade_notice ) );
 	}
 
 	/**
@@ -855,19 +868,27 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$upgrade_notice = '';
 
 		if ( preg_match( $regexp, $content, $matches ) ) {
-			$version = trim( $matches[1] );
 			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
-			// Check the latest stable version and ignore trunk.
-			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
+			// Convert the full version strings to minor versions.
+			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
+			$current_version_parts = explode( '.', WC_VERSION );
 
-				$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
+			if ( 3 !== sizeof( $notice_version_parts ) ) {
+				return;
+			}
+
+			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
+			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
+
+			// Check the latest stable version and ignore trunk.
+			if ( version_compare( $current_version, $notice_version, '<' ) ) {
+
+				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
 
 				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
+					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
 				}
-
-				$upgrade_notice .= '</div> ';
 			}
 		}
 
@@ -882,7 +903,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" aria-label="' . esc_attr( __( 'View WooCommerce settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" aria-label="' . esc_attr__( 'View WooCommerce settings', 'woocommerce' ) . '">' . esc_html__( 'Settings', 'woocommerce' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );
@@ -898,9 +919,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function plugin_row_meta( $links, $file ) {
 		if ( WC_PLUGIN_BASENAME == $file ) {
 			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr( __( 'View WooCommerce documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr( __( 'View WooCommerce API docs', 'woocommerce' ) ) . '">' . __( 'API docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr( __( 'Visit premium customer support', 'woocommerce' ) ) . '">' . __( 'Premium support', 'woocommerce' ) . '</a>',
+				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
+				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>',
 			);
 
 			return array_merge( $links, $row_meta );
@@ -1075,6 +1096,65 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
+	 *
+	 * @param string $theme_slug
+	 * @since 3.1.0
+	 */
+	public static function theme_background_installer( $theme_slug ) {
+		// Explicitly clear the event.
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
+
+		if ( ! empty( $theme_slug ) ) {
+			// Suppress feedback
+			ob_start();
+
+			try {
+				$theme = wp_get_theme( $theme_slug );
+
+				if ( ! $theme->exists() ) {
+					require_once( ABSPATH . 'wp-admin/includes/file.php' );
+					include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+					include_once( ABSPATH . 'wp-admin/includes/theme.php' );
+
+					WP_Filesystem();
+
+					$skin     = new Automatic_Upgrader_Skin;
+					$upgrader = new Theme_Upgrader( $skin );
+					$api      = themes_api( 'theme_information', array(
+						'slug'   => $theme_slug,
+						'fields' => array( 'sections' => false ),
+					) );
+					$result   = $upgrader->install( $api->download_link );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					} elseif ( is_wp_error( $skin->result ) ) {
+						throw new Exception( $skin->result->get_error_message() );
+					} elseif ( is_null( $result ) ) {
+						throw new Exception( 'Unable to connect to the filesystem. Please confirm your credentials.' );
+					}
+				}
+
+				switch_theme( $theme_slug );
+			} catch ( Exception $e ) {
+				WC_Admin_Notices::add_custom_notice(
+					$theme_slug . '_install_error',
+					sprintf(
+						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
+						$theme_slug,
+						$e->getMessage(),
+						esc_url( admin_url( 'update.php?action=install-theme&theme=' . $theme_slug . '&_wpnonce=' . wp_create_nonce( 'install-theme_' . $theme_slug ) ) )
+					)
+				);
+			}
+
+			// Discard feedback
+			ob_end_clean();
 		}
 	}
 }

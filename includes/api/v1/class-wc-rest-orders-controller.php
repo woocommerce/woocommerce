@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -125,8 +125,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		global $wpdb;
-
 		$order = wc_get_order( $post );
 		$dp    = $request['dp'];
 
@@ -139,8 +137,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'currency'             => $order->get_currency(),
 			'version'              => $order->get_version(),
 			'prices_include_tax'   => $order->get_prices_include_tax(),
-			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),
-			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created() ),  // v1 API used UTC.
+			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified() ), // v1 API used UTC.
 			'customer_id'          => $order->get_customer_id(),
 			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'discount_tax'         => wc_format_decimal( $order->get_discount_tax(), $dp ),
@@ -158,8 +156,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->get_customer_user_agent(),
 			'created_via'          => $order->get_created_via(),
 			'customer_note'        => $order->get_customer_note(),
-			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed() ),
-			'date_paid'            => $order->get_date_paid() ? wc_rest_prepare_date_response( $order->get_date_paid() ) : '',
+			'date_completed'       => wc_rest_prepare_date_response( $order->get_date_completed(), false ), // v1 API used local time.
+			'date_paid'            => wc_rest_prepare_date_response( $order->get_date_paid(), false ), // v1 API used local time.
 			'cart_hash'            => $order->get_cart_hash(),
 			'line_items'           => array(),
 			'tax_lines'            => array(),
@@ -187,17 +185,15 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				$product_sku  = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-
 			$item_meta = array();
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key'   => $formatted_meta['key'],
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $formatted_meta->key,
+					'label' => $formatted_meta->display_key,
+					'value' => wc_clean( $formatted_meta->display_value ),
 				);
 			}
 
@@ -266,12 +262,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'taxes'        => array(),
 			);
 
-			$shipping_taxes = maybe_unserialize( $shipping_item['taxes'] );
+			$shipping_taxes = $shipping_item->get_taxes();
 
-			if ( ! empty( $shipping_taxes ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $dp );
+			if ( ! empty( $shipping_taxes['total'] ) ) {
+				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes['total'] ), $dp );
 
-				foreach ( $shipping_taxes as $tax_rate_id => $tax ) {
+				foreach ( $shipping_taxes['total'] as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(
 						'id'       => $tax_rate_id,
 						'total'    => $tax,
@@ -407,7 +403,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}
@@ -500,7 +496,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -508,7 +504,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Create base WC Order object.
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param array $data
 	 * @return WC_Order
 	 */
@@ -517,7 +513,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Only reutrn writeable props from schema.
+	 * Only return writable props from schema.
 	 * @param  array $schema
 	 * @return bool
 	 */
@@ -603,8 +599,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Gets the product ID from the SKU or posted ID.
+	 *
 	 * @param array $posted Request data
+	 *
 	 * @return int
+	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -648,6 +647,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
@@ -675,6 +676,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_shipping_lines( $posted, $action ) {
@@ -696,6 +699,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_fee_lines( $posted, $action ) {
@@ -717,6 +722,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param array $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 *
+	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action ) {
@@ -771,7 +778,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		/**
 		 * Action hook to adjust item before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
@@ -825,7 +832,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -864,7 +871,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			/**
 			 * Fires after a single item is created or updated via the REST API.
 			 *
-			 * @param object          $post      Inserted object (not a WP_Post object).
+			 * @param WP_Post         $post      Post object.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
 			 */
@@ -941,7 +948,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'version' => array(
-					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
+					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -953,13 +960,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1033,12 +1040,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1.', 'woocommerce' ),
+							'description' => __( 'Address line 1.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2.', 'woocommerce' ),
+							'description' => __( 'Address line 2.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1096,12 +1103,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address 1.', 'woocommerce' ),
+							'description' => __( 'Address line 1.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address 2.', 'woocommerce' ),
+							'description' => __( 'Address line 2.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1178,7 +1185,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'date_paid' => array(
-					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was paid, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

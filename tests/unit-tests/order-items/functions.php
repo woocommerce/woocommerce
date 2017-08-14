@@ -2,7 +2,7 @@
 /**
  * Order Item Function Tests
  * @package WooCommerce\Tests\Order_Items
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 
@@ -14,7 +14,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 	 * a datastore. These tests make sure cache is properly busted and
 	 * accessing those values via CRUD returns the correct value.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function test_wc_order_item_meta_functions() {
 		$meta_value  = 'cat';
@@ -33,7 +33,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$item_id = $item->get_id();
 
 		// Test that the initial key doesn't exist.
-		$item = new WC_Order_Item_Product( $item_id );;
+		$item = new WC_Order_Item_Product( $item_id );
 		$this->assertEmpty( $item->get_meta( '_test_key' ) );
 		$this->assertEmpty( wc_get_order_item_meta( $item_id, '_test_key' ) );
 

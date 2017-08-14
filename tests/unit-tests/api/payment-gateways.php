@@ -3,7 +3,7 @@
  * Tests for the Payment Gateways REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Payment_Gateways extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -33,7 +33,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting all payment gateways.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateways() {
 		wp_set_current_user( $this->user );
@@ -49,8 +49,8 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'order'              => '',
 			'enabled'            => true,
 			'method_title'       => 'Check payments',
-			'method_description' => "Allows check payments. Why would you take checks in this day and age? Well you probably wouldn't but it does allow you to make test purchases for testing order emails and the 'success' pages etc.",
-			'settings'           => $this->get_settings( 'WC_Gateway_Cheque' ),
+			'method_description' => 'Allows check payments. Why would you take checks in this day and age? Well you probably would not, but it does allow you to make test purchases for testing order emails and the success pages.',
+			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Cheque' ), array( 'enabled' => false, 'description' => false ) ),
 			'_links' => array(
 				'self'       => array(
 					array(
@@ -69,7 +69,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure payment gateways cannot viewed without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateways_without_permission() {
 		wp_set_current_user( 0 );
@@ -80,7 +80,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single payment gateway.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway() {
 		wp_set_current_user( $this->user );
@@ -90,21 +90,21 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array(
-			'id'    => 'paypal',
-			'title' => 'PayPal',
-			'description' => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
-			'order' => '',
-			'enabled'    => true,
-			'method_title' => 'PayPal',
+			'id'                 => 'paypal',
+			'title'              => 'PayPal',
+			'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
+			'order'              => '',
+			'enabled'            => true,
+			'method_title'       => 'PayPal',
 			'method_description' => 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
-			'settings' => $this->get_settings( 'WC_Gateway_Paypal' ),
+			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Paypal' ), array( 'enabled' => false, 'description' => false ) ),
 		), $paypal );
 	}
 
 	/**
 	 * Test getting a payment gateway without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
@@ -115,7 +115,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a payment gateway with an invalid id.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -126,7 +126,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single payment gateway.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway() {
 		wp_set_current_user( $this->user );
@@ -209,7 +209,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a payment gateway without valid permissions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway_without_permission() {
 		wp_set_current_user( 0 );
@@ -227,7 +227,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a payment gateway with an invalid id.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_payment_gateway_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -242,7 +242,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test the payment gateway schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_payment_gateway_schema() {
 		wp_set_current_user( $this->user );
@@ -264,9 +264,9 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Loads a particualr gateway's settings so we can correctly test API output.
+	 * Loads a particular gateway's settings so we can correctly test API output.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.
 	 */
 	private function get_settings( $gateway_class ) {

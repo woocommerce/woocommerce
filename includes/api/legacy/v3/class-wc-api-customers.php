@@ -30,7 +30,6 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_API_Server $server
-	 * @return WC_API_Customers
 	 */
 	public function __construct( WC_API_Server $server ) {
 
@@ -135,7 +134,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param array $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer( $id, $fields = null ) {
 		global $wpdb;
@@ -150,15 +149,15 @@ class WC_API_Customers extends WC_API_Resource {
 		$last_order    = $customer->get_last_order();
 		$customer_data = array(
 			'id'               => $customer->get_id(),
-			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ),
-			'last_update'      => $this->server->format_datetime( $customer->get_date_modified() ),
+			'created_at'       => $this->server->format_datetime( $customer->get_date_created() ? $customer->get_date_created()->getTimestamp() : 0 ), // API gives UTC times.
+			'last_update'      => $this->server->format_datetime( $customer->get_date_modified() ? $customer->get_date_modified()->getTimestamp() : 0 ), // API gives UTC times.
 			'email'            => $customer->get_email(),
 			'first_name'       => $customer->get_first_name(),
 			'last_name'        => $customer->get_last_name(),
 			'username'         => $customer->get_username(),
 			'role'             => $customer->get_role(),
 			'last_order_id'    => is_object( $last_order ) ? $last_order->get_id() : null,
-			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created() ) : null,
+			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->get_date_created() ? $last_order->get_date_created()->getTimestamp() : 0 ) : null, // API gives UTC times.
 			'orders_count'     => $customer->get_order_count(),
 			'total_spent'      => wc_format_decimal( $customer->get_total_spent(), 2 ),
 			'avatar_url'       => $customer->get_avatar_url(),
@@ -195,9 +194,11 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Get the customer for the given email
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $email the customer email
 	 * @param array $fields
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_customer_by_email( $email, $fields = null ) {
 		try {
@@ -220,8 +221,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Get the total number of customers
 	 *
 	 * @since 2.1
+	 *
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_customers_count( $filter = array() ) {
 		try {
@@ -336,8 +339,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Create a customer
 	 *
 	 * @since 2.2
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function create_customer( $data ) {
 		try {
@@ -388,9 +393,11 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Edit a customer
 	 *
 	 * @since 2.2
+	 *
 	 * @param int $id the customer ID
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function edit_customer( $id, $data ) {
 		try {
@@ -440,7 +447,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param int $id the customer ID
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_customer( $id ) {
 
@@ -464,7 +471,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
 	 * @param array $filter filters
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer_orders( $id, $fields = null, $filter = array() ) {
 		$id = $this->validate_request( $id, 'customer', 'read' );
@@ -485,7 +492,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_customer_downloads( $id, $fields = null ) {
 		$id = $this->validate_request( $id, 'customer', 'read' );
@@ -498,8 +505,17 @@ class WC_API_Customers extends WC_API_Resource {
 		$_downloads = wc_get_customer_available_downloads( $id );
 
 		foreach ( $_downloads as $key => $download ) {
-			$downloads[ $key ] = $download;
-			$downloads[ $key ]['access_expires'] = $this->server->format_datetime( $downloads[ $key ]['access_expires'] );
+			$downloads[] = array(
+				'download_url'        => $download['download_url'],
+				'download_id'         => $download['download_id'],
+				'product_id'          => $download['product_id'],
+				'download_name'       => $download['download_name'],
+				'order_id'            => $download['order_id'],
+				'order_key'           => $download['order_key'],
+				'downloads_remaining' => $download['downloads_remaining'],
+				'access_expires'      => $download['access_expires'] ? $this->server->format_datetime( $download['access_expires'] ) : null,
+				'file'                => $download['file'],
+			);
 		}
 
 		return array( 'downloads' => apply_filters( 'woocommerce_api_customer_downloads_response', $downloads, $id, $fields, $this->server ) );
@@ -581,7 +597,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$query_args['order'] = $args['order'];
 		}
 
-		// Orderby
+		// Order by
 		if ( ! empty( $args['orderby'] ) ) {
 			$query_args['orderby'] = $args['orderby'];
 
@@ -746,8 +762,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 * WC_API_Customers->create_customer() and WC_API_Customers->edit_customer()
 	 *
 	 * @since 2.4.0
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 

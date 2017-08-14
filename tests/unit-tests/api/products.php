@@ -3,7 +3,7 @@
  * Tests for Products API.
  *
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 
 class Products_API extends WC_REST_Unit_Test_Case {
@@ -22,7 +22,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -34,12 +34,12 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
 		WC_Helper_Product::create_external_product();
-		sleep( 1 ); // So both proudcts have different timestamps.
+		sleep( 1 ); // So both products have different timestamps.
 		WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
@@ -56,7 +56,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_products_without_permission() {
 		wp_set_current_user( 0 );
@@ -68,7 +68,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product() {
 		wp_set_current_user( $this->user );
@@ -90,7 +90,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting single product without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -102,7 +102,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product() {
 		wp_set_current_user( $this->user );
@@ -121,7 +121,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -135,7 +135,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_delete_product_with_invalid_id() {
 		wp_set_current_user( 0 );
@@ -148,7 +148,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test editing a single product. Tests multiple product types.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product() {
 		wp_set_current_user( $this->user );
@@ -180,7 +180,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
 		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
 
-		// test variable product (varations are tested in product-variations.php)
+		// test variable product (variations are tested in product-variations.php)
 		$product  = WC_Helper_Product::create_variation_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
@@ -225,7 +225,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single product without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -242,7 +242,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single product with an invalid ID.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_update_product_with_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -259,7 +259,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single product.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_product() {
 		wp_set_current_user( $this->user );
@@ -349,7 +349,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single product without permission.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -421,7 +421,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 * Tests to make sure you can filter products post statuses by both
 	 * the status query arg and WP_Query.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_products_filter_post_status() {
 		wp_set_current_user( $this->user );
@@ -468,7 +468,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test product schema.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_schema() {
 		wp_set_current_user( $this->user );
@@ -477,7 +477,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 62, count( $properties ) );
+		$this->assertEquals( 65, count( $properties ) );
 		$product->delete( true );
 	}
 

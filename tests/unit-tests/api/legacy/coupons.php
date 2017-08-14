@@ -2,7 +2,7 @@
 /**
  * Legacy Coupon API Tests
  * @package WooCommerce\Tests\API
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
@@ -12,7 +12,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 	/**
 	 * Setup test coupon data.
 	 * @see WC_API_UnitTestCase::setup()
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function setUp() {
 		parent::setUp();
@@ -22,7 +22,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Ensure valid coupon data response.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param array $response
 	 * @param WC_Coupon $coupon
 	 */
@@ -53,7 +53,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Get default arguments for creating/editing a coupon.
-	 * @since  2.7.0
+	 * @since 3.0.0
 	 * @param  array $args
 	 * @return array
 	 */
@@ -69,7 +69,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Clears out the post title from our post data before inserting the coupon into the database.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param  array $data
 	 * @return array
 	 */
@@ -80,7 +80,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test route registration.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->endpoint->register_routes( array() );
@@ -93,7 +93,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/{id}.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupon() {
 		// invalid ID
@@ -109,7 +109,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/{id} without valid permissions.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupon_without_permission() {
 		$this->disable_capability( 'read_private_shop_coupons' );
@@ -119,7 +119,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/code/{code}.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_get_coupon_by_code() {
 		// invalid ID
@@ -135,7 +135,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/code/{code} without valid permissions.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupon_by_code_without_permission() {
 		$this->disable_capability( 'read_private_shop_coupons' );
@@ -145,7 +145,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupons() {
 		$response = $this->endpoint->get_coupons();
@@ -157,7 +157,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons without valid permissions.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupons_without_permission() {
 		$this->disable_capability( 'read_private_shop_coupons' );
@@ -168,7 +168,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/count.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupons_count() {
 		$response = $this->endpoint->get_coupons_count();
@@ -178,7 +178,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test GET /coupons/count without valid permissions.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_coupons_count_without_permission() {
 		$this->disable_capability( 'read_private_shop_coupons' );
@@ -188,7 +188,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test POST /coupons.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon() {
 		$response = $this->endpoint->create_coupon( $this->get_defaults() );
@@ -199,7 +199,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test POST /coupons without valid permissions.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon_without_permission() {
 		$this->disable_capability( 'publish_shop_coupons' );
@@ -209,7 +209,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test an empty coupon code for POST /coupons.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon_empty_code() {
 		$response = $this->endpoint->create_coupon( $this->get_defaults( array( 'code' => null ) ) );
@@ -218,7 +218,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test an empty or invalid discount type for POST /coupons.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon_invalid_discount_type() {
 		// empty
@@ -231,7 +231,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test wp_insert_post() failure for POST /coupons.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon_insert_post_failure() {
 		add_filter( 'wp_insert_post_empty_content', '__return_true' );
@@ -242,7 +242,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test PUT /coupons/{id}.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_edit_coupon() {
 		// invalid ID
@@ -289,7 +289,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test POST /coupons/bulk.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_create_coupon_bulk() {
 		$test_coupon_data = $this->get_defaults();
@@ -305,7 +305,7 @@ class WC_Tests_API_Legacy_Coupons extends WC_API_Unit_Test_Case {
 
 	/**
 	 * Test PUT /coupons/bulk.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_edit_coupon_bulk() {
 		$coupon_1 = WC_Helper_Coupon::create_coupon( 'dummycoupon-1-' . time() );

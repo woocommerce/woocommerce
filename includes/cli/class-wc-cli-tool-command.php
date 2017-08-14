@@ -1,11 +1,16 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Hooks up our system status tools to the CLI.
  *
  * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
  * https://github.com/wp-cli/restful
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_Tool_Command {

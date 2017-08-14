@@ -8,7 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
- * @version     2.7
+ * @version     3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -177,7 +177,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the product ID
 	 * @param string $fields
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_product( $id, $fields = null ) {
 
@@ -222,9 +222,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the total number of products
 	 *
 	 * @since 2.1
+	 *
 	 * @param string $type
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_products_count( $type = null, $filter = array() ) {
 		try {
@@ -248,8 +250,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Create a new product.
 	 *
 	 * @since 2.2
+	 *
 	 * @param array $data posted data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function create_product( $data ) {
 		$id = 0;
@@ -361,9 +365,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Edit a product
 	 *
 	 * @since 2.2
+	 *
 	 * @param int $id the product ID
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function edit_product( $id, $data ) {
 		try {
@@ -459,9 +465,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Delete a product.
 	 *
 	 * @since 2.2
+	 *
 	 * @param int $id the product ID.
 	 * @param bool $force true to permanently delete order, false to move to trash.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function delete_product( $id, $force = false ) {
 
@@ -521,7 +529,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the product ID to get reviews for
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_product_reviews( $id, $fields = null ) {
 
@@ -556,10 +564,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.4.0
 	 * @param int $id the product ID to get orders for
 	 * @param string fields  fields to retrieve
-	 * @param string $filter filters to include in response
+	 * @param array $filter filters to include in response
 	 * @param string $status the order status to retrieve
 	 * @param $page  $page   page to retrieve
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_product_orders( $id, $fields = null, $filter = array(), $status = null, $page = 1 ) {
 		global $wpdb;
@@ -594,8 +602,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product categories
 	 *
 	 * @since 2.2
+	 *
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_categories( $fields = null ) {
 		try {
@@ -622,9 +632,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the product category for the given ID
 	 *
 	 * @since 2.2
+	 *
 	 * @param string $id product category term ID
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_category( $id, $fields = null ) {
 		try {
@@ -861,8 +873,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product tags.
 	 *
 	 * @since  2.5.0
+	 *
 	 * @param  string|null $fields Fields to limit response to
-	 * @return array               Product tags
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_tags( $fields = null ) {
 		try {
@@ -889,9 +903,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the product tag for the given ID.
 	 *
 	 * @since  2.5.0
+	 *
 	 * @param  string $id          Product tag term ID
 	 * @param  string|null $fields Fields to limit response to
-	 * @return array               Product tag
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_tag( $id, $fields = null ) {
 		try {
@@ -1123,11 +1139,16 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_Product|int $product
-	 * @return WC_Product
+	 *
+	 * @return array
 	 */
 	private function get_product_data( $product ) {
 		if ( is_numeric( $product ) ) {
 			$product = wc_get_product( $product );
+		}
+
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return array();
 		}
 
 		return array(
@@ -1225,7 +1246,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
 
-			if ( ! $variation->exists() ) {
+			if ( ! $variation || ! $variation->exists() ) {
 				continue;
 			}
 
@@ -1285,7 +1306,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $product->get_children() as $child_id ) {
 			$_product = wc_get_product( $child_id );
 
-			if ( ! $_product->exists() ) {
+			if ( ! $_product || ! $_product->exists() ) {
 				continue;
 			}
 
@@ -1299,7 +1320,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save default attributes.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product
 	 * @param WP_REST_Request $request
@@ -1312,6 +1333,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
+			$attributes         = $product->get_attributes();
 			$default_attributes = array();
 
 			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
@@ -1534,17 +1556,17 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $data['sale_price_dates_from'] ) ) {
 				$date_from = $data['sale_price_dates_from'];
 			} else {
-				$date_from = ( $product->get_date_on_sale_from() ) ? date( 'Y-m-d', $date_from ) : '';
+				$date_from = $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from()->getTimestamp() ) : '';
 			}
 
 			if ( isset( $data['sale_price_dates_to'] ) ) {
 				$date_to = $data['sale_price_dates_to'];
 			} else {
-				$date_to = ( $product->get_date_on_sale_to() ) ? date( 'Y-m-d', $date_to ) : '';
+				$date_to = $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() ) : '';
 			}
 
 			if ( $date_to && ! $date_from ) {
-				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+				$date_from = strtotime( 'NOW', current_time( 'timestamp', true ) );
 			}
 
 			$product->set_date_on_sale_to( $date_to );
@@ -1741,9 +1763,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Save variations.
 	 *
 	 * @since  2.2
+	 *
 	 * @param  WC_Product $product
 	 * @param  array $request
-	 * @return WC_Product
+	 *
+	 * @return bool
 	 * @throws WC_API_Exception
 	 */
 	protected function save_variations( $product, $request ) {
@@ -1751,7 +1775,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id         = $product->get_id();
 		$variations = $request['variations'];
-		$attributes = (array) maybe_unserialize( get_post_meta( $id, '_product_attributes', true ) );
+		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $data ) {
 			$variation_id = isset( $data['id'] ) ? absint( $data['id'] ) : 0;
@@ -1978,11 +2002,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Shipping class
 		if ( isset( $data['shipping_class'] ) ) {
-			$data_store         = $product->get_data_store();
-			$shipping_class_id  = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
-			if ( $shipping_class_id ) {
-				$product->set_shipping_class_id( $shipping_class_id );
-			}
+			$data_store        = $product->get_data_store();
+			$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			$product->set_shipping_class_id( $shipping_class_id );
 		}
 
 		return $product;
@@ -1994,12 +2016,12 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param WC_Product $product
 	 * @param array $downloads
-	 * @param int $deprecated Deprecated since 2.7.
+	 * @param int $deprecated Deprecated since 3.0.
 	 * @return WC_Product
 	 */
 	private function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
-			wc_deprecated_argument( 'variation_id', '2.7', 'save_downloadable_files() does not require a variation_id anymore.' );
+			wc_deprecated_argument( 'variation_id', '3.0', 'save_downloadable_files() does not require a variation_id anymore.' );
 		}
 
 		$files = array();
@@ -2203,7 +2225,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.5.0
 	 * @param string $image_url
 	 * @param string $upload_for
-	 * @return int|WP_Error Attachment id
+	 * @return array|WP_Error
 	 */
 	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
 		$file_name = basename( current( explode( '?', $image_url ) ) );
@@ -2421,8 +2443,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product attributes
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_attributes( $fields = null ) {
 		try {
@@ -2455,9 +2479,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the product attribute for the given ID
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param string $id product attribute term ID
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_attribute( $id, $fields = null ) {
 		global $wpdb;
@@ -2542,8 +2568,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Create a new product attribute.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param array $data Posted data.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function create_product_attribute( $data ) {
 		global $wpdb;
@@ -2623,9 +2651,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Edit a product attribute.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param int $id the attribute ID.
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function edit_product_attribute( $id, $data ) {
 		global $wpdb;
@@ -2705,8 +2735,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Delete a product attribute.
 	 *
 	 * @since  2.5.0
+	 *
 	 * @param  int $id the product attribute ID.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function delete_product_attribute( $id ) {
 		global $wpdb;
@@ -2765,9 +2797,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product attribute terms.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param int $attribute_id Attribute ID.
 	 * @param string|null $fields Fields to limit response to.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_attribute_terms( $attribute_id, $fields = null ) {
 		try {
@@ -2822,10 +2856,12 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get the product attribute term for the given ID.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param int $attribute_id Attribute ID.
 	 * @param string $id Product attribute term ID.
 	 * @param string|null $fields Fields to limit response to.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_product_attribute_term( $attribute_id, $id, $fields = null ) {
 		global $wpdb;
@@ -2872,9 +2908,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Create a new product attribute term.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param int $attribute_id Attribute ID.
 	 * @param array $data Posted data.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function create_product_attribute_term( $attribute_id, $data ) {
 		global $wpdb;
@@ -2934,10 +2972,12 @@ class WC_API_Products extends WC_API_Resource {
 	 * Edit a product attribute term.
 	 *
 	 * @since 2.5.0
+	 *
 	 * @param int $attribute_id Attribute ID.
 	 * @param int $id the attribute ID.
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function edit_product_attribute_term( $attribute_id, $id, $data ) {
 		global $wpdb;
@@ -2993,9 +3033,11 @@ class WC_API_Products extends WC_API_Resource {
 	 * Delete a product attribute term.
 	 *
 	 * @since  2.5.0
+	 *
 	 * @param int $attribute_id Attribute ID.
 	 * @param int $id the product attribute ID.
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function delete_product_attribute_term( $attribute_id, $id ) {
 		global $wpdb;
@@ -3031,6 +3073,8 @@ class WC_API_Products extends WC_API_Resource {
 
 	/**
 	 * Clear product
+	 *
+	 * @param int $product_id
 	 */
 	protected function clear_product( $product_id ) {
 		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
@@ -3059,8 +3103,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * WC_API_Products->create_product() and WC_API_Products->edit_product()
 	 *
 	 * @since 2.4.0
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 
