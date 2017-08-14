@@ -1567,7 +1567,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test add_discount and remove_coupon with a fixed discount coupon.
-	 * @todo add taxes into the mix
 	 * @since 3.2.0
 	 */
 	function test_add_remove_coupon_fixed() {
@@ -1591,7 +1590,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test add_discount and remove_coupon with a percent discount coupon.
-	 * @todo add taxes into the mix
 	 * @since 3.2.0
 	 */
 	function test_add_remove_coupon_percent() {
@@ -1615,7 +1613,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test add_discount and removing the discount with a fixed discount.
-	 * @todo add taxes into the mix
 	 * @since 3.2.0
 	 */
 	function test_add_remove_discount_fixed() {
@@ -1632,7 +1629,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test add_discount and removing the discount with a percent discount.
-	 * @todo add taxes into the mix
 	 * @since 3.2.0
 	 */
 	function test_add_remove_discount_percent() {
