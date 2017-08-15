@@ -84,9 +84,12 @@ class WC_Install {
 			'wc_update_310_old_comments',
 			'wc_update_310_db_version',
 		),
+		'3.1.2' => array(
+			'wc_update_312_shop_manager_capabilities',
+			'wc_update_312_db_version',
+		),
 		'3.2.0' => array(
 			'wc_update_320_mexican_states',
-			'wc_update_320_shop_manager_capabilities',
 			'wc_update_320_db_version',
 		),
 	);
