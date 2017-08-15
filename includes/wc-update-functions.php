@@ -1199,6 +1199,14 @@ function wc_update_320_mexican_states() {
 }
 
 /**
+ * Update shop_manager capabilities.
+ */
+function wc_update_320_shop_manager_capabilities() {
+	$role = get_role( 'shop_manager' );
+	$role->remove_cap( 'unfiltered_html' );
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_320_db_version() {

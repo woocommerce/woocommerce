@@ -86,6 +86,7 @@ class WC_Install {
 		),
 		'3.2.0' => array(
 			'wc_update_320_mexican_states',
+			'wc_update_320_shop_manager_capabilities',
 			'wc_update_320_db_version',
 		),
 	);
@@ -702,7 +703,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'manage_categories'      => true,
 			'manage_links'           => true,
 			'moderate_comments'      => true,
-			'unfiltered_html'        => true,
 			'upload_files'           => true,
 			'export'                 => true,
 			'import'                 => true,
