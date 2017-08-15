@@ -11,9 +11,9 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
+ * @author 		Automattic
  * @package 	WooCommerce/Templates
- * @version     2.3.0
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -83,6 +83,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td><?php wc_cart_totals_fee_html( $fee ); ?></td>
 			</tr>
 		<?php endforeach; ?>
+
+		<?php foreach ( WC()->cart->get_cart_discounts() as $discount ) : ?>
+			<tr class="discount">
+				<?php $discount_label = 'percent' === $discount->get_discount_type() ? wc_clean( $discount->get_amount() ) . '%' : wc_price( wc_remove_number_precision( $discount->get_amount() ) ); ?>
+				<?php /* translators: %s discount amount */ ?>
+				<th><?php printf( __( '%s Discount', 'woocommerce' ), $discount_label ); ?></th>
+				<td><?php wc_cart_totals_discount_html( $discount ); ?></td>
+			</tr>
+		<?php endforeach ?>
 
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) : ?>
 			<?php if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>

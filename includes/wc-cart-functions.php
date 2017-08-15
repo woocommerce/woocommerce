@@ -334,6 +334,18 @@ function wc_cart_totals_fee_html( $fee ) {
 }
 
 /**
+ * Output the discount html.
+ *
+ * @since 3.2.0
+ * @param WC_Discount $discount
+ */
+function wc_cart_totals_discount_html( $discount ) {
+	$amount = '-' . wc_price( wc_remove_number_precision( $discount->get_discount_total() ) );
+
+	echo apply_filters( 'woocommerce_cart_totals_discount_html', $amount, $discount );
+}
+
+/**
  * Get a shipping methods full label including price.
  * @param  WC_Shipping_Rate $method
  * @return string
