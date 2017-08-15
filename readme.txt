@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Improved customer IP address detection.
 * Fix - Fix dark theme readability.
 * Fix - CLI tools command.
+* Fix - Adjusted shop manager role to prevent unfiltered HTML being used.
 * Fix - Various notices/warnings.
 * Dev - Correctly invalidate cache after saving order items.
 * Dev - Added `woocommerce_data_store_wp_{$this->meta_type}_read_meta` filter.
