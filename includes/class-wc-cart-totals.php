@@ -298,8 +298,8 @@ final class WC_Cart_Totals {
 	/**
 	 * Sort coupons so discounts apply consistently.
 	 *
-	 * @param WC_Coupon $a
-	 * @param WC_Coupon $b
+	 * @param WC_Coupon $a Coupon object.
+	 * @param WC_Coupon $b Coupon object.
 	 * @return int
 	 */
 	protected function sort_coupons( $a, $b ) {
@@ -573,8 +573,8 @@ final class WC_Cart_Totals {
 	/**
 	 * Return discounted tax amount for an item.
 	 *
-	 * @param  object $item
-	 * @param  int $discount_amount
+	 * @param  object $item Item object.
+	 * @param  int    $discount_amount Amount of discount.
 	 * @return int
 	 */
 	protected function get_item_discount_tax( $item, $discount_amount ) {
