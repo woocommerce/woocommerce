@@ -55,7 +55,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @var array
 	 */
-	protected $cart_discounts = array();
+	public $cart_discounts = array();
 
 	/**
 	 * Contains an array of coupon code discounts after they have been applied.
@@ -146,7 +146,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @var float
 	 */
-	protected $cart_discounts_total;
+	public $cart_discounts_total;
 
 	/**
 	 * Shipping cost.
@@ -1738,11 +1738,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Fire an action where developers can add their discounts.
 		do_action( 'woocommerce_cart_calculate_cart_discounts', $this );
-
-		// If discounts were added, total them and calculate tax.
-		if ( ! empty( $this->cart_discounts ) ) {
-			/* @todo Calculate discounts */
-		}
 	}
 
 	/**

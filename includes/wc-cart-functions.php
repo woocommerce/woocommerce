@@ -340,7 +340,7 @@ function wc_cart_totals_fee_html( $fee ) {
  * @param WC_Discount $discount
  */
 function wc_cart_totals_discount_html( $discount ) {
-	$amount = '-' . wc_price( $discount->get_discount_total() );
+	$amount = '-' . wc_price( wc_remove_number_precision( $discount->get_discount_total() ) );
 
 	echo apply_filters( 'woocommerce_cart_totals_discount_html', $amount, $discount );
 }

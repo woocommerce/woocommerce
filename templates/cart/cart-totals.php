@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php foreach ( WC()->cart->get_cart_discounts() as $discount ) : ?>
 			<tr class="discount">
-				<?php $discount_label = 'percent' === $discount->get_discount_type() ? wc_clean( $discount->get_amount() ) . '%' : wc_price( $discount->get_amount() ); ?>
+				<?php $discount_label = 'percent' === $discount->get_discount_type() ? wc_clean( $discount->get_amount() ) . '%' : wc_price( wc_remove_number_precision( $discount->get_amount() ) ); ?>
 				<?php /* translators: %s discount amount */ ?>
 				<th><?php printf( __( '%s Discount', 'woocommerce' ), $discount_label ); ?></th>
 				<td data-title="Discount"><?php wc_cart_totals_discount_html( $discount ); ?></td>

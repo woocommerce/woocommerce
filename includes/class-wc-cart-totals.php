@@ -127,7 +127,6 @@ final class WC_Cart_Totals {
 	protected function calculate() {
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
-		$this->calculate_cart_discounts();
 		$this->calculate_shipping_totals();
 		$this->calculate_totals();
 	}
@@ -242,6 +241,11 @@ final class WC_Cart_Totals {
 
 			$this->fees[ $fee_key ] = $fee;
 		}
+	}
+
+	protected function set_cart_discounts() {
+		$this->object->calculate_cart_discounts();
+		$this->cart_discounts = $this->object->get_cart_discounts();
 	}
 
 	/**
@@ -535,6 +539,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_item_discounts() {
 		$this->set_coupons();
+		$this->set_cart_discounts();
 
 		$discounts = new WC_Discounts( $this->object );
 
@@ -542,28 +547,41 @@ final class WC_Cart_Totals {
 			$discounts->apply_coupon( $coupon );
 		}
 
+		foreach ( $this->cart_discounts as $discount ) {
+			$raw_discount = 'percent' === $discount->get_discount_type() ? $discount->get_amount() . '%' : $discount->get_amount();
+			$discounts->apply_discount( $raw_discount );
+		}
+
 		$coupon_discount_amounts     = $discounts->get_discounts_by_coupon( true );
 		$coupon_discount_tax_amounts = array();
 
+		$cart_discounts_total = 0;
+
 		// See how much tax was 'discounted' per item and per coupon.
 		if ( $this->calculate_tax ) {
-			foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
-				$coupon_discount_tax_amounts[ $coupon_code ] = 0;
+			foreach ( $discounts->get_discounts( true ) as $discount_code => $discount ) {
+				if ( is_array( $discount ) ) { // Coupon.
+					$coupon_discount_tax_amounts[ $discount_code ] = 0;
 
-				foreach ( $coupon_discounts as $item_key => $item_discount ) {
-					$item = $this->items[ $item_key ];
+					foreach ( $discount as $item_key => $item_discount ) {
+						$item = $this->items[ $item_key ];
 
-					if ( $item->product->is_taxable() ) {
-						$item_tax                                     = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, $item->price_includes_tax ) );
-						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
+						if ( $item->product->is_taxable() ) {
+							$item_tax                                      = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, $item->price_includes_tax ) );
+							$coupon_discount_tax_amounts[ $discount_code ] += $item_tax;
+						}
 					}
-				}
 
-				$coupon_discount_amounts[ $coupon_code ] -= $coupon_discount_tax_amounts[ $coupon_code ];
+					$coupon_discount_amounts[ $discount_code ] -= $coupon_discount_tax_amounts[ $discount_code ];
+				} else { // Cart discount.
+					$cart_discounts_total += $discount;
+				}
 			}
 		}
 
 		$this->discount_totals                     = $discounts->get_discounts_by_item( true );
+		$this->discount_totals['cart']             = $cart_discounts_total;
+		$this->object->cart_discounts              = $discounts->get_manual_discounts();
 		$this->object->coupon_discount_amounts     = wc_remove_number_precision_deep( $coupon_discount_amounts );
 		$this->object->coupon_discount_tax_amounts = wc_remove_number_precision_deep( $coupon_discount_tax_amounts );
 
@@ -584,10 +602,6 @@ final class WC_Cart_Totals {
 			return array_sum( $taxes );
 		}
 		return 0;
-	}
-
-	protected function calculate_cart_discounts() {
-		$this->object->calculate_cart_discounts();
 	}
 
 	/**
