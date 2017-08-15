@@ -150,9 +150,11 @@ class WC_Admin_Post_Types {
 			7 => __( 'Product saved.', 'woocommerce' ),
 			/* translators: %s: product url */
 			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			/* translators: 1: date 2: product url */
-			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			9 => sprintf(
+				/* translators: 1: date 2: product url */
+				__( 'Product scheduled for: %1$s. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
+			  	'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) . '</strong>'
+			),
 			/* translators: %s: product url */
 			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
@@ -168,9 +170,11 @@ class WC_Admin_Post_Types {
 			6 => __( 'Order updated.', 'woocommerce' ),
 			7 => __( 'Order saved.', 'woocommerce' ),
 			8 => __( 'Order submitted.', 'woocommerce' ),
-			/* translators: %s: date */
-			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			9 => sprintf(
+				/* translators: %s: date */
+				__( 'Order scheduled for: %s.', 'woocommerce' ),
+			  	'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
+			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and sent to the customer.', 'woocommerce' ),
 		);
@@ -186,9 +190,11 @@ class WC_Admin_Post_Types {
 			6 => __( 'Coupon updated.', 'woocommerce' ),
 			7 => __( 'Coupon saved.', 'woocommerce' ),
 			8 => __( 'Coupon submitted.', 'woocommerce' ),
-			/* translators: %s: date */
-			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			9 => sprintf(
+				/* translators: %s: date */
+				__( 'Coupon scheduled for: %s.', 'woocommerce' ),
+			  	'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
+			),
 			10 => __( 'Coupon draft updated.', 'woocommerce' ),
 		);
 
