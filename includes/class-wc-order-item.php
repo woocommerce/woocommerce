@@ -131,6 +131,24 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
+	 * Get tax status.
+	 * @return string
+	 */
+	public function get_tax_status() {
+		return 'taxable';
+	}
+
+	/**
+	 * Get tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class() {
+		return '';
+	}
+
+	/**
 	 * Get parent order object.
 	 * @return WC_Order
 	 */

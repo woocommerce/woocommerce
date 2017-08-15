@@ -11,6 +11,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
 // Get line items
 $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
@@ -18,7 +19,7 @@ if ( wc_tax_enabled() ) {
 	$order_taxes      = $order->get_taxes();
 	$tax_classes      = WC_Tax::get_tax_classes();
 	$classes_options  = wc_get_product_tax_class_options();
-	$show_tax_columns = sizeof( $order_taxes ) === 1;
+	$show_tax_columns = count( $order_taxes ) === 1;
 }
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
@@ -79,6 +80,14 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
 		?>
 		</tbody>
+		<tbody id="order_discount_line_items">
+		<?php
+			foreach ( $discounts as $item_id => $item ) {
+				include( 'html-order-discount.php' );
+			}
+			do_action( 'woocommerce_admin_order_items_after_discounts', $order->get_id() );
+		?>
+		</tbody>
 		<tbody id="order_refunds">
 		<?php
 			if ( $refunds = $order->get_refunds() ) {
@@ -99,7 +108,7 @@ if ( wc_tax_enabled() ) {
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
-		$coupons = $order->get_items( array( 'coupon' ) );
+		$coupons = $order->get_items( 'coupon' );
 		if ( $coupons ) {
 			?>
 			<div class="wc-used-coupons">
@@ -109,7 +118,7 @@ if ( wc_tax_enabled() ) {
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
 						$link    = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item->get_code(), 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a></li>';
+						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
 					}
 				?></ul>
 			</div>
@@ -117,28 +126,7 @@ if ( wc_tax_enabled() ) {
 		}
 	?>
 	<table class="wc-order-totals">
-		<tr>
-			<td class="label"><?php echo wc_help_tip( __( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ) ); ?> <?php _e( 'Discount:', 'woocommerce' ); ?></td>
-			<td width="1%"></td>
-			<td class="total">
-				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
-			</td>
-		</tr>
-
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
-
-		<tr>
-			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping:', 'woocommerce' ); ?></td>
-			<td width="1%"></td>
-			<td class="total"><?php
-				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
-					echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
-				} else {
-					echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
-				}
-			?></td>
-		</tr>
-
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->get_id() ); ?>
 
 		<?php if ( wc_tax_enabled() ) : ?>
@@ -186,11 +174,12 @@ if ( wc_tax_enabled() ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
+			<?php if ( wc_tax_enabled() ) : ?>
+				<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
+			<?php endif; ?>
+			<button type="button" class="button add-discount"><?php _e( 'Apply discount', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description"><?php echo wc_help_tip( __( 'To edit this order change the status back to "Pending"', 'woocommerce' ) ); ?> <?php _e( 'This order is no longer editable.', 'woocommerce' ); ?></span>
-		<?php endif; ?>
-		<?php if ( wc_tax_enabled() && $order->is_editable() ) : ?>
-			<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
