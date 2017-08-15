@@ -1127,3 +1127,19 @@ function wc_update_310_old_comments() {
 function wc_update_310_db_version() {
 	WC_Install::update_db_version( '3.1.0' );
 }
+
+/**
+ * Update shop_manager capabilities.
+ */
+function wc_update_312_shop_manager_capabilities() {
+	$role = get_role( 'shop_manager' );
+	$role->remove_cap( 'unfiltered_html' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_312_db_version() {
+	WC_Install::update_db_version( '3.1.2' );
+}
+

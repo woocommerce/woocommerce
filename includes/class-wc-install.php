@@ -84,6 +84,10 @@ class WC_Install {
 			'wc_update_310_old_comments',
 			'wc_update_310_db_version',
 		),
+		'3.1.2' => array(
+			'wc_update_312_shop_manager_capabilities',
+			'wc_update_312_db_version',
+		),
 	);
 
 	/** @var object Background update class */
@@ -698,7 +702,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'manage_categories'      => true,
 			'manage_links'           => true,
 			'moderate_comments'      => true,
-			'unfiltered_html'        => true,
 			'upload_files'           => true,
 			'export'                 => true,
 			'import'                 => true,
