@@ -565,9 +565,19 @@ table.wc_status_table {
 		width: 1em;
 	}
 
-	td {
-		padding: 9px;
+	td, th {
+		padding: 2em;
 		font-size: 1.1em;
+		font-weight: normal;
+
+		&.run-tool {
+			text-align:right;
+		}
+
+		strong.name {
+			display: block;
+			margin-bottom: .5em;
+		}
 
 		mark {
 			background: transparent none;
@@ -581,7 +591,7 @@ table.wc_status_table {
 			color: #999;
 		}
 
-		mark.error {
+		mark.error, .red {
 			color: $red;
 		}
 
