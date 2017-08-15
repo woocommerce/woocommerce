@@ -336,6 +336,7 @@ function wc_cart_totals_fee_html( $fee ) {
 /**
  * Output the discount html.
  *
+ * @since 3.2.0
  * @param WC_Discount $discount
  */
 function wc_cart_totals_discount_html( $discount ) {

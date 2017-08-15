@@ -127,8 +127,7 @@ final class WC_Cart_Totals {
 	protected function calculate() {
 		$this->calculate_item_totals();
 		$this->calculate_fee_totals();
-		// @todo? make this use a WC_Cart_Totals method.
-		$this->object->calculate_manual_discounts();
+		$this->calculate_cart_discounts();
 		$this->calculate_shipping_totals();
 		$this->calculate_totals();
 	}
@@ -585,6 +584,10 @@ final class WC_Cart_Totals {
 			return array_sum( $taxes );
 		}
 		return 0;
+	}
+
+	protected function calculate_cart_discounts() {
+		$this->object->calculate_cart_discounts();
 	}
 
 	/**
