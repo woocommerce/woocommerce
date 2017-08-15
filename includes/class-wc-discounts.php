@@ -469,7 +469,8 @@ class WC_Discounts {
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
 
-			$total_discount += min( $discounted_price, $discount );
+			$discount        = min( $discounted_price, $discount );
+			$total_discount += $discount;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
@@ -513,7 +514,8 @@ class WC_Discounts {
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
 
-			$total_discount += min( $discounted_price, $discount );
+			$discount        = min( $discounted_price, $discount );
+			$total_discount += $discount;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;

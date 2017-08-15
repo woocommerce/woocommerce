@@ -558,7 +558,9 @@ final class WC_Cart_Totals {
 					}
 				}
 
-				$coupon_discount_amounts[ $coupon_code ] -= $coupon_discount_tax_amounts[ $coupon_code ];
+				if ( wc_prices_include_tax() ) {
+					$coupon_discount_amounts[ $coupon_code ] -= $coupon_discount_tax_amounts[ $coupon_code ];
+				}
 			}
 		}
 
