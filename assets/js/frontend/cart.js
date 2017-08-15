@@ -272,7 +272,7 @@ jQuery( function( $ ) {
 
 			$( document ).on(
 				'wc_update_cart',
-				this.update_cart );
+				function() { cart.update_cart(); } );
 			$( document ).on(
 				'click',
 				'.woocommerce-cart-form input[type=submit]',
