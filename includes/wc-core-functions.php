@@ -15,22 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include core functions (available in both admin and frontend).
-include( 'wc-conditional-functions.php' );
-include( 'wc-coupon-functions.php' );
-include( 'wc-user-functions.php' );
-include( 'wc-deprecated-functions.php' );
-include( 'wc-formatting-functions.php' );
-include( 'wc-order-functions.php' );
-include( 'wc-order-item-functions.php' );
-include( 'wc-page-functions.php' );
-include( 'wc-product-functions.php' );
-include( 'wc-stock-functions.php' );
-include( 'wc-account-functions.php' );
-include( 'wc-term-functions.php' );
-include( 'wc-attribute-functions.php' );
-include( 'wc-rest-functions.php' );
-include( 'wc-widget-functions.php' );
-include( 'wc-webhook-functions.php' );
+include( WC_ABSPATH . 'includes/wc-conditional-functions.php' );
+include( WC_ABSPATH . 'includes/wc-coupon-functions.php' );
+include( WC_ABSPATH . 'includes/wc-user-functions.php' );
+include( WC_ABSPATH . 'includes/wc-deprecated-functions.php' );
+include( WC_ABSPATH . 'includes/wc-formatting-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-functions.php' );
+include( WC_ABSPATH . 'includes/wc-order-item-functions.php' );
+include( WC_ABSPATH . 'includes/wc-page-functions.php' );
+include( WC_ABSPATH . 'includes/wc-product-functions.php' );
+include( WC_ABSPATH . 'includes/wc-stock-functions.php' );
+include( WC_ABSPATH . 'includes/wc-account-functions.php' );
+include( WC_ABSPATH . 'includes/wc-term-functions.php' );
+include( WC_ABSPATH . 'includes/wc-attribute-functions.php' );
+include( WC_ABSPATH . 'includes/wc-rest-functions.php' );
+include( WC_ABSPATH . 'includes/wc-widget-functions.php' );
+include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.
@@ -1444,6 +1444,66 @@ function wc_get_rounding_precision() {
 }
 
 /**
+ * Add precision to a number and return an int.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return $value * $precision;
+}
+
+/**
+ * Remove precision from a number and return a float.
+ *
+ * @since  3.2.0
+ * @param  float $value Number to add precision to.
+ * @return float
+ */
+function wc_remove_number_precision( $value ) {
+	$precision = pow( 10, wc_get_price_decimals() );
+	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+}
+
+/**
+ * Add precision to an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_add_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_add_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_add_number_precision( $value );
+	}
+	return $value;
+}
+
+/**
+ * Remove precision from an array of number and return an array of int.
+ *
+ * @since  3.2.0
+ * @param  array $value Number to add precision to.
+ * @return int
+ */
+function wc_remove_number_precision_deep( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $subvalue ) {
+			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
+		}
+	} else {
+		$value = wc_remove_number_precision( $value );
+	}
+	return $value;
+}
+
+/**
  * Get a shared logger instance.
  *
  * Use the woocommerce_logging_class filter to change the logging class. You may provide one of the following:
@@ -1470,8 +1530,11 @@ function wc_get_logger() {
 			wc_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
-					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
-					esc_html( is_object( $class ) ? get_class( $class ) : $class )
+					/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */ 
+					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
+					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+					'<code>woocommerce_logging_class</code>',
+					'<code>WC_Logger_Interface</code>'
 				),
 				'3.0'
 			);
@@ -1590,7 +1653,10 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 	 */
 	$newlist = array();
 	foreach ( $list as $value ) {
-		if ( isset( $value->$index_key ) ) {
+		// Get index. @since 3.2.0 this supports a callback.
+		if ( is_callable( array( $value, $index_key ) ) ) {
+			$newlist[ $value->{$index_key}() ] = $value->{$callback_or_field}();
+		} elseif ( isset( $value->$index_key ) ) {
 			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
 		} else {
 			$newlist[] = $value->{$callback_or_field}();
@@ -1690,5 +1756,17 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed value sanitized by wc_clean
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( isset( $_POST[ $key ] ) ? $_POST[ $key ] : $default );
+	return wc_clean( wc_get_var( $_POST[ $key ], $default ) );
+}
+
+/**
+ * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
+ *
+ * @since  3.2.0
+ * @param  mixed $var
+ * @param  string $default
+ * @return mixed value sanitized by wc_clean
+ */
+function wc_get_var( &$var, $default = null ) {
+	return isset( $var ) ? $var : $default;
 }

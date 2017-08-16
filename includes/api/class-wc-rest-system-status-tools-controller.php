@@ -110,7 +110,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * A list of avaiable tools for use in the system status section.
+	 * A list of available tools for use in the system status section.
 	 * 'button' becomes 'action' in the API.
 	 *
 	 * @return array
@@ -118,13 +118,13 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	public function get_tools() {
 		$tools = array(
 			'clear_transients' => array(
-				'name'    => __( 'WC transients', 'woocommerce' ),
+				'name'    => __( 'WooCommerce transients', 'woocommerce' ),
 				'button'  => __( 'Clear transients', 'woocommerce' ),
 				'desc'    => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
 			'clear_expired_transients' => array(
 				'name'    => __( 'Expired transients', 'woocommerce' ),
-				'button'  => __( 'Clear expired transients', 'woocommerce' ),
+				'button'  => __( 'Clear transients', 'woocommerce' ),
 				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'delete_orphaned_variations' => array(
@@ -134,7 +134,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			),
 			'add_order_indexes' => array(
 				'name'    => __( 'Order address indexes', 'woocommerce' ),
-				'button'  => __( 'Add order address indexes', 'woocommerce' ),
+				'button'  => __( 'Index orders', 'woocommerce' ),
 				'desc'    => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
@@ -148,8 +148,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
 			'clear_sessions' => array(
-				'name'    => __( 'Customer sessions', 'woocommerce' ),
-				'button'  => __( 'Clear all sessions', 'woocommerce' ),
+				'name'    => __( 'Clear customer sessions', 'woocommerce' ),
+				'button'  => __( 'Clear', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
@@ -157,8 +157,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				),
 			),
 			'install_pages' => array(
-				'name'    => __( 'Install WooCommerce pages', 'woocommerce' ),
-				'button'  => __( 'Install pages', 'woocommerce' ),
+				'name'    => __( 'Create default WooCommerce pages', 'woocommerce' ),
+				'button'  => __( 'Create pages', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
@@ -166,17 +166,26 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				),
 			),
 			'delete_taxes' => array(
-				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
-				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
+				'name'    => __( 'Delete WooCommerce tax rates', 'woocommerce' ),
+				'button'  => __( 'Delete tax rates', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
-					__( 'This option will delete ALL of your tax rates, use with caution.', 'woocommerce' )
+					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
+				),
+			),
+			'delete_webhook_logs' => array(
+				'name'    => __( 'Delete WebHook logs', 'woocommerce' ),
+				'button'  => __( 'Delete logs', 'woocommerce' ),
+				'desc'    => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This tool removes WebHook logs. This will not delete the WebHooks themselves.', 'woocommerce' )
 				),
 			),
 			'reset_tracking' => array(
-				'name'    => __( 'Reset usage tracking settings', 'woocommerce' ),
-				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
+				'name'    => __( 'Reset usage tracking', 'woocommerce' ),
+				'button'  => __( 'Reset', 'woocommerce' ),
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			),
 		);
@@ -218,11 +227,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response( $this->prepare_item_for_response( array(
-		   'id'          => $request['id'],
-		   'name'        => $tool['name'],
-		   'action'      => $tool['button'],
-		   'description' => $tool['desc'],
-	   ), $request ) );
+			'id'          => $request['id'],
+			'name'        => $tool['name'],
+			'action'      => $tool['button'],
+			'description' => $tool['desc'],
+		), $request ) );
 	}
 
 	/**
@@ -458,6 +467,12 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 				WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 				$message = __( 'Tax rates successfully deleted', 'woocommerce' );
+			break;
+			case 'delete_webhook_logs' :
+
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->comments} WHERE comment_type='webhook_delivery';" ) );
+				$wpdb->query( "DELETE commentmeta FROM {$wpdb->commentmeta} commentmeta LEFT JOIN {$wpdb->comments} comments ON comments.comment_ID = commentmeta.comment_id WHERE comments.comment_ID IS NULL;" );
+				$message = sprintf( __( '%d logs deleted', 'woocommerce' ), $result );
 			break;
 			case 'reset_tracking' :
 				delete_option( 'woocommerce_allow_tracking' );

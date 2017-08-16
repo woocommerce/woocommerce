@@ -23,7 +23,7 @@ class WC_Data_Store {
 	 * Format of object name => class name.
 	 * Example: 'product' => 'WC_Product_Data_Store_CPT'
 	 * You can also pass something like product_<type> for product stores and
-	 * that type will be used first when avaiable, if a store is requested like
+	 * that type will be used first when available, if a store is requested like
 	 * this and doesn't exist, then the store would fall back to 'product'.
 	 * Ran through `woocommerce_data_stores`.
 	 */
@@ -36,6 +36,7 @@ class WC_Data_Store {
 		'order-refund'        => 'WC_Order_Refund_Data_Store_CPT',
 		'order-item'          => 'WC_Order_Item_Data_Store',
 		'order-item-coupon'   => 'WC_Order_Item_Coupon_Data_Store',
+		'order-item-discount' => 'WC_Order_Item_Discount_Data_Store',
 		'order-item-fee'      => 'WC_Order_Item_Fee_Data_Store',
 		'order-item-product'  => 'WC_Order_Item_Product_Data_Store',
 		'order-item-shipping' => 'WC_Order_Item_Shipping_Data_Store',

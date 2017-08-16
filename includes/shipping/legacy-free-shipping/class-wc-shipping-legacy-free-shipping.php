@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Free Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version 2.4.0
@@ -211,12 +211,11 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			break;
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package, $this );
 	}
 
 	/**
 	 * calculate_shipping function.
-	 * @return array
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$args = array(

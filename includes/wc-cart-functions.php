@@ -191,7 +191,6 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
  * Get the subtotal.
  *
  * @access public
- * @return string
  */
 function wc_cart_totals_subtotal_html() {
 	echo WC()->cart->get_cart_subtotal();
@@ -370,7 +369,19 @@ function wc_cart_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {
-		return round( $value, $precision );
+		// Fake it in PHP 5.2.
+		if ( 2 === WC_DISCOUNT_ROUNDING_MODE && strstr( $value, '.' ) ) {
+			$value    = (string) $value;
+			$value    = explode( '.', $value );
+			$value[1] = substr( $value[1], 0, $precision + 1 );
+			$value    = implode( '.', $value );
+
+			if ( substr( $value, -1 ) === '5' ) {
+				$value = substr( $value, 0, -1 ) . '4';
+			}
+			$value = floatval( $value );
+		}
+    	return round( $value, $precision );
 	}
 }
 
@@ -387,4 +398,70 @@ function wc_get_chosen_shipping_method_ids() {
 		$method_ids[]  = current( $chosen_method );
 	}
 	return $method_ids;
+}
+
+/**
+ * Get chosen method for package from session.
+ *
+ * @since  3.2.0
+ * @param  int $key
+ * @param  array $package
+ * @return string|bool
+ */
+function wc_get_chosen_shipping_method_for_package( $key, $package ) {
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
+	$changed        = wc_shipping_methods_have_changed( $key, $package );
+	// If not set, not available, or available methods have changed, set to the DEFAULT option
+	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
+		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
+		$chosen_methods[ $key ] = $chosen_method;
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
+	}
+	return $chosen_method;
+}
+/**
+ * Choose the default method for a package.
+ *
+ * @since  3.2.0
+ * @param  string $key
+ * @param  array $package
+ * @return string
+ */
+function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
+	$rate_keys = array_keys( $package['rates'] );
+	$default   = current( $rate_keys );
+	$coupons   = WC()->cart->get_coupons();
+	foreach ( $coupons as $coupon ) {
+		if ( $coupon->get_free_shipping() ) {
+			foreach ( $rate_keys as $rate_key ) {
+				if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
+					$default = $rate_key;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+}
+/**
+ * See if the methods have changed since the last request.
+ *
+ * @since  3.2.0
+ * @param  int $key
+ * @param  array $package
+ * @return bool
+ */
+function wc_shipping_methods_have_changed( $key, $package ) {
+	// Lookup previous methods from session.
+	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+	// Get new and old rates.
+	$new_rates  = array_keys( $package['rates'] );
+	$prev_rates = isset( $previous_shipping_methods[ $key ] ) ? $previous_shipping_methods[ $key ] : false;
+	// Update session.
+	$previous_shipping_methods[ $key ] = $new_rates;
+	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
+	return $new_rates != $prev_rates;
 }

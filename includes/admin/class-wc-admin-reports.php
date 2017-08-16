@@ -133,7 +133,7 @@ class WC_Admin_Reports {
 		}
 
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
-		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compat
+		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compatibility.
 
 		foreach ( $reports as $key => $report_group ) {
 			if ( isset( $reports[ $key ]['charts'] ) ) {

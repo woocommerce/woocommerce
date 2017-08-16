@@ -35,7 +35,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types avaiable at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 */
 	protected $meta_type = 'order_item';
@@ -66,6 +66,25 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
+	}
+
+	/**
+	 * Merge changes with data and clear.
+	 * Overrides WC_Data::apply_changes.
+	 * array_replace_recursive does not work well for order items because it merges taxes instead
+	 * of replacing them.
+	 *
+	 * @since 3.2.0
+	 */
+	public function apply_changes() {
+		if ( function_exists( 'array_replace' ) ) {
+			$this->data = array_replace( $this->data, $this->changes );
+		} else { // PHP 5.2 compatibility.
+			foreach ( $this->changes as $key => $change ) {
+				$this->data[ $key ] = $change;
+			}
+		}
+		$this->changes = array();
 	}
 
 	/*
@@ -112,6 +131,24 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
+	 * Get tax status.
+	 * @return string
+	 */
+	public function get_tax_status() {
+		return 'taxable';
+	}
+
+	/**
+	 * Get tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class() {
+		return '';
+	}
+
+	/**
 	 * Get parent order object.
 	 * @return WC_Order
 	 */
@@ -152,12 +189,41 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	*/
 
 	/**
-	 * Type checking
+	 * Type checking.
+	 *
 	 * @param  string|array  $type
 	 * @return boolean
 	 */
 	public function is_type( $type ) {
 		return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
+	}
+
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
+			return false;
+		}
+		if ( '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
+			$calculate_tax_for['tax_class'] = $this->get_tax_class();
+			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
+			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+
+			if ( method_exists( $this, 'get_subtotal' ) ) {
+				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, false );
+				$this->set_taxes( array( 'total' => $taxes, 'subtotal' => $subtotal_taxes ) );
+			} else {
+				$this->set_taxes( array( 'total' => $taxes ) );
+			}
+		} else {
+			$this->set_taxes( false );
+		}
+		return true;
 	}
 
 	/*
@@ -219,7 +285,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

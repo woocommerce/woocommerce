@@ -135,7 +135,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 					return self::trigger( "illegal character '_'" ); // but not in the input expression
 					// ===============
 				} elseif ( ( in_array( $op, $ops ) or $ex ) and $expecting_op ) { // are we putting an operator on the stack?
-					if ( $ex ) { // are we expecting an operator but have a number/variable/function/opening parethesis?
+					if ( $ex ) { // are we expecting an operator but have a number/variable/function/opening parenthesis?
 						$op = '*';
 						$index--; // it's an implicit multiplication
 					}

@@ -278,6 +278,10 @@ class WC_API_Products extends WC_API_Resource {
 			$product = wc_get_product( $product );
 		}
 
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return array();
+		}
+
 		return array(
 			'title'              => $product->get_name(),
 			'id'                 => $product->get_id(),

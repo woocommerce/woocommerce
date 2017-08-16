@@ -272,7 +272,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertCount( 2, $object->get_items() );
 	}
-	
+
 	/**
 	 * Test: get_different_items
 	 */
@@ -1563,5 +1563,83 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_remaining_refund_items() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 4, $object->get_remaining_refund_items() );
+	}
+
+	/**
+	 * Test add_discount and remove_coupon with a fixed discount coupon.
+	 * @since 3.2.0
+	 */
+	function test_add_remove_coupon_fixed() {
+		$order = WC_Helper_Order::create_order();
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order->add_discount( 'test' );
+		$this->assertEquals( 40, $order->get_total() );
+
+		$order->remove_coupon( 'test' );
+		$this->assertEquals( 50, $order->get_total() );
+
+		$coupon->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test add_discount and remove_coupon with a percent discount coupon.
+	 * @since 3.2.0
+	 */
+	function test_add_remove_coupon_percent() {
+		$order = WC_Helper_Order::create_order();
+
+		$coupon = new WC_Coupon;
+		$coupon->set_code( 'test' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 50 );
+		$coupon->save();
+
+		$order->add_discount( 'test' );
+		$this->assertEquals( 30, $order->get_total() );
+
+		$order->remove_coupon( 'test' );
+		$this->assertEquals( 50, $order->get_total() );
+
+		$coupon->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test add_discount and removing the discount with a fixed discount.
+	 * @since 3.2.0
+	 */
+	function test_add_remove_discount_fixed() {
+		$order = WC_Helper_Order::create_order();
+
+		$order->add_discount( 10 );
+		$this->assertEquals( 40, $order->get_total() );
+
+		$discount = current( $order->get_items( 'discount' ) );
+		$order->remove_item( $discount->get_id() );
+		$order->calculate_totals( true );
+		$this->assertEquals( 50, $order->get_total() );
+	}
+
+	/**
+	 * Test add_discount and removing the discount with a percent discount.
+	 * @since 3.2.0
+	 */
+	function test_add_remove_discount_percent() {
+		$order = WC_Helper_Order::create_order();
+
+		$order->add_discount( '50%' );
+		$this->assertEquals( 25, $order->get_total() );
+
+		$discount = current( $order->get_items( 'discount' ) );
+		$order->remove_item( $discount->get_id() );
+		$order->calculate_totals( true );
+		$this->assertEquals( 50, $order->get_total() );
 	}
 }

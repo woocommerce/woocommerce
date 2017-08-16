@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     2.5.0
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,6 +38,10 @@ if ( $totals = $order->get_order_item_totals() ) {
 	foreach ( $totals as $total ) {
 		echo $total['label'] . "\t " . $total['value'] . "\n";
 	}
+}
+
+if ( $order->get_customer_note() ) {
+	echo __( 'Note:', 'woocommerce' ) . "\t " . wptexturize( $order->get_customer_note() ) . "\n";
 }
 
 if ( $sent_to_admin ) {

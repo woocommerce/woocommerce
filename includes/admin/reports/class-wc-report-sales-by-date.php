@@ -373,14 +373,14 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$refunded_orders = array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds );
 
 		foreach ( $refunded_orders as $key => $value ) {
-			$this->report_data->total_tax_refunded          += ( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
-			$this->report_data->total_refunds               += $value->total_refund;
-			$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
-			$this->report_data->total_shipping_refunded     += ( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
+			$this->report_data->total_tax_refunded          += floatval( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
+			$this->report_data->total_refunds               += floatval( $value->total_refund );
+			$this->report_data->total_shipping_tax_refunded += floatval( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
+			$this->report_data->total_shipping_refunded     += floatval( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
 
 			// Only applies to parial.
 			if ( isset( $value->order_item_count ) ) {
-				$this->report_data->refunded_order_items    += ( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
+				$this->report_data->refunded_order_items    += floatval( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
 			}
 		}
 
@@ -391,7 +391,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		// Total the refunds and sales amounts. Sales subract refunds. Note - total_sales also includes shipping costs.
 		$this->report_data->total_sales = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_sales' ) ) - $this->report_data->total_refunds, 2 );
-		$this->report_data->net_sales   = wc_format_decimal( $this->report_data->total_sales - $this->report_data->total_shipping - $this->report_data->total_tax - $this->report_data->total_shipping_tax, 2 );
+		$this->report_data->net_sales   = wc_format_decimal( $this->report_data->total_sales - $this->report_data->total_shipping - max( 0, $this->report_data->total_tax ) - max( 0, $this->report_data->total_shipping_tax ), 2 );
 
 		// Calculate average based on net
 		$this->report_data->average_sales       = wc_format_decimal( $this->report_data->net_sales / ( $this->chart_interval + 1 ), 2 );
@@ -607,8 +607,6 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {
 		global $wp_locale;

@@ -39,7 +39,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
 		WC_Helper_Product::create_external_product();
-		sleep( 1 ); // So both proudcts have different timestamps.
+		sleep( 1 ); // So both products have different timestamps.
 		WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();

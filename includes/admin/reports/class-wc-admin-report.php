@@ -104,7 +104,8 @@ class WC_Admin_Report {
 		$query  = array();
 		$select = array();
 
-		foreach ( $data as $key => $value ) {
+		foreach ( $data as $raw_key => $value ) {
+			$key      = sanitize_key( $raw_key );
 			$distinct = '';
 
 			if ( isset( $value['distinct'] ) ) {
@@ -146,16 +147,17 @@ class WC_Admin_Report {
 		// Joins
 		$joins = array();
 
-		foreach ( ( $data + $where ) as $key => $value ) {
+		foreach ( ( $data + $where ) as $raw_key => $value ) {
 			$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
 			$type      = isset( $value['type'] ) ? $value['type'] : false;
+			$key       = sanitize_key( $raw_key );
 
 			switch ( $type ) {
 				case 'meta' :
-					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$key}' )";
+					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$raw_key}' )";
 					break;
 				case 'parent_meta' :
-					$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$key}')";
+					$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$raw_key}')";
 					break;
 				case 'order_item_meta' :
 					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
@@ -166,7 +168,7 @@ class WC_Admin_Report {
 
 					$joins[ "order_item_meta_{$key}" ]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
 														"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
-														" AND (order_item_meta_{$key}.meta_key = '{$key}')";
+														" AND (order_item_meta_{$key}.meta_key = '{$raw_key}')";
 					break;
 				case 'order_item' :
 					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
@@ -181,7 +183,7 @@ class WC_Admin_Report {
 				}
 				$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
 				$type      = isset( $value['type'] ) ? $value['type'] : false;
-				$key       = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
+				$key       = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
 
 				if ( 'order_item_meta' === $type ) {
 
@@ -238,7 +240,7 @@ class WC_Admin_Report {
 					continue;
 				}
 
-				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
+				$key = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
 
 				if ( strtolower( $value['operator'] ) == 'in' || strtolower( $value['operator'] ) == 'not in' ) {
 
@@ -614,8 +616,6 @@ class WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {}
 

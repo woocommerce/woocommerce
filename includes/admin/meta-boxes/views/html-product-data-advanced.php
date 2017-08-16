@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div id="advanced_product_data" class="panel woocommerce_options_panel hidden">
 
-	<div class="options_group hide_if_external">
+	<div class="options_group hide_if_external hide_if_grouped">
 		<?php
 			woocommerce_wp_textarea_input( array(
 				'id'          => '_purchase_note',
@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="options_group reviews">
 			<?php
 				woocommerce_wp_checkbox( array(
-					'id'      => '_reviews_allowed',
+					'id'      => 'comment_status',
 					'value'   => $product_object->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
 					'label'   => __( 'Enable reviews', 'woocommerce' ),
 					'cbvalue' => 'open',

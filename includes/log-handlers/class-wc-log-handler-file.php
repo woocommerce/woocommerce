@@ -283,7 +283,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Rotate log files.
 	 *
-	 * Logs are rotatated by prepending '.x' to the '.log' suffix.
+	 * Logs are rotated by prepending '.x' to the '.log' suffix.
 	 * The current log plus 10 historical logs are maintained.
 	 * For example:
 	 *     base.9.log -> [ REMOVED ]

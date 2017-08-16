@@ -99,7 +99,11 @@ class WC_Structured_Data {
 		$data = $types ? array_values( array_intersect_key( $data, array_flip( $types ) ) ) : array_values( $data );
 
 		if ( ! empty( $data ) ) {
-			$data = count( $data ) > 1 ? array( '@graph' => $data ) : $data[0];
+			if ( 1 < count( $data ) ) {
+				$data = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, '', '' ) + array( '@graph' => $data );
+			} else {
+				$data = $data[0];
+			}
 		}
 
 		return $data;
@@ -186,53 +190,62 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$shop_name       = get_bloginfo( 'name' );
-		$shop_url        = home_url();
-		$currency        = get_woocommerce_currency();
-		$markup          = array();
-		$markup['@type'] = 'Product';
-		$markup['@id']   = get_permalink( $product->get_id() );
-		$markup['url']   = $markup['@id'];
-		$markup['name']  = $product->get_name();
+		$shop_name = get_bloginfo( 'name' );
+		$shop_url  = home_url();
+		$currency  = get_woocommerce_currency();
+
+		$markup = array(
+			'@type' => 'Product',
+			'@id'   => get_permalink( $product->get_id() ),
+			'name'  => $product->get_name(),
+		);
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
+			$markup['url'] = $markup['@id'];
+
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 			return;
 		}
 
-		if ( '' !== $product->get_price() ) {
-			$markup_offer = array(
-				'@type'         => 'Offer',
-				'priceCurrency' => $currency,
-				'availability'  => 'https://schema.org/' . $stock = ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'sku'           => $product->get_sku(),
-				'image'         => wp_get_attachment_url( $product->get_image_id() ),
-				'description'   => $product->get_description(),
-				'seller'        => array(
-					'@type' => 'Organization',
-					'name'  => $shop_name,
-					'url'   => $shop_url,
-				),
-			);
+		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
+		$markup['description'] = wpautop( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
+		$markup['sku']         = $product->get_sku();
 
+		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
 				$prices = $product->get_variation_prices();
 				$lowest = reset( $prices['price'] );
 				$highest = end( $prices['price'] );
 
 				if ( $lowest === $highest ) {
-					$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+					$markup_offer = array(
+						'@type' => 'Offer',
+						'price' => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+					);
 				} else {
-					$markup_offer['priceSpecification'] = array(
-						'price'         => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-						'minPrice'      => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-						'maxPrice'      => wc_format_decimal( $highest, wc_get_price_decimals() ),
-						'priceCurrency' => $currency,
+					$markup_offer = array(
+						'@type'     => 'AggregateOffer',
+						'lowPrice'  => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'highPrice' => wc_format_decimal( $highest, wc_get_price_decimals() ),
 					);
 				}
 			} else {
-				$markup_offer['price'] = wc_format_decimal( $product->get_price(), wc_get_price_decimals() );
+				$markup_offer = array(
+					'@type' => 'Offer',
+					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+				);
 			}
+
+			$markup_offer += array(
+				'priceCurrency' => $currency,
+				'availability'  => 'https://schema.org/' . ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+				'url'           => $markup['@id'],
+				'seller'        => array(
+					'@type' => 'Organization',
+					'name'  => $shop_name,
+					'url'   => $shop_url,
+				),
+			);
 
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}

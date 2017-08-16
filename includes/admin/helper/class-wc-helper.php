@@ -315,9 +315,11 @@ class WC_Helper {
 	 * Enqueue admin scripts and styles.
 	 */
 	public static function admin_enqueue_scripts() {
-		$screen = get_current_screen();
+		$screen       = get_current_screen();
+		$screen_id    = $screen ? $screen->id : '';
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
-		if ( 'woocommerce_page_wc-addons' == $screen->id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
 		}
 	}
@@ -372,7 +374,7 @@ class WC_Helper {
 					), admin_url( 'admin.php' ) );
 
 					/* translators: %1$s: product name, %2$s: deactivate url */
-					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactive the plugin as well.', 'woocommerce' ),
+					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactivate the plugin as well.', 'woocommerce' ),
 						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>', esc_url( $deactivate_plugin_url ) );
 				}
 
@@ -441,7 +443,9 @@ class WC_Helper {
 	 * Various early-phase actions with possible redirects.
 	 */
 	public static function current_screen( $screen ) {
-		if ( 'woocommerce_page_wc-addons' != $screen->id ) {
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+
+		if ( $wc_screen_id . '_page_wc-addons' !== $screen->id ) {
 			return;
 		}
 
@@ -831,7 +835,7 @@ class WC_Helper {
 		$plugins = get_plugins();
 		$woo_plugins = array();
 
-		// Back-compat for woothemes_queue_update().
+		// Backwards compatibility for woothemes_queue_update().
 		$_compat = array();
 		if ( ! empty( $GLOBALS['woothemes_queued_updates'] ) ) {
 			foreach ( $GLOBALS['woothemes_queued_updates'] as $_compat_plugin ) {
@@ -876,7 +880,7 @@ class WC_Helper {
 		foreach ( $themes as $theme ) {
 			$header = $theme->get( 'Woo' );
 
-			// Back-compat for theme_info.txt
+			// Backwards compatibility for theme_info.txt
 			if ( ! $header ) {
 				$txt = $theme->get_stylesheet_directory() . '/theme_info.txt';
 				if ( is_readable( $txt ) ) {
@@ -1017,7 +1021,7 @@ class WC_Helper {
 			return;
 		}
 
-		self::log( 'Auto-activated a subscripton for ' . $filename );
+		self::log( 'Auto-activated a subscription for ' . $filename );
 		self::_flush_subscriptions_cache();
 	}
 
@@ -1073,7 +1077,7 @@ class WC_Helper {
 		}
 
 		if ( $deactivated ) {
-			self::log( sprintf( 'Auto-deactivated %d subscripton(s) for %s', $deactivated, $filename ) );
+			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
 			self::_flush_subscriptions_cache();
 		}
 	}
@@ -1082,8 +1086,10 @@ class WC_Helper {
 	 * Add a note about available extension updates if Woo core has an update available.
 	 */
 	public static function admin_notices() {
-		$screen = get_current_screen();
-		if ( 'update-core' !== $screen->id ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+
+		if ( 'update-core' !== $screen_id ) {
 			return;
 		}
 

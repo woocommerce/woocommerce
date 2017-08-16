@@ -23,7 +23,7 @@ class WC_CLI_Tool_Command {
 	public static function register_commands() {
 		global $wp_rest_server;
 
-		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
+		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
 		$response      = $wp_rest_server->dispatch( $request );
 		$response_data = $response->get_data();
 		if ( empty( $response_data ) ) {
@@ -42,7 +42,7 @@ class WC_CLI_Tool_Command {
 					'optional'	  => false,
 				);
 				$method = 'update_item';
-				$route  = '/wc/v1/system_status/tools/(?P<id>[\w-]+)';
+				$route  = '/wc/v2/system_status/tools/(?P<id>[\w-]+)';
 			} elseif ( 'list' === $command ) {
 				$synopsis[] = array(
 					'name'		  => 'fields',
@@ -75,7 +75,7 @@ class WC_CLI_Tool_Command {
 					),
 				);
 				$method = 'list_items';
-				$route  = '/wc/v1/system_status/tools';
+				$route  = '/wc/v2/system_status/tools';
 			}
 
 			$before_invoke = null;

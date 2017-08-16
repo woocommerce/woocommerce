@@ -39,7 +39,7 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		// Backwards compat with old pay and thanks link arguments
+		// Backwards compatibility with old pay and thanks link arguments
 		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) {
 			wc_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
 
@@ -83,35 +83,47 @@ class WC_Shortcode_Checkout {
 
 		$order_id = absint( $order_id );
 
-		// Handle payment
+		// Pay for existing order.
 		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) {
+			try {
+				$order_key = $_GET['key'];
+				$order     = wc_get_order( $order_id );
 
-			// Pay for existing order
-			$order_key = $_GET['key'];
-			$order     = wc_get_order( $order_id );
+				// Order or payment link is invalid.
+				if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
+					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+				}
 
-			// Order or payment link is invalid.
-			if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
-				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
+				// Logged out customer does not have permission to pay for this order.
+				if ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
+					echo '<div class="woocommerce-info">' . __( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
+					woocommerce_login_form( array(
+						'redirect' => $order->get_checkout_payment_url(),
+					) );
+					return;
+				}
 
-			// Logged out customer does not have permission to pay for this order.
-			} elseif ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
-				echo '<div class="woocommerce-info">' . __( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
-				woocommerce_login_form( array(
-					'redirect' => $order->get_checkout_payment_url(),
-				) );
-				return;
+				// Logged in customer trying to pay for someone else's order.
+				if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
+					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
+				}
 
-			// Logged in customer trying to pay for someone else's order.
-			} elseif ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				wc_add_notice( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
+				// Does not need payment.
+				if ( ! $order->needs_payment() ) {
+					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
+				}
 
-			// Order does not need to be paid.
-			} elseif ( ! $order->needs_payment() ) {
-				wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
+				// Ensure order items are still stocked.
+				foreach ( $order->get_items() as $item_key => $item ) {
+					if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
+						$product = $item->get_product();
 
-			// Show payment form.
-			} else {
+						if ( $product && ! $product->is_in_stock() ) {
+							/* translators: %s: product name */
+							throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
+						}
+					}
+				}
 
 				WC()->customer->set_props( array(
 					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country()   : null,
@@ -131,6 +143,9 @@ class WC_Shortcode_Checkout {
 					'available_gateways' => $available_gateways,
 					'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
 				) );
+
+			} catch ( Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
 			}
 		} elseif ( $order_id ) {
 
@@ -142,35 +157,8 @@ class WC_Shortcode_Checkout {
 
 				if ( $order->needs_payment() ) {
 
-					?>
-					<ul class="order_details">
-						<li class="order">
-							<?php _e( 'Order number:', 'woocommerce' ); ?>
-							<strong><?php echo $order->get_order_number(); ?></strong>
-						</li>
-						<li class="date">
-							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
-						</li>
-						<li class="total">
-							<?php _e( 'Total:', 'woocommerce' ); ?>
-							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
-						</li>
-						<?php if ( $order->get_payment_method_title() ) : ?>
-						<li class="method">
-							<?php _e( 'Payment method:', 'woocommerce' ); ?>
-							<strong><?php
-								echo wp_kses_post( $order->get_payment_method_title() );
-							?></strong>
-						</li>
-						<?php endif; ?>
-					</ul>
-
-					<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
-
-					<div class="clear"></div>
-					<?php
-
+					wc_get_template( 'checkout/order-receipt.php', array( 'order' => $order ) );
+					
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}

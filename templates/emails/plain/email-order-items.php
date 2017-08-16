@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     3.0.0
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,6 +29,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
 		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
+
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 		echo strip_tags( wc_display_item_meta( $item, array(
@@ -38,15 +39,7 @@ foreach ( $items as $item_id => $item ) :
 			'echo'      => false,
 			'autop'     => false,
 		) ) );
-		if ( $show_download_links ) {
-			echo strip_tags( wc_display_item_downloads( $item, array(
-				'before'    => "\n- ",
-				'separator' => "\n- ",
-				'after'     => "",
-				'echo'      => false,
-				'show_url'  => true,
-			) ) );
-		}
+
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}

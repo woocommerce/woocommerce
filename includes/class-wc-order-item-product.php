@@ -165,9 +165,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @param array $data Key/Value pairs
 	 */
-	public function set_variation( $data ) {
-		foreach ( $data as $key => $value ) {
-			$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+	public function set_variation( $data = array() ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+			}
 		}
 	}
 
@@ -198,7 +200,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
 
@@ -366,9 +368,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				$download_id = $customer_download->get_download_id();
 
 				if ( $product->has_file( $download_id ) ) {
-					$file                                  = $product->get_file( $download_id );
-					$files[ $download_id ]                 = $file->get_data();
-					$files[ $download_id ]['download_url'] = add_query_arg( array(
+					$file                                         = $product->get_file( $download_id );
+					$files[ $download_id ]                        = $file->get_data();
+					$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
+					$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
+					$files[ $download_id ]['download_url']        = add_query_arg( array(
 						'download_file' => $product_id,
 						'order'         => $order->get_order_key(),
 						'email'         => urlencode( $order->get_billing_email() ),
@@ -395,7 +399,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

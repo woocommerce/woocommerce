@@ -310,6 +310,18 @@ class WC_Meta_Box_Product_Data {
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
+		$stock        = null;
+
+		// Handle stock changes.
+		if ( isset( $_POST['_stock'] ) ) {
+			if ( isset( $_POST['_original_stock'] ) && wc_stock_amount( $product->get_stock_quantity( 'edit' ) ) !== wc_stock_amount( $_POST['_original_stock'] ) ) {
+				/* translators: 1: product ID 2: quantity in stock */
+				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
+			} else {
+				$stock = wc_stock_amount( $_POST['_stock'] );
+			}
+		}
+
 		$errors       = $product->set_props( array(
 			'sku'                => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
 			'purchase_note'      => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
@@ -334,7 +346,7 @@ class WC_Meta_Box_Product_Data {
 			'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
 			'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( $_POST['_backorders'] ) : null,
 			'stock_status'       => wc_clean( $_POST['_stock_status'] ),
-			'stock_quantity'     => isset( $_POST['_stock'] ) ? wc_stock_amount( $_POST['_stock'] ) : null,
+			'stock_quantity'     => $stock,
 			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
 			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
 			'downloads'          => self::prepare_downloads(
@@ -345,7 +357,7 @@ class WC_Meta_Box_Product_Data {
 			'product_url'        => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'        => wc_clean( $_POST['_button_text'] ),
 			'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
-			'reviews_allowed'    => ! empty( $_POST['_reviews_allowed'] ),
+			'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
 			'attributes'         => $attributes,
 			'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
 		) );
@@ -391,6 +403,18 @@ class WC_Meta_Box_Product_Data {
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
 				$variation    = new WC_Product_Variation( $variation_id );
+				$stock        = null;
+
+				// Handle stock changes.
+				if ( isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ) {
+					if ( isset( $_POST['variable_original_stock'], $_POST['variable_original_stock'][ $i ] ) && wc_stock_amount( $variation->get_stock_quantity( 'edit' ) ) !== wc_stock_amount( $_POST['variable_original_stock'][ $i ] ) ) {
+						/* translators: 1: product ID 2: quantity in stock */
+						WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $variation->get_id(), $variation->get_stock_quantity( 'edit' ) ) );
+					} else {
+						$stock = wc_stock_amount( $_POST['variable_stock'][ $i ] );
+					}
+				}
+
 				$errors       = $variation->set_props( array(
 					'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
 					'menu_order'        => wc_clean( $_POST['variation_menu_order'][ $i ] ),
@@ -409,7 +433,7 @@ class WC_Meta_Box_Product_Data {
 						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
 					),
 					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
-					'stock_quantity'    => isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ? wc_clean( $_POST['variable_stock'][ $i ] ) : null,
+					'stock_quantity'    => $stock,
 					'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),

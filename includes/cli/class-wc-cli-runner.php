@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_CLI_Runner {
 	/**
-	 * Endpoints to disable (meaning they will not be avaiable as CLI commands).
+	 * Endpoints to disable (meaning they will not be available as CLI commands).
 	 * Some of these can either be done via WP already, or are offered with
 	 * some other changes (like tools).
 	 */
@@ -86,7 +86,7 @@ class WC_CLI_Runner {
 
 	/**
 	 * Generates command information and tells WP CLI about all
-	 * commands avaiable from a route.
+	 * commands available from a route.
 	 *
 	 * @param string $rest_command
 	 * @param string $route

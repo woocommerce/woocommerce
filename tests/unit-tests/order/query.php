@@ -81,14 +81,14 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check WC_DateTime support.
 		$query = new WC_Order_Query( array(
-			'date_created' => $order->get_date_created()
+			'date_created' => $order->get_date_created(),
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
 		// Check date support.
 		$query = new WC_Order_Query( array(
-			'date_created' => $now_date
+			'date_created' => $now_date,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', $past );
@@ -96,7 +96,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check timestamp support.
 		$query = new WC_Order_Query( array(
-			'date_created' => $order->get_date_created()->getTimestamp()
+			'date_created' => $order->get_date_created()->getTimestamp(),
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', $future_stamp );
@@ -104,7 +104,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check comparison support.
 		$query = new WC_Order_Query( array(
-			'date_created' => '>' . $past
+			'date_created' => '>' . $past,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', '<' . $past );
@@ -114,7 +114,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check timestamp comparison support.
 		$query = new WC_Order_Query( array(
-			'date_created' => '<' . $future_stamp
+			'date_created' => '<' . $future_stamp,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', '<' . $past_stamp );
@@ -123,7 +123,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check date range support.
 		$query = new WC_Order_Query( array(
-			'date_created' => $past . '...' . $future
+			'date_created' => $past . '...' . $future,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', $past . '...' . $now_date );
@@ -133,7 +133,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check timestamp range support.
 		$query = new WC_Order_Query( array(
-			'date_created' => $past_stamp . '...' . $future_stamp
+			'date_created' => $past_stamp . '...' . $future_stamp,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_created', $now_stamp . '...' . $future_stamp );
@@ -162,14 +162,14 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check WC_DateTime support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => $order->get_date_completed()
+			'date_completed' => $order->get_date_completed(),
 		) );
 		$orders = $query->get_orders();
 		$this->assertEquals( 1, count( $orders ) );
 
 		// Check date support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => $now_date
+			'date_completed' => $now_date,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', $past );
@@ -177,7 +177,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check timestamp support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => $order->get_date_completed()->getTimestamp()
+			'date_completed' => $order->get_date_completed()->getTimestamp(),
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', $future_stamp );
@@ -185,17 +185,17 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check comparison support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => '>' . $past
+			'date_completed' => '>' . $past,
 		) );
-		//$this->assertEquals( 1, count( $query->get_orders() ) );
+		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', '<' . $past );
-		//$this->assertEquals( 0, count( $query->get_orders() ) );
+		$this->assertEquals( 0, count( $query->get_orders() ) );
 		$query->set( 'date_completed', '>=' . $now_date );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 
 		// Check timestamp comparison support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => '<' . $future_stamp
+			'date_completed' => '<' . $future_stamp,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', '<' . $past_stamp );
@@ -204,7 +204,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check date range support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => $past . '...' . $future
+			'date_completed' => $past . '...' . $future,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', $now_date . '...' . $future );
@@ -214,7 +214,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		// Check timestamp range support.
 		$query = new WC_Order_Query( array(
-			'date_completed' => $past_stamp . '...' . $future_stamp
+			'date_completed' => $past_stamp . '...' . $future_stamp,
 		) );
 		$this->assertEquals( 1, count( $query->get_orders() ) );
 		$query->set( 'date_completed', $now_stamp . '...' . $future_stamp );
@@ -232,7 +232,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 		$user_id = wp_insert_user( array(
 			'user_login' => 'testname',
 			'user_pass' => 'testpass',
-			'user_email' => 'email@testmail.com'
+			'user_email' => 'email@testmail.com',
 		) );
 
 		$order = new WC_Order();
@@ -240,7 +240,7 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 		$order->save();
 
 		$query = new WC_Order_Query( array(
-			'customer_id' => $user_id
+			'customer_id' => $user_id,
 		) );
 		$results = $query->get_orders();
 

@@ -30,7 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php endif; ?>
 						</td>
 						<td class="wc-importer-mapping-table-field">
-							<select name="map_to[<?php echo esc_attr( $name ); ?>]">
+							<input type="hidden" name="map_from[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $name ); ?>" />
+							<select name="map_to[<?php echo esc_attr( $index ); ?>]">
 								<option value=""><?php esc_html_e( 'Do not import', 'woocommerce' ); ?></option>
 								<option value="">--------------</option>
 								<?php foreach ( $this->get_mapping_options( $mapped_value ) as $key => $value ) : ?>

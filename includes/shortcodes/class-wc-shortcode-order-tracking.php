@@ -32,7 +32,6 @@ class WC_Shortcode_Order_Tracking {
 	 * @param array $atts
 	 */
 	public static function output( $atts ) {
-
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
 			return;
@@ -40,31 +39,26 @@ class WC_Shortcode_Order_Tracking {
 
 		extract( shortcode_atts( array(), $atts, 'woocommerce_order_tracking' ) );
 
-		global $post;
+		if ( isset( $_REQUEST['orderid'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-order_tracking' ) ) {
 
-		if ( ! empty( $_REQUEST['orderid'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-order_tracking' ) ) {
-
-			$order_id    = empty( $_REQUEST['orderid'] ) ? 0 : esc_attr( $_REQUEST['orderid'] );
-			$order_email = empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email'] );
+			$order_id    = empty( $_REQUEST['orderid'] ) ? 0 : wc_clean( ltrim( $_REQUEST['orderid'], '#' ) );
+			$order_email = empty( $_REQUEST['order_email'] ) ? '' : sanitize_email( $_REQUEST['order_email'] );
 
 			if ( ! $order_id ) {
 				wc_add_notice( __( 'Please enter a valid order ID', 'woocommerce' ), 'error' );
 			} elseif ( ! $order_email ) {
-				wc_add_notice( __( 'Please enter a valid order email', 'woocommerce' ), 'error' );
+				wc_add_notice( __( 'Please enter a valid email address', 'woocommerce' ), 'error' );
 			} else {
 				$order = wc_get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
-				if ( $order && $order->get_id() && $order_email ) {
-					if ( strtolower( $order->get_billing_email() ) == strtolower( $order_email ) ) {
-						do_action( 'woocommerce_track_order', $order->get_id() );
-						wc_get_template( 'order/tracking.php', array(
-							'order' => $order,
-						) );
-
-						return;
-					}
+				if ( $order && $order->get_id() && strtolower( $order->get_billing_email() ) === strtolower( $order_email ) ) {
+					do_action( 'woocommerce_track_order', $order->get_id() );
+					wc_get_template( 'order/tracking.php', array(
+						'order' => $order,
+					) );
+					return;
 				} else {
-					wc_add_notice( __( 'Sorry, we could not find that order ID in our database.', 'woocommerce' ), 'error' );
+					wc_add_notice( __( 'Sorry, the order could not be found. Please contact us if you are having difficulty finding your order details.', 'woocommerce' ), 'error' );
 				}
 			}
 		}

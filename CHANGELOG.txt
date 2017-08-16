@@ -1377,7 +1377,7 @@
 * Fix - Use wc_get_order in simplify-commerce.
 * Fix - Use 'no' instead of boolean to disable PayPal gateway.
 * Fix - Do not escape redirect url in form handler - fixes malformed URLs.
-* Fix - Prevented non-existant pages from breaking cache helper.
+* Fix - Prevented non-existent pages from breaking cache helper.
 * Fix - Prevent sale prices showing errors in admin wrongly.
 * Fix - Prevent order statuses affecting other queries.
 * Fix - Removed deprecated get_page() functions.

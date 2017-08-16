@@ -360,7 +360,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
+	 * Core credit card form which gateways can used if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
 	 * @param  array $args
 	 * @param  array $fields
 	 */
@@ -454,6 +454,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			</p>',
 			esc_attr( $this->id ),
 			esc_html__( 'Save to account', 'woocommerce' )
+		);
+	}
+
+	/**
+	 * Add payment method via account screen. This should be extended by gateway plugins.
+	 *
+	 * @since 3.2.0 Included here from 3.2.0, but supported from 3.0.0.
+	 * @return array
+	 */
+	public function add_payment_method() {
+		return array(
+			'result'   => 'failure',
+			'redirect' => wc_get_endpoint_url( 'payment-methods' ),
 		);
 	}
 }
