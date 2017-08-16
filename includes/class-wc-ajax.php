@@ -1002,7 +1002,7 @@ class WC_AJAX {
 			wc_delete_order_item( $rate_id );
 
 			$order = wc_get_order( $order_id );
-			$order->calculate_totals( true );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );

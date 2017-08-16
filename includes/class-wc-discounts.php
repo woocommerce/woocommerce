@@ -359,7 +359,8 @@ class WC_Discounts {
 				foreach ( $items_to_apply as $item ) {
 					$discounted_price  = $this->get_discounted_price_in_cents( $item );
 					$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price : $discounted_price );
-					$discount          = min( $discounted_price, wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount ), $item->object ) );
+					$discount          = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount, $item->object ) ) * $item->quantity;
+					$discount          = min( $discounted_price, $discount );
 
 					// Store code and discount amount per item.
 					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
@@ -462,8 +463,14 @@ class WC_Discounts {
 			$cart_total += $price_to_discount;
 
 			// Run coupon calculations.
-			$discount       = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
-			$discount       = min( $discounted_price, apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $price_to_discount, $item->object, false, $coupon ) );
+			$discount = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
+
+			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+				// Send through the legacy filter, but not as cents.
+				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+			}
+
+			$discount        = min( $discounted_price, $discount );
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
@@ -491,7 +498,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
-		$amount         = $amount ? $amount: wc_add_number_precision( $coupon->get_amount() );
+		$amount         = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
 
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
@@ -501,8 +508,14 @@ class WC_Discounts {
 			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
 
 			// Run coupon calculations.
-			$discount       = $amount * $item->quantity;
-			$discount       = min( $discounted_price, apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $price_to_discount, $item->object, false, $coupon ) );
+			$discount = $amount * $item->quantity;
+
+			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+				// Send through the legacy filter, but not as cents.
+				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+			}
+
+			$discount        = min( $discounted_price, $discount );
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
@@ -529,19 +542,24 @@ class WC_Discounts {
 			return $total_discount;
 		}
 
-		$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
+		if ( ! $amount ) {
+			// If there is no amount we still send it through so filters are fired.
+			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, 0 );
+		} else {
+			$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
 
-		if ( $per_item_discount > 0 ) {
-			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
+			if ( $per_item_discount > 0 ) {
+				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
 
-			/**
-			 * If there is still discount remaining, repeat the process.
-			 */
-			if ( $total_discount > 0 && $total_discount < $amount ) {
-				$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
+				/**
+				 * If there is still discount remaining, repeat the process.
+				 */
+				if ( $total_discount > 0 && $total_discount < $amount ) {
+					$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
+				}
+			} elseif ( $amount > 0 ) {
+				$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 			}
-		} elseif ( $amount > 0 ) {
-			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 		}
 		return $total_discount;
 	}

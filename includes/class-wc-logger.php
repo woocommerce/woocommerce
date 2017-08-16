@@ -54,8 +54,10 @@ class WC_Logger implements WC_Logger_Interface {
 					wc_doing_it_wrong(
 						__METHOD__,
 						sprintf(
-							__( 'The provided handler <code>%s</code> does not implement WC_Log_Handler_Interface.', 'woocommerce' ),
-							esc_html( is_object( $handler ) ? get_class( $handler ) : $handler )
+							/* translators: 1: class name 2: WC_Log_Handler_Interface */
+							__( 'The provided handler %1$s does not implement %2$s.', 'woocommerce' ),
+							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
+							'<code>WC_Log_Handler_Interface</code>'
 						),
 						'3.0'
 					);
@@ -124,7 +126,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( __( 'WC_Logger::log was called with an invalid level "%s".', 'woocommerce' ), $level ), '3.0' );
+			/* translators: 1: WC_Logger::log 2: level */
+			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'woocommerce' ), '<code>WC_Logger::log</code>', $level ), '3.0' );
 		}
 
 		if ( $this->should_handle( $level ) ) {

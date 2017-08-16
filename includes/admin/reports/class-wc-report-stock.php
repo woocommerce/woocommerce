@@ -101,7 +101,7 @@ class WC_Report_Stock extends WP_List_Table {
 
 			case 'parent' :
 				if ( $item->parent ) {
-					echo get_the_title( $item->parent );
+					echo esc_html( get_the_title( $item->parent ) );
 				} else {
 					echo '-';
 				}
