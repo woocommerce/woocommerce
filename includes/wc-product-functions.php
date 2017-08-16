@@ -58,7 +58,8 @@ function wc_get_products( $args ) {
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		/* translators: 1: wc_get_product 2: woocommerce_init */
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_get_product', 'woocommerce_init' ), '2.5' );
 		return false;
 	}
 	if ( ! empty( $deprecated ) ) {
