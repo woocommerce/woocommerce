@@ -506,6 +506,31 @@ final class WC_Cart_Totals {
 		return $taxes;
 	}
 
+	/**
+	 * Set processed cart discounts in the cart.
+	 *
+	 * @since 3.2.0
+	 */
+	public function set_processed_cart_discounts() {
+		foreach ( $this->cart_discounts as $key => $discount ) {
+
+			$taxes = wc_remove_number_precision_deep( $discount->taxes );
+			foreach( $taxes as &$amount ) {
+				$amount = - $amount;
+			}
+
+			$this->cart->processed_cart_discounts[ $key ] = array(
+				'amount' => wc_remove_number_precision( $discount->object->get_amount() ),
+				'discount_type' => 'percent' === $discount->object->get_discount_type() ? 'percent' : 'fixed',
+				'total' => - wc_remove_number_precision( $discount->total ),
+				'total_taxes' => - wc_remove_number_precision( $discount->total_tax ),
+				'taxes'     => array(
+					'total' => $taxes,
+				),
+			);
+		}
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Calculation methods.
@@ -728,6 +753,7 @@ final class WC_Cart_Totals {
 		$this->cart_discount_tax_totals      = wp_list_pluck( $this->cart_discounts, 'total_tax' );
 		$this->cart->cart_discount_total     = wc_remove_number_precision( array_sum( $this->cart_discount_totals ) );
 		$this->cart->cart_discount_tax_total = wc_remove_number_precision( array_sum( $this->cart_discount_tax_totals ) );
+		$this->set_processed_cart_discounts();
 	}
 
 	/**

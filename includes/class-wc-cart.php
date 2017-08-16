@@ -58,6 +58,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $cart_discounts = array();
 
 	/**
+	 * Contains an array of arrays of processed cart discount information.
+	 *
+	 * @var array
+	 */
+	public $processed_cart_discounts = array();
+
+	/**
 	 * Contains an array of coupon code discounts after they have been applied.
 	 *
 	 * @var array
@@ -1725,6 +1732,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart_discounts() {
 		return array_filter( (array) $this->cart_discounts );
+	}
+
+	/**
+	 * Get processed cart discounts.
+	 *
+	 * @since 3.2.0
+	 * @return array of arrays
+	 */
+	public function get_processed_cart_discounts() {
+		return array_filter( (array) $this->processed_cart_discounts );
 	}
 
 	/**

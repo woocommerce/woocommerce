@@ -346,7 +346,7 @@ class WC_Checkout {
 	/**
 	 * Add line items to the order.
 	 *
-	 * @param  WC_Order $order
+	 * @param WC_Order $order
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_line_items( &$order, $cart ) {
@@ -392,7 +392,7 @@ class WC_Checkout {
 	/**
 	 * Add fees to the order.
 	 *
-	 * @param  WC_Order $order
+	 * @param WC_Order $order
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_fee_lines( &$order, $cart ) {
@@ -424,7 +424,7 @@ class WC_Checkout {
 	/**
 	 * Add shipping lines to the order.
 	 *
-	 * @param  WC_Order $order
+	 * @param WC_Order $order
 	 * @param array $chosen_shipping_methods
 	 * @param array $packages
 	 */
@@ -463,7 +463,7 @@ class WC_Checkout {
 	/**
 	 * Add tax lines to the order.
 	 *
-	 * @param  WC_Order $order
+	 * @param WC_Order $order
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
@@ -494,7 +494,7 @@ class WC_Checkout {
 	/**
 	 * Add coupon lines to the order.
 	 *
-	 * @param  WC_Order $order
+	 * @param WC_Order $order
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
@@ -517,18 +517,16 @@ class WC_Checkout {
 		}
 	}
 
+	/**
+	 * Add discount lines to the order
+	 *
+	 * @param WC_Order $order
+	 * @param WC_Cart $cart
+	 */
 	public function create_order_discount_lines( &$order, $cart ) {
-		foreach ( $cart->get_cart_discounts() as $discount ) {
+		foreach ( $cart->get_processed_cart_discounts() as $discount ) {
 			$item = new WC_Order_Item_Discount();
-			$item->set_props( array(
-				'amount' => $discount->get_amount(),
-				'discount_type' => 'percent' === $discount->get_discount_type() ? 'percent' : 'fixed',
-				'total' => $discount->get_discount_total(), //@todo this is always 0 right now. needs to be set in wc_discounts/totals
-				'total_taxes' => 0,
-				'taxes'     => array(
-					'total' => array(),
-				),
-			) );
+			$item->set_props( $discount );
 
 			/**
 			 * Action hook to adjust item before save.
