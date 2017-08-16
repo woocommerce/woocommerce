@@ -628,6 +628,24 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_webhooks (
+  webhook_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  status varchar(200) NOT NULL,
+  name text NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  delivery_url text NOT NULL,
+  secret text NOT NULL,
+  topic varchar(200) NOT NULL,
+  date_created datetime NULL default null,
+  date_created_gmt datetime NULL default null,
+  date_modified datetime NULL default null,
+  date_modified_gmt datetime NULL default null,
+  api_version smallint(4) NOT NULL,
+  failure_count smallint(10) NOT NULL,
+  pending_delivery tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (webhook_id),
+  KEY user_id (user_id)
+) $collate;
 		";
 
 		/**
