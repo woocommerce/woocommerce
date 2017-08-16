@@ -737,7 +737,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_totals() {
 		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) + array_sum( $this->cart_discount_totals ) );
-		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) + array_sum( $this->cart_discount_totals ) );
+		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) + array_sum( $this->cart_discount_tax_totals ) );
 		$this->set_total( 'taxes', $this->get_merged_taxes() );
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) - array_sum( $this->cart_discount_totals ) ) );

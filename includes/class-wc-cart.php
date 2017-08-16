@@ -1707,8 +1707,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( strstr( $amount, '%' ) ) {
 			$discount->set_amount( trim( $amount, '%' ) );
 			$discount->set_discount_type( 'percent' );
-		} elseif ( is_numeric( $amount ) && 0 < absint( $amount ) ) {
-			$discount->set_amount( absint( $amount ) );
+		} elseif ( is_numeric( $amount ) && 0 < floatval( $amount ) ) {
+			$discount->set_amount( floatval( $amount ) );
 			$discount->set_discount_type( 'fixed' );
 		} else {
 			return;
@@ -1718,7 +1718,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Get manual discounts.
+	 * Get cart discounts.
 	 *
 	 * @since 3.2.0
 	 * @return array of WC_Discount objects.
@@ -1728,7 +1728,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Calculate manual discounts.
+	 * Calculate cart discounts.
 	 * @since 3.2.0
 	 */
 	public function calculate_cart_discounts() {

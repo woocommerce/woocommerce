@@ -25,14 +25,14 @@ class WC_Discounts {
 	protected $items = array();
 
 	/**
-	 * Stores fee total from cart/order. cart discounts can discount this.
+	 * Stores fee total from cart/order. Cart discounts can discount this.
 	 *
 	 * @var int
 	 */
 	protected $fee_total = 0;
 
 	/**
-	 * Stores shipping total from cart/order. cart discounts can discount this.
+	 * Stores shipping total from cart/order. Cart discounts can discount this.
 	 *
 	 * @var int
 	 */
@@ -253,7 +253,7 @@ class WC_Discounts {
 			$total_to_discount += $this->get_discounted_price_in_cents( $item );
 		}
 
-		// cart discounts can also discount shipping and fees.
+		// Cart discounts can also discount shipping and fees.
 		$total_to_discount += $this->shipping_total + $this->fee_total;
 
 		// Remove existing discount amounts.
