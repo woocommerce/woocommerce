@@ -65,14 +65,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php foreach ( WC()->cart->get_cart_discounts() as $discount ) : ?>
+		<?php if ( WC()->cart->cart_discount_total ) : ?>
 			<tr class="discount">
-				<?php $discount_label = 'percent' === $discount->get_discount_type() ? wc_clean( $discount->get_amount() ) . '%' : wc_price( wc_remove_number_precision( $discount->get_amount() ) ); ?>
-				<?php /* translators: %s discount amount */ ?>
-				<th><?php printf( __( '%s Discount', 'woocommerce' ), $discount_label ); ?></th>
-				<td data-title="Discount"><?php wc_cart_totals_discount_html( $discount ); ?></td>
+				<th><?php esc_html_e( 'Discounts', 'woocommerce' ); ?></th>
+				<td data-title="<?php esc_attr_e( 'Discounts', 'woocommerce' ); ?>"><?php wc_cart_totals_discounts_html(); ?></td>
 			</tr>
-		<?php endforeach ?>
+		<?php endif; ?>
 
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
 			$taxable_address = WC()->customer->get_taxable_address();

@@ -337,12 +337,10 @@ function wc_cart_totals_fee_html( $fee ) {
  * Output the discount html.
  *
  * @since 3.2.0
- * @param WC_Discount $discount
  */
-function wc_cart_totals_discount_html( $discount ) {
-	$amount = '-' . wc_price( wc_remove_number_precision( $discount->get_discount_total() ) );
-
-	echo apply_filters( 'woocommerce_cart_totals_discount_html', $amount, $discount );
+function wc_cart_totals_discounts_html() {
+	$amount = '-' . ( 'excl' === WC()->cart->tax_display_cart ? wc_price( WC()->cart->cart_discount_total ) : wc_price( WC()->cart->cart_discount_total + WC()->cart->cart_discount_total_tax ) );
+	echo apply_filters( 'woocommerce_cart_totals_discounts_html', $amount );
 }
 
 /**
