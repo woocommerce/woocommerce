@@ -16,7 +16,6 @@ if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
 $system_status    = new WC_REST_System_Status_Controller;
 $environment      = $system_status->get_environment_info();
 $database         = $system_status->get_database_info();
-$database_size    = $system_status->get_database_table_sizes();
 $post_type_counts = $system_status->get_post_type_counts();
 $active_plugins   = $system_status->get_active_plugins();
 $theme            = $system_status->get_theme_info();
@@ -327,56 +326,62 @@ $pages            = $system_status->get_pages();
 			?>
         </td>
     </tr>
-	<?php
-	foreach ( $database['database_tables'] as $table => $table_exists ) {
-		?>
-        <tr>
-            <td><?php echo esc_html( $table ); ?></td>
-            <td class="help">&nbsp;</td>
-            <td><?php echo ! $table_exists ? '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>' : '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>'; ?></td>
-        </tr>
-		<?php
-	}
 
-	if ( $settings['geolocation_enabled'] ) {
-		?>
+    <?php if ( $settings['geolocation_enabled'] ) { ?>
         <tr>
             <td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
             <td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
             <td><?php
-				if ( file_exists( $database['maxmind_geoip_database'] ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
-				} else {
-					printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
-				}
-				?></td>
+			    if ( file_exists( $database['maxmind_geoip_database'] ) ) {
+				    echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
+			    } else {
+				    printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
+			    }
+			    ?></td>
         </tr>
-		<?php
-	}
-	?>
-    </tbody>
-</table>
-<table class="wc_status_table widefat" cellspacing="0">
-    <thead>
+    <?php } ?>
+
     <tr>
-        <th colspan="3" data-export-label="Database Table Sizes"><h2><?php _e( 'Database Table Sizes', 'woocommerce' ); ?></h2></th>
+        <td><?php _e( 'Total Database Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] ); ?></td>
     </tr>
-    </thead>
-    <tbody>
-	<?php
-	foreach ( $database_size as $table ) {
-		?>
+
+    <tr>
+        <td><?php _e( 'Database Data Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['index'] ); ?></td>
+    </tr>
+
+    <tr>
+        <td><?php _e( 'Database Index Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] + $database['database_size']['index'] ); ?></td>
+    </tr>
+
+	<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
+    <tr>
+        <td><?php echo esc_html( $table ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td>
+			<?php if( ! $table_data ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
+			} else {
+				printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
+			} ?>
+        </td>
+        </tr>
+    <?php } ?>
+
+    <?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
         <tr>
-            <td><?php echo esc_html( $table->name ); ?></td>
+            <td><?php echo esc_html( $table ); ?></td>
             <td class="help">&nbsp;</td>
             <td>
-	            <?php _e( 'Data: ', 'woocommerce' ); ?><?php echo wc_format_decimal( $table->data, 2 ); ?>MB,
-	            <?php _e( 'Index: ', 'woocommerce' ); ?><?php echo wc_format_decimal( $table->index, 2 ); ?>MB
+			    <?php printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) ); ?>
             </td>
         </tr>
-		<?php
-	}
-	?>
+    <?php } ?>
     </tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
