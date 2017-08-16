@@ -6,7 +6,8 @@
 	var VariationForm = function( $form ) {
 		this.$form                = $form;
 		this.$attributeFields     = $form.find( '.variations select' );
-		this.$singleVariation     = $form.find( '.single_variation' );
+                this.$attributeClickables = $form.find( '.swatch-option' );//Contributed by Thewpexperts for color swatch
+		this.$singleVariation     = $form.find( '.single_variation' ),
 		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		this.$resetVariations     = $form.find( '.reset_variations' );
 		this.$product             = $form.closest( '.product' );
@@ -17,6 +18,7 @@
 		// Initial state.
 		this.$singleVariationWrap.show();
 		this.$form.off( '.wc-variation-form' );
+                this.$attributeClickables.unbind( 'click ' );
 
 		// Methods.
 		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
@@ -32,6 +34,7 @@
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
 		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
 		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
+                $form.on( 'reset_swatch', { variationForm: this }, this.onResetSwatch );//Contributed by Thewpexperts for color swatch
 		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: this }, this.onChange );
 		$form.on( 'found_variation.wc-variation-form', { variationForm: this }, this.onFoundVariation );
 		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
@@ -49,7 +52,13 @@
 		event.preventDefault();
 		event.data.variationForm.$attributeFields.val( '' ).change();
 		event.data.variationForm.$form.trigger( 'reset_data' );
+                event.data.variationForm.$form.trigger( 'reset_swatch' );//Contributed by Thewpexperts for color swatch
 	};
+    //Contributed by Thewpexperts for color swatch
+    VariationForm.prototype.onResetSwatch = function( event ) {
+        event.preventDefault();
+        event.data.variationForm.$form.find( '.woocommerce-swatch-color-grid.active' ).removeClass( 'active' );
+    };
 
 	/**
 	 * Reload variation data from the DOM.
@@ -284,12 +293,42 @@
 	VariationForm.prototype.onUpdateAttributes = function( event ) {
 		var form              = event.data.variationForm,
 			attributes        = form.getChosenAttributes(),
-			currentAttributes = attributes.data;
+			currentAttributes = attributes.data,
+                        noMatch = false;
 
 		if ( form.useAjax ) {
 			return;
 		}
+        //Contributed by Thewpexperts for color swatch
+        form.$attributeClickables.unbind( 'click' );
+        form.$attributeClickables.click( function( ) {
 
+            var selectedValue = $( this ).data( 'option_value' );
+            var targetSelectId = $( this ).closest( '#woocommerce-color-swatch' ).data( 'select-id' );
+
+            var targetSelect = $( '#' + targetSelectId );
+
+            if ( targetSelect.find( 'option[value=' + selectedValue + ']' ).length ) {
+                targetSelect.val( selectedValue );
+            } else {
+                targetSelect.val( '' ).change();
+                form.$form.trigger( 'reset_data' );
+                form.$form.trigger( 'reset_swatch' );
+                noMatch = true;
+                window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
+
+            }
+            if ( ! $( this ).hasClass( 'active' ) && ! noMatch ) {
+                $( this ).addClass( 'active' ).siblings( '.active' ).removeClass( 'active' );
+                targetSelect.val( selectedValue );
+            } else {
+                targetSelect.val( '' );
+                form.$form.trigger( 'reset_data' );
+                form.$form.trigger( 'reset_swatch' );
+            }
+
+            targetSelect.change();
+        } );//Contributed by Thewpexperts for color swatch
 		// Loop through selects and disable/enable options based on selections.
 		form.$attributeFields.each( function( index, el ) {
 			var current_attr_select     = $( el ),

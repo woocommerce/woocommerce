@@ -192,10 +192,11 @@ function wc_get_attribute_taxonomy_names() {
  * @return array
  */
 function wc_get_attribute_types() {
-	return (array) apply_filters( 'product_attributes_type_selector', array(
-		'select' => __( 'Select', 'woocommerce' ),
-		'text'   => __( 'Text', 'woocommerce' ),
-	) );
+    return (array) apply_filters('product_attributes_type_selector', array(
+                'select' => __('Select', 'woocommerce'),
+                'text' => __('Text', 'woocommerce'),
+                'color' => __('Color', 'woocommerce'),
+    ));
 }
 
 /**
@@ -613,4 +614,20 @@ function wc_delete_attribute( $id ) {
 	}
 
 	return false;
+}
+/** 
+ * Get properties of attribute
+ *
+ * @param string $taxonomy
+ *
+ * @return object
+ * Contributed by Thewpexperts for color swatch
+ */
+function wc_get_tax_attribute($taxonomy) {
+    global $wpdb;
+
+    $attr_name = substr($taxonomy, 3);
+    $attr = $wpdb->get_row("SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = '$attr_name'");
+
+    return $attr;
 }
