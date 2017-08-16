@@ -82,7 +82,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 * @var array
 	 */
-	protected $item_discount_totals = array();
+	protected $coupon_discount_totals = array();
 
 	/**
 	 * Item/coupon discount tax totals.
@@ -90,7 +90,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 * @var array
 	 */
-	protected $item_discount_tax_totals = array();
+	protected $coupon_discount_tax_totals = array();
 
 	/**
 	 * Cart discount totals.
@@ -392,7 +392,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
 		$item  = $this->items[ $item_key ];
-		$price = isset( $this->item_discount_totals[ $item_key ] ) ? $item->subtotal - $this->item_discount_totals[ $item_key ] : $item->subtotal;
+		$price = isset( $this->coupon_discount_totals[ $item_key ] ) ? $item->subtotal - $this->coupon_discount_totals[ $item_key ] : $item->subtotal;
 
 		if ( $item->price_includes_tax ) {
 			$price += $item->subtotal_tax;
@@ -520,7 +520,7 @@ final class WC_Cart_Totals {
 	protected function calculate_item_totals() {
 		$this->get_items_from_cart();
 		$this->calculate_item_subtotals();
-		$this->calculate_item_discounts();
+		$this->calculate_coupon_discounts();
 
 		foreach ( $this->items as $item_key => $item ) {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
@@ -611,7 +611,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 * @uses  WC_Discounts class.
 	 */
-	protected function calculate_item_discounts() {
+	protected function calculate_coupon_discounts() {
 		$this->get_coupons_from_cart();
 
 		$discounts = new WC_Discounts( $this->cart );
@@ -628,11 +628,11 @@ final class WC_Cart_Totals {
 			foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
 				$coupon_discount_tax_amounts[ $coupon_code ] = 0;
 
-				foreach ( $coupon_discounts as $item_key => $item_discount ) {
+				foreach ( $coupon_discounts as $item_key => $coupon_discount ) {
 					$item = $this->items[ $item_key ];
 
 					if ( $item->product->is_taxable() ) {
-						$item_tax                                      = array_sum( WC_Tax::calc_tax( $item_discount, $item->tax_rates, $item->price_includes_tax ) );
+						$item_tax                                      = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
 					}
 				}
@@ -643,8 +643,8 @@ final class WC_Cart_Totals {
 			}
 		}
 
-		$this->item_discount_totals              = (array) $discounts->get_discounts_by_item( true );
-		$this->item_discount_tax_totals          = $coupon_discount_tax_amounts;
+		$this->coupon_discount_totals              = (array) $discounts->get_discounts_by_item( true );
+		$this->coupon_discount_tax_totals          = $coupon_discount_tax_amounts;
 		$this->cart->coupon_discount_amounts     = wc_remove_number_precision_deep( $coupon_discount_amounts );
 		$this->cart->coupon_discount_tax_amounts = wc_remove_number_precision_deep( $coupon_discount_tax_amounts );
 	}
@@ -688,11 +688,12 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_cart_discounts() {
+		$this->cart->calculate_cart_discounts();
 		$discounts = new WC_Discounts( $this->cart );
 
-		foreach ( $this->cart->get_cart_discounts() as $discount ) {
+		foreach ( $this->cart->get_cart_discounts() as $discount_key => $discount ) {
 			$raw_discount = 'percent' === $discount->get_discount_type() ? $discount->get_amount() . '%' : $discount->get_amount();
-			$discounts->apply_discount( $raw_discount );
+			$discounts->apply_discount( $raw_discount, $discount_key );
 		}
 
 		$this->cart_discounts = array();
@@ -735,8 +736,8 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'discounts_total', array_sum( $this->item_discount_totals ) + array_sum( $this->cart_discount_totals ) );
-		$this->set_total( 'discounts_tax_total', array_sum( $this->item_discount_tax_totals ) + array_sum( $this->cart_discount_totals ) );
+		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) + array_sum( $this->cart_discount_totals ) );
+		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) + array_sum( $this->cart_discount_totals ) );
 		$this->set_total( 'taxes', $this->get_merged_taxes() );
 		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) - array_sum( $this->cart_discount_totals ) ) );

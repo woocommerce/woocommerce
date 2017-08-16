@@ -43,7 +43,7 @@ class WC_Discounts {
 	 *
 	 * @var array[] Code => Item Key => Value
 	 */
-	protected $item_discounts = array();
+	protected $coupon_discounts = array();
 
 	/**
 	 * An array of applied WC_Discount objects.
@@ -72,7 +72,7 @@ class WC_Discounts {
 	 * @param array $cart Cart object.
 	 */
 	public function set_items_from_cart( $cart ) {
-		$this->items = $this->item_discounts = $this->cart_discounts = array();
+		$this->items = $this->coupon_discounts = $this->cart_discounts = array();
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
@@ -98,7 +98,7 @@ class WC_Discounts {
 	 * @param array $order Cart object.
 	 */
 	public function set_items_from_order( $order ) {
-		$this->items     = $this->item_discounts      = $this->cart_discounts = array();
+		$this->items     = $this->coupon_discounts      = $this->cart_discounts = array();
 		$this->fee_total = $this->shipping_total = 0;
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
@@ -143,8 +143,8 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discount( $key, $in_cents = false ) {
-		$item_discount_totals = $this->get_discounts_by_item( $in_cents );
-		return isset( $item_discount_totals[ $key ] ) ? ( $in_cents ? $item_discount_totals[ $key ] : wc_remove_number_precision( $item_discount_totals[ $key ] ) ) : 0;
+		$coupon_discount_totals = $this->get_discounts_by_item( $in_cents );
+		return isset( $coupon_discount_totals[ $key ] ) ? ( $in_cents ? $coupon_discount_totals[ $key ] : wc_remove_number_precision( $coupon_discount_totals[ $key ] ) ) : 0;
 	}
 
 	/**
@@ -155,7 +155,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts( $in_cents = false ) {
-		$discounts = $this->get_item_discounts();
+		$discounts = $this->get_coupon_discounts();
 
 		foreach ( $this->get_cart_discounts() as $cart_discount_key => $cart_discount ) {
 			$discounts[ $cart_discount_key ] = $cart_discount->get_discount_total();
@@ -172,16 +172,16 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts_by_item( $in_cents = false ) {
-		$discounts            = $this->item_discounts;
-		$item_discount_totals = (array) array_shift( $discounts );
+		$discounts            = $this->coupon_discounts;
+		$coupon_discount_totals = (array) array_shift( $discounts );
 
-		foreach ( $discounts as $item_discounts ) {
-			foreach ( $item_discounts as $item_key => $item_discount ) {
-				$item_discount_totals[ $item_key ] += $item_discount;
+		foreach ( $discounts as $coupon_discounts ) {
+			foreach ( $coupon_discounts as $item_key => $coupon_discount ) {
+				$coupon_discount_totals[ $item_key ] += $coupon_discount;
 			}
 		}
 
-		return $in_cents ? $item_discount_totals : wc_remove_number_precision_deep( $item_discount_totals );
+		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
 	}
 
 	/**
@@ -192,7 +192,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts_by_coupon( $in_cents = false ) {
-		$coupon_discount_totals = array_map( 'array_sum', $this->item_discounts );
+		$coupon_discount_totals = array_map( 'array_sum', $this->coupon_discounts );
 
 		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
 	}
@@ -203,8 +203,8 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @return array 2D array. Coupon code => item ID => Discount amount.
 	 */
-	public function get_item_discounts() {
-		return $this->item_discounts;
+	public function get_coupon_discounts() {
+		return $this->coupon_discounts;
 	}
 
 	/**
@@ -347,8 +347,8 @@ class WC_Discounts {
 			return $is_coupon_valid;
 		}
 
-		if ( ! isset( $this->item_discounts[ $coupon->get_code() ] ) ) {
-			$this->item_discounts[ $coupon->get_code() ] = array_fill_keys( array_keys( $this->items ), 0 );
+		if ( ! isset( $this->coupon_discounts[ $coupon->get_code() ] ) ) {
+			$this->coupon_discounts[ $coupon->get_code() ] = array_fill_keys( array_keys( $this->items ), 0 );
 		}
 
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
@@ -373,7 +373,7 @@ class WC_Discounts {
 					$discount          = min( $discounted_price, $discount );
 
 					// Store code and discount amount per item.
-					$this->item_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+					$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 				}
 				break;
 		}
@@ -484,7 +484,7 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->item_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+			$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
 		// Work out how much discount would have been given to the cart has a whole and compare to what was discounted on all line items.
@@ -529,7 +529,7 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->item_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+			$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 		return $total_discount;
 	}
@@ -556,10 +556,10 @@ class WC_Discounts {
 			// If there is no amount we still send it through so filters are fired.
 			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, 0 );
 		} else {
-			$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
+			$per_coupon_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
 
-			if ( $per_item_discount > 0 ) {
-				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
+			if ( $per_coupon_discount > 0 ) {
+				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_coupon_discount );
 
 				/**
 				 * If there is still discount remaining, repeat the process.
@@ -602,7 +602,7 @@ class WC_Discounts {
 				$total_discount += $discount;
 
 				// Store code and discount amount per item.
-				$this->item_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+				$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 
 				if ( $total_discount >= $amount ) {
 					break 2;
