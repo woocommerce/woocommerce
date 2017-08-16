@@ -263,7 +263,7 @@ $pages          = $system_status->get_pages();
 				if ( $environment['remote_post_successful'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'wp_remote_post() failed. Contact your hosting provider.', 'woocommerce' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
 				} ?>
 			</td>
 		</tr>
@@ -274,7 +274,7 @@ $pages          = $system_status->get_pages();
 				if ( $environment['remote_get_successful'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'wp_remote_get() failed. Contact your hosting provider.', 'woocommerce' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
 				} ?>
 			</td>
 		</tr>
