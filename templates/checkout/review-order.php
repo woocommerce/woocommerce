@@ -84,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( WC()->cart->cart_discount_total ) : ?>
+		<?php if ( WC()->cart->cart_discount_total > 0 ) : ?>
 			<tr class="discount">
 				<th><?php esc_html_e( 'Discounts', 'woocommerce' ); ?></th>
 				<td><?php wc_cart_totals_discounts_html(); ?></td>

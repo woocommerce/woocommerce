@@ -1020,7 +1020,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set discount totals.
-		foreach ( $discounts->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
+		foreach ( $discounts->get_cart_discounts() as $manual_discount_key => $manual_discount ) {
 			$item = $this->get_item( $manual_discount_key, false );
 			$item->set_total( wc_remove_number_precision( $manual_discount->get_discount_total() ) * -1 );
 		}
