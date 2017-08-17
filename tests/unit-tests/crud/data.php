@@ -18,7 +18,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		update_option( 'timezone_string', '' );
 	}
 
-	public function onNotSuccessfulTest( Throwable $e ) {
+	public function onNotSuccessfulTest( $e ) {
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
 		// @codingStandardsIgnoreEnd

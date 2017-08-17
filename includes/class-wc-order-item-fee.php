@@ -31,6 +31,79 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		),
 	);
 
+	/**
+	 * Get item costs grouped by tax class.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Order $order Order object.
+	 * @return array
+	 */
+	protected function get_tax_class_costs( $order ) {
+		$tax_classes                = array_fill_keys( $order->get_items_tax_classes(), 0 );
+		$tax_classes['non-taxable'] = 0;
+
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			if ( 'taxable' === $item->get_tax_status() ) {
+				$tax_classes[ $item->get_tax_class() ] += $item->get_total();
+			} else {
+				$tax_classes['non-taxable'] += $item->get_total();
+			}
+		}
+
+		foreach ( $order->get_items( array( 'shipping' ) ) as $item ) {
+			if ( 'taxable' === $item->get_tax_status() ) {
+				$class                 = 'inherit' === $item->get_tax_class() ? current( $order->get_items_tax_classes() ): $item->get_tax_class();
+				$tax_classes[ $class ] += $item->get_total();
+			} else {
+				$tax_classes['non-taxable'] += $item->get_total();
+			}
+		}
+
+		return $tax_classes;
+	}
+
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
+			return false;
+		}
+
+		// Use regular calculation unless the fee is negative.
+		if ( 0 <= $this->get_total() ) {
+			return parent::calculate_taxes();
+		}
+
+		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
+			// Apportion taxes to order items, shipping, and fees.
+			$order           = $this->get_order();
+			$tax_class_costs = $this->get_tax_class_costs( $order );
+			$total_costs     = array_sum( $tax_class_costs );
+			$discount_taxes  = array();
+
+			if ( $total_costs ) {
+				foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
+					if ( 'non-taxable' === $tax_class ) {
+						continue;
+					}
+					$proportion               = $tax_class_cost / $total_costs;
+					$cart_discount_proportion = $this->get_total() * $proportion;
+					$discount_taxes           = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, WC_Tax::get_rates( $tax_class ) ) );
+				}
+			}
+
+			$this->set_taxes( array( 'total' => $discount_taxes ) );
+		} else {
+			$this->set_taxes( false );
+		}
+		return true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

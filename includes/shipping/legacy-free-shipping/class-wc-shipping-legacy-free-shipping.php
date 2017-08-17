@@ -173,11 +173,13 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {
-			if ( WC()->cart->prices_include_tax ) {
-				$total = WC()->cart->cart_contents_total + array_sum( WC()->cart->taxes );
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+			$total = WC()->cart->get_displayed_subtotal();
+
+			if ( 'incl' === WC()->cart->tax_display_cart ) {
+				$total = round( $total - ( WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total() ), wc_get_price_decimals() );
 			} else {
-				$total = WC()->cart->cart_contents_total;
+				$total = round( $total - WC()->cart->get_cart_discount_total(), wc_get_price_decimals() );
 			}
 
 			if ( $total >= $this->min_amount ) {

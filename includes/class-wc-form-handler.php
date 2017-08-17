@@ -478,7 +478,7 @@ class WC_Form_Handler {
 		nocache_headers();
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+			WC()->cart->apply_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
