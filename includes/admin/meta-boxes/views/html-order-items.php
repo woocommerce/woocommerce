@@ -174,9 +174,6 @@ if ( wc_tax_enabled() ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
-			<?php if ( wc_tax_enabled() ) : ?>
-				<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
-			<?php endif; ?>
 			<button type="button" class="button add-coupon"><?php _e( 'Apply coupon', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description"><?php echo wc_help_tip( __( 'To edit this order change the status back to "Pending"', 'woocommerce' ) ); ?> <?php _e( 'This order is no longer editable.', 'woocommerce' ); ?></span>
@@ -197,6 +194,9 @@ if ( wc_tax_enabled() ) {
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
+	<?php if ( wc_tax_enabled() ) : ?>
+		<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
+	<?php endif; ?>
 	<?php
 		// allow adding custom buttons
 		do_action( 'woocommerce_order_item_add_line_buttons', $order );
