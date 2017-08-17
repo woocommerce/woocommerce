@@ -368,7 +368,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		if ( $this->is_type( array( 'percent' ) ) ) {
 			$discount = (float) $this->get_amount() * ( $discounting_amount / 100 );
-		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
+		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->get_subtotal( 'raw' ) ) {
 			/**
 			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
 			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
@@ -379,9 +379,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			 * Uses price inc tax if prices include tax to work around https://github.com/woocommerce/woocommerce/issues/7669 and https://github.com/woocommerce/woocommerce/issues/8074.
 			 */
 			if ( wc_prices_include_tax() ) {
-				$discount_percent = ( wc_get_price_including_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal;
+				$discount_percent = ( wc_get_price_including_tax( $cart_item['data'] ) * $cart_item_qty ) / ( WC()->cart->get_subtotal( 'raw' ) + WC()->cart->get_subtotal_tax( 'raw' ) );
 			} else {
-				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+				$discount_percent = ( wc_get_price_excluding_tax( $cart_item['data'] ) * $cart_item_qty ) / WC()->cart->get_subtotal( 'raw' );
 			}
 			$discount = ( (float) $this->get_amount() * $discount_percent ) / $cart_item_qty;
 

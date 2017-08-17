@@ -36,19 +36,19 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Add product to cart x1, calc and test
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( '9.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '9.00', number_format( WC()->cart->get_total( 'raw' ), 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
 
 		// Add product to cart x2, calc and test
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( '19.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '19.00', number_format( WC()->cart->get_total( 'raw' ), 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
 
 		// Add product to cart x3, calc and test
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( '29.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '29.00', number_format( WC()->cart->get_total( 'raw' ), 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
 
 		// Clean up the cart
@@ -131,7 +131,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
-		$this->assertEquals( '16.55', WC()->cart->total );
+		$this->assertEquals( '16.55', WC()->cart->get_total( 'raw' ) );
 
 		// Cleanup
 		WC()->cart->empty_cart();
@@ -490,7 +490,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Check
-		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->total ) ), WC()->cart->get_total() );
+		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->get_total( 'raw' ) ) ), WC()->cart->get_total() );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -521,7 +521,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Calc total
-		$total = WC()->cart->total - WC()->cart->tax_total - WC()->cart->shipping_tax_total;
+		$total = WC()->cart->get_total( 'raw' ) - WC()->cart->get_total_tax( 'raw' );
 		if ( $total < 0 ) {
 			$total = 0;
 		}
@@ -582,7 +582,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 10, WC()->cart->shipping_total );
 
 		// Test if the cart total amount is equal 20
-		$this->assertEquals( 20, WC()->cart->total );
+		$this->assertEquals( 20, WC()->cart->get_total( 'raw' ) );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -618,7 +618,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test if the cart total amount is equal 20
-		$this->assertEquals( 20, WC()->cart->total );
+		$this->assertEquals( 20, WC()->cart->get_total( 'raw' ) );
 
 		// Clearing WC notices
 		wc_clear_notices();

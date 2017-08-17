@@ -76,7 +76,7 @@ abstract class WC_Legacy_Cart {
 			case 'subtotal_ex_tax' :
 				return $this->get_subtotal( 'raw' );
 			case 'tax_total' :
-				return $this->get_total_tax( 'raw' );
+				return $this->get_cart_tax( 'raw' );
 
 /*
 			case 'taxes' :

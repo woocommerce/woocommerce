@@ -796,7 +796,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function needs_payment() {
-		return apply_filters( 'woocommerce_cart_needs_payment', $this->total > 0, $this );
+		return apply_filters( 'woocommerce_cart_needs_payment', $this->get_total( 'raw' ) > 0, $this );
 	}
 
 	/*
@@ -1444,7 +1444,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
-				if ( wc_prices_include_tax() && $this->tax_total > 0 ) {
+				if ( wc_prices_include_tax() && $this->get_total_tax( 'raw' ) > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 			} else {
@@ -1452,7 +1452,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
-				if ( ! wc_prices_include_tax() && $this->tax_total > 0 ) {
+				if ( ! wc_prices_include_tax() && $this->get_total_tax( 'raw' ) > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 				}
 			}
@@ -1480,9 +1480,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_displayed_subtotal() {
 		if ( 'incl' === $this->tax_display_cart ) {
-			return wc_format_decimal( $this->subtotal );
+			return $this->get_subtotal( 'raw' ) + $this->get_subtotal_tax( 'raw' );
 		} elseif ( 'excl' === $this->tax_display_cart ) {
-			return wc_format_decimal( $this->subtotal_ex_tax );
+			return $this->get_subtotal( 'raw' );
 		}
 	}
 
@@ -1497,18 +1497,18 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * If the cart has compound tax, we want to show the subtotal as cart + shipping + non-compound taxes (after discount).
 		 */
 		if ( $compound ) {
-			$cart_subtotal = wc_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
+			$cart_subtotal = wc_price( $this->get_cart_total( 'raw' ) + $this->shipping_total + $this->get_taxes_total( false, false ) );
 
 		} elseif ( 'excl' === $this->tax_display_cart ) {
-			$cart_subtotal = wc_price( $this->subtotal_ex_tax );
+			$cart_subtotal = $this->get_subtotal();
 
-			if ( $this->tax_total > 0 && wc_prices_include_tax() ) {
+			if ( $this->get_total_tax( 'raw' ) > 0 && wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
-			$cart_subtotal = wc_price( $this->subtotal );
+			$cart_subtotal = wc_price( $this->get_subtotal( 'raw' ) + $this->get_subtotal_tax( 'raw' ) );
 
-			if ( $this->tax_total > 0 && ! wc_prices_include_tax() ) {
+			if ( $this->get_total_tax( 'raw' ) > 0 && ! wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
@@ -1644,10 +1644,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_total_ex_tax() {
-		$total = $this->total - $this->tax_total - $this->shipping_tax_total;
-		if ( $total < 0 ) {
-			$total = 0;
-		}
+		$total = max( 0, $this->get_total( 'raw' ) - $this->get_cart_tax( 'raw' ) - $this->shipping_tax_total );
+
 		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) );
 	}
 
@@ -1763,7 +1761,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $context If the context is view, the value will be formatted for display. Use 'raw' if you need the raw value.
 	 * @return float
 	 */
-	public function get_cart_tax( $context = 'view' ) { // @todo exists
+	public function get_cart_tax( $context = 'view' ) {
 		$value = apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_tax'] );
 
 		return 'view' === $context ? wc_price( $value ) : $value;
@@ -1833,6 +1831,106 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_totals( $value = array() ) {
 		$this->totals = wp_parse_args( $value, $this->default_totals );
+	}
+
+	/**
+	 * Get subtotal.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_subtotal( $value ) {
+		$this->totals['subtotal'] = $value;
+	}
+
+	/**
+	 * Get subtotal.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_subtotal_tax( $value ) {
+		$this->totals['subtotal_tax'] = $value;
+	}
+
+	/**
+	 * Get discount_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_discount_total( $value ) {
+		$this->totals['discount_total'] = $value;
+	}
+
+	/**
+	 * Get discount_tax.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_discount_tax( $value ) {
+		$this->totals['discount_tax'] = $value;
+	}
+
+	/**
+	 * Get shipping_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_shipping_total( $value ) {
+		$this->totals['shipping_total'] = $value;
+	}
+
+	/**
+	 * Get shipping_tax.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_shipping_tax( $value ) {
+		$this->totals['shipping_tax'] = $value;
+	}
+
+	/**
+	 * Gets cart_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_cart_total( $value ) {
+		$this->totals['cart_total'] = $value;
+	}
+
+	/**
+	 * Gets cart tax amount.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_cart_tax( $value ) {
+		$this->totals['cart_tax'] = $value;
+	}
+
+	/**
+	 * Gets cart total after calculation.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_total( $value ) {
+		$this->totals['total'] = $value;
+	}
+
+	/**
+	 * Get total tax amount.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_total_tax( $value ) {
+		$this->totals['total_tax'] = $value;
 	}
 
 	/**

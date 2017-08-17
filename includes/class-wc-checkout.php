@@ -275,7 +275,7 @@ class WC_Checkout {
 
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
-			$cart_hash          = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash          = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->get_total( 'raw' ) );
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 			/**
@@ -316,9 +316,9 @@ class WC_Checkout {
 			$order->set_shipping_total( WC()->cart->shipping_total );
 			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
 			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
-			$order->set_cart_tax( WC()->cart->tax_total );
+			$order->set_cart_tax( WC()->cart->get_cart_tax( 'raw' ) );
 			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
-			$order->set_total( WC()->cart->total );
+			$order->set_total( WC()->cart->get_total( 'raw' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
 			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );

@@ -140,7 +140,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// Test if the cart total amount is equal 15
-		$this->assertEquals( 15, WC()->cart->total );
+		$this->assertEquals( 15, WC()->cart->get_total( 'raw' ) );
 
 		// Clearing WC notices
 		wc_clear_notices();
@@ -201,7 +201,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// Test if the cart total amount is equal 25
-		$this->assertEquals( 25, WC()->cart->total );
+		$this->assertEquals( 25, WC()->cart->get_total( 'raw' ) );
 
 		// Clearing WC notices
 		wc_clear_notices();
@@ -265,7 +265,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// Test if the cart total amount is equal 29.5
-		$this->assertEquals( 29.5, WC()->cart->total );
+		$this->assertEquals( 29.5, WC()->cart->get_total( 'raw' ) );
 
 		// Clearing WC notices
 		wc_clear_notices();

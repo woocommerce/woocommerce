@@ -153,6 +153,14 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function test_cart_totals() {
 		$cart = WC()->cart;
 
+		// Getters.
+		$this->assertEquals( 27.00, $this->get_cart_total( 'raw' ) );
+		$this->assertEquals( 90.40, $cart->get_total( 'raw' ) );
+		$this->assertEquals( 36.00, $cart->get_subtotal( 'raw' ) + $cart->get_subtotal_tax( 'raw' ) );
+		$this->assertEquals( 30.00, $cart->get_subtotal( 'raw' ) );
+		$this->assertEquals( 11.40, $cart->get_cart_tax( 'raw' ) );
+
+		// Legacy props.
 		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 27.00, $cart->cart_contents_total );
 		$this->assertEquals( 90.40, $cart->total );

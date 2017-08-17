@@ -626,8 +626,8 @@ final class WC_Cart_Totals {
 		$this->set_total( 'items_subtotal', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) );
 		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
 
-		$this->cart->subtotal        = $this->get_total( 'items_subtotal' ) + $this->get_total( 'items_subtotal_tax' );
-		$this->cart->subtotal_ex_tax = $this->get_total( 'items_subtotal' );
+		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
+		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
 	}
 
 	/**
@@ -749,11 +749,8 @@ final class WC_Cart_Totals {
 				'taxes'     => $discount_taxes,
 			);
 		}
-		$this->cart_discount_totals          = wp_list_pluck( $this->cart_discounts, 'total' );
-		$this->cart_discount_tax_totals      = wp_list_pluck( $this->cart_discounts, 'total_tax' );
-		$this->cart->cart_discount_total     = wc_remove_number_precision( array_sum( $this->cart_discount_totals ) );
-		$this->cart->cart_discount_tax_total = wc_remove_number_precision( array_sum( $this->cart_discount_tax_totals ) );
-		$this->set_processed_cart_discounts();
+		$this->cart_discount_totals     = wp_list_pluck( $this->cart_discounts, 'total' );
+		$this->cart_discount_tax_totals = wp_list_pluck( $this->cart_discounts, 'total_tax' );
 	}
 
 	/**
@@ -769,13 +766,16 @@ final class WC_Cart_Totals {
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) - array_sum( $this->cart_discount_totals ) ) );
 
 		// Add totals to cart object.
+		$this->cart->set_cart_total( $this->get_total( 'items_total' ) );
+		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
+		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
+		$this->cart->set_total_tax( $this->get_total( 'tax_total' ) ); // @todo
+
+		$this->set_processed_cart_discounts();
+
+
 		$this->cart->taxes               = wp_list_pluck( $this->get_total( 'taxes' ), 'shipping_tax_total' );
 		$this->cart->shipping_taxes      = wp_list_pluck( $this->get_total( 'taxes' ), 'tax_total' );
-		$this->cart->cart_contents_total = $this->get_total( 'items_total' );
-		$this->cart->tax_total           = $this->get_total( 'tax_total' );
-		$this->cart->total               = $this->get_total( 'total' );
-		$this->cart->discount_cart       = $this->get_total( 'discounts_total' ) - $this->get_total( 'discounts_tax_total' );
-		$this->cart->discount_cart_tax   = $this->get_total( 'discounts_tax_total' );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
 		if ( has_action( 'woocommerce_calculate_totals' ) ) {
@@ -783,6 +783,6 @@ final class WC_Cart_Totals {
 		}
 
 		// Allow plugins to filter the grand total, and sum the cart totals in case of modifications.
-		$this->cart->total = max( 0, apply_filters( 'woocommerce_calculated_total', $this->get_total( 'total' ), $this->cart ) );
+		$this->cart->set_total( max( 0, apply_filters( 'woocommerce_calculated_total', $this->get_total( 'total' ), $this->cart ) ) );
 	}
 }
