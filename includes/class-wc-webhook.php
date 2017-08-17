@@ -751,7 +751,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Set webhoook created date.
+	 * Set webhook created date.
 	 *
 	 * @since 3.2.0
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
@@ -764,7 +764,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Set webhoook modified date.
+	 * Set webhook modified date.
 	 *
 	 * @since 3.2.0
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
@@ -835,9 +835,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
-		$number = 'legacy_v3' === $version ? -1 : intval( substr( $version, -1 ) );
-
-		$this->set_prop( 'api_version', $number );
+		$this->set_prop( 'api_version', $this->data_store->get_api_version_number( $version ) );
 	}
 
 	/**
