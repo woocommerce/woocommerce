@@ -161,6 +161,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 11.40, $cart->get_cart_tax( 'raw' ) );
 		$this->assertEquals( 10, $cart->get_shipping_total( 'raw' ) );
 		$this->assertEquals( 2, $cart->get_shipping_tax_total( 'raw' ) );
+		$this->assertEquals( 40.00, $cart->get_fee_total( 'raw' ) );
 
 		// Legacy props.
 		$this->assertEquals( 40.00, $cart->fee_total );
@@ -171,7 +172,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 11.40, $cart->tax_total );
 		$this->assertEquals( 3.40, $cart->discount_cart );
 		$this->assertEquals( 0.60, $cart->discount_cart_tax );
-		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 10, $cart->shipping_total );
 		$this->assertEquals( 2, $cart->shipping_tax_total );
 	}

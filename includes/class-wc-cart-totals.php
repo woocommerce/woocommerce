@@ -691,7 +691,8 @@ final class WC_Cart_Totals {
 			$this->cart->fees[ $fee_key ]->tax      = wc_remove_number_precision_deep( $fee->total_tax );
 			$this->cart->fees[ $fee_key ]->tax_data = wc_remove_number_precision_deep( $fee->taxes );
 		}
-		$this->cart->fee_total = wc_remove_number_precision_deep( array_sum( wp_list_pluck( $this->fees, 'total' ) ) );
+
+		$this->cart->set_fee_total( wc_remove_number_precision_deep( array_sum( wp_list_pluck( $this->fees, 'total' ) ) ) );
 	}
 
 	/**
