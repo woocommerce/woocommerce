@@ -57,7 +57,6 @@ final class WC_Cart_Session {
 
 		$this->cart->set_totals( $totals );
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
-		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
 		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
 		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
