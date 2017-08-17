@@ -747,6 +747,7 @@ final class WC_Cart_Totals {
 				'taxes'     => $discount_taxes,
 			);
 		}
+
 		$this->cart_discount_totals     = wp_list_pluck( $this->cart_discounts, 'total' );
 		$this->cart_discount_tax_totals = wp_list_pluck( $this->cart_discounts, 'total_tax' );
 	}

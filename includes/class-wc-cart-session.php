@@ -46,7 +46,7 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Get the cart data from the PHP session and store it in class variables. @todo
+	 * Get the cart data from the PHP session and store it in class variables.
 	 *
 	 * @since 3.2.0
 	 */

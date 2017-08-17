@@ -83,10 +83,10 @@ abstract class WC_Legacy_Cart {
 				return $this->get_taxes( 'shipping' );
 			case 'fee_total' :
 				return $this->get_fee_total( 'raw' );
-			case 'discount_cart' : // @todo
-				return $this->get_discount_total( 'raw' ); // @todo
+			case 'discount_cart' :
+				return $this->get_discount_total( 'raw' );
 			case 'discount_cart_tax' :
-				return $this->get_discount_tax( 'raw' ); // @todo
+				return $this->get_discount_tax( 'raw' );
 			case 'shipping_total' :
 				return $this->get_shipping_total( 'raw' );
 			case 'shipping_tax_total' :
@@ -118,23 +118,45 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
-	 * Magic setters. // @todo
+	 * Map legacy variables to setters.
 	 *
 	 * @param string $name Property name.
-	 * @param mixed $value Value to set.
+	 * @param mixed  $value Value to set.
 	 */
 	public function __set( $name, $value ) {
 		switch ( $name ) {
+			case 'cart_contents_total' :
+				$this->set_cart_total( $value );
+			case 'total' :
+				$this->set_total( $value );
+			case 'subtotal' :
+			case 'subtotal_ex_tax' :
+				$this->set_subtotal( $value );
+			case 'tax_total' :
+				$this->set_cart_tax( $value );
+			case 'taxes' :
+				$this->set_taxes( 'cart', $value );
+			case 'shipping_taxes' :
+				$this->set_taxes( 'shipping', $value );
+			case 'fee_total' :
+				$this->set_fee_total( $value );
+			case 'discount_cart' :
+				$this->set_discount_total( $value );
+			case 'discount_cart_tax' :
+				$this->set_discount_tax( $value );
+			case 'shipping_total' :
+				$this->set_shipping_total( $value );
+			case 'shipping_tax_total' :
+				$this->set_shipping_tax( $value );
 			case 'coupon_discount_amounts' :
 				$this->set_coupon_discount_totals( $value );
-				break;
+			case 'coupon_discount_tax_amounts' :
+				$this->set_coupon_discount_tax_totals( $value );
 			default :
 				$this->$name = $value;
 				break;
 		}
 	}
-
-	// @todo issets
 
 	/**
 	 * Methods moved to session class in 3.2.0.

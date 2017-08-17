@@ -1020,12 +1020,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $coupon_code Coupon code to check.
 	 * @return bool
 	 */
-	public function has_discount( $coupon_code = '' ) { // @todo
+	public function has_discount( $coupon_code = '' ) {
 		return $coupon_code ? in_array( wc_format_coupon_code( $coupon_code ), $this->applied_coupons, true ) : count( $this->applied_coupons ) > 0;
 	}
 
 	/**
-	 * Applies a coupon code passed to the method. // @todo
+	 * Applies a coupon code passed to the method.
 	 *
 	 * @param string $coupon_code - The code to apply.
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
@@ -1207,7 +1207,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			unset( $this->applied_coupons[ $position ] );
 		}
 
-		WC()->session->set( 'applied_coupons', $this->applied_coupons ); // @todo
 		WC()->session->set( 'refresh_totals', true );
 
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
@@ -1656,12 +1655,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Get the total of all cart discounts. @todo naming is weird
+	 * Get the total of all cart discounts.
 	 *
 	 * @return float
 	 */
 	public function get_cart_discount_total() {
-		return wc_cart_round_discount( $this->discount_cart, wc_get_price_decimals() );
+		return wc_cart_round_discount( $this->get_discount_total( 'raw' ), wc_get_price_decimals() );
 	}
 
 	/**
@@ -1670,7 +1669,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_discount_tax_total() {
-		return wc_cart_round_discount( $this->discount_cart_tax, wc_get_price_decimals() );
+		return wc_cart_round_discount( $this->get_discount_tax( 'raw' ), wc_get_price_decimals() );
 	}
 
 	/**
