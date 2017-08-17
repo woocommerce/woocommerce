@@ -84,13 +84,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( WC()->cart->cart_discount_total > 0 ) : ?>
-			<tr class="discount">
-				<th><?php esc_html_e( 'Discounts', 'woocommerce' ); ?></th>
-				<td><?php wc_cart_totals_discounts_html(); ?></td>
-			</tr>
-		<?php endif; ?>
-
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) : ?>
 			<?php if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>
 				<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>

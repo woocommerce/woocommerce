@@ -65,13 +65,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( WC()->cart->cart_discount_total > 0 ) : ?>
-			<tr class="discount">
-				<th><?php esc_html_e( 'Discounts', 'woocommerce' ); ?></th>
-				<td data-title="<?php esc_attr_e( 'Discounts', 'woocommerce' ); ?>"><?php wc_cart_totals_discounts_html(); ?></td>
-			</tr>
-		<?php endif; ?>
-
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
 			$taxable_address = WC()->customer->get_taxable_address();
 			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
