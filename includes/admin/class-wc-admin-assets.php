@@ -44,6 +44,8 @@ class WC_Admin_Assets {
 		wp_register_style( 'jquery-ui-style', '//code.jquery.com/ui/' . $jquery_version . '/themes/smoothness/jquery-ui.min.css', array(), $jquery_version );
 		wp_register_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 		wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), WC_VERSION, 'print' );
+                //Contributed by Thewpexperts for color swatch
+                wp_register_style( 'woocommerce_admin_swatch_styles', WC()->plugin_url() . '/assets/css/admin-swatch.css', array(), WC_VERSION );
 
 		// Add RTL support for admin styles
 		wp_style_add_data( 'woocommerce_admin_menu_styles', 'rtl', 'replace' );
@@ -57,6 +59,8 @@ class WC_Admin_Assets {
 		// Admin styles for WC pages only
 		if ( in_array( $screen_id, wc_get_screen_ids() ) ) {
 			wp_enqueue_style( 'woocommerce_admin_styles' );
+                        //Contributed by Thewpexperts for color swatch
+                        wp_enqueue_style( 'woocommerce_admin_swatch_styles' );
 			wp_enqueue_style( 'jquery-ui-style' );
 			wp_enqueue_style( 'wp-color-picker' );
 		}
@@ -168,6 +172,12 @@ class WC_Admin_Assets {
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 		}
+            if ( strpos( $screen_id, 'pa_' ) || in_array( $screen_id, array( 'product' ) ) ) {
+//Contributed by Thewpexperts for color swatch
+                wp_register_script( 'woocommerce_swatch', WC()->plugin_url() . '/assets/js/admin/swatch' .$suffix. '.js', array( 'jquery', 'wp-color-picker', 'wp-util' ), WC_VERSION );
+                wp_enqueue_style( 'wp-color-picker' );
+                wp_enqueue_script( 'woocommerce_swatch' );
+            }
 
 		// Edit product category pages
 		if ( in_array( $screen_id, array( 'edit-product_cat' ) ) ) {

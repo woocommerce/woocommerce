@@ -2247,12 +2247,15 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$show_option_none      = $args['show_option_none'] ? true : false;
 		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
+                //Contributed by Thewpexperts for color swatch
+                $attribute_details = wc_get_tax_attribute( $attribute );
+                $hiddenClass = ($attribute_details->attribute_type == 'color' ? "swatch_option_hidden" : '');
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 			$attributes = $product->get_variation_attributes();
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
+		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . ' ' . esc_attr( $hiddenClass ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -2277,8 +2280,75 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$html .= '</select>';
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
+                        if ( $attribute_details->attribute_type == 'color' ) {
+            wc_colorswatch_variation_attribute_options( array( 'options' => $options, 'attribute' => $attribute, 'product' => $product, 'selected' => sanitize_title( $args[ 'selected' ] ), 'id' => 'woocommerce-color-swatch' ) );
+        }
 	}
 }
+if ( !function_exists( 'wc_colorswatch_variation_attribute_options' ) ) {
+
+    /**
+     * 
+     * Outputs a list of color combination attributes for use in the cart forms.
+     *
+     * @param array $args
+     * @since 2.4.0
+     * Contributed by Thewpexperts for color swatch
+     */
+    function wc_colorswatch_variation_attribute_options( $args = array() ) {
+
+        $args = wp_parse_args( apply_filters( 'woocommerce_colorswatch_variation_attribute_options_args', $args ), array(
+            'options' => false,
+            'attribute' => false,
+            'product' => false,
+            'selected' => false,
+            'name' => '',
+            'id' => '',
+            'class' => '',
+            'show_option_none' => __( 'Choose an option', 'woocommerce' ),
+        ) );
+
+        $options = $args[ 'options' ];
+        $product = $args[ 'product' ];
+        $attribute = $args[ 'attribute' ];
+        $name = $args[ 'name' ] ? $args[ 'name' ] : 'attribute_' . sanitize_title( $attribute );
+        $id = $args[ 'id' ] ? $args[ 'id' ] : sanitize_title( $attribute );
+        $class = $args[ 'class' ];
+        $show_option_none = $args[ 'show_option_none' ] ? true : false;
+
+        if ( empty( $options ) && !empty( $product ) && !empty( $attribute ) ) {
+            $attributes = $product->get_variation_attributes();
+            $options = $attributes[ $attribute ];
+        }
+        $html = '<div id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" data-select-id="' . sanitize_title( $attribute ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
+
+        if ( !empty( $options ) && $product && taxonomy_exists( $attribute ) ) {
+            // Get terms if this is a taxonomy - ordered. We need the names too.
+            $terms = wc_get_product_terms( $product->get_id(), $attribute, array( 'fields' => 'all' ) );
+            foreach ( $terms as $term ) {
+                if ( in_array( $term->slug, $options ) ) {
+                    $data_value = esc_attr( $term->slug ) . ' ' . selected( sanitize_title( $args[ 'selected' ] ), $term->slug, false );
+                    $active = sanitize_title( $args[ 'selected' ] ) == $term->slug ? ' active' : '';
+                    $width = 40;
+                    $height = 40;
+                    $color_combination = get_woocommerce_term_meta( $term->term_id, 'term-color-comb', true );
+                    $html .= sprintf( '<div class="woocommerce-swatch-color-grid swatch-option%s" style="height:%s;width:%s;" data-option_value=%s title="%s">', $active, esc_attr( $height . 'px' ), esc_attr( $width . 'px' ), $data_value, $term->name );
+                    for ( $i = 1; $i <= $color_combination; $i++ ) {
+                        $value = get_woocommerce_term_meta( $term->term_id, "color-$i", true );
+                        $html .= sprintf( '<div class="woocommerce-swatch-color-value" style="height:%s;width:%s;background-color:%s;float:left;"></div>', esc_attr( $height . 'px' ), esc_attr( round( (100 / $color_combination ), 2 ) . '%' ), $value );
+                    }
+                    $html .= '</div>';
+                }
+            }
+        }
+
+        $html .= '</div>';
+
+        echo apply_filters( 'woocommerce_colorswatch_variation_attribute_options_html', $html, $args );
+    }
+
+}
+
 
 if ( ! function_exists( 'woocommerce_account_content' ) ) {
 

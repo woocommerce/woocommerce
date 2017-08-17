@@ -9,7 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong class="attribute_name"><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
 	</h3>
-	<div class="woocommerce_attribute_data wc-metabox-content">
+    <?php //Contributed by Thewpexperts for color swatch ?>
+	<div class="woocommerce_attribute_data wc-metabox-content <?php echo $attribute->get_taxonomy_object()->attribute_type; ?>">
 		<table cellpadding="0" cellspacing="0">
 			<tbody>
 				<tr>
@@ -29,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
 
 						<?php if ( $attribute->is_taxonomy() && ( $attribute_taxonomy = $attribute->get_taxonomy_object() ) ) : ?>
-							<?php if ( 'select' === $attribute_taxonomy->attribute_type ) : ?>
+							<?php if ( 'select' === $attribute_taxonomy->attribute_type || 'color' === $attribute_taxonomy->attribute_type) : //Contributed by Thewpexperts for color swatch ?>
 
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo $i; ?>][]">
 									<?php
@@ -49,7 +50,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</select>
 								<button class="button plus select_all_attributes"><?php _e( 'Select all', 'woocommerce' ); ?></button>
 								<button class="button minus select_no_attributes"><?php _e( 'Select none', 'woocommerce' ); ?></button>
-								<button class="button fr plus add_new_attribute"><?php _e( 'Add new', 'woocommerce' ); ?></button>
+                                                                        <?php if ( 'color' === $attribute_taxonomy->attribute_type ): ?>
+                                                                            <?php //Contributed by Thewpexperts for color swatch ?>
+                                                                            <button class="button fr plus add_new_color_attribute"><?php _e( 'Add new', 'woocommerce' ); ?></button>
+                                                                        <?php else: ?>					<button class="button fr plus add_new_attribute"><?php _e( 'Add new', 'woocommerce' ); ?></button>
+                                                                        <?php endif; ?>
 
 							<?php elseif ( 'text' == $attribute_taxonomy->attribute_type ) : ?>
 

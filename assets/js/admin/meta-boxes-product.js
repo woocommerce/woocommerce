@@ -427,6 +427,77 @@ jQuery( function( $ ) {
 
 		return false;
 	});
+        var $swatchPopup = $( '#wc-modal-add-new-color-attribute-container' );
+    $( '.product_attributes' ).on( 'click', 'button.add_new_color_attribute', function() {
+
+        $swatchPopup.removeClass( 'hidden' );
+        $swatchPopup.find( 'input[name=term-color-comb]' ).attr( 'checked', false );
+        $swatchPopup.find( '.wp-picker-container' ).hide();
+        var taxonomyTemplate = wp.template( 'swatch-input-taxonomy' ),
+                data = {
+                    taxonomy: $( this ).closest( '.woocommerce_attribute' ).data( 'taxonomy' )
+                };
+        $( '.wc-swatch-taxonomy' ).html( taxonomyTemplate( data ) );
+        return false;
+    } );
+    $swatchPopup.on( 'click', 'button.wc-swatch-popup-close', function() {
+        closeSwatchPopup();
+        return false;
+    } );
+    $swatchPopup.on( 'click', 'button.wc-modal-new-attribute-submit', function() {
+        var $swatchWrapper = $( '.woocommerce_attribute_data.color' );
+        var hasError = false,
+            postData = {
+                security: woocommerce_admin_meta_boxes.add_attribute_nonce,
+                action: 'woocommerce_add_new_attribute',
+                'term-color-comb': $( 'input[name=term-color-comb]:radio:checked' ).val()
+            },
+            $val,
+            $fieldName;
+                
+        $swatchPopup.find( '.swatch-input' ).each( function() {
+            $val = $( this ).val().trim();
+            $fieldName =  $(this ).attr( 'name' );
+            if ( $( this ).attr( 'name' ) === 'term' && $val === '' )
+            {
+                $( this ).addClass( 'required-error' );
+                hasError = true;
+            } else
+            {
+                $( this ).removeClass( 'required-error' );
+            }
+            postData[$fieldName] = $val;
+        } );
+               
+        if ( hasError )
+        {
+            return false;
+        }
+        $.post( woocommerce_admin_meta_boxes.ajax_url, postData, function( response ) {
+
+            if ( response.error ) {
+                // Error.
+                window.alert( response.error );
+            } else if ( response.slug ) {
+                // Success.
+                $swatchWrapper.find( 'select.attribute_values' ).append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
+                $swatchWrapper.find( 'select.attribute_values' ).change();
+            }
+
+            $( '.product_attributes' ).unblock();
+            closeSwatchPopup();
+        } );
+
+        return false;
+
+    } );
+
+    function closeSwatchPopup()
+    {
+        $swatchPopup.addClass( 'hidden' );
+        $swatchPopup.find( '.term_name, term_slug' ).val( '' );
+    }
+    //Contributed by Thewpexperts for color swatch
 
 	// Save attributes and update variations.
 	$( '.save_attributes' ).on( 'click', function() {

@@ -39,18 +39,71 @@ class WC_Admin_Taxonomies {
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
 
+        //Contributed by Thewpexperts for color swatch
+        add_action('woocommerce_product_attribute_field', array($this, 'woocommerce_term_custom_attribute_fields'), 10, 4);
+
+        //Contributed by Thewpexperts for color swatch
+        add_action('admin_footer', array($this, 'woocommerce_add_new_color_attribute_popup'));
+
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $attribute ) {
-				add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
+                            add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
+                            //Contributed by Thewpexperts for color swatch
+                            add_action('pa_' . $attribute->attribute_name . '_add_form_fields', array($this, 'woocommerce_add_attribute_fields'));
+                            add_action('pa_' . $attribute->attribute_name . '_edit_form_fields', array($this, 'woocommerce_edit_attribute_fields'), 10, 2);
+                            //Contributed by Thewpexperts for color swatch
+                            add_filter('manage_edit-pa_' . $attribute->attribute_name . '_columns', array($this, 'woocommerce_add_attribute_columns'));
+                            add_filter('manage_pa_' . $attribute->attribute_name . '_custom_column', array($this, 'woocommerce_add_attribute_column'), 10, 3);
+                                
 			}
 		}
 
 		// Maintain hierarchy of terms
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
 	}
+ /**
+  * Merged color swatch column with default columns. 
+  * 
+  * @param array $columns
+  * @return array
+  */
+    public function woocommerce_add_attribute_columns($columns) {
+        $attr = wc_get_tax_attribute($_REQUEST['taxonomy']);
+        $new_columns = array();
+        if ('color' === $attr->attribute_type) {
+            $new_columns['cb'] = $columns['cb'];
+            $new_columns['swatch'] = '';
+            unset($columns['cb']);
+        }
+        return array_merge($new_columns, $columns);
+    }
 
+    /**
+     * Adds a new column for color swatch
+     * 
+     * @param type $columns
+     * @param type $column
+     * @param type $term_id
+     * Contributed by Thewpexperts for color swatch
+     */
+    public function woocommerce_add_attribute_column($columns, $column, $term_id) {
+        $attr = wc_get_tax_attribute($_REQUEST['taxonomy']);
+        switch ($attr->attribute_type) {
+            case 'color':
+                $width = 80;
+                $height = 75;
+                $color_combination = get_woocommerce_term_meta($term_id, 'term-color-comb', true);
+                printf('<div class="multi-color-swatch-cloumn" style="border: 1px solid #e7e7e7;height:%s;width:%s;">', esc_attr($height . 'px'), esc_attr($width . 'px'));
+                for ($i = 1; $i <= $color_combination; $i++) {
+                    $value = get_woocommerce_term_meta($term_id, "color-$i", true);
+                    printf('<div class="color-value" style="height:%s;width:%s;background-color:%s;float:left;"></div>', esc_attr($height . 'px'), esc_attr(round((100 / $color_combination), 2) . '%'), $value);
+                }
+                printf('</div>');
+                break;
+        }
+    }
 	/**
 	 * Order term when created (put in position 0).
 	 *
@@ -286,7 +339,14 @@ class WC_Admin_Taxonomies {
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) {
 			update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
 		}
-	}
+                //Contributed by Thewpexperts for color swatch
+                if ( isset( $_POST[ 'term-color-comb' ] ) ) {
+                    update_woocommerce_term_meta( $term_id, 'term-color-comb', absint( $_POST[ 'term-color-comb' ] ) );
+                    update_woocommerce_term_meta( $term_id, 'color-1', esc_attr( $_POST[ 'color-1' ] ) );
+                    update_woocommerce_term_meta( $term_id, 'color-2', esc_attr( $_POST[ 'color-2' ] ) );
+                    update_woocommerce_term_meta( $term_id, 'color-3', esc_attr( $_POST[ 'color-3' ] ) );
+                }
+    }
 
 	/**
 	 * Description for product_cat page to aid users.
@@ -365,6 +425,152 @@ class WC_Admin_Taxonomies {
 		}
 		return $args;
 	}
+        
+    /** 
+     * Print HTML for color swatch on attribute term screens
+     *
+     * @param $term 
+     * @param $type
+     * @param $value
+     * @param $form
+     * Contributed by Thewpexperts for color swatch
+     */
+    public function woocommerce_term_custom_attribute_fields($term, $type, $value, $form) {
+
+        if (in_array($type, array('select', 'text'))) {
+            return;
+        }
+        printf(
+                '<%s class="form-field">%s<label for="term-%s">%s</label>%s', 'edit' == $form ? 'tr' : 'div', 'edit' == $form ? '<th>' : '', esc_attr($type), 'Select Color Combinations', 'edit' == $form ? '</th><td>' : ''
+        );
+        switch ($type) {
+            case 'color':
+                $color_comb = get_woocommerce_term_meta($term->term_id, 'term-color-comb', true);
+                ?>
+                <div style="line-height:60px;">
+                    <?php
+                    for ($numberOfColor = 1; $numberOfColor <= 3; $numberOfColor++) {
+                        ?>
+                        <input type="radio"  name="term-<?php echo esc_attr($type) ?>-comb" id="term-<?php echo esc_attr($type) . "-comb_$numberOfColor" ?>" value="<?php echo $numberOfColor; ?>" class="select_comb_radio" <?php echo ($color_comb == $numberOfColor) ? 'checked="checked"' : ''; ?>  />
+                        <?php
+                        esc_html_e(($numberOfColor == 1 ? 'One Color ' : ($numberOfColor == 2 ? 'Two Color ' : 'Three Color ')), 'woocommerce');
+                    }
+                    ?>
+                </div>
+                <?php
+                for ($color = 1; $color <= 3; $color++) {
+                    $colorVal = get_woocommerce_term_meta($term->term_id, "color-$color", true);
+                    ?>
+                    <input type="text" id="term-<?php echo esc_attr($type) . "-picker-$color" ?>" name="<?php echo esc_attr($type) . "-$color" ?>" value="<?php echo esc_attr($colorVal) ?>" />
+                    <?php
+                }
+                break;
+
+            default:
+
+                break;
+        }
+        echo 'edit' == $form ? '</td></tr>' : '</div>';
+    }
+
+    /**
+     * Show a Popup for color swatch items.
+     * 
+     * Contributed by Thewpexperts for color swatch
+     */
+    public function woocommerce_add_new_color_attribute_popup() {
+
+        global $post_type;
+
+        if ($post_type != 'product') {
+            return;
+        }
+        ?>
+        <div id="wc-modal-add-new-color-attribute-container" class="wc-swatch-modal-container hidden">
+            <div class="wc-swatch-modal">
+                <button type="button" class="wc-swatch-popup-close button-link media-modal-close">
+                    <span class="media-modal-icon"></span></button>
+                <div class="wc-swatch-modal-header">
+                    <h2><?php esc_html_e('Add New Value', 'woocommerce') ?></h2>
+                </div>
+                <div class="wc-swatch-modal-content">
+                    <div class="form-field">
+                        <label class="field-label" for="name"><?php _e('Name', 'woocommerce'); ?></label>
+                        <input type="text" name="term" class="swatch-input term_name">
+                        <p><?php _e('The name is how it appears on your site.', 'woocommerce'); ?></p>
+                    </div>
+                    <div class="form-field">
+                        <label class="field-label" for="slug"><?php _e('Slug', 'woocommerce'); ?></label>
+                        <input type="text" name="slug" class="swatch-input term_slug">
+                        <p><?php _e('The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.', 'woocommerce.'); ?></p>
+                    </div>
+                    <div class="form-field">
+                        <label class="field-label">Select Color Combinations</label>
+                        <br/>
+                        <?php
+                        $type = 'color';
+                        for ($numberOfColor = 1; $numberOfColor <= 3; $numberOfColor++) {
+                            ?>
+                            <input type="radio"  name="term-<?php echo esc_attr($type) ?>-comb" id="term-<?php echo esc_attr($type) . "-comb_$numberOfColor" ?>" value="<?php echo $numberOfColor; ?>" class="select_comb_radio swatch-input"/>
+                            <label for="<?php echo 'term-' . esc_attr($type) . '-comb_' . $numberOfColor . ''; ?>">
+                                <?php
+                                esc_html_e(($numberOfColor == 1 ? 'One Color ' : ($numberOfColor == 2 ? 'Two Color ' : 'Three Color ')), 'woocommerce');
+                            }
+                            ?>
+                        </label>
+                    </div>
+                    <br/>
+                    <div class="form-field">
+                        <?php
+                        for ($color = 1; $color <= 3; $color++) {
+                            ?>
+                            <input type="text" id="term-<?php echo esc_attr($type) . "-picker-$color" ?>" name="<?php echo esc_attr($type) . "-$color" ?>"  class="swatch-input"/>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                    <input type="text" name="taxonomytype" class="swatch-input hidden" value="<?php echo $type; ?>">
+                </div>
+                <div class="hidden wc-swatch-taxonomy"> </div>
+                <div class="wc-swatch-modal-footer">
+                    <button class="wc-swatch-popup-close button button-secondary">
+                        <?php esc_html_e('Cancel', 'woocommerce') ?></button>
+                    <button class="button button-primary wc-modal-new-attribute-submit">
+                        <?php esc_html_e('Add New', 'woocommerce') ?></button>
+                </div>
+            </div>
+
+            <script type="text/template" id="tmpl-swatch-input-taxonomy">
+                <input type="hidden" name="taxonomy" value="{{data.taxonomy}}" class="swatch-input">
+            </script>
+            <div class="wc-swatch-modal-main"></div>
+        </div>
+        <?php
+    }
+
+    /** 
+     * 
+     * A hook to add fields to "Add attribute" term screen.
+     *
+     * @param string $taxonomy
+     * Contributed by Thewpexperts for color swatch
+     */
+    public function woocommerce_add_attribute_fields($taxonomy) {
+        $attr = wc_get_tax_attribute($taxonomy);
+        do_action('woocommerce_product_attribute_field', $taxonomy, $attr->attribute_type, '', 'add');
+    }
+
+    /** 
+     * A hook to add fields to "Edit attribute" term screen
+     *
+     * @param string $taxonomy
+     * Contributed by Thewpexperts for color swatch
+     */
+    public function woocommerce_edit_attribute_fields($term, $taxonomy) {
+        $attr = wc_get_tax_attribute($taxonomy);
+        $value = get_term_meta($term->term_id, $attr->attribute_type, true);
+        do_action('woocommerce_product_attribute_field', $term, $attr->attribute_type, $value, 'edit');
+    }        
 }
 
 new WC_Admin_Taxonomies();

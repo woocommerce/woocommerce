@@ -518,6 +518,15 @@ class WC_AJAX {
 						'error' => $result->get_error_message(),
 					) );
 				} else {
+                                    //Contributed by Thewpexperts for color swatch
+                                    if ( isset( $_POST[ 'taxonomytype' ] ) && $_POST[ 'taxonomytype' ] == 'color' ) {
+                        foreach ( $_POST as $meta => $val ) {
+                            if ( strpos( $meta, $_POST[ 'taxonomytype' ] ) ) {
+                                update_term_meta( $term->term_id, $meta, $val );
+                            }
+                        }
+                    }
+                    //Contributed by Thewpexperts for color swatch           
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
 					wp_send_json( array(
 						'term_id' => $term->term_id,
