@@ -44,17 +44,17 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 		}
 
 		$data = array(
-			'status'            => $webhook->get_status( 'edit' ),
-			'name'              => $webhook->get_name( 'edit' ),
-			'user_id'           => $webhook->get_user_id( 'edit' ),
-			'delivery_url'      => $webhook->get_delivery_url( 'edit' ),
-			'secret'            => $webhook->get_secret( 'edit' ),
-			'topic'             => $webhook->get_topic( 'edit' ),
-			'date_created'      => $date_created,
-			'date_created_gmt'  => $date_created_gmt,
-			'api_version'       => $this->get_api_version_number( $webhook->get_api_version( 'edit' ) ),
-			'failure_count'     => $webhook->get_failure_count( 'edit' ),
-			'pending_delivery'  => $webhook->get_pending_delivery( 'edit' ),
+			'status'           => $webhook->get_status( 'edit' ),
+			'name'             => $webhook->get_name( 'edit' ),
+			'user_id'          => $webhook->get_user_id( 'edit' ),
+			'delivery_url'     => $webhook->get_delivery_url( 'edit' ),
+			'secret'           => $webhook->get_secret( 'edit' ),
+			'topic'            => $webhook->get_topic( 'edit' ),
+			'date_created'     => $date_created,
+			'date_created_gmt' => $date_created_gmt,
+			'api_version'      => $this->get_api_version_number( $webhook->get_api_version( 'edit' ) ),
+			'failure_count'    => $webhook->get_failure_count( 'edit' ),
+			'pending_delivery' => $webhook->get_pending_delivery( 'edit' ),
 		);
 
 		// @codingStandardsIgnoreStart
