@@ -832,10 +832,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Set API version.
 	 *
 	 * @since 3.0.0
-	 * @param string $version REST API version.
+	 * @param int|string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
-		$this->set_prop( 'api_version', $this->data_store->get_api_version_number( $version ) );
+		if ( ! is_numeric( $version ) ) {
+			$version = $this->data_store->get_api_version_number( $version );
+		}
+
+		$this->set_prop( 'api_version', (int) $version );
 	}
 
 	/**
