@@ -1150,7 +1150,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
-		$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+		$discount_amounts = $this->get_coupon_discount_totals();
+		$discount_amount  = isset( $discount_amounts[ $code ] ) ? $discount_amounts[ $code ]: 0;
 
 		if ( ! $ex_tax ) {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
@@ -1166,19 +1167,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, wc_get_price_decimals() );
+		$discount_tax_amounts = $this->get_coupon_discount_tax_totals();
+		return wc_cart_round_discount( isset( $discount_tax_amounts[ $code ] ) ? $discount_tax_amounts[ $code ] : 0, wc_get_price_decimals() );
 	}
 
 	/**
 	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
-	 *
-	 * @param null $deprecated No longer used.
 	 */
-	public function remove_coupons( $deprecated = null ) {
-		$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
-		WC()->session->set( 'applied_coupons', array() );
-		WC()->session->set( 'coupon_discount_amounts', array() ); // @todo
-		WC()->session->set( 'coupon_discount_tax_amounts', array() );
+	public function remove_coupons() {
+		$this->set_coupon_discount_totals( array() );
+		$this->set_coupon_discount_tax_totals( array() );
+		$this->set_applied_coupons( array() );
+		$this->session->set_session();
 	}
 
 	/**

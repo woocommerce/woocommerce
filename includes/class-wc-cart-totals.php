@@ -670,8 +670,9 @@ final class WC_Cart_Totals {
 
 		$this->coupon_discount_totals              = (array) $discounts->get_discounts_by_item( true );
 		$this->coupon_discount_tax_totals          = $coupon_discount_tax_amounts;
-		$this->cart->coupon_discount_amounts     = wc_remove_number_precision_deep( $coupon_discount_amounts );
-		$this->cart->coupon_discount_tax_amounts = wc_remove_number_precision_deep( $coupon_discount_tax_amounts );
+
+		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
+		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
 	}
 
 	/**
