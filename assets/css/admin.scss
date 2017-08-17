@@ -1617,19 +1617,6 @@ ul.wc_coupon_list_block {
 				}
 			}
 
-			tr.discount .thumb div {
-				@include ir();
-				font-size: 1.5em;
-				line-height: 1em;
-				vertical-align: middle;
-				margin: 0 auto;
-
-				&::before {
-					@include icon( '\e600' );
-					color: #ccc;
-				}
-			}
-
 			tr.refund .thumb div {
 				@include ir();
 				font-size: 1.5em;
