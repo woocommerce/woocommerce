@@ -69,14 +69,6 @@ final class WC_Cart_Totals {
 	protected $coupons = array();
 
 	/**
-	 * Applied cart discount objects.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-	protected $cart_discounts = array();
-
-	/**
 	 * Item/coupon discount totals.
 	 *
 	 * @since 3.2.0
@@ -91,23 +83,6 @@ final class WC_Cart_Totals {
 	 * @var array
 	 */
 	protected $coupon_discount_tax_totals = array();
-
-	/**
-	 * Cart discount totals.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-	protected $cart_discount_totals = array();
-
-	/**
-	 * Cart discount tax totals.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-
-	protected $cart_discount_tax_totals = array();
 
 	/**
 	 * Should taxes be calculated?
@@ -156,9 +131,8 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate() {
 		$this->calculate_item_totals();
-		$this->calculate_fee_totals();
 		$this->calculate_shipping_totals();
-		$this->calculate_cart_discounts();
+		$this->calculate_fee_totals();
 		$this->calculate_totals();
 	}
 
@@ -476,7 +450,7 @@ final class WC_Cart_Totals {
 	 * @param  array|string $types Types to merge and return. Defaults to all.
 	 * @return array
 	 */
-	protected function get_merged_taxes( $in_cents = false, $types = array( 'items', 'fees', 'shipping', 'cart_discounts' ) ) {
+	protected function get_merged_taxes( $in_cents = false, $types = array( 'items', 'fees', 'shipping' ) ) {
 		$items = array();
 		$taxes = array();
 
@@ -502,31 +476,6 @@ final class WC_Cart_Totals {
 		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
 	}
 
-	/**
-	 * Set processed cart discounts in the cart.
-	 *
-	 * @since 3.2.0
-	 */
-	public function set_processed_cart_discounts() {
-		foreach ( $this->cart_discounts as $key => $discount ) {
-
-			$taxes = wc_remove_number_precision_deep( $discount->taxes );
-			foreach( $taxes as &$amount ) {
-				$amount = - $amount;
-			}
-
-			$this->cart->processed_cart_discounts[ $key ] = array(
-				'amount' => wc_remove_number_precision( $discount->object->get_amount() ),
-				'discount_type' => 'percent' === $discount->object->get_discount_type() ? 'percent' : 'fixed',
-				'total' => - wc_remove_number_precision( $discount->total ),
-				'total_taxes' => - wc_remove_number_precision( $discount->total_tax ),
-				'taxes'     => array(
-					'total' => $taxes,
-				),
-			);
-		}
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Calculation methods.
@@ -541,7 +490,7 @@ final class WC_Cart_Totals {
 	protected function calculate_item_totals() {
 		$this->get_items_from_cart();
 		$this->calculate_item_subtotals();
-		$this->calculate_coupon_discounts();
+		$this->calculate_discounts();
 
 		foreach ( $this->items as $item_key => $item ) {
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
@@ -632,7 +581,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 * @uses  WC_Discounts class.
 	 */
-	protected function calculate_coupon_discounts() {
+	protected function calculate_discounts() {
 		$this->get_coupons_from_cart();
 
 		$discounts = new WC_Discounts( $this->cart );
@@ -653,7 +602,7 @@ final class WC_Cart_Totals {
 					$item = $this->items[ $item_key ];
 
 					if ( $item->product->is_taxable() ) {
-						$item_tax                                      = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
+						$item_tax = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
 					}
 				}
@@ -706,61 +655,14 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Calculate custom cart discounts - these can be fixed or percent and are applied to the cart as a whole.
-	 *
-	 * @since 3.2.0
-	 */
-	protected function calculate_cart_discounts() {
-		$this->cart->calculate_cart_discounts();
-		$discounts = new WC_Discounts( $this->cart );
-
-		foreach ( $this->cart->get_cart_discounts() as $discount_key => $discount ) {
-			$raw_discount = 'percent' === $discount->get_discount_type() ? $discount->get_amount() . '%' : $discount->get_amount();
-			$discounts->apply_discount( $raw_discount, $discount_key );
-		}
-
-		$this->cart_discounts = array();
-
-		foreach ( $discounts->get_cart_discounts() as $discount_key => $discount ) {
-			$discount_taxes  = array();
-
-			if ( $this->calculate_tax ) {
-				$tax_class_costs = $this->get_item_costs_by_tax_class();
-				$total_costs     = array_sum( $tax_class_costs );
-
-				if ( $total_costs ) {
-					foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
-						if ( 'non-taxable' === $tax_class ) {
-							continue;
-						}
-						$proportion               = $tax_class_cost / $total_costs;
-						$cart_discount_proportion = $discount->get_discount_total() * $proportion;
-						$discount_taxes           = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, WC_Tax::get_rates( $tax_class ) ) );
-					}
-				}
-			}
-
-			$this->cart_discounts[ $discount_key ] = (object) array(
-				'object'    => $discount,
-				'total'     => $discount->get_discount_total(),
-				'total_tax' => array_sum( $discount_taxes ),
-				'taxes'     => $discount_taxes,
-			);
-		}
-
-		$this->cart_discount_totals     = wp_list_pluck( $this->cart_discounts, 'total' );
-		$this->cart_discount_tax_totals = wp_list_pluck( $this->cart_discounts, 'total_tax' );
-	}
-
-	/**
 	 * Main cart totals.
 	 *
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) + array_sum( $this->cart_discount_totals ) );
-		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) + array_sum( $this->cart_discount_tax_totals ) );
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) - array_sum( $this->cart_discount_totals ) ) );
+		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) );
+		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) );
+		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) ) );
 
 		// Add totals to cart object.
 		$this->cart->set_cart_total( $this->get_total( 'items_total' ) );
@@ -770,11 +672,8 @@ final class WC_Cart_Totals {
 		$this->cart->set_taxes( 'cart', $this->get_merged_taxes( false, 'items' ) );
 		$this->cart->set_taxes( 'shipping', $this->get_merged_taxes( false, 'shipping' ) );
 		$this->cart->set_taxes( 'fees', $this->get_merged_taxes( false, 'fees' ) );
-		$this->cart->set_taxes( 'cart_discounts', $this->get_merged_taxes( false, 'cart_discounts' ) );
 		$this->cart->set_cart_tax( array_sum( $this->get_merged_taxes( false, 'items' ) ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
-
-		$this->set_processed_cart_discounts();
 
 		// Allow plugins to hook and alter totals before final total is calculated.
 		if ( has_action( 'woocommerce_calculate_totals' ) ) {
