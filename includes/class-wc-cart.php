@@ -916,7 +916,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( 'excl' === $this->tax_display_cart ) {
 				$return = $this->get_shipping_total();
 
-				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
+				if ( $this->get_shipping_tax_total( 'raw' ) > 0 && wc_prices_include_tax() ) {
 					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 
@@ -1640,7 +1640,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_total_ex_tax() {
-		$total = max( 0, $this->get_total( 'raw' ) - $this->get_cart_tax( 'raw' ) - $this->shipping_tax_total );
+		$total = max( 0, $this->get_total( 'raw' ) - $this->get_cart_tax( 'raw' ) - $this->get_shipping_tax_total( 'raw' ) );
 
 		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) );
 	}
