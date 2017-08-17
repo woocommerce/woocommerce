@@ -142,9 +142,9 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 90.40, $cart->get_total( 'raw' ) );
 		$this->assertEquals( 36.00, $cart->get_subtotal( 'raw' ) + $cart->get_subtotal_tax( 'raw' ) );
 		$this->assertEquals( 30.00, $cart->get_subtotal( 'raw' ) );
-		$this->assertEquals( 11.40, $cart->get_cart_tax( 'raw' ) );
+		$this->assertEquals( 5.40, $cart->get_cart_tax( 'raw' ) );
 		$this->assertEquals( 10, $cart->get_shipping_total( 'raw' ) );
-		$this->assertEquals( 2, $cart->get_shipping_tax_total( 'raw' ) );
+		$this->assertEquals( 2, $cart->get_shipping_tax( 'raw' ) );
 		$this->assertEquals( 40.00, $cart->get_fee_total( 'raw' ) );
 
 		// Legacy props.
@@ -154,7 +154,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 36.00, $cart->subtotal );
 		$this->assertEquals( 30.00, $cart->subtotal_ex_tax );
 		$this->assertEquals( 11.40, $cart->tax_total );
-		$this->assertEquals( 3.40, $cart->discount_cart );
+		$this->assertEquals( 3, $cart->discount_cart );
 		$this->assertEquals( 0.60, $cart->discount_cart_tax );
 		$this->assertEquals( 10, $cart->shipping_total );
 		$this->assertEquals( 2, $cart->shipping_tax_total );

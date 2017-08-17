@@ -460,7 +460,7 @@ final class WC_Cart_Totals {
 
 		foreach ( $types as $type ) {
 			if ( isset( $this->$type ) ) {
-				$items = $items + $this->$type;
+				$items = array_merge( $items, $this->$type );
 			}
 		}
 

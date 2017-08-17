@@ -317,7 +317,7 @@ class WC_Checkout {
 			$order->set_discount_total( WC()->cart->get_discount_total( 'raw' ) );
 			$order->set_discount_tax( WC()->cart->get_discount_tax( 'raw' ) );
 			$order->set_cart_tax( WC()->cart->get_cart_tax( 'raw' ) );
-			$order->set_shipping_tax( WC()->cart->get_shipping_tax_total( 'raw' ) );
+			$order->set_shipping_tax( WC()->cart->get_shipping_tax( 'raw' ) );
 			$order->set_total( WC()->cart->get_total( 'raw' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );

@@ -76,11 +76,11 @@ abstract class WC_Legacy_Cart {
 			case 'subtotal_ex_tax' :
 				return $this->get_subtotal( 'raw' );
 			case 'tax_total' :
-				return $this->get_cart_tax( 'raw' );
+				return array_sum( $this->get_merged_taxes( array( 'cart', 'fees' ) ) ); // Should be fees + cart items.
 			case 'taxes' :
 				return $this->get_taxes();
 			case 'shipping_taxes' :
-				return $this->get_taxes( 'shipping' );
+				return $this->get_shipping_taxes();
 			case 'fee_total' :
 				return $this->get_fee_total( 'raw' );
 			case 'discount_cart' :
