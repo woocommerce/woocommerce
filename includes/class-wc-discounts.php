@@ -43,14 +43,7 @@ class WC_Discounts {
 	 *
 	 * @var array[] Code => Item Key => Value
 	 */
-	protected $coupon_discounts = array();
-
-	/**
-	 * An array of applied WC_Discount objects.
-	 *
-	 * @var array
-	 */
-	protected $cart_discounts = array();
+	protected $discounts = array();
 
 	/**
 	 * Constructor.
@@ -72,7 +65,7 @@ class WC_Discounts {
 	 * @param array $cart Cart object.
 	 */
 	public function set_items_from_cart( $cart ) {
-		$this->items = $this->coupon_discounts = $this->cart_discounts = array();
+		$this->items = $this->discounts = array();
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
@@ -100,7 +93,7 @@ class WC_Discounts {
 	 * @param array $order Cart object.
 	 */
 	public function set_items_from_order( $order ) {
-		$this->items     = $this->coupon_discounts      = $this->cart_discounts = array();
+		$this->items     = $this->discounts = array();
 		$this->fee_total = $this->shipping_total = 0;
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
@@ -157,13 +150,7 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts( $in_cents = false ) {
-		$discounts = $this->get_coupon_discounts();
-
-		foreach ( $this->get_cart_discounts() as $cart_discount_key => $cart_discount ) {
-			$discounts[ $cart_discount_key ] = $cart_discount->get_discount_total();
-		}
-
-		return $in_cents ? $discounts : wc_remove_number_precision_deep( $discounts );
+		return $in_cents ? $this->discounts : wc_remove_number_precision_deep( $this->discounts );
 	}
 
 	/**
@@ -174,16 +161,16 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts_by_item( $in_cents = false ) {
-		$discounts            = $this->coupon_discounts;
-		$coupon_discount_totals = (array) array_shift( $discounts );
+		$discounts = $this->discounts;
+		$discount_totals = (array) array_shift( $discounts );
 
-		foreach ( $discounts as $coupon_discounts ) {
-			foreach ( $coupon_discounts as $item_key => $coupon_discount ) {
-				$coupon_discount_totals[ $item_key ] += $coupon_discount;
+		foreach ( $discounts as $discount ) {
+			foreach ( $discount as $item_key => $discount_amount ) {
+				$discount_totals[ $item_key ] += $discount_amount;
 			}
 		}
 
-		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
+		return $in_cents ? $discount_totals : wc_remove_number_precision_deep( $discount_totals );
 	}
 
 	/**
@@ -194,29 +181,9 @@ class WC_Discounts {
 	 * @return array
 	 */
 	public function get_discounts_by_coupon( $in_cents = false ) {
-		$coupon_discount_totals = array_map( 'array_sum', $this->coupon_discounts );
+		$discount_totals = array_map( 'array_sum', $this->discounts );
 
-		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
-	}
-
-	/**
-	 * Get an array of item discounts which have been applied.
-	 *
-	 * @since  3.2.0
-	 * @return array 2D array. Coupon code => item ID => Discount amount.
-	 */
-	public function get_coupon_discounts() {
-		return $this->coupon_discounts;
-	}
-
-	/**
-	 * Get an array of cart discounts which have been applied.
-	 *
-	 * @since  3.2.0
-	 * @return WC_Discount[]
-	 */
-	public function get_cart_discounts() {
-		return $this->cart_discounts;
+		return $in_cents ? $discount_totals : wc_remove_number_precision_deep( $discount_totals );
 	}
 
 	/**
@@ -242,96 +209,6 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Get total remaining after discounts.
-	 *
-	 * @since  3.2.0
-	 * @return int
-	 */
-	protected function get_total_after_discounts() {
-		$total_to_discount = 0;
-
-		// Sum line item costs.
-		foreach ( $this->items as $item ) {
-			$total_to_discount += $this->get_discounted_price_in_cents( $item );
-		}
-
-		// Cart discounts can also discount shipping and fees.
-		$total_to_discount += $this->shipping_total + $this->fee_total;
-
-		// Remove existing discount amounts.
-		foreach ( $this->cart_discounts as $key => $value ) {
-			$total_to_discount = $total_to_discount - $value->get_discount_total();
-		}
-
-		return $total_to_discount;
-	}
-
-	/**
-	 * Generate a unique ID for a discount.
-	 *
-	 * @param  WC_Discount $discount Discount object.
-	 * @return string
-	 */
-	protected function generate_discount_id( $discount ) {
-		$discount_id    = '';
-		$index          = 1;
-		while ( ! $discount_id ) {
-			$discount_id = 'discount-' . $discount->get_amount() . ( 'percent' === $discount->get_discount_type() ? '%' : '' );
-
-			if ( 1 < $index ) {
-				$discount_id .= '-' . $index;
-			}
-
-			if ( isset( $this->cart_discounts[ $discount_id ] ) ) {
-				$index ++;
-				$discount_id = '';
-			}
-		}
-		return $discount_id;
-	}
-
-	/**
-	 * Apply a discount to all items.
-	 *
-	 * @param  string|object $raw_discount Accepts a string (fixed or percent discounts), or WC_Coupon object.
-	 * @param  string        $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
-	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
-	 */
-	public function apply_discount( $raw_discount, $discount_id = null ) {
-		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
-			return $this->apply_coupon( $raw_discount );
-		}
-
-		$discount = new WC_Discount;
-
-		if ( strstr( $raw_discount, '%' ) ) {
-			$discount->set_discount_type( 'percent' );
-			$discount->set_amount( trim( $raw_discount, '%' ) );
-		} elseif ( is_numeric( $raw_discount ) && 0 < floatval( $raw_discount ) ) {
-			$discount->set_discount_type( 'fixed' );
-			$discount->set_amount( wc_add_number_precision( floatval( $raw_discount ) ) );
-		}
-
-		if ( ! $discount->get_amount() ) {
-			return new WP_Error( 'invalid_discount', __( 'Invalid discount', 'woocommerce' ) );
-		}
-
-		$total_to_discount = $this->get_total_after_discounts();
-
-		if ( 'percent' === $discount->get_discount_type() ) {
-			$discount->set_discount_total( $discount->get_amount() * ( $total_to_discount / 100 ) );
-		} else {
-			$discount->set_discount_total( min( $discount->get_amount(), $total_to_discount ) );
-		}
-
-		$discount_id = $discount_id ? $discount_id : $this->generate_discount_id( $discount );
-
-		$this->cart_discounts[ $discount_id ] = $discount;
-
-		return true;
-	}
-
-	/**
 	 * Apply a discount to all items using a coupon.
 	 *
 	 * @since  3.2.0
@@ -349,8 +226,8 @@ class WC_Discounts {
 			return $is_coupon_valid;
 		}
 
-		if ( ! isset( $this->coupon_discounts[ $coupon->get_code() ] ) ) {
-			$this->coupon_discounts[ $coupon->get_code() ] = array_fill_keys( array_keys( $this->items ), 0 );
+		if ( ! isset( $this->discounts[ $coupon->get_code() ] ) ) {
+			$this->discounts[ $coupon->get_code() ] = array_fill_keys( array_keys( $this->items ), 0 );
 		}
 
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
@@ -375,7 +252,7 @@ class WC_Discounts {
 					$discount          = min( $discounted_price, $discount );
 
 					// Store code and discount amount per item.
-					$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 				}
 				break;
 		}
@@ -486,7 +363,7 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
 		// Work out how much discount would have been given to the cart has a whole and compare to what was discounted on all line items.
@@ -531,7 +408,7 @@ class WC_Discounts {
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
-			$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 		return $total_discount;
 	}
@@ -604,7 +481,7 @@ class WC_Discounts {
 				$total_discount += $discount;
 
 				// Store code and discount amount per item.
-				$this->coupon_discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+				$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 
 				if ( $total_discount >= $amount ) {
 					break 2;
