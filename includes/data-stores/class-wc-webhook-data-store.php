@@ -75,22 +75,31 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 	public function read( &$webhook ) {
 		global $wpdb;
 
-		if ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}woocommerce_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ) ) ) {
+		$data = wp_cache_get( $webhook->get_id(), 'webhooks' );
+
+		if ( false === $data ) {
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}woocommerce_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A );
+
+			wp_cache_add( $webhook->get_id(), $data, 'webhooks' );
+		}
+
+		if ( is_array( $data ) ) {
 			$webhook->set_props( array(
-				'id'               => $data->webhook_id,
-				'status'           => $data->status,
-				'name'             => $data->name,
-				'user_id'          => $data->user_id,
-				'delivery_url'     => $data->delivery_url,
-				'secret'           => $data->secret,
-				'topic'            => $data->topic,
-				'date_created'     => $data->date_created,
-				'date_modified'    => $data->date_modified,
-				'api_version'      => $data->api_version,
-				'failure_count'    => $data->failure_count,
-				'pending_delivery' => $data->pending_delivery,
+				'id'               => $data['webhook_id'],
+				'status'           => $data['status'],
+				'name'             => $data['name'],
+				'user_id'          => $data['user_id'],
+				'delivery_url'     => $data['delivery_url'],
+				'secret'           => $data['secret'],
+				'topic'            => $data['topic'],
+				'date_created'     => $data['date_created'],
+				'date_modified'    => $data['date_modified'],
+				'api_version'      => $data['api_version'],
+				'failure_count'    => $data['failure_count'],
+				'pending_delivery' => $data['pending_delivery'],
 			) );
 			$webhook->set_object_read( true );
+
 			do_action( 'woocommerce_webhook_loaded', $webhook );
 		} else {
 			throw new Exception( __( 'Invalid webhook.', 'woocommerce' ) );
@@ -140,6 +149,7 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 
 		$webhook->apply_changes();
 
+		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		do_action( 'woocommerce_webhook_updated', $webhook->get_id() );
 	}
 
@@ -179,6 +189,7 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 	/**
 	 * Get all webhooks IDs.
 	 *
+	 * @since  3.2.0
 	 * @return int[]
 	 */
 	public function get_webhooks_ids() {

@@ -29,6 +29,7 @@ interface WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get all webhooks IDs.
 	 *
+	 * @since  3.2.0
 	 * @return int[]
 	 */
 	public function get_webhooks_ids();
