@@ -29,6 +29,16 @@ abstract class WC_Legacy_Cart {
 	public $coupon_applied_count = array();
 
 	/**
+	 * Init.
+	 *
+	 * @deprecated 3.2.0 Session is loaded via hooks rather than directly.
+	 */
+	public function init() {
+		wc_deprecated_function( 'WC_Cart::init', '3.2', '' );
+		$this->get_cart_from_session();
+	}
+
+	/**
 	 * Function to apply discounts to a product and get the discounted price (before tax is applied).
 	 *
 	 * @deprecated Calculation and coupon logic is handled in WC_Cart_Totals.
