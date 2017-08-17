@@ -808,6 +808,12 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param string $topic Webhook topic.
 	 */
 	public function set_topic( $topic ) {
+		$topic = wc_clean( $topic );
+
+		if ( wc_is_webhook_valid_topic( $topic ) ) {
+			$topic = '';
+		}
+
 		$this->set_prop( 'topic', $topic );
 	}
 
