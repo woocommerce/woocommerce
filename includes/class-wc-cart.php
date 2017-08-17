@@ -89,9 +89,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		'total_tax'      => 0,
 		'fee_total'      => 0,
 		'taxes'          => array(
-			'shipping' => array(),
-			'cart'     => array(),
-			'fees'     => array(),
+			'shipping'       => array(),
+			'cart'           => array(),
+			'fees'           => array(),
+			'cart_discounts' => array(),
 		),
 	);
 
@@ -817,7 +818,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
 		$this->set_shipping_tax( array_sum( wp_list_pluck( $this->shipping_methods, 'taxes' ) ) );
-		$this->set_shipping_taxes( wp_list_pluck( $this->shipping_methods, 'taxes' ) );
+		$this->set_taxes( 'shipping', wp_list_pluck( $this->shipping_methods, 'taxes' ) );
 
 		return $this->shipping_methods;
 	}
@@ -1412,7 +1413,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Cart Total getters.
+	| Cart Total getters (for display).
 	|--------------------------------------------------------------------------
 	*/
 
@@ -1491,7 +1492,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Gets the sub total (after calculation).
+	 * Gets the sub total (after calculation) for display.
 	 *
 	 * @param bool $compound whether to include compound taxes.
 	 * @return string formatted price
@@ -1520,8 +1521,51 @@ class WC_Cart extends WC_Legacy_Cart {
 		return apply_filters( 'woocommerce_cart_subtotal', $cart_subtotal, $compound, $this );
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	| Cart Total getters.
+	|--------------------------------------------------------------------------
+	*/
+
 	/**
-	 * Get taxes, merged by code, formatted ready for output.
+	 * Return all taxes merged.
+	 *
+	 * @return array
+	 */
+	public function get_taxes() {
+		return apply_filters( 'woocommerce_cart_get_taxes', $this->get_merged_taxes(), $this );
+	}
+
+	/**
+	 * Get taxes merged by type.
+	 *
+	 * @since 3.2.0
+	 * @param string|array $types Types to merge and return. Defaults to all.
+	 * @return array
+	 */
+	protected function get_merged_taxes( $types = 'all' ) {
+		$all_taxes = $this->totals['taxes'];
+		$taxes     = array();
+
+		if ( 'all' === $types ) {
+			foreach ( $all_taxes as $type => $type_taxes ) {
+				$taxes = wc_array_merge_recursive_numeric( $taxes, $type_taxes );
+			}
+		} elseif ( is_string( $types ) ) {
+			$taxes = isset( $all_taxes[ $types ] ) ? $all_taxes[ $types ] : array();
+		} else {
+			$taxes_to_merge = array_intersect_key( $all_taxes, array_fill_keys( $types, 0 ) );
+
+			foreach ( $taxes_to_merge as $type => $type_taxes ) {
+				$taxes = wc_array_merge_recursive_numeric( $taxes, $type_taxes );
+			}
+		}
+
+		return apply_filters( 'woocommerce_cart_get_merged_taxes', $taxes, $types );
+	}
+
+	/**
+	 * Get taxes formatted for display by tax code.
 	 *
 	 * @return array
 	 */
@@ -1819,24 +1863,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		return 'view' === $context ? wc_price( $value ) : $value;
 	}
 
-	/**
-	 * Returns taxes, merged, or of a specific type.
-	 *
-	 * @param string|array $types Types to merge and return. Added in 3.2.0.
-	 * @return array
-	 */
-	public function get_taxes( $types = array( 'cart', 'fees' ) ) {
-		$taxes = array();
-
-		if ( is_string( $types ) ) {
-			$taxes = isset( $this->totals['taxes'][ $types ] ) ? $this->totals['taxes'][ $types ] : array();
-		} else {
-			$taxes = wc_array_merge_recursive_numeric( array_intersect_key( $this->totals['taxes'], array_fill_keys( $types, 0 ) ) );
-		}
-
-		return apply_filters( 'woocommerce_cart_get_taxes', $taxes, $this, $types );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Cart Total setters.
@@ -1983,20 +2009,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->totals['fee_total'] = $value;
 	}
 
-	public function set_fees_taxes( $value ) {
-		$this->totals['taxes']['fees'] = $value;
+
+
+
+
+	public function set_taxes( $type, $value ) {
+		$this->totals['taxes'][ $type ] = $value;
 	}
 
-	public function set_cart_taxes( $value ) {
-		$this->totals['taxes']['cart'] = $value;
-	}
 
-	public function set_shipping_taxes( $value ) {
-		$this->totals['taxes']['shipping'] = $value;
-	}
+	public function get_shipping_taxes() {
 
-	// Set legacy totals for backwards compatibility with versions prior to 3.2. @todo
-	//$this->shipping_total = WC()->shipping->shipping_total = array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ); @todo move to shipping class getter.
-	//$this->shipping_taxes = WC()->shipping->shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
-	// @todo set_shipping_taxes
+	}
 }

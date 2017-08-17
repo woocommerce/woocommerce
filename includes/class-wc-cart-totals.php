@@ -123,19 +123,16 @@ final class WC_Cart_Totals {
 	 * @var array
 	 */
 	protected $totals = array(
-		'fees_total'              => 0,
-		'fees_total_tax'          => 0,
-		'items_subtotal'          => 0,
-		'items_subtotal_tax'      => 0,
-		'items_total'             => 0,
-		'items_total_tax'         => 0,
-		'total'                   => 0,
-		'taxes'                   => array(),
-		'tax_total'               => 0,
-		'shipping_total'          => 0,
-		'shipping_tax_total'      => 0,
-		'discounts_total'         => 0,
-		'discounts_tax_total'     => 0,
+		'fees_total'          => 0,
+		'fees_total_tax'      => 0,
+		'items_subtotal'      => 0,
+		'items_subtotal_tax'  => 0,
+		'items_total'         => 0,
+		'items_total_tax'     => 0,
+		'total'               => 0,
+		'shipping_total'      => 0,
+		'shipping_tax_total'  => 0,
+		'discounts_total'     => 0,
 	);
 
 	/**
@@ -471,39 +468,36 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Get all tax rows from items (including shipping and product line items).
+	 * Get taxes merged by type.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
+	 * @param  array|string $types Types to merge and return. Defaults to all.
 	 * @return array
 	 */
-	protected function get_merged_taxes() {
+	protected function get_merged_taxes( $in_cents = false, $types = array( 'items', 'fees', 'shipping', 'cart_discounts' ) ) {
+		$items = array();
 		$taxes = array();
 
-		foreach ( array_merge( $this->items, $this->fees, $this->shipping, $this->cart_discounts ) as $item ) {
-			foreach ( $item->taxes as $rate_id => $rate ) {
-				$taxes[ $rate_id ] = array( 'tax_total' => 0, 'shipping_tax_total' => 0 );
+		if ( is_string( $types ) ) {
+			$types = array( $types );
+		}
+
+		foreach ( $types as $type ) {
+			if ( isset( $this->$type ) ) {
+				$items = $items + $this->$type;
 			}
 		}
 
-		foreach ( $this->items + $this->fees as $item ) {
+		foreach ( $items as $item ) {
 			foreach ( $item->taxes as $rate_id => $rate ) {
-				$taxes[ $rate_id ]['tax_total'] = $taxes[ $rate_id ]['tax_total'] + $rate;
+				if ( ! isset( $taxes[ $rate_id ] ) ) {
+					$taxes[ $rate_id ] = 0;
+				}
+				$taxes[ $rate_id ] += $rate;
 			}
 		}
 
-		foreach ( $this->shipping as $item ) {
-			foreach ( $item->taxes as $rate_id => $rate ) {
-				$taxes[ $rate_id ]['shipping_tax_total'] = $taxes[ $rate_id ]['shipping_tax_total'] + $rate;
-			}
-		}
-
-		foreach ( $this->cart_discounts as $item ) {
-			foreach ( $item->taxes as $rate_id => $rate ) {
-				$taxes[ $rate_id ]['tax_total'] = $taxes[ $rate_id ]['tax_total'] - $rate;
-			}
-		}
-
-		return $taxes;
+		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
 	}
 
 	/**
@@ -763,21 +757,21 @@ final class WC_Cart_Totals {
 	protected function calculate_totals() {
 		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) + array_sum( $this->cart_discount_totals ) );
 		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) + array_sum( $this->cart_discount_tax_totals ) );
-		$this->set_total( 'taxes', $this->get_merged_taxes() );
-		$this->set_total( 'tax_total', array_sum( wp_list_pluck( $this->get_total( 'taxes', true ), 'tax_total' ) ) );
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + $this->get_total( 'tax_total', true ) + $this->get_total( 'shipping_tax_total', true ) - array_sum( $this->cart_discount_totals ) ) );
+		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) - array_sum( $this->cart_discount_totals ) ) );
 
 		// Add totals to cart object.
 		$this->cart->set_cart_total( $this->get_total( 'items_total' ) );
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
-		$this->cart->set_total_tax( $this->get_total( 'tax_total' ) ); // @todo tax total vs cart tax?
+
+		$this->cart->set_taxes( 'cart', $this->get_merged_taxes( false, 'items' ) );
+		$this->cart->set_taxes( 'shipping', $this->get_merged_taxes( false, 'shipping' ) );
+		$this->cart->set_taxes( 'fees', $this->get_merged_taxes( false, 'fees' ) );
+		$this->cart->set_taxes( 'cart_discounts', $this->get_merged_taxes( false, 'cart_discounts' ) );
+		$this->cart->set_cart_tax( array_sum( $this->get_merged_taxes( false, 'items' ) ) );
+		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		$this->set_processed_cart_discounts();
-
-
-		$this->cart->taxes               = wp_list_pluck( $this->get_total( 'taxes' ), 'shipping_tax_total' );
-		$this->cart->shipping_taxes      = wp_list_pluck( $this->get_total( 'taxes' ), 'tax_total' );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
 		if ( has_action( 'woocommerce_calculate_totals' ) ) {
