@@ -33,7 +33,8 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 	public function create( &$webhook ) {
 		global $wpdb;
 
-		if ( ! is_null( $webhook->get_date_created( 'edit' ) ) ) {
+		$changes = $webhook->get_changes();
+		if ( isset( $changes['date_created'] ) ) {
 			$date_created     = $webhook->get_date_created()->date( 'Y-m-d H:i:s' );
 			$date_created_gmt = gmdate( 'Y-m-d H:i:s', $webhook->get_date_created()->getTimestamp() );
 		} else {
@@ -120,7 +121,8 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 	public function update( &$webhook ) {
 		global $wpdb;
 
-		if ( ! is_null( $webhook->get_date_created( 'edit' ) ) ) {
+		$changes = $webhook->get_changes();
+		if ( isset( $changes['date_modified'] ) ) {
 			$date_modified     = $webhook->get_date_modified()->date( 'Y-m-d H:i:s' );
 			$date_modified_gmt = gmdate( 'Y-m-d H:i:s', $webhook->get_date_modified()->getTimestamp() );
 		} else {
