@@ -177,7 +177,7 @@ if ( wc_tax_enabled() ) {
 			<?php if ( wc_tax_enabled() ) : ?>
 				<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
 			<?php endif; ?>
-			<button type="button" class="button add-discount"><?php _e( 'Apply discount', 'woocommerce' ); ?></button>
+			<button type="button" class="button add-coupon"><?php _e( 'Apply coupon', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description"><?php echo wc_help_tip( __( 'To edit this order change the status back to "Pending"', 'woocommerce' ) ); ?> <?php _e( 'This order is no longer editable.', 'woocommerce' ); ?></span>
 		<?php endif; ?>

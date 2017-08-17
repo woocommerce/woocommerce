@@ -891,35 +891,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Add a discount/coupon to this order and recalculate totals.
-	 *
-	 * @since  3.2.0
-	 * @param  string $discount Discount amount or coupon code.
-	 */
-	public function add_discount( $discount ) {
-		// Try to apply as a coupon first.
-		$coupon = new WC_Coupon( wc_format_coupon_code( $discount ) );
-
-		if ( $coupon->get_code() === wc_format_coupon_code( $discount ) && $coupon->is_valid() ) {
-			$this->apply_coupon( $coupon );
-		} else {
-			$item = new WC_Order_Item_Discount();
-
-			if ( strstr( $discount, '%' ) ) {
-				$item->set_amount( trim( $discount, '%' ) );
-				$item->set_discount_type( 'percent' );
-				$this->add_item( $item );
-			} elseif ( is_numeric( $discount ) && 0 < floatval( $discount ) ) {
-				$item->set_amount( floatval( $discount ) );
-				$item->set_discount_type( 'fixed' );
-				$this->add_item( $item );
-			}
-
-			$this->calculate_totals( true );
-		}
-	}
-
-	/**
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
