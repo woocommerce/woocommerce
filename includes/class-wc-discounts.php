@@ -295,9 +295,9 @@ class WC_Discounts {
 		if ( strstr( $raw_discount, '%' ) ) {
 			$discount->set_discount_type( 'percent' );
 			$discount->set_amount( trim( $raw_discount, '%' ) );
-		} elseif ( is_numeric( $raw_discount ) && 0 < absint( $raw_discount ) ) {
+		} elseif ( is_numeric( $raw_discount ) && 0 < floatval( $raw_discount ) ) {
 			$discount->set_discount_type( 'fixed' );
-			$discount->set_amount( wc_add_number_precision( absint( $raw_discount ) ) );
+			$discount->set_amount( wc_add_number_precision( floatval( $raw_discount ) ) );
 		}
 
 		if ( ! $discount->get_amount() ) {

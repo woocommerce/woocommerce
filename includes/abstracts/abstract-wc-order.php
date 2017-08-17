@@ -909,8 +909,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$item->set_amount( trim( $discount, '%' ) );
 				$item->set_discount_type( 'percent' );
 				$this->add_item( $item );
-			} elseif ( is_numeric( $discount ) && 0 < absint( $discount ) ) {
-				$item->set_amount( absint( $discount ) );
+			} elseif ( is_numeric( $discount ) && 0 < floatval( $discount ) ) {
+				$item->set_amount( floatval( $discount ) );
 				$item->set_discount_type( 'fixed' );
 				$this->add_item( $item );
 			}
