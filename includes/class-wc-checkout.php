@@ -324,7 +324,6 @@ class WC_Checkout {
 			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
 			$this->create_order_tax_lines( $order, WC()->cart );
 			$this->create_order_coupon_lines( $order, WC()->cart );
-			$this->create_order_discount_lines( $order, WC()->cart );
 
 			/**
 			 * Action hook to adjust order before save.
@@ -511,28 +510,6 @@ class WC_Checkout {
 			 * @since 3.0.0
 			 */
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
-
-			// Add item to order and save.
-			$order->add_item( $item );
-		}
-	}
-
-	/**
-	 * Add discount lines to the order
-	 *
-	 * @param WC_Order $order
-	 * @param WC_Cart $cart
-	 */
-	public function create_order_discount_lines( &$order, $cart ) {
-		foreach ( $cart->get_processed_cart_discounts() as $discount ) {
-			$item = new WC_Order_Item_Discount();
-			$item->set_props( $discount );
-
-			/**
-			 * Action hook to adjust item before save.
-			 * @since 3.2.0
-			 */
-			do_action( 'woocommerce_checkout_create_order_discount_item', $item, $discount, $order );
 
 			// Add item to order and save.
 			$order->add_item( $item );

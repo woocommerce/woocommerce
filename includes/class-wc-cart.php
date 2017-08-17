@@ -23,20 +23,6 @@ include_once( WC_ABSPATH . 'includes/class-wc-cart-session.php' );
 class WC_Cart extends WC_Legacy_Cart {
 
 	/**
-	 * Contains an array of discount objects applied to the cart.
-	 *
-	 * @var array
-	 */
-	public $cart_discounts = array();
-
-	/**
-	 * Contains an array of arrays of processed cart discount information.
-	 *
-	 * @var array
-	 */
-	public $processed_cart_discounts = array();
-
-	/**
 	 * An array of applied fees. This are not stored in the session.
 	 *
 	 * @var array
@@ -89,10 +75,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		'total_tax'      => 0,
 		'fee_total'      => 0,
 		'taxes'          => array(
-			'shipping'       => array(),
-			'cart'           => array(),
-			'fees'           => array(),
-			'cart_discounts' => array(),
+			'shipping' => array(),
+			'cart'     => array(),
+			'fees'     => array(),
 		),
 	);
 

@@ -355,7 +355,6 @@ class WC_Order extends WC_Abstract_Order {
 				'shipping_lines' => $this->get_items( 'shipping' ),
 				'fee_lines'      => $this->get_items( 'fee' ),
 				'coupon_lines'   => $this->get_items( 'coupon' ),
-				'discount_lines' => $this->get_items( 'discount' ),
 			)
 		);
 	}
