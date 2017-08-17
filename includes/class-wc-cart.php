@@ -1283,11 +1283,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					if ( ! empty( $fee_taxes ) ) {
 						$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
 						$this->fees[ $fee_key ]->tax_data = $fee_taxes;
-
-						// Tax rows - merge the totals we just got.
-						foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
-							$this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
-						}
+						$this->set_taxes( 'fees', $fee_taxes );
 					}
 				}
 			}
@@ -1537,28 +1533,38 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get shipping taxes only.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_shipping_taxes() {
+		return $this->get_merged_taxes( 'shipping' );
+	}
+
+	/**
 	 * Get taxes merged by type.
 	 *
 	 * @since 3.2.0
 	 * @param string|array $types Types to merge and return. Defaults to all.
 	 * @return array
 	 */
-	protected function get_merged_taxes( $types = 'all' ) {
+	protected function get_merged_taxes( $types = '' ) {
 		$all_taxes = $this->totals['taxes'];
 		$taxes     = array();
 
-		if ( 'all' === $types ) {
-			foreach ( $all_taxes as $type => $type_taxes ) {
-				$taxes = wc_array_merge_recursive_numeric( $taxes, $type_taxes );
-			}
-		} elseif ( is_string( $types ) ) {
-			$taxes = isset( $all_taxes[ $types ] ) ? $all_taxes[ $types ] : array();
-		} else {
-			$taxes_to_merge = array_intersect_key( $all_taxes, array_fill_keys( $types, 0 ) );
+		if ( ! $types ) {
+			$types = array_keys( $all_taxes );
+		}
 
-			foreach ( $taxes_to_merge as $type => $type_taxes ) {
-				$taxes = wc_array_merge_recursive_numeric( $taxes, $type_taxes );
-			}
+		if ( is_string( $types ) ) {
+			$types = array( $types );
+		}
+
+		$taxes_to_merge = array_intersect_key( $all_taxes, array_fill_keys( $types, 0 ) );
+
+		foreach ( $taxes_to_merge as $type => $type_taxes ) {
+			$taxes = wc_array_merge_recursive_numeric( $taxes, $type_taxes );
 		}
 
 		return apply_filters( 'woocommerce_cart_get_merged_taxes', $taxes, $types );
@@ -1604,7 +1610,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float amount
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
-		return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
+		$taxes = $this->get_merged_taxes( array( 'cart', 'fees', 'cart_discounts' ) );
+
+		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
 	}
 
 	/**
@@ -1614,6 +1622,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float amount
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
+		$taxes = $this->get_merged_taxes( 'shipping' );
+
 		return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
 	}
 
@@ -1626,7 +1636,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {
 		$total = 0;
-		foreach ( $this->taxes as $key => $tax ) {
+		$taxes = $this->get_merged_taxes( array( 'cart', 'fees', 'cart_discounts' ) );
+		foreach ( $taxes as $key => $tax ) {
 			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
 				continue;
 			}
@@ -2009,16 +2020,13 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->totals['fee_total'] = $value;
 	}
 
-
-
-
-
+	/**
+	 * Set taxes by type.
+	 *
+	 * @param string $type Type/group of tax. e.g. shipping
+	 * @param array $value Tax values.
+	 */
 	public function set_taxes( $type, $value ) {
 		$this->totals['taxes'][ $type ] = $value;
-	}
-
-
-	public function get_shipping_taxes() {
-
 	}
 }

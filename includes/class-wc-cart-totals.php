@@ -415,7 +415,9 @@ final class WC_Cart_Totals {
 	 * @return array
 	 */
 	protected function get_item_costs_by_tax_class() {
-		$tax_classes = array();
+		$tax_classes = array(
+			'non-taxable' => 0,
+		);
 
 		foreach ( $this->items + $this->fees + $this->shipping as $item ) {
 			if ( ! isset( $tax_classes[ $item->tax_class ] ) ) {

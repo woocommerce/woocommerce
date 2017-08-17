@@ -118,7 +118,7 @@ abstract class WC_Legacy_Cart {
 	}
 
 	/**
-	 * Magic setters.
+	 * Magic setters. // @todo
 	 *
 	 * @param string $name Property name.
 	 * @param mixed $value Value to set.
@@ -133,6 +133,8 @@ abstract class WC_Legacy_Cart {
 				break;
 		}
 	}
+
+	// @todo issets
 
 	/**
 	 * Methods moved to session class in 3.2.0.
