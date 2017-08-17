@@ -91,7 +91,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Add discounts when discounts API is called.
 	 */
 	public function add_cart_discounts_callback() {
-		//WC()->cart->add_cart_discount( 1 );
+		WC()->cart->add_cart_discount( 1 );
 		//WC()->cart->add_cart_discount( '10%' ); @todo enable after getting things working properly
 	}
 
@@ -147,7 +147,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$cart = WC()->cart;
 
 		// Getters.
-		$this->assertEquals( 27.00, $this->get_cart_total( 'raw' ) );
+		$this->assertEquals( 27.00, $cart->get_cart_total( 'raw' ) );
 		$this->assertEquals( 90.40, $cart->get_total( 'raw' ) );
 		$this->assertEquals( 36.00, $cart->get_subtotal( 'raw' ) + $cart->get_subtotal_tax( 'raw' ) );
 		$this->assertEquals( 30.00, $cart->get_subtotal( 'raw' ) );
