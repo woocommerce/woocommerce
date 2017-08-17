@@ -89,6 +89,8 @@ class WC_Discounts {
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
+
+		$this->shipping_total = wc_add_number_precision( $cart->shipping_total );
 	}
 
 	/**
