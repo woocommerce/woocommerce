@@ -74,7 +74,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			'status'           => 'active',
 			'name'             => 'Testing webhook',
 			'user_id'          => 0,
-			'delivery_url'     => '',
+			'delivery_url'     => 'https://requestb.in/17jajv31',
 			'secret'           => 'secret',
 			'topic'            => 'action.woocommerce_some_action',
 			'api_version'      => 2,
