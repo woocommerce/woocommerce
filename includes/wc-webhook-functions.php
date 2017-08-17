@@ -66,9 +66,13 @@ function wc_get_webhook_statuses() {
 function wc_load_webhooks() {
 	$data_store = WC_Data_Store::load( 'webhook' );
 	$webhooks   = $data_store->get_webhooks_ids();
+	$loaded     = false;
 
 	foreach ( $webhooks as $webhook_id ) {
 		$webhook = new WC_Webhook( $webhook_id );
 		$webhook->enqueue();
+		$loaded = true;
 	}
+
+	return $loaded;
 }
