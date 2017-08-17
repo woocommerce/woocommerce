@@ -467,7 +467,7 @@ class WC_Checkout {
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
+		foreach ( $cart->get_taxes( 'all' ) as $tax_rate_id ) {
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
 				$item = new WC_Order_Item_Tax();
 				$item->set_props( array(

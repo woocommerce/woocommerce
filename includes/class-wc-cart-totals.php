@@ -706,7 +706,7 @@ final class WC_Cart_Totals {
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
 
 		$this->cart->set_shipping_total( $this->get_total( 'shipping_total' ) );
-		$this->cart->set_shipping_tax_total( $this->get_total( 'shipping_tax_total' ) );
+		$this->cart->set_shipping_tax( $this->get_total( 'shipping_tax_total' ) );
 	}
 
 	/**
