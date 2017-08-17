@@ -26,7 +26,7 @@ The tests will execute and you'll be presented with a summary. Code coverage doc
 
 You can run specific tests by providing the path and filename to the test class:
 
-    $ phpunit tests/unit-tests/api/webhooks
+    $ phpunit tests/unit-tests/api/orders
 
 A text code coverage summary can be displayed using the `--coverage-text` option:
 
