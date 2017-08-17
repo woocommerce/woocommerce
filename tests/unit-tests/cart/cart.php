@@ -579,7 +579,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// Test if the shipping total amount is equal 20
-		$this->assertEquals( 10, WC()->cart->shipping_total );
+		$this->assertEquals( 10, WC()->cart->get_shipping_total( 'raw' ) );
 
 		// Test if the cart total amount is equal 20
 		$this->assertEquals( 20, WC()->cart->get_total( 'raw' ) );

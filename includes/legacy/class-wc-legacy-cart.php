@@ -87,10 +87,10 @@ abstract class WC_Legacy_Cart {
 			*/
 
 
-			case 'discount_cart' :
+			case 'discount_cart' : // @todo
 				return $this->get_discount_total( 'raw' );
 			case 'discount_cart_tax' :
-				return $this->get_discount_tax( 'raw' );
+				return $this->get_discount_tax( 'raw' ); // @todo
 			case 'shipping_total' :
 				return $this->get_shipping_total( 'raw' );
 			case 'shipping_tax_total' :

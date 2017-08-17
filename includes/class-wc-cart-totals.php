@@ -703,8 +703,8 @@ final class WC_Cart_Totals {
 		$this->set_total( 'shipping_total', array_sum( wp_list_pluck( $this->shipping, 'total' ) ) );
 		$this->set_total( 'shipping_tax_total', array_sum( wp_list_pluck( $this->shipping, 'total_tax' ) ) );
 
-		$this->cart->shipping_total     = $this->get_total( 'shipping_total' );
-		$this->cart->shipping_tax_total = $this->get_total( 'shipping_tax_total' );
+		$this->cart->set_shipping_total( $this->get_total( 'shipping_total' ) );
+		$this->cart->set_shipping_tax_total( $this->get_total( 'shipping_tax_total' ) );
 	}
 
 	/**
@@ -769,7 +769,7 @@ final class WC_Cart_Totals {
 		$this->cart->set_cart_total( $this->get_total( 'items_total' ) );
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
-		$this->cart->set_total_tax( $this->get_total( 'tax_total' ) ); // @todo
+		$this->cart->set_total_tax( $this->get_total( 'tax_total' ) ); // @todo tax total vs cart tax?
 
 		$this->set_processed_cart_discounts();
 

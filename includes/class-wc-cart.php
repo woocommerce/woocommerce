@@ -809,9 +809,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function calculate_shipping() {
 		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
-		// Set legacy totals for backwards compatibility with versions prior to 3.2. @todo
-		$this->shipping_total = WC()->shipping->shipping_total = array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) );
-		$this->shipping_taxes = WC()->shipping->shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
+		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
+		$this->set_shipping_total_tax( array_sum( wp_list_pluck( $this->shipping_methods, 'taxes' ) ) );
+		$this->set_shipping_taxes( wp_list_pluck( $this->shipping_methods, 'taxes' ) );
 
 		return $this->shipping_methods;
 	}
@@ -912,31 +912,27 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string price or string for the shipping total
 	 */
 	public function get_cart_shipping_total() {
-		if ( isset( $this->shipping_total ) ) { // @todo
-			if ( $this->shipping_total > 0 ) {
+		if ( $this->get_shipping_total( 'raw' ) > 0 ) {
+			if ( 'excl' === $this->tax_display_cart ) {
+				$return = $this->get_shipping_total();
 
-				if ( 'excl' === $this->tax_display_cart ) {
-					$return = wc_price( $this->shipping_total );
-
-					if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
-						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-					}
-
-					return $return;
-				} else {
-					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
-
-					if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
-						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
-					}
-
-					return $return;
+				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
+					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
+
+				return $return;
 			} else {
-				return __( 'Free!', 'woocommerce' );
+				$return = wc_price( $this->get_shipping_total( 'raw' ) + $this->get_shipping_total_tax( 'raw' ) );
+
+				if ( $this->get_shipping_total_tax( 'raw' ) > 0 && ! wc_prices_include_tax() ) {
+					$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+				}
+
+				return $return;
 			}
+		} else {
+			return __( 'Free!', 'woocommerce' );
 		}
-		return '';
 	}
 
 	/**
@@ -1497,7 +1493,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * If the cart has compound tax, we want to show the subtotal as cart + shipping + non-compound taxes (after discount).
 		 */
 		if ( $compound ) {
-			$cart_subtotal = wc_price( $this->get_cart_total( 'raw' ) + $this->shipping_total + $this->get_taxes_total( false, false ) );
+			$cart_subtotal = wc_price( $this->get_cart_total( 'raw' ) + $this->get_shipping_total( 'raw' ) + $this->get_taxes_total( false, false ) );
 
 		} elseif ( 'excl' === $this->tax_display_cart ) {
 			$cart_subtotal = $this->get_subtotal();
@@ -1952,4 +1948,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function set_coupon_discount_tax_totals( $value = array() ) {
 		$this->coupon_discount_tax_totals = (array) $value;
 	}
+
+	public function set_shipping_taxes() { // @todo
+		// $this->shipping_taxes = WC()->shipping->shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
+	}
+
+	// Set legacy totals for backwards compatibility with versions prior to 3.2. @todo
+	//$this->shipping_total = WC()->shipping->shipping_total = array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ); @todo move to shipping class getter.
+	//$this->shipping_taxes = WC()->shipping->shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
+	// @todo set_shipping_taxes
 }
