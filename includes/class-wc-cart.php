@@ -810,7 +810,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
 		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
-		$this->set_shipping_total_tax( array_sum( wp_list_pluck( $this->shipping_methods, 'taxes' ) ) );
+		$this->set_shipping_tax( array_sum( wp_list_pluck( $this->shipping_methods, 'taxes' ) ) );
 		$this->set_shipping_taxes( wp_list_pluck( $this->shipping_methods, 'taxes' ) );
 
 		return $this->shipping_methods;

@@ -88,7 +88,7 @@ abstract class WC_Legacy_Cart {
 
 
 			case 'discount_cart' : // @todo
-				return $this->get_discount_total( 'raw' );
+				return $this->get_discount_total( 'raw' ); // @todo
 			case 'discount_cart_tax' :
 				return $this->get_discount_tax( 'raw' ); // @todo
 			case 'shipping_total' :
@@ -99,7 +99,6 @@ abstract class WC_Legacy_Cart {
 				return $this->get_coupon_discount_totals();
 			case 'coupon_discount_tax_amounts' :
 				return $this->get_coupon_discount_tax_totals();
-
 			case 'display_totals_ex_tax' :
 			case 'display_cart_ex_tax' :
 				return 'excl' === $this->tax_display_cart;
