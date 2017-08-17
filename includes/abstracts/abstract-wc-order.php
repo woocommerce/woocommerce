@@ -978,7 +978,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since  3.2.0
 	 */
-	protected function calculate_discounts() {
+	protected function recalculate_coupons() {
 		$discounts = new WC_Discounts( $this );
 		$coupons   = $this->get_items( 'coupon' );
 
