@@ -61,6 +61,7 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 		$webhook->set_id( $webhook_id );
 		$webhook->apply_changes();
 
+		delete_transient( 'woocommerce_webhook_ids' );
 		do_action( 'woocommerce_new_webhook', $webhook_id );
 	}
 
@@ -160,6 +161,7 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 			array( '%d' )
 		);
 
+		delete_transient( 'woocommerce_webhook_ids' );
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
 	}
 
@@ -172,5 +174,25 @@ class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_
 	 */
 	public function get_api_version_number( $api_version ) {
 		return 'legacy_v3' === $api_version ? -1 : intval( substr( $api_version, -1 ) );
+	}
+
+	/**
+	 * Get all webhooks IDs.
+	 *
+	 * @return int[]
+	 */
+	public function get_webhooks_ids() {
+		global $wpdb;
+
+		$ids = get_transient( 'woocommerce_webhook_ids' );
+
+		if ( false === $ids ) {
+			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}woocommerce_webhooks" );
+			$ids     = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
+
+			set_transient( 'woocommerce_webhook_ids', $ids );
+		}
+
+		return $ids;
 	}
 }

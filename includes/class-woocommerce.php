@@ -595,19 +595,7 @@ final class WooCommerce {
 			return;
 		}
 
-		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) {
-			$webhooks = get_posts( array(
-				'fields'         => 'ids',
-				'post_type'      => 'shop_webhook',
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-			) );
-			set_transient( 'woocommerce_webhook_ids', $webhooks );
-		}
-		foreach ( $webhooks as $webhook_id ) {
-			$webhook = new WC_Webhook( $webhook_id );
-			$webhook->enqueue();
-		}
+		wc_load_webhooks();
 	}
 
 	/**

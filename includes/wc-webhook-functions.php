@@ -25,3 +25,18 @@ function wc_get_webhook_statuses() {
 		'disabled' => __( 'Disabled', 'woocommerce' ),
 	) );
 }
+
+/**
+ * Load webhooks.
+ *
+ * @since 3.2.0
+ */
+function wc_load_webhooks() {
+	$data_store = WC_Data_Store::load( 'webhook' );
+	$webhooks   = $data_store->get_webhooks_ids();
+
+	foreach ( $webhooks as $webhook_id ) {
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->enqueue();
+	}
+}
