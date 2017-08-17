@@ -15,14 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Webhook data store class.
  */
-class WC_Webhook_Data_Store extends WC_Data_Store_WP implements WC_Webhook_Data_Store_Interface, WC_Object_Data_Store_Interface {
-
-	/**
-	 * Meta type. Webhooks does not have any meta data.
-	 *
-	 * @var string
-	 */
-	protected $meta_type = null;
+class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 	/**
 	 * Create a new webhook in the database.
