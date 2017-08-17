@@ -70,7 +70,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_to_cart( $product2->get_id(), 2 );
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 

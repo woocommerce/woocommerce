@@ -47,17 +47,17 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount method.
+	 * Test apply_coupon method.
 	 *
 	 * @since 2.3
 	 */
-	public function test_add_discount() {
+	public function test_apply_coupon() {
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon, test return statement
-		$this->assertTrue( WC()->cart->add_discount( $coupon->get_code() ) );
+		$this->assertTrue( WC()->cart->apply_coupon( $coupon->get_code() ) );
 
 		// Test if total amount of coupons is 1
 		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
@@ -73,20 +73,20 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount method.
+	 * Test apply_coupon method.
 	 *
 	 * @since 2.3
 	 */
-	public function test_add_discount_duplicate() {
+	public function test_apply_coupon_duplicate() {
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		$this->assertTrue( WC()->cart->add_discount( $coupon->get_code() ) );
+		$this->assertTrue( WC()->cart->apply_coupon( $coupon->get_code() ) );
 
 		// Add coupon again, test return statement
-		$this->assertFalse( WC()->cart->add_discount( $coupon->get_code() ) );
+		$this->assertFalse( WC()->cart->apply_coupon( $coupon->get_code() ) );
 
 		// Test if total amount of coupons is 1
 		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
@@ -133,7 +133,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		// Set the flat_rate shipping method
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
@@ -194,7 +194,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		// Set the flat_rate shipping method
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
@@ -258,7 +258,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		// Set the flat_rate shipping method
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );

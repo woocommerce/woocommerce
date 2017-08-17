@@ -1012,10 +1012,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Applies a coupon code passed to the method.
 	 *
+	 * @since 3.2.0
 	 * @param string $coupon_code - The code to apply.
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
 	 */
-	public function add_discount( $coupon_code ) {
+	public function apply_coupon( $coupon_code ) {
 		// Coupons are globally disabled.
 		if ( ! wc_coupons_enabled() ) {
 			return false;

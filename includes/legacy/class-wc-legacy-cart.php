@@ -169,6 +169,16 @@ abstract class WC_Legacy_Cart {
 	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
 
 	/**
+	 * Renamed for consistency.
+	 *
+	 * @param string $coupon_code
+	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
+	 */
+	public function add_discount( $coupon_code ) {
+		return $this->apply_coupon( $coupon_code );
+	}
+
+	/**
 	 * Remove taxes.
 	 *
 	 * @deprecated 3.2.0 Taxes are never calculated if customer is tax except making this function unused.

@@ -189,7 +189,7 @@ class WC_AJAX {
 		check_ajax_referer( 'apply-coupon', 'security' );
 
 		if ( ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+			WC()->cart->apply_coupon( sanitize_text_field( $_POST['coupon_code'] ) );
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 		}

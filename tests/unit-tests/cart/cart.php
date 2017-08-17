@@ -28,7 +28,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon  = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		// Create dummy product - price will be 10
 		$product = WC_Helper_Product::create_simple_product();
@@ -77,7 +77,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product->get_id() );
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
@@ -128,7 +128,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC()->cart->add_to_cart( $loop_product->get_id(), 1 );
 		}
 
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
 		$this->assertEquals( '16.55', WC()->cart->get_total( 'raw' ) );
@@ -174,7 +174,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon->save();
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
@@ -202,7 +202,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
@@ -641,7 +641,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
 
@@ -657,21 +657,21 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount allows coupons by code but not by ID.
+	 * Test apply_coupon allows coupons by code but not by ID.
 	 *
 	 * @since 3.2
 	 */
-	public function test_add_discount_code_id() {
+	public function test_apply_coupon_code_id() {
 
 		$coupon = new WC_Coupon;
 		$coupon->set_code( 'test' );
 		$coupon->set_amount( 100 );
 		$coupon->save();
 
-		$success = WC()->cart->add_discount( $coupon->get_code() );
+		$success = WC()->cart->apply_coupon( $coupon->get_code() );
 		$this->assertTrue( $success );
 
-		$success = WC()->cart->add_discount( (string) $coupon->get_id() );
+		$success = WC()->cart->apply_coupon( (string) $coupon->get_id() );
 		$this->assertFalse( $success );
 	}
 
@@ -681,8 +681,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$iu_coupon->save();
 		$coupon = WC_Helper_Coupon::create_coupon();
 
-		WC()->cart->add_discount( $iu_coupon->get_code() );
-		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->apply_coupon( $iu_coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
 
 		$coupons = WC()->cart->get_coupons();
 
@@ -702,8 +702,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$iu_coupon->set_individual_use( true );
 		$iu_coupon->save();
 
-		WC()->cart->add_discount( $coupon->get_code() );
-		WC()->cart->add_discount( $iu_coupon->get_code() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->apply_coupon( $iu_coupon->get_code() );
 
 		$coupons = WC()->cart->get_coupons();
 
@@ -727,8 +727,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$iu_coupon2->set_individual_use( true );
 		$iu_coupon2->save();
 
-		WC()->cart->add_discount( $iu_coupon1->get_code() );
-		WC()->cart->add_discount( $iu_coupon2->get_code() );
+		WC()->cart->apply_coupon( $iu_coupon1->get_code() );
+		WC()->cart->apply_coupon( $iu_coupon2->get_code() );
 
 		$coupons = WC()->cart->get_coupons();
 
