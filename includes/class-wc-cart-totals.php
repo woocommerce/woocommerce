@@ -524,7 +524,7 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$this->cart->cart_contents[ $item_key ]['line_tax_data']['total'] = $item->taxes;
+			$this->cart->cart_contents[ $item_key ]['line_tax_data']['total'] = wc_remove_number_precision_deep( $item->taxes );
 			$this->cart->cart_contents[ $item_key ]['line_total']             = wc_remove_number_precision( $item->total );
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
@@ -566,7 +566,7 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => $subtotal_taxes );
+			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => wc_remove_number_precision_deep( $subtotal_taxes ) );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal']     = wc_remove_number_precision( $item->subtotal );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
