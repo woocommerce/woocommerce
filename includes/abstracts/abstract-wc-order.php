@@ -893,7 +893,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string|WC_Coupon $coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
-	protected function apply_coupon( $coupon ) {
+	public function apply_coupon( $coupon ) {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
 			$code   = wc_format_coupon_code( $coupon );
 			$coupon = new WC_Coupon( $code );
@@ -912,7 +912,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$discounts = new WC_Discounts( $this );
-		$applied   = $discounts->apply_discount( $coupon );
+		$applied   = $discounts->apply_coupon( $coupon );
 
 		if ( is_wp_error( $applied ) ) {
 			return $applied;
