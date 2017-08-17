@@ -219,8 +219,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$total = (float) $order->get_total();
 
 		// Gets order total from cart/checkout.
-		} elseif ( 0 < WC()->cart->total ) {
-			$total = (float) WC()->cart->total;
+		} elseif ( 0 < WC()->cart->get_total( 'raw' ) ) {
+			$total = (float) WC()->cart->get_total( 'raw' );
 		}
 
 		return $total;

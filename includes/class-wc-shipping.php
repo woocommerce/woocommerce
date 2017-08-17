@@ -55,6 +55,22 @@ class WC_Shipping {
 	}
 
 	/**
+	 * Magic getter.
+	 *
+	 * @param string $name Property name.
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		// Grab from cart for backwards compatibility with versions prior to 3.2.
+		if ( 'shipping_total' === $name ){
+			return wc()->cart->get_shipping_total();
+		}
+		if ( 'shipping_taxes' === $name ){
+			return wc()->cart->get_shipping_taxes();
+		}
+	}
+
+	/**
 	 * Cloning is forbidden.
 	 *
 	 * @since 2.1
