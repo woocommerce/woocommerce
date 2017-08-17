@@ -520,7 +520,7 @@ final class WC_Cart_Totals {
 			}
 
 			$this->cart->processed_cart_discounts[ $key ] = array(
-				'amount' => wc_remove_number_precision( $discount->object->get_amount() ),
+				'amount' => 'percent' === $discount->object->get_discount_type() ? $discount->object->get_amount() : wc_remove_number_precision( $discount->object->get_amount() ),
 				'discount_type' => 'percent' === $discount->object->get_discount_type() ? 'percent' : 'fixed',
 				'total' => - wc_remove_number_precision( $discount->total ),
 				'total_taxes' => - wc_remove_number_precision( $discount->total_tax ),
