@@ -51,6 +51,20 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
+	 * Contains an array of discount objects applied to the cart.
+	 *
+	 * @var array
+	 */
+	public $cart_discounts = array();
+
+	/**
+	 * Contains an array of arrays of processed cart discount information.
+	 *
+	 * @var array
+	 */
+	public $processed_cart_discounts = array();
+
+	/**
 	 * Contains an array of coupon code discounts after they have been applied.
 	 *
 	 * @var array
@@ -133,6 +147,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var float
 	 */
 	public $fee_total;
+
+	/**
+	 * Total for cart discounts.
+	 *
+	 * @var float
+	 */
+	public $cart_discounts_total;
 
 	/**
 	 * Shipping cost.
@@ -1671,6 +1692,69 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add additional discount to the cart.
+	 *
+	 * A discount is a percentage or fixed value amount to deduct from the cart total and should
+	 * not be a negative number. Fixed value discounts should be a numeric value (e.g. 6.50) and percent value
+	 * discounts should be a numeric value followed by the '%' character (e.g. '10%').
+	 *
+	 * This method should be called on a callback attached to the
+	 * woocommerce_cart_calculate_cart_discounts action during cart/checkout. Discounts do not
+	 * persist.
+	 *
+	 * @since 3.2.0
+	 * @param float|string  $amount  Fixed or percent discount amount (do not enter negative amounts).
+	 */
+	public function add_cart_discount( $amount ) {
+		$discount = new WC_Discount;
+
+		if ( strstr( $amount, '%' ) ) {
+			$discount->set_amount( trim( $amount, '%' ) );
+			$discount->set_discount_type( 'percent' );
+		} elseif ( is_numeric( $amount ) && 0 < floatval( $amount ) ) {
+			$discount->set_amount( floatval( $amount ) );
+			$discount->set_discount_type( 'fixed' );
+		} else {
+			return;
+		}
+
+		$this->cart_discounts[] = $discount;
+	}
+
+	/**
+	 * Get cart discounts.
+	 *
+	 * @since 3.2.0
+	 * @return array of WC_Discount objects.
+	 */
+	public function get_cart_discounts() {
+		return array_filter( (array) $this->cart_discounts );
+	}
+
+	/**
+	 * Get processed cart discounts.
+	 *
+	 * @since 3.2.0
+	 * @return array of arrays
+	 */
+	public function get_processed_cart_discounts() {
+		return array_filter( (array) $this->processed_cart_discounts );
+	}
+
+	/**
+	 * Calculate cart discounts.
+	 * @since 3.2.0
+	 */
+	public function calculate_cart_discounts() {
+		// Reset discounts before calculation.
+		$this->cart_discounts_total = 0;
+		$this->cart_discounts       = array();
+
+		// Fire an action where developers can add their discounts.
+		do_action( 'woocommerce_cart_calculate_cart_discounts', $this );
 	}
 
 	/**

@@ -1016,11 +1016,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Re-calc manual discounts based on new line items.
 		foreach ( $this->get_items( 'discount' ) as $discount_key => $discount ) {
-			$result = $discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount_key );
+			$discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount_key );
 		}
 
 		// Set discount totals.
-		foreach ( $discounts->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
+		foreach ( $discounts->get_cart_discounts() as $manual_discount_key => $manual_discount ) {
 			$item = $this->get_item( $manual_discount_key, false );
 			$item->set_total( wc_remove_number_precision( $manual_discount->get_discount_total() ) * -1 );
 		}

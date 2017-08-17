@@ -73,6 +73,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon->get_code() );
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
+		add_action( 'woocommerce_cart_calculate_cart_discounts', array( $this, 'add_cart_discounts_callback' ) );
 
 		$this->totals = new WC_Cart_Totals( WC()->cart );
 	}
@@ -84,6 +85,14 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->add_fee( 'test fee', 10, true );
 		WC()->cart->add_fee( 'test fee 2', 20, true );
 		WC()->cart->add_fee( 'test fee non-taxable', 10, false );
+	}
+
+	/**
+	 * Add discounts when discounts API is called.
+	 */
+	public function add_cart_discounts_callback() {
+		WC()->cart->add_cart_discount( 1 );
+		//WC()->cart->add_cart_discount( '10%' ); @todo enable after getting things working properly
 	}
 
 	/**
@@ -133,7 +142,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'tax_total'           => 11.40,
 			'shipping_total'      => 10,
 			'shipping_tax_total'  => 2,
-			'discounts_total'     => 3.00,
+			'discounts_total'     => 4.00,
 			'discounts_tax_total' => 0.60,
 		), $this->totals->get_totals() );
 	}
@@ -150,7 +159,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 36.00, $cart->subtotal );
 		$this->assertEquals( 30.00, $cart->subtotal_ex_tax );
 		$this->assertEquals( 11.40, $cart->tax_total );
-		$this->assertEquals( 2.40, $cart->discount_cart );
+		$this->assertEquals( 3.40, $cart->discount_cart );
 		$this->assertEquals( 0.60, $cart->discount_cart_tax );
 		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 10, $cart->shipping_total );

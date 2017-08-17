@@ -11,9 +11,9 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
+ * @author 		Automattic
  * @package 	WooCommerce/Templates
- * @version     2.3.6
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -64,6 +64,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td data-title="<?php echo esc_attr( $fee->name ); ?>"><?php wc_cart_totals_fee_html( $fee ); ?></td>
 			</tr>
 		<?php endforeach; ?>
+
+		<?php if ( WC()->cart->cart_discount_total > 0 ) : ?>
+			<tr class="discount">
+				<th><?php esc_html_e( 'Discounts', 'woocommerce' ); ?></th>
+				<td data-title="<?php esc_attr_e( 'Discounts', 'woocommerce' ); ?>"><?php wc_cart_totals_discounts_html(); ?></td>
+			</tr>
+		<?php endif; ?>
 
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
 			$taxable_address = WC()->customer->get_taxable_address();
