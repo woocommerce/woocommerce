@@ -1277,70 +1277,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Add additional discount to the cart.
-	 *
-	 * A discount is a percentage or fixed value amount to deduct from the cart total and should
-	 * not be a negative number. Fixed value discounts should be a numeric value (e.g. 6.50) and percent value
-	 * discounts should be a numeric value followed by the '%' character (e.g. '10%').
-	 *
-	 * This method should be called on a callback attached to the
-	 * woocommerce_cart_calculate_cart_discounts action during cart/checkout. Discounts do not
-	 * persist.
-	 *
-	 * @since 3.2.0
-	 * @param float|string $amount Fixed or percent discount amount (do not enter negative amounts).
-	 */
-	public function add_cart_discount( $amount ) {
-		$discount = new WC_Discount;
-
-		if ( strstr( $amount, '%' ) ) {
-			$discount->set_amount( trim( $amount, '%' ) );
-			$discount->set_discount_type( 'percent' );
-		} elseif ( is_numeric( $amount ) && 0 < floatval( $amount ) ) {
-			$discount->set_amount( floatval( $amount ) );
-			$discount->set_discount_type( 'fixed' );
-		} else {
-			return;
-		}
-
-		$this->cart_discounts[] = $discount;
-	}
-
-	/**
-	 * Get cart discounts.
-	 *
-	 * @since 3.2.0
-	 * @return array of WC_Discount objects.
-	 */
-	public function get_cart_discounts() {
-		return array_filter( (array) $this->cart_discounts );
-	}
-
-	/**
-	 * Get processed cart discounts.
-	 *
-	 * @since 3.2.0
-	 * @return array of arrays
-	 */
-	public function get_processed_cart_discounts() {
-		return array_filter( (array) $this->processed_cart_discounts );
-	}
-
-	/**
-	 * Calculate cart discounts.
-	 *
-	 * @since 3.2.0
-	 */
-	public function calculate_cart_discounts() {
-		// Reset discounts before calculation.
-		$this->cart_discounts_total = 0;
-		$this->cart_discounts       = array();
-
-		// Fire an action where developers can add their discounts.
-		do_action( 'woocommerce_cart_calculate_cart_discounts', $this );
-	}
-
-	/**
 	 * Given a set of packages with rates, get the chosen ones only.
 	 *
 	 * @since 3.2.0
@@ -1594,7 +1530,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float amount
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
-		$taxes = $this->get_merged_taxes( array( 'cart', 'fees', 'cart_discounts' ) );
+		$taxes = $this->get_merged_taxes( array( 'cart', 'fees' ) );
 
 		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
 	}
@@ -1620,7 +1556,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {
 		$total = 0;
-		$taxes = $this->get_merged_taxes( array( 'cart', 'fees', 'cart_discounts' ) );
+		$taxes = $this->get_merged_taxes( array( 'cart', 'fees' ) );
 		foreach ( $taxes as $key => $tax ) {
 			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
 				continue;
@@ -1640,30 +1576,29 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Get the total of all cart discounts.
-	 *
-	 * @return float
-	 */
-	public function get_cart_discount_total() {
-		return wc_cart_round_discount( $this->get_discount_total( 'raw' ), wc_get_price_decimals() );
-	}
-
-	/**
-	 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
-	 *
-	 * @return float
-	 */
-	public function get_cart_discount_tax_total() {
-		return wc_cart_round_discount( $this->get_discount_tax( 'raw' ), wc_get_price_decimals() );
-	}
-
-	/**
 	 * Gets the total discount amount - both kinds.
 	 *
 	 * @return mixed formatted price or false if there are none
 	 */
 	public function get_total_discount() {
 		return apply_filters( 'woocommerce_cart_total_discount', $this->get_cart_discount_total() ? wc_price( $this->get_cart_discount_total() ) : false, $this );
+	}
+
+	/**
+	 * Get the total of all cart discounts.
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_total() {
+		return wc_cart_round_discount( $this->discount_cart, $this->dp );
+	}
+	/**
+	 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_tax_total() {
+		return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
 	}
 
 	/**
