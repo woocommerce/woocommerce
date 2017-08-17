@@ -52,7 +52,6 @@ class WC_Install {
 			'wc_update_240_options',
 			'wc_update_240_shipping_methods',
 			'wc_update_240_api_keys',
-			'wc_update_240_webhooks',
 			'wc_update_240_refunds',
 			'wc_update_240_db_version',
 		),
@@ -73,7 +72,6 @@ class WC_Install {
 			'wc_update_260_db_version',
 		),
 		'3.0.0' => array(
-			'wc_update_300_webhooks',
 			'wc_update_300_grouped_products',
 			'wc_update_300_settings',
 			'wc_update_300_product_visibility',
@@ -753,7 +751,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'view_woocommerce_reports',
 		);
 
-		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
+		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
 
 		foreach ( $capability_types as $capability_type ) {
 
