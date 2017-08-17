@@ -32,7 +32,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	protected $data = array(
 		'date_created'     => null,
 		'date_modified'    => null,
-		'status'           => '',
+		'status'           => 'disabled',
 		'delivery_url'     => '',
 		'secret'           => '',
 		'name'             => '',
@@ -783,6 +783,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param string $status Status.
 	 */
 	public function set_status( $status ) {
+		if ( ! array_key_exists( wc_get_webhook_statuses(), $status ) ) {
+			$status = 'disabled';
+		}
+
 		$this->set_prop( 'status', $status );
 	}
 
