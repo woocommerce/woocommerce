@@ -30,19 +30,20 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @var array
 	 */
 	protected $data = array(
-		'date_created'  => null,
-		'date_modified' => null,
-		'status'        => '',
-		'delivery_url'  => '',
-		'secret'        => '',
-		'name'          => '',
-		'topic'         => '',
-		'hooks'         => '',
-		'resource'      => '',
-		'event'         => '',
-		'failure_count' => '',
-		'user_id'       => '',
-		'api_version'   => '',
+		'date_created'     => null,
+		'date_modified'    => null,
+		'status'           => '',
+		'delivery_url'     => '',
+		'secret'           => '',
+		'name'             => '',
+		'topic'            => '',
+		'hooks'            => '',
+		'resource'         => '',
+		'event'            => '',
+		'failure_count'    => 0,
+		'user_id'          => 0,
+		'api_version'      => 2,
+		'pending_delivery' => false,
 	);
 
 	/**
@@ -624,6 +625,30 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
+	 * Get webhopk created date.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context  What the value is for.
+	 *                          Valid values are 'view' and 'edit'.
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
+	 */
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
+	}
+
+	/**
+	 * Get webhopk modified date.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context  What the value is for.
+	 *                          Valid values are 'view' and 'edit'.
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
+	 */
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
+	}
+
+	/**
 	 * Get the secret used for generating the HMAC-SHA256 signature.
 	 *
 	 * @since  2.2.0
@@ -723,6 +748,32 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	public function set_name( $name ) {
 		$this->set_prop( 'name', $name );
+	}
+
+	/**
+	 * Set webhoook created date.
+	 *
+	 * @since 3.2.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
+	 *                                  If the DateTime string has no timezone or offset,
+	 *                                  WordPress site timezone will be assumed.
+	 *                                  Null if their is no date.
+	 */
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
+	}
+
+	/**
+	 * Set webhoook modified date.
+	 *
+	 * @since 3.2.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
+	 *                                  If the DateTime string has no timezone or offset,
+	 *                                  WordPress site timezone will be assumed.
+	 *                                  Null if their is no date.
+	 */
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
 	}
 
 	/**
