@@ -112,4 +112,18 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 
 		return null;
 	}
+
+	/**
+	 * Update the webhook status.
+	 *
+	 * @deprecated 3.2.0
+	 * @since      2.2.0
+	 * @param      string $status Status to set.
+	 */
+	public function update_status( $status ) {
+		wc_deprecated_function( 'WC_Webhook::update_status', '3.2', 'WC_Webhook::set_status' );
+
+		$this->set_status( $status );
+		$this->save();
+	}
 }
