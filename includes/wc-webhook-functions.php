@@ -61,7 +61,8 @@ function wc_get_webhook_statuses() {
 /**
  * Load webhooks.
  *
- * @since 3.2.0
+ * @since  3.2.0
+ * @return bool
  */
 function wc_load_webhooks() {
 	$data_store = WC_Data_Store::load( 'webhook' );

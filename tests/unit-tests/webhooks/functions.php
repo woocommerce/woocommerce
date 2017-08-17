@@ -81,8 +81,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		) );
 		$webhook->save();
 
-		$results = wc_load_webhooks();
+		$this->assertTrue( wc_load_webhooks() );
 
-		$this->assertTrue( $results );
+		$webhook->delete( true );
+		$this->assertFalse( wc_load_webhooks() );
 	}
 }
