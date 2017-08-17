@@ -783,7 +783,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param string $status Status.
 	 */
 	public function set_status( $status ) {
-		if ( ! array_key_exists( wc_get_webhook_statuses(), $status ) ) {
+		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
 			$status = 'disabled';
 		}
 
@@ -810,7 +810,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function set_topic( $topic ) {
 		$topic = wc_clean( $topic );
 
-		if ( wc_is_webhook_valid_topic( $topic ) ) {
+		if ( ! wc_is_webhook_valid_topic( $topic ) ) {
 			$topic = '';
 		}
 
