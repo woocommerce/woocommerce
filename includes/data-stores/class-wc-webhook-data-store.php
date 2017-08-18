@@ -51,7 +51,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		);
 
 		// @codingStandardsIgnoreStart
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_webhooks', $data );
+		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data );
 		// @codingStandardsIgnoreEnd
 
 		$webhook_id = $wpdb->insert_id;
@@ -76,7 +76,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		if ( false === $data ) {
 			// @codingStandardsIgnoreStart
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}woocommerce_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A );
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A );
 			// @codingStandardsIgnoreEnd
 
 			wp_cache_add( $webhook->get_id(), $data, 'webhooks' );
@@ -140,7 +140,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		// @codingStandardsIgnoreStart
 		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_webhooks',
+			$wpdb->prefix . 'wc_webhooks',
 			$data,
 			array(
 				'webhook_id' => $webhook->get_id( 'edit' ),
@@ -166,7 +166,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		// @codingStandardsIgnoreStart
 		$wpdb->delete(
-			$wpdb->prefix . 'woocommerce_webhooks',
+			$wpdb->prefix . 'wc_webhooks',
 			array(
 				'webhook_id' => $webhook->get_id(),
 			),
@@ -202,7 +202,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		if ( false === $ids ) {
 			// @codingStandardsIgnoreStart
-			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}woocommerce_webhooks" );
+			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks" );
 			// @codingStandardsIgnoreEnd
 			$ids = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
 

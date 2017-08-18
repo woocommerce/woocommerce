@@ -626,7 +626,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_webhooks (
+CREATE TABLE {$wpdb->prefix}wc_webhooks (
   webhook_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status varchar(200) NOT NULL,
   name text NOT NULL,
