@@ -101,7 +101,10 @@ if ( wc_tax_enabled() ) {
 	</table>
 </div>
 <div class="wc-order-data-row wc-order-item-bulk-edit" style="display:none;">
-	<button type="button" class="button bulk-delete-items"><?php _e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
+	<?php if ( $order->is_editable() ) : ?>
+		<button type="button" class="button bulk-delete-items"><?php _e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
+	<?php endif; ?>
+
 	<button type="button" class="button bulk-decrease-stock"><?php _e( 'Reduce stock', 'woocommerce' ); ?></button>
 	<button type="button" class="button bulk-increase-stock"><?php _e( 'Increase stock', 'woocommerce' ); ?></button>
 	<?php do_action( 'woocommerce_admin_order_item_bulk_actions', $order ); ?>
