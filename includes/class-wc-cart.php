@@ -265,7 +265,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_removed_cart_contents() {
-		return $this->removed_cart_contents;
+		return (array) $this->removed_cart_contents;
 	}
 
 	/**
@@ -274,7 +274,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of applied coupons
 	 */
 	public function get_applied_coupons() {
-		return $this->applied_coupons;
+		return (array) $this->applied_coupons;
 	}
 
 	/**
@@ -284,7 +284,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_coupon_discount_totals() {
-		return $this->coupon_discount_totals;
+		return (array) $this->coupon_discount_totals;
 	}
 	/**
 	 * Return all calculated coupon tax totals.
@@ -293,7 +293,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_coupon_discount_tax_totals() {
-		return $this->coupon_discount_tax_totals;
+		return (array) $this->coupon_discount_tax_totals;
 	}
 
 	/**
@@ -303,7 +303,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_totals() {
-		return empty( $this->totals ) ? $this->default_totals : $this->totals;
+		return (array) empty( $this->totals ) ? $this->default_totals : $this->totals;
 	}
 
 	/*
