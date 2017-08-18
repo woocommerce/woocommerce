@@ -344,12 +344,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 	if ( $method->cost > 0 ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
 			$label .= ': ' . wc_price( $method->cost );
-			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
+			if ( $method->get_shipping_tax() > 0 && wc_prices_include_tax() ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
-			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
+			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
@@ -369,7 +369,19 @@ function wc_cart_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {
-		return round( $value, $precision );
+		// Fake it in PHP 5.2.
+		if ( 2 === WC_DISCOUNT_ROUNDING_MODE && strstr( $value, '.' ) ) {
+			$value    = (string) $value;
+			$value    = explode( '.', $value );
+			$value[1] = substr( $value[1], 0, $precision + 1 );
+			$value    = implode( '.', $value );
+
+			if ( substr( $value, -1 ) === '5' ) {
+				$value = substr( $value, 0, -1 ) . '4';
+			}
+			$value = floatval( $value );
+		}
+    	return round( $value, $precision );
 	}
 }
 

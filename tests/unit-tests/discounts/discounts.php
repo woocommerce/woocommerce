@@ -66,19 +66,19 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		// Apply a percent discount.
 		$coupon->set_discount_type( 'percent' );
 		$discounts->set_items_from_cart( WC()->cart );
-		$discounts->apply_discount( $coupon );
+		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( 9, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Apply a fixed cart coupon.
 		$coupon->set_discount_type( 'fixed_cart' );
 		$discounts->set_items_from_cart( WC()->cart );
-		$discounts->apply_discount( $coupon );
+		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Apply a fixed product coupon.
 		$coupon->set_discount_type( 'fixed_product' );
 		$discounts->set_items_from_cart( WC()->cart );
-		$discounts->apply_discount( $coupon );
+		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
 
 		// Cleanup.
@@ -354,7 +354,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 			foreach ( $test['coupons'] as $coupon_props ) {
 				$coupon->set_props( $coupon_props );
-				$discounts->apply_discount( $coupon );
+				$discounts->apply_coupon( $coupon );
 			}
 
 			$all_discounts = $discounts->get_discounts();
@@ -371,89 +371,5 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		$coupon->delete( true );
-	}
-
-	/**
-	 * Test apply_discount method.
-	 */
-	public function test_apply_discount() {
-		$tax_rate = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '20.0000',
-			'tax_rate_name'     => 'VAT',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		);
-		$tax_rate2 = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '20.0000',
-			'tax_rate_name'     => 'VAT',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => 'reduced-rate',
-		);
-		$tax_rate_id  = WC_Tax::_insert_tax_rate( $tax_rate );
-		$tax_rate_id2 = WC_Tax::_insert_tax_rate( $tax_rate2 );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-
-		$product  = WC_Helper_Product::create_simple_product();
-		$product2 = WC_Helper_Product::create_simple_product();
-
-		$product->set_tax_class( '' );
-		$product2->set_tax_class( 'reduced-rate' );
-
-		$product->save();
-		$product2->save();
-
-		// Add product to the cart.
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_to_cart( $product2->get_id(), 1 );
-
-		$discounts = new WC_Discounts();
-		$discounts->set_items_from_cart( WC()->cart );
-
-		$discounts->apply_discount( '50%' );
-		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 10, $all_discounts['discount-50%'], print_r( $all_discounts, true ) );
-
-		$discounts->apply_discount( '50%' );
-		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 10, $all_discounts['discount-50%'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 5, $all_discounts['discount-50%-2'], print_r( $all_discounts, true ) );
-
-		// Test fixed discounts.
-		$discounts = new WC_Discounts();
-		$discounts->set_items_from_cart( WC()->cart );
-
-		$discounts->apply_discount( '5' );
-		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-500'] );
-
-		$discounts->apply_discount( '5' );
-		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-500'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 5, $all_discounts['discount-500-2'], print_r( $all_discounts, true ) );
-
-		$discounts->apply_discount( '15' );
-		$all_discounts = $discounts->get_discounts();
-		$this->assertEquals( 5, $all_discounts['discount-500'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 5, $all_discounts['discount-500-2'], print_r( $all_discounts, true ) );
-		$this->assertEquals( 10, $all_discounts['discount-1500'], print_r( $all_discounts, true ) );
-
-		// Cleanup.
-		WC()->cart->empty_cart();
-		$product->delete( true );
-		$product2->delete( true );
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
-		WC_Tax::_delete_tax_rate( $tax_rate_id2 );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 }

@@ -565,9 +565,19 @@ table.wc_status_table {
 		width: 1em;
 	}
 
-	td {
-		padding: 9px;
+	td, th {
+		padding: 2em;
 		font-size: 1.1em;
+		font-weight: normal;
+
+		&.run-tool {
+			text-align:right;
+		}
+
+		strong.name {
+			display: block;
+			margin-bottom: .5em;
+		}
 
 		mark {
 			background: transparent none;
@@ -581,7 +591,7 @@ table.wc_status_table {
 			color: #999;
 		}
 
-		mark.error {
+		mark.error, .red {
 			color: $red;
 		}
 
@@ -797,22 +807,56 @@ ul.wc_coupon_list,
 	clear: both;
 }
 
-ul.wc_coupon_list li {
-	margin: 0;
+ul.wc_coupon_list {
+	padding-bottom: 5px;
 
-	&.code {
-		display: inline-block;
+	li {
+		margin: 0;
 
-		&::after {
-			content: ', ';
-		}
+		&.code {
+			display: inline-block;
+			position: relative;
+			padding-right: 2em;
+			padding-left: .5em;
+			background-color: #fff;
+			border: 1px solid #aaa;
+			-webkit-box-shadow: 0 1px 0 #dfdfdf;
+			box-shadow: 0 1px 0 #dfdfdf;
 
-		&:last-of-type::after {
-			display: none;
-		}
+			border-radius: 4px;
+			margin-right: 5px;
+			margin-top: 5px;
 
-		.tips {
-			cursor: pointer;
+			.tips {
+				cursor: pointer;
+
+				span {
+					color: #888;
+
+					&:hover {
+						color: #000;
+					}
+				}
+			}
+
+			.remove-coupon {
+				text-decoration: none;
+				color: #888;
+				position: absolute;
+				top: 7px;
+				right: 20px;
+
+				/*rtl:raw:
+				left: 7px;
+				*/
+
+				&::before {
+					@include icon_dashicons( '\f158' );
+				}
+				&:hover::before {
+					color: $red;
+				}
+			}
 		}
 	}
 }
@@ -1565,7 +1609,7 @@ ul.wc_coupon_list_block {
 				font-size: 1.5em;
 				line-height: 1em;
 				vertical-align: middle;
-				margin: 0;
+				margin: 0 auto;
 
 				&::before {
 					@include icon( '\e007' );
@@ -1578,7 +1622,7 @@ ul.wc_coupon_list_block {
 				font-size: 1.5em;
 				line-height: 1em;
 				vertical-align: middle;
-				margin: 0;
+				margin: 0 auto;
 
 				&::before {
 					@include icon( '\e014' );
@@ -1592,7 +1636,7 @@ ul.wc_coupon_list_block {
 					font-size: 1.5em;
 					line-height: 1em;
 					vertical-align: middle;
-					margin: 0;
+					margin: 0 auto;
 
 					&::before {
 						@include icon( '\e01a' );
@@ -3010,7 +3054,6 @@ img.help_tip {
 
 	nav.woo-nav-tab-wrapper {
 		margin: 1.5em 0 1em;
-		border-bottom: 1px solid #ccc;
 	}
 
 	.subsubsub {

@@ -32,31 +32,26 @@ class WC_Discounts {
 	protected $discounts = array();
 
 	/**
-	 * An array of applied WC_Discount objects.
-	 *
-	 * @var array
-	 */
-	protected $manual_discounts = array();
-
-	/**
-	 * Constructor. @todo accept order objects.
+	 * Constructor.
 	 *
 	 * @param array $object Cart or order object.
 	 */
 	public function __construct( $object = array() ) {
 		if ( is_a( $object, 'WC_Cart' ) ) {
 			$this->set_items_from_cart( $object );
+		} elseif ( is_a( $object, 'WC_Order' ) ) {
+			$this->set_items_from_order( $object );
 		}
 	}
 
 	/**
-	 * Normalise cart/order items which will be discounted.
+	 * Normalise cart items which will be discounted.
 	 *
 	 * @since 3.2.0
 	 * @param array $cart Cart object.
 	 */
 	public function set_items_from_cart( $cart ) {
-		$this->items = $this->discounts = $this->manual_discounts = array();
+		$this->items = $this->discounts = array();
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
@@ -70,6 +65,32 @@ class WC_Discounts {
 			$item->quantity      = $cart_item['quantity'];
 			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
 			$this->items[ $key ] = $item;
+		}
+
+		uasort( $this->items, array( $this, 'sort_by_price' ) );
+	}
+
+	/**
+	 * Normalise order items which will be discounted.
+	 *
+	 * @since 3.2.0
+	 * @param array $order Cart object.
+	 */
+	public function set_items_from_order( $order ) {
+		$this->items     = $this->discounts      = array();
+
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		foreach ( $order->get_items() as $order_item ) {
+			$item                = new stdClass();
+			$item->key           = $order_item->get_id();
+			$item->object        = $order_item;
+			$item->product       = $order_item->get_product();
+			$item->quantity      = $order_item->get_quantity();
+			$item->price         = wc_add_number_precision_deep( $order_item->get_total() );
+			$this->items[ $order_item->get_id() ] = $item;
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
@@ -107,11 +128,6 @@ class WC_Discounts {
 	 */
 	public function get_discounts( $in_cents = false ) {
 		$discounts = $this->discounts;
-
-		foreach ( $this->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
-			$discounts[ $manual_discount_key ] = $manual_discount->get_discount_total();
-		}
-
 		return $in_cents ? $discounts : wc_remove_number_precision_deep( $discounts );
 	}
 
@@ -124,7 +140,7 @@ class WC_Discounts {
 	 */
 	public function get_discounts_by_item( $in_cents = false ) {
 		$discounts            = $this->discounts;
-		$item_discount_totals = array_shift( $discounts );
+		$item_discount_totals = (array) array_shift( $discounts );
 
 		foreach ( $discounts as $item_discounts ) {
 			foreach ( $item_discounts as $item_key => $item_discount ) {
@@ -146,16 +162,6 @@ class WC_Discounts {
 		$coupon_discount_totals = array_map( 'array_sum', $this->discounts );
 
 		return $in_cents ? $coupon_discount_totals : wc_remove_number_precision_deep( $coupon_discount_totals );
-	}
-
-	/**
-	 * Get an array of manual discounts which have been applied.
-	 *
-	 * @since  3.2.0
-	 * @return WC_Discount[]
-	 */
-	public function get_manual_discounts() {
-		return $this->manual_discounts;
 	}
 
 	/**
@@ -181,95 +187,17 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Get total remaining after discounts.
-	 *
-	 * @since  3.2.0
-	 * @return int
-	 */
-	protected function get_total_after_discounts() {
-		$total_to_discount = 0;
-
-		foreach ( $this->items as $item ) {
-			$total_to_discount += $this->get_discounted_price_in_cents( $item );
-		}
-
-		foreach ( $this->manual_discounts as $key => $value ) {
-			$total_to_discount = $total_to_discount - $value->get_discount_total();
-		}
-
-		return $total_to_discount;
-	}
-
-	/**
-	 * Generate a unique ID for a discount.
-	 *
-	 * @param  WC_Discount $discount Discount object.
-	 * @return string
-	 */
-	protected function generate_discount_id( $discount ) {
-		$discount_id    = '';
-		$index          = 1;
-		while ( ! $discount_id ) {
-			$discount_id = 'discount-' . $discount->get_amount() . ( 'percent' === $discount->get_discount_type() ? '%' : '' );
-
-			if ( 1 < $index ) {
-				$discount_id .= '-' . $index;
-			}
-
-			if ( isset( $this->manual_discounts[ $discount_id ] ) ) {
-				$index ++;
-				$discount_id = '';
-			}
-		}
-		return $discount_id;
-	}
-
-	/**
-	 * Apply a discount to all items.
-	 *
-	 * @param  string|object $raw_discount Accepts a string (fixed or percent discounts), or WC_Coupon object.
-	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
-	 */
-	public function apply_discount( $raw_discount ) {
-		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
-			return $this->apply_coupon( $raw_discount );
-		}
-
-		$discount = new WC_Discount;
-
-		if ( strstr( $raw_discount, '%' ) ) {
-			$discount->set_discount_type( 'percent' );
-			$discount->set_amount( trim( $raw_discount, '%' ) );
-		} elseif ( 0 < absint( $raw_discount ) ) {
-			$discount->set_discount_type( 'fixed' );
-			$discount->set_amount( wc_add_number_precision( absint( $raw_discount ) ) );
-		}
-
-		if ( ! $discount->get_amount() ) {
-			return new WP_Error( 'invalid_coupon', __( 'Invalid discount', 'woocommerce' ) );
-		}
-
-		$total_to_discount = $this->get_total_after_discounts();
-
-		if ( 'percent' === $discount->get_discount_type() ) {
-			$discount->set_discount_total( $discount->get_amount() * ( $total_to_discount / 100 ) );
-		} else {
-			$discount->set_discount_total( min( $discount->get_amount(), $total_to_discount ) );
-		}
-
-		$this->manual_discounts[ $this->generate_discount_id( $discount ) ] = $discount;
-
-		return true;
-	}
-
-	/**
 	 * Apply a discount to all items using a coupon.
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	protected function apply_coupon( $coupon ) {
+	public function apply_coupon( $coupon ) {
+		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
+			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
+		}
+
 		$is_coupon_valid = $this->is_coupon_valid( $coupon );
 
 		if ( is_wp_error( $is_coupon_valid ) ) {
@@ -298,7 +226,8 @@ class WC_Discounts {
 				foreach ( $items_to_apply as $item ) {
 					$discounted_price  = $this->get_discounted_price_in_cents( $item );
 					$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price : $discounted_price );
-					$discount          = min( $discounted_price, wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount ), $item->object ) );
+					$discount          = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount, $item->object ) ) * $item->quantity;
+					$discount          = min( $discounted_price, $discount );
 
 					// Store code and discount amount per item.
 					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
@@ -401,8 +330,14 @@ class WC_Discounts {
 			$cart_total += $price_to_discount;
 
 			// Run coupon calculations.
-			$discount       = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
-			$discount       = min( $discounted_price, apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $price_to_discount, $item->object, false, $coupon ) );
+			$discount = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
+
+			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+				// Send through the legacy filter, but not as cents.
+				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+			}
+
+			$discount        = min( $discounted_price, $discount );
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
@@ -430,7 +365,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
-		$amount         = $amount ? $amount: wc_add_number_precision( $coupon->get_amount() );
+		$amount         = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
 
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
@@ -440,8 +375,14 @@ class WC_Discounts {
 			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
 
 			// Run coupon calculations.
-			$discount       = $amount * $item->quantity;
-			$discount       = min( $discounted_price, apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $price_to_discount, $item->object, false, $coupon ) );
+			$discount = $amount * $item->quantity;
+
+			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+				// Send through the legacy filter, but not as cents.
+				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+			}
+
+			$discount        = min( $discounted_price, $discount );
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
@@ -468,19 +409,24 @@ class WC_Discounts {
 			return $total_discount;
 		}
 
-		$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
+		if ( ! $amount ) {
+			// If there is no amount we still send it through so filters are fired.
+			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, 0 );
+		} else {
+			$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
 
-		if ( $per_item_discount > 0 ) {
-			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
+			if ( $per_item_discount > 0 ) {
+				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
 
-			/**
-			 * If there is still discount remaining, repeat the process.
-			 */
-			if ( $total_discount > 0 && $total_discount < $amount ) {
-				$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
+				/**
+				 * If there is still discount remaining, repeat the process.
+				 */
+				if ( $total_discount > 0 && $total_discount < $amount ) {
+					$total_discount += $this->apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount - $total_discount );
+				}
+			} elseif ( $amount > 0 ) {
+				$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 			}
-		} elseif ( $amount > 0 ) {
-			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 		}
 		return $total_discount;
 	}
@@ -582,7 +528,7 @@ class WC_Discounts {
 			$user_id = get_current_user_id();
 		}
 
-		if ( $coupon->get_usage_limit_per_user() > 0 && is_user_logged_in() && $coupon->get_id() && $coupon->get_data_store() ) {
+		if ( $coupon && $user_id && $coupon->get_usage_limit_per_user() > 0 && $coupon->get_id() && $coupon->get_data_store() ) {
 			$date_store  = $coupon->get_data_store();
 			$usage_count = $date_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
@@ -742,7 +688,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_items( $coupon ) {
-		if ( ! $this->items && $coupon->is_type( wc_get_product_coupon_types() ) ) {
+		if ( ! empty( $this->items ) && $coupon->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
 			foreach ( $this->items as $item ) {

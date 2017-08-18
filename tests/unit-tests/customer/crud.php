@@ -267,7 +267,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $customer->get_total_spent() );
 		$order->update_status( 'wc-completed' );
 		$customer = new WC_Customer( $customer_id );
-		$this->assertEquals( 40, $customer->get_total_spent() );
+		$this->assertEquals( 50, $customer->get_total_spent() );
 		$order->delete();
 	}
 

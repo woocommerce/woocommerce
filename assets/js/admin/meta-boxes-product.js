@@ -257,7 +257,7 @@ jQuery( function( $ ) {
 				date_picker_select( $( this ) );
 			}
 		});
-		$( this ).find( 'input' ).each( function() { date_picker_select( $( this ) ) } );
+		$( this ).find( 'input' ).each( function() { date_picker_select( $( this ) ); } );
 	});
 
 	// ATTRIBUTE TABLES.

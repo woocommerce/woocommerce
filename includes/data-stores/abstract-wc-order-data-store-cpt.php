@@ -210,8 +210,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Read order data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order
-	 * @param object $post_object
+	 * @param WC_Order $order
+	 * @param object   $post_object
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
@@ -278,7 +278,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Clear any caches.
 	 *
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$order ) {
@@ -323,8 +323,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * @param WC_Order
-	 * @param string $type Order item type. Default null.
+	 * @param WC_Order $order
+	 * @param string   $type Order item type. Default null.
 	 */
 	public function delete_items( $order, $type = null ) {
 		global $wpdb;
@@ -341,7 +341,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Get token ids for an order.
 	 *
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @return array
 	 */
 	public function get_payment_token_ids( $order ) {
@@ -352,8 +352,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Update token ids for an order.
 	 *
-	 * @param WC_Order
-	 * @param array $token_ids
+	 * @param WC_Order $order
+	 * @param array    $token_ids
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );

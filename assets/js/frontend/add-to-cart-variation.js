@@ -6,7 +6,7 @@
 	var VariationForm = function( $form ) {
 		this.$form                = $form;
 		this.$attributeFields     = $form.find( '.variations select' );
-		this.$singleVariation     = $form.find( '.single_variation' ),
+		this.$singleVariation     = $form.find( '.single_variation' );
 		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		this.$resetVariations     = $form.find( '.reset_variations' );
 		this.$product             = $form.closest( '.product' );
