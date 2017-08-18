@@ -180,7 +180,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_totals() {
-		return (array) empty( $this->totals ) ? $this->default_totals : $this->totals;
+		return empty( $this->totals ) ? $this->default_totals : $this->totals;
 	}
 
 	/**
