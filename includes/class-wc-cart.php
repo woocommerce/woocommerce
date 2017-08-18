@@ -24,13 +24,6 @@ include_once( WC_ABSPATH . 'includes/class-wc-cart-session.php' );
 class WC_Cart extends WC_Legacy_Cart {
 
 	/**
-	 * This stores the chosen shipping methods for the cart item packages.
-	 *
-	 * @var array
-	 */
-	protected $shipping_methods;
-
-	/**
 	 * Contains an array of cart items.
 	 *
 	 * @var array
@@ -52,127 +45,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * Contains an array of coupon code discounts after they have been applied.
-	 *
-	 * @var array
-	 */
-	public $coupon_discount_amounts = array();
-
-	/**
-	 * Contains an array of coupon code discount taxes. Used for tax incl pricing.
-	 *
-	 * @var array
-	 */
-	public $coupon_discount_tax_amounts = array();
-
-	/**
-	 * The total cost of the cart items.
-	 *
-	 * @var float
-	 */
-	public $cart_contents_total;
-
-	/**
-	 * Cart grand total.
-	 *
-	 * @var float
-	 */
-	public $total;
-
-	/**
-	 * Cart subtotal.
-	 *
-	 * @var float
-	 */
-	public $subtotal;
-
-	/**
-	 * Cart subtotal without tax.
-	 *
-	 * @var float
-	 */
-	public $subtotal_ex_tax;
-
-	/**
-	 * Total cart tax.
-	 *
-	 * @var float
-	 */
-	public $tax_total;
-
-	/**
-	 * An array of taxes/tax rates for the cart.
-	 *
-	 * @var array
-	 */
-	public $taxes;
-
-	/**
-	 * An array of taxes/tax rates for the shipping.
-	 *
-	 * @var array
-	 */
-	public $shipping_taxes;
-
-	/**
-	 * Discount amount before tax.
-	 *
-	 * @var float
-	 */
-	public $discount_cart;
-
-	/**
-	 * Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly.
-	 *
-	 * @var float
-	 */
-	public $discount_cart_tax;
-
-	/**
-	 * Total for additional fees.
-	 *
-	 * @var float
-	 */
-	public $fee_total;
-
-	/**
-	 * Shipping cost.
-	 *
-	 * @var float
-	 */
-	public $shipping_total;
-
-	/**
-	 * Shipping tax.
-	 *
-	 * @var float
-	 */
-	public $shipping_tax_total;
-
-	/**
-	 * Array of data the cart calculates and stores in the session with defaults
-	 *
-	 * @var array cart_session_data.
-	 */
-	public $cart_session_data = array(
-		'cart_contents_total'         => 0,
-		'total'                       => 0,
-		'subtotal'                    => 0,
-		'subtotal_ex_tax'             => 0,
-		'tax_total'                   => 0,
-		'taxes'                       => array(),
-		'shipping_taxes'              => array(),
-		'discount_cart'               => 0,
-		'discount_cart_tax'           => 0,
-		'shipping_total'              => 0,
-		'shipping_tax_total'          => 0,
-		'coupon_discount_amounts'     => array(),
-		'coupon_discount_tax_amounts' => array(),
-		'fee_total'                   => 0,
-		'fees'                        => array(),
-	);
-
-	/**
 	 * An array of fees.
 	 *
 	 * @var array
@@ -187,6 +59,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $tax_display_cart;
 
 	/**
+	 * This stores the chosen shipping methods for the cart item packages.
+	 *
+	 * @var array
+	 */
+	protected $shipping_methods;
+
+	/**
 	 * Total defaults used to reset. @todo these need implementing to replace default method variables.
 	 *
 	 * @var array
@@ -196,19 +75,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		'subtotal_tax'        => 0,
 		'shipping_total'      => 0,
 		'shipping_tax'        => 0,
+		'shipping_taxes'      => array(),
 		'discount_total'      => 0,
 		'discount_tax'        => 0,
 		'cart_contents_total' => 0,
 		'cart_contents_tax'   => 0,
+		'cart_contents_taxes' => array(),
 		'fee_total'           => 0,
 		'fee_tax'             => 0,
+		'fee_taxes'           => array(),
 		'total'               => 0,
 		'total_tax'           => 0,
-		'taxes'               => array(
-			'shipping' => array(),
-			'cart'     => array(),
-			'fees'     => array(),
-		),
 	);
 	/**
 	 * Store calculated totals.
@@ -428,6 +305,34 @@ class WC_Cart extends WC_Legacy_Cart {
 		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
 	}
 
+	/**
+	 * Get taxes.
+	 *
+	 * @since 3.2.0
+	 */
+	public function get_shipping_taxes() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_taxes'] );
+	}
+
+	/**
+	 * Get taxes.
+	 *
+	 * @since 3.2.0
+	 */
+	public function get_cart_contents_taxes() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_taxes'] );
+
+	}
+
+	/**
+	 * Get taxes.
+	 *
+	 * @since 3.2.0
+	 */
+	public function get_fee_taxes() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_taxes'] );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters.
@@ -614,13 +519,33 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Set taxes by type.
+	 * Set taxes.
 	 *
-	 * @param string $type Type/group of tax. e.g. shipping
+	 * @since 3.2.0
 	 * @param array $value Tax values.
 	 */
-	public function set_taxes( $type, $value ) {
-		$this->totals['taxes'][ $type ] = $value;
+	public function set_shipping_taxes( $value ) {
+		$this->totals['shipping_taxes'] = (array) $value;
+	}
+
+	/**
+	 * Set taxes.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Tax values.
+	 */
+	public function set_cart_contents_taxes( $value ) {
+		$this->totals['cart_contents_taxes'] = (array) $value;
+	}
+
+	/**
+	 * Set taxes.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Tax values.
+	 */
+	public function set_fee_taxes( $value ) {
+		$this->totals['fee_taxes'] = (array) $value;
 	}
 
 	/*
@@ -628,6 +553,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	| Helper methods.
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Returns the cart and shipping taxes, merged.
+	 *
+	 * @return array merged taxes
+	 */
+	public function get_taxes() {
+		return apply_filters( 'woocommerce_cart_get_taxes', wc_array_merge_recursive_numeric( $this->get_shipping_taxes(), $this->get_cart_contents_taxes(), $this->get_fee_taxes() ), $this );
+	}
 
 	/**
 	 * Returns the contents of the cart in an array.
@@ -971,21 +905,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		);
 
 		return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
-	}
-
-	/**
-	 * Returns the cart and shipping taxes, merged.
-	 *
-	 * @return array merged taxes
-	 */
-	public function get_taxes() {
-		$taxes = array();
-
-		foreach ( array_keys( $this->taxes + $this->shipping_taxes ) as $key ) {
-			$taxes[ $key ] = ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
-		}
-
-		return apply_filters( 'woocommerce_cart_get_taxes', $taxes, $this );
 	}
 
 	/**
