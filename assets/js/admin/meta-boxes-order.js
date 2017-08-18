@@ -385,7 +385,7 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.block();
 
 				var data = {
-					action   : 'woocommerce_add_order_discount',
+					action   : 'woocommerce_add_coupon_discount',
 					dataType : 'json',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,

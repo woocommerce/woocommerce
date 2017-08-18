@@ -113,7 +113,7 @@ class WC_AJAX {
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
-			'add_order_discount'                               => false,
+			'add_coupon_discount'                              => false,
 			'remove_order_coupon'                              => false,
 			'remove_order_item'                                => false,
 			'remove_order_tax'                                 => false,
@@ -896,7 +896,7 @@ class WC_AJAX {
 	/**
 	 * Add order discount via ajax.
 	 */
-	public static function add_order_discount() {
+	public static function add_coupon_discount() {
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
