@@ -29,6 +29,45 @@ abstract class WC_Legacy_Cart {
 	public $coupon_applied_count = array();
 
 	/**
+	 * Auto-load in-accessible properties on demand.
+	 *
+	 * @param mixed $key Key to get.
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		switch ( $key ) {
+			case 'prices_include_tax' :
+				return wc_prices_include_tax();
+			break;
+			case 'round_at_subtotal' :
+				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+			break;
+			case 'dp' :
+				return wc_get_price_decimals();
+			break;
+			case 'display_totals_ex_tax' :
+			case 'display_cart_ex_tax' :
+				return 'excl' === $this->tax_display_cart;
+			break;
+			case 'cart_contents_weight' :
+				return $this->get_cart_contents_weight();
+			break;
+			case 'cart_contents_count' :
+				return $this->get_cart_contents_count();
+			break;
+			case 'tax' :
+				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
+				$this->tax = new WC_Tax();
+				return $this->tax;
+			case 'discount_total':
+				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
+				return 0;
+			case 'coupons' :
+				return $this->get_coupons();
+		}
+	}
+
+	/**
 	 * Methods moved to session class in 3.2.0.
 	 */
 	public function get_cart_from_session() { $this->session->get_cart_from_session(); }

@@ -180,6 +180,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $fees = array();
 
 	/**
+	 * Are prices in the cart displayed inc or excl tax.
+	 *
+	 * @var string
+	 */
+	public $tax_display_cart;
+
+	/**
 	 * Total defaults used to reset. @todo these need implementing to replace default method variables.
 	 *
 	 * @var array
@@ -221,7 +228,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
-		$this->session = new WC_Cart_Session( $this );
+		$this->session          = new WC_Cart_Session( $this );
+		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
@@ -230,48 +238,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
-	}
-
-	/**
-	 * Auto-load in-accessible properties on demand.
-	 *
-	 * @param mixed $key Key to get.
-	 * @return mixed
-	 */
-	public function __get( $key ) {
-		switch ( $key ) {
-			case 'prices_include_tax' :
-				return wc_prices_include_tax();
-			break;
-			case 'round_at_subtotal' :
-				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
-			break;
-			case 'tax_display_cart' :
-				return get_option( 'woocommerce_tax_display_cart' );
-			break;
-			case 'dp' :
-				return wc_get_price_decimals();
-			break;
-			case 'display_totals_ex_tax' :
-			case 'display_cart_ex_tax' :
-				return 'excl' === $this->tax_display_cart;
-			break;
-			case 'cart_contents_weight' :
-				return $this->get_cart_contents_weight();
-			break;
-			case 'cart_contents_count' :
-				return $this->get_cart_contents_count();
-			break;
-			case 'tax' :
-				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
-				$this->tax = new WC_Tax();
-				return $this->tax;
-			case 'discount_total':
-				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
-				return 0;
-			case 'coupons' :
-				return $this->get_coupons();
-		}
 	}
 
 	/*
@@ -1279,7 +1245,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( 'excl' === $this->tax_display_cart ) {
 					$return = wc_price( $this->shipping_total );
 
-					if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
+					if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
 						$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
 
@@ -1287,7 +1253,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				} else {
 					$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
-					if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
+					if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
 						$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 
@@ -1508,7 +1474,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
 		}
 
-		return wc_cart_round_discount( $discount_amount, $this->dp );
+		return wc_cart_round_discount( $discount_amount, wc_get_price_decimals() );
 	}
 
 	/**
@@ -1518,7 +1484,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
+		return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, wc_get_price_decimals() );
 	}
 
 	/**
@@ -1665,7 +1631,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_cart_total() {
-		if ( ! $this->prices_include_tax ) {
+		if ( ! wc_prices_include_tax() ) {
 			$cart_contents_total = wc_price( $this->cart_contents_total );
 		} else {
 			$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
@@ -1691,13 +1657,13 @@ class WC_Cart extends WC_Legacy_Cart {
 		} elseif ( 'excl' === $this->tax_display_cart ) {
 			$cart_subtotal = wc_price( $this->subtotal_ex_tax );
 
-			if ( $this->tax_total > 0 && $this->prices_include_tax ) {
+			if ( $this->tax_total > 0 && wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
 			$cart_subtotal = wc_price( $this->subtotal );
 
-			if ( $this->tax_total > 0 && ! $this->prices_include_tax ) {
+			if ( $this->tax_total > 0 && ! wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
@@ -1741,7 +1707,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
-				if ( $this->prices_include_tax && $this->tax_total > 0 ) {
+				if ( wc_prices_include_tax() && $this->tax_total > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 			} else {
@@ -1749,7 +1715,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
-				if ( ! $this->prices_include_tax && $this->tax_total > 0 ) {
+				if ( ! wc_prices_include_tax() && $this->tax_total > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 				}
 			}
@@ -1825,7 +1791,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_discount_total() {
-		return wc_cart_round_discount( $this->discount_cart, $this->dp );
+		return wc_cart_round_discount( $this->discount_cart, wc_get_price_decimals() );
 	}
 
 	/**
@@ -1834,7 +1800,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_discount_tax_total() {
-		return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
+		return wc_cart_round_discount( $this->discount_cart_tax, wc_get_price_decimals() );
 	}
 
 	/**
