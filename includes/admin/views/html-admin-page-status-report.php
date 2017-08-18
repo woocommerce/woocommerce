@@ -13,14 +13,15 @@ if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
 	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
 }
 
-$system_status  = new WC_REST_System_Status_Controller;
-$environment    = $system_status->get_environment_info();
-$database       = $system_status->get_database_info();
-$active_plugins = $system_status->get_active_plugins();
-$theme          = $system_status->get_theme_info();
-$security       = $system_status->get_security_info();
-$settings       = $system_status->get_settings();
-$pages          = $system_status->get_pages();
+$system_status    = new WC_REST_System_Status_Controller;
+$environment      = $system_status->get_environment_info();
+$database         = $system_status->get_database_info();
+$post_type_counts = $system_status->get_post_type_counts();
+$active_plugins   = $system_status->get_active_plugins();
+$theme            = $system_status->get_theme_info();
+$security         = $system_status->get_security_info();
+$settings         = $system_status->get_settings();
+$pages            = $system_status->get_pages();
 ?>
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
@@ -302,57 +303,106 @@ $pages          = $system_status->get_pages();
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
-	<thead>
-		<tr>
-			<th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td data-export-label="WC Database Version"><?php _e( 'WC database version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); ?></td>
-			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="WC Database Prefix"><?php _e( 'Database prefix', 'woocommerce' ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td><?php
-				if ( strlen( $database['database_prefix'] ) > 20 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
-		<?php
-		foreach ( $database['database_tables'] as $table => $table_exists ) {
+    <thead>
+    <tr>
+        <th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td data-export-label="WC Database Version"><?php _e( 'WC database version', 'woocommerce' ); ?>:</td>
+        <td class="help"><?php echo wc_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); ?></td>
+        <td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
+    </tr>
+    <tr>
+        <td data-export-label="WC Database Prefix"><?php _e( 'Database prefix', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php
+			if ( strlen( $database['database_prefix'] ) > 20 ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+			} else {
+				echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
+			}
 			?>
-			<tr>
-				<td><?php echo esc_html( $table ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td><?php echo ! $table_exists ? '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>' : '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>'; ?></td>
-			</tr>
-			<?php
-		}
+        </td>
+    </tr>
 
-		if ( $settings['geolocation_enabled'] ) {
-			?>
-			<tr>
-				<td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
-				<td><?php
-					if ( file_exists( $database['maxmind_geoip_database'] ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
-					} else {
-						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
-					}
-				?></td>
-			</tr>
-			<?php
-		}
+    <?php if ( $settings['geolocation_enabled'] ) { ?>
+        <tr>
+            <td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
+            <td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
+            <td><?php
+			    if ( file_exists( $database['maxmind_geoip_database'] ) ) {
+				    echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
+			    } else {
+				    printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
+			    }
+			    ?></td>
+        </tr>
+    <?php } ?>
+
+    <tr>
+        <td><?php _e( 'Total Database Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] ); ?></td>
+    </tr>
+
+    <tr>
+        <td><?php _e( 'Database Data Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['index'] ); ?></td>
+    </tr>
+
+    <tr>
+        <td><?php _e( 'Database Index Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] + $database['database_size']['index'] ); ?></td>
+    </tr>
+
+	<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
+    <tr>
+        <td><?php echo esc_html( $table ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td>
+			<?php if( ! $table_data ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
+			} else {
+				printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
+			} ?>
+        </td>
+        </tr>
+    <?php } ?>
+
+    <?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
+        <tr>
+            <td><?php echo esc_html( $table ); ?></td>
+            <td class="help">&nbsp;</td>
+            <td>
+			    <?php printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) ); ?>
+            </td>
+        </tr>
+    <?php } ?>
+    </tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+    <thead>
+    <tr>
+        <th colspan="3" data-export-label="Post Type Counts"><h2><?php _e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
+    </tr>
+    </thead>
+    <tbody>
+	<?php
+	foreach ( $post_type_counts as $post_type ) {
 		?>
-	</tbody>
+        <tr>
+            <td><?php echo esc_html( $post_type->type ); ?></td>
+            <td class="help">&nbsp;</td>
+            <td><?php echo absint( $post_type->count ); ?></td>
+        </tr>
+		<?php
+	}
+	?>
+    </tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
