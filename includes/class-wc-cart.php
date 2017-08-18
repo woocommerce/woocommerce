@@ -746,7 +746,7 @@ class WC_Cart {
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
 
-			if ( $code || apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) === $key ) {
+			if ( $code || $key ===  apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' )  ) {
 				if ( ! isset( $tax_totals[ $code ] ) ) {
 					$tax_totals[ $code ] = new stdClass();
 					$tax_totals[ $code ]->amount = 0;
@@ -1541,7 +1541,7 @@ class WC_Cart {
 
 		$needs_shipping_address = false;
 
-		if ( $this->needs_shipping() === true && ! wc_ship_to_billing_address_only() ) {
+		if ( true === $this->needs_shipping()  && ! wc_ship_to_billing_address_only() ) {
 			$needs_shipping_address = true;
 		}
 

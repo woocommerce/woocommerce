@@ -333,7 +333,7 @@ class WC_Form_Handler {
 					$available_gateways[ $payment_method ]->validate_fields();
 
 					// Process
-					if ( wc_notice_count( 'error' ) == 0 ) {
+					if ( 0 ===  wc_notice_count( 'error' )  ) {
 
 						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
@@ -371,7 +371,7 @@ class WC_Form_Handler {
 			$available_gateways[ $payment_method ]->validate_fields();
 
 			// Process
-			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
+			if ( 0 ===  wc_notice_count( 'wc_errors' ) ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
 				// Redirect to success/confirmation/payment page
 				if ( 'success' === $result['result'] ) {
@@ -642,7 +642,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order_id === $order->get_id()  && $order_key === $order->get_order_key() ) {
 
 				// Cancel the order + restore stock
 				WC()->session->set( 'order_awaiting_payment', false );
@@ -706,12 +706,12 @@ class WC_Form_Handler {
 		}
 
 		// If we added the product to the cart we can now optionally do a redirect.
-		if ( $was_added_to_cart && wc_notice_count( 'error' ) === 0 ) {
+		if ( 0 === $was_added_to_cart && wc_notice_count( 'error' )  ) {
 			// If has custom URL redirect there
 			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url ) ) {
 				wp_safe_redirect( $url );
 				exit;
-			} elseif ( get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes' ) {
+			} elseif ( 'yes' ===  get_option( 'woocommerce_cart_redirect_after_add' )  ) {
 				wp_safe_redirect( wc_get_cart_url() );
 				exit;
 			}
@@ -728,7 +728,7 @@ class WC_Form_Handler {
 		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
+		if ( $passed_validation &&  false !== WC()->cart->add_to_cart( $product_id, $quantity )  ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
@@ -757,7 +757,7 @@ class WC_Form_Handler {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
-				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
+				if ( $passed_validation && false !==  WC()->cart->add_to_cart( $item, $quantity )  ) {
 					$was_added_to_cart = true;
 					$added_to_cart[ $item ] = $quantity;
 				}
@@ -844,7 +844,7 @@ class WC_Form_Handler {
 		// Add to cart validation
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations )  ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
