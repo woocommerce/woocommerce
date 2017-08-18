@@ -379,7 +379,7 @@ jQuery( function ( $ ) {
 		},
 
 		add_coupon: function() {
-			var value = window.prompt( 'Enter a coupon code, percentage, or fixed discount amount.' );
+			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_apply_coupon );
 
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
