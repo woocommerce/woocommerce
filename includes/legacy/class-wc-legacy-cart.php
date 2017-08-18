@@ -29,6 +29,43 @@ abstract class WC_Legacy_Cart {
 	public $coupon_applied_count = array();
 
 	/**
+	 * Methods moved to session class in 3.2.0.
+	 */
+	public function get_cart_from_session() { $this->session->get_cart_from_session(); }
+	public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
+	public function set_session() { $this->session->set_session(); }
+	public function get_cart_for_session() { $this->session->get_cart_for_session(); }
+	public function persistent_cart_update() { $this->session->persistent_cart_update(); }
+	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
+
+	/**
+	 * Renamed for consistency.
+	 *
+	 * @param string $coupon_code
+	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
+	 */
+	public function add_discount( $coupon_code ) {
+		return $this->apply_coupon( $coupon_code );
+	}
+	/**
+	 * Remove taxes.
+	 *
+	 * @deprecated 3.2.0 Taxes are never calculated if customer is tax except making this function unused.
+	 */
+	public function remove_taxes() {
+		wc_deprecated_function( 'WC_Cart::remove_taxes', '3.2', '' );
+	}
+	/**
+	 * Init.
+	 *
+	 * @deprecated 3.2.0 Session is loaded via hooks rather than directly.
+	 */
+	public function init() {
+		wc_deprecated_function( 'WC_Cart::init', '3.2', '' );
+		$this->get_cart_from_session();
+	}
+
+	/**
 	 * Function to apply discounts to a product and get the discounted price (before tax is applied).
 	 *
 	 * @deprecated Calculation and coupon logic is handled in WC_Cart_Totals.

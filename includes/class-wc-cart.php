@@ -15,7 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'legacy/class-wc-legacy-cart.php' );
+include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php' );
+include_once( WC_ABSPATH . 'includes/class-wc-cart-session.php' );
 
 /**
  * WC_Cart class.
@@ -179,14 +180,56 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $fees = array();
 
 	/**
+	 * Total defaults used to reset. @todo these need implementing to replace default method variables.
+	 *
+	 * @var array
+	 */
+	protected $default_totals = array(
+		'subtotal'       => 0,
+		'subtotal_tax'   => 0,
+		'shipping_total' => 0,
+		'shipping_tax'   => 0,
+		'discount_total' => 0,
+		'discount_tax'   => 0,
+		'cart_total'     => 0,
+		'cart_tax'       => 0,
+		'fee_total'      => 0,
+		'fee_taxes'      => 0,
+		'total'          => 0,
+		'total_tax'      => 0,
+		'taxes'          => array(
+			'shipping' => array(),
+			'cart'     => array(),
+			'fees'     => array(),
+		),
+	);
+	/**
+	 * Store calculated totals.
+	 *
+	 * @var array
+	 */
+	protected $totals = array();
+
+	/**
+	 * Reference to the cart session handling class.
+	 *
+	 * @var WC_Cart_Session
+	 */
+	protected $session;
+
+	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
-		add_action( 'wp_loaded', array( $this, 'init' ) ); // Get cart after WP and plugins are loaded.
-		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies.
-		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing.
+		$this->session = new WC_Cart_Session( $this );
+
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'calculate_totals' ), 20, 0 );
+		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
+		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
+		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
 	}
 
 	/**
@@ -231,130 +274,175 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 	}
 
-	/**
-	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
-	 */
-	public function init() {
-		$this->get_cart_from_session();
-
-		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
-		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
-		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
-	}
+	/*
+	|--------------------------------------------------------------------------
+	| Getters.
+	|--------------------------------------------------------------------------
+	|
+	| Methods to retrieve class properties and avoid direct access.
+	*/
 
 	/**
-	 * Will set cart cookies if needed, once, during WP hook.
-	 */
-	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
-			if ( ! $this->is_empty() ) {
-				$this->set_cart_cookies( true );
-			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-				$this->set_cart_cookies( false );
-			}
-		}
-	}
-
-	/**
-	 * Set cart hash cookie and items in cart.
+	 * Gets cart contents.
 	 *
-	 * @access private
-	 * @param bool $set Should cookies be set (true) or unset.
+	 * @since 3.2.0
+	 * @return array of applied coupons
 	 */
-	private function set_cart_cookies( $set = true ) {
-		if ( $set ) {
-			wc_setcookie( 'woocommerce_items_in_cart', 1 );
-			wc_setcookie( 'woocommerce_cart_hash', md5( wp_json_encode( $this->get_cart_for_session() ) ) );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
-			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
-		}
-		do_action( 'woocommerce_set_cart_cookies', $set );
+	public function get_cart_contents() {
+		return (array) $this->cart_contents;
 	}
 
 	/**
-	 * Get the cart data from the PHP session and store it in class variables.
+	 * Return items removed from the cart.
+	 *
+	 * @since 3.2.0
+	 * @return array
 	 */
-	public function get_cart_from_session() {
-		foreach ( $this->cart_session_data as $key => $default ) {
-			$this->$key = WC()->session->get( $key, $default );
-		}
-
-		$update_cart_session         = false;
-		$this->removed_cart_contents = array_filter( WC()->session->get( 'removed_cart_contents', array() ) );
-		$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
-
-		/**
-		 * Load the cart object. This defaults to the persistent cart if null.
-		 */
-		$cart = WC()->session->get( 'cart', null );
-
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
-			$cart                = $saved_cart['cart'];
-			$update_cart_session = true;
-		} elseif ( is_null( $cart ) ) {
-			$cart = array();
-		}
-
-		if ( is_array( $cart ) ) {
-			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', wp_list_pluck( $cart, 'product_id' ) );
-			update_object_term_cache( wp_list_pluck( $cart, 'product_id' ), 'product' );
-
-			foreach ( $cart as $key => $values ) {
-				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
-
-				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
-
-					if ( ! $product->is_purchasable() ) {
-						$update_cart_session = true; // Flag to indicate the stored cart should be updated.
-						/* translators: %s: product name */
-						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
-						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
-
-					} else {
-
-						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data = array_merge( $values, array( 'data' => $product ) );
-						$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
-					}
-				}
-			}
-		}
-
-		do_action( 'woocommerce_cart_loaded_from_session', $this );
-
-		if ( $update_cart_session ) {
-			WC()->session->cart = $this->get_cart_for_session();
-		}
-
-		// Queue re-calc if subtotal is not set.
-		if ( ( ! $this->subtotal && ! $this->is_empty() ) || $update_cart_session ) {
-			$this->calculate_totals();
-		}
+	public function get_removed_cart_contents() {
+		return $this->removed_cart_contents;
 	}
 
 	/**
-	 * Sets the php session data for the cart and coupons.
+	 * Gets the array of applied coupon codes.
+	 *
+	 * @return array of applied coupons
 	 */
-	public function set_session() {
-		$cart_session = $this->get_cart_for_session();
+	public function get_applied_coupons() {
+		return $this->applied_coupons;
+	}
 
-		WC()->session->set( 'cart', $cart_session );
-		WC()->session->set( 'applied_coupons', $this->applied_coupons );
-		WC()->session->set( 'coupon_discount_amounts', $this->coupon_discount_amounts );
-		WC()->session->set( 'coupon_discount_tax_amounts', $this->coupon_discount_tax_amounts );
-		WC()->session->set( 'removed_cart_contents', $this->removed_cart_contents );
+	/**
+	 * Return all calculated coupon totals.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_coupon_discount_totals() {
+		return $this->coupon_discount_totals;
+	}
+	/**
+	 * Return all calculated coupon tax totals.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_coupon_discount_tax_totals() {
+		return $this->coupon_discount_tax_totals;
+	}
 
-		foreach ( $this->cart_session_data as $key => $default ) {
-			WC()->session->set( $key, $this->$key );
+	/**
+	 * Return all calculated totals.
+	 *
+	 * @since 3.2.0
+	 * @return array
+	 */
+	public function get_totals() {
+		return empty( $this->totals ) ? $this->default_totals : $this->totals;
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Setters.
+	|--------------------------------------------------------------------------
+	|
+	| Methods to set class properties and avoid direct access.
+	*/
+
+	/**
+	 * Sets the contents of the cart.
+	 *
+	 * @param array $value Cart array.
+	 */
+	public function set_cart_contents( $value ) {
+		$this->cart_contents = (array) $value;
+	}
+
+	/**
+	 * Set items removed from the cart.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Item array.
+	 */
+	public function set_removed_cart_contents( $value = array() ) {
+		$this->removed_cart_contents = (array) $value;
+	}
+
+	/**
+	 * Sets the array of applied coupon codes.
+	 *
+	 * @param array $value List of applied coupon codes.
+	 */
+	public function set_applied_coupons( $value = array() ) {
+		$this->applied_coupons = (array) $value;
+	}
+
+	/**
+	 * Return all calculated coupon totals.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Value to set.
+	 */
+	public function set_coupon_discount_totals( $value = array() ) {
+		$this->coupon_discount_totals = (array) $value;
+	}
+	/**
+	 * Return all calculated coupon tax totals.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Value to set.
+	 */
+	public function set_coupon_discount_tax_totals( $value = array() ) {
+		$this->coupon_discount_tax_totals = (array) $value;
+	}
+
+	/**
+	 * Set all calculated totals.
+	 *
+	 * @since 3.2.0
+	 * @param array $value Value to set.
+	 */
+	public function set_totals( $value = array() ) {
+		$this->totals = wp_parse_args( $value, $this->default_totals );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Helper methods.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Returns the contents of the cart in an array.
+	 *
+	 * @return array contents of the cart
+	 */
+	public function get_cart() {
+		if ( ! did_action( 'wp_loaded' ) ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
 		}
-
-		if ( get_current_user_id() ) {
-			$this->persistent_cart_update();
+		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+			$this->session->get_cart_from_session();
 		}
+		return array_filter( $this->get_cart_contents() );
+	}
 
-		do_action( 'woocommerce_cart_updated' );
+	/**
+	 * Returns a specific item in the cart.
+	 *
+	 * @param string $item_key Cart item key.
+	 * @return array Item data
+	 */
+	public function get_cart_item( $item_key ) {
+		return isset( $this->cart_contents[ $item_key ] ) ? $this->cart_contents[ $item_key ] : array();
+	}
+
+	/**
+	 * Checks if the cart is empty.
+	 *
+	 * @return bool
+	 */
+	public function is_empty() {
+		return 0 === count( $this->get_cart() );
 	}
 
 	/**
@@ -363,33 +451,20 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param bool $clear_persistent_cart Should the persistant cart be cleared too. Defaults to true.
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
-		$this->cart_contents = array();
-		$this->shipping_methods = null;
-		$this->reset( true );
+		$this->cart_contents              = array();
+		$this->removed_cart_contents      = array();
+		$this->shipping_methods           = array();
+		$this->coupon_discount_totals     = array();
+		$this->coupon_discount_tax_totals = array();
+		$this->applied_coupons            = array();
+		$this->fees                       = array();
+		$this->totals                     = $this->default_totals;
 
-		unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->coupon_discount_tax_amounts, WC()->session->cart );
-
-		if ( $clear_persistent_cart && get_current_user_id() ) {
-			$this->persistent_cart_destroy();
+		if ( $clear_persistent_cart ) {
+			$this->session->persistent_cart_destroy();
 		}
 
 		do_action( 'woocommerce_cart_emptied' );
-	}
-
-	/**
-	 * Save the persistent cart when the cart is updated.
-	 */
-	public function persistent_cart_update() {
-		update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
-			'cart' => WC()->session->get( 'cart' ),
-		) );
-	}
-
-	/**
-	 * Delete the persistent cart permanently.
-	 */
-	public function persistent_cart_destroy() {
-		delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 	}
 
 	/**
@@ -418,12 +493,19 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Checks if the cart is empty.
+	 * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
 	 *
-	 * @return bool
+	 * @return array
 	 */
-	public function is_empty() {
-		return 0 === count( $this->get_cart() );
+	public function get_cart_item_quantities() {
+		$quantities = array();
+
+		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			$product = $values['data'];
+			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
+		}
+
+		return $quantities;
 	}
 
 	/**
@@ -461,22 +543,6 @@ class WC_Cart extends WC_Legacy_Cart {
 				$this->remove_coupon( $code );
 			}
 		}
-	}
-
-	/**
-	 * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
-	 *
-	 * @return array
-	 */
-	public function get_cart_item_quantities() {
-		$quantities = array();
-
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$product = $values['data'];
-			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
-		}
-
-		return $quantities;
 	}
 
 	/**
@@ -690,53 +756,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Returns the contents of the cart in an array.
-	 *
-	 * @return array contents of the cart
-	 */
-	public function get_cart() {
-		if ( ! did_action( 'wp_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
-		}
-		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
-			$this->get_cart_from_session();
-		}
-		return array_filter( (array) $this->cart_contents );
-	}
-
-	/**
-	 * Returns the contents of the cart in an array without the 'data' element.
-	 *
-	 * @return array contents of the cart
-	 */
-	public function get_cart_for_session() {
-		$cart_session = array();
-
-		if ( $this->get_cart() ) {
-			foreach ( $this->get_cart() as $key => $values ) {
-				$cart_session[ $key ] = $values;
-				unset( $cart_session[ $key ]['data'] ); // Unset product object.
-			}
-		}
-
-		return $cart_session;
-	}
-
-	/**
-	 * Returns a specific item in the cart.
-	 *
-	 * @param string $item_key Cart item key.
-	 * @return array Item data
-	 */
-	public function get_cart_item( $item_key ) {
-		if ( isset( $this->cart_contents[ $item_key ] ) ) {
-			return $this->cart_contents[ $item_key ];
-		}
-
-		return array();
-	}
-
-	/**
 	 * Returns the cart and shipping taxes, merged.
 	 *
 	 * @return array merged taxes
@@ -882,7 +901,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Add a product to the cart.
 	 *
-	 * @throws Exception To prevent adding to cart.
+	 * @throws Exception Plugins can throw an exception to prevent adding to cart.
 	 * @param int   $product_id contains the id of the product to add to the cart.
 	 * @param int   $quantity contains the quantity of the item to add.
 	 * @param int   $variation_id ID of the variation being added to the cart.
@@ -891,7 +910,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string|bool $cart_item_key
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
-		// Wrap in try catch so plugins can throw an exception to prevent adding to cart.
 		try {
 			$product_id   = absint( $product_id );
 			$variation_id = absint( $variation_id );
@@ -1001,6 +1019,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function remove_cart_item( $cart_item_key ) {
 		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
+
 			unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
 
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
@@ -1009,11 +1028,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
 
-			$this->calculate_totals();
-
 			return true;
 		}
-
 		return false;
 	}
 
@@ -1025,8 +1041,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function restore_cart_item( $cart_item_key ) {
 		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-			$this->cart_contents[ $cart_item_key ] = $this->removed_cart_contents[ $cart_item_key ];
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $this->cart_contents[ $cart_item_key ]['variation_id'] ? $this->cart_contents[ $cart_item_key ]['variation_id'] : $this->cart_contents[ $cart_item_key ]['product_id'] );
+			$restore_item                                  = $this->removed_cart_contents[ $cart_item_key ];
+			$this->cart_contents[ $cart_item_key ]         = $restore_item;
+			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
@@ -1034,11 +1051,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this );
 
-			$this->calculate_totals();
-
 			return true;
 		}
-
 		return false;
 	}
 
@@ -1068,22 +1082,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Reset cart totals to the defaults. Useful before running calculations.
-	 *
-	 * @param bool $unset_session If true, the session data will be forced unset.
-	 * @access private
-	 */
-	private function reset( $unset_session = false ) {
-		foreach ( $this->cart_session_data as $key => $default ) {
-			$this->$key = $default;
-			if ( $unset_session ) {
-				unset( WC()->session->$key );
-			}
-		}
-		do_action( 'woocommerce_cart_reset', $this, $unset_session );
-	}
-
-	/**
 	 * Get cart's owner.
 	 *
 	 * @since  3.2.0
@@ -1099,40 +1097,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @uses WC_Cart_Totals
 	 */
 	public function calculate_totals() {
-		$this->reset();
-
-		do_action( 'woocommerce_before_calculate_totals', $this );
+		$this->reset_totals();
 
 		if ( $this->is_empty() ) {
-			$this->set_session();
 			return;
 		}
+
+		do_action( 'woocommerce_before_calculate_totals', $this );
 
 		new WC_Cart_Totals( $this );
 
 		do_action( 'woocommerce_after_calculate_totals', $this );
-
-		$this->set_session();
-	}
-
-	/**
-	 * Remove taxes.
-	 */
-	public function remove_taxes() {
-		$this->shipping_tax_total = $this->tax_total = 0;
-		$this->subtotal           = $this->subtotal_ex_tax;
-
-		foreach ( $this->cart_contents as $cart_item_key => $item ) {
-			$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
-			$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array(), 'subtotal' => array() );
-		}
-
-		// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
-		if ( apply_filters( 'woocommerce_cart_remove_taxes_apply_zero_rate', true ) ) {
-			$this->taxes = $this->shipping_taxes = array( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) => 0 );
-		} else {
-			$this->taxes = $this->shipping_taxes = array();
-		}
 	}
 
 	/**
@@ -1413,7 +1388,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $coupon_code - The code to apply.
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
 	 */
-	public function add_discount( $coupon_code ) {
+	public function apply_coupon( $coupon_code ) {
 		// Coupons are globally disabled.
 		if ( ! wc_coupons_enabled() ) {
 			return false;
@@ -1520,15 +1495,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Gets the array of applied coupon codes.
-	 *
-	 * @return array of applied coupons
-	 */
-	public function get_applied_coupons() {
-		return $this->applied_coupons;
-	}
-
-	/**
 	 * Get the discount amount for a used coupon.
 	 *
 	 * @param  string $code coupon code.
@@ -1561,10 +1527,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param null $deprecated No longer used.
 	 */
 	public function remove_coupons( $deprecated = null ) {
-		$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
-		WC()->session->set( 'applied_coupons', array() );
-		WC()->session->set( 'coupon_discount_amounts', array() );
-		WC()->session->set( 'coupon_discount_tax_amounts', array() );
+		$this->set_coupon_discount_totals( array() );
+		$this->set_coupon_discount_tax_totals( array() );
+		$this->set_applied_coupons( array() );
+		$this->session->set_session();
 	}
 
 	/**
@@ -1574,7 +1540,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function remove_coupon( $coupon_code ) {
-		// Coupons are globally disabled.
 		if ( ! wc_coupons_enabled() ) {
 			return false;
 		}
@@ -1586,7 +1551,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			unset( $this->applied_coupons[ $position ] );
 		}
 
-		WC()->session->set( 'applied_coupons', $this->applied_coupons );
 		WC()->session->set( 'refresh_totals', true );
 
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
@@ -1880,5 +1844,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_total_discount() {
 		return apply_filters( 'woocommerce_cart_total_discount', $this->get_cart_discount_total() ? wc_price( $this->get_cart_discount_total() ) : false, $this );
+	}
+
+	/**
+	 * Reset cart totals to the defaults. Useful before running calculations.
+	 *
+	 * @access private
+	 */
+	private function reset_totals() {
+		$this->totals = $this->default_totals;
+		do_action( 'woocommerce_cart_reset', $this, false );
 	}
 }
