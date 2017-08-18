@@ -568,6 +568,8 @@ final class WC_Cart_Totals {
 				$item = $this->adjust_non_base_location_price( $item );
 			}
 
+			$subtotal_taxes = array();
+
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
 				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
 				$item->subtotal_tax = array_sum( $subtotal_taxes );

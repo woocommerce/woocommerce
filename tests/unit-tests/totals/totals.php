@@ -124,13 +124,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'items_total'         => 27.00,
 			'items_total_tax'     => 5.40,
 			'total'               => 90.40,
-			'taxes'               => array(
-				$this->ids['tax_rate_ids'][0] => array(
-					'tax_total'          => 11.40,
-					'shipping_tax_total' => 2.00,
-				),
-			),
-			'tax_total'           => 11.40,
 			'shipping_total'      => 10,
 			'shipping_tax_total'  => 2,
 			'discounts_total'     => 3.00,
