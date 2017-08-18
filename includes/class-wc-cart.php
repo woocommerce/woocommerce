@@ -1229,6 +1229,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->reset_totals();
 
 		if ( $this->is_empty() ) {
+			$this->session->set_session();
 			return;
 		}
 
