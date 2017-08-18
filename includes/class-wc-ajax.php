@@ -416,7 +416,7 @@ class WC_AJAX {
 	public static function get_variation() {
 		ob_start();
 
-		if ( empty( $_POST['product_id'] ) || ! ( $variable_product = wc_get_product( absint( $_POST['product_id'] ) ) ) ) {
+		if ( empty( $_POST['product_id'] ) || ! ( $variable_product === wc_get_product( absint( $_POST['product_id'] ) ) ) ) {
 			wp_die();
 		}
 
