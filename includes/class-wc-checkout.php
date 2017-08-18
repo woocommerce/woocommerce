@@ -313,12 +313,12 @@ class WC_Checkout {
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ]  : $data['payment_method'] );
-			$order->set_shipping_total( WC()->cart->shipping_total );
+			$order->set_shipping_total( WC()->cart->get_shipping_total() );
 			$order->set_discount_total( WC()->cart->get_discount_total() );
-			$order->set_discount_tax( WC()->cart->get_discount_tax_total() );
-			$order->set_cart_tax( WC()->cart->tax_total );
-			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
-			$order->set_total( WC()->cart->total );
+			$order->set_discount_tax( WC()->cart->get_discount_tax() );
+			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
+			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
+			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
 			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );

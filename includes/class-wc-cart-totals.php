@@ -483,10 +483,15 @@ final class WC_Cart_Totals {
 	 * @param array $taxes Taxes to combine.
 	 * @return array
 	 */
-	protected function combine_item_taxes( $taxes ) {
+	protected function combine_item_taxes( $item_taxes ) {
 		$merged_taxes = array();
-		foreach ( $taxes as $tax ) {
-			$merged_taxes = $merged_taxes + $tax;
+		foreach ( $item_taxes as $taxes ) {
+			foreach ( $taxes as $tax_id => $tax_amount ) {
+				if ( ! isset( $merged_taxes[ $tax_id ] ) ) {
+					$merged_taxes[ $tax_id ] = 0;
+				}
+				$merged_taxes[ $tax_id ] += $tax_amount;
+			}
 		}
 		return $merged_taxes;
 	}

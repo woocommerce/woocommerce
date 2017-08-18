@@ -302,7 +302,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_fee_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_tax'] );
 	}
 
 	/**
@@ -1259,10 +1259,14 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
 		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
-		$merged_taxes   = array();
-
-		foreach ( $shipping_taxes as $tax ) {
-			$merged_taxes = $merged_taxes + $tax;
+		$merged_taxes = array();
+		foreach ( $shipping_taxes as $taxes ) {
+			foreach ( $taxes as $tax_id => $tax_amount ) {
+				if ( ! isset( $merged_taxes[ $tax_id ] ) ) {
+					$merged_taxes[ $tax_id ] = 0;
+				}
+				$merged_taxes[ $tax_id ] += $tax_amount;
+			}
 		}
 
 		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
@@ -1738,39 +1742,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Calculate fees.
 	 */
 	public function calculate_fees() {
-		// Reset fees before calculation.
+		$this->fees = array();
 		$this->set_fee_total( 0 );
 		$this->set_fee_tax( 0 );
 		$this->set_fee_taxes( array() );
-		$this->fees = array();
 
 		// Fire an action where developers can add their fees.
 		do_action( 'woocommerce_cart_calculate_fees', $this );
-
-		// If fees were added, total them and calculate tax.
-		if ( ! empty( $this->fees ) ) {
-			$fees_total = 0;
-			$fees_taxes = array();
-
-			foreach ( $this->fees as $fee_key => $fee ) {
-				$fees_total += $fee->amount;
-
-				if ( $fee->taxable ) {
-					$tax_rates = WC_Tax::get_rates( $fee->tax_class );
-					$fee_taxes = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
-
-					if ( ! empty( $fee_taxes ) ) {
-						$this->fees[ $fee_key ]->tax      = array_sum( $fee_taxes );
-						$this->fees[ $fee_key ]->tax_data = $fee_taxes;
-						$fees_taxes                       = wc_array_merge_recursive_numeric( $fees_taxes, $fee_taxes );
-					}
-				}
-			}
-
-			$this->set_fee_total( $fees_total );
-			$this->set_fee_tax( array_sum( $fees_taxes ) );
-			$this->set_fee_taxes( $fees_taxes );
-		}
 	}
 
 	/**
