@@ -351,7 +351,6 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-discount-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php' );

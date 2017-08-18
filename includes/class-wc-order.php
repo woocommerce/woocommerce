@@ -355,7 +355,6 @@ class WC_Order extends WC_Abstract_Order {
 				'shipping_lines' => $this->get_items( 'shipping' ),
 				'fee_lines'      => $this->get_items( 'fee' ),
 				'coupon_lines'   => $this->get_items( 'coupon' ),
-				'discount_lines' => $this->get_items( 'discount' ),
 			)
 		);
 	}
@@ -1841,7 +1840,6 @@ class WC_Order extends WC_Abstract_Order {
 		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
-		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_payment_method_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_refund_rows( $total_rows, $tax_display );

@@ -80,14 +80,6 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
 		?>
 		</tbody>
-		<tbody id="order_discount_line_items">
-		<?php
-			foreach ( $discounts as $item_id => $item ) {
-				include( 'html-order-discount.php' );
-			}
-			do_action( 'woocommerce_admin_order_items_after_discounts', $order->get_id() );
-		?>
-		</tbody>
 		<tbody id="order_refunds">
 		<?php
 			if ( $refunds = $order->get_refunds() ) {
@@ -177,10 +169,7 @@ if ( wc_tax_enabled() ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
-			<?php if ( wc_tax_enabled() ) : ?>
-				<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
-			<?php endif; ?>
-			<button type="button" class="button add-discount"><?php _e( 'Apply discount', 'woocommerce' ); ?></button>
+			<button type="button" class="button add-coupon"><?php _e( 'Apply coupon', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description"><?php echo wc_help_tip( __( 'To edit this order change the status back to "Pending"', 'woocommerce' ) ); ?> <?php _e( 'This order is no longer editable.', 'woocommerce' ); ?></span>
 		<?php endif; ?>
@@ -200,6 +189,9 @@ if ( wc_tax_enabled() ) {
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
+	<?php if ( wc_tax_enabled() ) : ?>
+		<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
+	<?php endif; ?>
 	<?php
 		// allow adding custom buttons
 		do_action( 'woocommerce_order_item_add_line_buttons', $order );
