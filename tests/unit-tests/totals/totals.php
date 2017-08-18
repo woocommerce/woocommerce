@@ -124,13 +124,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 			'items_total'         => 27.00,
 			'items_total_tax'     => 5.40,
 			'total'               => 90.40,
-			'taxes'               => array(
-				$this->ids['tax_rate_ids'][0] => array(
-					'tax_total'          => 11.40,
-					'shipping_tax_total' => 2.00,
-				),
-			),
-			'tax_total'           => 11.40,
 			'shipping_total'      => 10,
 			'shipping_tax_total'  => 2,
 			'discounts_total'     => 3.00,
@@ -144,13 +137,26 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function test_cart_totals() {
 		$cart = WC()->cart;
 
-		$this->assertEquals( 40.00, $cart->fee_total );
+		$this->assertEquals( 40.00, $cart->get_fee_total() );
+		$this->assertEquals( 27.00, $cart->get_cart_contents_total() );
+		$this->assertEquals( 90.40, $cart->get_total( 'edit' ) );
+		$this->assertEquals( 30.00, $cart->get_subtotal() );
+		$this->assertEquals( 6.00, $cart->get_subtotal_tax() );
+		$this->assertEquals( 5.40, $cart->get_cart_contents_tax() );
+		$this->assertEquals( 5.40, array_sum( $cart->get_cart_contents_taxes() ) );
+		$this->assertEquals( 6.00, $cart->get_fee_tax() );
+		$this->assertEquals( 6.00, array_sum( $cart->get_fee_taxes() ) );
+		$this->assertEquals( 3, $cart->get_discount_total() );
+		$this->assertEquals( 0.60, $cart->get_discount_tax() );
+		$this->assertEquals( 10, $cart->get_shipping_total() );
+		$this->assertEquals( 2, $cart->get_shipping_tax() );
+
 		$this->assertEquals( 27.00, $cart->cart_contents_total );
 		$this->assertEquals( 90.40, $cart->total );
 		$this->assertEquals( 36.00, $cart->subtotal );
 		$this->assertEquals( 30.00, $cart->subtotal_ex_tax );
 		$this->assertEquals( 11.40, $cart->tax_total );
-		$this->assertEquals( 2.40, $cart->discount_cart );
+		$this->assertEquals( 3, $cart->discount_cart );
 		$this->assertEquals( 0.60, $cart->discount_cart_tax );
 		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 10, $cart->shipping_total );

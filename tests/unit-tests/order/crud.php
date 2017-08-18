@@ -1566,7 +1566,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount and remove_coupon with a fixed discount coupon.
+	 * Test apply_coupon and remove_coupon with a fixed discount coupon.
 	 * @since 3.2.0
 	 */
 	function test_add_remove_coupon_fixed() {
@@ -1578,7 +1578,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$coupon->set_amount( 10 );
 		$coupon->save();
 
-		$order->add_discount( 'test' );
+		$order->apply_coupon( 'test' );
 		$this->assertEquals( 40, $order->get_total() );
 
 		$order->remove_coupon( 'test' );
@@ -1589,7 +1589,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount and remove_coupon with a percent discount coupon.
+	 * Test apply_coupon and remove_coupon with a percent discount coupon.
 	 * @since 3.2.0
 	 */
 	function test_add_remove_coupon_percent() {
@@ -1601,7 +1601,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$coupon->set_amount( 50 );
 		$coupon->save();
 
-		$order->add_discount( 'test' );
+		$order->apply_coupon( 'test' );
 		$this->assertEquals( 30, $order->get_total() );
 
 		$order->remove_coupon( 'test' );
@@ -1609,37 +1609,5 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$coupon->delete( true );
 		$order->delete( true );
-	}
-
-	/**
-	 * Test add_discount and removing the discount with a fixed discount.
-	 * @since 3.2.0
-	 */
-	function test_add_remove_discount_fixed() {
-		$order = WC_Helper_Order::create_order();
-
-		$order->add_discount( 10 );
-		$this->assertEquals( 40, $order->get_total() );
-
-		$discount = current( $order->get_items( 'discount' ) );
-		$order->remove_item( $discount->get_id() );
-		$order->calculate_totals( true );
-		$this->assertEquals( 50, $order->get_total() );
-	}
-
-	/**
-	 * Test add_discount and removing the discount with a percent discount.
-	 * @since 3.2.0
-	 */
-	function test_add_remove_discount_percent() {
-		$order = WC_Helper_Order::create_order();
-
-		$order->add_discount( '50%' );
-		$this->assertEquals( 25, $order->get_total() );
-
-		$discount = current( $order->get_items( 'discount' ) );
-		$order->remove_item( $discount->get_id() );
-		$order->calculate_totals( true );
-		$this->assertEquals( 50, $order->get_total() );
 	}
 }

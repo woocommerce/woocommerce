@@ -233,7 +233,7 @@ body {
 		ul {
 			padding: 0 2em 0 0;
 			list-style: none outside;
-			margin: 0 0 -0.75em;
+			margin: 0;
 			li a {
 				display: block;
 				padding: 0 0 0.75em;
@@ -297,7 +297,9 @@ body {
 			}
 		}
 	}
-	.woocommerce-tracker, .updated {
+	.woocommerce-newsletter,
+	.woocommerce-tracker,
+	.updated {
 		padding: 24px 24px 0;
 		margin: 0 0 24px;
 		overflow: hidden;
@@ -306,9 +308,23 @@ body {
 			padding: 0;
 			margin: 0 0 12px;
 		}
+		form,
 		p:last-child {
 			margin: 0 0 24px;
 		}
+		form {
+			input[type="email"] {
+				padding: .25em .5em;
+				margin: 0 1% 0 0;
+				font-size: 1.05em;
+				width: 49%;
+				box-sizing: border-box;
+			}
+		}
+	}
+	.woocommerce-tracker + .woocommerce-newsletter {
+		margin-top: -24px;
+		border-top: 2px dashed #ddd;
 	}
 }
 .wc-setup-steps {
