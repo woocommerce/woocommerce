@@ -37,11 +37,7 @@ include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
-if ( function_exists( 'mb_strtolower' ) ) {
-	add_filter( 'woocommerce_coupon_code', 'mb_strtolower' );
-} else {
-	add_filter( 'woocommerce_coupon_code', 'strtolower' );
-}
+add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label
 
