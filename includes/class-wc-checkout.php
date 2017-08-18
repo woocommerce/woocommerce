@@ -216,7 +216,7 @@ class WC_Checkout {
 			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 				$this->fields['account']['account_password'] = array(
 					'type'         => 'password',
-					'label'        => __( 'Account password', 'woocommerce' ),
+					'label'        => __( 'Create account password', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
 				);
