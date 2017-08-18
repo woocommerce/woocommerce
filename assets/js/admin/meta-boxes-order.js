@@ -247,8 +247,8 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
-				.on( 'click', 'tr.item, tr.fee, tr.discount, tr.shipping, tr.refund', this.select_row )
-				.on( 'click', 'tr.item :input, tr.fee :input, tr.discount :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.discount a, tr.shipping a, tr.refund a', this.select_row_child )
+				.on( 'click', 'tr.item, tr.fee, tr.shipping, tr.refund', this.select_row )
+				.on( 'click', 'tr.item :input, tr.fee :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.shipping a, tr.refund a', this.select_row_child )
 				.on( 'click', 'button.bulk-delete-items', this.bulk_actions.do_delete )
 				.on( 'click', 'button.bulk-increase-stock', this.bulk_actions.do_increase_stock )
 				.on( 'click', 'button.bulk-decrease-stock', this.bulk_actions.do_reduce_stock )
@@ -530,7 +530,7 @@ jQuery( function ( $ ) {
 			var answer = window.confirm( woocommerce_admin_meta_boxes.remove_item_notice );
 
 			if ( answer ) {
-				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.discount, tr.shipping' );
+				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.shipping' );
 				var order_item_id = $item.attr( 'data-order_item_id' );
 
 				wc_meta_boxes_order_items.block();
@@ -772,7 +772,7 @@ jQuery( function ( $ ) {
 
 			input_changed: function() {
 				var refund_amount = 0;
-				var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.discount, tr.shipping' );
+				var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
 
 				$items.each(function() {
 					var $row               = $( this );
