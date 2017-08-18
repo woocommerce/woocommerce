@@ -192,19 +192,19 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var array
 	 */
 	protected $default_totals = array(
-		'subtotal'       => 0,
-		'subtotal_tax'   => 0,
-		'shipping_total' => 0,
-		'shipping_tax'   => 0,
-		'discount_total' => 0,
-		'discount_tax'   => 0,
-		'cart_total'     => 0,
-		'cart_tax'       => 0,
-		'fee_total'      => 0,
-		'fee_taxes'      => 0,
-		'total'          => 0,
-		'total_tax'      => 0,
-		'taxes'          => array(
+		'subtotal'            => 0,
+		'subtotal_tax'        => 0,
+		'shipping_total'      => 0,
+		'shipping_tax'        => 0,
+		'discount_total'      => 0,
+		'discount_tax'        => 0,
+		'cart_contents_total' => 0,
+		'cart_contents_tax'   => 0,
+		'fee_total'           => 0,
+		'fee_tax'             => 0,
+		'total'               => 0,
+		'total_tax'           => 0,
+		'taxes'               => array(
 			'shipping' => array(),
 			'cart'     => array(),
 			'fees'     => array(),
@@ -306,6 +306,128 @@ class WC_Cart extends WC_Legacy_Cart {
 		return (array) empty( $this->totals ) ? $this->default_totals : $this->totals;
 	}
 
+	/**
+	 * Get subtotal.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_subtotal() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal'] );
+	}
+
+	/**
+	 * Get subtotal.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_subtotal_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal_tax'] );
+	}
+
+	/**
+	 * Get discount_total.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_discount_total() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_total'] );
+	}
+
+	/**
+	 * Get discount_tax.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_discount_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_tax'] );
+	}
+
+	/**
+	 * Get shipping_total.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_shipping_total() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_total'] );
+	}
+
+	/**
+	 * Get shipping_tax.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_shipping_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_tax'] );
+	}
+
+	/**
+	 * Gets cart total. This is the total of items in the cart, but after discounts. Subtotal is before discounts.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_cart_contents_total() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_total'] );
+	}
+
+	/**
+	 * Gets cart tax amount.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_cart_contents_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_tax'] );
+	}
+
+	/**
+	 * Gets cart total after calculation.
+	 *
+	 * @since 3.2.0
+	 * @param string $context If the context is view, the value will be formatted for display. This keeps it compatible with pre-3.2 versions.
+	 * @return float
+	 */
+	public function get_total( $context = 'view' ) { // @todo conflict
+		$total = apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total'] );
+		return 'view' === $context ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
+	}
+
+	/**
+	 * Get total tax amount.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_total_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total_tax'] );
+	}
+
+	/**
+	 * Get total fee amount.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_fee_total() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
+	}
+
+	/**
+	 * Get total fee tax amount.
+	 *
+	 * @since 3.2.0
+	 * @return float
+	 */
+	public function get_fee_tax() {
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters.
@@ -369,6 +491,136 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_totals( $value = array() ) {
 		$this->totals = wp_parse_args( $value, $this->default_totals );
+	}
+
+	/**
+	 * Set subtotal.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_subtotal( $value ) {
+		$this->totals['subtotal'] = $value;
+	}
+
+	/**
+	 * Set subtotal.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_subtotal_tax( $value ) {
+		$this->totals['subtotal_tax'] = $value;
+	}
+
+	/**
+	 * Set discount_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_discount_total( $value ) {
+		$this->totals['discount_total'] = $value;
+	}
+
+	/**
+	 * Set discount_tax.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_discount_tax( $value ) {
+		$this->totals['discount_tax'] = $value;
+	}
+
+	/**
+	 * Set shipping_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_shipping_total( $value ) {
+		$this->totals['shipping_total'] = $value;
+	}
+
+	/**
+	 * Set shipping_tax.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_shipping_tax( $value ) {
+		$this->totals['shipping_tax'] = $value;
+	}
+
+	/**
+	 * Set cart_contents_total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_cart_contents_total( $value ) {
+		$this->totals['cart_contents_total'] = $value;
+	}
+
+	/**
+	 * Set cart tax amount.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_cart_contents_tax( $value ) {
+		$this->totals['cart_contents_tax'] = $value;
+	}
+
+	/**
+	 * Set cart total.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_total( $value ) {
+		$this->totals['total'] = $value;
+	}
+
+	/**
+	 * Set total tax amount.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_total_tax( $value ) {
+		$this->totals['total_tax'] = $value;
+	}
+
+	/**
+	 * Set fee amount.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_fee_total( $value ) {
+		$this->totals['fee_total'] = $value;
+	}
+
+	/**
+	 * Set fee tax.
+	 *
+	 * @since 3.2.0
+	 * @param string $value Value to set.
+	 */
+	public function set_fee_tax( $value ) {
+		$this->totals['fee_tax'] = $value;
+	}
+
+	/**
+	 * Set taxes by type.
+	 *
+	 * @param string $type Type/group of tax. e.g. shipping
+	 * @param array $value Tax values.
+	 */
+	public function set_taxes( $type, $value ) {
+		$this->totals['taxes'][ $type ] = $value;
 	}
 
 	/*
@@ -1601,15 +1853,6 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Gets the order total (after calculation).
-	 *
-	 * @return string formatted price
-	 */
-	public function get_total() {
-		return apply_filters( 'woocommerce_cart_total', wc_price( $this->total ) );
 	}
 
 	/**
