@@ -1126,10 +1126,6 @@ class WC_Cart extends WC_Legacy_Cart {
 				) ), $cart_item_key );
 			}
 
-			if ( did_action( 'wp' ) ) {
-				$this->set_cart_cookies( ! $this->is_empty() );
-			}
-
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
 			return $cart_item_key;
