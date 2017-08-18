@@ -930,9 +930,9 @@ class WC_Admin_Setup_Wizard {
 		<?php endif; ?>
 
 		<div class="woocommerce-message woocommerce-newsletter">
-			<p><?php esc_html_e( 'Join our mailing list to get regular updates on WooCommerce, tips for managing your store and inspiration from the wide world of Woo!', 'woocommerce' ); ?></p>
+			<p><?php esc_html_e( 'Join the WooCommerce mailing list for help getting started, tips, and product updates.', 'woocommerce' ); ?></p>
 			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
-				<input type="email" value="<?php echo esc_attr( $current_user->user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+				<input type="email" value="<?php echo esc_attr( $current_user->user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required><input type="submit" value="<?php esc_html_e( 'Subscribe', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
 			</form>
 		</div>
 
