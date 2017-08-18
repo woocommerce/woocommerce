@@ -25,32 +25,11 @@ class WC_Discounts {
 	protected $items = array();
 
 	/**
-	 * Stores fee total from cart/order. Manual discounts can discount this.
-	 *
-	 * @var int
-	 */
-	protected $fee_total = 0;
-
-	/**
-	 * Stores shipping total from cart/order. Manual discounts can discount this.
-	 *
-	 * @var int
-	 */
-	protected $shipping_total = 0;
-
-	/**
 	 * An array of discounts which have been applied to items.
 	 *
 	 * @var array[] Code => Item Key => Value
 	 */
 	protected $discounts = array();
-
-	/**
-	 * An array of applied WC_Discount objects.
-	 *
-	 * @var array
-	 */
-	protected $manual_discounts = array();
 
 	/**
 	 * Constructor.
@@ -72,7 +51,7 @@ class WC_Discounts {
 	 * @param array $cart Cart object.
 	 */
 	public function set_items_from_cart( $cart ) {
-		$this->items = $this->discounts = $this->manual_discounts = array();
+		$this->items = $this->discounts = array();
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
@@ -98,8 +77,7 @@ class WC_Discounts {
 	 * @param array $order Cart object.
 	 */
 	public function set_items_from_order( $order ) {
-		$this->items     = $this->discounts      = $this->manual_discounts = array();
-		$this->fee_total = $this->shipping_total = 0;
+		$this->items     = $this->discounts      = array();
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
@@ -116,12 +94,6 @@ class WC_Discounts {
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
-
-		foreach ( $order->get_fees() as $item ) {
-			$this->fee_total += wc_add_number_precision( $item->get_total() );
-		}
-
-		$this->shipping_total = wc_add_number_precision( $order->get_shipping_total() );
 	}
 
 	/**
@@ -156,11 +128,6 @@ class WC_Discounts {
 	 */
 	public function get_discounts( $in_cents = false ) {
 		$discounts = $this->discounts;
-
-		foreach ( $this->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
-			$discounts[ $manual_discount_key ] = $manual_discount->get_discount_total();
-		}
-
 		return $in_cents ? $discounts : wc_remove_number_precision_deep( $discounts );
 	}
 
@@ -198,16 +165,6 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Get an array of manual discounts which have been applied.
-	 *
-	 * @since  3.2.0
-	 * @return WC_Discount[]
-	 */
-	public function get_manual_discounts() {
-		return $this->manual_discounts;
-	}
-
-	/**
 	 * Get discounted price of an item without precision.
 	 *
 	 * @since  3.2.0
@@ -227,96 +184,6 @@ class WC_Discounts {
 	 */
 	public function get_discounted_price_in_cents( $item ) {
 		return absint( $item->price - $this->get_discount( $item->key, true ) );
-	}
-
-	/**
-	 * Get total remaining after discounts.
-	 *
-	 * @since  3.2.0
-	 * @return int
-	 */
-	protected function get_total_after_discounts() {
-		$total_to_discount = 0;
-
-		// Sum line item costs.
-		foreach ( $this->items as $item ) {
-			$total_to_discount += $this->get_discounted_price_in_cents( $item );
-		}
-
-		// Manual discounts can also discount shipping and fees.
-		$total_to_discount += $this->shipping_total + $this->fee_total;
-
-		// Remove existing discount amounts.
-		foreach ( $this->manual_discounts as $key => $value ) {
-			$total_to_discount = $total_to_discount - $value->get_discount_total();
-		}
-
-		return $total_to_discount;
-	}
-
-	/**
-	 * Generate a unique ID for a discount.
-	 *
-	 * @param  WC_Discount $discount Discount object.
-	 * @return string
-	 */
-	protected function generate_discount_id( $discount ) {
-		$discount_id    = '';
-		$index          = 1;
-		while ( ! $discount_id ) {
-			$discount_id = 'discount-' . $discount->get_amount() . ( 'percent' === $discount->get_discount_type() ? '%' : '' );
-
-			if ( 1 < $index ) {
-				$discount_id .= '-' . $index;
-			}
-
-			if ( isset( $this->manual_discounts[ $discount_id ] ) ) {
-				$index ++;
-				$discount_id = '';
-			}
-		}
-		return $discount_id;
-	}
-
-	/**
-	 * Apply a discount to all items.
-	 *
-	 * @param  string|object $raw_discount Accepts a string (fixed or percent discounts), or WC_Coupon object.
-	 * @param  string        $discount_id Optional ID for the discount. Generated from discount or coupon code if not defined.
-	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
-	 */
-	public function apply_discount( $raw_discount, $discount_id = null ) {
-		if ( is_a( $raw_discount, 'WC_Coupon' ) ) {
-			return $this->apply_coupon( $raw_discount );
-		}
-
-		$discount = new WC_Discount;
-
-		if ( strstr( $raw_discount, '%' ) ) {
-			$discount->set_discount_type( 'percent' );
-			$discount->set_amount( trim( $raw_discount, '%' ) );
-		} elseif ( is_numeric( $raw_discount ) && 0 < floatval( $raw_discount ) ) {
-			$discount->set_discount_type( 'fixed' );
-			$discount->set_amount( wc_add_number_precision( floatval( $raw_discount ) ) );
-		}
-
-		if ( ! $discount->get_amount() ) {
-			return new WP_Error( 'invalid_discount', __( 'Invalid discount', 'woocommerce' ) );
-		}
-
-		$total_to_discount = $this->get_total_after_discounts();
-
-		if ( 'percent' === $discount->get_discount_type() ) {
-			$discount->set_discount_total( $discount->get_amount() * ( $total_to_discount / 100 ) );
-		} else {
-			$discount->set_discount_total( min( $discount->get_amount(), $total_to_discount ) );
-		}
-
-		$discount_id = $discount_id ? $discount_id : $this->generate_discount_id( $discount );
-
-		$this->manual_discounts[ $discount_id ] = $discount;
-
-		return true;
 	}
 
 	/**

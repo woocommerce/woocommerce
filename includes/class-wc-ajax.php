@@ -907,7 +907,7 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
 
-			$order->add_discount( wc_clean( $_POST['discount'] ) );
+			$order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );

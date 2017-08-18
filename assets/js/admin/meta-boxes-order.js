@@ -234,7 +234,7 @@ jQuery( function ( $ ) {
 
 			$( '#woocommerce-order-items' )
 				.on( 'click', 'button.add-line-item', this.add_line_item )
-				.on( 'click', 'button.add-discount', this.add_discount )
+				.on( 'click', 'button.add-coupon', this.add_coupon )
 				.on( 'click', 'a.remove-coupon', this.remove_coupon )
 				.on( 'click', 'button.refund-items', this.refund_items )
 				.on( 'click', '.cancel-action', this.cancel )
@@ -378,7 +378,7 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
-		add_discount: function() {
+		add_coupon: function() {
 			var value = window.prompt( 'Enter a coupon code, percentage, or fixed discount amount.' );
 
 			if ( value != null ) {
@@ -389,7 +389,7 @@ jQuery( function ( $ ) {
 					dataType : 'json',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
-					discount : value
+					coupon   : value
 				};
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
