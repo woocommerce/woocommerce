@@ -180,6 +180,24 @@ abstract class WC_Legacy_Cart {
 	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
 
 	/**
+	 * Get the total of all cart discounts.
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_total() {
+		return $this->get_discount_total();
+	}
+
+	/**
+	 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
+	 *
+	 * @return float
+	 */
+	public function get_cart_discount_tax_total() {
+		return $this->get_discount_tax();
+	}
+
+	/**
 	 * Renamed for consistency.
 	 *
 	 * @param string $coupon_code
