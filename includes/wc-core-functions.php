@@ -37,7 +37,7 @@ include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
-add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
+add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label
 
@@ -1530,8 +1530,11 @@ function wc_get_logger() {
 			wc_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
-					__( 'The class <code>%s</code> provided by woocommerce_logging_class filter must implement <code>WC_Logger_Interface</code>.', 'woocommerce' ),
-					esc_html( is_object( $class ) ? get_class( $class ) : $class )
+					/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
+					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
+					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+					'<code>woocommerce_logging_class</code>',
+					'<code>WC_Logger_Interface</code>'
 				),
 				'3.0'
 			);
@@ -1650,7 +1653,10 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 	 */
 	$newlist = array();
 	foreach ( $list as $value ) {
-		if ( isset( $value->$index_key ) ) {
+		// Get index. @since 3.2.0 this supports a callback.
+		if ( is_callable( array( $value, $index_key ) ) ) {
+			$newlist[ $value->{$index_key}() ] = $value->{$callback_or_field}();
+		} elseif ( isset( $value->$index_key ) ) {
 			$newlist[ $value->$index_key ] = $value->{$callback_or_field}();
 		} else {
 			$newlist[] = $value->{$callback_or_field}();

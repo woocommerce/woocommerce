@@ -620,7 +620,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$wc_product_attributes = array();
 
 		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy['attribute_name'] ) ] = $taxonomy;
+			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
 		}
 
 		return $attribute_id;

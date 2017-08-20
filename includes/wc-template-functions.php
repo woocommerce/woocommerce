@@ -1900,7 +1900,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * @subpackage	Orders
 	 */
 	function woocommerce_order_again_button( $order ) {
-		if ( ! $order || ! $order->has_status( 'completed' ) || ! is_user_logged_in() ) {
+		if ( ! $order || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! is_user_logged_in() ) {
 			return;
 		}
 

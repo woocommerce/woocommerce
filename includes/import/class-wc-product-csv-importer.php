@@ -284,6 +284,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the stock qty field.
+	 *
+	 * @param string $value Field value.
+	 * @return float|string
+	 */
+	public function parse_stock_quantity_field( $value ) {
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		return wc_stock_amount( $value );
+	}
+
+	/**
 	 * Parse a category field from a CSV.
 	 * Categories are separated by commas and subcategories are "parent > subcategory".
 	 *
@@ -313,6 +327,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$term_id = $term['term_id'];
 				} else {
 					$term    = wp_insert_term( $_term, 'product_cat', array( 'parent' => intval( $parent ) ) );
+
+					if ( is_wp_error( $term ) ) {
+						break; // We cannot continue if the term cannot be inserted.
+					}
+
 					$term_id = $term['term_id'];
 				}
 
@@ -350,7 +369,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$term = (object) wp_insert_term( $name, 'product_tag' );
 			}
 
-			$tags[] = $term->term_id;
+			if ( ! is_wp_error( $term ) ) {
+				$tags[] = $term->term_id;
+			}
 		}
 
 		return $tags;
@@ -371,6 +392,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		if ( ! $term || is_wp_error( $term ) ) {
 			$term = (object) wp_insert_term( $value, 'product_shipping_class' );
+		}
+
+		if ( is_wp_error( $term ) ) {
+			return 0;
 		}
 
 		return $term->term_id;
@@ -488,7 +513,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'purchase_note'     => 'wp_filter_post_kses',
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
-			'stock_quantity'    => 'wc_stock_amount',
+			'stock_quantity'    => array( $this, 'parse_stock_quantity_field' ),
 			'category_ids'      => array( $this, 'parse_categories_field' ),
 			'tag_ids'           => array( $this, 'parse_tags_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
@@ -584,7 +609,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		if ( isset( $data['stock_quantity'] ) ) {
-			$data['manage_stock'] = 0 < $data['stock_quantity'];
+			if ( '' === $data['stock_quantity'] ) {
+				$data['manage_stock'] = false;
+				$data['stock_status'] = isset( $data['stock_status'] ) ? $data['stock_status'] : true;
+			} else {
+				$data['manage_stock'] = true;
+				$data['stock_status'] = 0 < $data['stock_quantity'];
+			}
 		}
 
 		// Stock is bool.

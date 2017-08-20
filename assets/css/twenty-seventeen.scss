@@ -567,6 +567,10 @@ button.pswp__button--zoom:hover {
 	background-position: -88px 0;
 }
 
+.pswp img {
+	max-width: none;
+}
+
 /**
  * Widgets
  */
