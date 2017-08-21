@@ -1770,3 +1770,49 @@ function wc_get_post_data_by_key( $key, $default = '' ) {
 function wc_get_var( &$var, $default = null ) {
 	return isset( $var ) ? $var : $default;
 }
+
+/**
+ * Read in WooCommerce headers when reading plugin headers.
+ *
+ * @since 3.2.0
+ * @param array $headers
+ * @return array $headers
+ */
+function wc_enable_wc_plugin_headers( $headers ) {
+	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+		include_once( dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php' );
+	}
+
+	$headers['WCRequires'] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
+	$headers['WCTested']   = WC_Plugin_Updates::VERSION_TESTED_HEADER;
+	return $headers;
+}
+add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
+
+/**
+ * Prevent auto-updating the WooCommerce plugin on major releases if there are untested extensions active.
+ *
+ * @since 3.2.0
+ * @param bool $should_update
+ * @param object $plugin
+ * @return bool
+ */
+function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
+	if ( 'woocommerce/woocommerce.php' !== $plugin->plugin ) {
+		return $should_update;
+	}
+
+	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+		include_once( dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php' );
+	}
+
+	$new_version = wc_clean( $plugin->new_version );
+	$plugin_updates = new WC_Plugin_Updates;
+	$untested_plugins = $plugin_updates->get_untested_plugins( $new_version, 'major' );
+	if ( ! empty( $untested_plugins ) ) {
+		return false;
+	}
+
+	return $should_update;
+}
+add_filter( 'auto_update_plugin', 'wc_prevent_dangerous_auto_updates', 99, 2 );

@@ -41,7 +41,6 @@ class WC_Helper {
 
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
 	}
@@ -1105,22 +1104,6 @@ class WC_Helper {
 	}
 
 	/**
-	 * Add an upgrade notice if there are extensions with updates.
-	 *
-	 * @param string $message An existing update notice or an empty string.
-	 *
-	 * @return string The resulting message.
-	 */
-	public static function in_plugin_update_message( $message ) {
-		$notice = self::_get_extensions_update_notice();
-		if ( ! empty( $notice ) ) {
-			$message .= '</p><p class="wc_plugin_upgrade_notice">' . $notice;
-		}
-
-		return $message;
-	}
-
-	/**
 	 * Get an update notice if one or more Woo extensions has an update available.
 	 *
 	 * @return string|null The update notice or null if everything is up to date.
@@ -1146,7 +1129,7 @@ class WC_Helper {
 		}
 
 		/* translators: %1$s: helper url, %2$d: number of extensions */
-		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
+		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
 			admin_url( 'admin.php?page=wc-addons&section=helper' ), $available );
 	}
 
