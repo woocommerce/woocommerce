@@ -52,6 +52,19 @@ abstract class WC_Legacy_Cart {
 	public $coupon_applied_count = array();
 
 	/**
+	 * Map legacy variables.
+	 *
+	 * @param string $name Property name.
+	 * @param mixed  $value Value to set.
+	 */
+	public function __isset( $name ) {
+		if ( array_key_exists( $name, $cart_session_data ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Magic getters.
 	 *
 	 * @param string $name Property name.
@@ -112,6 +125,7 @@ abstract class WC_Legacy_Cart {
 				return $this->get_coupons();
 		}
 	}
+
 	/**
 	 * Map legacy variables to setters.
 	 *
