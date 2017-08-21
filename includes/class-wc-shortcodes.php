@@ -1,17 +1,19 @@
 <?php
+/**
+ * Shortcodes
+ *
+ * @version  3.2.0
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   Automattic
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
- * WC_Shortcodes class
- *
- * @class       WC_Shortcodes
- * @version     2.1.0
- * @package     WooCommerce/Classes
- * @category    Class
- * @author      WooThemes
+ * Shortcodes class.
  */
 class WC_Shortcodes {
 
@@ -208,8 +210,8 @@ class WC_Shortcodes {
 	/**
 	 * Take in the shortcode attributes and return query args.
 	 *
-	 * @param array $atts
-	 * @param str $loop_name
+	 * @param  array  $atts      Shortcode attributes.
+	 * @param  string $loop_name Loop name.
 	 * @return array
 	 */
 	public static function products_query_args( $atts, $loop_name ) {
@@ -225,16 +227,11 @@ class WC_Shortcodes {
 			'meta_query'          => WC()->query->get_meta_query(),
 		) );
 
-		/*
-		|-------------------------
-		| Ordering
-		|-------------------------
-		*/
-
+		// Ordering.
 		if ( 'popularity' === $query_args['orderby'] ) {
 			$query_args['order'] = ( 'DESC' === strtoupper( $query_args['order'] ) ) ? 'DESC' : 'ASC';
 
-			// can remove after get_catalog_ordering_args() is updated
+			// can remove after get_catalog_ordering_args() is updated.
 			$query_args['meta_key'] = 'total_sales';
 			$query_args['orderby'] = array(
 				'meta_value_num' => 'DESC',
@@ -254,12 +251,7 @@ class WC_Shortcodes {
 			}
 		}
 
-		/*
-		|-------------------------
-		| Taxonomy Queries
-		|-------------------------
-		*/
-
+		// Taxonomy Queries.
 		if ( ! empty( $atts['category'] ) ) {
 			$query_args['tax_query'][] = array(
 					'taxonomy'     => 'product_cat',
@@ -287,12 +279,7 @@ class WC_Shortcodes {
 			);
 		}
 
-		/*
-		|-------------------------
-		| Meta Queries & post__in
-		|-------------------------
-		*/
-
+		// Meta Queries & post__in.
 		$min_per_page = 0;
 		if ( ! empty( $atts['ids'] ) ) {
 			$min_per_page += count( explode( ',', $atts['ids'] ) );
@@ -337,7 +324,7 @@ class WC_Shortcodes {
 	 */
 	public static function product_category( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'orderby'  => 'menu_order title',
 			'order'    => 'asc',
@@ -437,7 +424,7 @@ class WC_Shortcodes {
 	 */
 	public static function recent_products( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -568,7 +555,7 @@ class WC_Shortcodes {
 	 */
 	public static function sale_products( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
 			'order'    => 'asc',
@@ -593,7 +580,7 @@ class WC_Shortcodes {
 	 */
 	public static function best_selling_products( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'category' => '',  // Slugs
 			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
@@ -616,7 +603,7 @@ class WC_Shortcodes {
 	 */
 	public static function top_rated_products( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
 			'order'    => 'asc',
@@ -641,7 +628,7 @@ class WC_Shortcodes {
 	 */
 	public static function featured_products( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page' => '12',
+			'limit'    => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -778,7 +765,7 @@ class WC_Shortcodes {
 	 */
 	public static function product_attribute( $deprecated ) {
 		$args = shortcode_atts( array(
-			'per_page'  => '12',
+			'limit'     => '12',
 			'columns'   => '4',
 			'orderby'   => 'title',
 			'order'     => 'asc',
@@ -800,7 +787,7 @@ class WC_Shortcodes {
 	 */
 	public static function related_products( $atts ) {
 		$atts = shortcode_atts( array(
-			'per_page' => '4',
+			'limit'    => '4',
 			'columns'  => '4',
 			'orderby'  => 'rand',
 		), $atts, 'related_products' );
@@ -808,7 +795,7 @@ class WC_Shortcodes {
 		ob_start();
 
 		// Rename arg
-		$atts['posts_per_page'] = absint( $atts['per_page'] );
+		$atts['posts_per_page'] = isset( $atts['per_page'] ) ? absint( $atts['per_page'] ) : absint( $atts['limit'] );
 
 		woocommerce_related_products( $atts );
 
