@@ -2209,6 +2209,9 @@ class WC_AJAX {
 				'tax_rate_order'    => 1,
 			) );
 
+			// Format the rate.
+			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
+
 			if ( isset( $data['newRow'] ) ) {
 				// Hurrah, shiny and new!
 				$tax_rate['tax_rate_class'] = $current_class;
