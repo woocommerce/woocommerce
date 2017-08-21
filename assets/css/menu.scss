@@ -53,18 +53,13 @@ span.mce_woocommerce_shortcodes_button {
 	}
 	.wc_plugin_upgrade_notice {
 		font-weight: normal;
-		color: #fff !important;
-		background: #d54d21 !important;
-		padding: 1em !important;
-		margin: 9px 0 !important;
-
-		a {
-			color: #fff;
-			text-decoration: underline;
-		}
+		background: #FFF8E5 !important;
+		border-left: 4px solid #FFB900;
+		border-top: 1px solid #FFB900;
+		padding: 9px 0 9px 12px !important;
+		margin: 0 -12px 0 -16px !important;
 
 		&::before {
-			color: #fff !important;
 			content: '\f348';
 			display: inline-block;
 			font: 400 18px/1 dashicons;
@@ -77,52 +72,38 @@ span.mce_woocommerce_shortcodes_button {
 
 		&.minor,
 		&.major {
+			padding: 20px 0 !important;
 			&::before {
-				float: left !important;
+				display: none;
 			}
 			p {
-				padding: 0 0 0 2em;
+				padding: 0 20px;
 				margin: 0;
+				max-width: 700px;
+				line-height: 1.5em;
 
 				&::before {
 					content: '';
 					display: none;
 				}
 			}
-			ul {
-				margin-top: .5em;
-				margin-bottom: 0;
-				margin-left: 2em;
-				list-style: disc inside;
-			}
-			li {
-				margin: 0;
-			}
-		}
-
-		&.minor {
-			$minor_text_color: #96588a;
-			border-left: 5px solid #96588a;
-			background: #ECDBD4 !important;
-			color: $minor_text_color !important;
-
-			a,
-			p,
-			li,
-			&::before {
-				color: $minor_text_color !important;
-			}
-		}
-
-		&.major {
-			$major_text_color: #fff;
-			background: #96588a !important;
-
-			a,
-			p,
-			li,
-			&::before {
-				color: $major_text_color !important;
+			table.plugin-details-table {
+				margin: .75em 0 0;
+				tr {
+					background: transparent none !important;
+					border: 0 !important;
+				}
+				th, td {
+					background: transparent none !important;
+					margin: 0;
+					padding: .75em 20px 0;
+					border: 0 !important;
+					font-size: 1em;
+					box-shadow: none;
+				}
+				th {
+					font-weight: bold;
+				}
 			}
 		}
 	}
@@ -159,8 +140,8 @@ span.mce_woocommerce_shortcodes_button {
 .wc_untested_extensions_modal--content {
 	h1 {
 		margin: 2px 2px 0.5em;
-		padding: 1em;
-		line-height: 1;
+		padding: .75em 1em;
+		line-height: 1.5em;
 		font-size: 2em;
 		border-bottom: 1px solid #eee;
 		color: #fff;
@@ -174,11 +155,19 @@ span.mce_woocommerce_shortcodes_button {
 		padding: 0 2em;
 	}
 
-	.plugin-details-list {
-		li {
-			margin: 0 0 0 2em;
-			list-style: disc inside;
+	table.plugin-details-table {
+		margin: 20px 0;
+		th, td {
+			background: transparent none !important;
+			margin: 0;
+			padding: .75em 20px 0;
+			border: 0 !important;
+			font-size: 1em;
+			box-shadow: none;
+		}
+		th {
 			font-weight: bold;
+			margin-top: 0;
 		}
 	}
 

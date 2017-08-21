@@ -42,6 +42,14 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, 'major' );
 		$this->minor_untested_plugins = $this->get_untested_plugins( $response->new_version, 'minor' );
 
+		$current_version_parts = explode( '.', WC_VERSION );
+		$new_version_parts     = explode( '.', $this->new_version );
+
+		// If user has already moved to the major version, we should only shown minor notices and assume everything is "ok" for major.
+		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . '0', '>' ) ) {
+			$this->major_untested_plugins = array();
+		}
+
 		if ( ! empty( $this->major_untested_plugins ) ) {
 			$this->upgrade_notice .= $this->get_extensions_inline_warning_major();
 		}

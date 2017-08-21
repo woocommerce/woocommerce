@@ -113,7 +113,7 @@ class WC_Plugin_Updates {
 		}
 
 		/* translators: %s: version number */
-		$message = sprintf( __( 'The installed versions of the following plugin(s) are not tested with WooCommerce %s. If possible, update these plugins before updating WooCommerce:', 'woocommerce' ), $new_version );
+		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with the latest version of WooCommerce (%s).", 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
@@ -136,7 +136,7 @@ class WC_Plugin_Updates {
 		}
 
 		/* translators: %s: version number */
-		$message = sprintf( __( 'Heads up! The installed versions of the following plugin(s) are not tested with WooCommerce %s and may not be fully-compatible. Please update these extensions or confirm they are compatible first, or you may experience issues:', 'woocommerce' ), $new_version );
+		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with WooCommerce %s. Please update them or confirm compatibility before updating WooCommerce, or you may experience issues:", 'woocommerce' ), $new_version );
 
 		ob_start();
 		include( 'views/html-notice-untested-extensions-inline.php' );
@@ -174,12 +174,7 @@ class WC_Plugin_Updates {
 	 * @return array of plugin info arrays
 	 */
 	public function get_untested_plugins( $version, $release ) {
-		$extensions = $this->get_plugins_with_header( self::VERSION_TESTED_HEADER );
-
-		if ( 'major' === $release ) {
-			$extensions = array_merge( $extensions, $this->get_plugins_for_woocommerce() );
-		}
-
+		$extensions    = array_merge( $this->get_plugins_with_header( self::VERSION_TESTED_HEADER ), $this->get_plugins_for_woocommerce() );
 		$untested      = array();
 		$version_parts = explode( '.', $version );
 		$version       = $version_parts[0];
@@ -205,7 +200,7 @@ class WC_Plugin_Updates {
 					$plugin_version .= '.' . $plugin_version_parts[1];
 				}
 
-				if ( version_compare( $plugin_version, $version, '<' ) && is_plugin_active( $file ) ) {
+				if ( version_compare( $plugin_version, $version, '<' ) ) {
 					$untested[ $file ] = $plugin;
 				}
 			} else {
