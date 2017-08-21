@@ -45,8 +45,13 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 		$current_version_parts = explode( '.', WC_VERSION );
 		$new_version_parts     = explode( '.', $this->new_version );
 
+		// If user has already moved to the minor version, we don't need to flag up anything.
+		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . $new_version_parts[1], '=' ) ) {
+			return;
+		}
+
 		// If user has already moved to the major version, we should only shown minor notices and assume everything is "ok" for major.
-		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . '0', '>' ) ) {
+		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . '0', '>=' ) ) {
 			$this->major_untested_plugins = array();
 		}
 
