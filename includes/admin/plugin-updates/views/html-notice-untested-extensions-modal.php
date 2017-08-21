@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<thead>
 					<tr>
 						<th><?php esc_html_e( 'Plugin', 'woocommerce' ); ?></th>
-						<th><?php esc_html_e( 'Last tested version', 'woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Tested up to WooCommerce version', 'woocommerce' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
