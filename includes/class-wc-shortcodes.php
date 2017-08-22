@@ -203,6 +203,7 @@ class WC_Shortcodes {
 			'attr_operator' => 'IN',   // IN, NOT IN, or AND.
 			'on_sale'       => false,
 			'featured'      => false,
+			'best_selling'  => false,
 		), $atts, 'products' );
 
 		$query_args = self::products_query_args( $atts, $loop_name );
@@ -232,6 +233,11 @@ class WC_Shortcodes {
 		$query_args['tax_query']  = WC()->query->get_tax_query();
 		$query_args['meta_query'] = WC()->query->get_meta_query();
 		// @codingStandardsIgnoreEnd
+
+		// Best selling.
+		if ( ! empty( $atts['best_selling'] ) ) {
+			$query_args['orderby'] = 'popularity';
+		}
 
 		// Ordering.
 		if ( 'popularity' === $query_args['orderby'] ) {
@@ -272,7 +278,8 @@ class WC_Shortcodes {
 			);
 		}
 
-		if ( ! empty( $atts['featured'] ) && $atts['featured'] ) {
+		// Featured products.
+		if ( ! empty( $atts['featured'] ) ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'terms'    => 'featured',
@@ -316,7 +323,8 @@ class WC_Shortcodes {
 			$query_args['posts_per_page'] = $min_per_page;
 		}
 
-		if ( ! empty( $atts['on_sale'] ) && $atts['on_sale'] ) {
+		// On sale products.
+		if ( ! empty( $atts['on_sale'] ) ) {
 			if ( isset( $query_args['post__in'] ) ) {
 				$query_args['post__in'] = array_merge( $query_args['post__in'], wc_get_product_ids_on_sale() );
 			} else {
