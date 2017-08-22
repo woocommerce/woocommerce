@@ -846,12 +846,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Return product ID based on SKU.
 	 *
 	 * @since 3.0.0
-	 * @param string $sku
+	 * @param string $sku Product SKU.
 	 * @return int
 	 */
 	public function get_product_id_by_sku( $sku ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare( "
+
+		$id = $wpdb->get_var( $wpdb->prepare( "
 			SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
@@ -861,6 +862,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value = '%s'
 			LIMIT 1
 		 ", $sku ) );
+
+		return (int) apply_filters( 'woocommerce_get_product_id_by_sku', $id, $sku );
 	}
 
 	/**
