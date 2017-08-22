@@ -278,7 +278,7 @@ final class WC_Cart_Totals {
 			if ( $this->calculate_tax ) {
 				if ( 0 > $fee->total ) {
 					// Negative fees should have the taxes split between all items so it works as a true discount.
-					$tax_class_costs = $this->get_tax_class_costs( $order );
+					$tax_class_costs = $this->get_tax_class_costs();
 					$total_cost      = array_sum( $tax_class_costs );
 
 					if ( $total_cost ) {
