@@ -41,7 +41,7 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function populate_untested_plugins( $plugins, $header ) {
-		if ( $this->updates::VERSION_TESTED_HEADER === $header && ! empty( $this->plugins ) ) {
+		if ( WC_Plugin_Updates::VERSION_TESTED_HEADER === $header && ! empty( $this->plugins ) ) {
 			$plugins = $this->plugins;
 			update_option( 'active_plugins', array_keys( $this->plugins ) );
 		}
@@ -59,19 +59,19 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->plugins = array(
 			'test/test.php' => array(
 				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.0.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.0.0',
 			),
 			'test2/test2.php' => array(
 				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '5.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '5.0',
 			),
 			'test3/test3.php' => array(
 				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test4/test4.php' => array(
 				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => '4.0.1',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.0.1',
 			),
 		);
 		$new_version = '4.0.0';
@@ -114,15 +114,15 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->plugins = array(
 			'test/test.php' => array(
 				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '3.0.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0.0',
 			),
 			'test2/test2.php' => array(
 				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '3.9.9',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.9.9',
 			),
 			'test3/test3.php' => array(
 				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '3.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0',
 			),
 		);
 		$new_version = '4.0.0';
@@ -146,19 +146,19 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->plugins = array(
 			'test/test.php' => array(
 				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test2/test2.php' => array(
 				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '5.0.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '5.0.0',
 			),
 			'test3/test3.php' => array(
 				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.1',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.1',
 			),
 			'test4/test4.php' => array(
 				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => '4.2.1',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.2.1',
 			),
 		);
 		$new_version = '4.1.0';
@@ -182,15 +182,15 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->plugins = array(
 			'test/test.php' => array(
 				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test2/test2.php' => array(
 				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '3.9.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.9.0',
 			),
 			'test3/test3.php' => array(
 				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.2',
 			),
 		);
 		$new_version = '4.3.0';
@@ -218,19 +218,19 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->plugins = array(
 			'test/test.php' => array(
 				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4',
 			),
 			'test2/test2.php' => array(
 				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => 'Latest release',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => 'Latest release',
 			),
 			'test3/test3.php' => array(
 				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => 'WC 3.0.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => 'WC 3.0.0',
 			),
 			'test4/test4.php' => array(
 				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => ' ',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => ' ',
 			),
 		);
 
