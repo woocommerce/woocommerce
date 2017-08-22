@@ -402,6 +402,7 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
 			__( 'External URL', 'woocommerce' )                            => 'product_url',
 			__( 'Button text', 'woocommerce' )                             => 'button_text',
+			__( 'Position', 'woocommerce' )                                => 'menu_order',
 		) );
 
 		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
@@ -560,6 +561,7 @@ class WC_Product_CSV_Importer_Controller {
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
 			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options, $item );
