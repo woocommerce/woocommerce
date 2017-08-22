@@ -30,7 +30,7 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  - phpunit -v
+  - phpunit --version
   - phpunit -c phpunit.xml
 
 after_script:
