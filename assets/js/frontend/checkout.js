@@ -41,7 +41,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
-			this.$checkout_form.on( 'change keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
+			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
 
 			// Address fields
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
