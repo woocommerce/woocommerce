@@ -566,6 +566,7 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
 function wc_get_product_id_by_sku( $sku ) {
 	$data_store = WC_Data_Store::load( 'product' );
 	$product_id = $data_store->get_product_id_by_sku( $sku );
+	$product_id = apply_filters( 'wc_get_product_id_by_sku', $product_id, $sku );
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }
