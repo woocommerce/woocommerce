@@ -1704,6 +1704,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Return reference to fees API.
+	 *
+	 * @since  3.2.0
+	 * @return WC_Cart_Fees
+	 */
+	public function fees_api() {
+		return $this->fees_api;
+	}
+
+	/**
 	 * Add additional fee to the cart.
 	 *
 	 * This method should be called on a callback attached to the
@@ -1717,7 +1727,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-		$this->fees_api->add_fee( array(
+		$this->fees_api()->add_fee( array(
 			'name'      => $name,
 			'amount'    => (float) $amount,
 			'taxable'   => $taxable,
@@ -1732,7 +1742,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_fees() {
-		return $this->fees_api->get_fees();
+		return $this->fees_api()->get_fees();
 	}
 
 	/**

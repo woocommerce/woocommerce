@@ -99,6 +99,19 @@ final class WC_Cart_Fees {
 	}
 
 	/**
+	 * Set fees.
+	 *
+	 * @param object[] $raw_fees Array of fees.
+	 */
+	public function set_fees( $raw_fees = array() ) {
+		$this->fees = array();
+
+		foreach ( $raw_fees as $raw_fee ) {
+			$this->add_fee( $raw_fee );
+		}
+	}
+
+	/**
 	 * Remove all fees.
 	 *
 	 * @since 3.2.0
@@ -121,23 +134,10 @@ final class WC_Cart_Fees {
 	/**
 	 * Generate a unique ID for the fee being added.
 	 *
-	 * @param string  $fee Fee object.
+	 * @param string $fee Fee object.
 	 * @return string fee key.
 	 */
 	private function generate_id( $fee ) {
 		return sanitize_title( $fee->name );
-	}
-
-	/**
-	 * Set fees.
-	 *
-	 * @param object[] $raw_fees Array of fees.
-	 */
-	private function set_fees( $raw_fees = array() ) {
-		$this->fees = array();
-
-		foreach ( $raw_fees as $raw_fee ) {
-			$this->add_fee( $raw_fee );
-		}
 	}
 }

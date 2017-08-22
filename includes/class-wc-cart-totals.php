@@ -303,6 +303,10 @@ final class WC_Cart_Totals {
 				$fee->total_tax = wc_round_tax_total( $fee->total_tax, wc_get_rounding_precision() );
 			}
 
+			// Set totals within object.
+			$fee->object->tax_data  = wc_remove_number_precision_deep( $fee->taxes );
+			$fee->object->tax       = wc_remove_number_precision_deep( $fee->total_tax );
+
 			$this->fees[ $fee_key ] = $fee;
 		}
 	}
@@ -700,14 +704,11 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_fee_totals() {
 		$this->get_fees_from_cart();
+
 		$this->set_total( 'fees_total', array_sum( wp_list_pluck( $this->fees, 'total' ) ) );
 		$this->set_total( 'fees_total_tax', array_sum( wp_list_pluck( $this->fees, 'total_tax' ) ) );
 
-		foreach ( $this->fees as $fee_key => $fee ) {
-			$this->cart->fees[ $fee_key ]->tax      = wc_remove_number_precision_deep( $fee->total_tax );
-			$this->cart->fees[ $fee_key ]->tax_data = wc_remove_number_precision_deep( $fee->taxes );
-		}
-
+		$this->cart->fees_api()->set_fees( wp_list_pluck( $this->fees, 'object' ) );
 		$this->cart->set_fee_total( wc_remove_number_precision_deep( array_sum( wp_list_pluck( $this->fees, 'total' ) ) ) );
 		$this->cart->set_fee_tax( wc_remove_number_precision_deep( array_sum( wp_list_pluck( $this->fees, 'total_tax' ) ) ) );
 		$this->cart->set_fee_taxes( wc_remove_number_precision_deep( $this->combine_item_taxes( wp_list_pluck( $this->fees, 'taxes' ) ) ) );
