@@ -71,7 +71,7 @@ final class WC_Cart_Fees {
 	 */
 	public function add_fee( $args = array() ) {
 		$fee_props            = (object) wp_parse_args( $args, $this->default_fee_props );
-		$fee_props->name      = $fee_props->name ? $fee_props->name    : __( 'Fee', 'woocommerce' );
+		$fee_props->name      = $fee_props->name ? $fee_props->name : __( 'Fee', 'woocommerce' );
 		$fee_props->tax_class = in_array( $fee_props->tax_class, WC_Tax::get_tax_classes(), true ) ? $fee_props->tax_class: '';
 		$fee_props->taxable   = wc_string_to_bool( $fee_props->taxable );
 		$fee_props->amount    = wc_format_decimal( $fee_props->amount );
@@ -93,7 +93,9 @@ final class WC_Cart_Fees {
 	 * @return array
 	 */
 	public function get_fees() {
-		return array_filter( (array) $this->fees );
+		uasort( $this->fees, array( $this, 'sort_fees_callback' ) );
+
+		return $this->fees;
 	}
 
 	/**
@@ -106,13 +108,24 @@ final class WC_Cart_Fees {
 	}
 
 	/**
+	 * Sort fees by amount.
+	 *
+	 * @param WC_Coupon $a Coupon object.
+	 * @param WC_Coupon $b Coupon object.
+	 * @return int
+	 */
+	protected function sort_fees_callback( $a, $b ) {
+		return ( $a->amount > $b->amount ) ? -1 : 1;
+	}
+
+	/**
 	 * Generate a unique ID for the fee being added.
 	 *
-	 * @param string $fee Fee name.
+	 * @param string  $fee Fee object.
 	 * @return string fee key.
 	 */
 	private function generate_id( $fee ) {
-		return sanitize_title( $fee );
+		return sanitize_title( $fee->name );
 	}
 
 	/**

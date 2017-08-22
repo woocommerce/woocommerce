@@ -231,6 +231,34 @@ final class WC_Cart_Totals {
 	}
 
 	/**
+	 * Get item costs grouped by tax class.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	protected function get_tax_class_costs() {
+		$item_tax_classes     = wp_list_pluck( $this->items, 'tax_class' );
+		$shipping_tax_classes = wp_list_pluck( $this->shipping, 'tax_class' );
+		$fee_tax_classes      = wp_list_pluck( $this->fees, 'tax_class' );
+		$costs                = array_fill_keys( $item_tax_classes + $shipping_tax_classes + $fee_tax_classes, 0 );
+		$costs['non-taxable'] = 0;
+
+		foreach ( $this->items + $this->fees + $this->shipping as $item ) {
+			if ( 0 > $item->total ) {
+				continue;
+			}
+			if ( ! $item->taxable ) {
+				$costs['non-taxable'] += $item->total;
+			} elseif ( 'inherit' === $item->tax_class ) {
+				$costs[ reset( $item_tax_classes ) ] += $item->total;
+			} else {
+				$costs[ $item->tax_class ] += $item->total;
+			}
+		}
+		return array_filter( $costs );
+	}
+
+	/**
 	 * Get fee objects from the cart. Normalises data
 	 * into the same format for use by this class.
 	 *
@@ -247,13 +275,32 @@ final class WC_Cart_Totals {
 			$fee->taxable   = $fee->object->taxable;
 			$fee->total     = wc_add_number_precision_deep( $fee->object->amount );
 
-			if ( $this->calculate_tax && $fee->object->taxable ) {
-				$fee->taxes     = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->object->tax_class, $this->cart->get_customer() ), false );
-				$fee->total_tax = array_sum( $fee->taxes );
+			if ( $this->calculate_tax ) {
+				if ( 0 > $fee->total ) {
+					// Negative fees should have the taxes split between all items so it works as a true discount.
+					$tax_class_costs = $this->get_tax_class_costs( $order );
+					$total_cost      = array_sum( $tax_class_costs );
 
-				if ( ! $this->round_at_subtotal() ) {
-					$fee->total_tax = wc_round_tax_total( $fee->total_tax, wc_get_rounding_precision() );
+					if ( $total_cost ) {
+						foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
+							if ( 'non-taxable' === $tax_class ) {
+								continue;
+							}
+							$proportion               = $tax_class_cost / $total_cost;
+							$cart_discount_proportion = $fee->total * $proportion;
+							$fee->taxes               = wc_array_merge_recursive_numeric( $fee->taxes, WC_Tax::calc_tax( $fee->total * $proportion, WC_Tax::get_rates( $tax_class ) ) );
+						}
+					}
+
+				} elseif ( $fee->object->taxable ) {
+					$fee->taxes = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->tax_class, $this->cart->get_customer() ), false );
 				}
+			}
+
+			$fee->total_tax = array_sum( $fee->taxes );
+
+			if ( ! $this->round_at_subtotal() ) {
+				$fee->total_tax = wc_round_tax_total( $fee->total_tax, wc_get_rounding_precision() );
 			}
 
 			$this->fees[ $fee_key ] = $fee;
