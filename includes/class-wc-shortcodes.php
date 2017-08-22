@@ -190,7 +190,7 @@ class WC_Shortcodes {
 		// Filterable with the shortcode_atts_{$shortcode} filter.
 		$atts = shortcode_atts( array(
 			'orderby'       => '',     // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'         => 'desc', // asc or desc.
+			'order'         => 'DESC', // ASC or DESC.
 			'limit'         => '4',
 			'per_page'      => '',     // Overrides 'limit'.
 			'columns'       => '4',
@@ -226,9 +226,12 @@ class WC_Shortcodes {
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
 			'orderby'             => empty( $atts['orderby'] ) ? '' : $atts['orderby'],
-			'order'               => empty( $atts['order'] ) ? 'desc' : $atts['order'],
+			'order'               => empty( $atts['order'] ) ? 'DESC' : strtoupper( $atts['order'] ),
 			'posts_per_page'      => empty( $atts['limit'] ) ? 1 : intval( $atts['limit'] ),
 		) );
+
+		// Validate order options.
+		$query_args['order'] = 'DESC' === $query_args['order'] ? 'DESC' : 'ASC';
 
 		// @codingStandardsIgnoreStart
 		$query_args['tax_query']  = WC()->query->get_tax_query();
@@ -247,8 +250,6 @@ class WC_Shortcodes {
 
 		// Ordering.
 		if ( 'popularity' === $query_args['orderby'] ) {
-			$query_args['order'] = ( 'DESC' === strtoupper( $query_args['order'] ) ) ? 'DESC' : 'ASC';
-
 			// Can remove after get_catalog_ordering_args() is updated.
 			// @codingStandardsIgnoreStart
 			$query_args['meta_key'] = 'total_sales';
@@ -260,7 +261,6 @@ class WC_Shortcodes {
 			);
 		} elseif ( is_string( $query_args['orderby'] ) && 'ID' === strtoupper( $query_args['orderby'] ) ) {
 			$query_args['orderby'] = 'ID';
-			$query_args['order'] = ( 'DESC' === strtoupper( $query_args['order'] ) ) ? 'DESC' : 'ASC';
 		} else {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
 			$query_args['orderby'] = $ordering_args['orderby'];
@@ -274,7 +274,7 @@ class WC_Shortcodes {
 			}
 		}
 
-		// Taxonomy Queries.
+		// Taxonomy queries.
 		if ( ! empty( $atts['category'] ) ) {
 			$query_args['tax_query'][] = array(
 					'taxonomy'     => 'product_cat',
