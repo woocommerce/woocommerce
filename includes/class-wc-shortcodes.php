@@ -204,6 +204,7 @@ class WC_Shortcodes {
 			'on_sale'       => false,
 			'featured'      => false,
 			'best_selling'  => false,
+			'top_rated'     => false,
 		), $atts, 'products' );
 
 		$query_args = self::products_query_args( $atts, $loop_name );
@@ -237,6 +238,11 @@ class WC_Shortcodes {
 		// Best selling.
 		if ( ! empty( $atts['best_selling'] ) ) {
 			$query_args['orderby'] = 'popularity';
+		}
+
+		// Top rated.
+		if ( ! empty( $atts['top_rated'] ) ) {
+			$query_args['orderby'] = 'rating';
 		}
 
 		// Ordering.
