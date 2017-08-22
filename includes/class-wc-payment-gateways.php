@@ -154,9 +154,7 @@ class WC_Payment_Gateways {
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( 'add_payment_method' ) ) {
-					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( 'tokenization' ) ) {
+				} elseif ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}

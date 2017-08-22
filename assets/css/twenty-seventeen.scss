@@ -367,6 +367,12 @@ table.variations {
 
 	figure {
 		margin: 0;
+		padding: 0;
+	}
+
+	.woocommerce-product-gallery__wrapper {
+		margin: 0;
+		padding: 0;
 	}
 
 	.zoomImg {
@@ -559,6 +565,10 @@ button.pswp__button--close:hover {
 
 button.pswp__button--zoom:hover {
 	background-position: -88px 0;
+}
+
+.pswp img {
+	max-width: none;
 }
 
 /**
@@ -1006,6 +1016,14 @@ button.pswp__button--zoom:hover {
 }
 
 .colors-dark {
+	.page-numbers {
+		color: #444;
+
+		&.next, &.prev {
+			color: #ddd;
+		}
+	}
+
 	.checkout-button {
 		border: 2px solid #555;
 

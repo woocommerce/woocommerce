@@ -66,7 +66,7 @@ class WC_Post_Data {
 	 * @return string
 	 */
 	public static function variation_post_link( $permalink, $post ) {
-		if ( isset( $post->ID, $post->post_type ) && 'product_variation' === $post->post_type && ( $variation = wc_get_product( $post->ID ) ) ) {
+		if ( isset( $post->ID, $post->post_type ) && 'product_variation' === $post->post_type && ( $variation = wc_get_product( $post->ID ) ) && $variation->get_parent_id() ) {
 			return $variation->get_permalink();
 		}
 		return $permalink;
@@ -400,7 +400,9 @@ class WC_Post_Data {
 		if ( in_array( get_post_type( $order_id ), wc_get_order_types() ) ) {
 			// Clean up user.
 			$order       = wc_get_order( $order_id );
-			$customer_id = $order->get_customer_id();
+
+			// Check for `get_customer_id`, since this may be e.g. a refund order (which doesn't implement it).
+			$customer_id = is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0;
 
 			if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
 				$customer    = new WC_Customer( $customer_id );

@@ -888,8 +888,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $class Tax class.
 	 */
 	public function set_tax_class( $class ) {
-		$class       = sanitize_title( $class );
-		$class       = 'standard' === $class ? '' : $class;
+		$class         = sanitize_title( $class );
+		$class         = 'standard' === $class ? '' : $class;
+		$valid_classes = WC_Tax::get_tax_class_slugs();
+
+		if ( ! in_array( $class, $valid_classes ) ) {
+			$class = '';
+		}
+
 		$this->set_prop( 'tax_class', $class );
 	}
 

@@ -178,7 +178,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product_catdiv',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product tags', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags are a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
 							'align' => 'middle',

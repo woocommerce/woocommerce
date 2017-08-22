@@ -113,6 +113,8 @@ class WC_AJAX {
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
+			'add_coupon_discount'                              => false,
+			'remove_order_coupon'                              => false,
 			'remove_order_item'                                => false,
 			'remove_order_tax'                                 => false,
 			'reduce_order_item_stock'                          => false,
@@ -365,7 +367,7 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
-			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
+			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' )  ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
@@ -892,6 +894,60 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Add order discount via ajax.
+	 */
+	public static function add_coupon_discount() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$order    = wc_get_order( $order_id );
+
+			$order->apply_coupon( wc_clean( $_POST['coupon'] ) );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Remove coupon from an order via ajax.
+	 */
+	public static function remove_order_coupon() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$order    = wc_get_order( $order_id );
+
+			$order->remove_coupon( wc_clean( $_POST['coupon'] ) );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
+	}
+
+	/**
 	 * Remove an order item.
 	 */
 	public static function remove_order_item() {
@@ -901,18 +957,32 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$order_item_ids = $_POST['order_item_ids'];
+		try {
+			$order_id       = absint( $_POST['order_id'] );
+			$order_item_ids = $_POST['order_item_ids'];
 
-		if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
-			$order_item_ids = array( $order_item_ids );
-		}
-
-		if ( sizeof( $order_item_ids ) > 0 ) {
-			foreach ( $order_item_ids as $id ) {
-				wc_delete_order_item( absint( $id ) );
+			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
+				$order_item_ids = array( $order_item_ids );
 			}
+
+			if ( sizeof( $order_item_ids ) > 0 ) {
+				foreach ( $order_item_ids as $id ) {
+					wc_delete_order_item( absint( $id ) );
+				}
+			}
+
+			$order = wc_get_order( $order_id );
+			$order->calculate_totals( true );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-		wp_die();
 	}
 
 	/**
@@ -925,15 +995,24 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$order_id = absint( $_POST['order_id'] );
-		$rate_id  = absint( $_POST['rate_id'] );
+		try {
+			$order_id = absint( $_POST['order_id'] );
+			$rate_id  = absint( $_POST['rate_id'] );
 
-		wc_delete_order_item( $rate_id );
+			wc_delete_order_item( $rate_id );
 
-		// Return HTML items
-		$order = wc_get_order( $order_id );
-		include( 'admin/meta-boxes/views/html-order-items.php' );
-		wp_die();
+			$order = wc_get_order( $order_id );
+			$order->calculate_totals( false );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+
+			wp_send_json_success( array(
+				'html' => ob_get_clean(),
+			) );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 	}
 
 	/**
@@ -1411,7 +1490,7 @@ class WC_AJAX {
 
 		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
 
-		do_action( 'woocommerce_after_product_ordering' );
+		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
 	}
 
@@ -2129,6 +2208,9 @@ class WC_AJAX {
 				'tax_rate_shipping' => 1,
 				'tax_rate_order'    => 1,
 			) );
+
+			// Format the rate.
+			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
 
 			if ( isset( $data['newRow'] ) ) {
 				// Hurrah, shiny and new!

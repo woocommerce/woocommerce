@@ -238,22 +238,26 @@ jQuery( function( $ ) {
 	}).change();
 
 	// DATE PICKER FIELDS.
+	function date_picker_select( datepicker ) {
+		var option         = $( datepicker ).next().is( '.hasDatepicker' ) ? 'minDate' : 'maxDate',
+			otherDateField = 'minDate' === option ? $( datepicker ).next() : $( datepicker ).prev(),
+			date           = $( datepicker ).datepicker( 'getDate' );
+
+		$( otherDateField ).datepicker( 'option', option, date );
+		$( datepicker ).change();
+	}
+
 	$( '.sale_price_dates_fields' ).each( function() {
 		$( this ).find( 'input' ).datepicker({
 			defaultDate: '',
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
 			showButtonPanel: true,
-			onSelect: function( selectedDate ) {
-				var option   = $( this ).next().is('.hasDatepicker') ? 'minDate' : 'maxDate',
-					instance = $( this ).data( 'datepicker' ),
-					dates    = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
-					date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
-
-				dates.not( this ).datepicker( 'option', option, date );
-				$( this ).change();
+			onSelect: function() {
+				date_picker_select( $( this ) );
 			}
 		});
+		$( this ).find( 'input' ).each( function() { date_picker_select( $( this ) ); } );
 	});
 
 	// ATTRIBUTE TABLES.

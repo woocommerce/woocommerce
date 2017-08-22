@@ -417,16 +417,16 @@ class WC_Countries {
 						foreach ( $states as $state_key => $state_value ) :
 						echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
-						if ( $selected_country == $key && $selected_state == $state_key ) {
+						if ( $selected_country === $key && $selected_state === $state_key ) {
 							echo ' selected="selected"';
-							}
+						}
 
 						echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
 						endforeach;
 					echo '</optgroup>';
 				else :
 					echo '<option';
-					if ( $selected_country == $key && '*' == $selected_state ) {
+					if ( $selected_country === $key && '*' === $selected_state ) {
 						echo ' selected="selected"';
 					}
 					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';

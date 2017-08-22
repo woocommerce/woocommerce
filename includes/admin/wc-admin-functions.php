@@ -186,12 +186,10 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @param array $items Order items to save
  */
 function wc_save_order_items( $order_id, $items ) {
-	// Allow other plugins to check change in order items before they are saved
+	// Allow other plugins to check change in order items before they are saved.
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	$order = wc_get_order( $order_id );
-
-	// Line items and fees
+	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
 		$data_keys = array(
 			'line_tax'             => array(),
@@ -203,7 +201,7 @@ function wc_save_order_items( $order_id, $items ) {
 			'line_subtotal'        => null,
 		);
 		foreach ( $items['order_item_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
@@ -260,7 +258,7 @@ function wc_save_order_items( $order_id, $items ) {
 		);
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
@@ -299,10 +297,8 @@ function wc_save_order_items( $order_id, $items ) {
 		}
 	}
 
-	// Updates tax totals
+	$order = wc_get_order( $order_id );
 	$order->update_taxes();
-
-	// Calc totals - this also triggers save
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved
