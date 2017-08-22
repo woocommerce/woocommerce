@@ -34,14 +34,14 @@ class WC_Tests_WC_Cart_Fees extends WC_Unit_Test_Case {
 		// Test set_fees.
 		$args = array(
 			array(
-				'name' => 'newfee',
-				'amount' => -5,
+				'name'      => 'newfee',
+				'amount'    => -5,
 			),
 			array(
-				'name' => 'newfee2',
-				'amount' => 10,
+				'name'      => 'newfee2',
+				'amount'    => 10,
 				'tax_class' => 'Reduced rate',
-				'taxable' => true
+				'taxable'   => true
 			),
 		);
 		$cart_fees->set_fees( $args );
