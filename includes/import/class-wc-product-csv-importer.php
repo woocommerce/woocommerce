@@ -525,6 +525,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
 			'product_url'       => 'esc_url_raw',
+			'menu_order'        => 'intval',
 		);
 
 		/**

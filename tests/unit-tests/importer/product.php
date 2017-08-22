@@ -67,6 +67,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Grouped products'        => 'grouped_products',
 			'External URL'            => 'product_url',
 			'Button text'             => 'button_text',
+			'Position'                => 'menu_order',
 			'Attribute 1 name'        => 'attributes:name1',
 			'Attribute 1 value(s)'    => 'attributes:value2',
 			'Attribute 2 name'        => 'attributes:name2',
@@ -173,6 +174,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'',
 				'',
+				'0',
 				'Color',
 				'Red',
 				'',
@@ -219,6 +221,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'',
 				'',
+				'1',
 				'Label',
 				'WooCommerce',
 				'Vinyl',
@@ -287,6 +290,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name' => 'Color',
 					),
 				),
+				'menu_order'            => 0,
 			),
 			array(
 				'type'                  => 'simple',
@@ -338,6 +342,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'file' => 'http://woo.dev/albums/album.flac',
 					),
 				),
+				'menu_order'            => 1,
 			),
 			array(
 				'type'               => 'external',
@@ -373,6 +378,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'virtual'            => false,
 				'downloadable'       => false,
 				'manage_stock'       => false,
+				'menu_order'         => 2,
 			),
 			array(
 				'type'                  => 'variable',
@@ -424,6 +430,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'default' => 'L',
 					),
 				),
+				'menu_order'            => 3,
 			),
 			array(
 				'type'                  => 'variation',
@@ -468,6 +475,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
+				'menu_order'            => 1,
 			),
 			array(
 				'type'               => 'variation',
@@ -512,6 +520,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
+				'menu_order'            => 2,
 			),
 			array(
 				'type'                  => 'grouped',
@@ -548,6 +557,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'virtual'               => false,
 				'downloadable'          => false,
 				'manage_stock'          => false,
+				'menu_order'            => 4,
 			),
 		);
 
