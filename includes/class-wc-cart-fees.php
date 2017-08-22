@@ -2,10 +2,9 @@
 /**
  * Cart fees API.
  *
- * Developers can add fees to the cart via WC()->cart->fees_api which will reference this class.
+ * Developers can add fees to the cart via WC()->cart->fees_api() which will reference this class.
  *
- * Fees can be added/removed at any time, however, before cart total calculations fees are purged
- * so we suggest using the action woocommerce_cart_calculate_fees or woocommerce_before_calculate_totals.
+ * We suggest using the action woocommerce_cart_calculate_fees hook for adding fees.
  *
  * @author  Automattic
  * @package WooCommerce/Classes
