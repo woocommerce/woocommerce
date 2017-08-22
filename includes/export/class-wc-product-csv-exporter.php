@@ -114,7 +114,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
-			'position'           => __( 'Position', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
 		) );
 	}
 
@@ -424,17 +424,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		}
 
 		return $this->implode_values( $types );
-	}
-
-	/**
-	 * Get position value.
-	 *
-	 * @since 3.2.0
-	 * @param WC_Product $product Product data.
-	 * @return string
-	 */
-	protected function get_column_value_position( $product ) {
-		return $product->get_menu_order();
 	}
 
 	/**
