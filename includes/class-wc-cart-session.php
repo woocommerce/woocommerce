@@ -95,8 +95,6 @@ final class WC_Cart_Session {
 					}
 				}
 			}
-
-			$this->cart->set_cart_contents( $cart_contents );
 		}
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
