@@ -1336,6 +1336,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$amount = $item->get_amount();
 
 			if ( 0 > $amount ) {
+				$item->set_total( $amount );
 				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
 				if ( $item->get_total() < $max_discount ) {
