@@ -837,9 +837,25 @@ class WC_Email extends WC_Settings_API {
 							<p>
 								<a href="#" class="button toggle_editor"></a>
 
-								<?php if ( ( is_dir( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) && is_writable( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
-									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
-								<?php } ?>
+								<?php
+									$emails_dir    = get_stylesheet_directory() . '/' . $template_dir . '/emails';
+									$templates_dir = get_stylesheet_directory() . '/' . $template_dir;
+									$theme_dir     = get_stylesheet_directory();
+
+									if ( is_dir( $emails_dir ) ) {
+										$target_dir = $emails_dir;
+									} elseif ( is_dir( $templates_dir ) ) {
+										$target_dir = $templates_dir;
+									} else {
+										$target_dir = $theme_dir;
+									}
+
+									if ( is_writable( $target_dir ) ) {
+										?>
+										<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
+										<?php
+									}
+								?>
 
 								<?php printf( __( 'To override and edit this email template copy %1$s to your theme folder: %2$s.', 'woocommerce' ), '<code>' . plugin_basename( $template_file ) . '</code>', '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>

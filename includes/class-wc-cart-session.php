@@ -87,13 +87,14 @@ final class WC_Cart_Session {
 
 					} else {
 						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data = array_merge( $values, array( 'data' => $product ) );
+						$session_data          = array_merge( $values, array( 'data' => $product ) );
 						$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+
+						// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
+						$this->cart->set_cart_contents( $cart_contents );
 					}
 				}
 			}
-
-			$this->cart->set_cart_contents( $cart_contents );
 		}
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );

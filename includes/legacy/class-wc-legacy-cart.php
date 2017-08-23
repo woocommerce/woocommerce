@@ -52,6 +52,19 @@ abstract class WC_Legacy_Cart {
 	public $coupon_applied_count = array();
 
 	/**
+	 * Map legacy variables.
+	 *
+	 * @param string $name Property name.
+	 * @param mixed  $value Value to set.
+	 */
+	public function __isset( $name ) {
+		if ( array_key_exists( $name, $cart_session_data ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Magic getters.
 	 *
 	 * @param string $name Property name.
@@ -112,6 +125,7 @@ abstract class WC_Legacy_Cart {
 				return $this->get_coupons();
 		}
 	}
+
 	/**
 	 * Map legacy variables to setters.
 	 *
@@ -175,7 +189,7 @@ abstract class WC_Legacy_Cart {
 	public function get_cart_from_session() { $this->session->get_cart_from_session(); }
 	public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
 	public function set_session() { $this->session->set_session(); }
-	public function get_cart_for_session() { $this->session->get_cart_for_session(); }
+	public function get_cart_for_session() { return $this->session->get_cart_for_session(); }
 	public function persistent_cart_update() { $this->session->persistent_cart_update(); }
 	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
 
