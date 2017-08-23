@@ -465,12 +465,13 @@ class WC_Post_Data {
 	/**
 	 * Update changed downloads.
 	 *
+	 * @deprecated 3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
 	 * @param array $downloads newly set files
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
-		// No action is necessary on changes to download paths since download_id is no longer based on file hash.
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 	}
 
 	/**
