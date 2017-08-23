@@ -376,7 +376,6 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id     = (int) $request['id'];
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;
