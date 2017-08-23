@@ -890,17 +890,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param string|WC_Coupon $coupon Coupon code or object.
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
-	public function apply_coupon( $coupon ) {
-		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
-			$code   = wc_format_coupon_code( $coupon );
+	public function apply_coupon( $raw_coupon ) {
+		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
+			$coupon = $raw_coupon;
+		} elseif ( is_string( $raw_coupon ) ) {
+			$code   = wc_format_coupon_code( $raw_coupon );
 			$coupon = new WC_Coupon( $code );
 
 			if ( $coupon->get_code() !== $code || ! $coupon->is_valid() ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
 			}
+		} else {
+			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
 		// Check to make sure coupon is not already applied.
@@ -1017,7 +1021,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupons           = $this->get_items( 'coupon' );
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
-		$item_discounts    = $discounts->get_discounts_by_item();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
 
 		if ( $coupon_discounts ) {
@@ -1324,17 +1327,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$cart_total    += $item->get_total();
 		}
 
-		// Sum fee costs.
-		foreach ( $this->get_fees() as $item ) {
-			$fee_total += $item->get_total();
-		}
-
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
 			$shipping_total += $shipping->get_total();
 		}
 
 		$this->set_shipping_total( $shipping_total );
+
+		// Sum fee costs.
+		foreach ( $this->get_fees() as $item ) {
+			$amount = $item->get_amount();
+
+			if ( 0 > $amount ) {
+				$item->set_total( $amount );
+				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
+
+				if ( $item->get_total() < $max_discount ) {
+					$item->set_total( $max_discount );
+				}
+			}
+
+			$fee_total += $item->get_total();
+		}
 
 		// Calculate taxes for items, shipping, discounts.
 		if ( $and_taxes ) {

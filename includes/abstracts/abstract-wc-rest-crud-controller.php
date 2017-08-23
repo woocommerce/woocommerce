@@ -37,7 +37,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * Get object.
 	 *
 	 * @param  int $id Object ID.
-	 * @return WP_Error|WC_Data
+	 * @return object WC_Data object or WP_Error object.
 	 */
 	protected function get_object( $id ) {
 		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
@@ -376,7 +376,6 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id     = (int) $request['id'];
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;
