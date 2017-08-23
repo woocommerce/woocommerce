@@ -23,7 +23,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$object = new WC_Customer_Download_Log();
 		$set_to = current_time( 'timestamp', true );
 
-		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat
+		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dtStr = date("c", $set_to);
 		$wc_timestamp = new WC_DateTime($dtStr);
 
@@ -65,7 +65,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	 * Test creating a new download log manually.
 	 */
 	public function test_create_download_log() {
-		// First create a download permission to test against
+		// First create a download permission to test against.
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
@@ -74,10 +74,10 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$download_1->set_order_id( 1 );
 		$download_1->save();
 
-		// Create download log
+		// Create download log.
 		$timestamp = current_time( 'timestamp', true );
 
-		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat
+		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dtStr = date("c", $timestamp);
 		$wc_timestamp = new WC_DateTime($dtStr);
 
@@ -88,22 +88,22 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$download_log->set_user_ip_address( '1.2.3.4' );
 		$download_log->save();
 
-		// Pull the download log back from data store
+		// Pull the download log back from data store.
 		$db_download_log = new WC_Customer_Download_Log( $download_log->get_id() );
 
-		// Check that created log matches data from data store
-		$this->assertNotEquals( 0, $db_download_log->get_id() );
-		$this->assertEquals( $wc_timestamp, $db_download_log->get_timestamp() );
-		$this->assertEquals( $download_1->get_id(), $db_download_log->get_permission_id() );
-		$this->assertEquals( $customer_id_2, $db_download_log->get_user_id() );
-		$this->assertEquals( '1.2.3.4', $db_download_log->get_user_ip_address() );
+		// Check that created log matches data from data store.
+		$this->assertNotEquals( 0, $db_download_log->get_id(), 'New download log ID not set to non-zero value.' );
+		$this->assertEquals( $wc_timestamp, $db_download_log->get_timestamp(), 'New download log timestamp set incorrectly.' );
+		$this->assertEquals( $download_1->get_id(), $db_download_log->get_permission_id(), 'New download log permission ID set incorrectly.' );
+		$this->assertEquals( $customer_id_2, $db_download_log->get_user_id(), 'New download log user ID set incorrectly.' );
+		$this->assertEquals( '1.2.3.4', $db_download_log->get_user_ip_address(), 'New download log IP address set incorrectly.' );
 	}
 
 	/**
 	 * Test creating a new download log automatically from customer download.
 	 */
 	public function test_track_download() {
-		// First create a download permission to test against
+		// First create a download permission to test against.
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
@@ -115,31 +115,31 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 
 		$ip_address = '1.2.3.4';
 
-		// Initially download count should be zero, and remaining should be 10
-		$this->assertEquals( 0, $download_1->get_download_count() );
-		$this->assertEquals( 10, $download_1->get_downloads_remaining() );
+		// Initially download count should be zero, and remaining should be 10.
+		$this->assertEquals( 0, $download_1->get_download_count(), 'New permission download count should be zero.' );
+		$this->assertEquals( 10, $download_1->get_downloads_remaining(), 'New permission downloads remaining should be 10.' );
 
-		// Track the download in logs and change remaining/counts
+		// Track the download in logs and change remaining/counts.
 		$download_1->track_download( $customer_id_2, $ip_address );
 
-		// Ensure download count iterates properly
-		$this->assertEquals( 1, $download_1->get_download_count() );
-		$this->assertEquals( 9, $download_1->get_downloads_remaining() );
+		// Ensure download count iterates properly.
+		$this->assertEquals( 1, $download_1->get_download_count(), 'After download, permission download count should be 1.' );
+		$this->assertEquals( 9, $download_1->get_downloads_remaining(), 'After download, permission downloads remaining should be 9.' );
 
-		// Make sure download log was recorded properly
+		// Make sure download log was recorded properly.
 		$data_store = WC_Data_Store::load( 'customer-download-log' );
 		$download_logs = $data_store->get_download_logs( array(
 			'permission_id' => $download_1->get_id()
 		) );
 
-		$this->assertEquals( 1, count( $download_logs ) );
+		$this->assertEquals( 1, count( $download_logs ), 'After single download, permission should have one download log in database.' );
 
 		$download_log = current( $download_logs );
 
 		// Ensure log contains appropriate data for the user, etc.
-		$this->assertNotEquals( 0, $download_log->get_id() );
-		$this->assertEquals( $download_1->get_id(), $download_log->get_permission_id() );
-		$this->assertEquals( $customer_id_2, $download_log->get_user_id() );
-		$this->assertEquals( $ip_address, $download_log->get_user_ip_address() );
+		$this->assertNotEquals( 0, $download_log->get_id(), 'Tracked download log ID should not be zero.' );
+		$this->assertEquals( $download_1->get_id(), $download_log->get_permission_id(), 'Tracked download log permission ID did not match.' );
+		$this->assertEquals( $customer_id_2, $download_log->get_user_id(), 'Tracked download log user ID did not match.' );
+		$this->assertEquals( $ip_address, $download_log->get_user_ip_address(), 'Tracked download log IP address did not match.' );
 	}
 }
