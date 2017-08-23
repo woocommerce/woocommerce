@@ -183,30 +183,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function products( $atts, $loop_name = 'products' ) {
-		if ( empty( $atts ) ) {
-			return '';
-		}
-
-		// Filterable with the shortcode_atts_{$shortcode} filter.
-		$atts = shortcode_atts( array(
-			'orderby'       => '',     // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'         => 'DESC', // ASC or DESC.
-			'limit'         => '4',
-			'per_page'      => '',     // Overrides 'limit'.
-			'columns'       => '4',
-			'ids'           => '',     // Comma separated IDs.
-			'skus'          => '',     // Comma separated SKUs.
-			'category'      => '',     // Comma separated category slugs.
-			'cat_operator'  => 'IN',   // IN, NOT IN, or AND.
-			'attribute'     => '',     // Single attribute slug.
-			'attr_terms'    => '',     // Comma separated term slugs.
-			'attr_operator' => 'IN',   // IN, NOT IN, or AND.
-			'on_sale'       => false,
-			'featured'      => false,
-			'best_selling'  => false,
-			'top_rated'     => false,
-		), $atts, 'products' );
-
 		$query_args = self::products_query_args( $atts, $loop_name );
 
 		return self::product_loop( $query_args, $atts, $loop_name );
@@ -220,14 +196,34 @@ class WC_Shortcodes {
 	 * @return array
 	 */
 	public static function products_query_args( $atts, $loop_name ) {
+		// Standard attributes. Filterable with the shortcode_atts_{$shortcode} filter.
+		$atts = shortcode_atts( array(
+			'orderby'       => 'title', // menu_order, title, date, rand, price, popularity, rating, or id.
+			'order'         => 'ASC',   // ASC or DESC.
+			'limit'         => '4',
+			'per_page'      => '',      // Overrides 'limit'.
+			'columns'       => '4',
+			'ids'           => '',      // Comma separated IDs.
+			'skus'          => '',      // Comma separated SKUs.
+			'category'      => '',      // Comma separated category slugs.
+			'cat_operator'  => 'IN',    // IN, NOT IN, or AND.
+			'attribute'     => '',      // Single attribute slug.
+			'attr_terms'    => '',      // Comma separated term slugs.
+			'attr_operator' => 'IN',    // IN, NOT IN, or AND.
+			'on_sale'       => false,
+			'featured'      => false,
+			'best_selling'  => false,
+			'top_rated'     => false,
+		), $atts, $loop_name );
+
 		$query_args = apply_filters( "woocommerce_default_{$loop_name}_query_args", array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
-			'orderby'             => empty( $atts['orderby'] ) ? '' : $atts['orderby'],
-			'order'               => empty( $atts['order'] ) ? 'DESC' : strtoupper( $atts['order'] ),
-			'posts_per_page'      => empty( $atts['limit'] ) ? 1 : intval( $atts['limit'] ),
+			'orderby'             => $atts['orderby'],
+			'order'               => empty( $atts['order'] ) ? 'ASC' : strtoupper( $atts['order'] ),
+			'posts_per_page'      => empty( $atts['limit'] ) ? -1 : intval( $atts['limit'] ),
 		) );
 
 		// Validate order options.
@@ -277,10 +273,10 @@ class WC_Shortcodes {
 		// Taxonomy queries.
 		if ( ! empty( $atts['category'] ) ) {
 			$query_args['tax_query'][] = array(
-					'taxonomy'     => 'product_cat',
-					'terms'        => array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
-					'field'        => 'slug',
-					'operator'     => empty( $atts['cat_operator'] ) ? 'IN' : $atts['cat_operator'],
+				'taxonomy' => 'product_cat',
+				'terms'    => array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
+				'field'    => 'slug',
+				'operator' => empty( $atts['cat_operator'] ) ? 'IN' : $atts['cat_operator'],
 			);
 		}
 
