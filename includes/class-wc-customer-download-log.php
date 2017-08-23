@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version		3.3.0
  * @since		3.3.0
  * @package		WooCommerce/Classes
- * @author		WooThemes
+ * @author		Automattic
  */
-class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
+class WC_Customer_Download_Log extends WC_Data {
 
 	/**
 	 * This is the name of this object type.
@@ -25,10 +25,10 @@ class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'timestamp'			=> null,
-		'permission_id'		=> 0,
-		'user_id'			=> null,
-		'user_ip_address'	=> null,
+		'timestamp'       => null,
+		'permission_id'   => 0,
+		'user_id'         => null,
+		'user_ip_address' => null,
 	);
 
 	/**
@@ -169,74 +169,5 @@ class WC_Customer_Download_Log extends WC_Data implements ArrayAccess {
 			}
 		}
 		return $this->get_id();
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| ArrayAccess/Backwards compatibility.
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * offsetGet
-	 * @param string $offset
-	 * @return mixed
-	 */
-	public function offsetGet( $offset ) {
-		if ( is_callable( array( $this, "get_$offset" ) ) ) {
-			return $this->{"get_$offset"}();
-		}
-	}
-
-	/**
-	 * offsetSet
-	 * @param string $offset
-	 * @param mixed $value
-	 */
-	public function offsetSet( $offset, $value ) {
-		if ( is_callable( array( $this, "set_$offset" ) ) ) {
-			$this->{"set_$offset"}( $value );
-		}
-	}
-
-	/**
-	 * offsetUnset
-	 * @param string $offset
-	 */
-	public function offsetUnset( $offset ) {
-		if ( is_callable( array( $this, "set_$offset" ) ) ) {
-			$this->{"set_$offset"}( '' );
-		}
-	}
-
-	/**
-	 * offsetExists
-	 * @param string $offset
-	 * @return bool
-	 */
-	public function offsetExists( $offset ) {
-		return in_array( $offset, array_keys( $this->data ) );
-	}
-
-	/**
-	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
-	 *
-	 * @param  string $key Key name.
-	 * @return bool
-	 */
-	public function __isset( $key ) {
-		return in_array( $offset, array_keys( $this->data ) );
-	}
-
-	/**
-	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
-	 *
-	 * @param  string $key Key name.
-	 * @return mixed
-	 */
-	public function __get( $key ) {
-		if ( is_callable( array( $this, "get_$key" ) ) ) {
-			return $this->{"get_$key"}( '' );
-		}
 	}
 }
