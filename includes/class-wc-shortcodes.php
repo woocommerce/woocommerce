@@ -183,24 +183,11 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function products( $atts, $loop_name = 'products' ) {
-		$query_args = self::products_query_args( $atts, $loop_name );
-
-		return self::product_loop( $query_args, $atts, $loop_name );
-	}
-
-	/**
-	 * Take in the shortcode attributes and return query args.
-	 *
-	 * @param  array  $atts      Shortcode attributes.
-	 * @param  string $loop_name Loop name.
-	 * @return array
-	 */
-	public static function products_query_args( $atts, $loop_name ) {
 		// Standard attributes. Filterable with the shortcode_atts_{$shortcode} filter.
 		$atts = shortcode_atts( array(
 			'orderby'       => 'title', // menu_order, title, date, rand, price, popularity, rating, or id.
 			'order'         => 'ASC',   // ASC or DESC.
-			'limit'         => '4',
+			'limit'         => '-1',
 			'per_page'      => '',      // Overrides 'limit'.
 			'columns'       => '4',
 			'ids'           => '',      // Comma separated IDs.
@@ -216,6 +203,19 @@ class WC_Shortcodes {
 			'top_rated'     => false,
 		), $atts, $loop_name );
 
+		$query_args = self::products_query_args( $atts, $loop_name );
+
+		return self::product_loop( $query_args, $atts, $loop_name );
+	}
+
+	/**
+	 * Take in the shortcode attributes and return query args.
+	 *
+	 * @param  array  $atts      Shortcode attributes.
+	 * @param  string $loop_name Loop name.
+	 * @return array
+	 */
+	public static function products_query_args( $atts, $loop_name ) {
 		$query_args = apply_filters( "woocommerce_default_{$loop_name}_query_args", array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
