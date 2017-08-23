@@ -809,15 +809,33 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id    = absint( $_POST['order_id'] );
-			$order       = wc_get_order( $order_id );
-			$order_taxes = $order->get_taxes();
-			$item        = new WC_Order_Item_Fee();
-			$item->set_order_id( $order_id );
-			$item_id     = $item->save();
+			$order_id = absint( $_POST['order_id'] );
+			$amount   = wc_clean( $_POST['amount'] );
+			$order    = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				throw new exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			if ( strstr( $amount, '%' ) ) {
+				$formatted_amount = $amount;
+				$percent          = floatval( trim( $amount, '%' ) );
+				$amount           = $order->get_total() * ( $percent / 100 );
+			} else {
+				$amount           = floatval( $amount );
+				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
+			}
+
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_total( $amount );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+
+			$order->add_item( $fee );
+			$order->calculate_totals( true );
+			$order->save();
 
 			ob_start();
-			include( 'admin/meta-boxes/views/html-order-fee.php' );
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
