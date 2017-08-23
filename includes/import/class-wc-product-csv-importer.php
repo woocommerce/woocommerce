@@ -582,12 +582,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function expand_data( $data ) {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
-		// Status is mapped from a special published field.
-		if ( isset( $data['published'] ) ) {
-			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
-			unset( $data['published'] );
-		}
-
 		// Images field maps to image and gallery id fields.
 		if ( isset( $data['images'] ) ) {
 			$images               = $data['images'];
@@ -607,6 +601,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// Convert type to string.
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
+		}
+
+		// Status is mapped from a special published field.
+		if ( isset( $data['published'] ) ) {
+			$non_published_status = isset( $data['type'] ) && 'variation' === $data['type'] ? 'private' : 'draft';
+			$data['status']       = ( $data['published'] ? 'publish' : $non_published_status );
+			unset( $data['published'] );
 		}
 
 		if ( isset( $data['stock_quantity'] ) ) {
