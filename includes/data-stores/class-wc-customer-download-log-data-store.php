@@ -12,15 +12,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Data_Store_Interface {
 
+	// Table name for download logs.
+	const WC_DOWNLOAD_LOG_TABLE = 'wc_download_log';
+
+	/**
+	 * Get the table name for download logs.
+	 *
+	 * @return string
+	 */
+	public static function get_table_name() {
+		return self::WC_DOWNLOAD_LOG_TABLE;
+	}
+
 	/**
 	 * Create download log entry.
 	 *
 	 * @param WC_Customer_Download_Log $download_log
 	 */
-	public function create( &$download_log ) {
+	public function create( WC_Customer_Download_Log &$download_log ) {
 		global $wpdb;
 
-		// Always set a timestamp
+		// Always set a timestamp.
 		if ( is_null( $download_log->get_timestamp( 'edit' ) ) ) {
 			$download_log->set_timestamp( current_time( 'timestamp', true ) );
 		}
@@ -40,16 +52,19 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		);
 
 		$result = $wpdb->insert(
-			$wpdb->prefix . 'woocommerce_downloadable_product_download_log',
-			apply_filters( 'woocommerce_downloadable_product_download_log_data', $data ),
-			apply_filters( 'woocommerce_downloadable_product_download_log_format', $format, $data )
+			$wpdb->prefix . self::get_table_name(),
+			apply_filters( 'woocommerce_downloadable_product_download_log_insert_data', $data ),
+			apply_filters( 'woocommerce_downloadable_product_download_log_insert_format', $format, $data )
 		);
 
-		do_action( 'woocommerce_downloadable_product_download_log', $data );
+		do_action( 'woocommerce_downloadable_product_download_log_insert', $data );
 
 		if ( $result ) {
 			$download_log->set_id( $wpdb->insert_id );
 			$download_log->apply_changes();
+		}
+		else {
+			wp_die( __( 'Unable to insert download log entry in database.', 'woocommerce' ) );
 		}
 	}
 
@@ -65,8 +80,18 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 
 		$download_log->set_defaults();
 
-		if ( ! $download_log->get_id() || ! ( $raw_download_log = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_download_log WHERE download_log_id = %d", $download_log->get_id() ) ) ) ) {
-			throw new Exception( __( 'Invalid download log.', 'woocommerce' ) );
+		// Ensure we have an id to pull from the DB.
+		if ( ! $download_log->get_id() ) {
+			throw new Exception( __( 'Invalid download log: no ID.', 'woocommerce' ) );
+		}
+
+		// Query the DB for the download log.
+		$raw_download_log_query = $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}" . self::get_table_name() . " WHERE download_log_id = %d", $download_log->get_id()
+		);
+		$raw_download_log = $wpdb->get_row( $raw_download_log_query );
+		if ( ! $raw_download_log ) {
+			throw new Exception( __( 'Invalid download log: not found.', 'woocommerce' ) );
 		}
 
 		$download_log->set_props( array(
@@ -102,7 +127,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		);
 
 		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_downloadable_product_download_log',
+			$wpdb->prefix . self::get_table_name(),
 			$data,
 			array(
 				'download_log_id' => $download_log->get_id(),
@@ -142,7 +167,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		) );
 
 		$query   = array();
-		$query[] = "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_download_log WHERE 1=1";
+		$query[] = "SELECT * FROM {$wpdb->prefix}" . self::get_table_name() . " WHERE 1=1";
 
 		if ( $args['permission_id'] ) {
 			$query[] = $wpdb->prepare( "AND permission_id = %d", $args['permission_id'] );
@@ -183,7 +208,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	 * @return array
 	 */
 	public function get_download_logs_for_permission( $permission_id ) {
-		// If no permission_id is passed, return an empty array
+		// If no permission_id is passed, return an empty array.
 		if ( empty( $permission_id ) ) {
 			return array();
 		}

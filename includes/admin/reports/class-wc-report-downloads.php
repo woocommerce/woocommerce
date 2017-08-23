@@ -56,45 +56,55 @@ class WC_Report_Downloads extends WP_List_Table {
 
 		$this->prepare_items();
 
-		// Subtitle for permission if set
+		// Subtitle for permission if set.
 		if ( isset( $_GET['permission_id'] ) && is_numeric( $_GET['permission_id'] ) && $_GET['permission_id'] > 0 ) {
-			// Load the permission, order, etc. so we can render more information
+			$permission_id = $_GET['permission_id'];
+			// Load the permission, order, etc. so we can render more information.
 			$permission	= null;
 			$product	= null;
 			try {
-				$permission	= new WC_Customer_Download( $_GET['permission_id'] );
+				$permission	= new WC_Customer_Download( $permission_id );
 				$product	= wc_get_product( $permission->product_id );
 			} catch ( Exception $e ) {
-				echo '<p>Permission #' . esc_html( $_GET['permission_id'] ) . ' not found.</p>';
+				wp_die( sprintf( __( 'Permission #%d not found.', 'woocommerce' ), $permission_id ) );
 			}
 
 			if ( ! empty( $permission ) && ! empty( $product ) ) {
-				echo '<h2>';
-
-				// File information
-				if ( $file = $product->get_file( $permission->get_download_id() ) ) {
-					echo esc_html( $file->get_name() ) . ' for ';
-				}
-
-				// Product information
-				$product_description = '';
-				if ( $sku = $product->get_sku() ) {
-					$product_description .= $sku . ' - ';
-				}
-				$product_description .= $product->get_name();
-				echo edit_post_link( $product_description, '', '', $product->get_id() );
-
-				// Order information
-				echo ' in Order ';
-				echo edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
-
-				echo '</h2>';
+				// File information.
+				$file = $product->get_file( $permission->get_download_id() );
+				
+				// Output the titles at the top of the report.
+				$this->output_report_title( $file, $product, $permission );
 			}
 		}
 
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 		$this->display();
 		echo '</div>';
+	}
+
+	/**
+	 * Output the title at the top of the report.
+	 *
+	 * @param mixed $file
+	 * @param WC_Product $product
+	 * @param WC_Customer_Download $permission
+	 */
+	protected function output_report_title( $file, $product, $permission ) {
+		// Output file information (if provided).
+		if ( $file ) {
+			echo '<p><strong>' . __( 'File:', 'woocommerce' ) . '</strong><br/>' . esc_html( $file->get_name() ) . '</p>';
+		}
+
+		// Output product information.
+		echo '<p><strong>' . __( 'Product: ', 'woocommerce' ) . '</strong><br/>';
+		edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
+		echo '</p>';
+
+		// Output order information.
+		echo '<p><strong>' . __( 'Order: ', 'woocommerce' ) . '</strong><br/>';
+		edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
+		echo '</p>';
 	}
 
 	/**
@@ -111,7 +121,7 @@ class WC_Report_Downloads extends WP_List_Table {
 			$permission	= new WC_Customer_Download( $item->permission_id );
 			$product	= wc_get_product( $permission->product_id );
 		} catch ( Exception $e ) {
-			// Ok to continue rendering other information even if permission and/or product is not found
+			// Ok to continue rendering other information even if permission and/or product is not found.
 		}
 
 		switch ( $column_name ) {
@@ -124,19 +134,13 @@ class WC_Report_Downloads extends WP_List_Table {
 					break;
 				}
 
-				$product_description = '';
-				if ( $sku = $product->get_sku() ) {
-					$product_description .= $sku . ' - ';
-				}
-				$product_description .= $product->get_name();
-
-				echo edit_post_link( $product_description, '', '', $product->get_id() );
+				edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
 
 				break;
 
 			case 'order' :
 				if ( ! empty( $permission ) ) {
-					echo edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
+					edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
 				}
 			
 				break;
@@ -151,7 +155,7 @@ class WC_Report_Downloads extends WP_List_Table {
 							$user_description = $user->data->user_email;
 						}
 
-						echo '<a href="' . get_edit_user_link( $item->user_id ) . '">' . esc_html( $user_description ) . '</a>';
+						echo '<a href="' . esc_url( get_edit_user_link( $item->user_id ) ) . '">' . esc_html( $user_description ) . '</a>';
 					}
 				}
 
@@ -189,7 +193,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
-		$per_page              = apply_filters( 'woocommerce_admin_downloads_report_downloads_per_page', 20 );
+		// Allow filtering per_page value, but ensure it's at least 1.
+		$per_page              = max( 1, apply_filters( 'woocommerce_admin_downloads_report_downloads_per_page', 20 ) );
 
 		$this->get_items( $current_page, $per_page );
 
@@ -222,24 +227,24 @@ class WC_Report_Downloads extends WP_List_Table {
 		$this->max_items = 0;
 		$this->items     = array();
 
-		// Get downloads from database
-		$table = $wpdb->prefix . 'woocommerce_downloadable_product_download_log';
+		// Get downloads from database.
+		$table = $wpdb->prefix . WC_Customer_Download_Log_Data_Store::get_table_name();
 
 		$query_from = "FROM {$table} as downloads WHERE 1=1 ";
 
-		// Apply filter by permission
+		// Apply filter by permission.
 		if ( isset( $_GET['permission_id'] ) && is_numeric( $_GET['permission_id'] ) && $_GET['permission_id'] > 0 ) {
 
-			// Ensure the permission and product exist
+			// Ensure the permission and product exist.
 			try {
 				$permission	= new WC_Customer_Download( $_GET['permission_id'] );
 				$product	= wc_get_product( $permission->product_id );
 			} catch ( Exception $e ) {
-				// Return empty array since we can't find the permission
-				return array();
+				// Leave array empty since we can't find the permission.
+				return;
 			}
 
-			// Add filter for permission id
+			// Add filter for permission id.
 			$query_from .= $wpdb->prepare( "AND permission_id = %d", $_GET['permission_id'] );
 		}
 
