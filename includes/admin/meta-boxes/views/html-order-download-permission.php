@@ -45,16 +45,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</td>
 				<td>
 					<label><?php _e( 'Downloads completed', 'woocommerce' ); ?></label>
-					<?php echo esc_html( $download->get_download_count() ); ?>
+					<?php echo esc_html( number_format_i18n( $download->get_download_count() ) ); ?>
 				</td>
 				<td>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
-							$download->get_id(),
+							rawurlencode( $download->get_id() ),
 							admin_url( 'admin.php?page=wc-reports&tab=products&report=downloads' )
 						);
-						echo '<a href="' . esc_attr( $report_url ) . '">';
+						echo '<a href="' . esc_url( $report_url ) . '">';
 						_e( 'View download logs', 'woocommerce' );
 						echo '</a>';
 					?>
