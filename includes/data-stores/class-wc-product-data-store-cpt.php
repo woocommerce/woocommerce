@@ -715,12 +715,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 
-			if ( $product->is_type( 'variation' ) ) {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
-			} else {
-				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
-			}
-
 			return update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
 		}
 		return false;
