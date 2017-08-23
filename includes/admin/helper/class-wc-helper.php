@@ -615,7 +615,7 @@ class WC_Helper {
 			'wc-helper-status' => 'helper-disconnected',
 		), admin_url( 'admin.php' ) );
 
-		$result = WC_Helper_API::post( 'oauth/invalidate_token', array(
+		WC_Helper_API::post( 'oauth/invalidate_token', array(
 			'authenticated' => true,
 		) );
 
