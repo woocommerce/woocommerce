@@ -168,7 +168,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @return integer
 	 */
 	public function get_download_count( $context = 'view' ) {
-		// Check for count of download logs
+		// Check for count of download logs.
 		$data_store = WC_Data_Store::load( 'customer-download-log' );
 		$download_log_ids = $data_store->get_download_logs_for_permission( $this->get_id() );
 
@@ -177,7 +177,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 			$download_log_count = count( $download_log_ids );
 		}
 
-		// Check download count in prop
+		// Check download count in prop.
 		$download_count_prop = $this->get_prop( 'download_count', $context );
 
 		// Return the larger of the two in case they differ.
@@ -289,16 +289,30 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @param string user_ip_address IP Address of the user performing the download
 	 */
 	public function track_download( $user_id = null, $user_ip_address = null ) {
-		// Must have a permission_id to track download log
+		global $wpdb;
+
+		// Must have a permission_id to track download log.
 		if ( ! ( $this->get_id() > 0 ) ) {
 			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
 		}
 
-		// Increment download count on parameter
-		$count = $this->get_download_count();
-		$this->set_download_count( $count + 1 );
+		// Increment download count, and decrement downloads remaining.
+		// Use SQL to avoid possible issues with downloads in quick succession.
+		// If downloads_remaining is blank, leave it blank (unlimited).
+		// Also, ensure downloads_remaining doesn't drop below zero.
+		$query = $wpdb->prepare( "
+UPDATE {$wpdb->prefix}woocommerce_downloadable_product_permissions
+SET download_count = download_count + 1,
+downloads_remaining = IF( downloads_remaining = '', '', GREATEST( 0, downloads_remaining - 1 ) )
+WHERE permission_id = %d",
+			$this->get_id()
+		);
+		$wpdb->query( $query );
+		
+		// Re-read this download from the data store to pull updated counts.
+		$this->data_store->read( $this );
 
-		// Track download in download log
+		// Track download in download log.
 		$download_log = new WC_Customer_Download_Log();
 		$download_log->set_timestamp( current_time( 'timestamp', true ) );
 		$download_log->set_permission_id( $this->get_id() );
@@ -312,15 +326,6 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		}
 
 		$download_log->save();
-
-		// Update downloads remaining
-		$remaining = $this->get_downloads_remaining();
-		if ( '' !== $remaining ) {
-			$this->set_downloads_remaining( $remaining - 1 );
-		}
-
-		// Save the download at this point to ensure the download log matches the param count
-		$this->save();
 	}
 
 	/*
