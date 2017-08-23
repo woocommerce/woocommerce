@@ -47,6 +47,7 @@ final class WC_Cart_Fees {
 		'tax_class' => '',
 		'taxable'   => false,
 		'amount'    => 0,
+		'total'     => 0,
 	);
 
 	/**

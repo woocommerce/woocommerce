@@ -268,12 +268,25 @@ final class WC_Cart_Totals {
 		$this->fees = array();
 		$this->cart->calculate_fees();
 
+		$fee_running_total = 0;
+
 		foreach ( $this->cart->get_fees() as $fee_key => $fee_object ) {
 			$fee            = $this->get_default_fee_props();
 			$fee->object    = $fee_object;
 			$fee->tax_class = $fee->object->tax_class;
 			$fee->taxable   = $fee->object->taxable;
 			$fee->total     = wc_add_number_precision_deep( $fee->object->amount );
+
+			// Negative fees should not make the order total go negative.
+			if ( 0 > $fee->total ) {
+				$max_discount = round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
+
+				if ( $fee->total < $max_discount ) {
+					$fee->total = $max_discount;
+				}
+			}
+
+			$fee_running_total += $fee->total;
 
 			if ( $this->calculate_tax ) {
 				if ( 0 > $fee->total ) {
@@ -304,8 +317,9 @@ final class WC_Cart_Totals {
 			}
 
 			// Set totals within object.
-			$fee->object->tax_data  = wc_remove_number_precision_deep( $fee->taxes );
-			$fee->object->tax       = wc_remove_number_precision_deep( $fee->total_tax );
+			$fee->object->total    = wc_remove_number_precision_deep( $fee->total );
+			$fee->object->tax_data = wc_remove_number_precision_deep( $fee->taxes );
+			$fee->object->tax      = wc_remove_number_precision_deep( $fee->total_tax );
 
 			$this->fees[ $fee_key ] = $fee;
 		}
@@ -691,6 +705,9 @@ final class WC_Cart_Totals {
 		$this->coupon_discount_totals              = (array) $discounts->get_discounts_by_item( true );
 		$this->coupon_discount_tax_totals          = $coupon_discount_tax_amounts;
 
+		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) );
+		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) );
+
 		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
 		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
 	}
@@ -735,8 +752,6 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) );
-		$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) );
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) ) );
 
 		// Add totals to cart object.

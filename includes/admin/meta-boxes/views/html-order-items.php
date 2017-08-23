@@ -188,7 +188,7 @@ if ( wc_tax_enabled() ) {
 <div class="wc-order-data-row wc-order-add-item wc-order-data-row-toggle" style="display:none;">
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
-	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
+	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping', 'woocommerce' ); ?></button>
 	<?php if ( wc_tax_enabled() ) : ?>
 		<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
 	<?php endif; ?>

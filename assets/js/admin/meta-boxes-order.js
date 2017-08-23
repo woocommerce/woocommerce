@@ -467,24 +467,32 @@ jQuery( function ( $ ) {
 		},
 
 		add_fee: function() {
-			wc_meta_boxes_order_items.block();
+			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_add_fee );
 
-			var data = {
-				action   : 'woocommerce_add_order_fee',
-				order_id : woocommerce_admin_meta_boxes.post_id,
-				dataType : 'json',
-				security : woocommerce_admin_meta_boxes.order_item_nonce
-			};
+			if ( value != null ) {
+				wc_meta_boxes_order_items.block();
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				if ( response.success ) {
-					$( 'table.woocommerce_order_items tbody#order_fee_line_items' ).append( response.data.html );
-				} else {
-					window.alert( response.data.error );
-				}
-				wc_meta_boxes_order_items.unblock();
-			});
+				var data = {
+					action  : 'woocommerce_add_order_fee',
+					dataType: 'json',
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					security: woocommerce_admin_meta_boxes.order_item_nonce,
+					amount  : value
+				};
 
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					if ( response.success ) {
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.unblock();
+							wc_meta_boxes_order_items.stupidtable.init();
+					} else {
+						window.alert( response.data.error );
+					}
+					wc_meta_boxes_order_items.unblock();
+				});
+			}
 			return false;
 		},
 

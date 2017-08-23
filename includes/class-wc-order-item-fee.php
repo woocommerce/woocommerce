@@ -18,12 +18,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
 		'tax_class'  => '',
 		'tax_status' => 'taxable',
+		'amount'     => '',
 		'total'      => '',
 		'total_tax'  => '',
 		'taxes'      => array(
@@ -39,8 +41,9 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return array
 	 */
 	protected function get_tax_class_costs( $order ) {
-		$costs                = array_fill_keys( $order->get_items_tax_classes(), 0 );
-		$costs['non-taxable'] = 0;
+		$order_item_tax_classes = $order->get_items_tax_classes();
+		$costs                  = array_fill_keys( $order_item_tax_classes, 0 );
+		$costs['non-taxable']   = 0;
 
 		foreach ( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) as $item ) {
 			if ( 0 > $item->get_total() ) {
@@ -49,7 +52,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			if ( 'taxable' !== $item->get_tax_status() ) {
 				$costs['non-taxable'] += $item->get_total();
 			} elseif ( 'inherit' === $item->get_tax_class() ) {
-				$costs[ reset( $order->get_items_tax_classes() ) ] += $item->get_total();
+				$inherit_class = reset( $order_item_tax_classes );
+				$costs[ $inherit_class ] += $item->get_total();
 			} else {
 				$costs[ $item->get_tax_class() ] += $item->get_total();
 			}
@@ -70,7 +74,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		}
 		// Use regular calculation unless the fee is negative.
 		if ( 0 <= $this->get_total() ) {
-			return parent::calculate_taxes();
+			return parent::calculate_taxes( $calculate_tax_for );
 		}
 		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
 			// Apportion taxes to order items, shipping, and fees.
@@ -100,6 +104,16 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Set fee amount.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_amount( $value ) {
+		$this->set_prop( 'amount', wc_format_decimal( $value ) );
+	}
 
 	/**
 	 * Set tax class.
@@ -172,6 +186,16 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Get fee amount.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_amount( $context = 'view' ) {
+		return $this->get_prop( 'amount', $context );
+	}
 
 	/**
 	 * Get order item name.
