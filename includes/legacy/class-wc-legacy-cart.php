@@ -58,7 +58,7 @@ abstract class WC_Legacy_Cart {
 	 * @param mixed  $value Value to set.
 	 */
 	public function __isset( $name ) {
-		if ( array_key_exists( $name, $cart_session_data ) ) {
+		if ( array_key_exists( $name, $cart_session_data ) || 'fees' === $name ) {
 			return true;
 		}
 		return false;
@@ -114,6 +114,8 @@ abstract class WC_Legacy_Cart {
 				return $this->get_cart_contents_weight();
 			case 'cart_contents_count' :
 				return $this->get_cart_contents_count();
+			case 'fees' :
+				return $this->fees_api->get_fees();
 			case 'tax' :
 				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
@@ -176,6 +178,9 @@ abstract class WC_Legacy_Cart {
 				break;
 			case 'coupon_discount_tax_amounts' :
 				$this->set_coupon_discount_tax_totals( $value );
+				break;
+			case 'fees' :
+				$this->fees_api->set_fees( $value );
 				break;
 			default :
 				$this->$name = $value;
