@@ -1701,8 +1701,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function calculate_fees() {
 		do_action( 'woocommerce_cart_calculate_fees', $this );
-
-		$this->add_fee( 'Test', -100 );
 	}
 
 	/**
