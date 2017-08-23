@@ -103,7 +103,7 @@ class WC_Admin_Reports {
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 					"most_stocked" => array(
-						'title'       => __( 'Most Stocked', 'woocommerce' ),
+						'title'       => __( 'Most stocked', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
@@ -113,8 +113,8 @@ class WC_Admin_Reports {
 			'products'     => array(
 				'title'  => __( 'Products', 'woocommerce' ),
 				'reports' => array(
-					"downloads" => array(
-						'title'       => __( 'Product Downloads', 'woocommerce' ),
+					'downloads' => array(
+						'title'       => __( 'Product downloads', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => false,
 						'callback'    => array( __CLASS__, 'get_report' ),
