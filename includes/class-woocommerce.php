@@ -5,7 +5,7 @@
  * @author   Automattic
  * @category API
  * @package  WooCommerce
- * @since    3.3.0
+ * @since    3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
