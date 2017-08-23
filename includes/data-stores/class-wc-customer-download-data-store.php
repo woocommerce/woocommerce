@@ -283,7 +283,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function update_download_id( $product_id, $old_id, $new_id ) {
 		global $wpdb;
 
-		wc_deprecated_function( 'update_download_id', '3.3' );
+		wc_deprecated_function( __METHOD__, '3.3' );
 
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
