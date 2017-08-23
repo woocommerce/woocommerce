@@ -45,13 +45,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * An array of fees.
-	 *
-	 * @var array
-	 */
-	public $fees = array();
-
-	/**
 	 * Are prices in the cart displayed inc or excl tax.
 	 *
 	 * @var string
@@ -102,10 +95,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $session;
 
 	/**
+	 * Reference to the cart fees API class.
+	 *
+	 * @var WC_Cart_Fees
+	 */
+	protected $fees_api;
+
+	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
 		$this->session          = new WC_Cart_Session( $this );
+		$this->fees_api         = new WC_Cart_Fees( $this );
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
@@ -609,7 +610,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_totals     = array();
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
-		$this->fees                       = array();
 		$this->totals                     = $this->default_totals;
 
 		if ( $clear_persistent_cart ) {
@@ -1695,61 +1695,54 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Add additional fee to the cart.
+	 * Trigger an action so 3rd parties can add custom fees.
 	 *
-	 * Fee is an amount of money charged for a particular piece of work
-	 * or for a particular right or service, and not supposed to be negative.
+	 * @since 2.0.0
+	 */
+	public function calculate_fees() {
+		do_action( 'woocommerce_cart_calculate_fees', $this );
+	}
+
+	/**
+	 * Return reference to fees API.
+	 *
+	 * @since  3.2.0
+	 * @return WC_Cart_Fees
+	 */
+	public function fees_api() {
+		return $this->fees_api;
+	}
+
+	/**
+	 * Add additional fee to the cart.
 	 *
 	 * This method should be called on a callback attached to the
 	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
 	 * persist.
 	 *
+	 * @uses WC_Cart_Fees::add_fee
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
 	 * @param bool   $taxable   Is the fee taxable? (default: false).
 	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-		$new_fee_id = sanitize_title( $name );
-
-		// Only add each fee once.
-		foreach ( $this->fees as $fee ) {
-			if ( $fee->id === $new_fee_id ) {
-				return;
-			}
-		}
-
-		$new_fee            = new stdClass();
-		$new_fee->id        = $new_fee_id;
-		$new_fee->name      = esc_attr( $name );
-		$new_fee->amount    = (float) esc_attr( $amount );
-		$new_fee->tax_class = $tax_class;
-		$new_fee->taxable   = $taxable ? true : false;
-		$new_fee->tax       = 0;
-		$new_fee->tax_data  = array();
-		$this->fees[]       = $new_fee;
+		$this->fees_api()->add_fee( array(
+			'name'      => $name,
+			'amount'    => (float) $amount,
+			'taxable'   => $taxable,
+			'tax_class' => $tax_class,
+		) );
 	}
 
 	/**
-	 * Get fees.
+	 * Return all added fees from the Fees API.
 	 *
+	 * @uses WC_Cart_Fees::get_fees
 	 * @return array
 	 */
 	public function get_fees() {
-		return array_filter( (array) $this->fees );
-	}
-
-	/**
-	 * Calculate fees.
-	 */
-	public function calculate_fees() {
-		$this->fees = array();
-		$this->set_fee_total( 0 );
-		$this->set_fee_tax( 0 );
-		$this->set_fee_taxes( array() );
-
-		// Fire an action where developers can add their fees.
-		do_action( 'woocommerce_cart_calculate_fees', $this );
+		return $this->fees_api()->get_fees();
 	}
 
 	/**
