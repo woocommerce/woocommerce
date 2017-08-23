@@ -1324,17 +1324,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$cart_total    += $item->get_total();
 		}
 
-		// Sum fee costs.
-		foreach ( $this->get_fees() as $item ) {
-			$fee_total += $item->get_total();
-		}
-
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
 			$shipping_total += $shipping->get_total();
 		}
 
 		$this->set_shipping_total( $shipping_total );
+
+		// Sum fee costs.
+		foreach ( $this->get_fees() as $item ) {
+			$amount = $item->get_amount();
+
+			if ( 0 > $amount ) {
+				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
+
+				if ( $item->get_total() < $max_discount ) {
+					$item->set_total( $max_discount );
+				}
+			}
+
+			$fee_total += $item->get_total();
+		}
 
 		// Calculate taxes for items, shipping, discounts.
 		if ( $and_taxes ) {

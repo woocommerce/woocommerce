@@ -401,8 +401,9 @@ class WC_Checkout {
 			$item->legacy_fee_key = $fee_key; // @deprecated For legacy actions.
 			$item->set_props( array(
 				'name'      => $fee->name,
-				'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-				'total'     => $fee->amount,
+				'tax_class' => $fee->taxable ? $fee->tax_class: 0,
+				'amount'    => $fee->amount,
+				'total'     => $fee->total,
 				'total_tax' => $fee->tax,
 				'taxes'     => array(
 					'total' => $fee->tax_data,
