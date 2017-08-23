@@ -66,7 +66,7 @@ class WC_Helper_API {
 		$request_uri  = parse_url( $url, PHP_URL_PATH );
 		$query_string = parse_url( $url, PHP_URL_QUERY );
 
-		if ( $query_string ) {
+		if ( is_string( $query_string ) ) {
 			$request_uri .= '?' . $query_string;
 		}
 
