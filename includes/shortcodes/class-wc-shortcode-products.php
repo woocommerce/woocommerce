@@ -83,11 +83,10 @@ class WC_Shortcode_Products {
 	 * Get the shortcode.
 	 *
 	 * @since  3.2.0
-	 * @param  array $atts Shortcode attributes.
 	 * @return string
 	 */
-	public static function get_shortcode( $atts ) {
-		return self::product_loop( $query_args, $atts );
+	public static function get_shortcode() {
+		return $this->product_loop();
 	}
 
 	/**
@@ -129,7 +128,7 @@ class WC_Shortcode_Products {
 	 * @since  3.2.0
 	 * @return string
 	 */
-	protected static function product_loop() {
+	protected function product_loop() {
 		global $woocommerce_loop;
 
 		$columns                     = absint( $this->attributes['columns'] );
