@@ -74,6 +74,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Is this coupon added through the woocommerce_get_shop_coupon_data filter?
+	 *
+	 * @var bool
+	 */
+	protected $is_virtual = false;
+
+	/**
 	 * Coupon constructor. Loads coupon data.
 	 * @param mixed $data Coupon data, object, ID or code.
 	 */
@@ -690,8 +697,20 @@ class WC_Coupon extends WC_Legacy_Coupon {
 					break;
 			}
 		}
-		$this->set_code( $code );
 		$this->set_props( $coupon );
+		$this->set_code( $code );
+		$this->set_id( 0 );
+		$this->is_virtual = true;
+	}
+
+	/**
+	 * If the filter is added through the woocommerce_get_shop_coupon_data filter, it's virtual and not in the DB.
+	 *
+	 * @since 3.2.0
+	 * @return boolean
+	 */
+	public function is_virtual() {
+		return (bool) $this->is_virtual;
 	}
 
 	/**
