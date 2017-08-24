@@ -46,8 +46,9 @@ class WC_Shortcode_Products {
 	 *
 	 * @since 3.2.0
 	 * @param array $attributes Shortcode attributes.
+	 * @param array $loop_name  Loop name.
 	 */
-	public function __construct( $attributes = array() ) {
+	public function __construct( $attributes = array(), $loop_name = 'products' ) {
 		$this->attributes = shortcode_atts( array(
 			'columns' => '4',
 			'orderby' => 'title',
@@ -57,6 +58,7 @@ class WC_Shortcode_Products {
 		), $attributes, $this->loop_name );
 
 		$this->query_args = $this->parse_query_args();
+		$this->loop_name  = $loop_name;
 	}
 
 	/**
@@ -77,6 +79,16 @@ class WC_Shortcode_Products {
 	 */
 	public function get_query_args() {
 		return $this->query_args;
+	}
+
+	/**
+	 * Get loop name.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	public function get_loop_name() {
+		return $this->loop_name;
 	}
 
 	/**

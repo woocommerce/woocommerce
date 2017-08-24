@@ -93,6 +93,15 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: WC_Shortcode_Products::get_loop_name.
+	 */
+	public function test_loop_name() {
+		$shortcode = new WC_Shortcode_Products();
+
+		$this->assertEquals( 'products', $shortcode->get_loop_name() );
+	}
+
+	/**
 	 * Test: WC_Shortcode_Products::get_content.
 	 */
 	public function test_get_content() {
