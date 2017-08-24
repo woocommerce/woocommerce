@@ -47,7 +47,7 @@ class WC_Shortcode_Products {
 	 * @since 3.2.0
 	 * @param array $attributes Shortcode attributes.
 	 */
-	public function __construct( $attributes ) {
+	public function __construct( $attributes = array() ) {
 		$this->attributes = shortcode_atts( array(
 			'columns' => '4',
 			'orderby' => 'title',
@@ -57,16 +57,6 @@ class WC_Shortcode_Products {
 		), $attributes, $this->loop_name );
 
 		$this->query_args = $this->parse_query_args();
-	}
-
-	/**
-	 * Get query args.
-	 *
-	 * @since  3.2.0
-	 * @return array
-	 */
-	public function get_query_args() {
-		return $this->query_args;
 	}
 
 	/**
@@ -80,12 +70,22 @@ class WC_Shortcode_Products {
 	}
 
 	/**
+	 * Get query args.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	public function get_query_args() {
+		return $this->query_args;
+	}
+
+	/**
 	 * Get shortcode content.
 	 *
 	 * @since  3.2.0
 	 * @return string
 	 */
-	public static function get_content() {
+	public function get_content() {
 		return $this->product_loop();
 	}
 
