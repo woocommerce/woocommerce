@@ -565,7 +565,7 @@ class WC_Query {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-		$meta_query['price_filter']  = $this->price_filter_meta_query();
+		$meta_query['price_filter'] = $this->price_filter_meta_query();
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}
 
