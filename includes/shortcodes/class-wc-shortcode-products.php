@@ -102,10 +102,13 @@ class WC_Shortcode_Products {
 			'ignore_sticky_posts' => 1,
 			'orderby'             => $this->attributes['orderby'],
 			'order'               => $this->attributes['order'],
-			'posts_per_page'      => -1,
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
 		);
+
+		// @codingStandardsIgnoreStart
+		$this->query_args['posts_per_page'] = -1;
+		$this->query_args['meta_query']     = WC()->query->get_meta_query();
+		$this->query_args['tax_query']      = WC()->query->get_tax_query();
+		// @codingStandardsIgnoreEnd
 
 		if ( ! empty( $this->attributes['skus'] ) ) {
 			$this->query_args['meta_query'][] = array(
