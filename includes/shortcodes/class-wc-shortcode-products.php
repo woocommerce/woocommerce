@@ -80,12 +80,12 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get the shortcode.
+	 * Get shortcode content.
 	 *
 	 * @since  3.2.0
 	 * @return string
 	 */
-	public static function get_shortcode() {
+	public static function get_content() {
 		return $this->product_loop();
 	}
 

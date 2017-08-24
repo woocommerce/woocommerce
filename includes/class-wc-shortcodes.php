@@ -330,38 +330,9 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function products( $atts ) {
-		$atts = shortcode_atts( array(
-			'columns' => '4',
-			'orderby' => 'title',
-			'order'   => 'asc',
-			'ids'     => '',
-			'skus'    => '',
-		), $atts, 'products' );
+		$shortcode = new WC_Shortcode_Products( $atts );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'posts_per_page'      => -1,
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
-
-		if ( ! empty( $atts['skus'] ) ) {
-			$query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
-				'compare' => 'IN',
-			);
-		}
-
-		if ( ! empty( $atts['ids'] ) ) {
-			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
-		}
-
-		return self::product_loop( $query_args, $atts, 'products' );
+		return $shortcode->get_content();
 	}
 
 	/**
