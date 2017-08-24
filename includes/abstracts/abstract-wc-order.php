@@ -983,21 +983,46 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since  3.2.0
 	 */
 	protected function recalculate_coupons() {
-		$discounts = new WC_Discounts( $this );
-		$coupons   = $this->get_items( 'coupon' );
-
-		foreach ( $coupons as $coupon ) {
-			$coupon_object = new WC_Coupon( $coupon->get_code() );
-			$discounts->apply_coupon( $coupon_object );
-		}
-
-		$this->set_coupon_discount_amounts( $discounts );
-
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
 			$item->set_total_tax( $item->get_subtotal_tax() );
 		}
+
+		$discounts = new WC_Discounts( $this );
+
+		foreach ( $this->get_items( 'coupon' ) as $coupon_item ) {
+			$coupon_code   = $coupon_item->get_code();
+			$coupon_id     = wc_get_coupon_id_by_code( $coupon_code );
+			$coupon_object = false;
+
+			if ( $coupon_id ) {
+				$coupon_object = new WC_Coupon( $coupon_id );
+			} elseif ( $original_coupon_data = $coupon_item->get_meta( 'coupon_data', true ) ) {
+				$coupon_object = new WC_Coupon();
+				$coupon_object->set_props( $original_coupon_data );
+				$coupon_object->set_code( $coupon_code );
+
+				// If there is no amount, set it to the given discount amount.
+				if ( ! $coupon_object->get_amount() ) {
+					$coupon_object->set_amount( $coupon_item->get_discount() );
+					$coupon_object->set_discount_type( 'fixed_cart' );
+				}
+			}
+
+			/**
+			 * Allow developers to filter this coupon before it get's re-applied to the order.
+			 *
+			 * @since 3.2.0
+			 */
+			$coupon_object = apply_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
+
+			if ( $coupon_object ) {
+				$discounts->apply_coupon( $coupon_object );
+			}
+		}
+
+		$this->set_coupon_discount_amounts( $discounts );
 
 		// Add discounts to line items.
 		if ( $item_discounts = $discounts->get_discounts_by_item() ) {
