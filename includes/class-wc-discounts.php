@@ -18,6 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Discounts {
 
 	/**
+	 * Reference to cart or order object.
+	 *
+	 * @since 3.2.0
+	 * @var array
+	 */
+	protected $object;
+
+	/**
 	 * An array of items to discount.
 	 *
 	 * @var array
@@ -37,10 +45,12 @@ class WC_Discounts {
 	 * @param array $object Cart or order object.
 	 */
 	public function __construct( $object = array() ) {
-		if ( is_a( $object, 'WC_Cart' ) ) {
-			$this->set_items_from_cart( $object );
-		} elseif ( is_a( $object, 'WC_Order' ) ) {
-			$this->set_items_from_order( $object );
+		$this->object = $object;
+
+		if ( is_a( $this->object, 'WC_Cart' ) ) {
+			$this->set_items_from_cart( $this->object );
+		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
+			$this->set_items_from_order( $this->object );
 		}
 	}
 
@@ -332,7 +342,7 @@ class WC_Discounts {
 			// Run coupon calculations.
 			$discount = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
 
-			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
@@ -377,7 +387,7 @@ class WC_Discounts {
 			// Run coupon calculations.
 			$discount = $amount * $item->quantity;
 
-			if ( has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
+			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
@@ -487,7 +497,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_exists( $coupon ) {
-		if ( ! $coupon->get_id() ) {
+		if ( ! $coupon->get_id() && ! $coupon->is_virtual() ) {
 			/* translators: %s: coupon code */
 			throw new Exception( sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $coupon->get_code() ), 105 );
 		}
