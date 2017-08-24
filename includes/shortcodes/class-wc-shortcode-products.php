@@ -56,7 +56,7 @@ class WC_Shortcode_Products {
 			'skus'    => '',
 		), $attributes, $this->loop_name );
 
-		$this->query_args = $this->get_query_args();
+		$this->query_args = $this->parse_query_args();
 	}
 
 	/**
