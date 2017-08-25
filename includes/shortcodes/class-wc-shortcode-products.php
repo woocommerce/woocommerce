@@ -139,6 +139,32 @@ class WC_Shortcode_Products {
 		// @codingStandardsIgnoreEnd
 
 		// SKUs.
+		$this->set_skus_query_args( $query_args );
+
+		// IDs.
+		$this->set_ids_query_args( $query_args );
+
+		// Set specific types query args.
+		if ( method_exists( $this, "set_{$this->type}_query_args" ) ) {
+			$this->{"set_{$this->type}_query_args"}( $query_args );
+		}
+
+		// Attributes.
+		$this->set_attributes_query_args( $query_args );
+
+		// Categories.
+		$this->set_categories_query_args( $query_args );
+
+		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
+	}
+
+	/**
+	 * Set skus query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_skus_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['skus'] ) ) {
 			$skus = array_map( 'trim', explode( ',', $this->attributes['skus'] ) );
 			$query_args['meta_query'][] = array(
@@ -147,8 +173,15 @@ class WC_Shortcode_Products {
 				'compare' => 1 === count( $skus ) ? '=' : 'IN',
 			);
 		}
+	}
 
-		// IDs.
+	/**
+	 * Set ids query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_ids_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['ids'] ) ) {
 			$ids = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
 
@@ -158,32 +191,15 @@ class WC_Shortcode_Products {
 				$query_args['post__in'] = $ids;
 			}
 		}
+	}
 
-		// On sale.
-		if ( 'sale_products' === $this->type ) {
-			$query_args['post__in'] = array_merge( array( 0 ), wc_get_product_ids_on_sale() );
-		}
-
-		// Best selling.
-		if ( 'best_selling_products' === $this->type ) {
-			// @codingStandardsIgnoreStart
-			$query_args['meta_key'] = 'total_sales';
-			// @codingStandardsIgnoreEnd
-			$query_args['order']    = 'DESC';
-			$query_args['orderby']  = 'meta_value_num';
-		}
-
-		// Featured products.
-		if ( 'featured_products' === $this->type ) {
-			$query_args['tax_query'][] = array(
-				'taxonomy' => 'product_visibility',
-				'terms'    => 'featured',
-				'field'    => 'name',
-				'operator' => 'IN',
-			);
-		}
-
-		// Attributes.
+	/**
+	 * Set attributes query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_attributes_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['filter'] ) ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] ),
@@ -191,8 +207,15 @@ class WC_Shortcode_Products {
 				'field'    => 'slug',
 			);
 		}
+	}
 
-		// Categories.
+	/**
+	 * Set categories query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
 			$query_args['orderby'] = $ordering_args['orderby'];
@@ -211,8 +234,64 @@ class WC_Shortcode_Products {
 				'operator' => $this->attributes['operator'],
 			);
 		}
+	}
 
-		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
+	/**
+	 * Set sale products query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_sale_products_query_args( &$query_args ) {
+		$query_args['post__in'] = array_merge( array( 0 ), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * Set best selling products query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_best_selling_products_query_args( &$query_args ) {
+		// @codingStandardsIgnoreStart
+		$query_args['meta_key'] = 'total_sales';
+		// @codingStandardsIgnoreEnd
+		$query_args['order']    = 'DESC';
+		$query_args['orderby']  = 'meta_value_num';
+	}
+
+	/**
+	 * Set featured products query args.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_featured_products_query_args( &$query_args ) {
+		$query_args['tax_query'][] = array(
+			'taxonomy' => 'product_visibility',
+			'terms'    => 'featured',
+			'field'    => 'name',
+			'operator' => 'IN',
+		);
+	}
+
+	/**
+	 * Get wrapper classes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $columns Number of columns.
+	 * @return array
+	 */
+	protected function get_wrapper_classes( $columns ) {
+		$classes = array( 'woocommerce' );
+
+		if ( 'product' !== $this->type ) {
+			$classes[] = 'columns-' . $columns;
+		}
+
+		$classes[] = $this->attributes['class'];
+
+		return $classes;
 	}
 
 	/**
@@ -225,6 +304,7 @@ class WC_Shortcode_Products {
 		global $woocommerce_loop;
 
 		$columns                     = absint( $this->attributes['columns'] );
+		$classes                     = $this->get_wrapper_classes( $columns );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $this->type;
 		$transient_name              = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
@@ -271,12 +351,6 @@ class WC_Shortcode_Products {
 
 		woocommerce_reset_loop();
 		wp_reset_postdata();
-
-		$classes = array( 'woocommerce' );
-		if ( 'product' !== $this->type ) {
-			$classes[] = 'columns-' . $columns;
-		}
-		$classes[] = $this->attributes['class'];
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
 	}
