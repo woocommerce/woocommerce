@@ -969,12 +969,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
+				$this->recalculate_coupons();
 				break;
 			}
 		}
-
-		// Reset line item totals.
-		$this->recalculate_coupons();
 	}
 
 	/**
@@ -1000,8 +998,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( $coupon_id ) {
 				$coupon_object = new WC_Coupon( $coupon_id );
 
-			// If we don't have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
 			} elseif ( $original_coupon_data = $coupon_item->get_meta( 'coupon_data', true ) ) {
+
+				// If we do not have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
 				$coupon_object = new WC_Coupon();
 				$coupon_object->set_props( $original_coupon_data );
 				$coupon_object->set_code( $coupon_code );
