@@ -36,7 +36,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_product_categories';
 		$this->widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_product_categories';
-		$this->widget_name        = __( 'WooCommerce product categories', 'woocommerce' );
+		$this->widget_name        = __( 'Product Categories', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
