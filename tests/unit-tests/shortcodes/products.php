@@ -224,6 +224,29 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected7, $shortcode7->get_query_args() );
+
+		// top_rated_products shortcode.
+		$shortcode8 = new WC_Shortcode_Products( array(
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'title',
+			'order'    => 'ASC',
+			'category' => '',
+			'operator' => 'IN',
+		), 'top_rated_products' );
+		$expected8  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'title',
+			'order'               => 'ASC',
+			'posts_per_page'      => 12,
+			'meta_query'          => $meta_query,
+			'tax_query'           => $tax_query,
+		);
+
+		$this->assertEquals( $expected8, $shortcode8->get_query_args() );
 	}
 
 	/**
@@ -240,8 +263,24 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 	 */
 	public function test_get_content() {
 		$shortcode = new WC_Shortcode_Products();
-		$results   = $shortcode->get_content();
+		$result    = $shortcode->get_content();
 
-		$this->assertTrue( ! empty( $results ) );
+		$this->assertTrue( ! empty( $result ) );
+	}
+
+	/**
+	 * Test: WC_Shortcode_Products::order_by_rating_post_clauses.
+	 */
+	public function test_order_by_rating_post_clauses() {
+		global $wpdb;
+
+		$expected = array(
+			'where'   => " AND $wpdb->commentmeta.meta_key = 'rating' ",
+			'join'    => "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)",
+			'orderby' => "$wpdb->commentmeta.meta_value DESC",
+			'groupby' => "$wpdb->posts.ID",
+		);
+
+		$this->assertEquals( $expected, WC_Shortcode_Products::order_by_rating_post_clauses( array( 'where' => '', 'join' => '' ) ) );
 	}
 }

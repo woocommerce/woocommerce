@@ -206,7 +206,14 @@ class WC_Shortcode_Products {
 		$products                    = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
-			$products = new WP_Query( $this->query_args );
+			if ( 'top_rated_products' === $this->type ) {
+				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
+				$products = new WP_Query( $this->query_args );
+				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
+			} else {
+				$products = new WP_Query( $this->query_args );
+			}
+
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
 		}
 
@@ -247,5 +254,23 @@ class WC_Shortcode_Products {
 		$classes[] = $this->attributes['class'];
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
+	}
+
+	/**
+	 * Order by rating.
+	 *
+	 * @since  3.2.0
+	 * @param  array $args Query args.
+	 * @return array
+	 */
+	public static function order_by_rating_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['where']   .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
+		$args['join']    .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
+		$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
+		$args['groupby'] = "$wpdb->posts.ID";
+
+		return $args;
 	}
 }

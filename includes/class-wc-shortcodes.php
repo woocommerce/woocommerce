@@ -454,35 +454,18 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function top_rated_products( $atts ) {
-		$atts = shortcode_atts( array(
+		$atts = array_merge( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
-			'order'    => 'asc',
-			'category' => '',  // Slugs
-			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'top_rated_products' );
+			'order'    => 'ASC',
+			'category' => '',
+			'operator' => 'IN',
+		), (array) $atts );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'posts_per_page'      => $atts['per_page'],
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		$shortcode = new WC_Shortcode_Products( $atts, 'top_rated_products' );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-
-		$return = self::product_loop( $query_args, $atts, 'top_rated_products' );
-
-		remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-
-		return $return;
+		return $shortcode->get_content();
 	}
 
 	/**
@@ -641,20 +624,14 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * woocommerce_order_by_rating_post_clauses function.
+	 * Order by rating.
 	 *
-	 * @param array $args
-	 * @return array
+	 * @deprecated 3.2.0 Use WC_Shortcode_Products::order_by_rating_post_clauses().
+	 * @param      array $args Query args.
+	 * @return     array
 	 */
 	public static function order_by_rating_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['where']   .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
-		$args['join']    .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID               = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
-		$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
-		$args['groupby'] = "$wpdb->posts.ID";
-
-		return $args;
+		return WC_Shortcode_Products::order_by_rating_post_clauses( $args );
 	}
 
 	/**
