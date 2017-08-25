@@ -996,14 +996,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$coupon_id     = wc_get_coupon_id_by_code( $coupon_code );
 			$coupon_object = false;
 
+			// If we have a coupon ID (loaded via wc_get_coupon_id_by_code) we can simply load the new coupon object using the ID.
 			if ( $coupon_id ) {
 				$coupon_object = new WC_Coupon( $coupon_id );
+
+			// If we don't have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
 			} elseif ( $original_coupon_data = $coupon_item->get_meta( 'coupon_data', true ) ) {
 				$coupon_object = new WC_Coupon();
 				$coupon_object->set_props( $original_coupon_data );
 				$coupon_object->set_code( $coupon_code );
 
-				// If there is no amount, set it to the given discount amount.
+				// If there is no coupon amount (maybe dynamic?), set it to the given **discount** amount so the coupon's same value is applied.
 				if ( ! $coupon_object->get_amount() ) {
 					$coupon_object->set_amount( $coupon_item->get_discount() );
 					$coupon_object->set_discount_type( 'fixed_cart' );
