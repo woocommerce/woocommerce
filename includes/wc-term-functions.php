@@ -177,9 +177,6 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
 /**
  * WooCommerce Dropdown categories.
  *
- * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
- * We use a custom walker, just like WordPress does.
- *
  * @param array $args Args to control display of dropdown.
  * @return string
  */
@@ -212,7 +209,9 @@ function wc_product_dropdown_categories( $args = array() ) {
 }
 
 /**
- * Walk the Product Categories.
+ * Custom walker for Product Categories.
+ *
+ * Previously used by wc_product_dropdown_categories, but wp_dropdown_categories has been fixed in core.
  *
  * @return mixed
  */
