@@ -136,24 +136,6 @@ class WC_Shortcode_Products {
 		$query_args['tax_query']      = WC()->query->get_tax_query();
 		// @codingStandardsIgnoreEnd
 
-		// Categories.
-		if ( ! empty( $this->attributes['category'] ) ) {
-			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-			$query_args['orderby'] = $ordering_args['orderby'];
-			$query_args['order']   = $ordering_args['order'];
-
-			if ( isset( $ordering_args['meta_key'] ) ) {
-				$query_args['meta_key'] = $ordering_args['meta_key'];
-			}
-
-			$query_args['tax_query'][] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
-				'field'    => 'slug',
-				'operator' => $this->attributes['operator'],
-			);
-		}
-
 		// SKUs.
 		if ( ! empty( $this->attributes['skus'] ) ) {
 			$skus = array_map( 'trim', explode( ',', $this->attributes['skus'] ) );
@@ -178,6 +160,31 @@ class WC_Shortcode_Products {
 		// On sale.
 		if ( 'sale_products' === $this->type ) {
 			$query_args['post__in'] = array_merge( array( 0 ), wc_get_product_ids_on_sale() );
+		}
+
+		// Best selling.
+		if ( 'best_selling_products' === $this->type ) {
+			$query_args['meta_key'] = 'total_sales';
+			$query_args['order']    = 'DESC';
+			$query_args['orderby']  = 'meta_value_num';
+		}
+
+		// Categories.
+		if ( ! empty( $this->attributes['category'] ) ) {
+			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+			$query_args['orderby'] = $ordering_args['orderby'];
+			$query_args['order']   = $ordering_args['order'];
+
+			if ( isset( $ordering_args['meta_key'] ) ) {
+				$query_args['meta_key'] = $ordering_args['meta_key'];
+			}
+
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
+				'field'    => 'slug',
+				'operator' => $this->attributes['operator'],
+			);
 		}
 
 		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );

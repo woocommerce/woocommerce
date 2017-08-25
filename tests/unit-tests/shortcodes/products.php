@@ -180,7 +180,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected5, $shortcode5->get_query_args() );
 
 		// sale_products shortcode.
-		$shortcode4 = new WC_Shortcode_Products( array(
+		$shortcode6 = new WC_Shortcode_Products( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
@@ -188,7 +188,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'category' => '',
 			'operator' => 'IN',
 		), 'sale_products' );
-		$expected4  = array(
+		$expected6  = array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
@@ -201,7 +201,29 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post__in'            => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
 		);
 
-		$this->assertEquals( $expected4, $shortcode4->get_query_args() );
+		$this->assertEquals( $expected6, $shortcode6->get_query_args() );
+
+		// best_selling_products shortcode.
+		$shortcode7 = new WC_Shortcode_Products( array(
+			'per_page' => '12',
+			'columns'  => '4',
+			'category' => '',
+			'operator' => 'IN',
+		), 'best_selling_products' );
+		$expected7  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'meta_value_num',
+			'order'               => 'DESC',
+			'posts_per_page'      => 12,
+			'meta_query'          => $meta_query,
+			'tax_query'           => $tax_query,
+			'meta_key'            => 'total_sales',
+		);
+
+		$this->assertEquals( $expected7, $shortcode7->get_query_args() );
 	}
 
 	/**

@@ -435,27 +435,16 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function best_selling_products( $atts ) {
-		$atts = shortcode_atts( array(
+		$atts = array_merge( array(
 			'per_page' => '12',
 			'columns'  => '4',
-			'category' => '',  // Slugs
-			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'best_selling_products' );
+			'category' => '',
+			'operator' => 'IN',
+		), (array) $atts );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'meta_key'            => 'total_sales',
-			'orderby'             => 'meta_value_num',
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		$shortcode = new WC_Shortcode_Products( $atts, 'best_selling_products' );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		return self::product_loop( $query_args, $atts, 'best_selling_products' );
+		return $shortcode->get_content();
 	}
 
 	/**
