@@ -18,12 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shortcode_Products {
 
 	/**
-	 * Loop name.
+	 * Shortcode type.
 	 *
 	 * @since 3.2.0
 	 * @var   string
 	 */
-	protected $loop_name = 'products';
+	protected $type = 'products';
 
 	/**
 	 * Attributes.
@@ -46,10 +46,10 @@ class WC_Shortcode_Products {
 	 *
 	 * @since 3.2.0
 	 * @param array $attributes Shortcode attributes.
-	 * @param array $loop_name  Loop name.
+	 * @param array $type       Shortcode type.
 	 */
-	public function __construct( $attributes = array(), $loop_name = 'products' ) {
-		$this->loop_name  = $loop_name;
+	public function __construct( $attributes = array(), $type = 'products' ) {
+		$this->type       = $type;
 		$this->attributes = $this->parse_attributes( $attributes );
 		$this->query_args = $this->parse_query_args();
 	}
@@ -75,13 +75,13 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get loop name.
+	 * Get shortcode type.
 	 *
 	 * @since  3.2.0
 	 * @return array
 	 */
-	public function get_loop_name() {
-		return $this->loop_name;
+	public function get_type() {
+		return $this->type;
 	}
 
 	/**
@@ -111,7 +111,7 @@ class WC_Shortcode_Products {
 			'category' => '',   // Slugs.
 			'operator' => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
 			'class'    => '',
-		), $attributes, $this->loop_name );
+		), $attributes, $this->type );
 	}
 
 	/**
@@ -175,7 +175,7 @@ class WC_Shortcode_Products {
 			}
 		}
 
-		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->loop_name );
+		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
 	}
 
 	/**
@@ -189,8 +189,8 @@ class WC_Shortcode_Products {
 
 		$columns                     = absint( $this->attributes['columns'] );
 		$woocommerce_loop['columns'] = $columns;
-		$woocommerce_loop['name']    = $this->loop_name;
-		$transient_name              = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$woocommerce_loop['name']    = $this->type;
+		$transient_name              = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
@@ -209,7 +209,7 @@ class WC_Shortcode_Products {
 			// Prime caches before grabbing objects.
 			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
 
-			do_action( "woocommerce_shortcode_before_{$this->loop_name}_loop", $this->attributes );
+			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
 			woocommerce_product_loop_start();
 
@@ -220,16 +220,16 @@ class WC_Shortcode_Products {
 
 			woocommerce_product_loop_end();
 
-			do_action( "woocommerce_shortcode_after_{$this->loop_name}_loop", $this->attributes );
+			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 		} else {
-			do_action( "woocommerce_shortcode_{$this->loop_name}_loop_no_results", $this->attributes );
+			do_action( "woocommerce_shortcode_{$this->type}_loop_no_results", $this->attributes );
 		}
 
 		woocommerce_reset_loop();
 		wp_reset_postdata();
 
 		$classes = array( 'woocommerce' );
-		if ( 'product' !== $this->loop_name ) {
+		if ( 'product' !== $this->type ) {
 			$classes[] = 'columns-' . $columns;
 		}
 		$classes[] = $this->attributes['class'];
