@@ -166,7 +166,9 @@ class WC_Shortcode_Products {
 
 		// Best selling.
 		if ( 'best_selling_products' === $this->type ) {
+			// @codingStandardsIgnoreStart
 			$query_args['meta_key'] = 'total_sales';
+			// @codingStandardsIgnoreEnd
 			$query_args['order']    = 'DESC';
 			$query_args['orderby']  = 'meta_value_num';
 		}
@@ -197,7 +199,9 @@ class WC_Shortcode_Products {
 			$query_args['order']   = $ordering_args['order'];
 
 			if ( isset( $ordering_args['meta_key'] ) ) {
+				// @codingStandardsIgnoreStart
 				$query_args['meta_key'] = $ordering_args['meta_key'];
+				// @codingStandardsIgnoreEnd
 			}
 
 			$query_args['tax_query'][] = array(
