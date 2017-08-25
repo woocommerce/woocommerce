@@ -1011,6 +1011,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_object->set_amount( $coupon_item->get_discount() );
 					$coupon_object->set_discount_type( 'fixed_cart' );
 				}
+			} else {
+				// No data? Make a virtual coupon.
+				$coupon_object = new WC_Coupon();
+				$coupon_object->set_code( $coupon_code );
+				$coupon_object->set_amount( $coupon_item->get_discount() );
+				$coupon_object->set_discount_type( 'fixed_cart' );
+				$coupon_object->set_virtual( true );
 			}
 
 			/**
