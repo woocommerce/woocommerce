@@ -24,7 +24,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
 		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->get_id(), '_regular_price', '1000' );
@@ -33,7 +33,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 
 		$coupon = new WC_Coupon;
 		$coupon->set_code( 'test-coupon-1' );
-		$coupon->set_amount( 1 );
+		$coupon->set_amount( 1.00 );
 		$coupon->set_discount_type( 'fixed_cart' );
 		$coupon->save();
 
@@ -64,8 +64,8 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$item = new WC_Order_Item_Coupon();
 		$item->set_props( array(
 			'code'         => 'test-coupon-1',
-			'discount'     => 1.00,
-			'discount_tax' => 0.01,
+			'discount'     => 0.91,
+			'discount_tax' => 0.09,
 		) );
 		$item->save();
 		$order->add_item( $item );
@@ -106,7 +106,11 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		foreach ( $this->objects['coupons'] + $this->objects['products'] as $object ) {
+		foreach ( $this->objects['coupons'] as $object ) {
+			$object->delete( true );
+		}
+
+		foreach ( $this->objects['products'] as $object ) {
 			$object->delete( true );
 		}
 
@@ -117,6 +121,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$this->objects = array();
+		wp_cache_flush();
 	}
 
 	/**
@@ -142,15 +147,18 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->tearDown();
 		$this->setUp();
 
+		$order_id = $this->objects['order']->get_id();
+		$order    = wc_get_order( $order_id );
+
+		// Check it's expected.
+		$this->assertEquals( 'shop_order', $order->get_type() );
+		$this->assertEquals( '799', $order->get_total(), $order->get_total() );
+
 		// Do the above tests in reverse.
 		$order->remove_coupon( 'test-coupon-1' );
 		$this->assertEquals( '800', $order->get_total(), $order->get_total() );
 		$order->remove_coupon( 'this-is-a-virtal-coupon' );
 		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
-
-		// Reset.
-		$this->tearDown();
-		$this->setUp();
 	}
 
 	/**
