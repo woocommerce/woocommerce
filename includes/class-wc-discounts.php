@@ -100,6 +100,11 @@ class WC_Discounts {
 			$item->product       = $order_item->get_product();
 			$item->quantity      = $order_item->get_quantity();
 			$item->price         = wc_add_number_precision_deep( $order_item->get_total() );
+
+			if ( $order->get_prices_include_tax() ) {
+				$item->price += wc_add_number_precision_deep( $order_item->get_total_tax() );
+			}
+
 			$this->items[ $order_item->get_id() ] = $item;
 		}
 
