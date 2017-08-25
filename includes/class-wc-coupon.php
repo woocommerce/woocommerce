@@ -46,6 +46,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
 		'used_by'                     => array(),
+		'virtual'                     => false,
 	);
 
 	// Coupon message codes
@@ -72,13 +73,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @var string
 	 */
 	protected $cache_group = 'coupons';
-
-	/**
-	 * Is this coupon added through the woocommerce_get_shop_coupon_data filter?
-	 *
-	 * @var bool
-	 */
-	protected $is_virtual = false;
 
 	/**
 	 * Coupon constructor. Loads coupon data.
@@ -359,6 +353,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_used_by( $context = 'view' ) {
 		return $this->get_prop( 'used_by', $context );
+	}
+
+	/**
+	 * If the filter is added through the woocommerce_get_shop_coupon_data filter, it's virtual and not in the DB.
+	 *
+	 * @since 3.2.0
+	 * @param  string $context
+	 * @return boolean
+	 */
+	public function get_virtual( $context = 'view' ) {
+		return (bool) $this->get_prop( 'virtual', $context );
 	}
 
 	/**
@@ -649,6 +654,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_prop( 'used_by', array_filter( $used_by ) );
 	}
 
+	/**
+	 * Set coupon virtual state.
+	 * @param boolean $virtual Whether it is virtual or not.
+	 * @since 3.2.0
+	 */
+	public function set_virtual( $virtual ) {
+		$this->set_prop( 'virtual', (bool) $virtual );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Other Actions
@@ -700,17 +714,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_props( $coupon );
 		$this->set_code( $code );
 		$this->set_id( 0 );
-		$this->is_virtual = true;
-	}
-
-	/**
-	 * If the filter is added through the woocommerce_get_shop_coupon_data filter, it's virtual and not in the DB.
-	 *
-	 * @since 3.2.0
-	 * @return boolean
-	 */
-	public function is_virtual() {
-		return (bool) $this->is_virtual;
+		$this->set_virtual( true );
 	}
 
 	/**

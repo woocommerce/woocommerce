@@ -497,7 +497,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_exists( $coupon ) {
-		if ( ! $coupon->get_id() && ! $coupon->is_virtual() ) {
+		if ( ! $coupon->get_id() && ! $coupon->get_virtual() ) {
 			/* translators: %s: coupon code */
 			throw new Exception( sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $coupon->get_code() ), 105 );
 		}

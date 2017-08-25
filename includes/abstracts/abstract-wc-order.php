@@ -1005,6 +1005,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object = new WC_Coupon();
 				$coupon_object->set_props( $original_coupon_data );
 				$coupon_object->set_code( $coupon_code );
+				$coupon_object->set_virtual( true );
 
 				// If there is no coupon amount (maybe dynamic?), set it to the given **discount** amount so the coupon's same value is applied.
 				if ( ! $coupon_object->get_amount() ) {
