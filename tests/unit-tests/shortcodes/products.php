@@ -246,13 +246,41 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'tax_query'           => $tax_query,
 		);
 
-		$this->assertEquals( $expected8, $shortcode8->get_query_args() );
+		// featured_products shortcode.
+		$shortcode9 = new WC_Shortcode_Products( array(
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'date',
+			'order'    => 'DESC',
+			'category' => '',
+			'operator' => 'IN',
+		), 'featured_products' );
+		$expected9  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'date',
+			'order'               => 'DESC',
+			'posts_per_page'      => 12,
+			'meta_query'          => $meta_query,
+			'tax_query'           => array_merge( $tax_query, array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'name',
+					'terms'    => 'featured',
+					'operator' => 'IN',
+				),
+			) ),
+		);
+
+		$this->assertEquals( $expected9, $shortcode9->get_query_args() );
 	}
 
 	/**
 	 * Test: WC_Shortcode_Products::get_type.
 	 */
-	public function test_loop_name() {
+	public function test_get_type() {
 		$shortcode = new WC_Shortcode_Products();
 
 		$this->assertEquals( 'products', $shortcode->get_type() );

@@ -475,38 +475,18 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function featured_products( $atts ) {
-		$atts = shortcode_atts( array(
+		$atts = array_merge( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
-			'order'    => 'desc',
-			'category' => '',  // Slugs
-			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'featured_products' );
-
-		$meta_query  = WC()->query->get_meta_query();
-		$tax_query   = WC()->query->get_tax_query();
-		$tax_query[] = array(
-			'taxonomy' => 'product_visibility',
-			'field'    => 'name',
-			'terms'    => 'featured',
+			'order'    => 'DESC',
+			'category' => '',
 			'operator' => 'IN',
-		);
+		), (array) $atts );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
-		);
+		$shortcode = new WC_Shortcode_Products( $atts, 'featured_products' );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		return self::product_loop( $query_args, $atts, 'featured_products' );
+		return $shortcode->get_content();
 	}
 
 	/**

@@ -169,6 +169,16 @@ class WC_Shortcode_Products {
 			$query_args['orderby']  = 'meta_value_num';
 		}
 
+		// Featured products.
+		if ( 'featured_products' === $this->type ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => 'IN',
+			);
+		}
+
 		// Categories.
 		if ( ! empty( $this->attributes['category'] ) ) {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
