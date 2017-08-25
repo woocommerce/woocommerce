@@ -218,7 +218,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 	 */
 	public function test_get_content() {
 		$shortcode = new WC_Shortcode_Products();
+		$results   = $shortcode->get_content();
 
-		$this->assertTrue( ! empty( $shortcode->get_content() ) );
+		$this->assertTrue( ! empty( $results ) );
 	}
 }
