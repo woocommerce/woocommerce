@@ -807,6 +807,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+			do_action( 'woocommerce_product_import_before_import', $parsed_data );
+
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
 			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 			$id_exists  = false;
