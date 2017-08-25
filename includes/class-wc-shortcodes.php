@@ -177,47 +177,23 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_category( $atts ) {
-		$atts = shortcode_atts( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'menu_order title',
-			'order'    => 'asc',
-			'category' => '',  // Slugs
-			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'product_category' );
-
-		if ( ! $atts['category'] ) {
+		if ( empty( $atts['category'] ) ) {
 			return '';
 		}
 
-		// Default ordering args
-		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
-		$meta_query    = WC()->query->get_meta_query();
-		$query_args    = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'orderby'             => $ordering_args['orderby'],
-			'order'               => $ordering_args['order'],
-			'posts_per_page'      => $atts['per_page'],
-			'meta_query'          => $meta_query,
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		$atts = array_merge( array(
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'menu_order title',
+			'order'    => 'ASC',
+			'category' => '',
+			'operator' => 'IN',
+		), $atts );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
+		$shortcode = new WC_Shortcode_Products( $atts, 'product_category' );
 
-		if ( isset( $ordering_args['meta_key'] ) ) {
-			$query_args['meta_key'] = $ordering_args['meta_key'];
-		}
-
-		$return = self::product_loop( $query_args, $atts, 'product_cat' );
-
-		// Remove ordering query arguments
-		WC()->query->remove_ordering_args();
-
-		return $return;
+		return $shortcode->get_content();
 	}
-
 
 	/**
 	 * List all (or limited) product categories.

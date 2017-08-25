@@ -49,16 +49,9 @@ class WC_Shortcode_Products {
 	 * @param array $loop_name  Loop name.
 	 */
 	public function __construct( $attributes = array(), $loop_name = 'products' ) {
-		$this->attributes = shortcode_atts( array(
-			'columns' => '4',
-			'orderby' => 'title',
-			'order'   => 'asc',
-			'ids'     => '',
-			'skus'    => '',
-		), $attributes, $this->loop_name );
-
-		$this->query_args = $this->parse_query_args();
 		$this->loop_name  = $loop_name;
+		$this->attributes = $this->parse_attributes( $attributes );
+		$this->query_args = $this->parse_query_args();
 	}
 
 	/**
@@ -102,6 +95,25 @@ class WC_Shortcode_Products {
 	}
 
 	/**
+	 * Parse attributes.
+	 *
+	 * @param  array $attributes Shortcode attributes.
+	 * @return array
+	 */
+	protected function parse_attributes( $attributes ) {
+		return shortcode_atts( array(
+			'per_page' => '-1',
+			'columns'  => '4',
+			'orderby'  => 'title',
+			'order'    => 'ASC',
+			'ids'      => '',
+			'skus'     => '',
+			'category' => '',   // Slugs.
+			'operator' => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
+		), $attributes, $this->loop_name );
+	}
+
+	/**
 	 * Parse query args.
 	 *
 	 * @since  3.2.0
@@ -113,15 +125,34 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
 			'orderby'             => $this->attributes['orderby'],
-			'order'               => $this->attributes['order'],
+			'order'               => strtoupper( $this->attributes['order'] ),
 		);
 
 		// @codingStandardsIgnoreStart
-		$this->query_args['posts_per_page'] = -1;
+		$this->query_args['posts_per_page'] = (int) $this->attributes['per_page'];
 		$this->query_args['meta_query']     = WC()->query->get_meta_query();
 		$this->query_args['tax_query']      = WC()->query->get_tax_query();
 		// @codingStandardsIgnoreEnd
 
+		// Categories.
+		if ( ! empty( $this->attributes['category'] ) ) {
+			$ordering_args = WC()->query->get_catalog_ordering_args( $this->query_args['orderby'], $this->query_args['order'] );
+			$this->query_args['orderby'] = $ordering_args['orderby'];
+			$this->query_args['order']   = $ordering_args['order'];
+
+			if ( isset( $ordering_args['meta_key'] ) ) {
+				$this->query_args['meta_key'] = $ordering_args['meta_key'];
+			}
+
+			$this->query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
+				'field'    => 'slug',
+				'operator' => $this->attributes['operator'],
+			);
+		}
+
+		// SKUs.
 		if ( ! empty( $this->attributes['skus'] ) ) {
 			$this->query_args['meta_query'][] = array(
 				'key'     => '_sku',
@@ -130,6 +161,7 @@ class WC_Shortcode_Products {
 			);
 		}
 
+		// IDs.
 		if ( ! empty( $this->attributes['ids'] ) ) {
 			$this->query_args['post__in'] = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
 		}
@@ -156,6 +188,11 @@ class WC_Shortcode_Products {
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
 			$products = new WP_Query( $this->query_args );
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+		}
+
+		// Remove ordering query arguments.
+		if ( ! empty( $this->attributes['category'] ) ) {
+			WC()->query->remove_ordering_args();
 		}
 
 		ob_start();
