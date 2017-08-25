@@ -175,6 +175,11 @@ class WC_Shortcode_Products {
 			}
 		}
 
+		// On sale.
+		if ( 'sale_products' === $this->type ) {
+			$query_args['post__in'] = array_merge( array( 0 ), wc_get_product_ids_on_sale() );
+		}
+
 		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
 	}
 

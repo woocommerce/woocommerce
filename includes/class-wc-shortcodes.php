@@ -414,30 +414,18 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function sale_products( $atts ) {
-		$atts = shortcode_atts( array(
+		$atts = array_merge( array(
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
-			'order'    => 'asc',
-			'category' => '', // Slugs
-			'operator' => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts, 'sale_products' );
+			'order'    => 'ASC',
+			'category' => '',
+			'operator' => 'IN',
+		), (array) $atts );
 
-		$query_args = array(
-			'posts_per_page' => $atts['per_page'],
-			'orderby'        => $atts['orderby'],
-			'order'          => $atts['order'],
-			'no_found_rows'  => 1,
-			'post_status'    => 'publish',
-			'post_type'      => 'product',
-			'meta_query'     => WC()->query->get_meta_query(),
-			'tax_query'      => WC()->query->get_tax_query(),
-			'post__in'       => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
-		);
+		$shortcode = new WC_Shortcode_Products( $atts, 'sale_products' );
 
-		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		return self::product_loop( $query_args, $atts, 'sale_products' );
+		return $shortcode->get_content();
 	}
 
 	/**
