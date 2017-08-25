@@ -120,7 +120,7 @@ class WC_Shortcode_Products {
 	 * @return array
 	 */
 	protected function parse_query_args() {
-		$this->query_args = array(
+		$query_args = array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => 1,
@@ -129,22 +129,22 @@ class WC_Shortcode_Products {
 		);
 
 		// @codingStandardsIgnoreStart
-		$this->query_args['posts_per_page'] = (int) $this->attributes['per_page'];
-		$this->query_args['meta_query']     = WC()->query->get_meta_query();
-		$this->query_args['tax_query']      = WC()->query->get_tax_query();
+		$query_args['posts_per_page'] = (int) $this->attributes['per_page'];
+		$query_args['meta_query']     = WC()->query->get_meta_query();
+		$query_args['tax_query']      = WC()->query->get_tax_query();
 		// @codingStandardsIgnoreEnd
 
 		// Categories.
 		if ( ! empty( $this->attributes['category'] ) ) {
-			$ordering_args = WC()->query->get_catalog_ordering_args( $this->query_args['orderby'], $this->query_args['order'] );
-			$this->query_args['orderby'] = $ordering_args['orderby'];
-			$this->query_args['order']   = $ordering_args['order'];
+			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+			$query_args['orderby'] = $ordering_args['orderby'];
+			$query_args['order']   = $ordering_args['order'];
 
 			if ( isset( $ordering_args['meta_key'] ) ) {
-				$this->query_args['meta_key'] = $ordering_args['meta_key'];
+				$query_args['meta_key'] = $ordering_args['meta_key'];
 			}
 
-			$this->query_args['tax_query'][] = array(
+			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
 				'field'    => 'slug',
@@ -154,7 +154,7 @@ class WC_Shortcode_Products {
 
 		// SKUs.
 		if ( ! empty( $this->attributes['skus'] ) ) {
-			$this->query_args['meta_query'][] = array(
+			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => array_map( 'trim', explode( ',', $this->attributes['skus'] ) ),
 				'compare' => 'IN',
@@ -163,10 +163,10 @@ class WC_Shortcode_Products {
 
 		// IDs.
 		if ( ! empty( $this->attributes['ids'] ) ) {
-			$this->query_args['post__in'] = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
+			$query_args['post__in'] = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
 		}
 
-		return $this->query_args;
+		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->loop_name );
 	}
 
 	/**
@@ -181,7 +181,6 @@ class WC_Shortcode_Products {
 		$columns                     = absint( $this->attributes['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $this->loop_name;
-		$this->query_args            = apply_filters( 'woocommerce_shortcode_products_query', $this->query_args, $this->attributes, $this->loop_name );
 		$transient_name              = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->loop_name ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$products                    = get_transient( $transient_name );
 
