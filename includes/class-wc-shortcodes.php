@@ -246,7 +246,21 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function products( $atts ) {
-		$shortcode = new WC_Shortcode_Products( (array) $atts );
+		$atts = (array) $atts;
+		$type = 'products';
+
+		// Allow list product based on specific cases.
+		if ( isset( $atts['on_sale'] ) && wc_string_to_bool( $atts['on_sale'] ) ) {
+			$type = 'sale_products';
+		} elseif ( isset( $atts['best_selling'] ) && wc_string_to_bool( $atts['best_selling'] ) ) {
+			$type = 'best_selling_products';
+		} elseif ( isset( $atts['top_rated'] ) && wc_string_to_bool( $atts['top_rated'] ) ) {
+			$type = 'top_rated_products';
+		} elseif ( isset( $atts['featured'] ) && wc_string_to_bool( $atts['featured'] ) ) {
+			$type = 'featured_products';
+		}
+
+		$shortcode = new WC_Shortcode_Products( $atts, $type );
 
 		return $shortcode->get_content();
 	}
@@ -583,7 +597,7 @@ class WC_Shortcodes {
 			'per_page'  => '12',
 			'columns'   => '4',
 			'orderby'   => 'title',
-			'order'     => 'asc',
+			'order'     => 'ASC',
 			'attribute' => '',
 			'filter'    => '',
 		), (array) $atts );
