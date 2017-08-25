@@ -102,15 +102,17 @@ class WC_Shortcode_Products {
 	 */
 	protected function parse_attributes( $attributes ) {
 		return shortcode_atts( array(
-			'per_page' => '-1',
-			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'ASC',
-			'ids'      => '',
-			'skus'     => '',
-			'category' => '',   // Slugs.
-			'operator' => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
-			'class'    => '',
+			'per_page'  => '-1',
+			'columns'   => '4',
+			'orderby'   => 'title',
+			'order'     => 'ASC',
+			'ids'       => '',
+			'skus'      => '',
+			'category'  => '',   // Slugs.
+			'operator'  => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
+			'class'     => '',
+			'attribute' => '',
+			'filter'    => '',
 		), $attributes, $this->type );
 	}
 
@@ -173,9 +175,18 @@ class WC_Shortcode_Products {
 		if ( 'featured_products' === $this->type ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
-				'field'    => 'name',
 				'terms'    => 'featured',
+				'field'    => 'name',
 				'operator' => 'IN',
+			);
+		}
+
+		// Attributes.
+		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['filter'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] ),
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['filter'] ) ),
+				'field'    => 'slug',
 			);
 		}
 

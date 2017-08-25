@@ -13,15 +13,17 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 	public function test_get_attributes() {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
-			'per_page' => '-1',
-			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'ASC',
-			'ids'      => '',
-			'skus'     => '',
-			'category' => '',
-			'operator' => 'IN',
-			'class'    => '',
+			'per_page'  => '-1',
+			'columns'   => '4',
+			'orderby'   => 'title',
+			'order'     => 'ASC',
+			'ids'       => '',
+			'skus'      => '',
+			'category'  => '',
+			'operator'  => 'IN',
+			'class'     => '',
+			'attribute' => '',
+			'filter'    => '',
 		);
 		$this->assertEquals( $expected, $shortcode->get_attributes() );
 
@@ -30,15 +32,17 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'order'   => 'DESC',
 		) );
 		$expected2  = array(
-			'per_page' => '-1',
-			'columns'  => '4',
-			'orderby'  => 'id',
-			'order'    => 'DESC',
-			'ids'      => '',
-			'skus'     => '',
-			'category' => '',
-			'operator' => 'IN',
-			'class'    => '',
+			'per_page'  => '-1',
+			'columns'   => '4',
+			'orderby'   => 'id',
+			'order'     => 'DESC',
+			'ids'       => '',
+			'skus'      => '',
+			'category'  => '',
+			'operator'  => 'IN',
+			'class'     => '',
+			'attribute' => '',
+			'filter'    => '',
 		);
 		$this->assertEquals( $expected2, $shortcode2->get_attributes() );
 	}
@@ -274,7 +278,34 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			) ),
 		);
 
-		$this->assertEquals( $expected9, $shortcode9->get_query_args() );
+		// product_attribute shortcode.
+		$shortcode10 = new WC_Shortcode_Products( array(
+			'per_page'  => '12',
+			'columns'   => '4',
+			'orderby'   => 'title',
+			'order'     => 'asc',
+			'attribute' => 'color',
+			'filter'    => 'black',
+		), 'product_attribute' );
+		$expected10  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'title',
+			'order'               => 'ASC',
+			'posts_per_page'      => 12,
+			'meta_query'          => $meta_query,
+			'tax_query'           => array_merge( $tax_query, array(
+				array(
+					'taxonomy' => 'pa_color',
+					'terms'    => array( 'black' ),
+					'field'    => 'slug',
+				),
+			) ),
+		);
+
+		$this->assertEquals( $expected10, $shortcode10->get_query_args() );
 	}
 
 	/**

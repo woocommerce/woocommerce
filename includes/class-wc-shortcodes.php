@@ -622,33 +622,22 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_attribute( $atts ) {
-		$atts = shortcode_atts( array(
+		$atts = array_merge( array(
 			'per_page'  => '12',
 			'columns'   => '4',
 			'orderby'   => 'title',
 			'order'     => 'asc',
 			'attribute' => '',
 			'filter'    => '',
-		), $atts, 'product_attribute' );
+		), (array) $atts );
 
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
-			'posts_per_page'      => $atts['per_page'],
-			'orderby'             => $atts['orderby'],
-			'order'               => $atts['order'],
-			'meta_query'          => WC()->query->get_meta_query(),
-			'tax_query'           => WC()->query->get_tax_query(),
-		);
+		if ( empty( $atts['attribute'] ) || empty( $atts['filter'] ) ) {
+			return '';
+		}
 
-		$query_args['tax_query'][] = array(
-			'taxonomy' => strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] ),
-			'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
-			'field'    => 'slug',
-		);
+		$shortcode = new WC_Shortcode_Products( $atts, 'product_attribute' );
 
-		return self::product_loop( $query_args, $atts, 'product_attribute' );
+		return $shortcode->get_content();
 	}
 
 	/**
