@@ -110,6 +110,7 @@ class WC_Shortcode_Products {
 			'skus'     => '',
 			'category' => '',   // Slugs.
 			'operator' => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
+			'class'    => '',
 		), $attributes, $this->loop_name );
 	}
 
@@ -123,7 +124,8 @@ class WC_Shortcode_Products {
 		$query_args = array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
-			'ignore_sticky_posts' => 1,
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
 			'orderby'             => $this->attributes['orderby'],
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
@@ -154,16 +156,23 @@ class WC_Shortcode_Products {
 
 		// SKUs.
 		if ( ! empty( $this->attributes['skus'] ) ) {
+			$skus = array_map( 'trim', explode( ',', $this->attributes['skus'] ) );
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
-				'value'   => array_map( 'trim', explode( ',', $this->attributes['skus'] ) ),
-				'compare' => 'IN',
+				'value'   => 1 === count( $skus ) ? $skus[0] : $skus,
+				'compare' => 1 === count( $skus ) ? '=' : 'IN',
 			);
 		}
 
 		// IDs.
 		if ( ! empty( $this->attributes['ids'] ) ) {
-			$query_args['post__in'] = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
+			$ids = array_map( 'trim', explode( ',', $this->attributes['ids'] ) );
+
+			if ( 1 === count( $ids ) ) {
+				$query_args['p'] = $ids[0];
+			} else {
+				$query_args['post__in'] = $ids;
+			}
 		}
 
 		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->loop_name );
@@ -219,6 +228,12 @@ class WC_Shortcode_Products {
 		woocommerce_reset_loop();
 		wp_reset_postdata();
 
-		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
+		$classes = array( 'woocommerce' );
+		if ( 'product' !== $this->loop_name ) {
+			$classes[] = 'columns-' . $columns;
+		}
+		$classes[] = $this->attributes['class'];
+
+		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
 	}
 }

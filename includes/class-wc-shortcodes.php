@@ -311,56 +311,12 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$meta_query = WC()->query->get_meta_query();
+		$atts['skus']     = isset( $atts['sku'] ) ? $atts['sku'] : '';
+		$atts['ids']      = isset( $atts['id'] ) ? $atts['id'] : '';
+		$atts['per_page'] = '1';
+		$shortcode        = new WC_Shortcode_Products( (array) $atts, 'product' );
 
-		$args = array(
-			'post_type'      => 'product',
-			'posts_per_page' => 1,
-			'no_found_rows'  => 1,
-			'post_status'    => 'publish',
-			'meta_query'     => $meta_query,
-			'tax_query'      => WC()->query->get_tax_query(),
-		);
-
-		if ( isset( $atts['sku'] ) ) {
-			$args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $atts['sku'],
-				'compare' => '=',
-			);
-		}
-
-		if ( isset( $atts['id'] ) ) {
-			$args['p'] = $atts['id'];
-		}
-
-		ob_start();
-
-		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts, null ) );
-
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		wp_reset_postdata();
-
-		$css_class = 'woocommerce';
-
-		if ( isset( $atts['class'] ) ) {
-			$css_class .= ' ' . $atts['class'];
-		}
-
-		return '<div class="' . esc_attr( $css_class ) . '">' . ob_get_clean() . '</div>';
+		return $shortcode->get_content();
 	}
 
 	/**
