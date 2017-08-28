@@ -77,7 +77,11 @@
 								} else {
 									_e( 'Subscription: Unlimited', 'woocommerce' );
 								}
-								if ( isset( $subscription['master_user_email'] ) ) {
+
+								// Check shared.
+								if ( ! empty( $subscription['is_shared'] ) && ! empty( $subscription['owner_email'] ) ) {
+									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), esc_html( $subscription['owner_email'] ) );
+								} elseif ( isset( $subscription['master_user_email'] ) ) {
 									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), esc_html( $subscription['master_user_email'] ) );
 								}
 							?>
