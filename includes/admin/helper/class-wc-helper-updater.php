@@ -289,6 +289,10 @@ class WC_Helper_Updater {
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
+
+		// Refresh update transients
+		set_site_transient( 'update_plugins', get_site_transient( 'update_plugins' ) );
+		set_site_transient( 'update_themes', get_site_transient( 'update_themes' ) );
 	}
 
 	/**
