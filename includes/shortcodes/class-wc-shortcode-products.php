@@ -97,10 +97,13 @@ class WC_Shortcode_Products {
 	/**
 	 * Parse attributes.
 	 *
+	 * @since  3.2.0
 	 * @param  array $attributes Shortcode attributes.
 	 * @return array
 	 */
 	protected function parse_attributes( $attributes ) {
+		$attributes = $this->parse_legacy_attributes( $attributes );
+
 		return shortcode_atts( array(
 			'limit'          => '-1',    // Results limit.
 			'columns'        => '4',     // Number of columns.
@@ -115,6 +118,30 @@ class WC_Shortcode_Products {
 			'terms_operator' => 'IN',    // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 			'class'          => '',      // HTML class.
 		), $attributes, $this->type );
+	}
+
+	/**
+	 * Parse legacy attributes.
+	 *
+	 * @since  3.2.0
+	 * @param  array  $attributes Attributes.
+	 * @return array
+	 */
+	protected function parse_legacy_attributes( $attributes ) {
+		$mapping = array(
+			'per_page' => 'limit',
+			'operator' => 'cat_operator',
+			'filter'   => 'terms',
+		);
+
+		foreach ( $mapping as $old => $new ) {
+			if ( isset( $attributes[ $old ] ) ) {
+				$attributes[ $new ] = $attributes[ $old ];
+				unset( $attributes[ $old ] );
+			}
+		}
+
+		return $attributes;
 	}
 
 	/**
