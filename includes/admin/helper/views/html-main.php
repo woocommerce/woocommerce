@@ -16,7 +16,7 @@
 		<?php
 			$filters = array_keys( WC_Helper::get_filters() );
 			$last_filter = array_pop( $filters );
-			$current_filter = ! empty( $_GET['filter'] ) ? $_GET['filter'] : 'all';
+			$current_filter = WC_Helper::get_current_filter();
 		?>
 
 		<?php foreach ( WC_Helper::get_filters() as $key => $label ) : ?>

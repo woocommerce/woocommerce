@@ -75,9 +75,11 @@ class WC_Helper {
 			'wc-helper-nonce' => wp_create_nonce( 'disconnect' ),
 		), admin_url( 'admin.php' ) );
 
+		$current_filter = self::get_current_filter();
 		$refresh_url = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => $current_filter,
 			'wc-helper-refresh' => 1,
 			'wc-helper-nonce' => wp_create_nonce( 'refresh' ),
 		), admin_url( 'admin.php' ) );
@@ -97,6 +99,7 @@ class WC_Helper {
 			$subscription['activate_url'] = add_query_arg( array(
 				'page' => 'wc-addons',
 				'section' => 'helper',
+				'filter' => $current_filter,
 				'wc-helper-activate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -106,6 +109,7 @@ class WC_Helper {
 			$subscription['deactivate_url'] = add_query_arg( array(
 				'page' => 'wc-addons',
 				'section' => 'helper',
+				'filter' => $current_filter,
 				'wc-helper-deactivate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -308,9 +312,7 @@ class WC_Helper {
 
 		// Filters
 		self::get_filters( $subscriptions ); // Warm it up.
-		if ( ! empty( $_GET['filter'] ) && in_array( $_GET['filter'], array_keys( self::get_filters() ) ) ) {
-			self::_filter( $subscriptions, $_GET['filter'] );
-		}
+		self::_filter( $subscriptions, self::get_current_filter() );
 
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
@@ -325,10 +327,10 @@ class WC_Helper {
 	 * @return array An array of filter keys and labels.
 	 */
 	public static function get_filters( $subscriptions = null ) {
-		static $filters;
+		static $_filters;
 
-		if ( isset( $filters ) ) {
-			return $filters;
+		if ( isset( $_filters ) ) {
+			return $_filters;
 		}
 
 		$filters = array(
@@ -341,13 +343,35 @@ class WC_Helper {
 			'download' => __( 'Download (%d)', 'woocommerce' ),
 		);
 
+		if ( empty( $subscriptions ) ) {
+			return $filters;
+		}
+
 		foreach ( $filters as $key => $label ) {
 			$_subs = $subscriptions;
 			self::_filter( $_subs, $key );
 			$filters[ $key ] = sprintf( $label, count( $_subs ) );
 		}
 
-		return $filters;
+		// Cache it.
+		$_filters = $filters;
+		return $_filters;
+	}
+
+	/**
+	 * Get current filter.
+	 *
+	 * @return string The current filter.
+	 */
+	public static function get_current_filter() {
+		$current_filter = 'all';
+		$valid_filters = array_keys( self::get_filters() );
+
+		if ( ! empty( $_GET['filter'] ) && in_array( $_GET['filter'], $valid_filters ) ) {
+			$current_filter = $_GET['filter'];
+		}
+
+		return $current_filter;
 	}
 
 	/**
@@ -445,6 +469,7 @@ class WC_Helper {
 					$deactivate_plugin_url = add_query_arg( array(
 						'page' => 'wc-addons',
 						'section' => 'helper',
+						'filter' => self::get_current_filter(),
 						'wc-helper-deactivate-plugin' => 1,
 						'wc-helper-product-id' => $subscription['product_id'],
 						'wc-helper-nonce' => wp_create_nonce( 'deactivate-plugin:' . $subscription['product_id'] ),
@@ -722,6 +747,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => 'helper-refreshed',
 		), admin_url( 'admin.php' ) );
 
@@ -768,6 +794,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $activated ? 'activate-success' : 'activate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -805,6 +832,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $deactivated ? 'deactivate-success' : 'deactivate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -845,6 +873,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $deactivated ? 'deactivate-plugin-success' : 'deactivate-plugin-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
