@@ -1,4 +1,4 @@
-/*global wc_add_to_cart_variation_params, wc_cart_fragments_params */
+/*global wc_add_to_cart_variation_params */
 ;(function ( $, window, document, undefined ) {
 	/**
 	 * VariationForm class which handles variation forms and attributes.
@@ -135,7 +135,7 @@
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
 				form.xhr                      = $.ajax( {
-					url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
+					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
 					data: currentAttributes,
 					success: function( variation ) {
