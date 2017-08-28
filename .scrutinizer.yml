@@ -15,10 +15,10 @@ build:
   tests:
     override:
       -
-        command: "vendor/bin/phpunit -c phpunit.xml --coverage-clover=results"
+        command: "vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.clover"
         coverage:
-          file: results
-          format: clover
+          file: coverage.clover
+          format: php-clover
 tools:
   php_code_sniffer:
     config:
