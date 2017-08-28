@@ -185,13 +185,24 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get a total.
+	 *
+	 * @since 3.2.0
+	 * @param string $key Key of element in $totals array.
+	 * @return mixed
+	 */
+	protected function get_totals_var( $key ) {
+		return isset( $this->totals[ $key ] ) ? $this->totals[ $key ] : $this->default_totals[ $key ];
+	}
+
+	/**
 	 * Get subtotal.
 	 *
 	 * @since 3.2.0
 	 * @return float
 	 */
 	public function get_subtotal() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'subtotal' ) );
 	}
 
 	/**
@@ -201,7 +212,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_subtotal_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'subtotal_tax' ) );
 	}
 
 	/**
@@ -211,7 +222,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_discount_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_total'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'discount_total' ) );
 	}
 
 	/**
@@ -221,7 +232,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_discount_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'discount_tax' ) );
 	}
 
 	/**
@@ -231,7 +242,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_shipping_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_total'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'shipping_total' ) );
 	}
 
 	/**
@@ -241,7 +252,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'shipping_tax' ) );
 	}
 
 	/**
@@ -251,7 +262,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_contents_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_total'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'cart_contents_total' ) );
 	}
 
 	/**
@@ -261,7 +272,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_contents_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'cart_contents_tax' ) );
 	}
 
 	/**
@@ -272,7 +283,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_total( $context = 'view' ) {
-		$total = apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total'] );
+		$total = apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'total' ) );
 		return 'view' === $context ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
 	}
 
@@ -283,7 +294,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_total_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'total_tax' ) );
 	}
 
 	/**
@@ -293,7 +304,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_fee_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'fee_total' ) );
 	}
 
 	/**
@@ -303,7 +314,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_fee_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'fee_tax' ) );
 	}
 
 	/**
@@ -312,7 +323,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_shipping_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'shipping_taxes' ) );
 	}
 
 	/**
@@ -321,7 +332,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_cart_contents_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'cart_contents_taxes' ) );
 
 	}
 
@@ -331,7 +342,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_fee_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->get_totals_var( 'fee_taxes' ) );
 	}
 
 	/*
