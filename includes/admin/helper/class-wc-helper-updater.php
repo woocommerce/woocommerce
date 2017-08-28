@@ -291,8 +291,15 @@ class WC_Helper_Updater {
 		delete_transient( '_woocommerce_helper_updates_count' );
 
 		// Refresh update transients
-		set_site_transient( 'update_plugins', get_site_transient( 'update_plugins' ) );
-		set_site_transient( 'update_themes', get_site_transient( 'update_themes' ) );
+		$update_plugins = get_site_transient( 'update_plugins' );
+		if ( ! empty( $update_plugins ) ) {
+			set_site_transient( 'update_plugins', $update_plugins );
+		}
+
+		$update_themes = get_site_transient( 'update_themes' );
+		if ( ! empty( $update_themes ) ) {
+			set_site_transient( 'update_themes', $update_themes );
+		}
 	}
 
 	/**
