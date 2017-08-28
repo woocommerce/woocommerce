@@ -322,7 +322,11 @@ class WC_Admin_Setup_Wizard {
 			$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
 		}
 
-		// Defaults
+		if ( empty( $state ) ) {
+			$state = '*';
+		}
+
+		// Defaults.
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
@@ -334,39 +338,34 @@ class WC_Admin_Setup_Wizard {
 			<table class="form-table">
 				<tr>
 					<tr>
-						<th scope="row"><label for="store_address"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+						<th scope="row"><label for="store_address"><?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_address" name="store_address" value="<?php echo esc_attr( $address ); ?>" />
-							<span class="description"> <?php esc_html_e( 'Address line 1', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_address_2" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
-							<span class="description"> <?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label></th>
 						<td>
 							<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
-							<span class="description"> <?php esc_html_e( 'City', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">&nbsp;</th>
+						<th scope="row"><label for="store_location"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label></th>
 						<td>
 							<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 							</select>
-							<span class="description"> <?php esc_html_e( 'Country / State', 'woocommerce' ); ?></span>
 						</td>
 					</tr>
-					<th scope="row">&nbsp;</th>
+					<th scope="row"><label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
-						<span class="description"> <?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -912,6 +911,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
+		$current_user = wp_get_current_user();
 		shuffle( $this->tweets );
 		?>
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://woocommerce.com/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooCommerce" data-size="large">Tweet</a>
@@ -929,6 +929,13 @@ class WC_Admin_Setup_Wizard {
 			</div>
 		<?php endif; ?>
 
+		<div class="woocommerce-message woocommerce-newsletter">
+			<p><?php esc_html_e( 'Join the WooCommerce mailing list for help getting started, tips, and product updates.', 'woocommerce' ); ?></p>
+			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
+				<input type="email" value="<?php echo esc_attr( $current_user->user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required><input type="submit" value="<?php esc_html_e( 'Subscribe', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+			</form>
+		</div>
+
 		<div class="wc-setup-next-steps">
 			<div class="wc-setup-next-steps-first">
 				<h2><?php esc_html_e( 'Next steps', 'woocommerce' ); ?></h2>
@@ -941,8 +948,8 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php _e( 'Learn more', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Watch the Guided Tour videos', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="learn-more"><a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>

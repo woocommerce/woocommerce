@@ -138,7 +138,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'shipping_lines' => $this->get_items( 'shipping' ),
 				'fee_lines'      => $this->get_items( 'fee' ),
 				'coupon_lines'   => $this->get_items( 'coupon' ),
-				'discount_lines' => $this->get_items( 'discount' ),
 			)
 		);
 	}
@@ -685,7 +684,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			'shipping'  => 'shipping_lines',
 			'fee'       => 'fee_lines',
 			'coupon'    => 'coupon_lines',
-			'discount'  => 'discount_lines',
 		) );
 		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
@@ -837,8 +835,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return 'tax_lines';
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
-		} elseif ( is_a( $item, 'WC_Order_Item_Discount' ) ) {
-			return 'discount_lines';
 		}
 		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
@@ -891,49 +887,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Add a discount/coupon to this order and recalculate totals.
-	 *
-	 * @since  3.2.0
-	 * @param  string $discount Discount amount or coupon code.
-	 */
-	public function add_discount( $discount ) {
-		// Try to apply as a coupon first.
-		$coupon = new WC_Coupon( wc_format_coupon_code( $discount ) );
-
-		if ( $coupon->get_code() === wc_format_coupon_code( $discount ) && $coupon->is_valid() ) {
-			$this->apply_coupon( $coupon );
-		} else {
-			$item = new WC_Order_Item_Discount();
-
-			if ( strstr( $discount, '%' ) ) {
-				$item->set_amount( trim( $discount, '%' ) );
-				$item->set_discount_type( 'percent' );
-				$this->add_item( $item );
-			} elseif ( is_numeric( $discount ) && 0 < floatval( $discount ) ) {
-				$item->set_amount( floatval( $discount ) );
-				$item->set_discount_type( 'fixed' );
-				$this->add_item( $item );
-			}
-
-			$this->calculate_totals( true );
-		}
-	}
-
-	/**
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param string|WC_Coupon $coupon Coupon code or object.
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
-	protected function apply_coupon( $coupon ) {
-		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
-			$code   = wc_format_coupon_code( $coupon );
+	public function apply_coupon( $raw_coupon ) {
+		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
+			$coupon = $raw_coupon;
+		} elseif ( is_string( $raw_coupon ) ) {
+			$code   = wc_format_coupon_code( $raw_coupon );
 			$coupon = new WC_Coupon( $code );
 
 			if ( $coupon->get_code() !== $code || ! $coupon->is_valid() ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
 			}
+		} else {
+			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
 		// Check to make sure coupon is not already applied.
@@ -945,7 +916,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$discounts = new WC_Discounts( $this );
-		$applied   = $discounts->apply_discount( $coupon );
+		$applied   = $discounts->apply_coupon( $coupon );
 
 		if ( is_wp_error( $applied ) ) {
 			return $applied;
@@ -1007,26 +978,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Calculate actual discount amounts for each discount row from line items.
-	 *
-	 * @since 3.2.0
-	 */
-	protected function calculate_discounts() {
-		$discounts = new WC_Discounts( $this );
-
-		// Re-calc manual discounts based on new line items.
-		foreach ( $this->get_items( 'discount' ) as $discount_key => $discount ) {
-			$result = $discounts->apply_discount( ( 'fixed' === $discount->get_discount_type() ? $discount->get_amount() : $discount->get_amount() . '%' ), $discount_key );
-		}
-
-		// Set discount totals.
-		foreach ( $discounts->get_manual_discounts() as $manual_discount_key => $manual_discount ) {
-			$item = $this->get_item( $manual_discount_key, false );
-			$item->set_total( wc_remove_number_precision( $manual_discount->get_discount_total() ) * -1 );
-		}
-	}
-
-	/**
 	 * Apply all coupons in this order again to all line items.
 	 *
 	 * @since  3.2.0
@@ -1070,7 +1021,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupons           = $this->get_items( 'coupon' );
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
-		$item_discounts    = $discounts->get_discounts_by_item();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
 
 		if ( $coupon_discounts ) {
@@ -1293,7 +1243,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Trigger tax recalculation for all items.
-		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$item->calculate_taxes( $calculate_tax_for );
 		}
 
@@ -1313,7 +1263,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$existing_taxes = $this->get_taxes();
 		$saved_rate_ids = array();
 
-		foreach ( $this->get_items( array( 'line_item', 'fee', 'discount' ) ) as $item_id => $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
 				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
@@ -1368,8 +1318,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_total         = 0;
 		$fee_total          = 0;
 		$shipping_total     = 0;
-		$discount_total     = 0;
-		$discount_total_tax = 0;
 		$cart_subtotal_tax  = 0;
 		$cart_total_tax     = 0;
 
@@ -1379,11 +1327,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$cart_total    += $item->get_total();
 		}
 
-		// Sum fee costs.
-		foreach ( $this->get_fees() as $item ) {
-			$fee_total += $item->get_total();
-		}
-
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
 			$shipping_total += $shipping->get_total();
@@ -1391,11 +1334,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_shipping_total( $shipping_total );
 
-		// Calculate manual discounts.
-		$this->calculate_discounts();
+		// Sum fee costs.
+		foreach ( $this->get_fees() as $item ) {
+			$amount = $item->get_amount();
 
-		foreach ( $this->get_items( 'discount' ) as $item ) {
-			$discount_total += $item->get_total() * -1;
+			if ( 0 > $amount ) {
+				$item->set_total( $amount );
+				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
+
+				if ( $item->get_total() < $max_discount ) {
+					$item->set_total( $max_discount );
+				}
+			}
+
+			$fee_total += $item->get_total();
 		}
 
 		// Calculate taxes for items, shipping, discounts.
@@ -1409,13 +1361,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$cart_total_tax    += $item->get_total_tax();
 		}
 
-		foreach ( $this->get_items( 'discount' ) as $item ) {
-			$discount_total_tax += $item->get_total_tax() * -1;
-		}
-
-		$this->set_discount_total( $cart_subtotal - $cart_total + $discount_total );
-		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax + $discount_total_tax );
-		$this->set_total( round( $cart_total - $discount_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_discount_total( $cart_subtotal - $cart_total );
+		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
+		$this->set_total( round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 		$this->save();
 
 		return $this->get_total();

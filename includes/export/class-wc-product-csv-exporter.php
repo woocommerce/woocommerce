@@ -114,6 +114,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
 		) );
 	}
 

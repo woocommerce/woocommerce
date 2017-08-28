@@ -37,7 +37,7 @@ include( WC_ABSPATH . 'includes/wc-webhook-functions.php' );
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
-add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
+add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label
 
@@ -617,9 +617,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'VND' => '&#8363;',
 		'VUV' => 'Vt',
 		'WST' => 'T',
-		'XAF' => 'Fr',
+		'XAF' => 'CFA',
 		'XCD' => '&#36;',
-		'XOF' => 'Fr',
+		'XOF' => 'CFA',
 		'XPF' => 'Fr',
 		'YER' => '&#xfdfc;',
 		'ZAR' => '&#82;',
@@ -1530,7 +1530,7 @@ function wc_get_logger() {
 			wc_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
-					/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */ 
+					/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
 					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
 					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
 					'<code>woocommerce_logging_class</code>',
@@ -1770,3 +1770,49 @@ function wc_get_post_data_by_key( $key, $default = '' ) {
 function wc_get_var( &$var, $default = null ) {
 	return isset( $var ) ? $var : $default;
 }
+
+/**
+ * Read in WooCommerce headers when reading plugin headers.
+ *
+ * @since 3.2.0
+ * @param array $headers
+ * @return array $headers
+ */
+function wc_enable_wc_plugin_headers( $headers ) {
+	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+		include_once( dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php' );
+	}
+
+	$headers['WCRequires'] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
+	$headers['WCTested']   = WC_Plugin_Updates::VERSION_TESTED_HEADER;
+	return $headers;
+}
+add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
+
+/**
+ * Prevent auto-updating the WooCommerce plugin on major releases if there are untested extensions active.
+ *
+ * @since 3.2.0
+ * @param bool $should_update
+ * @param object $plugin
+ * @return bool
+ */
+function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
+	if ( 'woocommerce/woocommerce.php' !== $plugin->plugin ) {
+		return $should_update;
+	}
+
+	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+		include_once( dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php' );
+	}
+
+	$new_version = wc_clean( $plugin->new_version );
+	$plugin_updates = new WC_Plugin_Updates;
+	$untested_plugins = $plugin_updates->get_untested_plugins( $new_version, 'major' );
+	if ( ! empty( $untested_plugins ) ) {
+		return false;
+	}
+
+	return $should_update;
+}
+add_filter( 'auto_update_plugin', 'wc_prevent_dangerous_auto_updates', 99, 2 );

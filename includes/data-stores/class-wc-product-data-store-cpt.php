@@ -85,7 +85,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product
 	 */
 	public function create( &$product ) {
-		if ( ! $product->get_date_created() ) {
+		if ( ! $product->get_date_created( 'edit' ) ) {
 			$product->set_date_created( current_time( 'timestamp', true ) );
 		}
 
@@ -544,10 +544,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Handle updated meta props after updating meta data.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Product $product
+	 * @param  WC_Product $product Product Object.
 	 */
 	protected function handle_updated_props( &$product ) {
-		if ( in_array( 'date_on_sale_from', $this->updated_props ) || in_array( 'date_on_sale_to', $this->updated_props ) || in_array( 'regular_price', $this->updated_props ) || in_array( 'sale_price', $this->updated_props ) ) {
+		if ( in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
+			if ( $product->get_sale_price( 'edit' ) >= $product->get_regular_price( 'edit' ) ) {
+				update_post_meta( $product->get_id(), '_sale_price', '' );
+				$product->set_sale_price( '' );
+			}
+		}
+		if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 				$product->set_price( $product->get_sale_price( 'edit' ) );
@@ -557,11 +563,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( in_array( 'stock_quantity', $this->updated_props ) ) {
+		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock' , $product );
 		}
 
-		if ( in_array( 'stock_status', $this->updated_props ) ) {
+		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
 			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status' , $product->get_id(), $product->get_stock_status(), $product );
 		}
 
@@ -840,12 +846,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Return product ID based on SKU.
 	 *
 	 * @since 3.0.0
-	 * @param string $sku
+	 * @param string $sku Product SKU.
 	 * @return int
 	 */
 	public function get_product_id_by_sku( $sku ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare( "
+
+		$id = $wpdb->get_var( $wpdb->prepare( "
 			SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
@@ -855,6 +862,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND postmeta.meta_value = '%s'
 			LIMIT 1
 		 ", $sku ) );
+
+		return (int) apply_filters( 'woocommerce_get_product_id_by_sku', $id, $sku );
 	}
 
 	/**

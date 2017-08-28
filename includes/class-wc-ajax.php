@@ -113,7 +113,7 @@ class WC_AJAX {
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
-			'add_order_discount'                               => false,
+			'add_coupon_discount'                              => false,
 			'remove_order_coupon'                              => false,
 			'remove_order_item'                                => false,
 			'remove_order_tax'                                 => false,
@@ -367,7 +367,7 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
-			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
+			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' )  ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
@@ -809,15 +809,34 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id    = absint( $_POST['order_id'] );
-			$order       = wc_get_order( $order_id );
-			$order_taxes = $order->get_taxes();
-			$item        = new WC_Order_Item_Fee();
-			$item->set_order_id( $order_id );
-			$item_id     = $item->save();
+			$order_id = absint( $_POST['order_id'] );
+			$amount   = wc_clean( $_POST['amount'] );
+			$order    = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				throw new exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			if ( strstr( $amount, '%' ) ) {
+				$formatted_amount = $amount;
+				$percent          = floatval( trim( $amount, '%' ) );
+				$amount           = $order->get_total() * ( $percent / 100 );
+			} else {
+				$amount           = floatval( $amount );
+				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
+			}
+
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_amount( $amount );
+			$fee->set_total( $amount );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+
+			$order->add_item( $fee );
+			$order->calculate_totals( true );
+			$order->save();
 
 			ob_start();
-			include( 'admin/meta-boxes/views/html-order-fee.php' );
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
@@ -896,7 +915,7 @@ class WC_AJAX {
 	/**
 	 * Add order discount via ajax.
 	 */
-	public static function add_order_discount() {
+	public static function add_coupon_discount() {
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
@@ -907,7 +926,7 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
 
-			$order->add_discount( wc_clean( $_POST['discount'] ) );
+			$order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
@@ -2208,6 +2227,9 @@ class WC_AJAX {
 				'tax_rate_shipping' => 1,
 				'tax_rate_order'    => 1,
 			) );
+
+			// Format the rate.
+			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
 
 			if ( isset( $data['newRow'] ) ) {
 				// Hurrah, shiny and new!

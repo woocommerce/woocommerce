@@ -234,7 +234,7 @@ jQuery( function ( $ ) {
 
 			$( '#woocommerce-order-items' )
 				.on( 'click', 'button.add-line-item', this.add_line_item )
-				.on( 'click', 'button.add-discount', this.add_discount )
+				.on( 'click', 'button.add-coupon', this.add_coupon )
 				.on( 'click', 'a.remove-coupon', this.remove_coupon )
 				.on( 'click', 'button.refund-items', this.refund_items )
 				.on( 'click', '.cancel-action', this.cancel )
@@ -247,8 +247,8 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
-				.on( 'click', 'tr.item, tr.fee, tr.discount, tr.shipping, tr.refund', this.select_row )
-				.on( 'click', 'tr.item :input, tr.fee :input, tr.discount :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.discount a, tr.shipping a, tr.refund a', this.select_row_child )
+				.on( 'click', 'tr.item, tr.fee, tr.shipping, tr.refund', this.select_row )
+				.on( 'click', 'tr.item :input, tr.fee :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.shipping a, tr.refund a', this.select_row_child )
 				.on( 'click', 'button.bulk-delete-items', this.bulk_actions.do_delete )
 				.on( 'click', 'button.bulk-increase-stock', this.bulk_actions.do_increase_stock )
 				.on( 'click', 'button.bulk-decrease-stock', this.bulk_actions.do_reduce_stock )
@@ -378,18 +378,18 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
-		add_discount: function() {
-			var value = window.prompt( 'Enter a coupon code, percentage, or fixed discount amount.' );
+		add_coupon: function() {
+			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_apply_coupon );
 
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
 				var data = {
-					action   : 'woocommerce_add_order_discount',
+					action   : 'woocommerce_add_coupon_discount',
 					dataType : 'json',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
-					discount : value
+					coupon   : value
 				};
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
@@ -467,24 +467,32 @@ jQuery( function ( $ ) {
 		},
 
 		add_fee: function() {
-			wc_meta_boxes_order_items.block();
+			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_add_fee );
 
-			var data = {
-				action   : 'woocommerce_add_order_fee',
-				order_id : woocommerce_admin_meta_boxes.post_id,
-				dataType : 'json',
-				security : woocommerce_admin_meta_boxes.order_item_nonce
-			};
+			if ( value != null ) {
+				wc_meta_boxes_order_items.block();
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				if ( response.success ) {
-					$( 'table.woocommerce_order_items tbody#order_fee_line_items' ).append( response.data.html );
-				} else {
-					window.alert( response.data.error );
-				}
-				wc_meta_boxes_order_items.unblock();
-			});
+				var data = {
+					action  : 'woocommerce_add_order_fee',
+					dataType: 'json',
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					security: woocommerce_admin_meta_boxes.order_item_nonce,
+					amount  : value
+				};
 
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					if ( response.success ) {
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.unblock();
+							wc_meta_boxes_order_items.stupidtable.init();
+					} else {
+						window.alert( response.data.error );
+					}
+					wc_meta_boxes_order_items.unblock();
+				});
+			}
 			return false;
 		},
 
@@ -530,7 +538,7 @@ jQuery( function ( $ ) {
 			var answer = window.confirm( woocommerce_admin_meta_boxes.remove_item_notice );
 
 			if ( answer ) {
-				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.discount, tr.shipping' );
+				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.shipping' );
 				var order_item_id = $item.attr( 'data-order_item_id' );
 
 				wc_meta_boxes_order_items.block();
@@ -772,7 +780,7 @@ jQuery( function ( $ ) {
 
 			input_changed: function() {
 				var refund_amount = 0;
-				var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.discount, tr.shipping' );
+				var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
 
 				$items.each(function() {
 					var $row               = $( this );

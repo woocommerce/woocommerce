@@ -82,8 +82,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Read order data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order
-	 * @param object $post_object
+	 * @param WC_Order $order
+	 * @param object   $post_object
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
@@ -155,7 +155,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
@@ -270,7 +270,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get amount already refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return string
 	 */
 	public function get_total_refunded( $order ) {
@@ -290,7 +290,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
@@ -311,7 +311,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the total shipping refunded.
 	 *
-	 * @param  WC_Order
+	 * @param  WC_Order $order
 	 * @return float
 	 */
 	public function get_total_shipping_refunded( $order ) {

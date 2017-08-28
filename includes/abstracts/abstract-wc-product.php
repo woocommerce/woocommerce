@@ -888,8 +888,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $class Tax class.
 	 */
 	public function set_tax_class( $class ) {
-		$class       = sanitize_title( $class );
-		$class       = 'standard' === $class ? '' : $class;
+		$class         = sanitize_title( $class );
+		$class         = 'standard' === $class ? '' : $class;
+		$valid_classes = WC_Tax::get_tax_class_slugs();
+
+		if ( ! in_array( $class, $valid_classes ) ) {
+			$class = '';
+		}
+
 		$this->set_prop( 'tax_class', $class );
 	}
 
@@ -1184,7 +1190,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set download limit.
 	 *
 	 * @since 3.0.0
-	 * @param int $download_limit
+	 * @param int|string $download_limit
 	 */
 	public function set_download_limit( $download_limit ) {
 		$this->set_prop( 'download_limit', -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit ) );
@@ -1194,7 +1200,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set download expiry.
 	 *
 	 * @since 3.0.0
-	 * @param int $download_expiry
+	 * @param int|string $download_limit
 	 */
 	public function set_download_expiry( $download_expiry ) {
 		$this->set_prop( 'download_expiry', -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry ) );
