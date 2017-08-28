@@ -102,17 +102,18 @@ class WC_Shortcode_Products {
 	 */
 	protected function parse_attributes( $attributes ) {
 		return shortcode_atts( array(
-			'per_page'  => '-1',
-			'columns'   => '4',
-			'orderby'   => 'title',
-			'order'     => 'ASC',
-			'ids'       => '',
-			'skus'      => '',
-			'category'  => '',   // Slugs.
-			'operator'  => 'IN', // Category operator. Possible values are 'IN', 'NOT IN', 'AND'.
-			'class'     => '',
-			'attribute' => '',
-			'filter'    => '',
+			'limit'          => '-1',    // Results limit.
+			'columns'        => '4',     // Number of columns.
+			'orderby'        => 'title', // menu_order, title, date, rand, price, popularity, rating, or id.
+			'order'          => 'ASC',   // ASC or DESC.
+			'ids'            => '',      // Comma separated IDs.
+			'skus'           => '',      // Comma separated SKUs.
+			'category'       => '',      // Comma separated category slugs.
+			'cat_operator'   => 'IN',    // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
+			'attribute'      => '',      // Single attribute slug.
+			'terms'          => '',      // Comma separated term slugs.
+			'terms_operator' => 'IN',    // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+			'class'          => '',      // HTML class.
 		), $attributes, $this->type );
 	}
 
@@ -133,7 +134,7 @@ class WC_Shortcode_Products {
 		);
 
 		// @codingStandardsIgnoreStart
-		$query_args['posts_per_page'] = (int) $this->attributes['per_page'];
+		$query_args['posts_per_page'] = (int) $this->attributes['limit'];
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = WC()->query->get_tax_query();
 		// @codingStandardsIgnoreEnd
@@ -203,8 +204,9 @@ class WC_Shortcode_Products {
 		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['filter'] ) ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] ),
-				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['filter'] ) ),
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ),
 				'field'    => 'slug',
+				'operator' => $this->attributes['terms_operator'],
 			);
 		}
 	}
@@ -231,7 +233,7 @@ class WC_Shortcode_Products {
 				'taxonomy' => 'product_cat',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
 				'field'    => 'slug',
-				'operator' => $this->attributes['operator'],
+				'operator' => $this->attributes['cat_operator'],
 			);
 		}
 	}
