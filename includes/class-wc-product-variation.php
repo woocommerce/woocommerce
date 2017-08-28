@@ -20,7 +20,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Post type.
 	 * @var string
 	 */
-	public $post_type = 'product_variation';
+	protected $post_type = 'product_variation';
 
 	/**
 	 * Parent data.
@@ -424,16 +424,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$attributes[ $key ] = $value;
 		}
 		$this->set_prop( 'attributes', $attributes );
-	}
-
-	/**
-	 * Returns array of attribute name value pairs. Keys are prefixed with attribute_, as stored.
-	 *
-	 * @param  string $context
-	 * @return array
-	 */
-	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
 	}
 
 	/**

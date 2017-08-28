@@ -19,7 +19,6 @@ class WC_API_Authentication {
 	 * Setup class
 	 *
 	 * @since 2.1
-	 * @return WC_API_Authentication
 	 */
 	public function __construct() {
 
@@ -291,7 +290,7 @@ class WC_API_Authentication {
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param array $parameters un-normalized pararmeters
+	 * @param array $parameters un-normalized parameters
 	 * @return array normalized parameters
 	 */
 	private function normalize_parameters( $parameters ) {

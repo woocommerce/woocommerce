@@ -110,7 +110,6 @@ class WC_Admin_Settings {
 
 	/**
 	 * Output messages + errors.
-	 * @return string
 	 */
 	public static function show_messages() {
 		if ( sizeof( self::$errors ) > 0 ) {
@@ -141,27 +140,6 @@ class WC_Admin_Settings {
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
 			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 		) );
-
-		// Include settings pages
-		self::get_settings_pages();
-
-		// Get current tab/section
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
-
-		// Save settings if data has been posted
-		if ( ! empty( $_POST ) ) {
-			self::save();
-		}
-
-		// Add any posted messages
-		if ( ! empty( $_GET['wc_error'] ) ) {
-			self::add_error( stripslashes( $_GET['wc_error'] ) );
-		}
-
-		if ( ! empty( $_GET['wc_message'] ) ) {
-			self::add_message( stripslashes( $_GET['wc_message'] ) );
-		}
 
 		// Get tabs for the settings page
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
@@ -449,7 +427,7 @@ class WC_Admin_Settings {
 				case 'checkbox' :
 
 					$option_value    = self::get_option( $value['id'], $value['default'] );
-					$visbility_class = array();
+					$visibility_class = array();
 
 					if ( ! isset( $value['hide_if_checked'] ) ) {
 						$value['hide_if_checked'] = false;
@@ -458,25 +436,25 @@ class WC_Admin_Settings {
 						$value['show_if_checked'] = false;
 					}
 					if ( 'yes' == $value['hide_if_checked'] || 'yes' == $value['show_if_checked'] ) {
-						$visbility_class[] = 'hidden_option';
+						$visibility_class[] = 'hidden_option';
 					}
 					if ( 'option' == $value['hide_if_checked'] ) {
-						$visbility_class[] = 'hide_options_if_checked';
+						$visibility_class[] = 'hide_options_if_checked';
 					}
 					if ( 'option' == $value['show_if_checked'] ) {
-						$visbility_class[] = 'show_options_if_checked';
+						$visibility_class[] = 'show_options_if_checked';
 					}
 
 					if ( ! isset( $value['checkboxgroup'] ) || 'start' == $value['checkboxgroup'] ) {
 						?>
-							<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+							<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
 								<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
 								<td class="forminp forminp-checkbox">
 									<fieldset>
 						<?php
 					} else {
 						?>
-							<fieldset class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+							<fieldset class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
 						<?php
 					}
 

@@ -36,7 +36,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $enable_meta_export = false;
 
 	/**
-	 * Which product types are beign exported.
+	 * Which product types are being exported.
 	 * @var array
 	 */
 	protected $product_types_to_export = array();
@@ -114,6 +114,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
 			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
 		) );
 	}
 
@@ -124,7 +125,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
-		$products = wc_get_products( array(
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
 			'status'   => array( 'private', 'publish' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
@@ -135,6 +136,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'return'   => 'objects',
 			'paginate' => true,
 		) );
+		$products = wc_get_products( $args );
 
 		$this->total_rows = $products->total;
 		$this->row_data   = array();

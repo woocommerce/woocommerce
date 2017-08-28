@@ -31,10 +31,6 @@ class WC_Tests_Main_Class extends WC_Unit_Test_Case {
 		$this->assertClassHasStaticAttribute( '_instance', 'WooCommerce' );
 	}
 
-	public function test_constructor() {
-
-	}
-
 	/**
 	 * Test that all WC constants are set.
 	 *

@@ -189,13 +189,17 @@ class WC_Download_Handler {
 		$wp_uploads_dir = $wp_uploads['basedir'];
 		$wp_uploads_url = $wp_uploads['baseurl'];
 
-		// Replace uploads dir, site url etc with absolute counterparts if we can
+		/**
+		 * Replace uploads dir, site url etc with absolute counterparts if we can.
+		 * Note the str_replace on site_url is on purpose, so if https is forced
+		 * via filters we can still do the string replacement on a HTTP file.
+		 */
 		$replacements = array(
-			$wp_uploads_url                  => $wp_uploads_dir,
-			network_site_url( '/', 'https' ) => ABSPATH,
-			network_site_url( '/', 'http' )  => ABSPATH,
-			site_url( '/', 'https' )         => ABSPATH,
-			site_url( '/', 'http' )          => ABSPATH,
+			$wp_uploads_url                                                   => $wp_uploads_dir,
+			network_site_url( '/', 'https' )                                  => ABSPATH,
+			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
+			site_url( '/', 'https' )                                          => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
 		);
 
 		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );

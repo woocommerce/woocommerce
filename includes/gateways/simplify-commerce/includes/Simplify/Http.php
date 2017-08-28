@@ -394,7 +394,7 @@ class Simplify_HTTP
 					break;
 			case 3: $s = $s . "=";
 					break;
-			default: throw new InvalidArgumentException('incorrecly formatted JWS payload');
+			default: throw new InvalidArgumentException('incorrectly formatted JWS payload');
 		}
 		return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
 	}

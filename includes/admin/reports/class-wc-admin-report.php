@@ -616,8 +616,6 @@ class WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {}
 

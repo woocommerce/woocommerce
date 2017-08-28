@@ -92,7 +92,7 @@ class WC_REST_Authentication {
 	 * @return WP_Error|null|bool
 	 */
 	public function check_authentication_error( $error ) {
-		// Passthrough other errors.
+		// Pass through other errors.
 		if ( ! empty( $error ) ) {
 			return $error;
 		}
@@ -103,7 +103,7 @@ class WC_REST_Authentication {
 	/**
 	 * Set authentication error.
 	 *
-	 * @param WP_Error $error Authication error data.
+	 * @param WP_Error $error Authentication error data.
 	 */
 	protected function set_error( $error ) {
 		// Reset user.
@@ -533,6 +533,8 @@ class WC_REST_Authentication {
 					return new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 				}
 				break;
+			case 'OPTIONS' :
+				return true;
 
 			default :
 				return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Unknown request method.', 'woocommerce' ), array( 'status' => 401 ) );

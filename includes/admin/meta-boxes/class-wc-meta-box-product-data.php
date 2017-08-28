@@ -357,7 +357,7 @@ class WC_Meta_Box_Product_Data {
 			'product_url'        => esc_url_raw( $_POST['_product_url'] ),
 			'button_text'        => wc_clean( $_POST['_button_text'] ),
 			'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
-			'reviews_allowed'    => ! empty( $_POST['_reviews_allowed'] ),
+			'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
 			'attributes'         => $attributes,
 			'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
 		) );

@@ -995,8 +995,6 @@ function wc_update_300_webhooks() {
 /**
  * Add an index to the field comment_type to improve the response time of the query
  * used by WC_Comments::wp_count_comments() to get the number of comments by type.
- *
- * @return null
  */
 function wc_update_300_comment_type_index() {
 	global $wpdb;
@@ -1126,6 +1124,21 @@ function wc_update_310_old_comments() {
  */
 function wc_update_310_db_version() {
 	WC_Install::update_db_version( '3.1.0' );
+}
+
+/**
+ * Update shop_manager capabilities.
+ */
+function wc_update_312_shop_manager_capabilities() {
+	$role = get_role( 'shop_manager' );
+	$role->remove_cap( 'unfiltered_html' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_312_db_version() {
+	WC_Install::update_db_version( '3.1.2' );
 }
 
 /**

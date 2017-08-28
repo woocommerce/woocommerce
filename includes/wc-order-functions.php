@@ -223,7 +223,7 @@ function wc_get_order_types( $for = '' ) {
 /**
  * Get an order type by post type name.
  * @param  string post type name
- * @return bool|array of datails about the order type
+ * @return bool|array of details about the order type
  */
 function wc_get_order_type( $type ) {
 	global $wc_order_types;
@@ -864,3 +864,146 @@ function wc_sanitize_order_id( $order_id ) {
 	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
 }
 add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
+
+/**
+ * Get an order note.
+ *
+ * @since  3.2.0
+ * @param  int|WP_Comment $data Note ID (or WP_Comment instance for internal use only).
+ * @return stdClass|null        Object with order note details or null when does not exists.
+ */
+function wc_get_order_note( $data ) {
+	if ( is_numeric( $data ) ) {
+		$data = get_comment( $data );
+	}
+
+	if ( ! is_a( $data, 'WP_Comment' ) ) {
+		return null;
+	}
+
+	return (object) apply_filters( 'woocommerce_get_order_note', array(
+		'id'            => (int) $data->comment_ID,
+		'date_created'  => wc_string_to_datetime( $data->comment_date ),
+		'content'       => $data->comment_content,
+		'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
+		'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+	), $data );
+}
+
+/**
+ * Get order notes.
+ *
+ * @since  3.2.0
+ * @param  array $args Query arguments {
+ *     Array of query parameters.
+ *
+ *     @type string $limit         Maximum number of notes to retrieve.
+ *                                 Default empty (no limit).
+ *     @type int    $order_id      Limit results to those affiliated with a given order ID.
+ *                                 Default 0.
+ *     @type array  $order__in     Array of order IDs to include affiliated notes for.
+ *                                 Default empty.
+ *     @type array  $order__not_in Array of order IDs to exclude affiliated notes for.
+ *                                 Default empty.
+ *     @type string $orderby       Define how should sort notes.
+ *                                 Accepts 'date_created', 'date_created_gmt' or 'id'.
+ *                                 Default: 'id'.
+ *     @type string $order         How to order retrieved notes.
+ *                                 Accepts 'ASC' or 'DESC'.
+ *                                 Default: 'DESC'.
+ *     @type string $type          Define what type of note should retrieve.
+ *                                 Accepts 'customer', 'internal' or empty for both.
+ *                                 Default empty.
+ * }
+ * @return stdClass[]              Array of stdClass objects with order notes details.
+ */
+function wc_get_order_notes( $args ) {
+	$key_mapping = array(
+		'limit'         => 'number',
+		'order_id'      => 'post_id',
+		'order__in'     => 'post__in',
+		'order__not_in' => 'post__not_in',
+	);
+
+	foreach ( $key_mapping as $query_key => $db_key ) {
+		if ( isset( $args[ $query_key ] ) ) {
+			$args[ $db_key ] = $args[ $query_key ];
+			unset( $args[ $query_key ] );
+		}
+	}
+
+	// Define orderby.
+	$orderby_mapping = array(
+		'date_created'     => 'comment_date',
+		'date_created_gmt' => 'comment_date_gmt',
+		'id'               => 'comment_ID',
+	);
+
+	$args['orderby'] = ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'date_created', 'date_created_gmt', 'id' ), true ) ? $orderby_mapping[ $args['orderby'] ] : 'comment_ID';
+
+	// Set WooCommerce order type.
+	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
+		$args['meta_query'] = array(
+			array(
+				'key'     => 'is_customer_note',
+				'value'   => 1,
+				'compare' => '=',
+			),
+		);
+	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
+		$args['meta_query'] = array(
+			array(
+				'key'     => 'is_customer_note',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+	}
+
+	// Set correct comment type.
+	$args['type'] = 'order_note';
+
+	// Always approved.
+	$args['status'] = 'approve';
+
+	// Does not support 'count' or 'fields';
+	unset( $args['count'], $args['fields'] );
+
+	remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+	$notes = get_comments( $args );
+
+	add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+	return array_filter( array_map( 'wc_get_order_note', $notes ) );
+}
+
+/**
+ * Create an order note.
+ *
+ * @since  3.2.0
+ * @param  int    $order_id         Order ID.
+ * @param  string $note             Note to add.
+ * @param  bool   $is_customer_note Is this a note for the customer?
+ * @param  bool   $added_by_user    Was the note added by a user?
+ * @return int|WP_Error             Integer when created or WP_Error when found an error.
+ */
+function wc_create_order_note( $order_id, $note, $is_customer_note = false, $added_by_user = false ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order ) {
+		return new WP_Error( 'invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 400 ) );
+	}
+
+	return $order->add_order_note( $note, (int) $is_customer_note, $added_by_user );
+}
+
+/**
+ * Delete an order note.
+ *
+ * @since  3.2.0
+ * @param  int $note_id Order note.
+ * @return bool         True on success, false on failure.
+ */
+function wc_delete_order_note( $note_id ) {
+	return wp_delete_comment( $note_id, true );
+}

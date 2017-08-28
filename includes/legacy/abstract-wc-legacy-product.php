@@ -681,7 +681,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	}
 
 	/**
-	 * @deprected 3.0.0 Sync is taken care of during save - no need to call this directly.
+	 * @deprecated 3.0.0 Sync is taken care of during save - no need to call this directly.
 	 */
 	public function grouped_product_sync() {
 		wc_deprecated_function( 'WC_Product::grouped_product_sync', '3.0' );

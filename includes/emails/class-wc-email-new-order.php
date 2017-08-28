@@ -23,11 +23,16 @@ class WC_Email_New_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'new_order';
-		$this->title            = __( 'New order', 'woocommerce' );
-		$this->description      = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
-		$this->template_html    = 'emails/admin-new-order.php';
-		$this->template_plain   = 'emails/plain/admin-new-order.php';
+		$this->id             = 'new_order';
+		$this->title          = __( 'New order', 'woocommerce' );
+		$this->description    = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
+		$this->template_html  = 'emails/admin-new-order.php';
+		$this->template_plain = 'emails/plain/admin-new-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
@@ -76,11 +81,9 @@ class WC_Email_New_Order extends WC_Email {
 		}
 
 		if ( is_a( $order, 'WC_Order' ) ) {
-			$this->object                  = $order;
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = wc_format_datetime( $this->object->get_date_created() );
-			$this->replace['order-number'] = $this->object->get_order_number();
+			$this->object                         = $order;
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {

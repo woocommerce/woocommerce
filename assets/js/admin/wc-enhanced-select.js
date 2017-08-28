@@ -131,6 +131,24 @@ jQuery( function( $ ) {
 								} );
 							}
 						});
+					// Keep multiselects ordered alphabetically if they are not sortable.
+					} else if ( $( this ).prop( 'multiple' ) ) {
+						$( this ).on( 'change', function(){
+							var $children = $( this ).children();
+							$children.sort(function(a, b){
+								var atext = a.text.toLowerCase();
+								var btext = b.text.toLowerCase();
+
+								if ( atext > btext ) {
+									return 1;
+								}
+								if ( atext < btext ) {
+									return -1;
+								}
+								return 0;
+							});
+							$( this ).html( $children );
+						});
 					}
 				});
 
@@ -195,6 +213,47 @@ jQuery( function( $ ) {
 							}
 						});
 					}
+				});
+
+				// Ajax category search boxes
+				$( ':input.wc-category-search' ).filter( ':not(.enhanced)' ).each( function() {
+					var select2_args = $.extend( {
+						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
+						placeholder       : $( this ).data( 'placeholder' ),
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : 3,
+						escapeMarkup      : function( m ) {
+							return m;
+						},
+						ajax: {
+							url:         wc_enhanced_select_params.ajax_url,
+							dataType:    'json',
+							delay:       250,
+							data:        function( params ) {
+								return {
+									term:     params.term,
+									action:   'woocommerce_json_search_categories',
+									security: wc_enhanced_select_params.search_categories_nonce
+								};
+							},
+							processResults: function( data ) {
+								var terms = [];
+								if ( data ) {
+									$.each( data, function( id, term ) {
+										terms.push({
+											id:   term.slug,
+											text: term.formatted_name
+										});
+									});
+								}
+								return {
+									results: terms
+								};
+							},
+							cache: true
+						}
+					}, getEnhancedSelectFormatString() );
+
+					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 			})
 

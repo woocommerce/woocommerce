@@ -18,8 +18,10 @@
 		<whitelist addUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">.</directory>
 			<exclude>
-				<directory suffix=".php">./apigen/</directory>
-				<directory suffix=".php">./i18n/</directory>
+				<directory>./apigen/</directory>
+				<directory>./assets/</directory>
+				<directory>./dummy-data/</directory>
+				<directory>./i18n/</directory>
 				<directory suffix=".php">./includes/api/legacy/</directory>
 				<directory suffix=".php">./includes/gateways/simplify-commerce-deprecated/</directory>
 				<directory suffix=".php">./includes/gateways/simplify-commerce/includes/</directory>
@@ -30,14 +32,17 @@
 				<directory suffix=".php">./includes/shipping/legacy-local-delivery/</directory>
 				<directory suffix=".php">./includes/shipping/legacy-local-pickup/</directory>
 				<directory suffix=".php">./includes/updates/</directory>
+				<directory suffix=".php">./includes/vendor/</directory>
 				<directory suffix=".php">./includes/widgets/</directory>
 				<directory suffix=".php">./templates/</directory>
 				<directory>./tests/</directory>
+				<directory>./vendor/</directory>
+				<directory>./.*/</directory>
+				<directory>./tmp/</directory>
+				<directory suffix=".php">./tests/</directory>
 				<directory suffix=".php">./tmp/</directory>
+				<directory suffix=".php">./vendor/</directory>
 			</exclude>
 		</whitelist>
 	</filter>
-	<logging>
-		<log type="coverage-html" target="./tmp/coverage" charset="UTF-8" />
-	</logging>
 </phpunit>

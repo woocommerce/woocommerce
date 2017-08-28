@@ -41,7 +41,6 @@ class WC_Helper {
 
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
 	}
@@ -476,7 +475,7 @@ class WC_Helper {
 					), admin_url( 'admin.php' ) );
 
 					/* translators: %1$s: product name, %2$s: deactivate url */
-					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactive the plugin as well.', 'woocommerce' ),
+					$message = sprintf( __( 'Subscription for %1$s deactivated successfully. You will no longer receive updates for this product. <a href="%2$s">Click here</a> if you wish to deactivate the plugin as well.', 'woocommerce' ),
 						'<strong>' . esc_html( $subscription['product_name'] ) . '</strong>', esc_url( $deactivate_plugin_url ) );
 				}
 
@@ -718,7 +717,7 @@ class WC_Helper {
 			'wc-helper-status' => 'helper-disconnected',
 		), admin_url( 'admin.php' ) );
 
-		$result = WC_Helper_API::post( 'oauth/invalidate_token', array(
+		WC_Helper_API::post( 'oauth/invalidate_token', array(
 			'authenticated' => true,
 		) );
 
@@ -941,7 +940,7 @@ class WC_Helper {
 		$plugins = get_plugins();
 		$woo_plugins = array();
 
-		// Back-compat for woothemes_queue_update().
+		// Backwards compatibility for woothemes_queue_update().
 		$_compat = array();
 		if ( ! empty( $GLOBALS['woothemes_queued_updates'] ) ) {
 			foreach ( $GLOBALS['woothemes_queued_updates'] as $_compat_plugin ) {
@@ -986,7 +985,7 @@ class WC_Helper {
 		foreach ( $themes as $theme ) {
 			$header = $theme->get( 'Woo' );
 
-			// Back-compat for theme_info.txt
+			// Backwards compatibility for theme_info.txt
 			if ( ! $header ) {
 				$txt = $theme->get_stylesheet_directory() . '/theme_info.txt';
 				if ( is_readable( $txt ) ) {
@@ -1211,22 +1210,6 @@ class WC_Helper {
 	}
 
 	/**
-	 * Add an upgrade notice if there are extensions with updates.
-	 *
-	 * @param string $message An existing update notice or an empty string.
-	 *
-	 * @return string The resulting message.
-	 */
-	public static function in_plugin_update_message( $message ) {
-		$notice = self::_get_extensions_update_notice();
-		if ( ! empty( $notice ) ) {
-			$message .= '</p><p class="wc_plugin_upgrade_notice">' . $notice;
-		}
-
-		return $message;
-	}
-
-	/**
 	 * Get an update notice if one or more Woo extensions has an update available.
 	 *
 	 * @return string|null The update notice or null if everything is up to date.
@@ -1252,7 +1235,7 @@ class WC_Helper {
 		}
 
 		/* translators: %1$s: helper url, %2$d: number of extensions */
-		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
+		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
 			admin_url( 'admin.php?page=wc-addons&section=helper' ), $available );
 	}
 

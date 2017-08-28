@@ -137,11 +137,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	public function save_item_data( &$item ) {}
 
 	/**
-	 * Clear meta cachce.
+	 * Clear meta cache.
 	 *
 	 * @param WC_Order_Item $item
 	 */
 	public function clear_cache( &$item ) {
 		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
+		wp_cache_delete( 'order-items-' . $item->get_order_id(), 'orders' );
+		wp_cache_delete( $item->get_id(), $this->meta_type . '_meta' );
 	}
 }

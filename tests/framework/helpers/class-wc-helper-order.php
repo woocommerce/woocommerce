@@ -62,7 +62,7 @@ class WC_Helper_Order {
 			'product'  => $product,
 			'quantity' => 4,
 			'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
-			'total' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+			'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
 		) );
 		$item->save();
 		$order->add_item( $item );
@@ -105,7 +105,7 @@ class WC_Helper_Order {
 		$order->set_discount_tax( 0 );
 		$order->set_cart_tax( 0 );
 		$order->set_shipping_tax( 0 );
-		$order->set_total( 40 ); // 4 x $10 simple helper product
+		$order->set_total( 50 ); // 4 x $10 simple helper product
 		$order->save();
 
 		return $order;

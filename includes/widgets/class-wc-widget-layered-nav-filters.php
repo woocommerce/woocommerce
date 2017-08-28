@@ -62,7 +62,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			$link = add_query_arg( 'max_price', wc_clean( $_GET['max_price'] ), $link );
 		}
 
-		// Orderby
+		// Order by
 		if ( isset( $_GET['orderby'] ) ) {
 			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
 		}
