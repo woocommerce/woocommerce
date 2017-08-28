@@ -12,6 +12,21 @@
 		<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
 	</div>
 
+	<div class="subsubsub">
+		<?php
+			$filters = array_keys( WC_Helper::get_filters() );
+			$last_filter = array_pop( $filters );
+			$current_filter = ! empty( $_GET['filter'] ) ? $_GET['filter'] : 'all';
+		?>
+
+		<?php foreach ( WC_Helper::get_filters() as $key => $label ) : ?>
+			<li>
+				<a <?php echo $current_filter === $key ? 'class="current"' : ''; ?> href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key ) ); ?>"><?php echo esc_html( $label ); ?></a>
+				<?php echo $key !== $last_filter ? '|' : ''; ?>
+			</li>
+		<?php endforeach; ?>
+	</div>
+
 	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>
 			<?php foreach ( $subscriptions as $subscription ) : ?>

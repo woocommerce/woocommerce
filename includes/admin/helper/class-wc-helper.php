@@ -306,9 +306,86 @@ class WC_Helper {
 		uasort( $subscriptions, array( __CLASS__, '_sort_by_product_name' ) );
 		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
+		// Filters
+		self::get_filters( $subscriptions ); // Warm it up.
+		if ( ! empty( $_GET['filter'] ) && in_array( $_GET['filter'], array_keys( self::get_filters() ) ) ) {
+			self::_filter( $subscriptions, $_GET['filter'] );
+		}
+
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
 		return;
+	}
+
+	/**
+	 * Get available subscriptions filters.
+	 *
+	 * @param array Optional subscriptions array to generate counts.
+	 *
+	 * @return array An array of filter keys and labels.
+	 */
+	public static function get_filters( $subscriptions = null ) {
+		static $filters;
+
+		if ( isset( $filters ) ) {
+			return $filters;
+		}
+
+		$filters = array(
+			'all' => __( 'All (%d)', 'woocommerce' ),
+			'active' => __( 'Active (%d)', 'woocommerce' ),
+			'inactive' => __( 'Inactive (%d)', 'woocommerce' ),
+			'update-available' => __( 'Update Available (%d)', 'woocommerce' ),
+			'expiring' => __( 'Expiring Soon (%d)', 'woocommerce' ),
+			'expired' => __( 'Expired (%d)', 'woocommerce' ),
+			'download' => __( 'Download (%d)', 'woocommerce' ),
+		);
+
+		foreach ( $filters as $key => $label ) {
+			$_subs = $subscriptions;
+			self::_filter( $_subs, $key );
+			$filters[ $key ] = sprintf( $label, count( $_subs ) );
+		}
+
+		return $filters;
+	}
+
+	/**
+	 * Filter an array of subscriptions by $filter.
+	 *
+	 * @param array $subscriptions The subscriptions array, passed by ref.
+	 * @param string $filter The filter.
+	 */
+	private static function _filter( &$subscriptions, $filter ) {
+		switch( $filter ) {
+			case 'active':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => true ) );
+				break;
+
+			case 'inactive':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => false ) );
+				break;
+
+			case 'update-available':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'has_update' => true ) );
+				break;
+
+			case 'expiring':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'expiring' => true ) );
+				break;
+
+			case 'expired':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'expired' => true ) );
+				break;
+
+			case 'download':
+				foreach ( $subscriptions as $key => $subscription ) {
+					if ( $subscription['local']['installed'] || $subscription['expired'] ) {
+						unset( $subscriptions[ $key ] );
+					}
+				}
+				break;
+		}
 	}
 
 	/**
