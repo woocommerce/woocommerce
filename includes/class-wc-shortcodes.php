@@ -131,12 +131,12 @@ class WC_Shortcodes {
 		}
 
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'menu_order title',
-			'order'    => 'ASC',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'orderby'      => 'menu_order title',
+			'order'        => 'ASC',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'product_category' );
@@ -153,8 +153,12 @@ class WC_Shortcodes {
 	public static function product_categories( $atts ) {
 		global $woocommerce_loop;
 
+		if ( isset( $atts['number'] ) ) {
+			$atts['limit'] = $atts['number'];
+		}
+
 		$atts = shortcode_atts( array(
-			'number'     => null,
+			'limit'      => '-1',
 			'orderby'    => 'name',
 			'order'      => 'ASC',
 			'columns'    => '4',
@@ -192,8 +196,9 @@ class WC_Shortcodes {
 			}
 		}
 
-		if ( $atts['number'] ) {
-			$product_categories = array_slice( $product_categories, 0, $atts['number'] );
+		$atts['limit'] = '-1' === $atts['limit'] ? null : intval( $atts['limit'] );
+		if ( $atts['limit'] ) {
+			$product_categories = array_slice( $product_categories, 0, $atts['limit'] );
 		}
 
 		$columns = absint( $atts['columns'] );
@@ -226,12 +231,12 @@ class WC_Shortcodes {
 	 */
 	public static function recent_products( $atts ) {
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'date',
-			'order'    => 'DESC',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'orderby'      => 'date',
+			'order'        => 'DESC',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'recent_products' );
@@ -276,10 +281,10 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$atts['skus']     = isset( $atts['sku'] ) ? $atts['sku'] : '';
-		$atts['ids']      = isset( $atts['id'] ) ? $atts['id'] : '';
-		$atts['per_page'] = '1';
-		$shortcode        = new WC_Shortcode_Products( (array) $atts, 'product' );
+		$atts['skus']  = isset( $atts['sku'] ) ? $atts['sku'] : '';
+		$atts['ids']   = isset( $atts['id'] ) ? $atts['id'] : '';
+		$atts['limit'] = '1';
+		$shortcode     = new WC_Shortcode_Products( (array) $atts, 'product' );
 
 		return $shortcode->get_content();
 	}
@@ -382,12 +387,12 @@ class WC_Shortcodes {
 	 */
 	public static function sale_products( $atts ) {
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'ASC',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'orderby'      => 'title',
+			'order'        => 'ASC',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'sale_products' );
@@ -403,10 +408,10 @@ class WC_Shortcodes {
 	 */
 	public static function best_selling_products( $atts ) {
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'best_selling_products' );
@@ -422,12 +427,12 @@ class WC_Shortcodes {
 	 */
 	public static function top_rated_products( $atts ) {
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'ASC',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'orderby'      => 'title',
+			'order'        => 'ASC',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'top_rated_products' );
@@ -443,12 +448,12 @@ class WC_Shortcodes {
 	 */
 	public static function featured_products( $atts ) {
 		$atts = array_merge( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'date',
-			'order'    => 'DESC',
-			'category' => '',
-			'operator' => 'IN',
+			'limit'        => '12',
+			'columns'      => '4',
+			'orderby'      => 'date',
+			'order'        => 'DESC',
+			'category'     => '',
+			'cat_operator' => 'IN',
 		), (array) $atts );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'featured_products' );
@@ -594,15 +599,15 @@ class WC_Shortcodes {
 	 */
 	public static function product_attribute( $atts ) {
 		$atts = array_merge( array(
-			'per_page'  => '12',
+			'limit'     => '12',
 			'columns'   => '4',
 			'orderby'   => 'title',
 			'order'     => 'ASC',
 			'attribute' => '',
-			'filter'    => '',
+			'terms'     => '',
 		), (array) $atts );
 
-		if ( empty( $atts['attribute'] ) || empty( $atts['filter'] ) ) {
+		if ( empty( $atts['attribute'] ) ) {
 			return '';
 		}
 
@@ -618,9 +623,13 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function related_products( $atts ) {
+		if ( isset( $atts['per_page'] ) ) {
+			$atts['limit'] = $atts['per_page'];
+		}
+
 		// @codingStandardsIgnoreStart
 		$atts = shortcode_atts( array(
-			'per_page' => '4',
+			'limit'    => '4',
 			'columns'  => '4',
 			'orderby'  => 'rand',
 		), $atts, 'related_products' );
@@ -629,7 +638,7 @@ class WC_Shortcodes {
 		ob_start();
 
 		// Rename arg.
-		$atts['posts_per_page'] = absint( $atts['per_page'] );
+		$atts['posts_per_page'] = absint( $atts['limit'] );
 
 		woocommerce_related_products( $atts );
 
