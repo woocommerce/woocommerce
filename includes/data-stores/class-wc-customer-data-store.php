@@ -375,6 +375,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {
+		if ( $results = apply_filters( 'woocommerce_customer_pre_search_customers', array(), $term, $limit ) ) {
+			return $results;
+		}
+
 		$query = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
