@@ -375,7 +375,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {
-		if ( $results = apply_filters( 'woocommerce_customer_pre_search_customers', array(), $term, $limit ) ) {
+		$results = apply_filters( 'woocommerce_customer_pre_search_customers', false, $term, $limit );
+		if ( is_array( $results ) ) {
 			return $results;
 		}
 
