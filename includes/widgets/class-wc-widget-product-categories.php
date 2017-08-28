@@ -1,17 +1,21 @@
 <?php
+/**
+ * Product Categories Widget
+ *
+ * @author   Automattic
+ * @category Widgets
+ * @package  WooCommerce/Widgets
+ * @version  2.3.0
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Product Categories Widget.
+ * Product categories widget class.
  *
- * @author   WooThemes
- * @category Widgets
- * @package  WooCommerce/Widgets
- * @version  2.3.0
- * @extends  WC_Widget
+ * @extends WC_Widget
  */
 class WC_Widget_Product_Categories extends WC_Widget {
 
@@ -91,8 +95,8 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	 * Output widget.
 	 *
 	 * @see WP_Widget
-	 * @param array $args
-	 * @param array $instance
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Widget instance.
 	 */
 	public function widget( $args, $instance ) {
 		global $wp_query, $post;
@@ -103,9 +107,16 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$dropdown           = isset( $instance['dropdown'] ) ? $instance['dropdown'] : $this->settings['dropdown']['std'];
 		$orderby            = isset( $instance['orderby'] ) ? $instance['orderby'] : $this->settings['orderby']['std'];
 		$hide_empty         = isset( $instance['hide_empty'] ) ? $instance['hide_empty'] : $this->settings['hide_empty']['std'];
-		$dropdown_args      = array( 'hide_empty' => $hide_empty );
-		$list_args          = array( 'show_count' => $count, 'hierarchical' => $hierarchical, 'taxonomy' => 'product_cat', 'hide_empty' => $hide_empty );
-		$max_depth          = absint( isset( $instance['max_depth'] ) ? $instance['max_depth'] : $this->settings['max_depth']['std']);
+		$dropdown_args      = array(
+			'hide_empty' => $hide_empty,
+		);
+		$list_args          = array(
+			'show_count'   => $count,
+			'hierarchical' => $hierarchical,
+			'taxonomy'     => 'product_cat',
+			'hide_empty'   => $hide_empty,
+		);
+		$max_depth          = absint( isset( $instance['max_depth'] ) ? $instance['max_depth'] : $this->settings['max_depth']['std'] );
 
 		$list_args['menu_order'] = false;
 		$dropdown_args['depth']  = $max_depth;
@@ -125,7 +136,9 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 
 		} elseif ( is_singular( 'product' ) ) {
-			$product_category = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_product_categories_widget_product_terms_args', array( 'orderby' => 'parent' ) ) );
+			$product_category = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_product_categories_widget_product_terms_args', array(
+				'orderby' => 'parent',
+			) ) );
 
 			if ( ! empty( $product_category ) ) {
 				$this->current_cat   = end( $product_category );
@@ -183,9 +196,10 @@ class WC_Widget_Product_Categories extends WC_Widget {
 						'hide_empty'   => false,
 					)
 				);
-			}
+			} // End if().
 
-			$dropdown_args['include'] = $list_args['include'] = implode( ',', $include );
+			$list_args['include']     = implode( ',', $include );
+			$dropdown_args['include'] = $list_args['include'];
 
 			if ( empty( $include ) ) {
 				return;
@@ -197,7 +211,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$list_args['depth']            = 1;
 			$list_args['child_of']         = 0;
 			$list_args['hierarchical']     = 1;
-		}
+		} // End if().
 
 		$this->widget_start( $args, $instance );
 
@@ -230,7 +244,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$list_args['title_li']                   = '';
 			$list_args['pad_counts']                 = 1;
 			$list_args['show_option_none']           = __( 'No product categories exist.', 'woocommerce' );
-			$list_args['current_category']           = ( $this->current_cat ) ? $this->current_cat->term_id: '';
+			$list_args['current_category']           = ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$list_args['current_category_ancestors'] = $this->cat_ancestors;
 
 			echo '<ul class="product-categories">';
@@ -238,7 +252,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			wp_list_categories( apply_filters( 'woocommerce_product_categories_widget_args', $list_args ) );
 
 			echo '</ul>';
-		}
+		} // End if().
 
 		$this->widget_end( $args );
 	}
