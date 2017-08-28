@@ -17,6 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 			$count = WC_Helper_Updater::get_updates_count();
 			$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">(%d)</span></span>', $count, number_format_i18n( $count ) );
+			if ( ! $count ) {
+				$count_html = '';
+			}
+
 			$menu_title = sprintf( __( 'WooCommerce.com Subscriptions %s', 'woocommerce' ), $count_html );
 		?>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo $menu_title; ?></a>
