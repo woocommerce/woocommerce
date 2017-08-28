@@ -230,6 +230,29 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Get the number of products that have updates.
+	 *
+	 * @return int The number of products with updates.
+	 */
+	public static function get_updates_count() {
+		// Don't fetch any new data since this function in high-frequency.
+		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
+			return 0;
+		}
+
+		if ( ! get_transient( '_woocommerce_helper_updates' ) ) {
+			return 0;
+		}
+
+		$data = self::get_update_data();
+		if ( empty( $data ) ) {
+			return 0;
+		}
+
+		return count( $data );
+	}
+
+	/**
 	 * Flushes cached update data.
 	 */
 	public static function flush_updates_cache() {
