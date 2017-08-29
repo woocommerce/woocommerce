@@ -12,7 +12,8 @@
 		<p><?php printf( __( 'Below is a list of extensions available on your WooCommerce.com account. To receive extension updates please make sure the extension is installed, and its subscription activated and connected to your WooCommerce.com account. Extensions can be activated from the <a href="%s">Plugins</a> screen.', 'woocommerce' ), admin_url( 'plugins.php' ) ); ?></p>
 	</div>
 
-	<div class="subsubsub">
+	<ul class="subscription-filter">
+		<label><?php _e( 'Sort by:', 'woocommerce' ); ?> <span class="chevron dashicons dashicons-arrow-up-alt2"></span></label>
 		<?php
 			$filters = array_keys( WC_Helper::get_filters() );
 			$last_filter = array_pop( $filters );
@@ -22,10 +23,9 @@
 		<?php foreach ( WC_Helper::get_filters() as $key => $label ) : ?>
 			<li>
 				<a <?php echo $current_filter === $key ? 'class="current"' : ''; ?> href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key ) ); ?>"><?php echo esc_html( $label ); ?></a>
-				<?php echo $key !== $last_filter ? '|' : ''; ?>
 			</li>
 		<?php endforeach; ?>
-	</div>
+	</ul>
 
 	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>
