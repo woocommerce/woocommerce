@@ -42,6 +42,14 @@ class WC_Shortcode_Products {
 	protected $query_args = array();
 
 	/**
+	 * Set custom visibility.
+	 *
+	 * @since 3.2.0
+	 * @var   bool
+	 */
+	protected $custom_visibility = false;
+
+	/**
 	 * Initialize shortcode.
 	 *
 	 * @since 3.2.0
@@ -105,18 +113,19 @@ class WC_Shortcode_Products {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
 		return shortcode_atts( array(
-			'limit'          => '-1',    // Results limit.
-			'columns'        => '4',     // Number of columns.
-			'orderby'        => 'title', // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'          => 'ASC',   // ASC or DESC.
-			'ids'            => '',      // Comma separated IDs.
-			'skus'           => '',      // Comma separated SKUs.
-			'category'       => '',      // Comma separated category slugs.
-			'cat_operator'   => 'IN',    // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
-			'attribute'      => '',      // Single attribute slug.
-			'terms'          => '',      // Comma separated term slugs.
-			'terms_operator' => 'IN',    // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
-			'class'          => '',      // HTML class.
+			'limit'          => '-1',      // Results limit.
+			'columns'        => '4',       // Number of columns.
+			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
+			'order'          => 'ASC',     // ASC or DESC.
+			'ids'            => '',        // Comma separated IDs.
+			'skus'           => '',        // Comma separated SKUs.
+			'category'       => '',        // Comma separated category slugs.
+			'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
+			'attribute'      => '',        // Single attribute slug.
+			'terms'          => '',        // Comma separated term slugs.
+			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+			'class'          => '',        // HTML class.
 		), $attributes, $this->type );
 	}
 
@@ -163,8 +172,11 @@ class WC_Shortcode_Products {
 		// @codingStandardsIgnoreStart
 		$query_args['posts_per_page'] = (int) $this->attributes['limit'];
 		$query_args['meta_query']     = WC()->query->get_meta_query();
-		$query_args['tax_query']      = WC()->query->get_tax_query();
+		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
+
+		// Visibility.
+		$this->set_visibility_query_args( $query_args );
 
 		// SKUs.
 		$this->set_skus_query_args( $query_args );
@@ -228,7 +240,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_attributes_query_args( &$query_args ) {
-		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['filter'] ) ) {
+		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['terms'] ) ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] ),
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ),
@@ -290,18 +302,87 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Set featured products query args.
+	 * Set visibility query args.
 	 *
 	 * @since 3.2.0
 	 * @param array $query_args Query args.
 	 */
-	protected function set_featured_products_query_args( &$query_args ) {
-		$query_args['tax_query'][] = array(
-			'taxonomy' => 'product_visibility',
-			'terms'    => 'featured',
-			'field'    => 'name',
-			'operator' => 'IN',
-		);
+	protected function set_visibility_query_args( &$query_args ) {
+		switch ( $this->attributes['visibility'] ) {
+			case 'hidden' :
+					$this->custom_visibility = true;
+					$query_args['tax_query'][] = array(
+						'taxonomy'         => 'product_visibility',
+						'terms'            => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'field'            => 'name',
+						'operator'         => 'AND',
+						'include_children' => false,
+					);
+				break;
+			case 'catalog' :
+					$this->custom_visibility = true;
+					$query_args['tax_query'][] = array(
+						'taxonomy'         => 'product_visibility',
+						'terms'            => 'exclude-from-search',
+						'field'            => 'name',
+						'operator'         => 'IN',
+						'include_children' => false,
+					);
+					$query_args['tax_query'][] = array(
+						'taxonomy'         => 'product_visibility',
+						'terms'            => 'exclude-from-catalog',
+						'field'            => 'name',
+						'operator'         => 'NOT IN',
+						'include_children' => false,
+					);
+				break;
+			case 'search' :
+					$this->custom_visibility = true;
+					$query_args['tax_query'][] = array(
+						'taxonomy'         => 'product_visibility',
+						'terms'            => 'exclude-from-catalog',
+						'field'            => 'name',
+						'operator'         => 'IN',
+						'include_children' => false,
+					);
+					$query_args['tax_query'][] = array(
+						'taxonomy'         => 'product_visibility',
+						'terms'            => 'exclude-from-search',
+						'field'            => 'name',
+						'operator'         => 'NOT IN',
+						'include_children' => false,
+					);
+				break;
+			case 'featured' :
+					$query_args['tax_query']   = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
+					$query_args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'terms'    => 'featured',
+						'field'    => 'name',
+						'operator' => 'IN',
+						'include_children' => false,
+					);
+				break;
+
+			default :
+					$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
+				break;
+		}
+	}
+
+	/**
+	 * Set product as visible when quering for hidden products.
+	 *
+	 * @since  3.2.0
+	 * @param  bool $visibility Product visibility.
+	 * @return bool
+	 */
+	public function set_product_as_visible( $visibility ) {
+		if ( $this->custom_visibility ) {
+			return true;
+		}
+
+		return $visibility;
 	}
 
 	/**
@@ -324,6 +405,36 @@ class WC_Shortcode_Products {
 	}
 
 	/**
+	 * Get products.
+	 *
+	 * @since  3.2.0
+	 * @return array
+	 */
+	protected function get_products() {
+		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$products       = get_transient( $transient_name );
+
+		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
+			if ( 'top_rated_products' === $this->type ) {
+				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
+				$products = new WP_Query( $this->query_args );
+				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
+			} else {
+				$products = new WP_Query( $this->query_args );
+			}
+
+			// Remove ordering query arguments.
+			if ( ! empty( $this->attributes['category'] ) ) {
+				WC()->query->remove_ordering_args();
+			}
+
+			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+		}
+
+		return $products;
+	}
+
+	/**
 	 * Loop over found products.
 	 *
 	 * @since  3.2.0
@@ -336,25 +447,7 @@ class WC_Shortcode_Products {
 		$classes                     = $this->get_wrapper_classes( $columns );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $this->type;
-		$transient_name              = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
-		$products                    = get_transient( $transient_name );
-
-		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
-			if ( 'top_rated_products' === $this->type ) {
-				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-				$products = new WP_Query( $this->query_args );
-				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-			} else {
-				$products = new WP_Query( $this->query_args );
-			}
-
-			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
-		}
-
-		// Remove ordering query arguments.
-		if ( ! empty( $this->attributes['category'] ) ) {
-			WC()->query->remove_ordering_args();
-		}
+		$products                    = $this->get_products();
 
 		ob_start();
 
@@ -368,7 +461,15 @@ class WC_Shortcode_Products {
 
 			while ( $products->have_posts() ) {
 				$products->the_post();
+
+				// Set custom product visibility when quering hidden products.
+				add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+
+				// Render product template.
 				wc_get_template_part( 'content', 'product' );
+
+				// Restore product visibility.
+				remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
 			}
 
 			woocommerce_product_loop_end();
