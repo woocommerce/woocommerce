@@ -64,7 +64,7 @@ class WC_Product_Query extends WC_Object_Query {
 
 	/**
 	 * Get products matching the current query vars.
-	 * @return array of WC_Product objects
+	 * @return array|object of WC_Product objects
 	 */
 	public function get_products() {
 		$args = apply_filters( 'woocommerce_product_object_query_args', $this->get_query_vars() );
