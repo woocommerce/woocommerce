@@ -775,21 +775,21 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			ob_start();
-
 			foreach ( $items_to_add as $item_to_add ) {
 				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
 					continue;
 				}
-				$item_id     = $order->add_product( wc_get_product( $item_to_add ) );
-				$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-				$order_taxes = $order->get_taxes();
-				$class       = 'new_row';
-
-				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-				include( 'admin/meta-boxes/views/html-order-item.php' );
+				$item_id        = $order->add_product( wc_get_product( $item_to_add ) );
+				$item           = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
 
+			do_action( 'woocommerce_ajax_added_order_items', $item_id, $item, $order );
+
+			$data = get_post_meta( $order_id );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
 			) );
