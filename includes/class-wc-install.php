@@ -796,6 +796,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
+		// Bypass if filesystem is read-only and/or non-standard upload system is used
+		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
+			return;
+		}
+
 		// Install files and folders for uploading files and prevent hotlinking
 		$upload_dir      = wp_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
