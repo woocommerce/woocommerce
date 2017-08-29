@@ -494,8 +494,8 @@ class WC_Checkout {
 	/**
 	 * Add coupon lines to the order.
 	 *
-	 * @param  WC_Order $order
-	 * @param WC_Cart $cart
+	 * @param WC_Order $order
+	 * @param WC_Cart  $cart
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
 		foreach ( $cart->get_coupons() as $code => $coupon ) {
@@ -505,6 +505,7 @@ class WC_Checkout {
 				'discount'     => $cart->get_coupon_discount_amount( $code ),
 				'discount_tax' => $cart->get_coupon_discount_tax_amount( $code ),
 			) );
+			$item->add_meta_data( 'coupon_data', $coupon->get_data() );
 
 			/**
 			 * Action hook to adjust item before save.
