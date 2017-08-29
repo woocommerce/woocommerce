@@ -692,14 +692,14 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_payment_gateways() {
 		$gateways = array(
-			'paypal-braintree' => array(
+			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
-			'paypal-ec' => array(
+			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
@@ -750,14 +750,14 @@ class WC_Admin_Setup_Wizard {
 		$country = WC()->countries->get_base_country();
 
 		if ( 'US' === $country ) {
-			unset( $gateways['paypal-ec'] );
+			unset( $gateways['ppec_paypal'] );
 		} else {
-			unset( $gateways['paypal-braintree'] );
+			unset( $gateways['braintree_paypal'] );
 		}
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['paypal-braintree'] );
-			unset( $gateways['paypal-ec'] );
+			unset( $gateways['braintree_paypal'] );
+			unset( $gateways['ppec_paypal'] );
 			unset( $gateways['stripe'] );
 		}
 
