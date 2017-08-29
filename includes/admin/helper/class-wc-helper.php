@@ -380,7 +380,7 @@ class WC_Helper {
 	 * @param string $filter The filter.
 	 */
 	private static function _filter( &$subscriptions, $filter ) {
-		switch( $filter ) {
+		switch ( $filter ) {
 			case 'active':
 				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => true ) );
 				break;

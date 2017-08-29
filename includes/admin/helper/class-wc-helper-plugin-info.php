@@ -37,7 +37,7 @@ class WC_Helper_Plugin_Info {
 		}
 
 		// Only for slugs that start with woo-
-		if ( strpos( $args->slug, 'woo-') !== 0 ) {
+		if ( 0 !== strpos( $args->slug, 'woo-' ) ) {
 			return $response;
 		}
 
