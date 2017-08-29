@@ -5,7 +5,7 @@
 
 	<?php
 		$count = WC_Helper_Updater::get_updates_count();
-		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">(%d)</span></span>', $count, number_format_i18n( $count ) );
+		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
 		if ( ! $count ) {
 			$count_html = '';
 		}
