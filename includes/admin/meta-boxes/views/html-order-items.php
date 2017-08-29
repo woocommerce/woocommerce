@@ -56,7 +56,6 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items as $item_id => $item ) {
 				do_action( 'woocommerce_before_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );
 
-				$class = isset( $new_item_ids ) && is_array( $new_item_ids ) && in_array( $item_id, $new_item_ids ) ? 'new_row' : '';
 				include( 'html-order-item.php' );
 
 				do_action( 'woocommerce_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );

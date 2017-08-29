@@ -770,7 +770,6 @@ class WC_AJAX {
 			$order_id     = absint( $_POST['order_id'] );
 			$order        = wc_get_order( $order_id );
 			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
-			$new_item_ids = array();
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -782,8 +781,6 @@ class WC_AJAX {
 				}
 				$item_id        = $order->add_product( wc_get_product( $item_to_add ) );
 				$item           = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-				$new_item_ids[] = $item_id;
-
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
 
