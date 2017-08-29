@@ -22,6 +22,8 @@ $theme            = $system_status->get_theme_info();
 $security         = $system_status->get_security_info();
 $settings         = $system_status->get_settings();
 $pages            = $system_status->get_pages();
+$plugin_updates   = new WC_Plugin_Updates;
+$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
@@ -455,6 +457,7 @@ $pages            = $system_status->get_pages();
 
 				$version_string = '';
 				$network_string = '';
+				$untested_string = '';
 				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: %s: plugin latest version */
@@ -464,6 +467,10 @@ $pages            = $system_status->get_pages();
 					if ( false != $plugin['network_activated'] ) {
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
+
+					if ( in_array( $plugin['plugin'], array_keys( $untested_plugins ) ) ) {
+						$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
+					}
 				}
 				?>
 				<tr>
@@ -472,7 +479,7 @@ $pages            = $system_status->get_pages();
 					<td><?php
 						/* translators: %s: plugin author */
 						printf( __( 'by %s', 'woocommerce' ), $plugin['author_name'] );
-						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $untested_string . $network_string;
 					?></td>
 				</tr>
 				<?php
