@@ -80,12 +80,12 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 			$coupon_item_1->set_props( array(
 				'code'         => 'test-coupon-1',
 				'discount'     => 1,
-				'discount_tax' => 0.1,
+				'discount_tax' => get_option( 'woocommerce_calc_taxes', 'no' ) === 'yes' ? 0.1 : 0,
 			) );
 			$coupon_item_2->set_props( array(
 				'code'         => 'this-is-a-virtal-coupon',
 				'discount'     => 200,
-				'discount_tax' => 20,
+				'discount_tax' => get_option( 'woocommerce_calc_taxes', 'no' ) === 'yes' ? 20 : 0,
 			) );
 		}
 
@@ -311,6 +311,61 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	 */
 	function test_add_coupon_to_order_no_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$this->setUp();
+
+		$order_id = $this->objects['order']->get_id();
+		$order    = wc_get_order( $order_id );
+
+		$order->apply_coupon( 'test-coupon-2' );
+		$this->assertEquals( '639.2', $order->get_total(), $order->get_total() );
+	}
+
+	/**
+	 * Test: test_remove_coupon_from_order_no_tax
+	 */
+	function test_remove_coupon_from_order_no_tax_inc_prices_on() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$this->setUp();
+
+		$order_id = $this->objects['order']->get_id();
+		$order    = wc_get_order( $order_id );
+
+		// Check it's expected.
+		$this->assertEquals( 'shop_order', $order->get_type() );
+		$this->assertEquals( '799', $order->get_total(), $order->get_total() );
+
+		// Remove the virtual coupon. Total should be 999.
+		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$this->assertEquals( '999', $order->get_total(), $order->get_total() );
+
+		// Remove the other coupon. Total should be 1000.
+		$order->remove_coupon( 'test-coupon-1' );
+		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
+
+		// Reset.
+		$this->setUp();
+
+		$order_id = $this->objects['order']->get_id();
+		$order    = wc_get_order( $order_id );
+
+		// Check it's expected.
+		$this->assertEquals( 'shop_order', $order->get_type() );
+		$this->assertEquals( '799', $order->get_total(), $order->get_total() );
+
+		// Do the above tests in reverse.
+		$order->remove_coupon( 'test-coupon-1' );
+		$this->assertEquals( '800', $order->get_total(), $order->get_total() );
+		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
+	}
+
+	/**
+	 * Test: test_add_coupon_to_order_no_tax
+	 */
+	function test_add_coupon_to_order_no_tax_inc_prices_on() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		$this->setUp();
 

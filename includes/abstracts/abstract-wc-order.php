@@ -1043,7 +1043,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$item = $this->get_item( $item_id, false );
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
-				if ( $this->get_prices_include_tax() ) {
+				if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
 					$amount_tax = WC_Tax::get_tax_total( WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
 					$amount    -= $amount_tax;
 					$item->set_total( max( 0, $item->get_total() - $amount ) );
@@ -1083,7 +1083,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( $this->get_prices_include_tax() ) {
+					if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
 						$amount_tax    = array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
 						$discount_tax += $amount_tax;
 						$amount        = $amount - $amount_tax;
