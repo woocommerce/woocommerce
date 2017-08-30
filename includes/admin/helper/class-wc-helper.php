@@ -337,20 +337,6 @@ class WC_Helper {
 		);
 
 		return $filters;
-
-		if ( empty( $subscriptions ) ) {
-			return $filters;
-		}
-
-		foreach ( $filters as $key => $label ) {
-			$_subs = $subscriptions;
-			self::_filter( $_subs, $key );
-			$filters[ $key ] = sprintf( $label, count( $_subs ) );
-		}
-
-		// Cache it.
-		$_filters = $filters;
-		return $_filters;
 	}
 
 	/**
