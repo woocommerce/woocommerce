@@ -438,16 +438,16 @@ class WC_Query {
 
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
-		$args    = array();
+		$args    = array(
+			'orderby'  => 'relevance',
+			'order'    => 'DESC',
+			'meta_key' => '',
+		);
 
 		// Set to default. Menu order for non-searches, relevance for searches.
 		if ( ! is_search() ) {
 			$args['orderby']  = 'menu_order title';
 			$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-			$args['meta_key'] = '';
-		} else {
-			$args['orderby']  = 'relevance';
-			$args['order']    = 'DESC';
 			$args['meta_key'] = '';
 		}
 

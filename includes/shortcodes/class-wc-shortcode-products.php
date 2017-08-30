@@ -53,8 +53,8 @@ class WC_Shortcode_Products {
 	 * Initialize shortcode.
 	 *
 	 * @since 3.2.0
-	 * @param array $attributes Shortcode attributes.
-	 * @param array $type       Shortcode type.
+	 * @param array  $attributes Shortcode attributes.
+	 * @param string $type       Shortcode type.
 	 */
 	public function __construct( $attributes = array(), $type = 'products' ) {
 		$this->type       = $type;
@@ -259,14 +259,11 @@ class WC_Shortcode_Products {
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
 			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-			$query_args['orderby'] = $ordering_args['orderby'];
-			$query_args['order']   = $ordering_args['order'];
-
-			if ( isset( $ordering_args['meta_key'] ) ) {
-				// @codingStandardsIgnoreStart
-				$query_args['meta_key'] = $ordering_args['meta_key'];
-				// @codingStandardsIgnoreEnd
-			}
+			$query_args['orderby']  = $ordering_args['orderby'];
+			$query_args['order']    = $ordering_args['order'];
+ 			// @codingStandardsIgnoreStart
+			$query_args['meta_key'] = $ordering_args['meta_key'];
+			// @codingStandardsIgnoreEnd
 
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
@@ -410,11 +407,7 @@ class WC_Shortcode_Products {
 	 * @return bool
 	 */
 	public function set_product_as_visible( $visibility ) {
-		if ( $this->custom_visibility ) {
-			return true;
-		}
-
-		return $visibility;
+		return $this->custom_visibility ? true : $visibility;
 	}
 
 	/**
@@ -440,7 +433,7 @@ class WC_Shortcode_Products {
 	 * Get products.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return WP_Query
 	 */
 	protected function get_products() {
 		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
