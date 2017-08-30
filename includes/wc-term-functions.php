@@ -177,67 +177,41 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
 /**
  * WooCommerce Dropdown categories.
  *
- * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
- * We use a custom walker, just like WordPress does.
- *
- * @param array $args
- * @param int $deprecated_hierarchical
- * @param int $deprecated_show_uncategorized (default: 1)
- * @param string $deprecated_orderby
- *
+ * @param array $args Args to control display of dropdown.
  * @return string
  */
-function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
+function wc_product_dropdown_categories( $args = array() ) {
 	global $wp_query;
 
-	if ( ! is_array( $args ) ) {
-		wc_deprecated_argument( 'wc_product_dropdown_categories()', '2.1', 'show_counts, hierarchical, show_uncategorized and orderby arguments are invalid - pass a single array of values instead.' );
-
-		$args['show_count']         = $args;
-		$args['hierarchical']       = $deprecated_hierarchical;
-		$args['show_uncategorized'] = $deprecated_show_uncategorized;
-		$args['orderby']            = $deprecated_orderby;
-	}
-
-	$current_product_cat = isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '';
-	$defaults            = array(
+	$args = wp_parse_args( $args, array(
 		'pad_counts'         => 1,
 		'show_count'         => 1,
 		'hierarchical'       => 1,
 		'hide_empty'         => 1,
 		'show_uncategorized' => 1,
 		'orderby'            => 'name',
-		'selected'           => $current_product_cat,
+		'selected'           => isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat']: '',
 		'menu_order'         => false,
-		'option_select_text' => __( 'Select a category', 'woocommerce' ),
-	);
-
-	$args = wp_parse_args( $args, $defaults );
+		'show_option_none'   => __( 'Select a category', 'woocommerce' ),
+		'option_none_value'  => '',
+		'value_field'        => 'slug',
+		'taxonomy'           => 'product_cat',
+		'name'               => 'product_cat',
+		'class'              => 'dropdown_product_cat',
+	) );
 
 	if ( 'order' === $args['orderby'] ) {
 		$args['menu_order'] = 'asc';
 		$args['orderby']    = 'name';
 	}
 
-	$terms = get_terms( 'product_cat', apply_filters( 'wc_product_dropdown_categories_get_terms_args', $args ) );
-
-	if ( empty( $terms ) ) {
-		return;
-	}
-
-	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
-	$output .= '<option value="" ' . selected( $current_product_cat, '', false ) . '>' . esc_html( $args['option_select_text'] ) . '</option>';
-	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
-	if ( $args['show_uncategorized'] ) {
-		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . esc_html__( 'Uncategorized', 'woocommerce' ) . '</option>';
-	}
-	$output .= "</select>";
-
-	echo $output;
+	wp_dropdown_categories( $args );
 }
 
 /**
- * Walk the Product Categories.
+ * Custom walker for Product Categories.
+ *
+ * Previously used by wc_product_dropdown_categories, but wp_dropdown_categories has been fixed in core.
  *
  * @return mixed
  */

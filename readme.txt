@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.8
-Stable tag: 3.0.8
+Stable tag: 3.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -128,7 +128,7 @@ For extending or theming WooCommerce, see our [codex](https://docs.woocommerce.c
 
 If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
-For help with premium extensions from WooThemes, use [our helpdesk](https://support.woothemes.com/).
+For help with premium extensions from WooCommerce.com, use [our helpdesk](https://woocommerce.com/my-account/tickets/).
 
 = Will WooCommerce work with my theme? =
 
@@ -162,43 +162,60 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.2.0 - 2017-XX-XX =
+* Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
 * Feature - Simplified the ability to resend order details to customers with a single "Resend Order Details" action.
 * Feature - Added store street address, city and postal code to settings for use by plugins.
-* Feature - wrapping values in quotes now let's you use commas in the product CSV importer.
+* Feature - Wrapping values in quotes now let's you use commas in the product CSV importer.
 * Feature - If a fatal error occurs, WooCommerce will catch and log it to be viewed in WC > Status > Logs.
 * Feature - Drag and drop sorting on the grouped product field to control display order.
-* Feature - Integrated selectWoo; more accessible Select2 (enhanced select boxes) in admin and on the frontend.
+* Feature - Integrated selectWoo; more accessible Select2 (enhanced select boxes) in admin and on the front-end.
 * Feature - Enhanced select boxes in the shipping calculator.
 * Feature - Enhanced select boxes in layered nav "or" widget.
 * Feature - Ajaxified the product category filter on the products screen.
-* Tweak - Made the buyer phone number clickable in the in the order backend.
+* Feature - `[products]` shortcode can be used in place of other product shortcodes - one shortcode to rule them all.
+* Feature - Added option to control maximum depth of product category widget, and cleaned up widget naming.
+* Feature - Show sorting options when viewing search results. This defaults to sorting by relevance.
+* Feature - Support for the `WC tested up to` plugin header to show which extensions have been tested against updates.
+* Feature - Helper - Filters on the subscription management screen, update notifications, and support for shared licenses.
+* Tweak - Importer now supports menu_order property, adds filename based titles to imported images, and correctly sets post status of variations.
+* Tweak - Made the buyer phone number clickable in the in the order back-end.
 * Tweak - Clean up user is_paying_customer after deleting an order.
 * Tweak - If stock changes between page load and editing, reject stock changes to avoid incorrect stock changes.
 * Tweak - Disable search engines indexing core, dynamic, cart/checkout pages.
 * Tweak - Added shortcodes to description output in structured data, and improved variable product data.
-* Tweak - Use ajax when restoring an item in the cart, and removing an item from the mini-cart.
-* Tweak - Onboarding: added "next" button to pointers and allowed them to be dismissed.
+* Tweak - Use AJAX when restoring an item in the cart, and removing an item from the mini-cart.
+* Tweak - On-boarding: added "next" button to pointers and allowed them to be dismissed.
 * Tweak - Display post states for WC pages e.g. shop, checkout etc.
 * Tweak - Improved order tracking page display and validation.
+* Tweak - Wizard improvements, with store-owner newsletter sign-up.
+* Tweak - Improved tax calculations on negative fees by apportioning to all items.
+* Dev - API - Creating webhooks uses the current API version rather than the latest API version.
 * Dev - Product CRUD search helpers. 
-* Dev - Refactor shipping rate to include instance IDs.
+* Dev - Refactor shipping rate to include instance IDs, and pass instance IDs through filters.
 * Dev - New attribute helper functions.
 * Dev - Order note helper functions.
 * Dev - Added the "Terms and conditions" page to the api system status report.
 * Dev - Made date inputs reusable.
-* Dev - Added option for merging when using 'Order Again' via filter woocommerce_empty_cart_when_order_again.
-* Dev - Added tool for repopulating order address search indexes. 
+* Dev - Added option for merging when using 'Order Again' via filter `woocommerce_empty_cart_when_order_again`.
+* Dev - Added system status tool for re-populating order address search indexes. 
+* Dev - Added system status tool for clearing webhook logs.
 * Dev - Added woocommerce_get_asset_url filter.
 * Dev - Show notice when internal meta props are accessed directly.
 * Dev - Improve meta data updates so data is only updated when changed.
 * Dev - Improved get_filtered_term_product_counts performance.
 * Dev - Introduced wc_get_account_orders_actions function.
+* Dev - `wc_get_account_formatted_address` can get address by customer ID.
+* Dev - Added `woocommerce_get_product_id_by_sku` filter.
+* Dev - Refactored cart to use new WC_Cart_Session/WC_Cart_Totals/WC_Cart_Fees/WC_Discounts classes.
+* Dev - New `WC_Shortcode_Products` class to handle all product based shortcodes.
 * Theming - Display downloads in their own table, universally, using a new template file.
 * Theming - Checkout: Order pay template 
 * Localization - Added cantons of Switzerland.
-* Localization - Add rtl support for activation.css.
+* Localization - Updated XAF and XOF currency codes.
+* Localization - Added rtl support for activation.css.
 * Localization - Updated Mexican states to use correct 2 letter codes.
-* Many smaller fixes and improvements - see Github!
+* Localization - Improved many strings by excluding HTML.
+* Many smaller fixes and improvements - see GitHub!
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

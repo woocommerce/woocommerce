@@ -20,9 +20,9 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_product_tag_cloud';
-		$this->widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
+		$this->widget_description = __( 'A cloud of your most used product tags.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_product_tag_cloud';
-		$this->widget_name        = __( 'WooCommerce product tags', 'woocommerce' );
+		$this->widget_name        = __( 'Product Tag Cloud', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',

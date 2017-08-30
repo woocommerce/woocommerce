@@ -375,6 +375,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {
+		$results = apply_filters( 'woocommerce_customer_pre_search_customers', false, $term, $limit );
+		if ( is_array( $results ) ) {
+			return $results;
+		}
+
 		$query = new WP_User_Query( apply_filters( 'woocommerce_customer_search_customers', array(
 			'search'         => '*' . esc_attr( $term ) . '*',
 			'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
@@ -400,7 +405,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			),
 		), $term, $limit, 'meta_query' ) );
 
-		$results = wp_parse_id_list( array_merge( $query->get_results(), $query2->get_results() ) );
+		$results = wp_parse_id_list( array_merge( (array) $query->get_results(), (array) $query2->get_results() ) );
 
 		if ( $limit && count( $results ) > $limit ) {
 			$results = array_slice( $results, 0, $limit );

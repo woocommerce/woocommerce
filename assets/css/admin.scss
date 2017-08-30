@@ -579,7 +579,6 @@ table.wc_status_table {
 	}
 
 	td, th {
-		padding: 2em;
 		font-size: 1.1em;
 		font-weight: normal;
 
@@ -615,6 +614,12 @@ table.wc_status_table {
 
 	.help_tip {
 		cursor: help;
+	}
+}
+
+table.wc_status_table--tools {
+	td, th {
+		padding: 2em;
 	}
 }
 

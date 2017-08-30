@@ -308,7 +308,7 @@ class WC_Install {
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
 
-		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
+		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
@@ -796,6 +796,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
+		// Bypass if filesystem is read-only and/or non-standard upload system is used
+		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
+			return;
+		}
+
 		// Install files and folders for uploading files and prevent hotlinking
 		$upload_dir      = wp_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );

@@ -25,7 +25,6 @@ class WC_Admin_Assets {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_head',            array( $this, 'product_taxonomy_styles' ) );
 	}
 
 	/**
@@ -385,27 +384,6 @@ class WC_Admin_Assets {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Admin Head.
-	 *
-	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
-	 */
-	public function product_taxonomy_styles() {
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-		?>
-		<style type="text/css">
-			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset( $_GET['taxonomy'] ) && 'product_tag' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -301px -5px !important; }
-			<?php endif; ?>
-		</style>
-		<?php
 	}
 }
 

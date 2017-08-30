@@ -1103,17 +1103,19 @@ jQuery( function ( $ ) {
 						item_to_add: add_item_ids,
 						dataType   : 'json',
 						order_id   : woocommerce_admin_meta_boxes.post_id,
-						security   : woocommerce_admin_meta_boxes.order_item_nonce
+						security   : woocommerce_admin_meta_boxes.order_item_nonce,
+						data       : $( '#wc-backbone-modal-dialog form' ).serialize()
 					};
 
 					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 						if ( response.success ) {
-							$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response.data.html );
+							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.stupidtable.init();
 						} else {
 							window.alert( response.data.error );
 						}
-
-						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 					});
 				}

@@ -22,6 +22,8 @@ $theme            = $system_status->get_theme_info();
 $security         = $system_status->get_security_info();
 $settings         = $system_status->get_settings();
 $pages            = $system_status->get_pages();
+$plugin_updates   = new WC_Plugin_Updates;
+$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
@@ -465,6 +467,10 @@ $pages            = $system_status->get_pages();
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
+				}
 				?>
 				<tr>
 					<td><?php echo $plugin_name; ?></td>
@@ -472,7 +478,7 @@ $pages            = $system_status->get_pages();
 					<td><?php
 						/* translators: %s: plugin author */
 						printf( __( 'by %s', 'woocommerce' ), $plugin['author_name'] );
-						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $untested_string . $network_string;
 					?></td>
 				</tr>
 				<?php

@@ -372,16 +372,11 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-		// Ordering query vars
-		if ( ! $q->is_search() ) {
-			$ordering  = $this->get_catalog_ordering_args();
-			$q->set( 'orderby', $ordering['orderby'] );
-			$q->set( 'order', $ordering['order'] );
-			if ( isset( $ordering['meta_key'] ) ) {
-				$q->set( 'meta_key', $ordering['meta_key'] );
-			}
-		} else {
-			$q->set( 'orderby', 'relevance' );
+		$ordering  = $this->get_catalog_ordering_args();
+		$q->set( 'orderby', $ordering['orderby'] );
+		$q->set( 'order', $ordering['order'] );
+		if ( isset( $ordering['meta_key'] ) ) {
+			$q->set( 'meta_key', $ordering['meta_key'] );
 		}
 
 		// Query vars that affect posts shown
@@ -445,10 +440,16 @@ class WC_Query {
 		$order   = strtoupper( $order );
 		$args    = array();
 
-		// default - menu_order
-		$args['orderby']  = 'menu_order title';
-		$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-		$args['meta_key'] = '';
+		// Set to default. Menu order for non-searches, relevance for searches.
+		if ( ! is_search() ) {
+			$args['orderby']  = 'menu_order title';
+			$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+			$args['meta_key'] = '';
+		} else {
+			$args['orderby']  = 'relevance';
+			$args['order']    = 'DESC';
+			$args['meta_key'] = '';
+		}
 
 		switch ( $orderby ) {
 			case 'rand' :
@@ -481,6 +482,10 @@ class WC_Query {
 			case 'title' :
 				$args['orderby'] = 'title';
 				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+				break;
+			case 'relevance' :
+				$args['orderby'] = 'relevance';
+				$args['order']   = 'DESC';
 				break;
 		}
 
