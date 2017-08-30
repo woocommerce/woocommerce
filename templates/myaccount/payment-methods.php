@@ -57,7 +57,7 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 								echo esc_html( $method['expires'] );
 							} elseif ( 'actions' === $column_id ) {
 								foreach ( $method['actions'] as $key => $action ) {
-									echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>&nbsp;';
+									echo '<a href="' . esc_url( $action['url'] ) . '" class="' . sanitize_html_class( 'button ' .$key ) . '">' . esc_html( $action['name'] ) . '</a>&nbsp;';
 								}
 							}
 							?>
