@@ -457,7 +457,6 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 
 				$version_string = '';
 				$network_string = '';
-				$untested_string = '';
 				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: %s: plugin latest version */
@@ -467,10 +466,10 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 					if ( false != $plugin['network_activated'] ) {
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
-
-					if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
-						$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
-					}
+				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
 				}
 				?>
 				<tr>
