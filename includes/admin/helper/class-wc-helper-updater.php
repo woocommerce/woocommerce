@@ -250,12 +250,13 @@ class WC_Helper_Updater {
 			return 0;
 		}
 
-		$update_data = self::get_update_data();
-		if ( empty( $update_data ) ) {
-			return 0;
-		}
-
 		$count = 0;
+		$update_data = self::get_update_data();
+
+		if ( empty( $update_data ) ) {
+			set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
+			return $count;
+		}
 
 		// Scan local plugins.
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
