@@ -37,9 +37,11 @@
 		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
 		$form.on( 'update_variation_values.wc-variation-form', { variationForm: this }, this.onUpdateAttributes );
 
-		// Check variations once init.
-		$form.trigger( 'check_variations' );
-		$form.trigger( 'wc_variation_form' );
+		// Init after gallery.
+		setTimeout( function() {
+			$form.trigger( 'check_variations' );
+			$form.trigger( 'wc_variation_form' );
+		}, 100 );
 	};
 
 	/**
@@ -553,8 +555,7 @@
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
 			if ( $( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' ).length > 0 ) {
-				$gallery_img = $( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' );
-				$gallery_img.trigger( 'click' );
+				$( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' ).trigger( 'click' );
 				$form.attr( 'current-image', variation.image_id );
 				return;
 			} else {
