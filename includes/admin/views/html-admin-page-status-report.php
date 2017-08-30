@@ -468,7 +468,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 
-					if ( in_array( $plugin['plugin'], array_keys( $untested_plugins ) ) ) {
+					if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
 						$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
 					}
 				}
