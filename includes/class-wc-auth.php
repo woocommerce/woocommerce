@@ -175,7 +175,7 @@ class WC_Auth {
 			}
 		}
 
-		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write' ) ) ) {
+		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write', ) ,true) ) {
 			/* translators: %s: scope */
 			throw new Exception( sprintf( __( 'Invalid scope %s', 'woocommerce' ), wc_clean( $_REQUEST['scope'] ) ) );
 		}

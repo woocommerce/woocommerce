@@ -114,7 +114,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function is_type( $type ) {
-		return ( $this->get_discount_type() === $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ) ) );
+		return ( $this->get_discount_type() === $type || ( is_array( $type ) && in_array( $this->get_discount_type(), $type ,true) ) );
 	}
 
 	/**
