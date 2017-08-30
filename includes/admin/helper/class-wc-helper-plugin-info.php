@@ -37,11 +37,11 @@ class WC_Helper_Plugin_Info {
 		}
 
 		// Only for slugs that start with woo-
-		if ( 0 !== strpos( $args->slug, 'woo-' ) ) {
+		if ( 0 !== strpos( $args->slug, 'woocommerce-com-' ) ) {
 			return $response;
 		}
 
-		$clean_slug = preg_replace( '#^woo-#', '', $args->slug );
+		$clean_slug = str_replace( 'woocommerce-com-', '', $args->slug );
 
 		// Look through update data by slug.
 		$update_data = WC_Helper_Updater::get_update_data();

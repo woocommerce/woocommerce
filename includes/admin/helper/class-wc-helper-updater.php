@@ -40,8 +40,8 @@ class WC_Helper_Updater {
 			$filename = $plugin['_filename'];
 
 			$item = array(
-				'id' => 'woo-' . $plugin['_product_id'],
-				'slug' => 'woo-' . $data['slug'],
+				'id' => 'woocommerce-com-' . $plugin['_product_id'],
+				'slug' => 'woocommerce-com-' . $data['slug'],
 				'plugin' => $filename,
 				'new_version' => $data['version'],
 				'url' => $data['url'],
