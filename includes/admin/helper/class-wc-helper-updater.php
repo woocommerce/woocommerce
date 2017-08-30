@@ -284,6 +284,21 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Return the updates count markup.
+	 *
+	 * @return string Updates count markup, empty string if no updates avairable.
+	 */
+	public static function get_updates_count_html() {
+		$count = self::get_updates_count();
+		if ( ! $count ) {
+			return '';
+		}
+
+		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+		return $count_html;
+	}
+
+	/**
 	 * Flushes cached update data.
 	 */
 	public static function flush_updates_cache() {

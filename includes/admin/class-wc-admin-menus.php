@@ -124,8 +124,7 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		$count = WC_Helper_Updater::get_updates_count();
-		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+		$count_html = WC_Helper_Updater::get_updates_count_html();
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
 		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
