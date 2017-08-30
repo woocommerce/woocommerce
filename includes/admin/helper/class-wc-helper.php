@@ -310,7 +310,7 @@ class WC_Helper {
 		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
 		// Filters
-		self::get_filters( $subscriptions ); // Warm it up.
+		self::get_filters_counts( $subscriptions ); // Warm it up.
 		self::_filter( $subscriptions, self::get_current_filter() );
 
 		// We have an active connection.
@@ -326,21 +326,17 @@ class WC_Helper {
 	 * @return array An array of filter keys and labels.
 	 */
 	public static function get_filters( $subscriptions = null ) {
-		static $_filters;
-
-		if ( isset( $_filters ) ) {
-			return $_filters;
-		}
-
 		$filters = array(
-			'all' => __( 'All (%d)', 'woocommerce' ),
-			'active' => __( 'Active (%d)', 'woocommerce' ),
-			'inactive' => __( 'Inactive (%d)', 'woocommerce' ),
-			'update-available' => __( 'Update Available (%d)', 'woocommerce' ),
-			'expiring' => __( 'Expiring Soon (%d)', 'woocommerce' ),
-			'expired' => __( 'Expired (%d)', 'woocommerce' ),
-			'download' => __( 'Download (%d)', 'woocommerce' ),
+			'all' => __( 'All', 'woocommerce' ),
+			'active' => __( 'Active', 'woocommerce' ),
+			'inactive' => __( 'Inactive', 'woocommerce' ),
+			'update-available' => __( 'Update Available', 'woocommerce' ),
+			'expiring' => __( 'Expiring Soon', 'woocommerce' ),
+			'expired' => __( 'Expired', 'woocommerce' ),
+			'download' => __( 'Download', 'woocommerce' ),
 		);
+
+		return $filters;
 
 		if ( empty( $subscriptions ) ) {
 			return $filters;
@@ -355,6 +351,34 @@ class WC_Helper {
 		// Cache it.
 		$_filters = $filters;
 		return $_filters;
+	}
+
+	/**
+	 * Get counts data for the filters array.
+	 *
+	 * @param array $subscriptions The array of all available subscriptions.
+	 *
+	 * @return array Filter counts (filter => count)
+	 */
+	public static function get_filters_counts( $subscriptions = null ) {
+		static $filters;
+
+		if ( isset( $filters ) ) {
+			return $filters;
+		}
+
+		$filters = array_fill_keys( array_keys( self::get_filters() ), 0 );
+		if ( empty( $subscriptions ) ) {
+			return array();
+		}
+
+		foreach ( $filters as $key => $count ) {
+			$_subs = $subscriptions;
+			self::_filter( $_subs, $key );
+			$filters[ $key ] = count( $_subs );
+		}
+
+		return $filters;
 	}
 
 	/**

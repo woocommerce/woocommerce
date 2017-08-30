@@ -18,11 +18,24 @@
 			$filters = array_keys( WC_Helper::get_filters() );
 			$last_filter = array_pop( $filters );
 			$current_filter = WC_Helper::get_current_filter();
+			$counts = WC_Helper::get_filters_counts();
 		?>
 
 		<?php foreach ( WC_Helper::get_filters() as $key => $label ) : ?>
+			<?php
+				// Don't show empty filters.
+				if ( empty( $counts[ $key ] ) ) {
+					continue;
+				}
+
+				$url = admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key );
+				$class_html = $current_filter === $key ? 'class="current"' : '';
+			?>
 			<li>
-				<a <?php echo $current_filter === $key ? 'class="current"' : ''; ?> href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key ) ); ?>"><?php echo esc_html( $label ); ?></a>
+				<a <?php echo $class_html; ?> href="<?php echo esc_url( $url ); ?>">
+					<?php echo esc_html( $label ); ?>
+					<span class="count">(<?php echo absint( $counts[ $key ] ); ?>)</span>
+				</a>
 			</li>
 		<?php endforeach; ?>
 	</ul>
