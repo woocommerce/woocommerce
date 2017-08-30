@@ -261,8 +261,6 @@ class WC_Shortcodes {
 			$type = 'best_selling_products';
 		} elseif ( isset( $atts['top_rated'] ) && wc_string_to_bool( $atts['top_rated'] ) ) {
 			$type = 'top_rated_products';
-		} elseif ( isset( $atts['featured'] ) && wc_string_to_bool( $atts['featured'] ) ) {
-			$type = 'featured_products';
 		}
 
 		$shortcode = new WC_Shortcode_Products( $atts, $type );
@@ -455,6 +453,8 @@ class WC_Shortcodes {
 			'category'     => '',
 			'cat_operator' => 'IN',
 		), (array) $atts );
+
+		$atts['visibility'] = 'featured';
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'featured_products' );
 
