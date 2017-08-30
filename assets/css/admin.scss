@@ -21,6 +21,19 @@
 
 .wc_addons_wrap {
 
+	.update-plugins .update-count  {
+		background-color: #d54e21;
+		border-radius: 10px;
+		color: #fff;
+		display: inline-block;
+		font-size: 9px;
+		font-weight: 600;
+		line-height: 17px;
+		margin: 1px 0 0 2px;
+		padding: 0 6px;
+		vertical-align: text-top;
+	}
+
 	.addons-featured {
 		max-width: 1140px;
 		margin: -1%;
