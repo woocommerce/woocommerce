@@ -665,7 +665,7 @@ class WC_Checkout {
 							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
-						if ( ! in_array( $data[ $key ], $valid_state_values ) ) {
+						if ( ! in_array( $data[ $key ], $valid_state_values ,true ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
 						}

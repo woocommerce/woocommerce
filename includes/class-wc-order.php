@@ -1285,7 +1285,7 @@ class WC_Order extends WC_Abstract_Order {
 			// Remove any instance IDs after :
 			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
 
-			if ( ! in_array( $shipping_method_id, $hide ) ) {
+			if ( ! in_array( $shipping_method_id, $hide,true ) ) {
 				$needs_address = true;
 				break;
 			}

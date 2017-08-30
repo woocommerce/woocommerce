@@ -635,7 +635,7 @@ class WC_AJAX {
 			$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
 
 			foreach ( $possible_attributes as $possible_attribute ) {
-				if ( in_array( $possible_attribute, $existing_attributes ) ) {
+				if ( in_array( $possible_attribute, $existing_attributes ,true ) ) {
 					continue;
 				}
 				$variation = new WC_Product_Variation();
@@ -776,7 +776,7 @@ class WC_AJAX {
 			}
 
 			foreach ( $items_to_add as $item_to_add ) {
-				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
+				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ,true ) ) {
 					continue;
 				}
 				$item_id        = $order->add_product( wc_get_product( $item_to_add ) );
