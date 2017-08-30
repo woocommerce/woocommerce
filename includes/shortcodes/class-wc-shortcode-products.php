@@ -133,7 +133,7 @@ class WC_Shortcode_Products {
 	 * Parse legacy attributes.
 	 *
 	 * @since  3.2.0
-	 * @param  array  $attributes Attributes.
+	 * @param  array $attributes Attributes.
 	 * @return array
 	 */
 	protected function parse_legacy_attributes( $attributes ) {
@@ -302,71 +302,103 @@ class WC_Shortcode_Products {
 	}
 
 	/**
+	 * Set visibility as hidden.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_hidden_query_args( &$query_args ) {
+		$this->custom_visibility = true;
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => array( 'exclude-from-catalog', 'exclude-from-search' ),
+			'field'            => 'name',
+			'operator'         => 'AND',
+			'include_children' => false,
+		);
+	}
+
+	/**
+	 * Set visibility as catalog.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_catalog_query_args( &$query_args ) {
+		$this->custom_visibility = true;
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => 'exclude-from-search',
+			'field'            => 'name',
+			'operator'         => 'IN',
+			'include_children' => false,
+		);
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => 'exclude-from-catalog',
+			'field'            => 'name',
+			'operator'         => 'NOT IN',
+			'include_children' => false,
+		);
+	}
+
+	/**
+	 * Set visibility as search.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_search_query_args( &$query_args ) {
+		$this->custom_visibility = true;
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => 'exclude-from-catalog',
+			'field'            => 'name',
+			'operator'         => 'IN',
+			'include_children' => false,
+		);
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => 'exclude-from-search',
+			'field'            => 'name',
+			'operator'         => 'NOT IN',
+			'include_children' => false,
+		);
+	}
+
+	/**
+	 * Set visibility as featured.
+	 *
+	 * @since 3.2.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_featured_query_args( &$query_args ) {
+		// @codingStandardsIgnoreStart
+		$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
+		// @codingStandardsIgnoreEnd
+
+		$query_args['tax_query'][] = array(
+			'taxonomy'         => 'product_visibility',
+			'terms'            => 'featured',
+			'field'            => 'name',
+			'operator'         => 'IN',
+			'include_children' => false,
+		);
+	}
+
+	/**
 	 * Set visibility query args.
 	 *
 	 * @since 3.2.0
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_query_args( &$query_args ) {
-		switch ( $this->attributes['visibility'] ) {
-			case 'hidden' :
-					$this->custom_visibility = true;
-					$query_args['tax_query'][] = array(
-						'taxonomy'         => 'product_visibility',
-						'terms'            => array( 'exclude-from-catalog', 'exclude-from-search' ),
-						'field'            => 'name',
-						'operator'         => 'AND',
-						'include_children' => false,
-					);
-				break;
-			case 'catalog' :
-					$this->custom_visibility = true;
-					$query_args['tax_query'][] = array(
-						'taxonomy'         => 'product_visibility',
-						'terms'            => 'exclude-from-search',
-						'field'            => 'name',
-						'operator'         => 'IN',
-						'include_children' => false,
-					);
-					$query_args['tax_query'][] = array(
-						'taxonomy'         => 'product_visibility',
-						'terms'            => 'exclude-from-catalog',
-						'field'            => 'name',
-						'operator'         => 'NOT IN',
-						'include_children' => false,
-					);
-				break;
-			case 'search' :
-					$this->custom_visibility = true;
-					$query_args['tax_query'][] = array(
-						'taxonomy'         => 'product_visibility',
-						'terms'            => 'exclude-from-catalog',
-						'field'            => 'name',
-						'operator'         => 'IN',
-						'include_children' => false,
-					);
-					$query_args['tax_query'][] = array(
-						'taxonomy'         => 'product_visibility',
-						'terms'            => 'exclude-from-search',
-						'field'            => 'name',
-						'operator'         => 'NOT IN',
-						'include_children' => false,
-					);
-				break;
-			case 'featured' :
-					$query_args['tax_query']   = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-					$query_args['tax_query'][] = array(
-						'taxonomy' => 'product_visibility',
-						'terms'    => 'featured',
-						'field'    => 'name',
-						'operator' => 'IN',
-						'include_children' => false,
-					);
-				break;
-
-			default :
-					$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-				break;
+		if ( method_exists( $this, 'set_visibility_' . $this->attributes['visibility'] . '_query_args' ) ) {
+			$this->{'set_visibility_' . $this->attributes['visibility'] . '_query_args'}( $query_args );
+		} else {
+			// @codingStandardsIgnoreStart
+			$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
+			// @codingStandardsIgnoreEnd
 		}
 	}
 
@@ -423,12 +455,12 @@ class WC_Shortcode_Products {
 				$products = new WP_Query( $this->query_args );
 			}
 
-			// Remove ordering query arguments.
-			if ( ! empty( $this->attributes['category'] ) ) {
-				WC()->query->remove_ordering_args();
-			}
-
 			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+		}
+
+		// Remove ordering query arguments.
+		if ( ! empty( $this->attributes['category'] ) ) {
+			WC()->query->remove_ordering_args();
 		}
 
 		return $products;
