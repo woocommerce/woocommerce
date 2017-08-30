@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.8
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Feature - Added option to control maximum depth of product category widget, and cleaned up widget naming.
 * Feature - Show sorting options when viewing search results. This defaults to sorting by relevance.
 * Feature - Support for the `WC tested up to` plugin header to show which extensions have been tested against updates.
+* Feature - Helper - Filters on the subscription management screen, update notifications, and support for shared licenses.
 * Tweak - Importer now supports menu_order property, adds filename based titles to imported images, and correctly sets post status of variations.
 * Tweak - Made the buyer phone number clickable in the in the order back-end.
 * Tweak - Clean up user is_paying_customer after deleting an order.
