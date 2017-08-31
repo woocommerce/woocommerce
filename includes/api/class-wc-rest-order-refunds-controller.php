@@ -282,6 +282,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			'line_items'     => $request['line_items'],
 			'refund_payment' => is_bool( $request['api_refund'] ) ? $request['api_refund'] : true,
 			'restock_items'  => true,
+			'meta_data'      => empty( $request['meta_data'] ) ? null : $request['meta_data'],
 		) );
 
 		if ( is_wp_error( $refund ) ) {

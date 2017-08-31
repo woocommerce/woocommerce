@@ -475,6 +475,7 @@ function wc_create_refund( $args = array() ) {
 		'line_items'     => array(),
 		'refund_payment' => false,
 		'restock_items'  => false,
+		'meta_data'      => array(),
 	);
 
 	try {
@@ -497,6 +498,10 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+
+		foreach ( $args['meta_data'] as $meta ) {
+			$refund->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+		}
 
 		if ( ! is_null( $args['reason'] ) ) {
 			$refund->set_reason( $args['reason'] );
