@@ -490,8 +490,8 @@ function wc_price( $price, $args = array() ) {
 	) ) ) );
 
 	$negative        = $price < 0;
-	$price           = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
-	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $decimals, $decimal_separator, $thousand_separator ), $price, $decimals, $decimal_separator, $thousand_separator );
+	$raw_price       = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
+	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $raw_price, $decimals, $decimal_separator, $thousand_separator ), $raw_price, $decimals, $decimal_separator, $thousand_separator );
 
 	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $decimals > 0 ) {
 		$price = wc_trim_zeros( $price );
@@ -504,7 +504,7 @@ function wc_price( $price, $args = array() ) {
 		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
-	return apply_filters( 'wc_price', $return, $price, $args );
+	return apply_filters( 'wc_price', $return, $raw_price, $args );
 }
 
 /**
