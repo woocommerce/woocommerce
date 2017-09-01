@@ -58,7 +58,7 @@ abstract class WC_Legacy_Cart {
 	 * @param mixed  $value Value to set.
 	 */
 	public function __isset( $name ) {
-		if ( array_key_exists( $name, $cart_session_data ) || 'fees' === $name ) {
+		if ( array_key_exists( $name, $this->cart_session_data ) || 'fees' === $name ) {
 			return true;
 		}
 		return false;
