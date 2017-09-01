@@ -631,6 +631,11 @@ class WC_Form_Handler {
 				}
 			}
 
+			// Prevent reordering variable products if no selected variation.
+			if ( ! $variation_id && ( $product = $item->get_product() ) && $product->is_type( 'variable' ) ) {
+				continue;
+			}
+
 			// Add to cart validation
 			if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) {
 				continue;

@@ -236,7 +236,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Handle multipart mail.
 	 *
-	 * @param PHPMailer $mailer
+	 * @param  PHPMailer $mailer
 	 * @return PHPMailer
 	 */
 	public function handle_multipart( $mailer ) {
@@ -254,9 +254,20 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		// handle legacy find and replace.
-		$string = str_replace( $this->find, $this->replace, $string );
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', array_keys( $this->placeholders ), $this ), apply_filters( 'woocommerce_email_format_string_replace', array_values( $this->placeholders ), $this ), $string );
+		// Legacy placeholders. @todo deprecate in 4.0.0.
+		if ( has_filter( 'woocommerce_email_format_string_replace' ) || has_filter( 'woocommerce_email_format_string_find' ) ) {
+			$legacy_find    = array();
+			$legacy_replace = array();
+
+			foreach ( $this->placeholders as $find => $replace ) {
+				$legacy_key                    = sanitize_title( str_replace( '_', '-', trim( $find, '{}' ) ) );
+				$legacy_find[ $legacy_key ]    = $find;
+				$legacy_replace[ $legacy_key ] = $replace;
+			}
+
+			$string = str_replace( apply_filters( 'woocommerce_email_format_string_find', $legacy_find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $legacy_replace, $this ), $string );
+		}
+		return str_replace( $this->find, $this->replace, $string );
 	}
 
 	/**
