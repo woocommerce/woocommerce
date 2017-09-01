@@ -284,19 +284,19 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			'restock_items'  => true,
 		) );
 
-		if(!empty( $request['meta_data'] ) && is_array( $request['meta_data'] )) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$refund->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-			$refund->save_meta_data();
-		}
-
 		if ( is_wp_error( $refund ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
 		}
 
 		if ( ! $refund ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
+		}
+
+		if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
+			foreach ( $request['meta_data'] as $meta ) {
+				$refund->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+			}
+			$refund->save_meta_data();
 		}
 
 		/**
