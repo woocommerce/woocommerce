@@ -346,19 +346,19 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
     <tr>
         <td><?php _e( 'Total Database Size', 'woocommerce' ); ?></td>
         <td class="help">&nbsp;</td>
-        <td><?php printf( '%.2fMB', $database['database_size']['data'] ); ?></td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] + $database['database_size']['index'] ); ?></td>
     </tr>
 
     <tr>
         <td><?php _e( 'Database Data Size', 'woocommerce' ); ?></td>
         <td class="help">&nbsp;</td>
-        <td><?php printf( '%.2fMB', $database['database_size']['index'] ); ?></td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] ); ?></td>
     </tr>
 
     <tr>
         <td><?php _e( 'Database Index Size', 'woocommerce' ); ?></td>
         <td class="help">&nbsp;</td>
-        <td><?php printf( '%.2fMB', $database['database_size']['data'] + $database['database_size']['index'] ); ?></td>
+        <td><?php printf( '%.2fMB', $database['database_size']['index'] ); ?></td>
     </tr>
 
 	<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
