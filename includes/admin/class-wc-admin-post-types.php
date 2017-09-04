@@ -96,9 +96,6 @@ class WC_Admin_Post_Types {
 		// Disable post type view mode options
 		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
 
-		// Update the screen options.
-		add_filter( 'default_hidden_columns', array( $this, 'adjust_shop_order_columns' ), 10, 2 );
-
 		// Show blank state
 		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
 
@@ -108,25 +105,6 @@ class WC_Admin_Post_Types {
 
 		// Add a post display state for special WC pages.
 		add_filter( 'display_post_states', array( $this, 'add_display_post_states' ), 10, 2 );
-	}
-
-	/**
-	 * Adjust shop order columns for the user on certain conditions.
-	 *
-	 * @param array $hidden
-	 * @param object $screen
-	 *
-	 * @return array
-	 */
-	public function adjust_shop_order_columns( $hidden, $screen ) {
-		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
-			if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
-				$hidden[] = 'shipping_address';
-			} else {
-				$hidden[] = 'billing_address';
-			}
-		}
-		return $hidden;
 	}
 
 	/**
@@ -524,19 +502,15 @@ class WC_Admin_Post_Types {
 	public function shop_order_columns( $existing_columns ) {
 		$columns                     = array();
 		$columns['cb']               = $existing_columns['cb'];
-
 		$columns['order_number']      = __( 'Order', 'woocommerce' );
-
-
 		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		//$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
-	//	$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
 		$columns['order_date']       = __( 'Date', 'woocommerce' );
-
 		$columns['order_status']     = __( 'Status', 'woocommerce' );
-		//$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order notes', 'woocommerce' ) . '">' . esc_attr__( 'Order notes', 'woocommerce' ) . '</span>';
 		$columns['order_total']      = __( 'Total', 'woocommerce' );
-		//$columns['order_actions']    = __( 'Actions', 'woocommerce' );
+
+		if ( has_action( 'woocommerce_admin_order_actions_start' ) || has_action( 'woocommerce_admin_order_actions_end' ) || has_filter( 'woocommerce_admin_order_actions' ) ) {
+			$columns['order_actions'] = __( 'Actions', 'woocommerce' );
+		}
 
 		wp_enqueue_script( 'wc-orders' );
 		add_action( 'admin_footer', array( $this, 'order_preview_template' ) );
@@ -648,7 +622,33 @@ class WC_Admin_Post_Types {
 				echo '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="order-view"><strong>#' . esc_attr( $the_order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 				break;
 			case 'order_status' :
-				printf( '<mark class="order-status %s">%s</mark>', esc_attr( sanitize_html_class( 'status-' . $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
+				$tooltip = '';
+
+				if ( $post->comment_count ) {
+					$latest_notes = wc_get_order_notes( array(
+						'order_id' => $post->ID,
+						'limit'    => 1,
+						'orderby'  => 'date_created_gmt',
+					) );
+
+					$latest_note = current( $latest_notes );
+
+					if ( isset( $latest_note->content ) && 1 == $post->comment_count ) {
+						$tooltip = wc_sanitize_tooltip( $latest_note->content );
+					} elseif ( isset( $latest_note->content ) ) {
+						/* translators: %d: notes count */
+						$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' );
+					} else {
+						/* translators: %d: notes count */
+						$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) );
+					}
+				}
+
+				if ( $tooltip ) {
+					printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $the_order->get_status() ) ), $tooltip, esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
+				} else {
+					printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
+				}
 				break;
 			case 'order_date' :
 				$order_timestamp = $the_order->get_date_created()->getTimestamp();
@@ -665,65 +665,6 @@ class WC_Admin_Post_Types {
 					esc_html( $show_date )
 				);
 				break;
-			case 'customer_message' :
-				if ( $the_order->get_customer_note() ) {
-					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-				} else {
-					echo '<span class="na">&ndash;</span>';
-				}
-				break;
-			case 'billing_address' :
-
-				if ( $address = $the_order->get_formatted_billing_address() ) {
-					echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
-				} else {
-					echo '&ndash;';
-				}
-
-				if ( $the_order->get_billing_phone() ) {
-					echo '<small class="meta">' . __( 'Phone', 'woocommerce' ) . ': ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
-				}
-
-			break;
-			case 'shipping_address' :
-
-				if ( $address = $the_order->get_formatted_shipping_address( array( 'exclude' => array( 'first_name', 'last_name', 'company' ) ) ) ) {
-					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
-				} else {
-					echo '&ndash;';
-				}
-
-				if ( $the_order->get_shipping_method() ) {
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
-				}
-
-			break;
-			case 'order_notes' :
-
-				if ( $post->comment_count ) {
-
-					$latest_notes = wc_get_order_notes( array(
-						'order_id' => $post->ID,
-						'limit'    => 1,
-						'orderby'  => 'date_created_gmt',
-					) );
-
-					$latest_note = current( $latest_notes );
-
-					if ( isset( $latest_note->content ) && 1 == $post->comment_count ) {
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					} elseif ( isset( $latest_note->content ) ) {
-						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					} else {
-						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					}
-				} else {
-					echo '<span class="na">&ndash;</span>';
-				}
-
-			break;
 			case 'order_total' :
 				if ( $the_order->get_payment_method_title() ) {
 					/* translators: %s: method */
@@ -733,7 +674,6 @@ class WC_Admin_Post_Types {
 				}
 				break;
 			case 'order_actions' :
-
 				?><p>
 					<?php
 						do_action( 'woocommerce_admin_order_actions_start', $the_order );
@@ -756,12 +696,6 @@ class WC_Admin_Post_Types {
 							);
 						}
 
-						$actions['view'] = array(
-							'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-							'name'      => __( 'View', 'woocommerce' ),
-							'action'    => "view",
-						);
-
 						$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
 
 						foreach ( $actions as $action ) {
@@ -771,8 +705,7 @@ class WC_Admin_Post_Types {
 						do_action( 'woocommerce_admin_order_actions_end', $the_order );
 					?>
 				</p><?php
-
-			break;
+				break;
 		}
 	}
 

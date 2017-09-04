@@ -1893,11 +1893,6 @@ ul.wc_coupon_list_block {
 		font-size: inherit;
 		margin: 3px 0;
 	}
-
-	.column-order_total,
-	.column-order_date {
-		width: 9%;
-	}
 }
 
 .post-type-shop_order {
@@ -1905,6 +1900,7 @@ ul.wc_coupon_list_block {
 		display: none;
 	}
 	.wp-list-table {
+		margin-top: 1em;
 		th {
 			padding: 1em;
 		}
@@ -1985,6 +1981,7 @@ ul.wc_coupon_list_block {
 					color: #777;
 					background: #E5E5E5;
 					border-radius: 4px;
+					border-bottom: 1px solid rgba(0,0,0,0.05);
 
 					&.status-completed {
 						background: #C8D7E1;
