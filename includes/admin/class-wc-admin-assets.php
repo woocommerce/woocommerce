@@ -135,7 +135,7 @@ class WC_Admin_Assets {
 			'mon_decimal_point' => wc_get_price_decimal_separator(),
 		) );
 
-		wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'woocommerce_admin' ), WC_VERSION );
+		wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-blockui' ), WC_VERSION );
 		wp_localize_script( 'wc-orders', 'wc_orders_params', array(
 			'ajax_url'      => admin_url( 'admin-ajax.php' ),
 			'preview_nonce' => wp_create_nonce( 'woocommerce-preview-order' ),

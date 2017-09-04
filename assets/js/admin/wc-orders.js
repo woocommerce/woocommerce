@@ -31,7 +31,7 @@ jQuery( function( $ ) {
 	/**
 	 * Preview an order.
 	 */
-	WCOrdersTable.prototype.onPreview = function( e ) {
+	WCOrdersTable.prototype.onPreview = function() {
 		var $previewButton    = $( this ),
 			$order_id         = $previewButton.data( 'order-id' );
 
@@ -41,6 +41,14 @@ jQuery( function( $ ) {
 				variable : $previewButton.data( 'order-data' )
 			});
 		} else {
+			$previewButton.closest( 'table' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+
 			$.ajax({
 				url:     wc_orders_params.ajax_url,
 				data:    {
@@ -58,6 +66,7 @@ jQuery( function( $ ) {
 							variable : response.data
 						});
 					}
+					$previewButton.closest( 'table' ).unblock();
 				}
 			});
 		}
