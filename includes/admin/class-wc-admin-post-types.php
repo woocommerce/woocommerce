@@ -307,27 +307,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for orders.
-	 * @param  array $existing_columns
-	 * @return array
-	 */
-	public function shop_order_columns( $existing_columns ) {
-		$columns                     = array();
-		$columns['cb']               = $existing_columns['cb'];
-		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
-		$columns['order_title']      = __( 'Order', 'woocommerce' );
-		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
-		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
-		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order notes', 'woocommerce' ) . '">' . esc_attr__( 'Order notes', 'woocommerce' ) . '</span>';
-		$columns['order_date']       = __( 'Date', 'woocommerce' );
-		$columns['order_total']      = __( 'Total', 'woocommerce' );
-		$columns['order_actions']    = __( 'Actions', 'woocommerce' );
-
-		return $columns;
-	}
-
-	/**
 	 * Output custom columns for products.
 	 *
 	 * @param string $column
@@ -537,6 +516,110 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Define custom columns for orders.
+	 *
+	 * @param  array $existing_columns
+	 * @return array
+	 */
+	public function shop_order_columns( $existing_columns ) {
+		$columns                     = array();
+		$columns['cb']               = $existing_columns['cb'];
+
+		$columns['order_number']      = __( 'Order', 'woocommerce' );
+
+
+		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
+		//$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
+	//	$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
+		$columns['order_date']       = __( 'Date', 'woocommerce' );
+
+		$columns['order_status']     = __( 'Status', 'woocommerce' );
+		//$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order notes', 'woocommerce' ) . '">' . esc_attr__( 'Order notes', 'woocommerce' ) . '</span>';
+		$columns['order_total']      = __( 'Total', 'woocommerce' );
+		//$columns['order_actions']    = __( 'Actions', 'woocommerce' );
+
+		wp_enqueue_script( 'wc-orders' );
+		add_action( 'admin_footer', array( $this, 'order_preview_template' ) );
+
+		return $columns;
+	}
+
+	/**
+	 * Template for order preview.
+	 *
+	 * @since 3.3.0
+	 */
+	public function order_preview_template() {
+		?>
+		<script type="text/template" id="tmpl-wc-modal-view-order">
+			<div class="wc-backbone-modal wc-order-preview">
+				<div class="wc-backbone-modal-content">
+					<section class="wc-backbone-modal-main" role="main">
+						<header class="wc-backbone-modal-header">
+							<h1><?php printf( __( 'Order #%s', 'woocommerce' ), '{{ data.order_number }}' ); ?></h1>
+							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+								<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+							</button>
+						</header>
+						<article>
+							{{{ data.item_html }}}
+
+							<div class="wc-order-preview-addresses">
+								<div class="wc-order-preview-address">
+									<h2><?php _e( 'Billing details', 'woocommerce' ); ?></h2>
+									{{{ data.formatted_billing_address }}}
+
+									<# if ( data.data.billing.email ) { #>
+										<strong><?php _e( 'Email', 'woocommerce' ); ?></strong>
+										{{ data.data.billing.email }}
+									<# } #>
+
+									<# if ( data.data.billing.phone ) { #>
+										<strong><?php _e( 'Phone', 'woocommerce' ); ?></strong>
+										{{ data.data.billing.phone }}
+									<# } #>
+
+									<# if ( data.payment_via ) { #>
+										<strong><?php _e( 'Payment via', 'woocommerce' ); ?></strong>
+										{{ data.payment_via }}
+									<# } #>
+								</div>
+								<# if ( data.needs_shipping ) { #>
+									<div class="wc-order-preview-address">
+										<h2><?php _e( 'Shipping details', 'woocommerce' ); ?></h2>
+										<# if ( data.ship_to_billing ) { #>
+											{{{ data.formatted_billing_address }}}
+										<# } else { #>
+											{{{ data.formatted_shipping_address }}}
+										<# } #>
+
+										<# if ( data.data.customer_note ) { #>
+											<strong><?php _e( 'Note', 'woocommerce' ); ?></strong>
+											{{ data.data.customer_note }}
+										<# } #>
+
+										<# if ( data.shipping_via ) { #>
+											<strong><?php _e( 'Shipping method', 'woocommerce' ); ?></strong>
+											{{ data.shipping_via }}
+										<# } #>
+									</div>
+								<# } #>
+							</div>
+						</article>
+						<footer>
+							<div class="inner">
+								<a class="button button-primary button-large" href="<?php echo admin_url( 'post.php?post={{ data.data.id }}&action=edit' ); ?>"><?php _e( 'Edit order', 'woocommerce' ); ?></a>
+							</div>
+						</footer>
+					</section>
+				</div>
+			</div>
+			<div class="wc-backbone-modal-backdrop modal-close"></div>
+		</script>
+		<?php
+	}
+
+	/**
 	 * Output custom columns for coupons.
 	 * @param string $column
 	 */
@@ -548,25 +631,47 @@ class WC_Admin_Post_Types {
 		}
 
 		switch ( $column ) {
+			case 'order_number' :
+				$buyer = '';
+
+				if ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
+					/* translators: 1: first name 2: last name */
+					$buyer = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
+				} elseif ( $the_order->get_billing_company() ) {
+					$buyer = trim( $the_order->get_billing_company() );
+				} elseif ( $the_order->get_customer_id() ) {
+					$user  = get_user_by( 'id', $the_order->get_customer_id() );
+					$buyer = ucwords( $user->display_name );
+				}
+
+				echo '<a href="#" class="order-preview" data-order-id="' . absint( $post->ID ) . '" title="' . __( 'Preview', 'woocommerce' ) . '">' . __( 'Preview', 'woocommerce' ) . '</a>';
+				echo '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="order-view"><strong>#' . esc_attr( $the_order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
+				break;
 			case 'order_status' :
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
-			break;
+				printf( '<mark class="order-status %s">%s</mark>', esc_attr( sanitize_html_class( 'status-' . $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
+				break;
 			case 'order_date' :
+				$order_timestamp = $the_order->get_date_created()->getTimestamp();
+
+				if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) ) {
+					$show_date = sprintf( _x( '%s ago', '%s = human-readable time difference', 'woocommerce' ), human_time_diff( $the_order->get_date_created()->getTimestamp(), current_time( 'timestamp', true ) ) );
+				} else {
+					$show_date = $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) );
+				}
 				printf(
 					'<time datetime="%1$s" title="%2$s">%3$s</time>',
 					esc_attr( $the_order->get_date_created()->date( 'c' ) ),
 					esc_html( $the_order->get_date_created()->date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ),
-					esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) )
+					esc_html( $show_date )
 				);
-			break;
+				break;
 			case 'customer_message' :
 				if ( $the_order->get_customer_note() ) {
 					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
-
-			break;
+				break;
 			case 'billing_address' :
 
 				if ( $address = $the_order->get_formatted_billing_address() ) {
@@ -576,13 +681,13 @@ class WC_Admin_Post_Types {
 				}
 
 				if ( $the_order->get_billing_phone() ) {
-					echo '<small class="meta">' . __( 'Phone:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
+					echo '<small class="meta">' . __( 'Phone', 'woocommerce' ) . ': ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
 				}
 
 			break;
 			case 'shipping_address' :
 
-				if ( $address = $the_order->get_formatted_shipping_address() ) {
+				if ( $address = $the_order->get_formatted_shipping_address( array( 'exclude' => array( 'first_name', 'last_name', 'company' ) ) ) ) {
 					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
 				} else {
 					echo '&ndash;';
@@ -620,42 +725,13 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'order_total' :
-				echo $the_order->get_formatted_order_total();
-
 				if ( $the_order->get_payment_method_title() ) {
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_payment_method_title() ) . '</small>';
-				}
-			break;
-			case 'order_title' :
-
-				if ( $the_order->get_customer_id() ) {
-					$user     = get_user_by( 'id', $the_order->get_customer_id() );
-					$username = '<a href="user-edit.php?user_id=' . absint( $the_order->get_customer_id() ) . '">';
-					$username .= esc_html( ucwords( $user->display_name ) );
-					$username .= '</a>';
-				} elseif ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
-					/* translators: 1: first name 2: last name */
-					$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-				} elseif ( $the_order->get_billing_company() ) {
-					$username = trim( $the_order->get_billing_company() );
+					/* translators: %s: method */
+					echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $the_order->get_payment_method_title() ) ) . '">' . $the_order->get_formatted_order_total() . '</span>';
 				} else {
-					$username = __( 'Guest', 'woocommerce' );
+					echo $the_order->get_formatted_order_total();
 				}
-
-				/* translators: 1: order and number (i.e. Order #13) 2: user name */
-				printf(
-					__( '%1$s by %2$s', 'woocommerce' ),
-					'<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>',
-					$username
-				);
-
-				if ( $the_order->get_billing_email() ) {
-					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->get_billing_email() ) . '">' . esc_html( $the_order->get_billing_email() ) . '</a></small>';
-				}
-
-				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';
-
-			break;
+				break;
 			case 'order_actions' :
 
 				?><p>
@@ -781,7 +857,11 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
+		if ( 'shop_order' === $post->post_type ) {
+			return array();
+		}
+
+		if ( in_array( $post->post_type, array( 'shop_coupon' ) ) ) {
 			if ( isset( $actions['inline hide-if-no-js'] ) ) {
 				unset( $actions['inline hide-if-no-js'] );
 			}

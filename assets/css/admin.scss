@@ -1898,68 +1898,186 @@ ul.wc_coupon_list_block {
 	.column-order_date {
 		width: 9%;
 	}
+}
 
-	.column-order_status {
-		width: 45px;
-		text-align: center;
-
-		mark {
-			@include ir();
-			background: none;
-			font-size: 1.4em;
-			margin: 0 auto;
+.post-type-shop_order {
+	.tablenav .one-page .displaying-num {
+		display: none;
+	}
+	.wp-list-table {
+		th {
+			padding: 1em;
 		}
-
-		mark.pending,
-		mark.completed,
-		mark.on-hold,
-		mark.failed,
-		mark.cancelled,
-		mark.processing,
-		mark.refunded {
-			&::after {
-				@include icon;
+		th.sortable a, th.sorted a {
+			padding: 0;
+		}
+		.check-column {
+			width: 48px;
+			padding: 1em 0 1em 0 !important;
+			vertical-align: middle;
+			input {
+				vertical-align: text-top;
+				margin: 1px 16px 0 2em;
 			}
 		}
+		.column-order_number {
+			width: 35ch;
+			line-height: 26px;
+			.order-preview {
+				float:right;
+				width: 16px;
+				padding: 20px 4px 4px 4px;
+				height: 0;
+				overflow: hidden;
+				position: relative;
+				border: 2px solid #F9F9F9;
+				border-radius: 4px;
 
-		mark.pending::after {
-			content: '\e012';
-			color: $orange;
+				&::before {
+					@include icon( '\e010' );
+					line-height: 16px;
+					font-size: 14px;
+					vertical-align:middle;
+					top: 4px;
+
+				}
+				&:hover {
+					border: 2px solid #00a0d2;
+				}
+			}
 		}
-
-		mark.completed::after {
-			content: '\e015';
-			color: $blue;
+		.column-order_status {
+			width: 20ch;
 		}
-
-		mark.on-hold::after {
-			content: '\e033';
-			color: #999;
+		.column-order_total {
+			text-align: right;
+			a span {
+				float:right;
+			}
 		}
-
-		mark.failed::after {
-			content: '\e016';
-			color: #d0c21f;
+		th:first-child,
+		td:first-child {
+			padding-left: 2em;
 		}
-
-		mark.cancelled::after {
-			content: '\e013';
-			color: $red;
+		th:last-child,
+		td:last-child {
+			padding-right: 2em;
 		}
+		tbody {
+			tr:nth-child(odd), .alternate {
+				background-color: #fff;
+			}
+			th, td {
+				border-top: 1px solid #f5f5f5;
+			}
+			td {
+				vertical-align: middle;
+				padding: 1em;
 
-		mark.processing::after {
-			content: '\e011';
-			color: #73a724;
-		}
+				.post-row-actions {
+					display: none;
+				}
 
-		mark.refunded::after {
-			content: '\e014';
-			color: #999;
+				.order-status {
+					display: inline-flex;
+					padding: 0px 1em;
+					line-height: 2.5em;
+					color: #777;
+					background: #E5E5E5;
+					border-radius: 4px;
+
+					&.status-completed {
+						background: #C8D7E1;
+						color: #2e4453;
+					}
+
+					&.status-on-hold {
+						background: #f8dda7;
+						color: #94660c;
+					}
+
+					&.status-failed {
+						background: #eba3a3;
+						color: #761919;
+					}
+
+					&.status-processing {
+						background: #C6E1C6;
+						color: #5B841B;
+					}
+				}
+			}
+			tr:hover {
+				td, th {
+					background: #F9F9F9;
+					cursor: pointer;
+				}
+			}
 		}
 	}
+}
 
-	td.column-order_status {
-		padding-top: 9px;
+.wc-order-preview {
+	article {
+		padding: 0 !important;
+	}
+	.wc-order-preview__table {
+		width: 100%;
+		margin: 0;
+		border-bottom: 1px solid #ccc;
+		th, td {
+			padding: 1em 1.5em;
+			text-align: left;
+			border: 0;
+			border-bottom: 1px solid #eee;
+			margin: 0;
+			background: transparent;
+			box-shadow: none;
+			text-align: right;
+			vertical-align: top;
+		}
+		td:first-child,
+		th:first-child {
+			text-align: left;
+		}
+		th {
+			border-color: #ccc;
+		}
+		tr:last-child td {
+			border: 0;
+		}
+		.wc-order-item-sku {
+			margin-top: .5em;
+		}
+		.wc-order-item-meta {
+			margin-top: .5em;
+			th, td {
+				padding: 0;
+				border: 0;
+				text-align: left;
+				vertical-align: top;
+			}
+			td:last-child {
+				padding-left: .5em;
+			}
+		}
+	}
+	.wc-order-preview-addresses {
+		overflow:hidden;
+		.wc-order-preview-address {
+			width: 50%;
+			float: left;
+			padding: 1.5em;
+			box-sizing: border-box;
+
+			h2 {
+				margin-top: 0;
+			}
+			strong {
+				display: block;
+				margin-top: 1em;
+			}
+		}
 	}
 }
 
@@ -5292,20 +5410,6 @@ table.bar_chart {
 
 	.post-type-shop_order {
 		.wp-list-table {
-			.column-order_status {
-				display: none;
-				text-align: left;
-				padding-bottom: 0;
-
-				mark {
-					margin: 0;
-				}
-
-				&::before {
-					display: none !important;
-				}
-			}
-
 			.column-customer_message,
 			.column-order_notes {
 				text-align: inherit;

@@ -810,8 +810,10 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @return string
 	 */
-	public function get_formatted_billing_address() {
-		return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this ) );
+	public function get_formatted_billing_address( $args = array() ) {
+		$exclude = isset( $args['exclude'] ) && is_array( $args['exclude'] ) ? $args['exclude'] : array();
+
+		return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_billing_address', array_diff_key( $this->get_address( 'billing' ), array_fill_keys( $exclude, 0 ) ), $this, $args ) );
 	}
 
 	/**
@@ -819,9 +821,11 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @return string
 	 */
-	public function get_formatted_shipping_address() {
+	public function get_formatted_shipping_address( $args = array() ) {
+		$exclude = isset( $args['exclude'] ) && is_array( $args['exclude'] ) ? $args['exclude'] : array();
+
 		if ( $this->has_shipping_address() ) {
-			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this ) );
+			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', array_diff_key( $this->get_address( 'shipping' ), array_fill_keys( $exclude, 0 ) ), $this, $args ) );
 		} else {
 			return '';
 		}
