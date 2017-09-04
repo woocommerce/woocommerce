@@ -19,7 +19,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-if ( ! $order = wc_get_order( $order_id ) ) {
+if ( ! $order = wc_get_order( $order->get_id() ) ) {
 	return;
 }
 
