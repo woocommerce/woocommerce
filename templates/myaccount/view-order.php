@@ -53,4 +53,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</ol>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_view_order', $order_id ); ?>
+<?php do_action( 'woocommerce_view_order', $order->get_id() ); ?>
