@@ -937,7 +937,6 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
