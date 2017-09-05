@@ -58,7 +58,7 @@ class WC_Admin_Setup_Wizard {
 			'store_setup' => array(
 				'name'    => __( 'Store setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_store_setup' ),
-				'handler' => '',
+				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
 			'pages' => array(
 				'name'    => __( 'Page setup', 'woocommerce' ),
@@ -310,10 +310,47 @@ class WC_Admin_Setup_Wizard {
 		<?php endif; ?>
 			<p><?php esc_html_e( 'Transforming your site into an online store requires WooCommerce to create a few pages for you. These pages are: shop, cart, my account, and checkout.', 'woocommerce' ); ?></p>
 			<p class="wc-setup-actions step">
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></a>
+				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step" />
 			</p>
+			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Save initial store settings.
+	 */
+	public function wc_setup_store_setup_save() {
+		check_admin_referer( 'wc-setup' );
+
+		$address        = sanitize_text_field( $_POST['store_address'] );
+		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
+		$city           = sanitize_text_field( $_POST['store_city'] );
+		$store_country  = sanitize_text_field( $_POST['store_country'] );
+		$store_state    = sanitize_text_field( $_POST['store_state'] );
+		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
+		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
+		$product_type   = sanitize_text_field( $_POST['product_type'] );
+		$tracking       = isset( $_POST['wc_tracker_optin'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_optin'] ) );
+
+		update_option( 'woocommerce_store_address', $address );
+		update_option( 'woocommerce_store_address_2', $address_2 );
+		update_option( 'woocommerce_store_city', $city );
+		update_option( 'woocommerce_default_country', sprintf( '%s:%s', $store_country, $store_state ) );
+		update_option( 'woocommerce_store_postcode', $postcode );
+		update_option( 'woocommerce_currency', $currency_code );
+		update_option( 'woocommerce_product_type', $product_type );
+
+		if ( $tracking ) {
+			update_option( 'woocommerce_allow_tracking', 'yes' );
+			WC_Tracker::send_tracking_data( true );
+		} else {
+			update_option( 'woocommerce_allow_tracking', 'no' );
+		}
+
+		WC_Install::create_pages();
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		exit;
 	}
 
 	/**
