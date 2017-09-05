@@ -17,7 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Install {
 
-	/** @var array DB updates and callbacks that need to be run per version */
+	/**
+	 * DB updates and callbacks that need to be run per version.
+	 *
+	 * @var array
+	 */
 	private static $db_updates = array(
 		'2.0.0' => array(
 			'wc_update_200_file_paths',
@@ -94,7 +98,11 @@ class WC_Install {
 		),
 	);
 
-	/** @var object Background update class */
+	/**
+	 * Background update class.
+	 *
+	 * @var object
+	 */
 	private static $background_updater;
 
 	/**
@@ -153,81 +161,105 @@ class WC_Install {
 	 * Install WC.
 	 */
 	public static function install() {
-		global $wpdb;
-
 		if ( ! is_blog_installed() ) {
 			return;
 		}
 
-		if ( ! defined( 'WC_INSTALLING' ) ) {
-			define( 'WC_INSTALLING', true );
-		}
+		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
-		// Ensure needed classes are loaded
-		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
-
+		self::remove_admin_notices();
 		self::create_options();
 		self::create_tables();
 		self::create_roles();
+		self::setup_environment();
+		self::create_terms();
+		self::create_cron_jobs();
+		self::create_files();
+		self::maybe_enable_setup_wizard();
+		self::update_wc_version();
+		self::maybe_update_db_version();
 
-		// Register post types
+		do_action( 'woocommerce_flush_rewrite_rules' );
+		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Reset any notices added to admin.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function remove_admin_notices() {
+		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
+		WC_Admin_Notices::remove_all_notices();
+	}
+
+	/**
+	 * Setup WC environment - post types, taxonomies, endpoints.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function setup_environment() {
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
-
-		// Also register endpoints - this needs to be done prior to rewrite rule flush
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
+	}
 
-		self::create_terms();
-		self::create_cron_jobs();
-		self::create_files();
+	/**
+	 * Is this a brand new WC install?
+	 *
+	 * @since 3.2.0
+	 * @return boolean
+	 */
+	private static function is_new_install() {
+		return is_null( get_option( 'woocommerce_version', null ) ) && is_null( get_option( 'woocommerce_db_version', null ) );
+	}
 
-		// Queue upgrades/setup wizard
-		$current_wc_version    = get_option( 'woocommerce_version', null );
-		$current_db_version    = get_option( 'woocommerce_db_version', null );
+	/**
+	 * Is a DB update needed?
+	 *
+	 * @since 3.2.0
+	 * @return boolean
+	 */
+	private static function needs_db_update() {
+		$current_db_version = get_option( 'woocommerce_db_version', null );
+		$updates            = self::get_db_update_callbacks();
 
-		WC_Admin_Notices::remove_all_notices();
+		return true;
 
-		// No versions? This is a new install :)
-		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( $updates ) ), '<' );
+	}
+
+	/**
+	 * See if we need the wizard or not.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function maybe_enable_setup_wizard() {
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', self::is_new_install() ) ) {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_activation_redirect', 1, 30 );
-
-		// No page? Let user run wizard again..
-		} elseif ( ! get_option( 'woocommerce_cart_page_id' ) ) {
-			WC_Admin_Notices::add_notice( 'install' );
 		}
+	}
 
-		if ( ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( self::$db_updates ) ), '<' ) ) {
-			WC_Admin_Notices::add_notice( 'update' );
+	/**
+	 * See if we need to show or run database updates during install.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function maybe_update_db_version() {
+		if ( self::needs_db_update() ) {
+			if ( apply_filters( 'woocommerce_enable_auto_update_db', true ) ) {
+				self::init_background_updater();
+				self::update();
+			} else {
+				WC_Admin_Notices::add_notice( 'update' );
+			}
 		} else {
 			self::update_db_version();
 		}
-
-		self::update_wc_version();
-
-		// Flush rules after install
-		do_action( 'woocommerce_flush_rewrite_rules' );
-		delete_transient( 'wc_attribute_taxonomies' );
-
-		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used
-		 * to delete the transient record from table a, and the corresponding
-		 * transient_timeout record from table b.
-		 *
-		 * Based on code inside core's upgrade_network() function.
-		 */
-		$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-			WHERE a.option_name LIKE %s
-			AND a.option_name NOT LIKE %s
-			AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-			AND b.option_value < %d";
-		$wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-		// Trigger action
-		do_action( 'woocommerce_installed' );
 	}
 
 	/**
