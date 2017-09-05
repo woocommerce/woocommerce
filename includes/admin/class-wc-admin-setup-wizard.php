@@ -60,10 +60,10 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_store_setup' ),
 				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
-			'pages' => array(
-				'name'    => __( 'Page setup', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_pages' ),
-				'handler' => array( $this, 'wc_setup_pages_save' ),
+			'payments' => array(
+				'name'    => __( 'Payments', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payments' ),
+				'handler' => array( $this, 'wc_setup_payments_save' ),
 			),
 			'location' => array(
 				'name'    => __( 'Store location', 'woocommerce' ),
@@ -74,11 +74,6 @@ class WC_Admin_Setup_Wizard {
 				'name'    => __( 'Shipping', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping' ),
 				'handler' => array( $this, 'wc_setup_shipping_save' ),
-			),
-			'payments' => array(
-				'name'    => __( 'Payments', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_payments' ),
-				'handler' => array( $this, 'wc_setup_payments_save' ),
 			),
 			'theme' => array(
 				'name'    => __( 'Theme', 'woocommerce' ),
@@ -347,67 +342,6 @@ class WC_Admin_Setup_Wizard {
 		} else {
 			update_option( 'woocommerce_allow_tracking', 'no' );
 		}
-
-		WC_Install::create_pages();
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
-		exit;
-	}
-
-	/**
-	 * Page setup.
-	 */
-	public function wc_setup_pages() {
-		?>
-		<h1><?php esc_html_e( 'Page setup', 'woocommerce' ); ?></h1>
-		<form method="post">
-			<p><?php printf( __( 'Your store needs a few essential <a href="%s" target="_blank">pages</a>. The following will be created automatically (if they do not already exist):', 'woocommerce' ), esc_url( admin_url( 'edit.php?post_type=page' ) ) ); ?></p>
-			<table class="wc-setup-pages" cellspacing="0">
-				<thead>
-					<tr>
-						<th class="page-name"><?php esc_html_e( 'Page name', 'woocommerce' ); ?></th>
-						<th class="page-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="page-name"><?php echo _x( 'Shop', 'Page title', 'woocommerce' ); ?></td>
-						<td><?php esc_html_e( 'The shop page will display your products.', 'woocommerce' ); ?></td>
-					</tr>
-					<tr>
-						<td class="page-name"><?php echo _x( 'Cart', 'Page title', 'woocommerce' ); ?></td>
-						<td><?php esc_html_e( 'The cart page will be where the customers go to view their cart and begin checkout.', 'woocommerce' ); ?></td>
-					</tr>
-					<tr>
-						<td class="page-name"><?php echo _x( 'Checkout', 'Page title', 'woocommerce' ); ?></td>
-						<td>
-							<?php esc_html_e( 'The checkout page will be where the customers go to pay for their items.', 'woocommerce' ); ?>
-						</td>
-					</tr>
-					<tr>
-						<td class="page-name"><?php echo _x( 'My account', 'Page title', 'woocommerce' ); ?></td>
-						<td>
-							<?php esc_html_e( 'Registered customers will be able to manage their account details and view past orders on this page.', 'woocommerce' ); ?>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the <a href="%1$s" target="_blank">Pages screen</a>. You can control which pages are shown on your website via <a href="%2$s" target="_blank">Appearance > Menus</a>.', 'woocommerce' ), esc_url( admin_url( 'edit.php?post_type=page' ) ), esc_url( admin_url( 'nav-menus.php' ) ) ); ?></p>
-
-			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
-				<?php wp_nonce_field( 'wc-setup' ); ?>
-			</p>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Save Page Settings.
-	 */
-	public function wc_setup_pages_save() {
-		check_admin_referer( 'wc-setup' );
 
 		WC_Install::create_pages();
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
