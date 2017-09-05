@@ -739,6 +739,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Sets shipping method title.
+	 *
+	 * @param string|array $shipping_methods
+	 */
+	public function set_shipping_method( $shipping_methods ) {
+		/*
+		$valid_shipping_methods = array();
+
+		if ( ! is_array( $shipping_methods ) ) {
+			$shipping_methods = array( $shipping_methods );
+		}
+
+		foreach ( $this->get_shipping_methods() as $shipping_method ) {
+			if ( in_array( $shipping_method->get_name(), $shipping_methods ) ) {
+				$valid_shipping_methods[] = $shipping_method->get_method_id();
+			}
+		}
+
+		$this->set_prop( 'shipping_method', $valid_shipping_methods );
+		*/
+
+		// For the time being, we cannot use `set_prop` since it would call `get_shipping_method`
+		// to get the changes, but `get_shipping_method` will return a formatted method title instead
+		// of the method id, which is the format stored in the DB. In order to not break BC, use this hack.
+		// TODO: Rely only on props instead of updating post meta.
+		update_post_meta( $this->get_id(), '_shipping_method', $valid_shipping_methods );
+	}
+
+	/**
 	 * Gets formatted shipping method title.
 	 *
 	 * @return string
