@@ -173,6 +173,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_date_completed'       => 'date_completed',
 			'_date_paid'            => 'date_paid',
 			'_cart_hash'            => 'cart_hash',
+			'_shipping_method'      => 'shipping_method',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
