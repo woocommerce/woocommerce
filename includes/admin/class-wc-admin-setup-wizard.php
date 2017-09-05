@@ -55,9 +55,9 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 		$default_steps = array(
-			'introduction' => array(
-				'name'    => __( 'Introduction', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_introduction' ),
+			'store_setup' => array(
+				'name'    => __( 'Store setup', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_store_setup' ),
 				'handler' => '',
 			),
 			'pages' => array(
@@ -226,6 +226,93 @@ class WC_Admin_Setup_Wizard {
 		echo '<div class="wc-setup-content">';
 		call_user_func( $this->steps[ $this->step ]['view'], $this );
 		echo '</div>';
+	}
+
+	/**
+	 * Initial "store setup" step.
+	 * Location, product type, page setup, and tracking opt-in.
+	 */
+	public function wc_setup_store_setup() {
+		$address        = WC()->countries->get_base_address();
+		$address_2      = WC()->countries->get_base_address_2();
+		$city           = WC()->countries->get_base_city();
+		$state          = WC()->countries->get_base_state();
+		$country        = WC()->countries->get_base_country();
+		$postcode       = WC()->countries->get_base_postcode();
+		$currency       = get_option( 'woocommerce_currency', 'GBP' );
+
+		if ( empty( $country ) ) {
+			$user_location = WC_Geolocation::geolocate_ip();
+			$country       = $user_location['country'];
+			$state         = $user_location['state'];
+		}
+
+		?>
+		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<p><?php esc_html_e( "This quick setup wizard will help you configure the basic settings, and shouldn't take longer than five minutes. To get started, we need to know a few details about your store.", 'woocommerce' ); ?></p>
+			<div>
+				<label for="store_country"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
+				<select id="store_country" name="store_country" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+					<option value=""><?php esc_html_e( 'Choose a country&hellip;', 'woocommerce' ); ?></option>
+				<?php foreach ( WC()->countries->get_countries() as $country_code => $country_name ) : ?>
+					<option value="<?php echo esc_attr( $country_code ); ?>" <?php selected( $country_code, $country ); ?>><?php echo esc_html( $country_name ); ?></option>
+				<?php endforeach; ?>
+				</select>
+			</div>
+			<div>
+				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
+				<input type="text" id="store_address" name="store_address" style="width:100%;" value="<?php echo esc_attr( $address ); ?>" />
+				<input type="text" id="store_address_2" name="store_address_2" style="width:100%;" value="<?php echo esc_attr( $address_2 ); ?>" />
+
+			</div>
+			<div style="width:33%; float:left;">
+				<label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
+				<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
+			</div>
+			<div style="width:33%; float:left;">
+				<label for="store_state"><?php esc_html_e( 'State', 'woocommerce' ); ?></label>
+				<select id="store_state" name="store_state" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a state&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+					<option value=""><?php esc_html_e( 'Choose a state&hellip;', 'woocommerce' ); ?></option>
+				<?php foreach ( WC()->countries->get_states( $country ) as $state_code => $state_name ) : ?>
+					<option value="<?php echo esc_attr( $state_code ); ?>" <?php selected( $state_code, $state ); ?>><?php echo esc_html( $state_name ); ?></option>
+				<?php endforeach; ?>
+				</select>
+			</div>
+			<div style="width:33%; float:left;">
+				<label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
+				<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
+			</div>
+			<div>
+				<label for="currency_code"><?php esc_html_e( 'Store currency', 'woocommerce' ); ?></label>
+				<select id="currency_code" name="currency_code" style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+					<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
+				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
+				<?php endforeach; ?>
+				</select>
+			</div>
+			<div>
+				<label for="product_type"><?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?></label>
+				<select id="product_type" name="product_type" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+					<option value=""><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
+					<option value="physical"><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
+					<option value="virtual"><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
+					<option value="both"><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+				</select>
+			</div>
+		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
+			<div>
+				<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
+				<label for="wc_tracker_optin"><?php _e( 'Allow WooCommerce to collect non-sensitive diagnostic data and usage information.', 'woocommerce' ); ?></label>
+			</div>
+		<?php endif; ?>
+			<p><?php esc_html_e( 'Transforming your site into an online store requires WooCommerce to create a few pages for you. These pages are: shop, cart, my account, and checkout.', 'woocommerce' ); ?></p>
+			<p class="wc-setup-actions step">
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></a>
+			</p>
+		</form>
+		<?php
 	}
 
 	/**
