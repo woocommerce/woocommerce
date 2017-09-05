@@ -508,11 +508,12 @@ function wc_price( $price, $args = array() ) {
 	/**
 	 * Filters the string of price markup.
 	 *
-	 * @param string $return 			Price HTML markup
-	 * @param float  $unformatted_price	Price as float to allow plugins custom formatting
-	 * @param array  $args     			Pass on the args
+	 * @param string $return 			Price HTML markup.
+	 * @param string $price	            Formatted price.
+	 * @param array  $args     			Pass on the args.
+	 * @param float  $unformatted_price	Price as float to allow plugins custom formatting. Since 3.2.0.
 	 */
-	return apply_filters( 'wc_price', $return, $unformatted_price, $args );
+	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price );
 }
 
 /**
