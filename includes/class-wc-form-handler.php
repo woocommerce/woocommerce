@@ -285,9 +285,7 @@ class WC_Form_Handler {
 				exit;
 			}
 
-			if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-				define( 'WOOCOMMERCE_CHECKOUT', true );
-			}
+			wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 			WC()->checkout()->process_checkout();
 		}

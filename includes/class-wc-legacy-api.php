@@ -91,8 +91,8 @@ class WC_Legacy_API {
 		// REST API request.
 		if ( ! empty( $wp->query_vars['wc-api-version'] ) && ! empty( $wp->query_vars['wc-api-route'] ) ) {
 
-			define( 'WC_API_REQUEST', true );
-			define( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
+			wc_maybe_define_constant( 'WC_API_REQUEST', true );
+			wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
 
 			// Legacy v1 API request.
 			if ( 1 === WC_API_REQUEST_VERSION ) {
