@@ -845,7 +845,7 @@ class WC_Form_Handler {
 		// If no variation ID is set, attempt to get a variation ID from posted attributes.
 		if ( empty( $variation_id ) ) {
 			$data_store   = WC_Data_Store::load( 'product' );
-			$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
+			$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_REQUEST ) );
 		}
 
 		// Validate the attributes.
