@@ -190,7 +190,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_footer() {
 		?>
-			<?php if ( 'next_steps' === $this->step ) : ?>
+			<?php if ( 'store_setup' === $this->step ) : ?>
+				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
+			<?php elseif ( 'next_steps' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to the WordPress Dashboard', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			</body>
