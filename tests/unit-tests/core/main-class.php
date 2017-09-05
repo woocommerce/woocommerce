@@ -1,12 +1,16 @@
 <?php
 
 /**
- * Class Main_Class.
+ * WooCommerce class.
  * @package WooCommerce\Tests\Util
  */
-class WC_Tests_Main_Class extends WC_Unit_Test_Case {
+class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 
-	/** @var \WooCommerce instance */
+	/**
+	 * WooCommerce instance.
+	 *
+	 * @var \WooCommerce instance
+	 */
 	protected $wc;
 
 	/**
@@ -15,7 +19,6 @@ class WC_Tests_Main_Class extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function setUp() {
-
 		parent::setUp();
 
 		$this->wc = WC();
@@ -38,7 +41,7 @@ class WC_Tests_Main_Class extends WC_Unit_Test_Case {
 	 */
 	public function test_constants() {
 
-		$this->assertEquals( str_replace( 'tests/unit-tests/util/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
+		$this->assertEquals( str_replace( 'tests/unit-tests/core/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
 
 		$this->assertEquals( $this->wc->version, WC_VERSION );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
@@ -64,5 +67,22 @@ class WC_Tests_Main_Class extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Mock_Session_Handler', $this->wc->session );
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+	}
+
+	/**
+	 * Test WooCommerce->define.
+	 *
+	 * @since 2.3.0
+	 */
+	public function test_define() {
+		$this->assertFalse( defined( 'WC_TESTING_DEFINE_METHOD' ) );
+
+		// Check if defined.
+		$this->wc->define( 'WC_TESTING_DEFINE_METHOD', true );
+		$this->assertTrue( defined( 'WC_TESTING_DEFINE_METHOD' ) );
+
+		// Check value.
+		$this->wc->define( 'WC_TESTING_DEFINE_METHOD', false );
+		$this->assertTrue( WC_TESTING_DEFINE_METHOD );
 	}
 }
