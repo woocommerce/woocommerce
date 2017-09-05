@@ -203,7 +203,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_steps() {
 		$output_steps = $this->steps;
-		array_shift( $output_steps );
 		?>
 		<ol class="wc-setup-steps">
 			<?php foreach ( $output_steps as $step_key => $step ) : ?>
