@@ -739,24 +739,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Sets shipping method title.
-	 *
-	 * @param array $shipping_method
-	 */
-	public function set_shipping_method( $shipping_method ) {
-		$this->set_prop( 'shipping_method', $shipping_method );
-	}
-
-	/**
 	 * Gets formatted shipping method title.
 	 *
 	 * @return string
 	 */
-	public function get_shipping_method( $context = 'view' ) {
-		if ( 'edit' === $context ) {
-			return $this->get_prop( 'shipping_method' );
-		}
-
+	public function get_shipping_method() {
 		$names = array();
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
 			$names[] = $shipping_method->get_name();

@@ -39,7 +39,6 @@ class WC_Order extends WC_Abstract_Order {
 		'date_modified'        => null,
 		'discount_total'       => 0,
 		'discount_tax'         => 0,
-		'shipping_method'      => '',
 		'shipping_total'       => 0,
 		'shipping_tax'         => 0,
 		'cart_tax'             => 0,
