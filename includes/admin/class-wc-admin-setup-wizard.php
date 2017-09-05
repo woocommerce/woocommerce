@@ -75,6 +75,11 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_theme' ),
 				'handler' => array( $this, 'wc_setup_theme_save' ),
 			),
+			'activate' => array(
+				'name'    => __( 'Activate', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_activate' ),
+				'handler' => '',
+			),
 			'next_steps' => array(
 				'name'    => __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
@@ -783,6 +788,79 @@ class WC_Admin_Setup_Wizard {
 		wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
+	}
+
+	/**
+	 * Activate step.
+	 */
+	public function wc_setup_activate() {
+		?>
+		<form method="post" class="wc-wizard-storefront">
+			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
+			<p class="wc-wizard-storefront-intro">
+				<?php // TODO: tailor this message to the Jetpack-powered services selected earlier ?>
+				<?php esc_html_e( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, USPS live rates, and discounted shipping labels.", 'woocommerce' ); ?>
+				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/storefront-intro.png' ); ?>" alt="Storefront" />
+			</p>
+
+			<h3><?php esc_html_e( "Reasons you'll ❤️ Jetpack", 'woocommerce' ); ?></h3>
+			<ul class="wc-wizard-storefront-features">
+				<li class="wc-wizard-storefront-feature first">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'Attack protection', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php esc_html_e( 'Automatically block attacks and protect your site from unauthorized access.', 'woocommerce' ); ?>
+					</p>
+				</li>
+				<li class="wc-wizard-storefront-feature last">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'Plugin management', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php esc_html_e( 'Manage multiple sites and automatic plugin updates from a single dashboard.', 'woocommerce' ); ?>
+					</p>
+				</li>
+				<li class="wc-wizard-storefront-feature first">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'Site monitoring', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php esc_html_e( 'Keep tabs on your site and get an alert the moment downtime is detected.', 'woocommerce' ); ?>
+					</p>
+				</li>
+				<li class="wc-wizard-storefront-feature last">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'SEO tools', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php esc_html_e( 'Better results on search engines and social media.', 'woocommerce' ); ?>
+					</p>
+				</li>
+				<li class="wc-wizard-storefront-feature first">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'Single sign-on', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php esc_html_e( 'Use one account to access multiple sites quickly and securely.', 'woocommerce' ); ?>
+					</p>
+				</li>
+				<li class="wc-wizard-storefront-feature last">
+					<p class="wc-wizard-storefront-feature-heading">
+						<strong><?php esc_html_e( 'So much more', 'woocommerce' ); ?></strong>
+					</p>
+					<p class="wc-wizard-storefront-feature-description">
+						<?php echo wp_kses_post( sprintf( __( 'You get access to <a href="%s" target="_blank">more features</a> that are only possible through Jetpack.', 'woocommerce' ), 'https://jetpack.com/features/' ) ); ?>
+					</p>
+				</li>
+			</ul>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" name="save_step" />
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</p>
+		</form>
+		<?php
+
 	}
 
 	/**
