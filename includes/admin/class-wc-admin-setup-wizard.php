@@ -762,10 +762,10 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Simple array of gateways to show in wizard.
+	 * Simple array of "in cart" gateways to show in wizard.
 	 * @return array
 	 */
-	protected function get_wizard_payment_gateways() {
+	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
 		$can_stripe = $this->is_stripe_supported_country( $country );
 
@@ -790,21 +790,21 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
-				'class'       => 'featured featured-row-last',
+				'class'       => 'in-cart',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
 			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
-				'class'       => 'featured featured-row-last',
+				'class'       => 'in-cart',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
 			'paypal' => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
-				'class'       => '',
+				'class'       => 'in-cart',
 				'settings'    => array(
 					'email' => array(
 						'label'       => __( 'PayPal email address', 'woocommerce' ),
@@ -814,6 +814,31 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
+		);
+
+		$country = WC()->countries->get_base_country();
+
+		if ( 'US' === $country ) {
+			unset( $gateways['ppec_paypal'] );
+		} else {
+			unset( $gateways['braintree_paypal'] );
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			unset( $gateways['braintree_paypal'] );
+			unset( $gateways['ppec_paypal'] );
+			unset( $gateways['stripe'] );
+		}
+
+		return $gateways;
+	}
+
+	/**
+	 * Simple array of "manual" gateways to show in wizard.
+	 * @return array
+	 */
+	protected function get_wizard_manual_payment_gateways() {
+		$gateways = array(
 			'cheque' => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
@@ -834,22 +859,6 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		if ( 'US' === $country ) {
-			unset( $gateways['ppec_paypal'] );
-		} else {
-			unset( $gateways['braintree_paypal'] );
-		}
-
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['braintree_paypal'] );
-			unset( $gateways['ppec_paypal'] );
-			unset( $gateways['stripe'] );
-		}
-
-		if ( ! $can_stripe ) {
-			unset( $gateways['stripe'] );
-		}
-
 		return $gateways;
 	}
 
@@ -857,9 +866,10 @@ class WC_Admin_Setup_Wizard {
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
-		$gateways   = $this->get_wizard_payment_gateways();
-		$country    = WC()->countries->get_base_country();
-		$can_stripe = $this->is_stripe_supported_country( $country );
+		$in_cart_gateways = $this->get_wizard_in_cart_payment_gateways();
+		$manual_gateways  = $this->get_wizard_manual_payment_gateways();
+		$country          = WC()->countries->get_base_country();
+		$can_stripe       = $this->is_stripe_supported_country( $country );
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
@@ -868,8 +878,8 @@ class WC_Admin_Setup_Wizard {
 			<?php else: ?>
 				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
 			<?php endif; ?>
-			<ul class="wc-wizard-payment-gateways">
-				<?php foreach ( $gateways as $gateway_id => $gateway ) : ?>
+			<ul class="wc-wizard-payment-gateways in-cart">
+				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) : ?>
 					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
 						<div class="wc-wizard-gateway-enable">
 							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" <?php checked( isset( $gateway['enabled'] ) && $gateway['enabled'] ); ?>/>
@@ -906,6 +916,25 @@ class WC_Admin_Setup_Wizard {
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<ul class="wc-wizard-payment-gateways manual">
+				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) : ?>
+					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
+						<div class="wc-wizard-gateway-enable">
+							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" <?php checked( isset( $gateway['enabled'] ) && $gateway['enabled'] ); ?>/>
+							<label>
+								<?php if ( $gateway['image'] ) : ?>
+									<img src="<?php echo esc_attr( $gateway['image'] ); ?>" alt="<?php echo esc_attr( $gateway['name'] ); ?>" />
+								<?php else : ?>
+									<?php echo esc_html( $gateway['name'] ); ?>
+								<?php endif; ?>
+							</label>
+						</div>
+						<div class="wc-wizard-gateway-description">
+							<?php echo wp_kses_post( wpautop( $gateway['description'] ) ); ?>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -921,7 +950,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$gateways = $this->get_wizard_payment_gateways();
+		$gateways = $this->get_wizard_in_cart_payment_gateways();
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
