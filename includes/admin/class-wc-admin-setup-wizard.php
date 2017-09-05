@@ -731,16 +731,50 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * https://stripe.com/global
+	 */
+	protected function is_stripe_supported_country( $country_code ) {
+		$stripe_supported_countries = array(
+			'AU' => __( 'Australia', 'woocommerce' ),
+			'AT' => __( 'Austria', 'woocommerce' ),
+			'BE' => __( 'Belgium', 'woocommerce' ),
+			'CA' => __( 'Canada', 'woocommerce' ),
+			'DK' => __( 'Denmark', 'woocommerce' ),
+			'FI' => __( 'Finland', 'woocommerce' ),
+			'FR' => __( 'France', 'woocommerce' ),
+			'DE' => __( 'Germany', 'woocommerce' ),
+			'HK' => __( 'Hong Kong', 'woocommerce' ),
+			'IE' => __( 'Ireland', 'woocommerce' ),
+			'JP' => __( 'Japan', 'woocommerce' ),
+			'LU' => __( 'Luxembourg', 'woocommerce' ),
+			'NL' => __( 'Netherlands', 'woocommerce' ),
+			'NZ' => __( 'New Zealand', 'woocommerce' ),
+			'NO' => __( 'Norway', 'woocommerce' ),
+			'SG' => __( 'Singapore', 'woocommerce' ),
+			'ES' => __( 'Spain', 'woocommerce' ),
+			'SE' => __( 'Sweden', 'woocommerce' ),
+			'CH' => __( 'Switzerland', 'woocommerce' ),
+			'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
+			'US' => __( 'United States (US)', 'woocommerce' ),
+		);
+
+		return array_key_exists( $country_code, $stripe_supported_countries );
+	}
+
+	/**
 	 * Simple array of gateways to show in wizard.
 	 * @return array
 	 */
 	protected function get_wizard_payment_gateways() {
+		$country    = WC()->countries->get_base_country();
+		$can_stripe = $this->is_stripe_supported_country( $country );
+
 		$gateways = array(
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => sprintf( __( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>. <p class="description">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
-				'class'       => 'featured featured-row-first',
+				'class'       => $can_stripe ? 'featured featured-row-first checked' : 'featured featured-row-first',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'email' => array(
@@ -750,7 +784,7 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
 					),
 				),
-				'enabled'     => true,
+				'enabled'     => $can_stripe,
 			),
 			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
@@ -800,8 +834,6 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$country = WC()->countries->get_base_country();
-
 		if ( 'US' === $country ) {
 			unset( $gateways['ppec_paypal'] );
 		} else {
@@ -814,6 +846,10 @@ class WC_Admin_Setup_Wizard {
 			unset( $gateways['stripe'] );
 		}
 
+		if ( ! $can_stripe ) {
+			unset( $gateways['stripe'] );
+		}
+
 		return $gateways;
 	}
 
@@ -821,12 +857,17 @@ class WC_Admin_Setup_Wizard {
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
-		$gateways = $this->get_wizard_payment_gateways();
+		$gateways   = $this->get_wizard_payment_gateways();
+		$country    = WC()->countries->get_base_country();
+		$can_stripe = $this->is_stripe_supported_country( $country );
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
-			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
-
+			<?php if ( $can_stripe ) : ?>
+				<p><?php esc_html_e( 'Your store will be setup to accept payments instantly on checkout with Stripe.', 'woocommerce' ); ?></p>
+			<?php else: ?>
+				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
+			<?php endif; ?>
 			<ul class="wc-wizard-payment-gateways">
 				<?php foreach ( $gateways as $gateway_id => $gateway ) : ?>
 					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
