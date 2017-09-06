@@ -830,28 +830,48 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
-		$adding_to_cart     = wc_get_product( $product_id );
-		$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-		$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
-		$missing_attributes = array();
-		$variations         = array();
-		$attributes         = $adding_to_cart->get_attributes();
-
-		// If no variation ID is set, attempt to get a variation ID from posted attributes.
-		if ( empty( $variation_id ) ) {
-			$data_store   = WC_Data_Store::load( 'product' );
-			$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
-		}
-
-		// Validate the attributes.
 		try {
+			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
+			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+			$missing_attributes = array();
+			$variations         = array();
+			$adding_to_cart     = wc_get_product( $product_id );
+
+			if ( ! $adding_to_cart ) {
+				return false;
+			}
+
+			// If the $product_id was in fact a variation ID, update the variables.
+			if ( $adding_to_cart->is_type( 'variation' ) ) {
+				$variation_id   = $product_id;
+				$product_id     = $adding_to_cart->get_parent_id();
+				$adding_to_cart = wc_get_product( $product_id );
+
+				if ( ! $adding_to_cart ) {
+					return false;
+				}
+			}
+
+			// If no variation ID is set, attempt to get a variation ID from posted attributes.
+			if ( empty( $variation_id ) ) {
+				$data_store   = WC_Data_Store::load( 'product' );
+				$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
+			}
+
+			// If no variation ID is set, attempt to get a variation ID from posted attributes.
+			if ( empty( $variation_id ) ) {
+				$data_store   = WC_Data_Store::load( 'product' );
+				$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, wp_unslash( $_POST ) );
+			}
+
+			// Validate the attributes.
 			if ( empty( $variation_id ) ) {
 				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			}
 
 			$variation_data = wc_get_product_variation_attributes( $variation_id );
 
-			foreach ( $attributes as $attribute ) {
+			foreach ( $adding_to_cart->get_attributes() as $attribute ) {
 				if ( ! $attribute['is_variation'] ) {
 					continue;
 				}
@@ -861,9 +881,9 @@ class WC_Form_Handler {
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 					if ( $attribute['is_taxonomy'] ) {
 						// Don't use wc_clean as it destroys sanitized characters.
-						$value = sanitize_title( wp_unlash( $_REQUEST[ $taxonomy ] ) );
+						$value = sanitize_title( wp_unslash( $_REQUEST[ $taxonomy ] ) );
 					} else {
-						$value = wc_clean( wp_unlash( $_REQUEST[ $taxonomy ] ) );
+						$value = wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) );
 					}
 
 					// Get valid value from variation data.
