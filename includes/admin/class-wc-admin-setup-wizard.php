@@ -78,7 +78,7 @@ class WC_Admin_Setup_Wizard {
 			'activate' => array(
 				'name'    => __( 'Activate', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_activate' ),
-				'handler' => '',
+				'handler' => array( $this, 'wc_setup_activate_save' ),
 			),
 			'next_steps' => array(
 				'name'    => __( 'Ready!', 'woocommerce' ),
@@ -837,9 +837,25 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Go to the next step if Jetpack was connected.
+	 */
+	protected function wc_setup_activate_actions() {
+		if (
+			isset( $_GET['from'] ) &&
+			'wpcom' === $_GET['from'] &&
+			class_exists( 'Jetpack' ) &&
+			Jetpack::is_active()
+		) {
+			wp_redirect( esc_url_raw( remove_query_arg( 'from', $this->get_next_step_link() ) ) );
+			exit;
+		}
+	}
+
+	/**
 	 * Activate step.
 	 */
 	public function wc_setup_activate() {
+		$this->wc_setup_activate_actions();
 		?>
 		<form method="post" class="wc-wizard-storefront">
 			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
@@ -906,7 +922,28 @@ class WC_Admin_Setup_Wizard {
 			</p>
 		</form>
 		<?php
+	}
 
+	/**
+	 * Activate step save.
+	 *
+	 * Install, activate, and launch connection flow for Jetpack.
+	 */
+	public function wc_setup_activate_save() {
+		check_admin_referer( 'wc-setup' );
+
+		$this->install_jetpack( true );
+
+		if ( ! class_exists( 'Jetpack' ) ) {
+			wp_redirect( esc_url_raw( add_query_arg( 'error', true ) ) );
+			exit;
+		}
+
+		$redirect_url   = site_url( add_query_arg( 'from', 'wpcom' ) );
+		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce' );
+
+		wp_redirect( esc_url_raw( $connection_url ) );
+		exit;
 	}
 
 	/**
