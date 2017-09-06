@@ -436,8 +436,16 @@ class WC_Shortcode_Products {
 	 * @return WP_Query
 	 */
 	protected function get_products() {
-		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
-		$products       = get_transient( $transient_name );
+		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
+
+		if ( 'rand' === $this->query_args['orderby'] ) {
+			// When using rand, we'll cache a number of random queries and pull those to avoid querying rand on each page load.
+			$rand_index      = rand( 0, max( 1, absint( apply_filters( 'woocommerce_product_query_max_rand_cache_count', 5 ) ) ) );
+			$transient_name .= $rand_index;
+		}
+
+		$transient_name .= WC_Cache_Helper::get_transient_version( 'product_query' );
+		$products        = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
 			if ( 'top_rated_products' === $this->type ) {
