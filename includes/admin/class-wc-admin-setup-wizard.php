@@ -92,6 +92,11 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['theme'] );
 		}
 
+		// Hide shipping step if the store is selling digital products only.
+		if ( 'virtual' === get_option( 'woocommerce_product_type' ) ) {
+			unset( $default_steps['shipping'] );
+		}
+
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -238,6 +243,7 @@ class WC_Admin_Setup_Wizard {
 		$country        = WC()->countries->get_base_country();
 		$postcode       = WC()->countries->get_base_postcode();
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
+		$product_type   = get_option( 'woocommerce_product_type' );
 
 		if ( empty( $country ) ) {
 			$user_location = WC_Geolocation::geolocate_ip();
@@ -293,10 +299,10 @@ class WC_Admin_Setup_Wizard {
 			<div>
 				<label for="product_type"><?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?></label>
 				<select id="product_type" name="product_type" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value=""><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
-					<option value="physical"><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
-					<option value="virtual"><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-					<option value="both"><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+					<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
+					<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
+					<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
+					<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
 				</select>
 			</div>
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
