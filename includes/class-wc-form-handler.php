@@ -752,7 +752,7 @@ class WC_Form_Handler {
 		}
 
 		// If we added the product to the cart we can now optionally do a redirect.
-		if ( 0 === $was_added_to_cart && wc_notice_count( 'error' ) ) {
+		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
 			// If has custom URL redirect there
 			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url ) ) {
 				wp_safe_redirect( $url );
