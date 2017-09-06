@@ -225,7 +225,7 @@ final class WooCommerce {
 	 * @param string      $name  Constant name.
 	 * @param string|bool $value Constant value.
 	 */
-	public function define( $name, $value ) {
+	private function define( $name, $value ) {
 		if ( ! defined( $name ) ) {
 			define( $name, $value );
 		}

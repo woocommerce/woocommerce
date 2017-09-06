@@ -57,12 +57,14 @@ add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 /**
  * Define a constant if it is not already defined.
  *
- * @since  3.0.0
- * @param  string $name
- * @param  string $value
+ * @since 3.0.0
+ * @param string $name  Constant name.
+ * @param string $value Value.
  */
 function wc_maybe_define_constant( $name, $value ) {
-	WC()->define( $name, $value );
+	if ( ! defined( $name ) ) {
+		define( $name, $value );
+	}
 }
 
 /**
