@@ -734,26 +734,18 @@ class WC_Form_Handler {
 
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
-		// Variable product handling
-		if ( 'variable' === $add_to_cart_handler ) {
+		if ( 'variable' === $add_to_cart_handler || 'variation' === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
-
-		// Grouped Products
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
-
-		// Custom Handler
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
-			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
-
-		// Simple Products
+			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url ); // Custom handler.
 		} else {
 			$was_added_to_cart = self::add_to_cart_handler_simple( $product_id );
 		}
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
-			// If has custom URL redirect there
 			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url ) ) {
 				wp_safe_redirect( $url );
 				exit;
@@ -766,8 +758,9 @@ class WC_Form_Handler {
 
 	/**
 	 * Handle adding simple products to the cart.
-	 * @since 2.4.6 Split from add_to_cart_action
-	 * @param int $product_id
+	 *
+	 * @since 2.4.6 Split from add_to_cart_action.
+	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
@@ -783,8 +776,9 @@ class WC_Form_Handler {
 
 	/**
 	 * Handle adding grouped products to the cart.
-	 * @since 2.4.6 Split from add_to_cart_action
-	 * @param int $product_id
+	 *
+	 * @since 2.4.6 Split from add_to_cart_action.
+	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_grouped( $product_id ) {
@@ -830,8 +824,9 @@ class WC_Form_Handler {
 
 	/**
 	 * Handle adding variable products to the cart.
-	 * @since 2.4.6 Split from add_to_cart_action
-	 * @param int $product_id
+	 *
+	 * @since 2.4.6 Split from add_to_cart_action.
+	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
@@ -864,22 +859,21 @@ class WC_Form_Handler {
 				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
 
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
-					// Get value from post data
 					if ( $attribute['is_taxonomy'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
-						$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
+						// Don't use wc_clean as it destroys sanitized characters.
+						$value = sanitize_title( wp_unlash( $_REQUEST[ $taxonomy ] ) );
 					} else {
-						$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
+						$value = wc_clean( wp_unlash( $_REQUEST[ $taxonomy ] ) );
 					}
 
-					// Get valid value from variation
+					// Get valid value from variation data.
 					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {
 						$variations[ $taxonomy ] = $value;
-					// If valid values are empty, this is an 'any' variation so get all possible values.
 					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs() ) ) {
+						// If valid values are empty, this is an 'any' variation so get all possible values.
 						$variations[ $taxonomy ] = $value;
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
@@ -889,14 +883,13 @@ class WC_Form_Handler {
 				}
 			}
 			if ( ! empty( $missing_attributes ) ) {
-				throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
+				throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
 			}
 		} catch ( Exception $e ) {
 			wc_add_notice( $e->getMessage(), 'error' );
 			return false;
 		}
 
-		// Add to cart validation
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
