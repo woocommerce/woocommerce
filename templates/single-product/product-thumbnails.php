@@ -21,13 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $post, $product;
-
+$gallery_thumbnail_size			= apply_filters( 'woocommerce_product_gallery_thumbnails_large_size', 'full' );
+$gallery_shop_thumbnail_size	= apply_filters( 'woocommerce_product_gallery_shop_thumbnail_size', 'shop_thumbnail' );
 $attachment_ids = $product->get_gallery_image_ids();
 
 if ( $attachment_ids && has_post_thumbnail() ) {
 	foreach ( $attachment_ids as $attachment_id ) {
-		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$full_size_image = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
+		$thumbnail       = wp_get_attachment_image_src( $attachment_id, $gallery_shop_thumbnail_size );
 		$attributes      = array(
 			'title'                   => get_post_field( 'post_title', $attachment_id ),
 			'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
