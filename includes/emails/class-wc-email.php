@@ -191,22 +191,6 @@ class WC_Email extends WC_Settings_API {
 	protected $placeholders = array();
 
 	/**
-	 * Strings to find in subjects/headings.
-	 *
-	 * @deprecated 3.2.0 in favour of placeholders
-	 * @var array
-	 */
-	public $find = array();
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 *
-	 * @deprecated 3.2.0 in favour of placeholders
-	 * @var array
-	 */
-	public $replace = array();
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
