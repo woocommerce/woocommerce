@@ -401,29 +401,40 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Helper method to queue the background install of a plugin.
+	 *
+	 * @param string $plugin_id  Plugin id used for background install.
+	 * @param array $plugin_info Plugin info array containing at least main file and repo slug.
+	 */
+	protected function install_plugin( $plugin_id, $plugin_info ) {
+		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
+			return;
+		}
+
+		wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin_id, $plugin_info ) );
+	}
+
+	/**
+	 * Helper method to install Jetpack.
+	 */
+	protected function install_jetpack() {
+		$this->install_plugin( 'jetpack', array(
+			'file'      => 'jetpack/jetpack.php',
+			'name'      => __( 'Jetpack', 'woocommerce' ),
+			'repo-slug' => 'jetpack',
+		) );
+	}
+
+	/**
 	 * Helper method to install WooCommerce Services and its Jetpack dependency.
 	 */
 	protected function install_woocommerce_services() {
-		$plugins = array(
-			array(
-				'file' => 'jetpack/jetpack.php',
-				'name' => __( 'Jetpack', 'woocommerce' ),
-				'slug' => 'jetpack',
-			),
-			array(
-				'file' => 'woocommerce-services/woocommerce-services.php',
-				'name' => __( 'WooCommerce Services', 'woocommerce' ),
-				'slug' => 'woocommerce-services',
-			),
-		);
-
-		foreach ( $plugins as $plugin ) {
-			if ( is_plugin_active( $plugin['file'] ) ) {
-				continue;
-			}
-
-			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin['slug'], $plugin ) );
-		}
+		$this->install_jetpack();
+		$this->install_plugin( 'woocommerce-services', array(
+			'file'      => 'woocommerce-services/woocommerce-services.php',
+			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-services',
+		) );
 	}
 
 	/**
@@ -754,7 +765,7 @@ class WC_Admin_Setup_Wizard {
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
 			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ) {
-				wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $gateway_id, $gateway ) );
+				$this->install_plugin( $gateway_id, $gateway );
 			}
 
 			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
