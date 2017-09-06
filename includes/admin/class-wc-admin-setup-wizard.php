@@ -781,6 +781,11 @@ class WC_Admin_Setup_Wizard {
 			update_option( $settings_key, $settings );
 		}
 
+		// Install WooCommerce Services with Stripe to enable deferred account creation
+		if ( ! empty( $_POST[ 'wc-wizard-gateway-stripe-enabled' ] ) ) {
+			$this->install_woocommerce_services();
+		}
+
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
