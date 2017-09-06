@@ -68,21 +68,4 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 	}
-
-	/**
-	 * Test WooCommerce->define.
-	 *
-	 * @since 2.3.0
-	 */
-	public function test_define() {
-		$this->assertFalse( defined( 'WC_TESTING_DEFINE_METHOD' ) );
-
-		// Check if defined.
-		$this->wc->define( 'WC_TESTING_DEFINE_METHOD', true );
-		$this->assertTrue( defined( 'WC_TESTING_DEFINE_METHOD' ) );
-
-		// Check value.
-		$this->wc->define( 'WC_TESTING_DEFINE_METHOD', false );
-		$this->assertTrue( WC_TESTING_DEFINE_METHOD );
-	}
 }

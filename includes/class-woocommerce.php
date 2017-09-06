@@ -220,8 +220,6 @@ final class WooCommerce {
 	/**
 	 * Define constant if not already set.
 	 *
-	 * For integrations prefer wc_maybe_define_constant() instead.
-	 *
 	 * @param string      $name  Constant name.
 	 * @param string|bool $value Constant value.
 	 */
