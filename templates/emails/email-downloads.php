@@ -19,8 +19,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-?>
-<h2 class="woocommerce-order-downloads__title"><?php _e( 'Downloads', 'woocommerce' ); ?></h2>
+
+$text_align = is_rtl() ? 'right' : 'left';
+
+?><h2 class="woocommerce-order-downloads__title"><?php _e( 'Downloads', 'woocommerce' ); ?></h2>
 
 <table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; margin-bottom: 40px;" border="1">
 	<thead>
