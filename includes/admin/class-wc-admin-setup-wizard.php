@@ -267,6 +267,7 @@ class WC_Admin_Setup_Wizard {
 			<div>
 				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
 				<input type="text" id="store_address" name="store_address" style="width:100%;" value="<?php echo esc_attr( $address ); ?>" />
+				<label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
 				<input type="text" id="store_address_2" name="store_address_2" style="width:100%;" value="<?php echo esc_attr( $address_2 ); ?>" />
 
 			</div>
