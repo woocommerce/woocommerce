@@ -1020,7 +1020,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$coupon_object = apply_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
 
 			if ( $coupon_object ) {
-				$discounts->apply_coupon( $coupon_object );
+				$discounts->apply_coupon( $coupon_object, false );
 			}
 		}
 

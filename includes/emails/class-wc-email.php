@@ -191,22 +191,6 @@ class WC_Email extends WC_Settings_API {
 	protected $placeholders = array();
 
 	/**
-	 * Strings to find in subjects/headings.
-	 *
-	 * @deprecated 3.2.0 in favour of placeholders
-	 * @var array
-	 */
-	public $find = array();
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 *
-	 * @deprecated 3.2.0 in favour of placeholders
-	 * @var array
-	 */
-	public $replace = array();
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -250,14 +234,23 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Format email string.
 	 *
-	 * @param mixed $string
+	 * @param mixed $string Text to replace placeholders in.
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		// Legacy placeholders. @todo deprecate in 4.0.0.
+		$find    = array_keys( $this->placeholders );
+		$replace = array_values( $this->placeholders );
+
+		// If using legacy find replace, add those to our find/replace arrays first. @todo deprecate in 4.0.0.
+		if ( isset( $this->find, $this->replace ) ) {
+			$find    = array_merge( $this->find, $find );
+			$replace = array_merge( $this->replace, $replace );
+		}
+
+		// If using the older style filters for find and replace, ensure the array is associative and then pass through filters. @todo deprecate in 4.0.0.
 		if ( has_filter( 'woocommerce_email_format_string_replace' ) || has_filter( 'woocommerce_email_format_string_find' ) ) {
-			$legacy_find    = array();
-			$legacy_replace = array();
+			$legacy_find    = isset( $this->find ) ? $this->find : array();
+			$legacy_replace = isset( $this->replace ) ? $this->replace : array();
 
 			foreach ( $this->placeholders as $find => $replace ) {
 				$legacy_key                    = sanitize_title( str_replace( '_', '-', trim( $find, '{}' ) ) );
@@ -267,7 +260,13 @@ class WC_Email extends WC_Settings_API {
 
 			$string = str_replace( apply_filters( 'woocommerce_email_format_string_find', $legacy_find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $legacy_replace, $this ), $string );
 		}
-		return str_replace( $this->find, $this->replace, $string );
+
+		/**
+		 * woocommerce_email_format_string filter for main find/replace code.
+		 *
+		 * @since 3.2.0
+		 */
+		return apply_filters( 'woocommerce_email_format_string', str_replace( $find, $replace, $string ), $this );
 	}
 
 	/**
