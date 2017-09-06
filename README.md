@@ -13,7 +13,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).
 
 ## Support
-This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core, WooCommerce issues only. Support can take place through the appropriate channels:
+This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
 * The [WooCommerce premium support portal](https://woocommerce.com/my-account/create-a-ticket/) for customers who have purchased themes or extensions.
 * [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
@@ -24,4 +24,4 @@ Support requests in issues on this repository will be closed on sight.
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
 
 ## Contributing new features to the WooCommerce REST API
-If you're like to add a feature to the next version of the REST API, contribute here: https://github.com/woocommerce/wc-api-dev
+If you'd like to add a feature to the next version of the REST API, contribute here: https://github.com/woocommerce/wc-api-dev
