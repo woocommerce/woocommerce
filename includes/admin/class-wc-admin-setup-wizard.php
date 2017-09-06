@@ -401,6 +401,32 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Helper method to install WooCommerce Services and its Jetpack dependency.
+	 */
+	protected function install_woocommerce_services() {
+		$plugins = array(
+			array(
+				'file' => 'jetpack/jetpack.php',
+				'name' => __( 'Jetpack', 'woocommerce' ),
+				'slug' => 'jetpack',
+			),
+			array(
+				'file' => 'woocommerce-services/woocommerce-services.php',
+				'name' => __( 'WooCommerce Services', 'woocommerce' ),
+				'slug' => 'woocommerce-services',
+			),
+		);
+
+		foreach ( $plugins as $plugin ) {
+			if ( is_plugin_active( $plugin['file'] ) ) {
+				continue;
+			}
+
+			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin['slug'], $plugin ) );
+		}
+	}
+
+	/**
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
@@ -494,13 +520,8 @@ class WC_Admin_Setup_Wizard {
 			$zone->save();
 		}
 
-		if ( $install_services && ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
-			$services_plugin_id = 'woocommerce-services';
-			$services_plugin    = array(
-				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
-				'repo-slug' => 'woocommerce-services',
-			);
-			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $services_plugin_id, $services_plugin ) );
+		if ( $install_services ) {
+			$this->install_woocommerce_services();
 		} else {
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
