@@ -249,7 +249,7 @@ class WC_Install {
 	 */
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
-			if ( apply_filters( 'woocommerce_enable_auto_update_db', true ) ) {
+			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
 				self::init_background_updater();
 				self::update();
 			} else {
