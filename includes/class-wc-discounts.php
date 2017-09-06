@@ -206,14 +206,15 @@ class WC_Discounts {
 	 *
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
+	 * @param  bool      $validate Set to false to skip coupon validation.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
-	public function apply_coupon( $coupon ) {
+	public function apply_coupon( $coupon, $validate = true ) {
 		if ( ! is_a( $coupon, 'WC_Coupon' ) ) {
 			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
-		$is_coupon_valid = $this->is_coupon_valid( $coupon );
+		$is_coupon_valid = $validate ? $this->is_coupon_valid( $coupon ) : true;
 
 		if ( is_wp_error( $is_coupon_valid ) ) {
 			return $is_coupon_valid;
