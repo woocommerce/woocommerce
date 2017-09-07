@@ -761,7 +761,7 @@ class WC_Form_Handler {
 	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
-	private static function add_to_cart_handler_simple( $product_id ) {
+	public static function add_to_cart_handler_simple( $product_id ) {
 		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
@@ -779,7 +779,7 @@ class WC_Form_Handler {
 	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
-	private static function add_to_cart_handler_grouped( $product_id ) {
+	public static function add_to_cart_handler_grouped( $product_id ) {
 		$was_added_to_cart = false;
 		$added_to_cart     = array();
 
@@ -827,7 +827,7 @@ class WC_Form_Handler {
 	 * @param int $product_id Product ID to add to the cart.
 	 * @return bool success or not
 	 */
-	private static function add_to_cart_handler_variable( $product_id ) {
+	public static function add_to_cart_handler_variable( $product_id ) {
 		try {
 			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
 			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
