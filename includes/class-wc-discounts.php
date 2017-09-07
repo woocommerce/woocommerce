@@ -853,7 +853,7 @@ class WC_Discounts {
 			 * @param int       $error_code    Error code.
 			 * @param WC_Coupon $coupon        Coupon data.
 			 */
-			$message = apply_filters( 'woocommerce_coupon_error', $e->getMessage(), $e->getCode(), $coupon );
+			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
 			return new WP_Error( 'invalid_coupon', $message, array(
 				'status' => 400,
