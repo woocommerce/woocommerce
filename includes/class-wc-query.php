@@ -291,9 +291,7 @@ class WC_Query {
 			}
 
 			// Define a variable so we know this is the front page shop later on
-			if ( ! defined( 'SHOP_IS_ON_FRONT' ) ) {
-				define( 'SHOP_IS_ON_FRONT', true );
-			}
+			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
 			// Get the actual WP page to avoid errors and let us use is_front_page()
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096

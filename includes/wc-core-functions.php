@@ -57,9 +57,9 @@ add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 /**
  * Define a constant if it is not already defined.
  *
- * @since  3.0.0
- * @param  string $name
- * @param  string $value
+ * @since 3.0.0
+ * @param string $name  Constant name.
+ * @param string $value Value.
  */
 function wc_maybe_define_constant( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -1151,9 +1151,7 @@ function wc_transaction_query( $type = 'start' ) {
 
 	$wpdb->hide_errors();
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		define( 'WC_USE_TRANSACTIONS', true );
-	}
+	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
 	if ( WC_USE_TRANSACTIONS ) {
 		switch ( $type ) {
