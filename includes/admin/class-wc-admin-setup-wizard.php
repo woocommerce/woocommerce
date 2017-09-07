@@ -687,6 +687,47 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Display service item in list.
+	 */
+	public function display_service_item( $item_id, $item_info ) {
+		$enabled = isset( $item_info['enabled'] ) && $item_info['enabled'];
+		?>
+		<li class="wc-wizard-service-item">
+			<div class="wc-wizard-service-name">
+				<?php if ( $item_info['image'] ) : ?>
+					<img src="<?php echo esc_attr( $item_info['image'] ); ?>" alt="<?php echo esc_attr( $item_info['name'] ); ?>" />
+				<?php else : ?>
+					<p><?php echo esc_html( $item_info['name'] ); ?></p>
+				<?php endif; ?>
+			</div>
+			<div class="wc-wizard-service-description">
+				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
+				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
+					<div>
+						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
+							<label for="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label>
+							<input
+								type="<?php echo esc_attr( $setting['type'] ); ?>"
+								id="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+								name="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+								value="<?php echo esc_attr( $setting['value'] ); ?>"
+								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+							/>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+			<div class="wc-wizard-service-enable">
+				<span class="wc-wizard-service-toggle <?php echo esc_attr( $enabled ? '' : 'disabled' ); ?>">
+					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $enabled ); ?>/>
+					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
+				</span>
+			</div>
+		</li>
+		<?php
+	}
+
+	/**
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
@@ -702,62 +743,15 @@ class WC_Admin_Setup_Wizard {
 			<?php else: ?>
 				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
 			<?php endif; ?>
-			<ul class="wc-wizard-payment-gateways in-cart">
-				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) : ?>
-					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
-						<div class="wc-wizard-gateway-enable">
-							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" <?php checked( isset( $gateway['enabled'] ) && $gateway['enabled'] ); ?>/>
-							<label>
-								<?php if ( $gateway['image'] ) : ?>
-									<img src="<?php echo esc_attr( $gateway['image'] ); ?>" alt="<?php echo esc_attr( $gateway['name'] ); ?>" />
-								<?php else : ?>
-									<?php echo esc_html( $gateway['name'] ); ?>
-								<?php endif; ?>
-							</label>
-						</div>
-						<div class="wc-wizard-gateway-description">
-							<?php echo wp_kses_post( wpautop( $gateway['description'] ) ); ?>
-						</div>
-						<?php if ( ! empty( $gateway['settings'] ) ) : ?>
-							<table class="form-table wc-wizard-gateway-settings">
-								<?php foreach ( $gateway['settings'] as $setting_id => $setting ) : ?>
-									<tr>
-										<th scope="row"><label for="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label></th>
-										<td>
-											<input
-												type="<?php echo esc_attr( $setting['type'] ); ?>"
-												id="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
-												name="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
-												class="input-text"
-												value="<?php echo esc_attr( $setting['value'] ); ?>"
-												placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
-												/>
-										</td>
-									</tr>
-								<?php endforeach; ?>
-							</table>
-						<?php endif; ?>
-					</li>
-				<?php endforeach; ?>
+			<ul class="wc-wizard-services in-cart">
+				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) {
+					$this->display_service_item( $gateway_id, $gateway );
+				} ?>
 			</ul>
-			<ul class="wc-wizard-payment-gateways manual">
-				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) : ?>
-					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
-						<div class="wc-wizard-gateway-enable">
-							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" <?php checked( isset( $gateway['enabled'] ) && $gateway['enabled'] ); ?>/>
-							<label>
-								<?php if ( $gateway['image'] ) : ?>
-									<img src="<?php echo esc_attr( $gateway['image'] ); ?>" alt="<?php echo esc_attr( $gateway['name'] ); ?>" />
-								<?php else : ?>
-									<?php echo esc_html( $gateway['name'] ); ?>
-								<?php endif; ?>
-							</label>
-						</div>
-						<div class="wc-wizard-gateway-description">
-							<?php echo wp_kses_post( wpautop( $gateway['description'] ) ); ?>
-						</div>
-					</li>
-				<?php endforeach; ?>
+			<ul class="wc-wizard-services manual">
+				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) {
+					$this->display_service_item( $gateway_id, $gateway );
+				} ?>
 			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -777,13 +771,13 @@ class WC_Admin_Setup_Wizard {
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
-			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ) {
+			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ) {
 				$this->install_plugin( $gateway_id, $gateway );
 			}
 
 			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
 			$settings            = array_filter( (array) get_option( $settings_key, array() ) );
-			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no';
+			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no';
 
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
@@ -795,7 +789,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// Install WooCommerce Services with Stripe to enable deferred account creation
-		if ( ! empty( $_POST[ 'wc-wizard-gateway-stripe-enabled' ] ) ) {
+		if ( ! empty( $_POST[ 'wc-wizard-service-stripe-enabled' ] ) ) {
 			$this->install_woocommerce_services();
 		}
 
