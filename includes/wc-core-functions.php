@@ -115,11 +115,15 @@ function wc_create_order( $args = array() ) {
 			$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
 		}
 
+		// Set these fields when creating a new order but not when updating an existing order.
+		if ( ! $args['order_id'] ) {
+			$order->set_currency( get_woocommerce_currency() );
+			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+			$order->set_customer_user_agent( wc_get_user_agent() );
+		}
+
 		// Update other order props set automatically
-		$order->set_currency( get_woocommerce_currency() );
-		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->save();
 	} catch ( Exception $e ) {
 		return new WP_Error( 'error', $e->getMessage() );
@@ -135,7 +139,7 @@ function wc_create_order( $args = array() ) {
  * @return string | WC_Order
  */
 function wc_update_order( $args ) {
-	if ( ! $args['order_id'] ) {
+	if ( empty( $args['order_id'] ) ) {
 		return new WP_Error( __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
