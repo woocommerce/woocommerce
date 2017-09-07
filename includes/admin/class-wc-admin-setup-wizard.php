@@ -598,7 +598,7 @@ class WC_Admin_Setup_Wizard {
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => sprintf( __( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>. <p class="description">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
+				'description' => sprintf( __( '<p>Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.</p><p class="payment-gateway-fee">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
 				'class'       => $can_stripe ? 'featured featured-row-first checked' : 'featured featured-row-first',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
