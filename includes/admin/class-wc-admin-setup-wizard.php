@@ -599,7 +599,7 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => sprintf( __( '<p>Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.</p><p class="payment-gateway-fee">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
-				'class'       => $can_stripe ? 'featured featured-row-first checked' : 'featured featured-row-first',
+				'class'       => $can_stripe ? 'checked' : '',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'email' => array(
@@ -609,7 +609,8 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
 					),
 				),
-				'enabled'     => $can_stripe,
+				'enabled' => $can_stripe,
+				'featured' => true,
 			),
 			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
@@ -640,7 +641,6 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 		);
-
 
 		if ( 'US' === $country ) {
 			unset( $gateways['ppec_paypal'] );
@@ -727,14 +727,23 @@ class WC_Admin_Setup_Wizard {
 		<?php
 	}
 
+	public function is_featured_service( $service ) {
+		return $service['featured'] && true === $service['featured'];
+	}
+
+	public function is_not_featured_service( $service ) {
+		return ! $this->is_featured_service( $service );
+	}
+
 	/**
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
-		$in_cart_gateways = $this->get_wizard_in_cart_payment_gateways();
-		$manual_gateways  = $this->get_wizard_manual_payment_gateways();
-		$country          = WC()->countries->get_base_country();
-		$can_stripe       = $this->is_stripe_supported_country( $country );
+		$featured_gateways = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_featured_service' ) );
+		$in_cart_gateways  = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_not_featured_service' ) );
+		$manual_gateways   = $this->get_wizard_manual_payment_gateways();
+		$country           = WC()->countries->get_base_country();
+		$can_stripe        = $this->is_stripe_supported_country( $country );
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
@@ -743,6 +752,11 @@ class WC_Admin_Setup_Wizard {
 			<?php else: ?>
 				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
 			<?php endif; ?>
+			<ul class="wc-wizard-services featured">
+				<?php foreach ( $featured_gateways as $gateway_id => $gateway ) :
+					$this->display_service_item( $gateway_id, $gateway );
+				endforeach; ?>
+			</ul>
 			<ul class="wc-wizard-services in-cart">
 				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) {
 					$this->display_service_item( $gateway_id, $gateway );
