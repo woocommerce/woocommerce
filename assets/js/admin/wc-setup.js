@@ -79,21 +79,20 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
-	$( '.wc-wizard-payment-gateways, .wc-wizard-shipping-methods' ).on( 'change', '.wc-wizard-gateway-enable input, .wc-wizard-shipping-enable input', function() {
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-service-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
-			$( this ).closest( 'li' ).addClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-toggle' ).removeClass( 'disabled' );
 		} else {
-			$( this ).closest( 'li' ).removeClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-toggle' ).addClass( 'disabled' );
 		}
 	} );
 
-	$( '.wc-wizard-payment-gateways, .wc-wizard-shipping-methods' ).on( 'click', 'li.wc-wizard-gateway, li.wc-wizard-shipping', function() {
-		var $enabled = $( this ).find( '.wc-wizard-gateway-enable input, .wc-wizard-shipping-enable input' );
-
-		$enabled.prop( 'checked', ! $enabled.prop( 'checked' ) ).change();
+	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-item', function() {
+		var $checkbox = $( this ).find( '.wc-wizard-service-enable input' );
+		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
-	$( '.wc-wizard-payment-gateways li, .wc-wizard-shipping-methods li' ).on( 'click', 'table, a', function( e ) {
+	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable input', function( e ) {
 		e.stopPropagation();
 	} );
 } );
