@@ -641,7 +641,6 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$country = WC()->countries->get_base_country();
 
 		if ( 'US' === $country ) {
 			unset( $gateways['ppec_paypal'] );
