@@ -1743,7 +1743,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$image = '';
 		}
-		return str_replace( array( 'https://', 'http://' ), '//', $image );
+		return $image;
 	}
 
 	/**
