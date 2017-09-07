@@ -482,7 +482,7 @@ body {
 	}
 }
 
-.wc-wizard-service-item {
+.wc-wizard-service-item, .wc-wizard-services-list-toggle {
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
@@ -557,4 +557,27 @@ body {
 			}
 		}
 	}
+}
+
+// Toggle display a list of services
+.wc-wizard-service-enable input {
+	visibility: hidden;
+
+	&:before {
+		content: "\f347"; // down chevron
+		font-family: "dashicons";
+		visibility: initial;
+		color: #666;
+		font-size: 25px;
+		margin-left: -5px; // center it
+	}
+}
+
+.wc-wizard-service-enable input:checked {
+	&:before {
+		content: "\f343"; // up chevron
+	}
+}
+.wc-wizard-services.manual .wc-wizard-service-item {
+	display: none;
 }

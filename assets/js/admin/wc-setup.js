@@ -95,4 +95,10 @@ jQuery( function( $ ) {
 	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable input', function( e ) {
 		e.stopPropagation();
 	} );
+
+	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
+			$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
+				.slideToggle()
+				.css( 'display', 'flex' );
+	} );
 } );

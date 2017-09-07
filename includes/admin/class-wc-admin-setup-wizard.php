@@ -763,6 +763,16 @@ class WC_Admin_Setup_Wizard {
 				} ?>
 			</ul>
 			<ul class="wc-wizard-services manual">
+				<li class="wc-wizard-services-list-toggle">
+					<div class="wc-wizard-service-name">Manual Payments</div>
+					<div class="wc-wizard-service-description">
+						Collect payments from customers outside your online store.
+					</div>
+					<div class="wc-wizard-service-enable">
+							<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
+							<label for="wc-wizard-service-list-toggle"></label>
+					</div>
+				</li>
 				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) {
 					$this->display_service_item( $gateway_id, $gateway );
 				} ?>
