@@ -20,7 +20,6 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-
 		$this->wc = WC();
 	}
 
@@ -30,7 +29,6 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_instance() {
-
 		$this->assertClassHasStaticAttribute( '_instance', 'WooCommerce' );
 	}
 
@@ -40,9 +38,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_constants() {
-
 		$this->assertEquals( str_replace( 'tests/unit-tests/core/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
-
 		$this->assertEquals( $this->wc->version, WC_VERSION );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
 		$this->assertEquals( 4, WC_ROUNDING_PRECISION );
@@ -57,14 +53,10 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_class_instances() {
-
-		$this->wc->init();
-
 		$this->assertInstanceOf( 'WC_Product_Factory', $this->wc->product_factory );
 		$this->assertInstanceOf( 'WC_Order_Factory', $this->wc->order_factory );
 		$this->assertInstanceOf( 'WC_Countries', $this->wc->countries );
 		$this->assertInstanceOf( 'WC_Integrations', $this->wc->integrations );
-		$this->assertInstanceOf( 'WC_Mock_Session_Handler', $this->wc->session );
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 	}
