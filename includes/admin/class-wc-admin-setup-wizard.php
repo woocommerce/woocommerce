@@ -614,7 +614,7 @@ class WC_Admin_Setup_Wizard {
 			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
+				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>.',
 				'class'       => 'in-cart',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
