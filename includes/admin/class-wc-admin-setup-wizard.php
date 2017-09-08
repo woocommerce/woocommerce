@@ -1169,67 +1169,62 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Actions on the final step.
-	 */
-	private function wc_setup_ready_actions() {
-		WC_Admin_Notices::remove_notice( 'install' );
-
-		if ( isset( $_GET['wc_tracker_optin'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optin' ) ) {
-			update_option( 'woocommerce_allow_tracking', 'yes' );
-			WC_Tracker::send_tracking_data( true );
-
-		} elseif ( isset( $_GET['wc_tracker_optout'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optout' ) ) {
-			update_option( 'woocommerce_allow_tracking', 'no' );
-		}
-	}
-
-	/**
 	 * Final step.
 	 */
 	public function wc_setup_ready() {
-		$this->wc_setup_ready_actions();
+		// We've made it! Don't prompt the user to run the wizard again.
+		WC_Admin_Notices::remove_notice( 'install' );
+
 		$current_user = wp_get_current_user();
-		shuffle( $this->tweets );
+		$user_email   = $current_user->user_email;
+		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
+		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
+		$help_text    = sprintf(
+			/* translators: %1$s: link to videos, %2$s: link to docs */
+			__( 'Watch our <a href="%1$s" target="_blank">guided tour videos</a> to learn more about WooCommerce, and visit WooCommerce.com to learn more about <a href="%2$s" target="_blank">getting started</a>.' ),
+			$videos_url,
+			$docs_url
+		);
 		?>
-		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://woocommerce.com/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooCommerce" data-size="large">Tweet</a>
-		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 		<h1><?php esc_html_e( 'Your store is ready!', 'woocommerce' ); ?></h1>
-
-		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
-			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooCommerce to collect non-sensitive diagnostic data and usage information. %1$sFind out more%2$s.', 'woocommerce' ), '<a href="https://woocommerce.com/usage-tracking/" target="_blank">', '</a>' ); ?></p>
-				<p class="submit">
-					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php esc_html_e( 'Allow', 'woocommerce' ); ?></a>
-					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php esc_html_e( 'No thanks', 'woocommerce' ); ?></a>
-				</p>
-			</div>
-		<?php endif; ?>
+		<p><?php esc_html_e( 'Your WooCommerce store is all set to go. You can start adding products to your store.', 'woocommerce' ); ?></p>
 
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( 'Join the WooCommerce mailing list for help getting started, tips, and product updates.', 'woocommerce' ); ?></p>
 			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
-				<input type="email" value="<?php echo esc_attr( $current_user->user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required><input type="submit" value="<?php esc_html_e( 'Subscribe', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+				<input type="email" value="<?php echo esc_attr( $user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required>
+				<input type="submit" value="<?php esc_html_e( 'Subscribe', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
 			</form>
 		</div>
 
-		<div class="wc-setup-next-steps">
-			<div class="wc-setup-next-steps-first">
-				<h2><?php esc_html_e( 'Next steps', 'woocommerce' ); ?></h2>
-				<ul>
-					<li class="setup-product"><a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php esc_html_e( 'Create your first product!', 'woocommerce' ); ?></a></li>
-					<li class="setup-product"><a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>"><?php esc_html_e( 'Import products from a CSV file', 'woocommerce' ); ?></a></li>
-				</ul>
-			</div>
-			<div class="wc-setup-next-steps-last">
-				<h2><?php _e( 'Learn more', 'woocommerce' ); ?></h2>
-				<ul>
-					<li class="video-walkthrough"><a href="https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Watch the Guided Tour videos', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="https://woocommerce.com/woocommerce-onboarding-email/?utm_source=setupwizard&utm_medium=product&utm_content=newsletter&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
-				</ul>
-			</div>
-		</div>
+		<ul class="wc-wizard-next-steps">
+			<li class="wc-wizard-next-step-item">
+				<div class="wc-wizard-next-step-description">
+					<?php // TODO: tailor this text based on number of products? ?>
+					<p><small><?php esc_html_e( 'Next step', 'woocommerce' ); ?></small></p>
+					<h3><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
+					<p><?php esc_html_e( "Your site doesn't have any products listed. Add a product to start selling.", 'woocommerce' ); ?></p>
+				</div>
+				<div class="wc-wizard-next-step-action">
+					<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
+						<?php esc_html_e( 'Create a product', 'woocommerce' ); ?>
+					</a>
+				</div>
+			</li>
+			<li class="wc-wizard-next-step-item">
+				<div class="wc-wizard-next-step-description">
+					<p><small><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></small></p>
+					<h3><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
+					<p><?php esc_html_e( 'You can transfer your existing products over by importing them with a CSV file.', 'woocommerce' ); ?></p>
+				</div>
+				<div class="wc-wizard-next-step-action">
+					<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
+						<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
+					</a>
+				</div>
+			</li>
+		</ul>
+		<p><?php echo wp_kses_post( $help_text ); ?></p>
 		<?php
 	}
 }
