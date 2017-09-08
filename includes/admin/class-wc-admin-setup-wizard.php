@@ -1052,6 +1052,30 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Extras step save.
+	 */
+	public function wc_setup_extras_save() {
+		check_admin_referer( 'wc-setup' );
+
+		$setup_automated_tax = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
+		$install_storefront  = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
+
+		if ( $setup_automated_tax ) {
+			$this->install_woocommerce_services();
+
+			// Signal WooCommerce Services to setup automated taxes.
+			update_option( 'woocommerce_setup_automated_taxes', true );
+		}
+
+		if ( $install_storefront ) {
+			wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
+		}
+
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		exit;
+	}
+
+	/**
 	 * Theme step.
 	 */
 	private function wc_setup_theme() {
