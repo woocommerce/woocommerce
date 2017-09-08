@@ -714,7 +714,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<li class="wc-wizard-service-item">
 			<div class="wc-wizard-service-name">
-				<?php if ( $item_info['image'] ) : ?>
+				<?php if ( ! empty( $item_info['image'] ) ) : ?>
 					<img src="<?php echo esc_attr( $item_info['image'] ); ?>" alt="<?php echo esc_attr( $item_info['name'] ); ?>" />
 				<?php else : ?>
 					<p><?php echo esc_html( $item_info['name'] ); ?></p>
@@ -748,7 +748,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	public function is_featured_service( $service ) {
-		return $service['featured'] && true === $service['featured'];
+		return isset( $service['featured'] ) && true === $service['featured'];
 	}
 
 	public function is_not_featured_service( $service ) {
