@@ -15,6 +15,28 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 
 /**
+ * Check Coupons is exist or not in Woocommerce
+ *
+ * @return int
+ */
+function wc_coupon_is_exist() {
+	$args = array(
+		'posts_per_page'   => -1,
+		'orderby'          => 'date',
+		'order'            => 'DESC',
+		'post_type'        => 'shop_coupon',
+		'post_status'      => 'publish',
+	);
+	$posts_array = get_posts( $args );
+	$total = 0;
+	if( !empty( $posts_array )) {
+		$total = count($posts_array);
+	}
+
+	return $total;
+}
+
+/**
  * Get coupon types.
  *
  * @return array
