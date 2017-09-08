@@ -301,9 +301,6 @@ class WC_AJAX {
 				'shipping_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
 				'shipping_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
 			) );
-			if ( ! empty( $_POST['country'] ) ) {
-				WC()->customer->set_calculated_shipping( true );
-			}
 		} else {
 			WC()->customer->set_props( array(
 				'shipping_country'   => isset( $_POST['s_country'] ) ? $_POST['s_country']     : null,
@@ -313,9 +310,12 @@ class WC_AJAX {
 				'shipping_address_1' => isset( $_POST['s_address'] ) ? $_POST['s_address']     : null,
 				'shipping_address_2' => isset( $_POST['s_address_2'] ) ? $_POST['s_address_2'] : null,
 			) );
-			if ( ! empty( $_POST['s_country'] ) ) {
-				WC()->customer->set_calculated_shipping( true );
-			}
+		}
+
+		if ( wc_string_to_bool( $_POST['has_full_address'] ) ) {
+			WC()->customer->set_calculated_shipping( true );
+		} else {
+			WC()->customer->set_calculated_shipping( false );
 		}
 
 		WC()->customer->save();
