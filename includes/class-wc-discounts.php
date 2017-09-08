@@ -241,7 +241,7 @@ class WC_Discounts {
 			default :
 				foreach ( $items_to_apply as $item ) {
 					$discounted_price  = $this->get_discounted_price_in_cents( $item );
-					$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price : $discounted_price );
+					$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price );
 					$discount          = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount, $item->object ) ) * $item->quantity;
 					$discount          = min( $discounted_price, $discount );
 
@@ -340,7 +340,7 @@ class WC_Discounts {
 			$discounted_price  = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
 
 			// Total up.
 			$cart_total += $price_to_discount;
@@ -388,7 +388,7 @@ class WC_Discounts {
 			$discounted_price  = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
 
 			// Run coupon calculations.
 			$discount = $amount * $item->quantity;
@@ -466,7 +466,7 @@ class WC_Discounts {
 				$discounted_price  = $this->get_discounted_price_in_cents( $item );
 
 				// Get the price we actually want to discount, based on settings.
-				$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $item->price: $discounted_price;
+				$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
 
 				// Run coupon calculations.
 				$discount = min( $discounted_price, 1 );
