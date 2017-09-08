@@ -48,6 +48,60 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * The theme "extra" should only be shown if the current user can modify themes
+	 * and the store doesn't already have a WooCommerce compatible theme.
+	 */
+	protected function should_show_theme_extra() {
+		return (
+			current_user_can( 'install_themes' ) &&
+			current_user_can( 'switch_themes' ) &&
+			! is_multisite() &&
+			! current_theme_supports( 'woocommerce' )
+		);
+	}
+
+	/**
+	 * https://developers.taxjar.com/api/reference/#countries
+	 */
+	protected function is_automated_tax_supported_country( $country_code ) {
+		$tax_supported_countries = array(
+			'AU' => __( 'Australia', 'woocommerce' ),
+			'AT' => __( 'Austria', 'woocommerce' ),
+			'BE' => __( 'Belgium', 'woocommerce' ),
+			'BG' => __( 'Bulgaria', 'woocommerce' ),
+			'CA' => __( 'Canada', 'woocommerce' ),
+			'HR' => __( 'Croatia', 'woocommerce' ),
+			'CY' => __( 'Cyprus', 'woocommerce' ),
+			'CZ' => __( 'Czech Republic', 'woocommerce' ),
+			'DK' => __( 'Denmark', 'woocommerce' ),
+			'EE' => __( 'Estonia', 'woocommerce' ),
+			'FI' => __( 'Finland', 'woocommerce' ),
+			'FR' => __( 'France', 'woocommerce' ),
+			'DE' => __( 'Germany', 'woocommerce' ),
+			'GR' => __( 'Greece', 'woocommerce' ),
+			'HU' => __( 'Hungary', 'woocommerce' ),
+			'IE' => __( 'Ireland', 'woocommerce' ),
+			'IT' => __( 'Italy', 'woocommerce' ),
+			'LV' => __( 'Latvia', 'woocommerce' ),
+			'LT' => __( 'Lithuania', 'woocommerce' ),
+			'LU' => __( 'Luxembourg', 'woocommerce' ),
+			'MT' => __( 'Malta', 'woocommerce' ),
+			'NL' => __( 'Netherlands', 'woocommerce' ),
+			'PL' => __( 'Poland', 'woocommerce' ),
+			'PT' => __( 'Portugal', 'woocommerce' ),
+			'RO' => __( 'Romania', 'woocommerce' ),
+			'SK' => __( 'Slovakia', 'woocommerce' ),
+			'SI' => __( 'Slovenia', 'woocommerce' ),
+			'ES' => __( 'Spain', 'woocommerce' ),
+			'SE' => __( 'Sweden', 'woocommerce' ),
+			'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
+			'US' => __( 'United States (US)', 'woocommerce' ),
+		);
+
+		return array_key_exists( $country_code, $tax_supported_countries );
+	}
+
+	/**
 	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
@@ -70,10 +124,10 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_shipping' ),
 				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
-			'theme' => array(
-				'name'    => __( 'Theme', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_theme' ),
-				'handler' => array( $this, 'wc_setup_theme_save' ),
+			'extras' => array(
+				'name'    => __( 'Extras', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_extras' ),
+				'handler' => array( $this, 'wc_setup_extras_save' ),
 			),
 			'activate' => array(
 				'name'    => __( 'Activate', 'woocommerce' ),
@@ -87,9 +141,11 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		// Hide storefront step if using a WooCommerce theme or user cannot modify themes.
-		if ( ! current_user_can( 'install_themes' ) || ! current_user_can( 'switch_themes' ) || is_multisite() || current_theme_supports( 'woocommerce' ) ) {
-			unset( $default_steps['theme'] );
+		$country = WC()->countries->get_base_country();
+
+		// Hide the extras step if this store/user isn't eligible for them
+		if ( ! $this->should_show_theme_extra() && ! $this->is_automated_tax_supported_country( $country ) ) {
+			unset( $default_steps['extras'] );
 		}
 
 		// Hide shipping step if the store is selling digital products only.
@@ -938,6 +994,61 @@ class WC_Admin_Setup_Wizard {
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
+	}
+
+	/**
+	 * Extras.
+	 */
+	public function wc_setup_extras() {
+		$country = WC()->countries->get_base_country();
+		?>
+		<h1><?php esc_html_e( 'Extras', 'woocommerce' ); ?></h1>
+		<p><?php esc_html_e( 'Enhance your store with these extra features and themes.', 'woocommerce' ); ?></p>
+		<form method="post">
+			<?php if ( $this->should_show_theme_extra() ) : ?>
+			<ul class="wc-wizard-services featured">
+				<li class="wc-wizard-service-item">
+					<div class="wc-wizard-service-description">
+						<h3><?php esc_html_e( 'Storefront (Recommended)', 'woocommerce' ); ?></h3>
+						<p>
+							<?php esc_html_e( 'Your theme is not compatible with WooCommerce. We recommend you switch over to Storefront, a free WordPress theme built and maintained by the makers of WooCommerce. If enabled, Storefront will be installed and activated for you.', 'woocommerce' ); ?>
+						</p>
+					</div>
+
+					<div class="wc-wizard-service-enable">
+						<span class="wc-wizard-service-toggle">
+							<input id="setup_storefront_theme" type="checkbox" name="setup_storefront_theme" value="yes" checked="checked" />
+							<label for="setup_storefront_theme">
+						</span>
+					</div>
+				</li>
+			</ul>
+			<?php endif; ?>
+			<?php if ( $this->is_automated_tax_supported_country( $country ) ) : ?>
+				<ul class="wc-wizard-services featured">
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-description">
+							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
+							<p>
+								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out.', 'woocommerce' ); ?>
+							</p>
+						</div>
+
+						<div class="wc-wizard-service-enable">
+						<span class="wc-wizard-service-toggle">
+							<input id="setup_automated_taxes" type="checkbox" name="setup_automated_taxes" value="yes" checked="checked" />
+							<label for="setup_automated_taxes">
+						</span>
+						</div>
+					</li>
+				</ul>
+			<?php endif; ?>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</p>
+		</form>
+		<?php
 	}
 
 	/**
