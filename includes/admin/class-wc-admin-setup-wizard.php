@@ -769,7 +769,7 @@ class WC_Admin_Setup_Wizard {
 		<form method="post" class="wc-wizard-payment-gateway-form">
 			<?php if ( $can_stripe ) : ?>
 				<p><?php esc_html_e( 'Your store will be set up to accept payments instantly on checkout with Stripe.', 'woocommerce' ); ?></p>
-			<?php else: ?>
+			<?php else : ?>
 				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
 			<?php endif; ?>
 			<ul class="wc-wizard-services featured">
@@ -778,9 +778,9 @@ class WC_Admin_Setup_Wizard {
 				endforeach; ?>
 			</ul>
 			<ul class="wc-wizard-services in-cart">
-				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) {
+				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) :
 					$this->display_service_item( $gateway_id, $gateway );
-				} ?>
+				endforeach; ?>
 			</ul>
 			<ul class="wc-wizard-services manual">
 				<li class="wc-wizard-services-list-toggle">
@@ -793,9 +793,9 @@ class WC_Admin_Setup_Wizard {
 							<label for="wc-wizard-service-list-toggle"></label>
 					</div>
 				</li>
-				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) {
+				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) :
 					$this->display_service_item( $gateway_id, $gateway );
-				} ?>
+				endforeach; ?>
 			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -833,7 +833,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// Install WooCommerce Services with Stripe to enable deferred account creation
-		if ( ! empty( $_POST[ 'wc-wizard-service-stripe-enabled' ] ) ) {
+		if ( ! empty( $_POST['wc-wizard-service-stripe-enabled'] ) ) {
 			$this->install_woocommerce_services();
 		}
 
