@@ -457,9 +457,11 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping() {
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', false );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', false );
+		$country_code   = WC()->countries->get_base_country();
+		$country_name   = WC()->countries->countries[ $country_code ];
+
 		if ( false === $dimension_unit || false === $weight_unit ) {
-			$country = get_option( 'woocommerce_default_country', '' );
-			if ( 0 === strpos( $country, 'US:' ) ) {
+			if ( 'US' === $country_code ) {
 				$dimension_unit = 'in';
 				$weight_unit = 'oz';
 			} else {
@@ -469,6 +471,24 @@ class WC_Admin_Setup_Wizard {
 		}
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
+		<p><?php
+		if ( 'US' === $country_code ) {
+			printf(
+				__( "You're all set up to ship anywhere in the %s, and outside of it. We recommend using live rates to get accurate USPS shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
+				$country_name
+			);
+		} elseif ( 'CA' === $country_code ) {
+			printf(
+				__( "You're all set up to ship anywhere in the %s, and outside of it. We recommend using live rates to get accurate Canada Post shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
+				$country_name
+			);
+		} else {
+			printf(
+				__( "You can choose which countries you'll be shipping to and with which methods. We've started you up with shipping to %s and the rest of the world.", 'woocommerce' ),
+				$country_name
+			);
+		}
+		?></p>
 		<form method="post">
 			<?php $this->wc_setup_wcs_tout(); ?>
 
