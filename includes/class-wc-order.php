@@ -1300,7 +1300,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function has_downloadable_item() {
 		foreach ( $this->get_items() as $item ) {
-			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->has_file() ) {
 				return true;
 			}
 		}
