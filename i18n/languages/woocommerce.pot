@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.2.0-beta.1\n"
+"Project-Id-Version: WooCommerce 3.2.0-beta.2\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-08-30 20:23:35+00:00\n"
+"POT-Creation-Date: 2017-09-08 16:49:10+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5536,7 +5536,7 @@ msgid "Invalid coupon code"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:907
-#: includes/class-wc-discounts.php:213
+#: includes/class-wc-discounts.php:214
 msgid "Invalid coupon"
 msgstr ""
 
@@ -5937,7 +5937,7 @@ msgstr ""
 #: includes/api/class-wc-rest-customers-controller.php:128
 #: includes/api/class-wc-rest-order-notes-controller.php:133
 #: includes/api/class-wc-rest-order-refunds-controller.php:92
-#: includes/api/class-wc-rest-order-refunds-controller.php:344
+#: includes/api/class-wc-rest-order-refunds-controller.php:351
 #: includes/api/class-wc-rest-orders-controller.php:82
 #: includes/api/class-wc-rest-orders-controller.php:803
 #: includes/api/class-wc-rest-payment-gateways-controller.php:53
@@ -6246,7 +6246,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-webhooks.php:200
 #: includes/admin/class-wc-admin-webhooks.php:285
 #: includes/admin/class-wc-admin-webhooks.php:314
-#: includes/emails/class-wc-email.php:742
+#: includes/emails/class-wc-email.php:766
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
@@ -7165,7 +7165,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/settings/class-wc-settings-api.php:42
 #: includes/admin/views/html-admin-page-status-report.php:493
-#: includes/class-wc-install.php:852
+#: includes/class-wc-install.php:882
 msgid "Settings"
 msgstr ""
 
@@ -7252,7 +7252,7 @@ msgstr ""
 #: includes/class-wc-payment-gateways.php:51
 #: includes/class-wc-payment-gateways.php:60 includes/class-wc-shipping.php:63
 #: includes/class-wc-shipping.php:72 includes/class-woocommerce.php:131
-#: includes/class-woocommerce.php:140 includes/emails/class-wc-email.php:746
+#: includes/class-woocommerce.php:140 includes/emails/class-wc-email.php:770
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
@@ -7859,7 +7859,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:451
 #: includes/admin/reports/class-wc-report-stock.php:112
-#: includes/wc-formatting-functions.php:1028
+#: includes/wc-formatting-functions.php:1037
 #: includes/wc-product-functions.php:778
 msgid "In stock"
 msgstr ""
@@ -9692,7 +9692,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-accounts.php:128
 #: includes/admin/views/html-admin-page-product-export.php:40
 #: includes/class-wc-query.php:110 includes/wc-account-functions.php:98
-#: templates/emails/email-downloads.php:23
+#: templates/emails/email-downloads.php:25
 #: templates/emails/plain/email-downloads.php:23
 #: templates/order/order-downloads.php:25
 msgid "Downloads"
@@ -10283,8 +10283,8 @@ msgstr ""
 #: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:93
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:122
 #: includes/wc-account-functions.php:331
-#: includes/wc-formatting-functions.php:1097
-#: includes/wc-formatting-functions.php:1116
+#: includes/wc-formatting-functions.php:1106
+#: includes/wc-formatting-functions.php:1125
 #: templates/emails/email-addresses.php:31
 #: templates/order/order-details-customer.php:36
 #: templates/order/order-details-customer.php:54
@@ -10477,7 +10477,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-download-permission.php:31
 #: includes/admin/meta-boxes/views/html-product-data-general.php:116
 #: includes/admin/meta-boxes/views/html-variation-admin.php:378
-#: templates/emails/email-downloads.php:54
+#: templates/emails/email-downloads.php:56
 #: templates/emails/plain/email-downloads.php:43
 #: templates/order/order-downloads.php:60
 msgid "Never"
@@ -10532,7 +10532,7 @@ msgid "Delete item"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-items.php:29
-#: includes/class-wc-form-handler.php:494
+#: includes/class-wc-form-handler.php:492
 #: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php:338
 msgid "Item"
 msgstr ""
@@ -12207,7 +12207,7 @@ msgid "Recipient(s)"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:262
-#: includes/class-wc-install.php:667
+#: includes/class-wc-install.php:697
 msgid "Customer"
 msgstr ""
 
@@ -14792,8 +14792,8 @@ msgstr ""
 
 #: includes/api/class-wc-rest-coupons-controller.php:491
 #: includes/api/class-wc-rest-customers-controller.php:338
-#: includes/api/class-wc-rest-order-refunds-controller.php:377
-#: includes/api/class-wc-rest-order-refunds-controller.php:489
+#: includes/api/class-wc-rest-order-refunds-controller.php:384
+#: includes/api/class-wc-rest-order-refunds-controller.php:496
 #: includes/api/class-wc-rest-orders-controller.php:1107
 #: includes/api/class-wc-rest-orders-controller.php:1219
 #: includes/api/class-wc-rest-orders-controller.php:1310
@@ -14807,8 +14807,8 @@ msgstr ""
 
 #: includes/api/class-wc-rest-coupons-controller.php:498
 #: includes/api/class-wc-rest-customers-controller.php:345
-#: includes/api/class-wc-rest-order-refunds-controller.php:384
-#: includes/api/class-wc-rest-order-refunds-controller.php:496
+#: includes/api/class-wc-rest-order-refunds-controller.php:391
+#: includes/api/class-wc-rest-order-refunds-controller.php:503
 #: includes/api/class-wc-rest-orders-controller.php:1114
 #: includes/api/class-wc-rest-orders-controller.php:1226
 #: includes/api/class-wc-rest-orders-controller.php:1317
@@ -14822,8 +14822,8 @@ msgstr ""
 
 #: includes/api/class-wc-rest-coupons-controller.php:504
 #: includes/api/class-wc-rest-customers-controller.php:351
-#: includes/api/class-wc-rest-order-refunds-controller.php:390
-#: includes/api/class-wc-rest-order-refunds-controller.php:502
+#: includes/api/class-wc-rest-order-refunds-controller.php:397
+#: includes/api/class-wc-rest-order-refunds-controller.php:509
 #: includes/api/class-wc-rest-orders-controller.php:1120
 #: includes/api/class-wc-rest-orders-controller.php:1232
 #: includes/api/class-wc-rest-orders-controller.php:1323
@@ -14839,8 +14839,8 @@ msgstr ""
 
 #: includes/api/class-wc-rest-coupons-controller.php:509
 #: includes/api/class-wc-rest-customers-controller.php:356
-#: includes/api/class-wc-rest-order-refunds-controller.php:395
-#: includes/api/class-wc-rest-order-refunds-controller.php:507
+#: includes/api/class-wc-rest-order-refunds-controller.php:402
+#: includes/api/class-wc-rest-order-refunds-controller.php:514
 #: includes/api/class-wc-rest-orders-controller.php:1125
 #: includes/api/class-wc-rest-orders-controller.php:1237
 #: includes/api/class-wc-rest-orders-controller.php:1328
@@ -14875,7 +14875,7 @@ msgid "Downloadable product ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-customer-downloads-controller.php:103
-#: includes/api/class-wc-rest-order-refunds-controller.php:416
+#: includes/api/class-wc-rest-order-refunds-controller.php:423
 #: includes/api/class-wc-rest-orders-controller.php:1146
 #: includes/api/class-wc-rest-products-controller.php:1370
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:380
@@ -15113,7 +15113,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:268
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:301
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:127
-#: includes/wc-core-functions.php:139 includes/wc-order-functions.php:484
+#: includes/wc-core-functions.php:143 includes/wc-order-functions.php:484
 #: includes/wc-order-functions.php:994
 msgid "Invalid order ID."
 msgstr ""
@@ -15174,37 +15174,37 @@ msgstr ""
 msgid "Cannot create order refund, please try again."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:350
+#: includes/api/class-wc-rest-order-refunds-controller.php:357
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:351
 msgid "The date the order refund was created, in the site's timezone."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:356
+#: includes/api/class-wc-rest-order-refunds-controller.php:363
 msgid "The date the order refund was created, as GMT."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:362
+#: includes/api/class-wc-rest-order-refunds-controller.php:369
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:357
 msgid "Refund amount."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:367
+#: includes/api/class-wc-rest-order-refunds-controller.php:374
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:362
 msgid "Reason for refund."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:372
+#: includes/api/class-wc-rest-order-refunds-controller.php:379
 msgid "User ID of user who created the refund."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:403
+#: includes/api/class-wc-rest-order-refunds-controller.php:410
 #: includes/api/class-wc-rest-orders-controller.php:1133
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:367
 #: includes/api/v1/class-wc-rest-orders-controller.php:1200
 msgid "Line items data."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:410
+#: includes/api/class-wc-rest-order-refunds-controller.php:417
 #: includes/api/class-wc-rest-orders-controller.php:1140
 #: includes/api/class-wc-rest-orders-controller.php:1268
 #: includes/api/class-wc-rest-orders-controller.php:1346
@@ -15219,7 +15219,7 @@ msgstr ""
 msgid "Item ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:421
+#: includes/api/class-wc-rest-order-refunds-controller.php:428
 #: includes/api/class-wc-rest-orders-controller.php:1151
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:392
 #: includes/api/v1/class-wc-rest-orders-controller.php:1225
@@ -15228,42 +15228,42 @@ msgstr ""
 msgid "Product ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:426
+#: includes/api/class-wc-rest-order-refunds-controller.php:433
 #: includes/api/class-wc-rest-orders-controller.php:1156
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:397
 #: includes/api/v1/class-wc-rest-orders-controller.php:1230
 msgid "Variation ID, if applicable."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:431
+#: includes/api/class-wc-rest-order-refunds-controller.php:438
 #: includes/api/class-wc-rest-orders-controller.php:1161
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:402
 #: includes/api/v1/class-wc-rest-orders-controller.php:1235
 msgid "Quantity ordered."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:436
+#: includes/api/class-wc-rest-order-refunds-controller.php:443
 #: includes/api/class-wc-rest-orders-controller.php:1166
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:407
 #: includes/api/v1/class-wc-rest-orders-controller.php:1240
 msgid "Tax class of product."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:441
+#: includes/api/class-wc-rest-order-refunds-controller.php:448
 #: includes/api/class-wc-rest-orders-controller.php:1171
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:419
 #: includes/api/v1/class-wc-rest-orders-controller.php:1252
 msgid "Line subtotal (before discounts)."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:446
+#: includes/api/class-wc-rest-order-refunds-controller.php:453
 #: includes/api/class-wc-rest-orders-controller.php:1176
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:424
 #: includes/api/v1/class-wc-rest-orders-controller.php:1257
 msgid "Line subtotal tax (before discounts)."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:452
+#: includes/api/class-wc-rest-order-refunds-controller.php:459
 #: includes/api/class-wc-rest-orders-controller.php:1182
 #: includes/api/class-wc-rest-orders-controller.php:1362
 #: includes/api/class-wc-rest-orders-controller.php:1454
@@ -15274,7 +15274,7 @@ msgstr ""
 msgid "Line total (after discounts)."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:457
+#: includes/api/class-wc-rest-order-refunds-controller.php:464
 #: includes/api/class-wc-rest-orders-controller.php:1187
 #: includes/api/class-wc-rest-orders-controller.php:1367
 #: includes/api/class-wc-rest-orders-controller.php:1459
@@ -15285,7 +15285,7 @@ msgstr ""
 msgid "Line total tax (after discounts)."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:463
+#: includes/api/class-wc-rest-order-refunds-controller.php:470
 #: includes/api/class-wc-rest-orders-controller.php:1193
 #: includes/api/class-wc-rest-orders-controller.php:1373
 #: includes/api/class-wc-rest-orders-controller.php:1465
@@ -15296,7 +15296,7 @@ msgstr ""
 msgid "Line taxes."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:471
+#: includes/api/class-wc-rest-order-refunds-controller.php:478
 #: includes/api/class-wc-rest-orders-controller.php:1201
 #: includes/api/class-wc-rest-orders-controller.php:1280
 #: includes/api/class-wc-rest-orders-controller.php:1381
@@ -15309,7 +15309,7 @@ msgstr ""
 msgid "Tax rate ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:476
+#: includes/api/class-wc-rest-order-refunds-controller.php:483
 #: includes/api/class-wc-rest-orders-controller.php:1206
 #: includes/api/class-wc-rest-orders-controller.php:1387
 #: includes/api/class-wc-rest-orders-controller.php:1479
@@ -15320,7 +15320,7 @@ msgstr ""
 msgid "Tax total."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:481
+#: includes/api/class-wc-rest-order-refunds-controller.php:488
 #: includes/api/class-wc-rest-orders-controller.php:1211
 #: includes/api/class-wc-rest-orders-controller.php:1485
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:459
@@ -15329,21 +15329,21 @@ msgstr ""
 msgid "Tax subtotal."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:515
+#: includes/api/class-wc-rest-order-refunds-controller.php:522
 #: includes/api/class-wc-rest-orders-controller.php:1245
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:386
 #: includes/api/v1/class-wc-rest-orders-controller.php:1219
 msgid "Product SKU."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:521
+#: includes/api/class-wc-rest-order-refunds-controller.php:528
 #: includes/api/class-wc-rest-orders-controller.php:1251
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:413
 #: includes/api/v1/class-wc-rest-orders-controller.php:1246
 msgid "Product price."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-refunds-controller.php:530
+#: includes/api/class-wc-rest-order-refunds-controller.php:537
 msgid "When true, the payment gateway API is used to generate the refund."
 msgstr ""
 
@@ -17137,55 +17137,55 @@ msgstr ""
 msgid "Product transients cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:412
+#: includes/api/class-wc-rest-system-status-tools-controller.php:391
 msgid "%d transients rows cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:422
+#: includes/api/class-wc-rest-system-status-tools-controller.php:401
 msgid "%d orphaned variations deleted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:440
+#: includes/api/class-wc-rest-system-status-tools-controller.php:419
 msgid "%d indexes added"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:446
+#: includes/api/class-wc-rest-system-status-tools-controller.php:425
 msgid "Roles successfully reset"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:453
+#: includes/api/class-wc-rest-system-status-tools-controller.php:432
 msgid "Terms successfully recounted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:458
+#: includes/api/class-wc-rest-system-status-tools-controller.php:437
 msgid "Sessions successfully cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:462
+#: includes/api/class-wc-rest-system-status-tools-controller.php:441
 msgid "All missing WooCommerce pages successfully installed"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:469
+#: includes/api/class-wc-rest-system-status-tools-controller.php:448
 msgid "Tax rates successfully deleted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:475
+#: includes/api/class-wc-rest-system-status-tools-controller.php:454
 msgid "%d logs deleted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:480
+#: includes/api/class-wc-rest-system-status-tools-controller.php:459
 msgid "Usage tracking settings successfully reset."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:492
+#: includes/api/class-wc-rest-system-status-tools-controller.php:471
 msgid "There was an error calling %s"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:494
+#: includes/api/class-wc-rest-system-status-tools-controller.php:473
 msgid "Tool ran."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:498
+#: includes/api/class-wc-rest-system-status-tools-controller.php:477
 msgid "There was an error calling this tool. There is no callback present."
 msgstr ""
 
@@ -18786,7 +18786,7 @@ msgstr ""
 msgid "Page %d"
 msgstr ""
 
-#: includes/class-wc-cache-helper.php:202
+#: includes/class-wc-cache-helper.php:196
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add %1$s to the \"Ignored Query Strings\" option in <a "
@@ -18890,73 +18890,73 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: includes/class-wc-checkout.php:619
+#: includes/class-wc-checkout.php:621
 #. translators: %s: field name
 msgid "Shipping %s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:623
+#: includes/class-wc-checkout.php:625
 #. translators: %s: field name
 msgid "Billing %s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:632 includes/class-wc-form-handler.php:116
+#: includes/class-wc-checkout.php:634 includes/class-wc-form-handler.php:116
 #: includes/shortcodes/class-wc-shortcode-cart.php:32
 msgid "Please enter a valid postcode / ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:641 includes/class-wc-form-handler.php:125
+#: includes/class-wc-checkout.php:643 includes/class-wc-form-handler.php:125
 #. translators: %s: phone number
 msgid "%s is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:650 includes/class-wc-form-handler.php:132
+#: includes/class-wc-checkout.php:652 includes/class-wc-form-handler.php:132
 #. translators: %s: email address
 msgid "%s is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:670
+#: includes/class-wc-checkout.php:672
 #. translators: 1: state field 2: valid states
 msgid "%1$s is not valid. Please enter one of the following: %2$s"
 msgstr ""
 
-#: includes/class-wc-checkout.php:677 includes/class-wc-form-handler.php:103
+#: includes/class-wc-checkout.php:679 includes/class-wc-form-handler.php:103
 #: includes/class-wc-form-handler.php:219
 #. translators: %s: field name
 msgid "%s is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:695 includes/class-wc-form-handler.php:325
+#: includes/class-wc-checkout.php:697 includes/class-wc-form-handler.php:323
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:702
+#: includes/class-wc-checkout.php:704
 msgid "Please enter an address to continue."
 msgstr ""
 
-#: includes/class-wc-checkout.php:704
+#: includes/class-wc-checkout.php:706
 msgid ""
 "Unfortunately <strong>we do not ship %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:710
+#: includes/class-wc-checkout.php:712
 msgid ""
 "No shipping method has been selected. Please double check your address, or "
 "contact us if you need any help."
 msgstr ""
 
-#: includes/class-wc-checkout.php:720 includes/class-wc-form-handler.php:335
-#: includes/class-wc-form-handler.php:433
-#: includes/class-wc-form-handler.php:458
+#: includes/class-wc-checkout.php:722 includes/class-wc-form-handler.php:333
+#: includes/class-wc-form-handler.php:431
+#: includes/class-wc-form-handler.php:456
 msgid "Invalid payment method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:945
+#: includes/class-wc-checkout.php:947
 msgid "We were unable to process your order, please try again."
 msgstr ""
 
-#: includes/class-wc-checkout.php:954
+#: includes/class-wc-checkout.php:956
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" "
 "class=\"wc-backward\">Return to shop</a>"
@@ -19098,11 +19098,11 @@ msgstr ""
 msgid "Coupon code removed successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:898 includes/class-wc-discounts.php:845
+#: includes/class-wc-coupon.php:898 includes/class-wc-discounts.php:846
 msgid "Coupon is not valid."
 msgstr ""
 
-#: includes/class-wc-coupon.php:902 includes/class-wc-discounts.php:507
+#: includes/class-wc-coupon.php:902 includes/class-wc-discounts.php:508
 #. translators: %s: coupon code
 msgid "Coupon \"%s\" does not exist!"
 msgstr ""
@@ -19128,21 +19128,21 @@ msgid ""
 "conjunction with other coupons."
 msgstr ""
 
-#: includes/class-wc-coupon.php:920 includes/class-wc-discounts.php:523
-#: includes/class-wc-discounts.php:550
+#: includes/class-wc-coupon.php:920 includes/class-wc-discounts.php:524
+#: includes/class-wc-discounts.php:551
 msgid "Coupon usage limit has been reached."
 msgstr ""
 
-#: includes/class-wc-coupon.php:923 includes/class-wc-discounts.php:567
+#: includes/class-wc-coupon.php:923 includes/class-wc-discounts.php:568
 msgid "This coupon has expired."
 msgstr ""
 
-#: includes/class-wc-coupon.php:927 includes/class-wc-discounts.php:585
+#: includes/class-wc-coupon.php:927 includes/class-wc-discounts.php:586
 #. translators: %s: coupon minimum amount
 msgid "The minimum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:931 includes/class-wc-discounts.php:603
+#: includes/class-wc-coupon.php:931 includes/class-wc-discounts.php:604
 #. translators: %s: coupon maximum amount
 msgid "The maximum spend for this coupon is %s."
 msgstr ""
@@ -19151,17 +19151,17 @@ msgstr ""
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
 
-#: includes/class-wc-coupon.php:948 includes/class-wc-discounts.php:762
+#: includes/class-wc-coupon.php:948 includes/class-wc-discounts.php:763
 #. translators: %s: products list
 msgid "Sorry, this coupon is not applicable to the products: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:968 includes/class-wc-discounts.php:798
+#: includes/class-wc-coupon.php:968 includes/class-wc-discounts.php:799
 #. translators: %s: categories list
 msgid "Sorry, this coupon is not applicable to the categories: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:971 includes/class-wc-discounts.php:690
+#: includes/class-wc-coupon.php:971 includes/class-wc-discounts.php:691
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
@@ -19191,8 +19191,8 @@ msgstr ""
 msgid "Invalid data store."
 msgstr ""
 
-#: includes/class-wc-discounts.php:629 includes/class-wc-discounts.php:663
-#: includes/class-wc-discounts.php:717
+#: includes/class-wc-discounts.php:630 includes/class-wc-discounts.php:664
+#: includes/class-wc-discounts.php:718
 msgid "Sorry, this coupon is not applicable to selected products."
 msgstr ""
 
@@ -19202,7 +19202,7 @@ msgid "Invalid download link."
 msgstr ""
 
 #: includes/class-wc-download-handler.php:93
-#: includes/class-wc-form-handler.php:698
+#: includes/class-wc-form-handler.php:701
 #: includes/data-stores/abstract-wc-order-data-store-cpt.php:89
 #: includes/shortcodes/class-wc-shortcode-checkout.php:169
 #: includes/shortcodes/class-wc-shortcode-my-account.php:127
@@ -19321,44 +19321,44 @@ msgstr ""
 msgid "Account details changed successfully."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:392
+#: includes/class-wc-form-handler.php:390
 msgid "Invalid payment gateway."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:405
+#: includes/class-wc-form-handler.php:403
 msgid "Payment method successfully added."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:409
+#: includes/class-wc-form-handler.php:407
 msgid "Unable to add payment method to your account."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:436
+#: includes/class-wc-form-handler.php:434
 msgid "Payment method deleted."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:461
+#: includes/class-wc-form-handler.php:459
 msgid "This payment method was successfully set as your default."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:498
-#: includes/class-wc-form-handler.php:501
+#: includes/class-wc-form-handler.php:496
+#: includes/class-wc-form-handler.php:499
 msgid "%s removed."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:499
+#: includes/class-wc-form-handler.php:497
 msgid "Undo?"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:552
+#: includes/class-wc-form-handler.php:550
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:575
+#: includes/class-wc-form-handler.php:573
 msgid "Cart updated."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:649
+#: includes/class-wc-form-handler.php:652
 msgid ""
 "%d item from your previous order is currently unavailable and could not be "
 "added to your cart."
@@ -19368,70 +19368,70 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-form-handler.php:660
+#: includes/class-wc-form-handler.php:663
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:688
+#: includes/class-wc-form-handler.php:691
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:691
+#: includes/class-wc-form-handler.php:694
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:696
+#: includes/class-wc-form-handler.php:699
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:813
+#: includes/class-wc-form-handler.php:810
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:821
+#: includes/class-wc-form-handler.php:818
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:849
+#: includes/class-wc-form-handler.php:861
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:880
+#: includes/class-wc-form-handler.php:891
 msgid "Invalid value posted for %s"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:887
+#: includes/class-wc-form-handler.php:898
 msgid "%s is a required field"
 msgid_plural "%s are required fields"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-form-handler.php:925
-#: includes/class-wc-form-handler.php:929
-#: includes/class-wc-form-handler.php:942
-#: includes/class-wc-form-handler.php:1083 includes/wc-user-functions.php:111
+#: includes/class-wc-form-handler.php:935
+#: includes/class-wc-form-handler.php:939
+#: includes/class-wc-form-handler.php:952
+#: includes/class-wc-form-handler.php:1093 includes/wc-user-functions.php:111
 msgid "Error:"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:929
+#: includes/class-wc-form-handler.php:939
 msgid "Username is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:942
+#: includes/class-wc-form-handler.php:952
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:1020
+#: includes/class-wc-form-handler.php:1030
 msgid "Please enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:1024
+#: includes/class-wc-form-handler.php:1034
 msgid "Passwords do not match."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:1066
+#: includes/class-wc-form-handler.php:1076
 msgid "Anti-spam field was filled in."
 msgstr ""
 
@@ -19467,49 +19467,49 @@ msgstr ""
 msgid "Please enter a stronger password."
 msgstr ""
 
-#: includes/class-wc-install.php:294
+#: includes/class-wc-install.php:324
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:672
+#: includes/class-wc-install.php:702
 msgid "Shop manager"
 msgstr ""
 
-#: includes/class-wc-install.php:852
+#: includes/class-wc-install.php:882
 msgid "View WooCommerce settings"
 msgstr ""
 
-#: includes/class-wc-install.php:868
+#: includes/class-wc-install.php:898
 msgid "View WooCommerce documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:868
+#: includes/class-wc-install.php:898
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:869
+#: includes/class-wc-install.php:899
 msgid "View WooCommerce API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:869
+#: includes/class-wc-install.php:899
 msgid "API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:870
+#: includes/class-wc-install.php:900
 msgid "Visit premium customer support"
 msgstr ""
 
-#: includes/class-wc-install.php:870
+#: includes/class-wc-install.php:900
 msgid "Premium support"
 msgstr ""
 
-#: includes/class-wc-install.php:1012 includes/class-wc-install.php:1094
+#: includes/class-wc-install.php:1042 includes/class-wc-install.php:1124
 msgid ""
 "%1$s could not be installed (%2$s). <a href=\"%3$s\">Please install it "
 "manually by clicking here.</a>"
 msgstr ""
 
-#: includes/class-wc-install.php:1038
+#: includes/class-wc-install.php:1068
 msgid ""
 "%1$s was installed but could not be activated. <a href=\"%2$s\">Please "
 "activate it manually by clicking here.</a>"
@@ -20060,7 +20060,7 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: includes/cli/class-wc-cli-rest-command.php:314
+#: includes/cli/class-wc-cli-rest-command.php:313
 msgid ""
 "Make sure to include the --user flag with an account that has permissions "
 "for this action."
@@ -20136,7 +20136,7 @@ msgstr ""
 msgid "Invalid download."
 msgstr ""
 
-#: includes/data-stores/class-wc-order-data-store-cpt.php:402
+#: includes/data-stores/class-wc-order-data-store-cpt.php:401
 msgid "Invalid customer query."
 msgstr ""
 
@@ -20173,7 +20173,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:218
 #: includes/emails/class-wc-email-failed-order.php:131
 #: includes/emails/class-wc-email-new-order.php:136
-#: includes/emails/class-wc-email.php:541
+#: includes/emails/class-wc-email.php:565
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:73
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
 #: includes/gateways/cod/class-wc-gateway-cod.php:69
@@ -20189,7 +20189,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:220
 #: includes/emails/class-wc-email-failed-order.php:133
 #: includes/emails/class-wc-email-new-order.php:138
-#: includes/emails/class-wc-email.php:543
+#: includes/emails/class-wc-email.php:567
 msgid "Enable this email notification"
 msgstr ""
 
@@ -20205,7 +20205,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:185
 #: includes/emails/class-wc-email-failed-order.php:145
 #: includes/emails/class-wc-email-new-order.php:150
-#: includes/emails/class-wc-email.php:547
+#: includes/emails/class-wc-email.php:571
 msgid "Subject"
 msgstr ""
 
@@ -20225,8 +20225,8 @@ msgstr ""
 #: includes/emails/class-wc-email-failed-order.php:158
 #: includes/emails/class-wc-email-new-order.php:154
 #: includes/emails/class-wc-email-new-order.php:163
-#: includes/emails/class-wc-email.php:551
-#: includes/emails/class-wc-email.php:560
+#: includes/emails/class-wc-email.php:575
+#: includes/emails/class-wc-email.php:584
 #. translators: %s: list of placeholders
 msgid "Available placeholders: %s"
 msgstr ""
@@ -20236,7 +20236,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:194
 #: includes/emails/class-wc-email-failed-order.php:154
 #: includes/emails/class-wc-email-new-order.php:159
-#: includes/emails/class-wc-email.php:556
+#: includes/emails/class-wc-email.php:580
 msgid "Email heading"
 msgstr ""
 
@@ -20246,7 +20246,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:260
 #: includes/emails/class-wc-email-failed-order.php:163
 #: includes/emails/class-wc-email-new-order.php:168
-#: includes/emails/class-wc-email.php:565
+#: includes/emails/class-wc-email.php:589
 msgid "Email type"
 msgstr ""
 
@@ -20256,7 +20256,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:262
 #: includes/emails/class-wc-email-failed-order.php:165
 #: includes/emails/class-wc-email-new-order.php:170
-#: includes/emails/class-wc-email.php:567
+#: includes/emails/class-wc-email.php:591
 msgid "Choose which format of email to send."
 msgstr ""
 
@@ -20461,73 +20461,73 @@ msgstr ""
 msgid "New customer order"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:581
+#: includes/emails/class-wc-email.php:605
 msgid "Plain text"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:584
+#: includes/emails/class-wc-email.php:608
 msgid "HTML"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:585
+#: includes/emails/class-wc-email.php:609
 msgid "Multipart"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:650
+#: includes/emails/class-wc-email.php:674
 msgid "Could not write to template file."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:696
+#: includes/emails/class-wc-email.php:720
 msgid "Template file copied to theme."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:725
+#: includes/emails/class-wc-email.php:749
 msgid "Template file deleted from theme."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:771
+#: includes/emails/class-wc-email.php:795
 msgid "Return to emails"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:799
+#: includes/emails/class-wc-email.php:823
 msgid "HTML template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:800
+#: includes/emails/class-wc-email.php:824
 msgid "Plain text template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:825
+#: includes/emails/class-wc-email.php:849
 msgid "Delete template file"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:828
+#: includes/emails/class-wc-email.php:852
 msgid "This template has been overridden by your theme and can be found in: %s."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:855
+#: includes/emails/class-wc-email.php:879
 msgid "Copy file to theme"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:860
+#: includes/emails/class-wc-email.php:884
 msgid ""
 "To override and edit this email template copy %1$s to your theme folder: "
 "%2$s."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:869
+#: includes/emails/class-wc-email.php:893
 msgid "File was not found."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:896
+#: includes/emails/class-wc-email.php:920
 msgid "View template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:897
+#: includes/emails/class-wc-email.php:921
 msgid "Hide template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:908
+#: includes/emails/class-wc-email.php:932
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
@@ -21934,679 +21934,679 @@ msgstr ""
 msgid "estimated for %s"
 msgstr ""
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:200
 msgid "%s does not exist."
 msgstr ""
 
-#: includes/wc-core-functions.php:287
+#: includes/wc-core-functions.php:294
 msgid "United Arab Emirates dirham"
 msgstr ""
 
-#: includes/wc-core-functions.php:288
+#: includes/wc-core-functions.php:295
 msgid "Afghan afghani"
 msgstr ""
 
-#: includes/wc-core-functions.php:289
+#: includes/wc-core-functions.php:296
 msgid "Albanian lek"
 msgstr ""
 
-#: includes/wc-core-functions.php:290
+#: includes/wc-core-functions.php:297
 msgid "Armenian dram"
 msgstr ""
 
-#: includes/wc-core-functions.php:291
+#: includes/wc-core-functions.php:298
 msgid "Netherlands Antillean guilder"
 msgstr ""
 
-#: includes/wc-core-functions.php:292
+#: includes/wc-core-functions.php:299
 msgid "Angolan kwanza"
 msgstr ""
 
-#: includes/wc-core-functions.php:293
+#: includes/wc-core-functions.php:300
 msgid "Argentine peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:294
+#: includes/wc-core-functions.php:301
 msgid "Australian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:295
+#: includes/wc-core-functions.php:302
 msgid "Aruban florin"
 msgstr ""
 
-#: includes/wc-core-functions.php:296
+#: includes/wc-core-functions.php:303
 msgid "Azerbaijani manat"
 msgstr ""
 
-#: includes/wc-core-functions.php:297
+#: includes/wc-core-functions.php:304
 msgid "Bosnia and Herzegovina convertible mark"
 msgstr ""
 
-#: includes/wc-core-functions.php:298
+#: includes/wc-core-functions.php:305
 msgid "Barbadian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:299
+#: includes/wc-core-functions.php:306
 msgid "Bangladeshi taka"
 msgstr ""
 
-#: includes/wc-core-functions.php:300
+#: includes/wc-core-functions.php:307
 msgid "Bulgarian lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:301
+#: includes/wc-core-functions.php:308
 msgid "Bahraini dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:302
+#: includes/wc-core-functions.php:309
 msgid "Burundian franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:303
+#: includes/wc-core-functions.php:310
 msgid "Bermudian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:304
+#: includes/wc-core-functions.php:311
 msgid "Brunei dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:305
+#: includes/wc-core-functions.php:312
 msgid "Bolivian boliviano"
 msgstr ""
 
-#: includes/wc-core-functions.php:306
+#: includes/wc-core-functions.php:313
 msgid "Brazilian real"
 msgstr ""
 
-#: includes/wc-core-functions.php:307
+#: includes/wc-core-functions.php:314
 msgid "Bahamian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:308
+#: includes/wc-core-functions.php:315
 msgid "Bitcoin"
 msgstr ""
 
-#: includes/wc-core-functions.php:309
+#: includes/wc-core-functions.php:316
 msgid "Bhutanese ngultrum"
 msgstr ""
 
-#: includes/wc-core-functions.php:310
+#: includes/wc-core-functions.php:317
 msgid "Botswana pula"
 msgstr ""
 
-#: includes/wc-core-functions.php:311
+#: includes/wc-core-functions.php:318
 msgid "Belarusian ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:312
+#: includes/wc-core-functions.php:319
 msgid "Belize dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:313
+#: includes/wc-core-functions.php:320
 msgid "Canadian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:314
+#: includes/wc-core-functions.php:321
 msgid "Congolese franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:315
+#: includes/wc-core-functions.php:322
 msgid "Swiss franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:316
+#: includes/wc-core-functions.php:323
 msgid "Chilean peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:317
+#: includes/wc-core-functions.php:324
 msgid "Chinese yuan"
 msgstr ""
 
-#: includes/wc-core-functions.php:318
+#: includes/wc-core-functions.php:325
 msgid "Colombian peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:319
+#: includes/wc-core-functions.php:326
 msgid "Costa Rican col&oacute;n"
 msgstr ""
 
-#: includes/wc-core-functions.php:320
+#: includes/wc-core-functions.php:327
 msgid "Cuban convertible peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:321
+#: includes/wc-core-functions.php:328
 msgid "Cuban peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:322
+#: includes/wc-core-functions.php:329
 msgid "Cape Verdean escudo"
 msgstr ""
 
-#: includes/wc-core-functions.php:323
+#: includes/wc-core-functions.php:330
 msgid "Czech koruna"
 msgstr ""
 
-#: includes/wc-core-functions.php:324
+#: includes/wc-core-functions.php:331
 msgid "Djiboutian franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:325
+#: includes/wc-core-functions.php:332
 msgid "Danish krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:326
+#: includes/wc-core-functions.php:333
 msgid "Dominican peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:327
+#: includes/wc-core-functions.php:334
 msgid "Algerian dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:328
+#: includes/wc-core-functions.php:335
 msgid "Egyptian pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:329
+#: includes/wc-core-functions.php:336
 msgid "Eritrean nakfa"
 msgstr ""
 
-#: includes/wc-core-functions.php:330
+#: includes/wc-core-functions.php:337
 msgid "Ethiopian birr"
 msgstr ""
 
-#: includes/wc-core-functions.php:331
+#: includes/wc-core-functions.php:338
 msgid "Euro"
 msgstr ""
 
-#: includes/wc-core-functions.php:332
+#: includes/wc-core-functions.php:339
 msgid "Fijian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:333
+#: includes/wc-core-functions.php:340
 msgid "Falkland Islands pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:334
+#: includes/wc-core-functions.php:341
 msgid "Pound sterling"
 msgstr ""
 
-#: includes/wc-core-functions.php:335
+#: includes/wc-core-functions.php:342
 msgid "Georgian lari"
 msgstr ""
 
-#: includes/wc-core-functions.php:336
+#: includes/wc-core-functions.php:343
 msgid "Guernsey pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:337
+#: includes/wc-core-functions.php:344
 msgid "Ghana cedi"
 msgstr ""
 
-#: includes/wc-core-functions.php:338
+#: includes/wc-core-functions.php:345
 msgid "Gibraltar pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:339
+#: includes/wc-core-functions.php:346
 msgid "Gambian dalasi"
 msgstr ""
 
-#: includes/wc-core-functions.php:340
+#: includes/wc-core-functions.php:347
 msgid "Guinean franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:341
+#: includes/wc-core-functions.php:348
 msgid "Guatemalan quetzal"
 msgstr ""
 
-#: includes/wc-core-functions.php:342
+#: includes/wc-core-functions.php:349
 msgid "Guyanese dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:343
+#: includes/wc-core-functions.php:350
 msgid "Hong Kong dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:344
+#: includes/wc-core-functions.php:351
 msgid "Honduran lempira"
 msgstr ""
 
-#: includes/wc-core-functions.php:345
+#: includes/wc-core-functions.php:352
 msgid "Croatian kuna"
 msgstr ""
 
-#: includes/wc-core-functions.php:346
+#: includes/wc-core-functions.php:353
 msgid "Haitian gourde"
 msgstr ""
 
-#: includes/wc-core-functions.php:347
+#: includes/wc-core-functions.php:354
 msgid "Hungarian forint"
 msgstr ""
 
-#: includes/wc-core-functions.php:348
+#: includes/wc-core-functions.php:355
 msgid "Indonesian rupiah"
 msgstr ""
 
-#: includes/wc-core-functions.php:349
+#: includes/wc-core-functions.php:356
 msgid "Israeli new shekel"
 msgstr ""
 
-#: includes/wc-core-functions.php:350
+#: includes/wc-core-functions.php:357
 msgid "Manx pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:351
+#: includes/wc-core-functions.php:358
 msgid "Indian rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:352
+#: includes/wc-core-functions.php:359
 msgid "Iraqi dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:353
+#: includes/wc-core-functions.php:360
 msgid "Iranian rial"
 msgstr ""
 
-#: includes/wc-core-functions.php:354
+#: includes/wc-core-functions.php:361
 msgid "Iranian toman"
 msgstr ""
 
-#: includes/wc-core-functions.php:355
+#: includes/wc-core-functions.php:362
 msgid "Icelandic kr&oacute;na"
 msgstr ""
 
-#: includes/wc-core-functions.php:356
+#: includes/wc-core-functions.php:363
 msgid "Jersey pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:357
+#: includes/wc-core-functions.php:364
 msgid "Jamaican dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:358
+#: includes/wc-core-functions.php:365
 msgid "Jordanian dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:359
+#: includes/wc-core-functions.php:366
 msgid "Japanese yen"
 msgstr ""
 
-#: includes/wc-core-functions.php:360
+#: includes/wc-core-functions.php:367
 msgid "Kenyan shilling"
 msgstr ""
 
-#: includes/wc-core-functions.php:361
+#: includes/wc-core-functions.php:368
 msgid "Kyrgyzstani som"
 msgstr ""
 
-#: includes/wc-core-functions.php:362
+#: includes/wc-core-functions.php:369
 msgid "Cambodian riel"
 msgstr ""
 
-#: includes/wc-core-functions.php:363
+#: includes/wc-core-functions.php:370
 msgid "Comorian franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:364
+#: includes/wc-core-functions.php:371
 msgid "North Korean won"
 msgstr ""
 
-#: includes/wc-core-functions.php:365
+#: includes/wc-core-functions.php:372
 msgid "South Korean won"
 msgstr ""
 
-#: includes/wc-core-functions.php:366
+#: includes/wc-core-functions.php:373
 msgid "Kuwaiti dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:367
+#: includes/wc-core-functions.php:374
 msgid "Cayman Islands dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:368
+#: includes/wc-core-functions.php:375
 msgid "Kazakhstani tenge"
 msgstr ""
 
-#: includes/wc-core-functions.php:369
+#: includes/wc-core-functions.php:376
 msgid "Lao kip"
 msgstr ""
 
-#: includes/wc-core-functions.php:370
+#: includes/wc-core-functions.php:377
 msgid "Lebanese pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:371
+#: includes/wc-core-functions.php:378
 msgid "Sri Lankan rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:372
+#: includes/wc-core-functions.php:379
 msgid "Liberian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:373
+#: includes/wc-core-functions.php:380
 msgid "Lesotho loti"
 msgstr ""
 
-#: includes/wc-core-functions.php:374
+#: includes/wc-core-functions.php:381
 msgid "Libyan dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:375
+#: includes/wc-core-functions.php:382
 msgid "Moroccan dirham"
 msgstr ""
 
-#: includes/wc-core-functions.php:376
+#: includes/wc-core-functions.php:383
 msgid "Moldovan leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:377
+#: includes/wc-core-functions.php:384
 msgid "Malagasy ariary"
 msgstr ""
 
-#: includes/wc-core-functions.php:378
+#: includes/wc-core-functions.php:385
 msgid "Macedonian denar"
 msgstr ""
 
-#: includes/wc-core-functions.php:379
+#: includes/wc-core-functions.php:386
 msgid "Burmese kyat"
 msgstr ""
 
-#: includes/wc-core-functions.php:380
+#: includes/wc-core-functions.php:387
 msgid "Mongolian t&ouml;gr&ouml;g"
 msgstr ""
 
-#: includes/wc-core-functions.php:381
+#: includes/wc-core-functions.php:388
 msgid "Macanese pataca"
 msgstr ""
 
-#: includes/wc-core-functions.php:382
+#: includes/wc-core-functions.php:389
 msgid "Mauritanian ouguiya"
 msgstr ""
 
-#: includes/wc-core-functions.php:383
+#: includes/wc-core-functions.php:390
 msgid "Mauritian rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:384
+#: includes/wc-core-functions.php:391
 msgid "Maldivian rufiyaa"
 msgstr ""
 
-#: includes/wc-core-functions.php:385
+#: includes/wc-core-functions.php:392
 msgid "Malawian kwacha"
 msgstr ""
 
-#: includes/wc-core-functions.php:386
+#: includes/wc-core-functions.php:393
 msgid "Mexican peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:387
+#: includes/wc-core-functions.php:394
 msgid "Malaysian ringgit"
 msgstr ""
 
-#: includes/wc-core-functions.php:388
+#: includes/wc-core-functions.php:395
 msgid "Mozambican metical"
 msgstr ""
 
-#: includes/wc-core-functions.php:389
+#: includes/wc-core-functions.php:396
 msgid "Namibian dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:390
+#: includes/wc-core-functions.php:397
 msgid "Nigerian naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:391
+#: includes/wc-core-functions.php:398
 msgid "Nicaraguan c&oacute;rdoba"
 msgstr ""
 
-#: includes/wc-core-functions.php:392
+#: includes/wc-core-functions.php:399
 msgid "Norwegian krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:393
+#: includes/wc-core-functions.php:400
 msgid "Nepalese rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:394
+#: includes/wc-core-functions.php:401
 msgid "New Zealand dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:395
+#: includes/wc-core-functions.php:402
 msgid "Omani rial"
 msgstr ""
 
-#: includes/wc-core-functions.php:396
+#: includes/wc-core-functions.php:403
 msgid "Panamanian balboa"
 msgstr ""
 
-#: includes/wc-core-functions.php:397
+#: includes/wc-core-functions.php:404
 msgid "Peruvian nuevo sol"
 msgstr ""
 
-#: includes/wc-core-functions.php:398
+#: includes/wc-core-functions.php:405
 msgid "Papua New Guinean kina"
 msgstr ""
 
-#: includes/wc-core-functions.php:399
+#: includes/wc-core-functions.php:406
 msgid "Philippine peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:400
+#: includes/wc-core-functions.php:407
 msgid "Pakistani rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:401
+#: includes/wc-core-functions.php:408
 msgid "Polish z&#x142;oty"
 msgstr ""
 
-#: includes/wc-core-functions.php:402
+#: includes/wc-core-functions.php:409
 msgid "Transnistrian ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:403
+#: includes/wc-core-functions.php:410
 msgid "Paraguayan guaran&iacute;"
 msgstr ""
 
-#: includes/wc-core-functions.php:404
+#: includes/wc-core-functions.php:411
 msgid "Qatari riyal"
 msgstr ""
 
-#: includes/wc-core-functions.php:405
+#: includes/wc-core-functions.php:412
 msgid "Romanian leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:406
+#: includes/wc-core-functions.php:413
 msgid "Serbian dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:407
+#: includes/wc-core-functions.php:414
 msgid "Russian ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:408
+#: includes/wc-core-functions.php:415
 msgid "Rwandan franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:409
+#: includes/wc-core-functions.php:416
 msgid "Saudi riyal"
 msgstr ""
 
-#: includes/wc-core-functions.php:410
+#: includes/wc-core-functions.php:417
 msgid "Solomon Islands dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:411
+#: includes/wc-core-functions.php:418
 msgid "Seychellois rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:412
+#: includes/wc-core-functions.php:419
 msgid "Sudanese pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:413
+#: includes/wc-core-functions.php:420
 msgid "Swedish krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:414
+#: includes/wc-core-functions.php:421
 msgid "Singapore dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:415
+#: includes/wc-core-functions.php:422
 msgid "Saint Helena pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:416
+#: includes/wc-core-functions.php:423
 msgid "Sierra Leonean leone"
 msgstr ""
 
-#: includes/wc-core-functions.php:417
+#: includes/wc-core-functions.php:424
 msgid "Somali shilling"
 msgstr ""
 
-#: includes/wc-core-functions.php:418
+#: includes/wc-core-functions.php:425
 msgid "Surinamese dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:419
+#: includes/wc-core-functions.php:426
 msgid "South Sudanese pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:420
+#: includes/wc-core-functions.php:427
 msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra"
 msgstr ""
 
-#: includes/wc-core-functions.php:421
+#: includes/wc-core-functions.php:428
 msgid "Syrian pound"
 msgstr ""
 
-#: includes/wc-core-functions.php:422
+#: includes/wc-core-functions.php:429
 msgid "Swazi lilangeni"
 msgstr ""
 
-#: includes/wc-core-functions.php:423
+#: includes/wc-core-functions.php:430
 msgid "Thai baht"
 msgstr ""
 
-#: includes/wc-core-functions.php:424
+#: includes/wc-core-functions.php:431
 msgid "Tajikistani somoni"
 msgstr ""
 
-#: includes/wc-core-functions.php:425
+#: includes/wc-core-functions.php:432
 msgid "Turkmenistan manat"
 msgstr ""
 
-#: includes/wc-core-functions.php:426
+#: includes/wc-core-functions.php:433
 msgid "Tunisian dinar"
 msgstr ""
 
-#: includes/wc-core-functions.php:427
+#: includes/wc-core-functions.php:434
 msgid "Tongan pa&#x2bb;anga"
 msgstr ""
 
-#: includes/wc-core-functions.php:428
+#: includes/wc-core-functions.php:435
 msgid "Turkish lira"
 msgstr ""
 
-#: includes/wc-core-functions.php:429
+#: includes/wc-core-functions.php:436
 msgid "Trinidad and Tobago dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:430
+#: includes/wc-core-functions.php:437
 msgid "New Taiwan dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:431
+#: includes/wc-core-functions.php:438
 msgid "Tanzanian shilling"
 msgstr ""
 
-#: includes/wc-core-functions.php:432
+#: includes/wc-core-functions.php:439
 msgid "Ukrainian hryvnia"
 msgstr ""
 
-#: includes/wc-core-functions.php:433
+#: includes/wc-core-functions.php:440
 msgid "Ugandan shilling"
 msgstr ""
 
-#: includes/wc-core-functions.php:434
+#: includes/wc-core-functions.php:441
 msgid "United States dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:435
+#: includes/wc-core-functions.php:442
 msgid "Uruguayan peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:436
+#: includes/wc-core-functions.php:443
 msgid "Uzbekistani som"
 msgstr ""
 
-#: includes/wc-core-functions.php:437
+#: includes/wc-core-functions.php:444
 msgid "Venezuelan bol&iacute;var"
 msgstr ""
 
-#: includes/wc-core-functions.php:438
+#: includes/wc-core-functions.php:445
 msgid "Vietnamese &#x111;&#x1ed3;ng"
 msgstr ""
 
-#: includes/wc-core-functions.php:439
+#: includes/wc-core-functions.php:446
 msgid "Vanuatu vatu"
 msgstr ""
 
-#: includes/wc-core-functions.php:440
+#: includes/wc-core-functions.php:447
 msgid "Samoan t&#x101;l&#x101;"
 msgstr ""
 
-#: includes/wc-core-functions.php:441
+#: includes/wc-core-functions.php:448
 msgid "Central African CFA franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:442
+#: includes/wc-core-functions.php:449
 msgid "East Caribbean dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:443
+#: includes/wc-core-functions.php:450
 msgid "West African CFA franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:444
+#: includes/wc-core-functions.php:451
 msgid "CFP franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:445
+#: includes/wc-core-functions.php:452
 msgid "Yemeni rial"
 msgstr ""
 
-#: includes/wc-core-functions.php:446
+#: includes/wc-core-functions.php:453
 msgid "South African rand"
 msgstr ""
 
-#: includes/wc-core-functions.php:447
+#: includes/wc-core-functions.php:454
 msgid "Zambian kwacha"
 msgstr ""
 
-#: includes/wc-core-functions.php:1235
+#: includes/wc-core-functions.php:1243
 msgid "MasterCard"
 msgstr ""
 
-#: includes/wc-core-functions.php:1236
+#: includes/wc-core-functions.php:1244
 msgid "Visa"
 msgstr ""
 
-#: includes/wc-core-functions.php:1237
+#: includes/wc-core-functions.php:1245
 msgid "Discover"
 msgstr ""
 
-#: includes/wc-core-functions.php:1238
+#: includes/wc-core-functions.php:1246
 msgid "American Express"
 msgstr ""
 
-#: includes/wc-core-functions.php:1239
+#: includes/wc-core-functions.php:1247
 msgid "Diners"
 msgstr ""
 
-#: includes/wc-core-functions.php:1240
+#: includes/wc-core-functions.php:1248
 msgid "JCB"
 msgstr ""
 
-#: includes/wc-core-functions.php:1534
+#: includes/wc-core-functions.php:1542
 #. translators: 1: class name 2: woocommerce_logging_class 3:
 #. WC_Logger_Interface
 msgid "The class %1$s provided by %2$s filter must implement %3$s."
@@ -22624,15 +22624,15 @@ msgstr ""
 msgid "Fixed product discount"
 msgstr ""
 
-#: includes/wc-formatting-functions.php:1034
+#: includes/wc-formatting-functions.php:1043
 msgid "Only %s left in stock"
 msgstr ""
 
-#: includes/wc-formatting-functions.php:1038
+#: includes/wc-formatting-functions.php:1047
 msgid "%s in stock"
 msgstr ""
 
-#: includes/wc-formatting-functions.php:1043
+#: includes/wc-formatting-functions.php:1052
 msgid "(can be backordered)"
 msgstr ""
 
@@ -23108,13 +23108,13 @@ msgid "Application authentication request"
 msgstr ""
 
 #: templates/cart/cart-shipping.php:48
-msgid "Shipping costs will be calculated once you have provided your address."
+msgid ""
+"There are no shipping methods available. Please ensure that your address "
+"has been entered correctly, or contact us if you need any help."
 msgstr ""
 
 #: templates/cart/cart-shipping.php:50
-msgid ""
-"There are no shipping methods available. Please double check your address, "
-"or contact us if you need any help."
+msgid "Enter your full address to see shipping costs."
 msgstr ""
 
 #: templates/cart/cart-totals.php:28
@@ -23913,19 +23913,19 @@ msgid "Webhooks"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:76
-#: includes/wc-core-functions.php:1689 includes/wc-update-functions.php:51
+#: includes/wc-core-functions.php:1697 includes/wc-update-functions.php:51
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:85
-#: includes/wc-core-functions.php:1690 includes/wc-update-functions.php:52
+#: includes/wc-core-functions.php:1698 includes/wc-update-functions.php:52
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:194
-#: includes/wc-core-functions.php:1688 includes/wc-update-functions.php:60
+#: includes/wc-core-functions.php:1696 includes/wc-update-functions.php:60
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -23954,25 +23954,25 @@ msgid "%1$s %2$s"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:263
-#: includes/class-wc-install.php:333
+#: includes/class-wc-install.php:363
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:267
-#: includes/class-wc-install.php:338
+#: includes/class-wc-install.php:368
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:271
-#: includes/class-wc-install.php:343
+#: includes/class-wc-install.php:373
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:277
-#: includes/class-wc-install.php:348
+#: includes/class-wc-install.php:378
 msgctxt "Page title"
 msgid "My account"
 msgstr ""
@@ -24089,27 +24089,27 @@ msgctxt "Page setting"
 msgid "Terms and conditions"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:494 includes/wc-cart-functions.php:105
+#: includes/class-wc-form-handler.php:492 includes/wc-cart-functions.php:105
 msgctxt "Item name in quotes"
 msgid "&ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/class-wc-install.php:332
+#: includes/class-wc-install.php:362
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:337
+#: includes/class-wc-install.php:367
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:342
+#: includes/class-wc-install.php:372
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:347
+#: includes/class-wc-install.php:377
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
@@ -24171,7 +24171,7 @@ msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr ""
 
-#: includes/wc-formatting-functions.php:1080
+#: includes/wc-formatting-functions.php:1089
 msgctxt "Price range: from-to"
 msgid "%1$s &ndash; %2$s"
 msgstr ""
