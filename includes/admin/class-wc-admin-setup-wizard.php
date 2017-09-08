@@ -507,6 +507,8 @@ class WC_Admin_Setup_Wizard {
 		$country_name   = WC()->countries->countries[ $country_code ];
 		$wcs_carrier    = $this->get_wcs_shipping_carrier( $country_code );
 
+		// TODO: determine how to handle existing shipping zones (or choose not to)
+
 		if ( false === $dimension_unit || false === $weight_unit ) {
 			if ( 'US' === $country_code ) {
 				$dimension_unit = 'in';
@@ -554,8 +556,8 @@ class WC_Admin_Setup_Wizard {
 					</div>
 					<div class="wc-wizard-service-enable">
 						<span class="wc-wizard-service-toggle">
-							<input id="wc-wizard-service-domestic-shipping" type="checkbox" name="wc-wizard-service-domestic-shipping-enabled" value="yes" checked="checked" />
-							<label for="wc-wizard-service-domestic-shipping">
+							<input id="setup_domestic_zone" type="checkbox" name="setup_domestic_zone" value="yes" checked="checked" />
+							<label for="setup_domestic_zone">
 						</span>
 					</div>
 				</li>
@@ -564,12 +566,12 @@ class WC_Admin_Setup_Wizard {
 						<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
 					</div>
 					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'international' ); ?>
+						<?php $this->shipping_method_selection_form( $country_code, 'intl' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
 						<span class="wc-wizard-service-toggle">
-							<input id="wc-wizard-service-domestic-shipping" type="checkbox" name="wc-wizard-service-domestic-shipping-enabled" value="yes" checked="checked" />
-							<label for="wc-wizard-service-domestic-shipping">
+							<input id="setup_intl_zone" type="checkbox" name="setup_intl_zone" value="yes" checked="checked" />
+							<label for="setup_intl_zone">
 						</span>
 					</div>
 				</li>
@@ -609,41 +611,62 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
-		if ( isset( $_POST['save_step'] ) && esc_attr( 'Skip this step', 'woocommerce' ) === $_POST['save_step'] ) {
-			update_option( 'woocommerce_ship_to_countries', 'disabled' );
-			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
-			exit;
-		}
-
-		$current_shipping = get_option( 'woocommerce_ship_to_countries' );
-		$install_services = isset( $_POST['woocommerce_install_services'] );
+		$setup_domestic   = isset( $_POST['setup_domestic_zone'] ) && 'yes' === $_POST['setup_domestic_zone'];
+		$domestic_method  = sanitize_text_field( $_POST['shipping_method_domestic'] );
+		$setup_intl       = isset( $_POST['setup_intl_zone'] ) && 'yes' === $_POST['setup_intl_zone'];
+		$intl_method      = sanitize_text_field( $_POST['shipping_method_intl'] );
 		$weight_unit      = sanitize_text_field( $_POST['weight_unit'] );
 		$dimension_unit   = sanitize_text_field( $_POST['dimension_unit'] );
+		$existing_zones   = WC_Shipping_Zones::get_zones();
 
 		update_option( 'woocommerce_ship_to_countries', '' );
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
+		// Install WooCommerce Services if live rates were selected
+		if (
+			empty( $existing_zones ) &&
+			( $setup_domestic && 'live_rates' === $domestic_method ) ||
+			( $setup_intl && 'live_rates' === $intl_method )
+		) {
+			$this->install_woocommerce_services();
+		}
+
 		/*
-		 * If this is the initial shipping setup, create a shipping
-		 * zone containing the country the store is located in, with
-		 * a "free shipping" method preconfigured.
+		 * If enabled, create a shipping zone containing the country the
+		 * store is located in, with the selected method preconfigured.
 		 */
-		if ( false === $current_shipping ) {
-			$default_country = get_option( 'woocommerce_default_country' );
-			$location        = wc_format_country_state_string( $default_country );
+		if ( empty( $existing_zones ) && $setup_domestic ) {
+			$country  = WC()->countries->get_base_country();
 
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
-			$zone->add_location( $location['country'], 'country' );
-			$zone->set_zone_name( $zone->get_formatted_location() );
-			$zone->add_shipping_method( 'free_shipping' );
+			$zone->add_location( $country, 'country' );
+
+			if ( 'live_rates' === $domestic_method ) {
+				// Signal WooCommerce Services to setup the domestic zone.
+				update_option( 'woocommerce_setup_domestic_live_rates_zone', true, 'no' );
+			} else {
+				$zone->add_shipping_method( $domestic_method );
+			}
+
 			$zone->save();
 		}
 
-		if ( $install_services ) {
-			$this->install_woocommerce_services();
-		} else {
+		// If enabled, set the selected method for the "rest of world" zone.
+		if ( empty( $existing_zones ) && $setup_intl ) {
+			if ( 'live_rates' === $intl_method ) {
+				// Signal WooCommerce Services to setup the international zone.
+				update_option( 'woocommerce_setup_intl_live_rates_zone', true, 'no' );
+			} else {
+				$zone = new WC_Shipping_Zone( 0 );
+				$zone->add_shipping_method( $intl_method );
+				$zone->save();
+			}
+		}
+
+		// Notify the user that no shipping methods are configured
+		if ( empty( $existing_zones ) && ! $setup_domestic && ! $setup_intl ) {
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
 
