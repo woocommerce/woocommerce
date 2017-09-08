@@ -452,6 +452,52 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Get the WCS shipping carrier for a given country code.
+	 *
+	 * Can also be used to determine if WCS supports a given country.
+	 *
+	 * @param $country_code
+	 * @return bool|string Carrier name if supported, boolean False otherwise.
+	 */
+	protected function get_wcs_shipping_carrier( $country_code ) {
+		switch ( $country_code ) {
+			case 'US':
+				return 'USPS';
+			case 'CA':
+				return 'Canada Post';
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Render the available shipping methods for a given country code.
+	 *
+	 * @param string $country_code
+	 * @param sting  $zone_type
+	 */
+	protected function shipping_method_selection_form( $country_code, $zone_type = 'domestic' ) {
+		$input_name = "shipping_method_{$zone_type}";
+		?>
+		<div>
+			<select id="<?php echo esc_attr( $input_name ); ?>" name="<?php echo esc_attr( $input_name ); ?>" class="wc-enhanced-select">
+				<?php if ( $this->get_wcs_shipping_carrier( $country_code ) ) : ?>
+				<option value="live_rates" selected="selected">
+					<?php esc_html_e( 'Live Rates', 'woocommerce' ); ?>
+				</option>
+				<?php endif; ?>
+				<option value="free_shipping">
+					<?php esc_html_e( 'Free Shipping', 'woocommerce' ); ?>
+				</option>
+				<option value="flat_rate">
+					<?php esc_html_e( 'Flat Rate', 'woocommerce' ); ?>
+				</option>
+			</select>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
@@ -459,68 +505,98 @@ class WC_Admin_Setup_Wizard {
 		$weight_unit    = get_option( 'woocommerce_weight_unit', false );
 		$country_code   = WC()->countries->get_base_country();
 		$country_name   = WC()->countries->countries[ $country_code ];
+		$wcs_carrier    = $this->get_wcs_shipping_carrier( $country_code );
 
 		if ( false === $dimension_unit || false === $weight_unit ) {
 			if ( 'US' === $country_code ) {
 				$dimension_unit = 'in';
-				$weight_unit = 'oz';
+				$weight_unit    = 'oz';
 			} else {
 				$dimension_unit = 'cm';
-				$weight_unit = 'kg';
+				$weight_unit    = 'kg';
 			}
 		}
-		?>
-		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
-		<p><?php
-		if ( 'US' === $country_code ) {
-			printf(
-				__( "You're all set up to ship anywhere in the %s, and outside of it. We recommend using live rates to get accurate USPS shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
-				$country_name
-			);
-		} elseif ( 'CA' === $country_code ) {
-			printf(
-				__( "You're all set up to ship anywhere in the %s, and outside of it. We recommend using live rates to get accurate Canada Post shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
-				$country_name
+
+		if ( $wcs_carrier ) {
+			$intro_text = sprintf(
+			/* translators: %1$s: country name, %2$s: shipping carrier name */
+				__( "You're all set up to ship anywhere in the %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
+				$country_name,
+				$wcs_carrier
 			);
 		} else {
-			printf(
+			$intro_text = sprintf(
+			/* translators: %s: country name */
 				__( "You can choose which countries you'll be shipping to and with which methods. We've started you up with shipping to %s and the rest of the world.", 'woocommerce' ),
 				$country_name
 			);
 		}
-		?></p>
-		<form method="post">
-			<?php $this->wc_setup_wcs_tout(); ?>
 
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-			</table>
+		?>
+		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
+		<p><?php echo esc_html( $intro_text ); ?></p>
+		<form method="post">
+			<ul class="wc-wizard-services shipping">
+				<li class="wc-wizard-service-item">
+					<div class="wc-wizard-service-name">
+						<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
+					</div>
+					<div class="wc-wizard-service-description">
+						<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
+					</div>
+				</li>
+				<li class="wc-wizard-service-item">
+					<div class="wc-wizard-service-name">
+						<p><?php echo esc_html( $country_name ); ?></p>
+					</div>
+					<div class="wc-wizard-service-description">
+						<?php $this->shipping_method_selection_form( $country_code, 'domestic' ); ?>
+					</div>
+					<div class="wc-wizard-service-enable">
+						<span class="wc-wizard-service-toggle">
+							<input id="wc-wizard-service-domestic-shipping" type="checkbox" name="wc-wizard-service-domestic-shipping-enabled" value="yes" checked="checked" />
+							<label for="wc-wizard-service-domestic-shipping">
+						</span>
+					</div>
+				</li>
+				<li class="wc-wizard-service-item">
+					<div class="wc-wizard-service-name">
+						<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
+					</div>
+					<div class="wc-wizard-service-description">
+						<?php $this->shipping_method_selection_form( $country_code, 'international' ); ?>
+					</div>
+					<div class="wc-wizard-service-enable">
+						<span class="wc-wizard-service-toggle">
+							<input id="wc-wizard-service-domestic-shipping" type="checkbox" name="wc-wizard-service-domestic-shipping-enabled" value="yes" checked="checked" />
+							<label for="wc-wizard-service-domestic-shipping">
+						</span>
+					</div>
+				</li>
+			</ul>
+
+			<div>
+				<label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label>
+				<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
+					<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+					<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+					<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+					<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+				</select>
+			</div>
+			<div>
+				<label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label>
+				<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
+					<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+					<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+					<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+					<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+					<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+				</select>
+			</div>
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<input type="submit" class="button button-large button-next" value="<?php esc_attr_e( 'Skip this step', 'woocommerce' ); ?>" name="save_step" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
