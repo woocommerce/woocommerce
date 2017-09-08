@@ -1076,45 +1076,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Theme step.
-	 */
-	private function wc_setup_theme() {
-		?>
-		<form method="post" class="wc-wizard-storefront">
-			<p class="wc-wizard-storefront-intro">
-				<?php echo wp_kses_post( __( '<strong>Storefront</strong> is the free WordPress theme built and maintained by the makers of WooCommerce.', 'woocommerce' ) ); ?>
-				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/storefront-intro.png' ); ?>" alt="Storefront" />
-			</p>
-
-			<ul class="wc-wizard-storefront-features">
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__bulletproof first"><?php echo wp_kses_post( __( '<strong>Bulletproof WooCommerce integration:</strong> Rest assured the integration between WooCommerce, WooCommerce extensions and Storefront is water-tight.', 'woocommerce' ) ); ?></li>
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__accessibility last"><?php echo wp_kses_post( __( '<strong>Built with accessibility in mind:</strong> Storefront adheres to the strict wordpress.org accessibility guidelines making your store accessible to the widest audience possible.', 'woocommerce' ) ); ?></li>
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__extendable first"><?php echo wp_kses_post( __( '<strong>Child themes and extensions available:</strong> Like WooCommerce, you can extend Storefront with an extension or child theme to make your store truly your own.', 'woocommerce' ) ); ?></li>
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__compatibility last"><?php echo wp_kses_post( __( '<strong>No Shortcodes, sliders or page builders:</strong> Bring your favorite sliders or page builders, Storefront is built to work with the most popular options.', 'woocommerce' ) ); ?></li>
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__mobile first"><?php echo wp_kses_post( __( '<strong>Clean, simple mobile-first design:</strong> The perfect place to start when customizing your store, looks beautiful on any device.', 'woocommerce' ) ); ?></li>
-				<li class="wc-wizard-storefront-feature wc-wizard-storefront-feature__search last"><?php echo wp_kses_post( __( '<strong>Optimized for search:</strong> Valid schema markup for improved SEO performance.', 'woocommerce' ) ); ?></li>
-			</ul>
-			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Install &amp; activate Storefront', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
-				<?php wp_nonce_field( 'wc-setup' ); ?>
-			</p>
-		</form>
-		<?php
-
-	}
-
-	/**
-	 * Theme step save.
-	 */
-	private function wc_setup_theme_save() {
-		check_admin_referer( 'wc-setup' );
-		wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
-		exit;
-	}
-
-	/**
 	 * Go to the next step if Jetpack was connected.
 	 */
 	protected function wc_setup_activate_actions() {
