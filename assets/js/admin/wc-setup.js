@@ -104,4 +104,17 @@ jQuery( function( $ ) {
 				.slideToggle()
 				.css( 'display', 'flex' );
 	} );
+
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select', function( e ) {
+		var $zone = $( this );
+		var selected_method = e.target.value;
+
+		var $descriptions = $zone.find( '.shipping-method-description' );
+		$descriptions.find( 'p' ).hide();
+		$descriptions.find( 'p.' + selected_method ).show();
+
+		var $settings = $zone.find( '.shipping-method-settings' );
+		$settings.find( 'div' ).hide();
+		$settings.find( 'div.' + selected_method ).show();
+	} );
 } );
