@@ -92,13 +92,11 @@ jQuery( function( $ ) {
 		}
 	} );
 
-	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-item', function() {
-		var $checkbox = $( this ).find( '.wc-wizard-service-enable input' );
-		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
-	} );
-
-	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable input', function( e ) {
+	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable', function( e ) {
 		e.stopPropagation();
+
+		var $checkbox = $( this ).find( '.wc-wizard-service-toggle input' );
+		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
