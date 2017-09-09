@@ -524,22 +524,44 @@ class WC_Admin_Setup_Wizard {
 	 * @param sting  $zone_type
 	 */
 	protected function shipping_method_selection_form( $country_code, $zone_type = 'domestic' ) {
-		$input_name = "shipping_method_{$zone_type}";
+		$input_name        = "shipping_method_{$zone_type}";
+		$flat_rate_input   = "{$zone_type}_flat_rate";
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
 		?>
-		<div>
+		<div class="wc-wizard-shipping-method-select">
 			<select id="<?php echo esc_attr( $input_name ); ?>" name="<?php echo esc_attr( $input_name ); ?>" class="wc-enhanced-select">
-				<?php if ( $this->get_wcs_shipping_carrier( $country_code ) ) : ?>
-				<option value="live_rates" selected="selected">
+				<?php if ( $live_rate_carrier ) : ?>
+				<option value="live_rates" <?php selected( $selected, 'live_rates' ); ?>>
 					<?php esc_html_e( 'Live Rates', 'woocommerce' ); ?>
 				</option>
 				<?php endif; ?>
-				<option value="free_shipping">
-					<?php esc_html_e( 'Free Shipping', 'woocommerce' ); ?>
-				</option>
-				<option value="flat_rate">
+				<option value="flat_rate" <?php selected( $selected, 'flat_rate' ); ?>>
 					<?php esc_html_e( 'Flat Rate', 'woocommerce' ); ?>
 				</option>
+				<option value="free_shipping" <?php selected( $selected, 'free_shipping' ); ?>>
+					<?php esc_html_e( 'Free Shipping', 'woocommerce' ); ?>
+				</option>
 			</select>
+			<div class="shipping-method-description">
+				<p class="live_rates" <?php if ( 'live_rates' !== $selected ) echo 'style="display:none"'; ?>>
+					<?php esc_html_e( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ); ?>
+				</p>
+				<p class="free_shipping" <?php if ( 'free_shipping' !== $selected ) echo 'style="display:none"'; ?>>
+					<?php esc_html_e( "Don't charge for shipping.", 'woocommerce' ); ?>
+				</p>
+				<p class="flat_rate">
+					<?php esc_html_e( 'Set a fixed price to cover shipping costs.', 'woocommerce' ); ?>
+				</p>
+			</div>
+			<div class="shipping-method-settings">
+				<div class="flat_rate" <?php if ( 'flat_rate' !== $selected ) echo 'style="display:none"'; ?>>
+					<input type="text" id="<?php echo esc_attr( $flat_rate_input ); ?>" name="<?php echo esc_attr( $flat_rate_input ); ?>" />
+					<p class="description">
+						<?php esc_html_e( 'What would you like to charge for flat rate shipping?', 'woocommerce' ); ?>
+					</p>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
