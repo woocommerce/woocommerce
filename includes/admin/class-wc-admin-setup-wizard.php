@@ -318,14 +318,13 @@ class WC_Admin_Setup_Wizard {
 			</div>
 			<div>
 				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
-				<input type="text" id="store_address" name="store_address" style="width:100%;" value="<?php echo esc_attr( $address ); ?>" />
+				<input type="text" id="store_address" name="store_address" style="width:100%;" required value="<?php echo esc_attr( $address ); ?>" />
 				<label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
 				<input type="text" id="store_address_2" name="store_address_2" style="width:100%;" value="<?php echo esc_attr( $address_2 ); ?>" />
-
 			</div>
 			<div style="width:33%; float:left;">
 				<label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
-				<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
+				<input type="text" id="store_city" name="store_city" required value="<?php echo esc_attr( $city ); ?>" />
 			</div>
 			<div style="width:33%; float:left;">
 				<label for="store_country_state"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label>
@@ -335,11 +334,11 @@ class WC_Admin_Setup_Wizard {
 			</div>
 			<div style="width:33%; float:left;">
 				<label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
-				<input type="text" id="store_postcode" name="store_postcode" value="<?php echo esc_attr( $postcode ); ?>" />
+				<input type="text" id="store_postcode" name="store_postcode" required value="<?php echo esc_attr( $postcode ); ?>" />
 			</div>
 			<div>
 				<label for="currency_code"><?php esc_html_e( 'Store currency', 'woocommerce' ); ?></label>
-				<select id="currency_code" name="currency_code" style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+				<select id="currency_code" name="currency_code" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 					<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
 					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
