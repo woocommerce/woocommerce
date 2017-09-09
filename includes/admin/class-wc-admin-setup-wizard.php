@@ -305,6 +305,8 @@ class WC_Admin_Setup_Wizard {
 			$user_location = WC_Geolocation::geolocate_ip();
 			$country       = $user_location['country'];
 			$state         = $user_location['state'];
+		} elseif ( empty( $state ) ) {
+			$state = '*';
 		}
 
 		?>
@@ -312,13 +314,7 @@ class WC_Admin_Setup_Wizard {
 		<form method="post">
 			<p><?php esc_html_e( "This quick setup wizard will help you configure the basic settings, and shouldn't take longer than five minutes. To get started, we need to know a few details about your store.", 'woocommerce' ); ?></p>
 			<div>
-				<label for="store_country"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
-				<select id="store_country" name="store_country" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value=""><?php esc_html_e( 'Choose a country&hellip;', 'woocommerce' ); ?></option>
-				<?php foreach ( WC()->countries->get_countries() as $country_code => $country_name ) : ?>
-					<option value="<?php echo esc_attr( $country_code ); ?>" <?php selected( $country_code, $country ); ?>><?php echo esc_html( $country_name ); ?></option>
-				<?php endforeach; ?>
-				</select>
+				<label><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
 			</div>
 			<div>
 				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
@@ -332,12 +328,9 @@ class WC_Admin_Setup_Wizard {
 				<input type="text" id="store_city" name="store_city" value="<?php echo esc_attr( $city ); ?>" />
 			</div>
 			<div style="width:33%; float:left;">
-				<label for="store_state"><?php esc_html_e( 'State', 'woocommerce' ); ?></label>
-				<select id="store_state" name="store_state" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a state&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value=""><?php esc_html_e( 'Choose a state&hellip;', 'woocommerce' ); ?></option>
-				<?php foreach ( WC()->countries->get_states( $country ) as $state_code => $state_name ) : ?>
-					<option value="<?php echo esc_attr( $state_code ); ?>" <?php selected( $state_code, $state ); ?>><?php echo esc_html( $state_name ); ?></option>
-				<?php endforeach; ?>
+				<label for="store_country_state"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label>
+				<select id="store_country_state" name="store_country_state" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+					<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 				</select>
 			</div>
 			<div style="width:33%; float:left;">
@@ -386,8 +379,7 @@ class WC_Admin_Setup_Wizard {
 		$address        = sanitize_text_field( $_POST['store_address'] );
 		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
 		$city           = sanitize_text_field( $_POST['store_city'] );
-		$store_country  = sanitize_text_field( $_POST['store_country'] );
-		$store_state    = sanitize_text_field( $_POST['store_state'] );
+		$country_state  = sanitize_text_field( $_POST['store_country_state'] );
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
@@ -396,7 +388,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_store_address', $address );
 		update_option( 'woocommerce_store_address_2', $address_2 );
 		update_option( 'woocommerce_store_city', $city );
-		update_option( 'woocommerce_default_country', sprintf( '%s:%s', $store_country, $store_state ) );
+		update_option( 'woocommerce_default_country', $country_state );
 		update_option( 'woocommerce_store_postcode', $postcode );
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_product_type', $product_type );
