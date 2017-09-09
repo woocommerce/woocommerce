@@ -69,13 +69,18 @@ jQuery( function( $ ) {
 	} ).change();
 
 	$( '.button-next' ).on( 'click', function() {
-		$('.wc-setup-content').block({
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		});
+		var form = $( this ).parents( 'form' ).get( 0 );
+
+		if ( ( 'function' === typeof form.checkValidity ) && form.checkValidity() ) {
+			$('.wc-setup-content').block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+		}
+
 		return true;
 	} );
 
