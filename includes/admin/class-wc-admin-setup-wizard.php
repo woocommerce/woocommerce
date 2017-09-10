@@ -124,6 +124,9 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
+		// Whether or not there is a pending background install of Jetpack
+		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
+
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -152,6 +155,7 @@ class WC_Admin_Setup_Wizard {
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) ),
+			'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
 		) );
 
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
@@ -455,6 +459,10 @@ class WC_Admin_Setup_Wizard {
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
 		), ! $now );
+
+		if ( ! $now ) {
+			update_option( 'woocommerce_setup_queued_jetpack_install', true );
+		}
 	}
 
 	/**
