@@ -64,41 +64,12 @@ class WC_Admin_Setup_Wizard {
 	 * https://developers.taxjar.com/api/reference/#countries
 	 */
 	protected function is_automated_tax_supported_country( $country_code ) {
-		$tax_supported_countries = array(
-			'AU' => __( 'Australia', 'woocommerce' ),
-			'AT' => __( 'Austria', 'woocommerce' ),
-			'BE' => __( 'Belgium', 'woocommerce' ),
-			'BG' => __( 'Bulgaria', 'woocommerce' ),
-			'CA' => __( 'Canada', 'woocommerce' ),
-			'HR' => __( 'Croatia', 'woocommerce' ),
-			'CY' => __( 'Cyprus', 'woocommerce' ),
-			'CZ' => __( 'Czech Republic', 'woocommerce' ),
-			'DK' => __( 'Denmark', 'woocommerce' ),
-			'EE' => __( 'Estonia', 'woocommerce' ),
-			'FI' => __( 'Finland', 'woocommerce' ),
-			'FR' => __( 'France', 'woocommerce' ),
-			'DE' => __( 'Germany', 'woocommerce' ),
-			'GR' => __( 'Greece', 'woocommerce' ),
-			'HU' => __( 'Hungary', 'woocommerce' ),
-			'IE' => __( 'Ireland', 'woocommerce' ),
-			'IT' => __( 'Italy', 'woocommerce' ),
-			'LV' => __( 'Latvia', 'woocommerce' ),
-			'LT' => __( 'Lithuania', 'woocommerce' ),
-			'LU' => __( 'Luxembourg', 'woocommerce' ),
-			'MT' => __( 'Malta', 'woocommerce' ),
-			'NL' => __( 'Netherlands', 'woocommerce' ),
-			'PL' => __( 'Poland', 'woocommerce' ),
-			'PT' => __( 'Portugal', 'woocommerce' ),
-			'RO' => __( 'Romania', 'woocommerce' ),
-			'SK' => __( 'Slovakia', 'woocommerce' ),
-			'SI' => __( 'Slovenia', 'woocommerce' ),
-			'ES' => __( 'Spain', 'woocommerce' ),
-			'SE' => __( 'Sweden', 'woocommerce' ),
-			'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
-			'US' => __( 'United States (US)', 'woocommerce' ),
+		$tax_supported_countries = array_merge(
+			array( 'US', 'CA', 'AU' ),
+			WC()->countries->get_european_union_countries()
 		);
 
-		return array_key_exists( $country_code, $tax_supported_countries );
+		return in_array( $country_code, $tax_supported_countries );
 	}
 
 	/**
