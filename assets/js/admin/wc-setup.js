@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 	$( '.button-next' ).on( 'click', function() {
 		var form = $( this ).parents( 'form' ).get( 0 );
 
-		if ( ( 'function' === typeof form.checkValidity ) && form.checkValidity() ) {
+		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
 			$('.wc-setup-content').block({
 				message: null,
 				overlayCSS: {
