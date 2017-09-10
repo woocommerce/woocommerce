@@ -105,8 +105,8 @@ jQuery( function( $ ) {
 				.css( 'display', 'flex' );
 	} );
 
-	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select', function( e ) {
-		var $zone = $( this );
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select .method', function( e ) {
+		var $zone = $( this ).parent( 'div' );
 		var selected_method = e.target.value;
 
 		var $descriptions = $zone.find( '.shipping-method-description' );
