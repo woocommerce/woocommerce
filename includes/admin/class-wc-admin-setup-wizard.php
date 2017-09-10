@@ -1007,6 +1007,11 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
+		// Install WooCommerce Services with Stripe to enable deferred account creation
+		if ( ! empty( $_POST['wc-wizard-service-stripe-enabled'] ) ) {
+			$this->install_woocommerce_services();
+		}
+
 		$gateways = $this->get_wizard_in_cart_payment_gateways();
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
@@ -1026,11 +1031,6 @@ class WC_Admin_Setup_Wizard {
 			}
 
 			update_option( $settings_key, $settings );
-		}
-
-		// Install WooCommerce Services with Stripe to enable deferred account creation
-		if ( ! empty( $_POST['wc-wizard-service-stripe-enabled'] ) ) {
-			$this->install_woocommerce_services();
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
