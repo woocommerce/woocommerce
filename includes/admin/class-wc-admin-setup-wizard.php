@@ -152,7 +152,7 @@ class WC_Admin_Setup_Wizard {
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
 
-		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui' ), WC_VERSION );
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) ),
 			'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
@@ -1147,7 +1147,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate() {
 		$this->wc_setup_activate_actions();
 		?>
-		<form method="post">
+		<form method="post" class="activate-jetpack">
 			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
 			<p>
 				<?php // TODO: tailor this message to the Jetpack-powered services selected earlier ?>
@@ -1155,7 +1155,8 @@ class WC_Admin_Setup_Wizard {
 			</p>
 			<div>
 				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
-				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" name="save_step" />
+				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" />
+				<input type="hidden" name="save_step" value="activate" />
 				<h3><?php esc_html_e( "Reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			</div>
 			<ul class="wc-wizard-features">
@@ -1204,8 +1205,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
-
-		$this->install_jetpack( true );
 
 		if ( ! class_exists( 'Jetpack' ) ) {
 			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );

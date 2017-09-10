@@ -68,17 +68,21 @@ jQuery( function( $ ) {
 		}
 	} ).change();
 
+	function blockWizardUI() {
+		$('.wc-setup-content').block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+	}
+
 	$( '.button-next' ).on( 'click', function() {
 		var form = $( this ).parents( 'form' ).get( 0 );
 
 		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
-			$('.wc-setup-content').block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+			blockWizardUI();
 		}
 
 		return true;
@@ -116,5 +120,44 @@ jQuery( function( $ ) {
 		var $settings = $zone.find( '.shipping-method-settings' );
 		$settings.find( 'div' ).hide();
 		$settings.find( 'div.' + selected_method ).show();
+	} );
+
+	function submitActivateForm() {
+		$( 'form.activate-jetpack' ).submit();
+	}
+
+	function waitForJetpackInstall() {
+		wp.ajax.post( 'setup_wizard_check_jetpack' )
+			.then( function( result ) {
+				// If we receive success, or an unexpected result
+				// let the form submit.
+				if (
+					! result ||
+					! result.is_active ||
+					'yes' === result.is_active
+				) {
+					return submitActivateForm();
+				}
+
+				// Wait until checking the status again
+				setTimeout( waitForJetpackInstall, 3000 );
+			} )
+			.fail( function() {
+				// Submit the form as normal if the request fails
+				submitActivateForm();
+			} );
+	}
+
+	// Wait for a pending Jetpack install to finish before triggering a "save"
+	// on the activate step, which launches the Jetpack connection flow.
+	$( '.button-jetpack-connect' ).on( 'click', function( e ) {
+		blockWizardUI();
+
+		if ( 'no' === wc_setup_params.pending_jetpack_install ) {
+			return true;
+		}
+
+		e.preventDefault();
+		waitForJetpackInstall();
 	} );
 } );
