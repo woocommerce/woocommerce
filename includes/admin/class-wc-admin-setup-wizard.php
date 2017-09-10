@@ -685,10 +685,10 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$setup_domestic   = isset( $_POST['setup_domestic_zone'] ) && 'yes' === $_POST['setup_domestic_zone'];
-		$domestic_method  = sanitize_text_field( $_POST['shipping_method_domestic'] );
-		$setup_intl       = isset( $_POST['setup_intl_zone'] ) && 'yes' === $_POST['setup_intl_zone'];
-		$intl_method      = sanitize_text_field( $_POST['shipping_method_intl'] );
+		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
+		$domestic_method  = sanitize_text_field( $_POST['shipping_zones']['domestic']['method'] );
+		$setup_intl       = isset( $_POST['shipping_zones']['intl']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['intl']['enabled'] );
+		$intl_method      = sanitize_text_field( $_POST['shipping_zones']['intl']['method'] );
 		$weight_unit      = sanitize_text_field( $_POST['weight_unit'] );
 		$dimension_unit   = sanitize_text_field( $_POST['dimension_unit'] );
 		$existing_zones   = WC_Shipping_Zones::get_zones();
@@ -721,10 +721,21 @@ class WC_Admin_Setup_Wizard {
 				// Signal WooCommerce Services to setup the domestic zone.
 				update_option( 'woocommerce_setup_domestic_live_rates_zone', true, 'no' );
 			} else {
-				$zone->add_shipping_method( $domestic_method );
+				$instance_id = $zone->add_shipping_method( $domestic_method );
 			}
 
 			$zone->save();
+
+			// Save chosen shipping method settings (using REST controller for convenience)
+			if ( $instance_id && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) {
+				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
+
+				$method_controller->update_item( array(
+					'zone_id'     => $zone->get_id(),
+					'instance_id' => $instance_id,
+					'settings'    => $_POST['shipping_zones']['domestic'][ $domestic_method ],
+				) );
+			}
 		}
 
 		// If enabled, set the selected method for the "rest of world" zone.
@@ -733,9 +744,21 @@ class WC_Admin_Setup_Wizard {
 				// Signal WooCommerce Services to setup the international zone.
 				update_option( 'woocommerce_setup_intl_live_rates_zone', true, 'no' );
 			} else {
-				$zone = new WC_Shipping_Zone( 0 );
-				$zone->add_shipping_method( $intl_method );
+				$zone        = new WC_Shipping_Zone( 0 );
+				$instance_id = $zone->add_shipping_method( $intl_method );
+
 				$zone->save();
+			}
+
+			// Save chosen shipping method settings (using REST controller for convenience)
+			if ( $instance_id && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) {
+				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
+
+				$method_controller->update_item( array(
+					'zone_id'     => $zone->get_id(),
+					'instance_id' => $instance_id,
+					'settings'    => $_POST['shipping_zones']['intl'][ $intl_method ],
+				) );
 			}
 		}
 
