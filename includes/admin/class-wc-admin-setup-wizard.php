@@ -727,7 +727,7 @@ class WC_Admin_Setup_Wizard {
 			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience)
-			if ( $instance_id && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) {
+			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) {
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 
 				$method_controller->update_item( array(
@@ -751,7 +751,7 @@ class WC_Admin_Setup_Wizard {
 			}
 
 			// Save chosen shipping method settings (using REST controller for convenience)
-			if ( $instance_id && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) {
+			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) {
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 
 				$method_controller->update_item( array(
