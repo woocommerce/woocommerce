@@ -1074,6 +1074,8 @@ class WC_Admin_Setup_Wizard {
 		$install_storefront  = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
 
 		if ( $setup_automated_tax ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+
 			$this->install_woocommerce_services();
 
 			// Signal WooCommerce Services to setup automated taxes.
