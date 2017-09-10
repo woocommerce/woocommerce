@@ -489,49 +489,83 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Get shipping methods based on country code.
+	 *
+	 * @param $country_code
+	 * @return array
+	 */
+	protected function get_wizard_shipping_methods( $country_code ) {
+		$shipping_methods = array(
+			'live_rates' => array(
+				'name'        => __( 'Live Rates', 'woocommerce' ),
+				'description' => __( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ),
+			),
+			'flat_rate' => array(
+				'name'        => __( 'Flat Rate', 'woocommerce' ),
+				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
+				'settings'    => array(
+					'cost' => array(
+						'type'        => 'text',
+						'description' => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
+					),
+				),
+			),
+			'free_shipping' => array(
+				'name'        => __( 'Free Shipping', 'woocommerce' ),
+				'description' => __( "Don't charge for shipping.", 'woocommerce' ),
+			),
+		);
+
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+
+		if ( false === $live_rate_carrier ) {
+			unset( $shipping_methods['live_rates'] );
+		}
+
+		return $shipping_methods;
+	}
+
+	/**
 	 * Render the available shipping methods for a given country code.
 	 *
 	 * @param string $country_code
-	 * @param sting  $zone_type
+	 * @param string $input_prefix
 	 */
-	protected function shipping_method_selection_form( $country_code, $zone_type = 'domestic' ) {
-		$input_name        = "shipping_method_{$zone_type}";
-		$flat_rate_input   = "{$zone_type}_flat_rate";
+	protected function shipping_method_selection_form( $country_code, $input_prefix ) {
 		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
 		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
+		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
-			<select id="<?php echo esc_attr( $input_name ); ?>" name="<?php echo esc_attr( $input_name ); ?>" class="wc-enhanced-select">
-				<?php if ( $live_rate_carrier ) : ?>
-				<option value="live_rates" <?php selected( $selected, 'live_rates' ); ?>>
-					<?php esc_html_e( 'Live Rates', 'woocommerce' ); ?>
+			<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
+			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+				<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
+					<?php echo esc_html( $method['name'] ); ?>
 				</option>
-				<?php endif; ?>
-				<option value="flat_rate" <?php selected( $selected, 'flat_rate' ); ?>>
-					<?php esc_html_e( 'Flat Rate', 'woocommerce' ); ?>
-				</option>
-				<option value="free_shipping" <?php selected( $selected, 'free_shipping' ); ?>>
-					<?php esc_html_e( 'Free Shipping', 'woocommerce' ); ?>
-				</option>
+			<?php endforeach; ?>
 			</select>
+
 			<div class="shipping-method-description">
-				<p class="live_rates" <?php if ( 'live_rates' !== $selected ) echo 'style="display:none"'; ?>>
-					<?php esc_html_e( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ); ?>
+			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+				<p class="<?php echo esc_attr( $method_id ); ?>" <?php if ( $method_id !== $selected ) echo 'style="display:none"'; ?>>
+					<?php echo esc_html( $method['description'] ); ?>
 				</p>
-				<p class="free_shipping" <?php if ( 'free_shipping' !== $selected ) echo 'style="display:none"'; ?>>
-					<?php esc_html_e( "Don't charge for shipping.", 'woocommerce' ); ?>
-				</p>
-				<p class="flat_rate">
-					<?php esc_html_e( 'Set a fixed price to cover shipping costs.', 'woocommerce' ); ?>
-				</p>
+			<?php endforeach; ?>
 			</div>
+
 			<div class="shipping-method-settings">
-				<div class="flat_rate" <?php if ( 'flat_rate' !== $selected ) echo 'style="display:none"'; ?>>
-					<input type="text" id="<?php echo esc_attr( $flat_rate_input ); ?>" name="<?php echo esc_attr( $flat_rate_input ); ?>" />
+			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+				<?php if ( empty( $method['settings'] ) ) continue; ?>
+				<div class="<?php echo esc_attr( $method_id ); ?>" <?php if ( $method_id !== $selected ) echo 'style="display:none"'; ?>>
+				<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
+					<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
+					<input type="<?php echo esc_attr( $setting['type'] ); ?>" id="<?php echo esc_attr( $method_setting_id ); ?>" name="<?php echo esc_attr( $method_setting_id ); ?>" />
 					<p class="description">
-						<?php esc_html_e( 'What would you like to charge for flat rate shipping?', 'woocommerce' ); ?>
+						<?php echo esc_html( $setting['description'] ); ?>
 					</p>
+				<?php endforeach; ?>
 				</div>
+			<?php endforeach; ?>
 			</div>
 		</div>
 		<?php
@@ -592,12 +626,12 @@ class WC_Admin_Setup_Wizard {
 						<p><?php echo esc_html( $country_name ); ?></p>
 					</div>
 					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'domestic' ); ?>
+						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
 						<span class="wc-wizard-service-toggle">
-							<input id="setup_domestic_zone" type="checkbox" name="setup_domestic_zone" value="yes" checked="checked" />
-							<label for="setup_domestic_zone">
+							<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
+							<label for="shipping_zones[domestic][enabled]">
 						</span>
 					</div>
 				</li>
@@ -606,12 +640,12 @@ class WC_Admin_Setup_Wizard {
 						<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
 					</div>
 					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'intl' ); ?>
+						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
 						<span class="wc-wizard-service-toggle">
-							<input id="setup_intl_zone" type="checkbox" name="setup_intl_zone" value="yes" checked="checked" />
-							<label for="setup_intl_zone">
+							<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
+							<label for="shipping_zones[intl][enabled]">
 						</span>
 					</div>
 				</li>
