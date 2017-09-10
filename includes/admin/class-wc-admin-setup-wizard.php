@@ -1200,11 +1200,22 @@ class WC_Admin_Setup_Wizard {
 		$this->install_jetpack( true );
 
 		if ( ! class_exists( 'Jetpack' ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( 'error', true ) ) );
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );
 			exit;
 		}
 
-		$redirect_url   = site_url( add_query_arg( 'from', 'wpcom' ) );
+		Jetpack::maybe_set_version_option();
+		$registered = Jetpack::try_registration();
+
+		if ( is_wp_error( $registered ) ) {
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'register' ) ) );
+			exit;
+		}
+
+		$redirect_url   = site_url( add_query_arg( array(
+			'from'           => 'wpcom',
+			'activate_error' => false,
+		) ) );
 		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce' );
 
 		wp_redirect( esc_url_raw( $connection_url ) );
