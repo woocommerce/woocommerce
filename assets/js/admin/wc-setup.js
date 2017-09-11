@@ -43,15 +43,15 @@ jQuery( function( $ ) {
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select .method', function( e ) {
 		var $zone = $( this ).parent( 'div' );
-		var selected_method = e.target.value;
+		var selectedMethod = e.target.value;
 
 		var $descriptions = $zone.find( '.shipping-method-description' );
 		$descriptions.find( 'p' ).hide();
-		$descriptions.find( 'p.' + selected_method ).show();
+		$descriptions.find( 'p.' + selectedMethod ).show();
 
 		var $settings = $zone.find( '.shipping-method-settings' );
 		$settings.find( 'div' ).hide();
-		$settings.find( 'div.' + selected_method ).show();
+		$settings.find( 'div.' + selectedMethod ).show();
 	} );
 
 	function submitActivateForm() {
