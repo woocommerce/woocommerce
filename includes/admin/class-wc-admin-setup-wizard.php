@@ -367,6 +367,20 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_product_type', $product_type );
 
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$country     = WC()->countries->get_base_country();
+
+		// Set currency formatting options based on chosen location and currency
+		if (
+			isset( $locale_info[ $country ] ) &&
+			$locale_info[ $country ]['currency_code'] === $currency_code
+		) {
+			update_option( 'woocommerce_currency_pos', $locale_info[ $country ]['currency_pos'] );
+			update_option( 'woocommerce_price_decimal_sep', $locale_info[ $country ]['decimal_sep'] );
+			update_option( 'woocommerce_price_num_decimals', $locale_info[ $country ]['num_decimals'] );
+			update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
+		}
+
 		if ( $tracking ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
 			WC_Tracker::send_tracking_data( true );
