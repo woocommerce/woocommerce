@@ -61,9 +61,16 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * https://developers.taxjar.com/api/reference/#countries
+	 * The "automated tax" extra should only be shown if the current user can
+	 * install plugins and the store is in a supported coutnry
 	 */
-	protected function is_automated_tax_supported_country( $country_code ) {
+	protected function should_show_automated_tax_extra() {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return false;
+		}
+
+		$country_code = WC()->countries->get_base_country();
+		// https://developers.taxjar.com/api/reference/#countries
 		$tax_supported_countries = array_merge(
 			array( 'US', 'CA', 'AU' ),
 			WC()->countries->get_european_union_countries()
@@ -112,10 +119,8 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$country = WC()->countries->get_base_country();
-
 		// Hide the extras step if this store/user isn't eligible for them
-		if ( ! $this->should_show_theme_extra() && ! $this->is_automated_tax_supported_country( $country ) ) {
+		if ( ! $this->should_show_theme_extra() && ! $this->should_show_automated_tax_extra() ) {
 			unset( $default_steps['extras'] );
 		}
 
@@ -539,7 +544,7 @@ class WC_Admin_Setup_Wizard {
 
 		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
 
-		if ( false === $live_rate_carrier ) {
+		if ( false === $live_rate_carrier || ! current_user_can('install_plugins') ) {
 			unset( $shipping_methods['live_rates'] );
 		}
 
@@ -1067,7 +1072,6 @@ class WC_Admin_Setup_Wizard {
 	 * Extras.
 	 */
 	public function wc_setup_extras() {
-		$country = WC()->countries->get_base_country();
 		?>
 		<h1><?php esc_html_e( 'Extras', 'woocommerce' ); ?></h1>
 		<p><?php esc_html_e( 'Enhance your store with these extra features and themes.', 'woocommerce' ); ?></p>
@@ -1091,7 +1095,7 @@ class WC_Admin_Setup_Wizard {
 				</li>
 			</ul>
 			<?php endif; ?>
-			<?php if ( $this->is_automated_tax_supported_country( $country ) ) : ?>
+			<?php if ( $this->should_show_automated_tax_extra() ) : ?>
 				<ul class="wc-wizard-services featured">
 					<li class="wc-wizard-service-item">
 						<div class="wc-wizard-service-description">
