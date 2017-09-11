@@ -469,7 +469,7 @@ class WC_Discounts {
 				$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
 
 				// Run coupon calculations.
-				$discount = min( $discounted_price, 1 );
+				$discount = min( $price_to_discount, 1 );
 
 				// Store totals.
 				$total_discount += $discount;
