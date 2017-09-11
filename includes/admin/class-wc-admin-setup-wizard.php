@@ -718,9 +718,14 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
+		// For now, limit this setup to the first run
+		if ( empty( $existing_zones ) ) {
+			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			exit;
+		}
+
 		// Install WooCommerce Services if live rates were selected
 		if (
-			empty( $existing_zones ) &&
 			( $setup_domestic && 'live_rates' === $domestic_method ) ||
 			( $setup_intl && 'live_rates' === $intl_method )
 		) {
@@ -731,7 +736,7 @@ class WC_Admin_Setup_Wizard {
 		 * If enabled, create a shipping zone containing the country the
 		 * store is located in, with the selected method preconfigured.
 		 */
-		if ( empty( $existing_zones ) && $setup_domestic ) {
+		if ( $setup_domestic ) {
 			$country  = WC()->countries->get_base_country();
 
 			$zone = new WC_Shipping_Zone( null );
@@ -760,7 +765,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// If enabled, set the selected method for the "rest of world" zone.
-		if ( empty( $existing_zones ) && $setup_intl ) {
+		if ( $setup_intl ) {
 			if ( 'live_rates' === $intl_method ) {
 				// Signal WooCommerce Services to setup the international zone.
 				update_option( 'woocommerce_setup_intl_live_rates_zone', true, 'no' );
@@ -784,7 +789,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// Notify the user that no shipping methods are configured
-		if ( empty( $existing_zones ) && ! $setup_domestic && ! $setup_intl ) {
+		if ( ! $setup_domestic && ! $setup_intl ) {
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
 
