@@ -154,7 +154,6 @@ class WC_Admin_Setup_Wizard {
 
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
-			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) ),
 			'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
 		) );
 
