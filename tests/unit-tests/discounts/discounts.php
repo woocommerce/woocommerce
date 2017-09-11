@@ -7,14 +7,97 @@
 class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 	/**
+	 * @var WC_Product[] Array of products to clean up.
+	 */
+	protected $products;
+
+	/**
+	 * @var WC_Coupon[] Array of coupons to clean up.
+	 */
+	protected $coupons;
+
+	/**
+	 * @var WC_Order[] Array of orders to clean up.
+	 */
+	protected $orders;
+
+	/**
+	 * @var array An array containing all the test data from the last Data Provider test.
+	 */
+	protected $last_test_data;
+
+	/**
+	 * Helper function to hold a reference to created coupon objects so they
+	 * can be cleaned up properly at the end of each test.
+	 *
+	 * @param $coupon WC_Coupon The coupon object to store.
+	 */
+	protected function store_coupon( $coupon ) {
+		$this->coupons[ $coupon->get_code() ] = $coupon;
+	}
+
+	/**
+	 * Helper function to hold a reference to created product objects so they
+	 * can be cleaned up properly at the end of each test.
+	 *
+	 * @param $product WC_Product The product object to store.
+	 */
+	protected function store_product( $product ) {
+		$this->products[] = $product;
+	}
+
+	/**
+	 * Helper function to hold a reference to created order objects so they
+	 * can be cleaned up properly at the end of each test.
+	 *
+	 * @param $order WC_Order The order object to store.
+	 */
+	protected function store_order( $order ) {
+		$this->orders[] = $order;
+	}
+
+	public function setUp() {
+		parent::setUp();
+
+		$this->products = array();
+		$this->coupons = array();
+		$this->orders = array();
+		$this->last_test_data = null;
+	}
+
+	/**
 	 * Clean up after each test. DB changes are reverted in parent::tearDown().
 	 */
 	public function tearDown() {
-		parent::tearDown();
-
 		WC()->cart->empty_cart();
-
 		WC()->cart->remove_coupons();
+
+		foreach ( $this->products as $product ) {
+			$product->delete( true );
+		}
+
+		foreach ( $this->coupons as $code => $coupon ) {
+			$coupon->delete( true );
+
+			// Temporarily necessary until https://github.com/woocommerce/woocommerce/pull/16767 is implemented.
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+		}
+
+		foreach ( $this->orders as $order ) {
+			$order->delete( true );
+		}
+
+		if ( $this->last_test_data ) {
+			if ( isset( $this->last_test_data['wc_options'] ) ) {
+				foreach ( $this->last_test_data['wc_options'] as $_option_name => $_option_value ) {
+					update_option( $_option_name, $_option_value['revert'] );
+				}
+			}
+
+			$this->last_test_data = null;
+		}
+
+		parent::tearDown();
 	}
 
 	/**
@@ -23,6 +106,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	public function test_get_set_items_from_cart() {
 		// Create dummy product - price will be 10
 		$product = WC_Helper_Product::create_simple_product();
+		$this->store_product( $product );
 
 		// Add product to the cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
@@ -32,6 +116,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$order->add_product( $product, 1 );
 		$order->calculate_totals();
 		$order->save();
+		$this->store_order( $order );
 
 		// Test setting items to the cart.
 		$discounts = new WC_Discounts();
@@ -64,10 +149,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_tax_status( 'taxable' );
 		$product->save();
+		$this->store_product( $product );
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 		$coupon->set_amount( 10 );
+		$this->store_coupon( $coupon );
 
 		// Apply a percent discount.
 		$coupon->set_discount_type( 'percent' );
@@ -96,9 +183,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 * @param array $test_data All of the settings to use for testing.
 	 */
 	public function test_calculations( $test_data ) {
+		$this->last_test_data = $test_data;
 		$discounts = new WC_Discounts();
-		$products  = array();
-		$coupons   = array();
 
 		if ( isset( $test_data['tax_rate'] ) ) {
 			WC_Tax::_insert_tax_rate( $test_data['tax_rate'] );
@@ -106,17 +192,17 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		if ( isset( $test_data['wc_options'] ) ) {
 			foreach ( $test_data['wc_options'] as $_option_name => $_option_value ) {
-				update_option( $_option_name, $_option_value );
+				update_option( $_option_name, $_option_value['set'] );
 			}
 		}
 
 		foreach ( $test_data['cart'] as $item ) {
 			$product = WC_Helper_Product::create_simple_product();
+			$this->store_product( $product );
 			$product->set_regular_price( $item['price'] );
 			$product->set_tax_status( 'taxable' );
 			$product->save();
 			WC()->cart->add_to_cart( $product->get_id(), $item['qty'] );
-			$products[] = $product;
 		}
 
 		$discounts->set_items_from_cart( WC()->cart );
@@ -125,8 +211,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			$coupon = WC_Helper_Coupon::create_coupon( $coupon_props['code'] );
 			$coupon->set_props( $coupon_props );
 			$discounts->apply_coupon( $coupon );
-
-			$coupons[ $coupon_props['code'] ] = $coupon;
+			$this->store_coupon( $coupon );
 		}
 
 		$all_discounts = $discounts->get_discounts();
@@ -160,7 +245,10 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_class'    => '',
 					),
 					'wc_options' => array(
-						'woocommerce_calc_taxes' => 'yes',
+						'woocommerce_calc_taxes' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
 					),
 					'prices_include_tax' => false,
 					'cart' => array(
