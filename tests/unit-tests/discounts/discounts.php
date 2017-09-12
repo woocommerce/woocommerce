@@ -372,4 +372,19 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		$coupon->delete( true );
 	}
+
+	public function test_free_shipping_coupon_no_products() {
+		$discounts = new WC_Discounts();
+		$coupon = WC_Helper_Coupon::create_coupon( 'freeshipping' );
+		$coupon->set_props( array(
+			'discount_type' => 'percent',
+			'amount' => '',
+			'free_shipping' => 'yes',
+		));
+
+		$discounts->apply_coupon( $coupon );
+
+		$all_discounts = $discounts->get_discounts();
+		$this->assertEquals( 0, array_sum( $all_discounts['freeshipping'] ), 'Free shipping coupon returned an unexpected amount.' );
+	}
 }
