@@ -467,19 +467,15 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * Helper method to install Jetpack.
-	 *
-	 * @param bool $now Optional. Whether or not to queue the install.
 	 */
-	protected function install_jetpack( $now = false ) {
+	protected function install_jetpack() {
 		$this->install_plugin( 'jetpack', array(
 			'file'      => 'jetpack/jetpack.php',
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
-		), ! $now );
+		) );
 
-		if ( ! $now ) {
-			update_option( 'woocommerce_setup_queued_jetpack_install', true );
-		}
+		update_option( 'woocommerce_setup_queued_jetpack_install', true );
 	}
 
 	/**
