@@ -461,6 +461,11 @@ class WC_Admin_Setup_Wizard {
 		// WC_Install::background_installer( $plugin_id, $plugin_info );
 	}
 
+	protected function install_theme( $theme_id ) {
+		wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( $theme_id ) );
+		// WC_Install::theme_background_installer( $theme_id );
+	}
+
 	/**
 	 * Helper method to install Jetpack.
 	 */
@@ -1180,7 +1185,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( $install_storefront ) {
-			wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
+			$this->install_theme( 'storefront' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
