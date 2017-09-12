@@ -451,18 +451,14 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $plugin_id  Plugin id used for background install.
 	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
-	 * @param bool   $background Optional. Whether or not to queue the install in the background.
 	 */
-	protected function install_plugin( $plugin_id, $plugin_info, $background = true ) {
+	protected function install_plugin( $plugin_id, $plugin_info ) {
 		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
 			return;
 		}
 
-		if ( $background ) {
-			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin_id, $plugin_info ) );
-		} else {
-			WC_Install::background_installer( $plugin_id, $plugin_info );
-		}
+		wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin_id, $plugin_info ) );
+		// WC_Install::background_installer( $plugin_id, $plugin_info );
 	}
 
 	/**
