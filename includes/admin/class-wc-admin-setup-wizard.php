@@ -1169,45 +1169,31 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate() {
 		$this->wc_setup_activate_actions();
 
-		$show_description = false;
-		$services = [];
+		$description = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
-		if ( $stripe_settings && ! empty( $stripe_settings[ 'email' ] ) ) {
-			$show_description = true;
-			array_push( $services, __( 'Stripe payments', 'woocommerce' ) );
-		}
-		if ( get_option( 'woocommerce_setup_automated_taxes', false ) ) {
-			$show_description = true;
-			array_push( $services, __( 'automated taxes', 'woocommerce' ) );
-		}
-		if (
-			get_option( 'woocommerce_setup_domestic_live_rates_zone', false ) ||
-			get_option( 'woocommerce_setup_intl_live_rates_zone', false )
-		) {
-			$show_description = true;
-			array_push( $services, __( 'live rates', 'woocommerce' ) );
-			array_push( $services, __( 'discounted shipping labels', 'woocommerce' ) );
-		}
-		if ( $show_description ) {
-			if ( 1 === count( $services ) ) {
-				$services_list = $services[ 0 ];
-			} else {
-				$services_list = implode( ', ', array_slice( $services, 0, -1 ) );
-				$services_list = sprintf(
-					__( '%s and %s', 'woocommerce' ),
-					$services_list,
-					array_slice( $services, -1 )[ 0 ]
-				);
-			}
-			$description = sprintf(
-				__( "Your store's almost ready. Connect to Jetpack for full access to %s.", 'woocommerce' ),
-				$services_list
-			);
+		$stripe_enabled = $stripe_settings && ! empty( $stripe_settings[ 'email' ] );
+		$taxes_enabled = get_option( 'woocommerce_setup_automated_taxes', false );
+		$rates_enabled = get_option( 'woocommerce_setup_domestic_live_rates_zone', false ) || get_option( 'woocommerce_setup_intl_live_rates_zone', false );
+
+		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, live rates and discounted shipping labels.", 'woocommerce' );
+		} else if ( $stripe_enabled && $taxes_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments and automated taxes.", 'woocommerce' );
+		} else if ( $stripe_enabled && $rates_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, live rates and discounted shipping labels.", 'woocommerce' );
+		} else if ( $stripe_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments.", 'woocommerce' );
+		} else if ( $taxes_enabled && $rates_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to automated taxes, live rates and discounted shipping labels.", 'woocommerce' );
+		} else if ( $taxes_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to automated taxes.", 'woocommerce' );
+		} else if ( $rates_enabled ) {
+			$description = __( "Your store's almost ready. Connect to Jetpack for full access to live rates and discounted shipping labels.", 'woocommerce' );
 		}
 		?>
 		<form method="post" class="activate-jetpack">
 			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
-			<?php if ( $show_description ) { ?>
+			<?php if ( $description ) { ?>
 			<p>
 				<?php echo $description ?>
 			</p>
