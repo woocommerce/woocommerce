@@ -335,6 +335,9 @@ class WC_Discounts {
 		$total_discount = 0;
 		$cart_total     = 0;
 
+		// Because get_amount() could return an empty string, let's be sure to set our local variable to a known good value.
+		$coupon_amount  = ( '' === $coupon->get_amount() ) ? 0 : $coupon->get_amount();
+
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
 			$discounted_price  = $this->get_discounted_price_in_cents( $item );
@@ -346,7 +349,7 @@ class WC_Discounts {
 			$cart_total += $price_to_discount;
 
 			// Run coupon calculations.
-			$discount = floor( $price_to_discount * ( $coupon->get_amount() / 100 ) );
+			$discount = floor( $price_to_discount * ( $coupon_amount / 100 ) );
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
@@ -360,8 +363,8 @@ class WC_Discounts {
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
-		// Work out how much discount would have been given to the cart has a whole and compare to what was discounted on all line items.
-		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon->get_amount() / 100 ), 0 );
+		// Work out how much discount would have been given to the cart as a whole and compare to what was discounted on all line items.
+		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon_amount / 100 ), 0 );
 
 		if ( $total_discount < $cart_total_discount ) {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
