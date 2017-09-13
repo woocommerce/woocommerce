@@ -1168,13 +1168,50 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate() {
 		$this->wc_setup_activate_actions();
+
+		$show_description = false;
+		$services = [];
+		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
+		if ( $stripe_settings && ! empty( $stripe_settings[ 'email' ] ) ) {
+			$show_description = true;
+			array_push( $services, __( 'Stripe payments', 'woocommerce' ) );
+		}
+		if ( get_option( 'woocommerce_setup_automated_taxes', false ) ) {
+			$show_description = true;
+			array_push( $services, __( 'automated taxes', 'woocommerce' ) );
+		}
+		if (
+			get_option( 'woocommerce_setup_domestic_live_rates_zone', false ) ||
+			get_option( 'woocommerce_setup_intl_live_rates_zone', false )
+		) {
+			$show_description = true;
+			array_push( $services, __( 'live rates', 'woocommerce' ) );
+			array_push( $services, __( 'discounted shipping labels', 'woocommerce' ) );
+		}
+		if ( $show_description ) {
+			if ( 1 === count( $services ) ) {
+				$services_list = $services[ 0 ];
+			} else {
+				$services_list = implode( ', ', array_slice( $services, 0, -1 ) );
+				$services_list = sprintf(
+					__( '%s and %s', 'woocommerce' ),
+					$services_list,
+					array_slice( $services, -1 )[ 0 ]
+				);
+			}
+			$description = sprintf(
+				__( "Your store's almost ready. Connect to Jetpack for full access to %s.", 'woocommerce' ),
+				$services_list
+			);
+		}
 		?>
 		<form method="post" class="activate-jetpack">
 			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
+			<?php if ( $show_description ) { ?>
 			<p>
-				<?php // TODO: tailor this message to the Jetpack-powered services selected earlier ?>
-				<?php esc_html_e( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, USPS live rates, and discounted shipping labels.", 'woocommerce' ); ?>
+				<?php echo $description ?>
 			</p>
+			<?php } ?>
 			<div>
 				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
 				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" />
