@@ -649,7 +649,7 @@ class WC_Checkout {
 
 					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
 					}
 				}
@@ -669,14 +669,14 @@ class WC_Checkout {
 
 						if ( ! in_array( $data[ $key ], $valid_state_values ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
+							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
 						}
 					}
 				}
 
 				if ( $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), $field_label ) );
+					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
 				}
 			}
 		}
