@@ -1,4 +1,4 @@
-( function( wp, i18n, rest ) {
+( function( $, wp, i18n, rest ) {
 	wp.blocks.registerBlockType( 'woocommerce/product', {
 		title : i18n['Product'],
 		icon : 'products',
@@ -16,6 +16,10 @@
 			searchResults : {
 				type : 'array',
 				default : []
+			},
+			product : {
+				type : 'object',
+				default : null
 			}
 		},
 
@@ -83,9 +87,39 @@
 								i18n['No products found.']
 							),
 							!! props.attributes.searchResults.length && !! props.attributes.s.length && wp.element.createElement(
-								'pre',
-								{ key : 'woocommerce/product/results' },
-								JSON.stringify( props.attributes.searchResults, null, 2 )
+								'ul',
+								{
+									key : 'woocommerce/product/results',
+									className : 'woocommerce-product-search-results'
+								},
+								props.attributes.searchResults.map( function( product ) {
+									return wp.element.createElement(
+										'li',
+										{
+											key : 'woocommerce/product/' + product.id,
+											className : 'woocommerce-product',
+											onClick : function( event ) {
+												props.setAttributes({
+													id : product.id,
+													s : '',
+													searchResults : [],
+													product : product
+												});
+											}
+										},
+										[
+											wp.element.createElement(
+												'img',
+												{
+													key : 'woocommerce/product/' + product.id + '/image',
+													src : product.images[0].src,
+													className : 'woocommerce-product-image'
+												}
+											),
+											product.name + ' – ' + product.price
+										]
+									)
+								})
 							)
 						]
 					),
@@ -94,7 +128,7 @@
 						{
 							key : 'woocommerce/product/view'
 						},
-						"PRODUCT DETAILS HERE"
+						props.attributes.id + ': ' + props.attributes.product.name
 					)
 				]
 			);
@@ -105,4 +139,4 @@
 		}
 
 	} );
-} )( window.wp, window.wcEditorBlocksI18n.strings, window.wcEditorBlocksI18n.rest );
+} )( jQuery, window.wp, window.wcEditorBlocksI18n.strings, window.wcEditorBlocksI18n.rest );
