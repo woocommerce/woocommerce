@@ -158,6 +158,7 @@ class WC_Admin_Help {
 				'id'    => 'n8n0sa8hee',
 			),
 		);
+		$video_map = apply_filters( 'woocommerce_help_videos', $video_map );
 
 		$page      = empty( $_GET['page'] ) ? '' : sanitize_title( $_GET['page'] );
 		$tab       = empty( $_GET['tab'] ) ? '' : sanitize_title( $_GET['tab'] );
