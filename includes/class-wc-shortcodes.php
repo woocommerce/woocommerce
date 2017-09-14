@@ -75,11 +75,13 @@ class WC_Shortcodes {
 				'url' => rest_url(),
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			),
+			'currency_symbol' => get_woocommerce_currency_symbol(),
 			'strings' => array(
 				'Product' => __( 'Product', 'woocommerce' ),
 				'Search Products' => __( 'Search Products', 'woocommerce' ),
 				'Enter search terms...' => __( 'Enter search terms...', 'woocommerce' ),
 				'No products found.' => __( 'No products found.', 'woocommerce' ),
+				'Select' => __( 'Select', 'woocommerce' ),
 			)
 		) );
 	}
