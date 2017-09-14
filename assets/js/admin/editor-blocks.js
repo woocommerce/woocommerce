@@ -41,11 +41,11 @@
 					$.ajax({
 						url: rest.url + 'wc/v2/products/?search=' + encodeURIComponent(event.target.value),
 						method: 'GET',
-						beforeSend: function (xhr) {
-							xhr.setRequestHeader('X-WP-Nonce', rest.nonce);
+						beforeSend: function ( xhr ) {
+							xhr.setRequestHeader( 'X-WP-Nonce', rest.nonce );
 						}
-					}).done(function (response) {
-						if (!props.attributes.s.length) {
+					}).done( function ( response ) {
+						if ( ! props.attributes.s ) {
 							response = [];
 						}
 						props.setAttributes({
@@ -62,6 +62,7 @@
 					! props.attributes.id && wp.element.createElement(
 						wp.components.Placeholder,
 						{
+							key : 'woocommerce/product/placeholder',
 							label : i18n['Search Products'],
 							icon : 'products'
 						},
@@ -76,7 +77,7 @@
 									placeholder : i18n['Enter search terms...']
 								}
 							),
-							! props.attributes.searchResults.length && !! props.attributes.s.length && wp.element.createElement(
+							! props.attributes.searchResults.length && !! props.attributes.s && wp.element.createElement(
 								'p',
 								{ key : 'woocommerce/product/results/no-results' },
 								i18n['No products found.']
@@ -91,7 +92,7 @@
 					!! props.attributes.id && wp.element.createElement(
 						'h1',
 						{
-							key : 'woocommerce/product/view',
+							key : 'woocommerce/product/view'
 						},
 						"PRODUCT DETAILS HERE"
 					)
