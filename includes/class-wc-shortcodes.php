@@ -84,6 +84,8 @@ class WC_Shortcodes {
 				'Select' => __( 'Select', 'woocommerce' ),
 			)
 		) );
+
+		wp_enqueue_style( 'woocommerce-editor-blocks', plugins_url( 'assets/css/editor-blocks.css', WC_PLUGIN_FILE ) );
 	}
 
 	/**
