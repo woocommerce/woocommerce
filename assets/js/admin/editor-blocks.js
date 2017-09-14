@@ -1,4 +1,51 @@
-( function( $, wp, i18n, rest ) {
+( function( $, wp, i18n, rest, misc ) {
+	class Product extends wp.element.Component {
+		render() {
+			var el = wp.element.createElement,
+				product = this.props.product;
+			return el(
+				'div',
+				{
+					key : 'woocommerce/product/' + product.id,
+					className : 'woocommerce-product',
+					onClick : this.props.onClick
+				},
+				[
+					!! product.images && el(
+						'img',
+						{
+							key : 'woocommerce/product/' + product.id + '/image',
+							src : product.images[0].src,
+						}
+					),
+					el(
+						'h3',
+						{
+							key : 'woocommerce/product/' + product.id + '/title',
+						},
+						product.name
+					),
+					el(
+						'span',
+						{
+							key : 'woocommerce/product/' + product.id + '/price',
+							className : 'price'
+						},
+						misc.currency_symbol + product.price
+					),
+					!! this.props.buttonAction && el(
+						'button',
+						{
+							key : 'woocommerce/product/' + product.id + '/button',
+							onClick : this.props.buttonAction
+						},
+						this.props.buttonLabel ? this.props.buttonLabel : '→'
+					)
+				]
+			);
+		}
+	}
+
 	wp.blocks.registerBlockType( 'woocommerce/product', {
 		title : i18n['Product'],
 		icon : 'products',
@@ -87,16 +134,17 @@
 								i18n['No products found.']
 							),
 							!! props.attributes.searchResults.length && !! props.attributes.s.length && wp.element.createElement(
-								'ul',
+								'div',
 								{
 									key : 'woocommerce/product/results',
 									className : 'woocommerce-product-search-results'
 								},
 								props.attributes.searchResults.map( function( product ) {
 									return wp.element.createElement(
-										'li',
+										Product,
 										{
 											key : 'woocommerce/product/' + product.id,
+											product : product,
 											className : 'woocommerce-product',
 											onClick : function( event ) {
 												props.setAttributes({
@@ -106,29 +154,18 @@
 													product : product
 												});
 											}
-										},
-										[
-											wp.element.createElement(
-												'img',
-												{
-													key : 'woocommerce/product/' + product.id + '/image',
-													src : product.images[0].src,
-													className : 'woocommerce-product-image'
-												}
-											),
-											product.name + ' – ' + product.price
-										]
+										}
 									)
 								})
 							)
 						]
 					),
 					!! props.attributes.id && wp.element.createElement(
-						'h1',
+						Product,
 						{
-							key : 'woocommerce/product/view'
-						},
-						props.attributes.id + ': ' + props.attributes.product.name
+							key : 'woocommerce/product/view',
+							product : props.attributes.product
+						}
 					)
 				]
 			);
@@ -139,4 +176,4 @@
 		}
 
 	} );
-} )( jQuery, window.wp, window.wcEditorBlocksI18n.strings, window.wcEditorBlocksI18n.rest );
+} )( jQuery, window.wp, window.wcEditorBlocksI18n.strings, window.wcEditorBlocksI18n.rest, window.wcEditorBlocksI18n );
