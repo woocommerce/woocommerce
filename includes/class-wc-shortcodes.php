@@ -49,6 +49,39 @@ class WC_Shortcodes {
 
 		// Alias for pre 2.1 compatibility.
 		add_shortcode( 'woocommerce_messages', __CLASS__ . '::shop_messages' );
+
+		if ( function_exists( 'register_block_type' ) ) {
+			foreach ( $shortcodes as $shortcode => $function ) {
+				register_block_type( 'woocommerce/' . str_replace( '_', '-', $shortcode ), array(
+					'render_callback' => $function
+				) );
+			}
+		}
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
+	}
+
+	/**
+	 * Handle the assets registration for the Gutenberg Editor
+	 */
+	public static function enqueue_block_editor_assets() {
+		wp_register_script(
+			'woocommerce-editor-blocks',
+			plugins_url( 'assets/js/admin/editor-blocks.js', WC_PLUGIN_FILE ),
+			array( 'wp-blocks', 'wp-element' )
+		);
+		wp_enqueue_script( 'woocommerce-editor-blocks' );
+		wp_localize_script( 'woocommerce-editor-blocks', 'wcEditorBlocksI18n', array(
+			'rest' => array(
+				'url' => rest_url(),
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+			),
+			'strings' => array(
+				'Product' => __( 'Product', 'woocommerce' ),
+				'Search Products' => __( 'Search Products', 'woocommerce' ),
+				'Enter search terms...' => __( 'Enter search terms...', 'woocommerce' ),
+				'No products found.' => __( 'No products found.', 'woocommerce' ),
+			)
+		) );
 	}
 
 	/**
