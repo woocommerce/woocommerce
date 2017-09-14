@@ -592,7 +592,7 @@ class WC_Checkout {
 		// BW compatibility.
 		$this->legacy_posted_data = $data;
 
-		return $data;
+		return apply_filters( 'woocommerce_checkout_posted_data', $data );
 	}
 
 	/**
