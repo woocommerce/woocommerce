@@ -109,6 +109,12 @@
 		},
 
 		edit : function( props ) {
+			function handleIdChange( event ) {
+				props.setAttributes({
+					id : $( event.target ).closest( '[data-id]' ).data('id'),
+					s : undefined,
+					searchResults : undefined
+				});
 			}
 
 			function handleSearch( event ) {
@@ -159,15 +165,6 @@
 								className : 'woocommerce-product-search-results'
 							},
 							misc.show_all.map( function( p ) {
-								function handleIdChange( event ) {
-
-									props.setAttributes({
-										id : p.id,
-										s : undefined,
-										searchResults : undefined
-									});
-								}
-
 								return wp.element.createElement(
 									Product,
 									{
@@ -210,14 +207,6 @@
 									className : 'woocommerce-product-search-results'
 								},
 								props.attributes.searchResults.map( function( p ) {
-									function handleIdChange( event ) {
-										props.setAttributes({
-											id : p.id,
-											s : undefined,
-											searchResults : undefined
-										});
-									}
-
 									return wp.element.createElement(
 										Product,
 										{
