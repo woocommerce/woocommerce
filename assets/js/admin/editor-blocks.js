@@ -161,8 +161,8 @@
 								function handleIdChange( event ) {
 									props.setAttributes({
 										id : product.id,
-										s : '',
-										searchResults : []
+										s : undefined,
+										searchResults : undefined
 									});
 								}
 
