@@ -50,12 +50,11 @@ class WC_Shortcodes {
 		// Alias for pre 2.1 compatibility.
 		add_shortcode( 'woocommerce_messages', __CLASS__ . '::shop_messages' );
 
+		// Gutenberg compat
 		if ( function_exists( 'register_block_type' ) ) {
-			foreach ( $shortcodes as $shortcode => $function ) {
-				register_block_type( 'woocommerce/' . str_replace( '_', '-', $shortcode ), array(
-					'render_callback' => $function
-				) );
-			}
+			register_block_type( 'woocommerce/product', array(
+				'render_callback' => array( __CLASS__, 'product' ),
+			) );
 		}
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
 	}
@@ -73,13 +72,13 @@ class WC_Shortcodes {
 
 		$show_all = false;
 		$qty_products = wp_count_posts( 'product' )->publish;
-		if ( $qty_products < 10 ) {
+		if ( $qty_products <= 10 ) {
 			$products = wc_get_products( array( 'post_status' => 'publish', 'limit' => 10 ) );
 			foreach ( $products as $product ) {
 				$product_arr = array(
-					'id' => $product->get_id(),
-					'name' => $product->get_name(),
-					'price' => $product->get_price(),
+					'id'     => $product->get_id(),
+					'name'   => $product->get_name(),
+					'price'  => $product->get_price(),
 					'images' => array(),
 				);
 				$image_arr = wp_get_attachment_image_src( $product->get_image_id() );
