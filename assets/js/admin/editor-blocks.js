@@ -15,78 +15,6 @@
 		};
 	}
 
-	class Product extends wp.element.Component {
-		render() {
-			var el = wp.element.createElement,
-				product = this.props.product;
-
-			if ( 'undefined' === typeof( product ) ) {
-				$.ajax({
-					url: rest.url + 'wc/v2/products/' + encodeURIComponent( this.props.id ),
-					method: 'GET',
-					beforeSend: function ( xhr ) {
-						xhr.setRequestHeader( 'X-WP-Nonce', rest.nonce );
-					}
-				}).done( function ( response ) {
-					response = ditch_unused_properties( response );
-					products[ response.id ] = response;
-					this.props.setAttributes({
-						product : response
-					});
-				});
-
-				return el(
-					wp.components.Placeholder,
-					{
-						label : i18n['Loading…'],
-						icon : 'products'
-					}
-				);
-			}
-			return el(
-				'div',
-				{
-					key : 'woocommerce/product/' + product.id,
-					className : 'woocommerce-product',
-					onClick : this.props.onClick
-				},
-				[
-					!! product.images && el(
-						'img',
-						{
-							key : 'woocommerce/product/' + product.id + '/image',
-							src : product.images[0].src,
-						}
-					),
-					el(
-						'h3',
-						{
-							key : 'woocommerce/product/' + product.id + '/title',
-						},
-						product.name
-					),
-					el(
-						'span',
-						{
-							key : 'woocommerce/product/' + product.id + '/price',
-							className : 'price'
-						},
-						misc.currency_symbol + product.price
-					),
-					!! this.props.buttonAction && el(
-						'button',
-						{
-							key : 'woocommerce/product/' + product.id + '/button',
-							onClick : this.props.buttonAction,
-							className : 'button button-primary'
-						},
-						this.props.buttonLabel ? this.props.buttonLabel : '→'
-					)
-				]
-			);
-		}
-	}
-
 	wp.blocks.registerBlockType( 'woocommerce/product', {
 		title : i18n['Product'],
 		icon : 'products',
@@ -110,6 +38,78 @@
 		// /wc/v2/products/?search=hoodie
 		// /wc/v2/products/123
 		edit : function( props ) {
+			class Product extends wp.element.Component {
+				render() {
+					var el = wp.element.createElement,
+						product = this.props.product;
+
+					if ( 'undefined' === typeof( product ) ) {
+						$.ajax({
+							url: rest.url + 'wc/v2/products/' + encodeURIComponent( this.props.id ),
+							method: 'GET',
+							beforeSend: function ( xhr ) {
+								xhr.setRequestHeader( 'X-WP-Nonce', rest.nonce );
+							}
+						}).done( function ( response ) {
+							response = ditch_unused_properties( response );
+							products[ response.id ] = response;
+							props.setAttributes({
+								product : response
+							});
+						});
+
+						return el(
+							wp.components.Placeholder,
+							{
+								label : i18n['Loading…'],
+								icon : 'products'
+							}
+						);
+					}
+					return el(
+						'div',
+						{
+							key : 'woocommerce/product/' + product.id,
+							className : 'woocommerce-product',
+							onClick : this.props.onClick
+						},
+						[
+							!! product.images && el(
+								'img',
+								{
+									key : 'woocommerce/product/' + product.id + '/image',
+									src : product.images[0].src,
+								}
+							),
+							el(
+								'h3',
+								{
+									key : 'woocommerce/product/' + product.id + '/title',
+								},
+								product.name
+							),
+							el(
+								'span',
+								{
+									key : 'woocommerce/product/' + product.id + '/price',
+									className : 'price'
+								},
+								misc.currency_symbol + product.price
+							),
+							!! this.props.buttonAction && el(
+								'button',
+								{
+									key : 'woocommerce/product/' + product.id + '/button',
+									onClick : this.props.buttonAction,
+									className : 'button button-primary'
+								},
+								this.props.buttonLabel ? this.props.buttonLabel : '→'
+							)
+						]
+					);
+				}
+			}
+
 			function handleSearch( event ) {
 				props.setAttributes({
 					s : event.target.value
