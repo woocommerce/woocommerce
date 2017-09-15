@@ -258,8 +258,8 @@ class WC_Email extends WC_Settings_API {
 		$replace = array_values( $this->placeholders );
 
 		// If using legacy find replace, add those to our find/replace arrays first. @todo deprecate in 4.0.0.
-		$find    = array_merge( $this->find, $find );
-		$replace = array_merge( $this->replace, $replace );
+		$find    = array_merge( (array) $this->find, $find );
+		$replace = array_merge( (array) $this->replace, $replace );
 
 		// If using the older style filters for find and replace, ensure the array is associative and then pass through filters. @todo deprecate in 4.0.0.
 		if ( has_filter( 'woocommerce_email_format_string_replace' ) || has_filter( 'woocommerce_email_format_string_find' ) ) {
