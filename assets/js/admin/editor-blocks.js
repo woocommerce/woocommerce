@@ -125,7 +125,7 @@
 									type : 'search',
 									onChange : handleSearch,
 									value : props.attributes.s,
-									placeholder : i18n['Enter search terms...']
+									placeholder : i18n['Search products...']
 								}
 							),
 							! props.attributes.searchResults.length && !! props.attributes.s && wp.element.createElement(

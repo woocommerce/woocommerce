@@ -79,9 +79,8 @@ class WC_Shortcodes {
 			'strings' => array(
 				'Product' => __( 'Product', 'woocommerce' ),
 				'Search Products' => __( 'Search Products', 'woocommerce' ),
-				'Enter search terms...' => __( 'Enter search terms...', 'woocommerce' ),
+				'Search products…' => __( 'Search products…', 'woocommerce' ),
 				'No products found.' => __( 'No products found.', 'woocommerce' ),
-				'Select' => __( 'Select', 'woocommerce' ),
 			)
 		) );
 
