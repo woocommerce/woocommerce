@@ -35,8 +35,6 @@
 			}
 		},
 
-		// /wc/v2/products/?search=hoodie
-		// /wc/v2/products/123
 		edit : function( props ) {
 			class Product extends wp.element.Component {
 				render() {
