@@ -22,6 +22,11 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	protected $orders;
 
 	/**
+	 * @var array An array of filters that have been set.
+	 */
+	protected $filters;
+
+	/**
 	 * @var array An array containing all the test data from the last Data Provider test.
 	 */
 	protected $last_test_data;
@@ -56,12 +61,24 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->orders[] = $order;
 	}
 
+	/**
+	 * @param $filter_name string The name of the filter to add a listener to.
+	 * @param $callback_function_name string The name of a function in this class
+	 *                                       to use as the callback.
+	 */
+	protected function add_filter( $filter_name, $callback_function_name ) {
+		add_filter( $filter_name, array( $this, $callback_function_name ) );
+
+		$this->filters[ $filter_name ][] = $callback_function_name;
+	}
+
 	public function setUp() {
 		parent::setUp();
 
 		$this->products = array();
 		$this->coupons = array();
 		$this->orders = array();
+		$this->filters = array();
 		$this->last_test_data = null;
 	}
 
@@ -95,6 +112,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			}
 
 			$this->last_test_data = null;
+		}
+
+		foreach ( $this->filters as $filter_name => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$removed = remove_filter( $filter_name, array( $this, $callback ) );
+			}
 		}
 
 		parent::tearDown();
@@ -186,6 +209,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->last_test_data = $test_data;
 		$discounts = new WC_Discounts();
 
+		if ( isset( $test_data['filters'] ) ) {
+			foreach ( $test_data['filters'] as $filter_name => $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					$this->add_filter( $filter_name, $callback );
+				}
+			}
+		}
+
 		if ( isset( $test_data['tax_rate'] ) ) {
 			WC_Tax::_insert_tax_rate( $test_data['tax_rate'] );
 		}
@@ -198,10 +229,10 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		foreach ( $test_data['cart'] as $item ) {
 			$product = WC_Helper_Product::create_simple_product();
-			$this->store_product( $product );
 			$product->set_regular_price( $item['price'] );
 			$product->set_tax_status( 'taxable' );
 			$product->save();
+			$this->store_product( $product );
 			WC()->cart->add_to_cart( $product->get_id(), $item['qty'] );
 		}
 
@@ -581,6 +612,676 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					'expected_total_discount' => 1,
 				),
 			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. No limits. Not discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 2,
+						),
+						array(
+							'price' => 5,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '10',
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 7.5,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. One coupon has limit up to one item. Not discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 2,
+						),
+						array(
+							'price' => 5,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 6,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. No limits. Discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 2,
+						),
+						array(
+							'price' => 5,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '10',
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 7,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. No limits. Discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 1.80,
+							'qty'   => 10,
+						),
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '10',
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 16.75,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'filters' => array(
+						'woocommerce_coupon_percent_calc_method' => array(
+							'filter_woocommerce_coupon_percent_calc_method_cart_item',
+						),
+					),
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 1.80,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '30',
+							'limit_usage_to_x_items' => 5,
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 20.35,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially. Multiple zero-dollar items.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'filters' => array(
+						'woocommerce_coupon_percent_calc_method' => array(
+							'filter_woocommerce_coupon_percent_calc_method_cart_item',
+						),
+					),
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 1.80,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 0,
+							'qty'   => 1,
+						),
+						array(
+							'price' => 0,
+							'qty'   => 1,
+						),
+						array(
+							'price' => 0,
+							'qty'   => 1,
+						),
+						array(
+							'price' => 0,
+							'qty'   => 1,
+						),
+						array(
+							'price' => 0,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '30',
+							'limit_usage_to_x_items' => 5,
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 20.35,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+						),
+					),
+					'expected_total_discount' => 30,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item. Coupon greater than item cost.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 41.85,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item. Limit to one item.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+					),
+					'expected_total_discount' => 10,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item. Limit to one item. Price greater than product.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '15',
+							'limit_usage_to_x_items' => 1,
+						),
+					),
+					'expected_total_discount' => 13.95,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item. Limit to same number of items as product. Price same as product.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '13.95',
+							'limit_usage_to_x_items' => 3,
+						),
+					),
+					'expected_total_discount' => 41.85,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. No limit.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+						),
+					),
+					'expected_total_discount' => 39,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. Limit to same number of items as first product.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 3,
+						),
+					),
+					'expected_total_discount' => 30,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 5,
+						),
+					),
+					'expected_total_discount' => 33.60,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities. Amount less than price of either product.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '1',
+							'limit_usage_to_x_items' => 5,
+						),
+					),
+					'expected_total_discount' => 5,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than both product quantities combined. Amount less than price of either product.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '1',
+							'limit_usage_to_x_items' => 10,
+						),
+					),
+					'expected_total_discount' => 8,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on two items. Limit to two items. Testing the products are sorted according to legacy method where first one to apply is the one with greatest price * quantity.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 1.80,
+							'qty'   => 5,
+						),
+						array(
+							'price' => 13.95,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 2,
+						),
+					),
+					'expected_total_discount' => 20,
+				),
+			),
 		);
 	}
 
@@ -597,5 +1298,17 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$all_discounts = $discounts->get_discounts();
 		$this->assertEquals( 0, count( $all_discounts['freeshipping'] ), 'Free shipping coupon should not have any discounts.' );
+	}
+
+	/**
+	 * A filter for 'woocommerce_coupon_percent_calc_method' that specifies to calculate
+	 * using the cart_item method.
+	 *
+	 * @param string $method Incoming method to filter.
+	 *
+	 * @return string Filtered string.
+	 */
+	public function filter_woocommerce_coupon_percent_calc_method_cart_item( $method ) {
+		return 'cart_item';
 	}
 }
