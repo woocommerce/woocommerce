@@ -110,8 +110,6 @@
 		// /wc/v2/products/?search=hoodie
 		// /wc/v2/products/123
 		edit : function( props ) {
-			var searchResults;
-
 			function handleSearch( event ) {
 				props.setAttributes({
 					s : event.target.value
@@ -136,7 +134,7 @@
 							response = [];
 						}
 						props.setAttributes({
-							searchResults: response
+							searchResults : response
 						});
 					});
 				}
