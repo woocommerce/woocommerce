@@ -76,7 +76,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->steps = array(
+		$default_steps = array(
 			'upload' => array(
 				'name'    => __( 'Upload CSV file', 'woocommerce' ),
 				'view'    => array( $this, 'upload_form' ),
@@ -98,6 +98,9 @@ class WC_Product_CSV_Importer_Controller {
 				'handler' => '',
 			),
 		);
+
+		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
+
 		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
