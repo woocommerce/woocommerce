@@ -30,7 +30,7 @@
 				}).done( function ( response ) {
 					response = ditch_unused_properties( response );
 					products[ response.id ] = response;
-					props.setAttributes({
+					this.props.setAttributes({
 						product : response
 					});
 				});
