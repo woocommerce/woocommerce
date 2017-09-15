@@ -70,17 +70,46 @@ class WC_Shortcodes {
 			array( 'wp-blocks', 'wp-element' )
 		);
 		wp_enqueue_script( 'woocommerce-editor-blocks' );
+
+		$show_all = false;
+		$qty_products = wp_count_posts( 'product' )->publish;
+		if ( $qty_products < 10 ) {
+			$products = wc_get_products( array( 'post_status' => 'publish', 'limit' => 10 ) );
+			foreach ( $products as $product ) {
+				$product_arr = array(
+					'id' => $product->get_id(),
+					'name' => $product->get_name(),
+					'price' => $product->get_price(),
+					'images' => array(),
+				);
+				$image_arr = wp_get_attachment_image_src( $product->get_image_id() );
+				if ( $image_arr ) {
+					$product_arr['images'][] = array_combine( array(
+						'src',
+						'width',
+						'height',
+						'is_intermediate',
+					), $image_arr );
+				}
+				$show_all[] = $product_arr;
+			}
+		}
+
 		wp_localize_script( 'woocommerce-editor-blocks', 'wcEditorBlocksI18n', array(
 			'rest' => array(
 				'url' => rest_url(),
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			),
 			'currency_symbol' => get_woocommerce_currency_symbol(),
+			'show_all' => $show_all,
 			'strings' => array(
 				'Product' => __( 'Product', 'woocommerce' ),
 				'Search Products' => __( 'Search Products', 'woocommerce' ),
 				'Search products…' => __( 'Search products…', 'woocommerce' ),
 				'No products found.' => __( 'No products found.', 'woocommerce' ),
+				'Select a Product' => __( 'Select a Product', 'woocommerce' ),
+				'Buy Now' => __( 'Buy Now', 'woocommerce' ),
+				'Loading…' => __( 'Loading…', 'woocommerce' ),
 			)
 		) );
 

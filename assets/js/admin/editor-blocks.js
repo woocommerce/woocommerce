@@ -1,8 +1,41 @@
 ( function( $, wp, i18n, rest, misc ) {
+	var products = {};
+	if ( misc.show_all ) {
+		for ( var i = 0; i < misc.show_all.length; i++ ) {
+			products[ misc.show_all[ i ].id ] = misc.show_all[ i ];
+		}
+	}
+	// The API returns a lot of fields we don't care about.  Simplify.
+	function ditch_unused_properties( product ) {
+		return {
+			id     : product.id,
+			name   : product.name,
+			price  : product.price,
+			images : product.images
+		};
+	}
+
 	class Product extends wp.element.Component {
 		render() {
 			var el = wp.element.createElement,
 				product = this.props.product;
+
+			if ( 'undefined' === typeof( product ) ) {
+				$.ajax({
+					url: rest.url + 'wc/v2/products/' + encodeURIComponent( this.props.id ),
+					method: 'GET',
+					beforeSend: function ( xhr ) {
+						xhr.setRequestHeader( 'X-WP-Nonce', rest.nonce );
+					}
+				}).done( function ( response ) {
+					response = ditch_unused_properties( response );
+					products[ response.id ] = response;
+					props.setAttributes({
+						product : response
+					});
+				});
+				return el( 'h1', null, i18n['Loading…'] );
+			}
 			return el(
 				'div',
 				{
@@ -37,7 +70,8 @@
 						'button',
 						{
 							key : 'woocommerce/product/' + product.id + '/button',
-							onClick : this.props.buttonAction
+							onClick : this.props.buttonAction,
+							className : 'button button-primary'
 						},
 						this.props.buttonLabel ? this.props.buttonLabel : '→'
 					)
@@ -63,10 +97,6 @@
 			searchResults : {
 				type : 'array',
 				default : []
-			},
-			product : {
-				type : 'object',
-				default : null
 			}
 		},
 
@@ -74,11 +104,6 @@
 		// /wc/v2/products/123
 		edit : function( props ) {
 			var searchResults;
-			function handleIdChange( event ) {
-				props.setAttributes({
-					id : event.target.value
-				});
-			}
 
 			function handleSearch( event ) {
 				props.setAttributes({
@@ -96,6 +121,10 @@
 							xhr.setRequestHeader( 'X-WP-Nonce', rest.nonce );
 						}
 					}).done( function ( response ) {
+						response = response.map( ditch_unused_properties );
+						for ( var i = 0; i < response.length; i++ ) {
+							products[ response[ i ].id ] = response[ i ];
+						}
 						if ( ! props.attributes.s ) {
 							response = [];
 						}
@@ -110,7 +139,41 @@
 				'div',
 				null,
 				[
-					! props.attributes.id && wp.element.createElement(
+					!! misc.show_all && ! props.attributes.id && wp.element.createElement(
+						wp.components.Placeholder,
+						{
+							key : 'woocommerce/product/placeholder',
+							label : i18n['Select a Product'],
+							icon : 'products'
+						},
+						wp.element.createElement(
+							'div',
+							{
+								key : 'woocommerce/product/results',
+								className : 'woocommerce-product-search-results'
+							},
+							misc.show_all.map( function( product ) {
+								function handleIdChange( event ) {
+									props.setAttributes({
+										id : product.id,
+										s : '',
+										searchResults : []
+									});
+								}
+
+								return wp.element.createElement(
+									Product,
+									{
+										key : 'woocommerce/product/' + product.id,
+										product : product,
+										className : 'woocommerce-product',
+										onClick : handleIdChange
+									}
+								)
+							})
+						)
+					),
+					! misc.show_all && ! props.attributes.id && wp.element.createElement(
 						wp.components.Placeholder,
 						{
 							key : 'woocommerce/product/placeholder',
@@ -125,7 +188,7 @@
 									type : 'search',
 									onChange : handleSearch,
 									value : props.attributes.s,
-									placeholder : i18n['Search products...']
+									placeholder : i18n['Search products…']
 								}
 							),
 							! props.attributes.searchResults.length && !! props.attributes.s && wp.element.createElement(
@@ -140,20 +203,21 @@
 									className : 'woocommerce-product-search-results'
 								},
 								props.attributes.searchResults.map( function( product ) {
+									function handleIdChange( event ) {
+										props.setAttributes({
+											id : product.id,
+											s : undefined,
+											searchResults : undefined
+										});
+									}
+
 									return wp.element.createElement(
 										Product,
 										{
 											key : 'woocommerce/product/' + product.id,
 											product : product,
 											className : 'woocommerce-product',
-											onClick : function( event ) {
-												props.setAttributes({
-													id : product.id,
-													s : '',
-													searchResults : [],
-													product : product
-												});
-											}
+											onClick : handleIdChange
 										}
 									)
 								})
@@ -163,8 +227,13 @@
 					!! props.attributes.id && wp.element.createElement(
 						Product,
 						{
+							id : props.attributes.id,
 							key : 'woocommerce/product/view',
-							product : props.attributes.product
+							product : products[ props.attributes.id ],
+							buttonLabel : i18n['Buy Now'],
+							buttonAction : function(e){
+								e.preventDefault();
+							}
 						}
 					)
 				]
