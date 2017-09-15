@@ -157,10 +157,11 @@
 								key : 'woocommerce/product/results',
 								className : 'woocommerce-product-search-results'
 							},
-							misc.show_all.map( function( product ) {
+							misc.show_all.map( function( p ) {
 								function handleIdChange( event ) {
+
 									props.setAttributes({
-										id : product.id,
+										id : p.id,
 										s : undefined,
 										searchResults : undefined
 									});
@@ -169,8 +170,8 @@
 								return wp.element.createElement(
 									Product,
 									{
-										key : 'woocommerce/product/' + product.id,
-										product : product,
+										key : 'woocommerce/product/' + p.id,
+										product : p,
 										className : 'woocommerce-product',
 										onClick : handleIdChange
 									}
@@ -207,10 +208,10 @@
 									key : 'woocommerce/product/results',
 									className : 'woocommerce-product-search-results'
 								},
-								props.attributes.searchResults.map( function( product ) {
+								props.attributes.searchResults.map( function( p ) {
 									function handleIdChange( event ) {
 										props.setAttributes({
-											id : product.id,
+											id : p.id,
 											s : undefined,
 											searchResults : undefined
 										});
@@ -219,8 +220,8 @@
 									return wp.element.createElement(
 										Product,
 										{
-											key : 'woocommerce/product/' + product.id,
-											product : product,
+											key : 'woocommerce/product/' + p.id,
+											product : p,
 											className : 'woocommerce-product',
 											onClick : handleIdChange
 										}
