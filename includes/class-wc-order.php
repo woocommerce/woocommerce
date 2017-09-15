@@ -1751,7 +1751,7 @@ class WC_Order extends WC_Abstract_Order {
 				$refunded_item_id = (int) $refunded_item->get_meta( '_refunded_item_id' );
 				if ( $refunded_item_id === $item_id ) {
 					$taxes = $refunded_item->get_taxes();
-					$total += isset( $taxes['total'][ $tax_id ] ) ? $taxes['total'][ $tax_id ] : 0;
+						$total += isset( $taxes['total'][ $tax_id ] ) ? (float) $taxes['total'][ $tax_id ] : 0;
 					break;
 				}
 			}
