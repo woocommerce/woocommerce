@@ -46,6 +46,7 @@
 
 .woocommerce-product-search-results .woocommerce-product {
 	flex-basis: 50%;
+	min-width: 265px;
 	flex-grow: 1;
 	flex-shrink: 0;
 }
