@@ -34,7 +34,14 @@
 						product : response
 					});
 				});
-				return el( 'h1', null, i18n['Loading…'] );
+
+				return el(
+					wp.components.Placeholder,
+					{
+						label : i18n['Loading…'],
+						icon : 'products'
+					}
+				);
 			}
 			return el(
 				'div',
