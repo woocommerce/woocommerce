@@ -107,6 +107,10 @@ class WC_Template_Loader {
 
 		$search_files[] = $default_file;
 		$search_files[] = WC()->template_path() . $default_file;
+		
+		if ( is_page_template() ) {
+				$search_files[] = get_page_template_slug(); // Supporting Custom Post Type Template
+		}
 
 		return array_unique( $search_files );
 	}
