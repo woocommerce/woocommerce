@@ -1178,19 +1178,19 @@ class WC_Admin_Setup_Wizard {
 		$rates_enabled   = $domestic_rates || $intl_rates;
 
 		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, live rates and discounted shipping labels.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
 		} else if ( $stripe_enabled && $taxes_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments and automated taxes.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments and automated taxes.', 'woocommerce' );
 		} else if ( $stripe_enabled && $rates_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, live rates and discounted shipping labels.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, live rates, and discounted shipping labels.', 'woocommerce' );
 		} else if ( $stripe_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments.', 'woocommerce' );
 		} else if ( $taxes_enabled && $rates_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to automated taxes, live rates and discounted shipping labels.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
 		} else if ( $taxes_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to automated taxes.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes.', 'woocommerce' );
 		} else if ( $rates_enabled ) {
-			$description = __( "Your store's almost ready. Connect to Jetpack for full access to live rates and discounted shipping labels.", 'woocommerce' );
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to live rates and discounted shipping labels.', 'woocommerce' );
 		}
 		?>
 		<form method="post" class="activate-jetpack">
