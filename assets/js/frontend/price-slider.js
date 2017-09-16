@@ -6,10 +6,6 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	// Get markup ready for slider
-	$( 'input#min_price, input#max_price' ).hide();
-	$( '.price_slider, .price_label' ).show();
-
 	// Price slider uses jquery ui
 	var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
 		max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
@@ -44,30 +40,48 @@ jQuery( function( $ ) {
 		$( document.body ).trigger( 'price_slider_updated', [ min, max ] );
 	});
 
-	$( '.price_slider' ).slider({
-		range: true,
-		animate: true,
-		min: min_price,
-		max: max_price,
-		values: [ current_min_price, current_max_price ],
-		create: function() {
+	function init_price_filter() {
+		$( 'input#min_price, input#max_price' ).hide();
+		$( '.price_slider, .price_label' ).show();
+		$( '.price_slider:not(.ui-slider)' ).slider({
+			range: true,
+			animate: true,
+			min: min_price,
+			max: max_price,
+			values: [ current_min_price, current_max_price ],
+			create: function() {
 
-			$( '.price_slider_amount #min_price' ).val( current_min_price );
-			$( '.price_slider_amount #max_price' ).val( current_max_price );
+				$( '.price_slider_amount #min_price' ).val( current_min_price );
+				$( '.price_slider_amount #max_price' ).val( current_max_price );
 
-			$( document.body ).trigger( 'price_slider_create', [ current_min_price, current_max_price ] );
-		},
-		slide: function( event, ui ) {
+				$( document.body ).trigger( 'price_slider_create', [ current_min_price, current_max_price ] );
+			},
+			slide: function( event, ui ) {
 
-			$( 'input#min_price' ).val( ui.values[0] );
-			$( 'input#max_price' ).val( ui.values[1] );
+				$( 'input#min_price' ).val( ui.values[0] );
+				$( 'input#max_price' ).val( ui.values[1] );
 
-			$( document.body ).trigger( 'price_slider_slide', [ ui.values[0], ui.values[1] ] );
-		},
-		change: function( event, ui ) {
+				$( document.body ).trigger( 'price_slider_slide', [ ui.values[0], ui.values[1] ] );
+			},
+			change: function( event, ui ) {
 
-			$( document.body ).trigger( 'price_slider_change', [ ui.values[0], ui.values[1] ] );
-		}
-	});
+				$( document.body ).trigger( 'price_slider_change', [ ui.values[0], ui.values[1] ] );
+			}
+		});
+	}
 
+	init_price_filter();
+
+	hasSelectiveRefresh = (
+		'undefined' !== typeof wp &&
+		wp.customize &&
+		wp.customize.selectiveRefresh &&
+		wp.customize.widgetsPreview &&
+		wp.customize.widgetsPreview.WidgetPartial
+	);
+	if ( hasSelectiveRefresh ) {
+		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
+			init_price_filter();
+		} );
+	}
 });
