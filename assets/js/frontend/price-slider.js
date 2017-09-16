@@ -6,19 +6,6 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	// Price slider uses jquery ui
-	var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
-		max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
-		current_min_price = parseInt( min_price, 10 ),
-		current_max_price = parseInt( max_price, 10 );
-
-	if ( woocommerce_price_slider_params.min_price ) {
-		current_min_price = parseInt( woocommerce_price_slider_params.min_price, 10 );
-	}
-	if ( woocommerce_price_slider_params.max_price ) {
-		current_max_price = parseInt( woocommerce_price_slider_params.max_price, 10 );
-	}
-
 	$( document.body ).bind( 'price_slider_create price_slider_slide', function( event, min, max ) {
 
 		$( '.price_slider_amount span.from' ).html( accounting.formatMoney( min, {
@@ -43,6 +30,12 @@ jQuery( function( $ ) {
 	function init_price_filter() {
 		$( 'input#min_price, input#max_price' ).hide();
 		$( '.price_slider, .price_label' ).show();
+
+		var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
+			max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
+			current_min_price = $( '.price_slider_amount #min_price' ).val(),
+			current_max_price = $( '.price_slider_amount #max_price' ).val();
+
 		$( '.price_slider:not(.ui-slider)' ).slider({
 			range: true,
 			animate: true,
