@@ -1011,9 +1011,11 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 			<ul class="wc-wizard-services manual">
 				<li class="wc-wizard-services-list-toggle">
-					<div class="wc-wizard-service-name">Manual Payments</div>
+					<div class="wc-wizard-service-name">
+						<?php esc_html_e( 'Manual Payments', 'woocommerce' ); ?>
+					</div>
 					<div class="wc-wizard-service-description">
-						Collect payments from customers outside your online store.
+						<?php esc_html_e( 'Collect payments from customers outside your online store.', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
 							<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
