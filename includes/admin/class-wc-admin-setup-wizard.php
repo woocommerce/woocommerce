@@ -62,7 +62,7 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * The "automated tax" extra should only be shown if the current user can
-	 * install plugins and the store is in a supported coutnry
+	 * install plugins and the store is in a supported country.
 	 */
 	protected function should_show_automated_tax_extra() {
 		if ( ! current_user_can( 'install_plugins' ) ) {
@@ -119,7 +119,7 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		// Hide the extras step if this store/user isn't eligible for them
+		// Hide the extras step if this store/user isn't eligible for them.
 		if ( ! $this->should_show_theme_extra() && ! $this->should_show_automated_tax_extra() ) {
 			unset( $default_steps['extras'] );
 		}
@@ -129,7 +129,7 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
-		// Whether or not there is a pending background install of Jetpack
+		// Whether or not there is a pending background install of Jetpack.
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
@@ -374,7 +374,7 @@ class WC_Admin_Setup_Wizard {
 		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 		$country     = WC()->countries->get_base_country();
 
-		// Set currency formatting options based on chosen location and currency
+		// Set currency formatting options based on chosen location and currency.
 		if (
 			isset( $locale_info[ $country ] ) &&
 			$locale_info[ $country ]['currency_code'] === $currency_code
@@ -452,7 +452,7 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $plugin_id  Plugin id used for background install.
 	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
-	 * @param bool   $background Optional. Whether or not to queue the install in the backgroud.
+	 * @param bool   $background Optional. Whether or not to queue the install in the background.
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info, $background = true ) {
 		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
@@ -723,13 +723,13 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		// For now, limit this setup to the first run
+		// For now, limit this setup to the first run.
 		if ( empty( $existing_zones ) ) {
 			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
 
-		// Install WooCommerce Services if live rates were selected
+		// Install WooCommerce Services if live rates were selected.
 		if (
 			( $setup_domestic && 'live_rates' === $domestic_method ) ||
 			( $setup_intl && 'live_rates' === $intl_method )
@@ -757,7 +757,7 @@ class WC_Admin_Setup_Wizard {
 
 			$zone->save();
 
-			// Save chosen shipping method settings (using REST controller for convenience)
+			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) {
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 
@@ -781,7 +781,7 @@ class WC_Admin_Setup_Wizard {
 				$zone->save();
 			}
 
-			// Save chosen shipping method settings (using REST controller for convenience)
+			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) {
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 
@@ -793,7 +793,7 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		// Notify the user that no shipping methods are configured
+		// Notify the user that no shipping methods are configured.
 		if ( ! $setup_domestic && ! $setup_intl ) {
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
@@ -1061,7 +1061,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Install WooCommerce Services with Stripe to enable deferred account creation
+		// Install WooCommerce Services with Stripe to enable deferred account creation.
 		if ( ! empty( $_POST['wc-wizard-service-stripe-enabled'] ) ) {
 			$this->install_woocommerce_services();
 		}
