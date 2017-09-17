@@ -963,7 +963,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-service-description">
 				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
-					<div>
+					<div class="wc-wizard-service-settings">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
 							<label for="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label>
 							<input

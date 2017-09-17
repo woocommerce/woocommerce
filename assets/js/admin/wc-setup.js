@@ -23,8 +23,10 @@ jQuery( function( $ ) {
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-service-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-toggle' ).removeClass( 'disabled' );
+			$( this ).closest( '.wc-wizard-service-item' ).addClass( 'checked' );
 		} else {
 			$( this ).closest( '.wc-wizard-service-toggle' ).addClass( 'disabled' );
+			$( this ).closest( '.wc-wizard-service-item' ).removeClass( 'checked' );
 		}
 	} );
 
