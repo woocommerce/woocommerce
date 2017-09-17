@@ -853,11 +853,17 @@ class WC_Admin_Setup_Wizard {
 		$country    = WC()->countries->get_base_country();
 		$user_email = $this->get_current_user_email();
 
+		$stripe_description = '<p>' . sprintf(
+			__( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/woocommerce-gateway-stripe/'
+		) . '</p>';
+		$stripe_fee_notice  = '<p class="payment-gateway-fee">' . __( 'Fee: 2.9%% + 30¢ per transaction', 'woocommerce' ) . '</p>';
+
 		$gateways = array(
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => sprintf( __( '<p>Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.</p><p class="payment-gateway-fee">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
+				'description' => $stripe_description . $stripe_fee_notice,
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'email' => array(
