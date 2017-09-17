@@ -807,30 +807,30 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function is_stripe_supported_country( $country_code ) {
 		$stripe_supported_countries = array(
-			'AU' => __( 'Australia', 'woocommerce' ),
-			'AT' => __( 'Austria', 'woocommerce' ),
-			'BE' => __( 'Belgium', 'woocommerce' ),
-			'CA' => __( 'Canada', 'woocommerce' ),
-			'DK' => __( 'Denmark', 'woocommerce' ),
-			'FI' => __( 'Finland', 'woocommerce' ),
-			'FR' => __( 'France', 'woocommerce' ),
-			'DE' => __( 'Germany', 'woocommerce' ),
-			'HK' => __( 'Hong Kong', 'woocommerce' ),
-			'IE' => __( 'Ireland', 'woocommerce' ),
-			'JP' => __( 'Japan', 'woocommerce' ),
-			'LU' => __( 'Luxembourg', 'woocommerce' ),
-			'NL' => __( 'Netherlands', 'woocommerce' ),
-			'NZ' => __( 'New Zealand', 'woocommerce' ),
-			'NO' => __( 'Norway', 'woocommerce' ),
-			'SG' => __( 'Singapore', 'woocommerce' ),
-			'ES' => __( 'Spain', 'woocommerce' ),
-			'SE' => __( 'Sweden', 'woocommerce' ),
-			'CH' => __( 'Switzerland', 'woocommerce' ),
-			'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
-			'US' => __( 'United States (US)', 'woocommerce' ),
+			'AU',
+			'AT',
+			'BE',
+			'CA',
+			'DK',
+			'FI',
+			'FR',
+			'DE',
+			'HK',
+			'IE',
+			'JP',
+			'LU',
+			'NL',
+			'NZ',
+			'NO',
+			'SG',
+			'ES',
+			'SE',
+			'CH',
+			'GB',
+			'US',
 		);
 
-		return array_key_exists( $country_code, $stripe_supported_countries );
+		return in_array( $country_code, $stripe_supported_countries );
 	}
 
 	/**
