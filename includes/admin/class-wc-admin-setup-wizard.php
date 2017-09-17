@@ -834,12 +834,25 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Helper method to retrieve the current user's email address.
+	 *
+	 * @return string Email address
+	 */
+	protected function get_current_user_email() {
+		$current_user = wp_get_current_user();
+		$user_email   = $current_user->user_email;
+
+		return $user_email;
+	}
+
+	/**
 	 * Simple array of "in cart" gateways to show in wizard.
 	 * @return array
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
 		$can_stripe = $this->is_stripe_supported_country( $country );
+		$user_email = $this->get_current_user_email();
 
 		$gateways = array(
 			'stripe' => array(
@@ -852,7 +865,7 @@ class WC_Admin_Setup_Wizard {
 					'email' => array(
 						'label'       => __( 'Stripe email address', 'woocommerce' ),
 						'type'        => 'email',
-						'value'       => get_option( 'admin_email' ),
+						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
 					),
 				),
@@ -882,7 +895,7 @@ class WC_Admin_Setup_Wizard {
 					'email' => array(
 						'label'       => __( 'PayPal email address', 'woocommerce' ),
 						'type'        => 'email',
-						'value'       => get_option( 'admin_email' ),
+						'value'       => $user_email,
 						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
 					),
 				),
@@ -1260,8 +1273,7 @@ class WC_Admin_Setup_Wizard {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
 
-		$current_user = wp_get_current_user();
-		$user_email   = $current_user->user_email;
+		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
 		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text    = sprintf(
