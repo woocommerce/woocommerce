@@ -992,7 +992,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	public function is_featured_service( $service ) {
-		return isset( $service['featured'] ) && true === $service['featured'];
+		return ! empty( $service['featured'] );
 	}
 
 	public function is_not_featured_service( $service ) {
