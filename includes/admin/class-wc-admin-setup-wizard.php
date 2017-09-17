@@ -851,7 +851,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
-		$can_stripe = $this->is_stripe_supported_country( $country );
 		$user_email = $this->get_current_user_email();
 
 		$gateways = array(
@@ -859,7 +858,6 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => sprintf( __( '<p>Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.</p><p class="payment-gateway-fee">Fee: 2.9%% + 30¢ per transaction</p>', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
-				'class'       => $can_stripe ? 'checked' : '',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'email' => array(
@@ -869,28 +867,24 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
 					),
 				),
-				'enabled' => $can_stripe,
 				'featured' => true,
 			),
 			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>.',
-				'class'       => 'in-cart',
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
 			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
-				'class'       => 'in-cart',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
 			'paypal' => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
-				'class'       => 'in-cart',
 				'settings'    => array(
 					'email' => array(
 						'label'       => __( 'PayPal email address', 'woocommerce' ),
@@ -901,6 +895,10 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 		);
+
+		if ( ! $this->is_stripe_supported_country( $country ) ) {
+			unset( $gateways['stripe'] );
+		}
 
 		if ( 'US' === $country ) {
 			unset( $gateways['ppec_paypal'] );
@@ -1002,30 +1000,34 @@ class WC_Admin_Setup_Wizard {
 		$featured_gateways = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_featured_service' ) );
 		$in_cart_gateways  = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_not_featured_service' ) );
 		$manual_gateways   = $this->get_wizard_manual_payment_gateways();
-		$country           = WC()->countries->get_base_country();
-		$can_stripe        = $this->is_stripe_supported_country( $country );
 		?>
 		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
-			<?php if ( $can_stripe ) : ?>
-				<p><?php esc_html_e( 'Your store will be set up to accept payments instantly on checkout with Stripe.', 'woocommerce' ); ?></p>
-			<?php else : ?>
-				<p><?php printf( __( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) ); ?></p>
-			<?php endif; ?>
+			<p>
+				<?php printf( __(
+					'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ),
+					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ),
+					esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) )
+				); ?>
+			</p>
+			<?php if ( $featured_gateways ) : ?>
 			<ul class="wc-wizard-services featured">
 				<?php foreach ( $featured_gateways as $gateway_id => $gateway ) :
 					$this->display_service_item( $gateway_id, $gateway );
 				endforeach; ?>
 			</ul>
+			<?php endif; ?>
+			<?php if ( $in_cart_gateways ) : ?>
 			<ul class="wc-wizard-services in-cart">
 				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) :
 					$this->display_service_item( $gateway_id, $gateway );
 				endforeach; ?>
 			</ul>
+			<?php endif; ?>
 			<ul class="wc-wizard-services manual">
 				<li class="wc-wizard-services-list-toggle">
 					<div class="wc-wizard-service-name">
-						<?php esc_html_e( 'Manual Payments', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Offline Payments', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-service-description">
 						<?php esc_html_e( 'Collect payments from customers outside your online store.', 'woocommerce' ); ?>
