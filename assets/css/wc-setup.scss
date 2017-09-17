@@ -558,6 +558,18 @@ body {
 			}
 		}
 	}
+
+	.wc-wizard-service-settings {
+		display: none;
+		margin-bottom: 0;
+		cursor: default;
+	}
+
+	&.checked {
+		.wc-wizard-service-settings {
+			display: inline-block;
+		}
+	}
 }
 
 // Toggle display a list of services
