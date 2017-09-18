@@ -682,20 +682,21 @@ class WC_AJAX {
 	 * Grant download permissions via ajax function.
 	 */
 	public static function grant_access_to_download() {
-
 		check_ajax_referer( 'grant-access', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
 
+		$download_permissions = array();
+
 		global $wpdb;
 
 		$wpdb->hide_errors();
 
-		$order_id     = intval( $_POST['order_id'] );
-		$product_ids  = $_POST['product_ids'];
-		$loop         = intval( $_POST['loop'] );
+		$order_id     = intval( $_POST[ 'order_id' ] );
+		$product_ids  = $_POST[ 'product_ids' ];
+		$loop         = intval( $_POST[ 'loop' ] );
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
 
@@ -723,11 +724,22 @@ class WC_AJAX {
 						} else {
 							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 						}
+
 						include( 'admin/meta-boxes/views/html-order-download-permission.php' );
+
+						$download_permissions = array_merge( $download_permissions, array(
+							'download_id' => $download_id,
+							'product_id'  => $product_id,
+							'order_id'    => $order_id,
+							'inserted_id' => $inserted_id
+						) );
 					}
 				}
 			}
 		}
+
+		do_action( 'woocommerce_ajax_grant_access_to_product_download', $download_permissions );
+
 		wp_die();
 	}
 
