@@ -1191,13 +1191,36 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate() {
 		$this->wc_setup_activate_actions();
+
+		$description     = false;
+		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
+		$stripe_enabled  = $stripe_settings && ! empty( $stripe_settings[ 'email' ] );
+		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
+		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
+		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
+		$rates_enabled   = $domestic_rates || $intl_rates;
+
+		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
+		} else if ( $stripe_enabled && $taxes_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments and automated taxes.', 'woocommerce' );
+		} else if ( $stripe_enabled && $rates_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, live rates, and discounted shipping labels.', 'woocommerce' );
+		} else if ( $stripe_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments.', 'woocommerce' );
+		} else if ( $taxes_enabled && $rates_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
+		} else if ( $taxes_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes.', 'woocommerce' );
+		} else if ( $rates_enabled ) {
+			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to live rates and discounted shipping labels.', 'woocommerce' );
+		}
 		?>
 		<form method="post" class="activate-jetpack">
 			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
-			<p>
-				<?php // TODO: tailor this message to the Jetpack-powered services selected earlier ?>
-				<?php esc_html_e( "Your store's almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, USPS live rates, and discounted shipping labels.", 'woocommerce' ); ?>
-			</p>
+			<?php if ( $description ) : ?>
+			<p><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
 			<div>
 				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
 				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" />
