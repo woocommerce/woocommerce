@@ -487,11 +487,11 @@ body {
 	flex-wrap: nowrap;
 	justify-content: space-between;
 	padding: 2em 0;
-	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
 	color: #666;
 
-	&:first-child {
-		border-top: 0;
+	&:last-child {
+		border-bottom: 0;
 	}
 
 	.payment-gateway-fee {
@@ -593,4 +593,28 @@ body {
 }
 .wc-wizard-services.manual .wc-wizard-service-item {
 	display: none;
+}
+
+// Shipping
+.wc-wizard-services.shipping {
+
+	.wc-wizard-service-name {
+		font-weight: normal;
+		text-align: left;
+	}
+
+	// List header
+	.wc-wizard-service-item {
+		padding-left: 2em;
+
+		&:first-child {
+			border-bottom: 0;
+			padding-bottom: 0;
+			font-weight: 700;
+
+			.wc-wizard-service-name {
+				font-weight: 700;
+			}
+		}
+	}
 }
