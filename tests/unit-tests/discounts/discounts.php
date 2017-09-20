@@ -22,11 +22,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	protected $orders;
 
 	/**
-	 * @var array An array of filters that have been set.
-	 */
-	protected $filters;
-
-	/**
 	 * @var array An array containing all the test data from the last Data Provider test.
 	 */
 	protected $last_test_data;
@@ -61,24 +56,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->orders[] = $order;
 	}
 
-	/**
-	 * @param $filter_name string The name of the filter to add a listener to.
-	 * @param $callback_function_name string The name of a function in this class
-	 *                                       to use as the callback.
-	 */
-	protected function add_filter( $filter_name, $callback_function_name ) {
-		add_filter( $filter_name, array( $this, $callback_function_name ) );
-
-		$this->filters[ $filter_name ][] = $callback_function_name;
-	}
-
 	public function setUp() {
 		parent::setUp();
 
 		$this->products = array();
 		$this->coupons = array();
 		$this->orders = array();
-		$this->filters = array();
 		$this->last_test_data = null;
 	}
 
@@ -112,12 +95,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			}
 
 			$this->last_test_data = null;
-		}
-
-		foreach ( $this->filters as $filter_name => $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				$removed = remove_filter( $filter_name, array( $this, $callback ) );
-			}
 		}
 
 		parent::tearDown();
@@ -208,14 +185,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	public function test_calculations( $test_data ) {
 		$this->last_test_data = $test_data;
 		$discounts = new WC_Discounts();
-
-		if ( isset( $test_data['filters'] ) ) {
-			foreach ( $test_data['filters'] as $filter_name => $callbacks ) {
-				foreach ( $callbacks as $callback ) {
-					$this->add_filter( $filter_name, $callback );
-				}
-			}
-		}
 
 		if ( isset( $test_data['tax_rate'] ) ) {
 			WC_Tax::_insert_tax_rate( $test_data['tax_rate'] );
@@ -787,7 +756,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially.',
+					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting non-sequentially.',
 					'tax_rate' => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
@@ -800,24 +769,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_class'    => '',
 					),
 					'prices_include_tax' => false,
-					'filters' => array(
-						'woocommerce_coupon_percent_calc_method' => array(
-							'filter_woocommerce_coupon_percent_calc_method_cart_item',
-						),
-					),
-					'wc_options' => array(
-						'woocommerce_calc_discounts_sequentially' => array(
-							'set'    => 'yes',
-							'revert' => 'no',
-						),
-					),
 					'cart' => array(
 						array(
-							'price' => 1.80,
+							'price' => 10,
 							'qty'   => 3,
 						),
 						array(
-							'price' => 13.95,
+							'price' => 5,
 							'qty'   => 3,
 						),
 					),
@@ -834,7 +792,54 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'amount'                 => '20',
 						),
 					),
-					'expected_total_discount' => 20.35,
+					'expected_total_discount' => 21,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 3,
+						),
+						array(
+							'price' => 5,
+							'qty'   => 3,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'percent',
+							'amount'                 => '30',
+							'limit_usage_to_x_items' => 5,
+						),
+						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+					),
+					'expected_total_discount' => 18.30,
 				),
 			),
 			array(
@@ -852,11 +857,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_class'    => '',
 					),
 					'prices_include_tax' => false,
-					'filters' => array(
-						'woocommerce_coupon_percent_calc_method' => array(
-							'filter_woocommerce_coupon_percent_calc_method_cart_item',
-						),
-					),
 					'wc_options' => array(
 						'woocommerce_calc_discounts_sequentially' => array(
 							'set'    => 'yes',
@@ -1298,17 +1298,5 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$all_discounts = $discounts->get_discounts();
 		$this->assertEquals( 0, count( $all_discounts['freeshipping'] ), 'Free shipping coupon should not have any discounts.' );
-	}
-
-	/**
-	 * A filter for 'woocommerce_coupon_percent_calc_method' that specifies to calculate
-	 * using the cart_item method.
-	 *
-	 * @param string $method Incoming method to filter.
-	 *
-	 * @return string Filtered string.
-	 */
-	public function filter_woocommerce_coupon_percent_calc_method_cart_item( $method ) {
-		return 'cart_item';
 	}
 }
