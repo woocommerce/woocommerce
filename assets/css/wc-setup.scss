@@ -495,7 +495,7 @@ body {
 	}
 
 	.payment-gateway-fee {
-		color: #b5b5b5;
+		color: #a6a6a6;
 	}
 
 	.wc-wizard-service-name {
@@ -616,4 +616,25 @@ body {
 			}
 		}
 	}
+
+	.wc-wizard-shipping-method-select {
+		display: flex;
+	}
+
+	.wc-wizard-shipping-method-dropdown {
+		margin-right: 2em;
+
+		.select2 {
+			min-width: 130px;
+		}
+	}
+
+	.shipping-method-description .live_rates {
+		color: #a6a6a6;
+		font-size: 0.92em;
+	}
+}
+
+.hide {
+	display: none;
 }
