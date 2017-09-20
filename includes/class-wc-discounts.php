@@ -300,25 +300,31 @@ class WC_Discounts {
 		}
 
 		foreach ( $this->items as $item ) {
-			if ( 0 === $this->get_discounted_price_in_cents( $item ) ) {
+			$item_to_apply = clone $item; // Clone the item so changes to this item do not affect the originals.
+
+			if ( 0 === $this->get_discounted_price_in_cents( $item_to_apply ) ) {
 				continue;
 			}
-			if ( ! $coupon->is_valid_for_product( $item->product, $item->object ) && ! $coupon->is_valid_for_cart() ) {
+			if ( ! $coupon->is_valid_for_product( $item_to_apply->product, $item_to_apply->object ) && ! $coupon->is_valid_for_cart() ) {
 				continue;
 			}
-			if ( $limit_usage_qty && $applied_count > $limit_usage_qty ) {
+
+			if ( $limit_usage_qty && $applied_count >= $limit_usage_qty ) {
 				break;
 			}
-			if ( $limit_usage_qty && $item->quantity > ( $limit_usage_qty - $applied_count ) ) {
-				$limit_to_qty   = absint( $limit_usage_qty - $applied_count );
-				$item->price    = ( $item->price / $item->quantity ) * $limit_to_qty;
-				$item->quantity = $limit_to_qty; // Lower the qty so the discount is applied less.
+
+			if ( $limit_usage_qty && $item_to_apply->quantity > ( $limit_usage_qty - $applied_count ) ) {
+				$limit_to_qty            = absint( $limit_usage_qty - $applied_count );
+
+				// Lower the qty and cost so the discount is applied less.
+				$item_to_apply->price    = ( $item_to_apply->price / $item_to_apply->quantity ) * $limit_to_qty;
+				$item_to_apply->quantity = $limit_to_qty;
 			}
-			if ( 0 >= $item->quantity ) {
+			if ( 0 >= $item_to_apply->quantity ) {
 				continue;
 			}
-			$items_to_apply[] = $item;
-			$applied_count   += $item->quantity;
+			$items_to_apply[] = $item_to_apply;
+			$applied_count   += $item_to_apply->quantity;
 		}
 		return $items_to_apply;
 	}
@@ -357,6 +363,7 @@ class WC_Discounts {
 			}
 
 			$discount        = min( $discounted_price, $discount );
+
 			$total_discount += $discount;
 
 			// Store code and discount amount per item.
