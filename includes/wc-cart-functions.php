@@ -413,11 +413,24 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
 	$changed        = wc_shipping_methods_have_changed( $key, $package );
 
+	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0
+	$method_counts  = WC()->session->get( 'shipping_method_counts' );
+
+	if ( ! empty( $method_counts[ $key ] ) ) {
+		$method_count = absint( $method_counts[ $key ] );
+	} else {
+		$method_count = 0;
+	}
+
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
-	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
+	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) || sizeof( $package['rates'] ) !== $method_count ) {
 		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
 		$chosen_methods[ $key ] = $chosen_method;
+		$method_counts[ $key ]  = sizeof( $package['rates'] );
+
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'shipping_method_counts', $method_counts );
+
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
