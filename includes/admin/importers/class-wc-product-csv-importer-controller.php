@@ -408,26 +408,33 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Position', 'woocommerce' )                                => 'menu_order',
 		) );
 
+		// Normalize the columns so they are case-insensitive.
+		$normalized_default_columns = array();
+		foreach ( $default_columns as $key => $val ) {
+			$normalized_default_columns[ strtolower( $key ) ] = $val;
+		}
+
 		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
 			array(
-				__( 'Attribute %d name', 'woocommerce' )     => 'attributes:name',
-				__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
-				__( 'Attribute %d visible', 'woocommerce' )  => 'attributes:visible',
-				__( 'Attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
-				__( 'Attribute %d default', 'woocommerce' )  => 'attributes:default',
-				__( 'Download %d name', 'woocommerce' )      => 'downloads:name',
-				__( 'Download %d URL', 'woocommerce' )       => 'downloads:url',
-				__( 'Meta: %s', 'woocommerce' )              => 'meta:',
+				__( 'attribute %d name', 'woocommerce' )     => 'attributes:name',
+				__( 'attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
+				__( 'attribute %d visible', 'woocommerce' )  => 'attributes:visible',
+				__( 'attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
+				__( 'attribute %d default', 'woocommerce' )  => 'attributes:default',
+				__( 'download %d name', 'woocommerce' )      => 'downloads:name',
+				__( 'download %d url', 'woocommerce' )       => 'downloads:url',
+				__( 'meta: %s', 'woocommerce' )              => 'meta:',
 			)
 		) );
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
+			$field             = strtolower( $field );
 			$index             = $num_indexes ? $key : $field;
 			$headers[ $index ] = $field;
 
-			if ( isset( $default_columns[ $field ] ) ) {
-				$headers[ $index ] = $default_columns[ $field ];
+			if ( isset( $normalized_default_columns[ $field ] ) ) {
+				$headers[ $index ] = $normalized_default_columns[ $field ];
 			} else {
 				foreach ( $special_columns as $regex => $special_key ) {
 					if ( preg_match( $regex, $field, $matches ) ) {
