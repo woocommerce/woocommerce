@@ -728,24 +728,44 @@ class WC_Admin_Setup_Wizard {
 				</li>
 			</ul>
 
-			<div>
-				<label for="weight_unit"><?php esc_html_e( 'Weight unit—used to calculate shipping rates, and more.', 'woocommerce' ); ?></label>
-				<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
-					<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-					<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-					<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-					<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-				</select>
-			</div>
-			<div>
-				<label for="dimension_unit"><?php esc_html_e( 'Dimension unit—helps for accurate package selection.', 'woocommerce' ); ?></label>
-				<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
-					<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-					<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-					<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-					<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-					<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-				</select>
+			<div class="wc-setup-shipping-units">
+				<div class="wc-setup-shipping-unit">
+					<p>
+						<label for="weight_unit">
+							<?php
+								printf( wp_kses(
+									__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
+									array( 'strong' => array() )
+								) );
+							?>
+						</label>
+					</p>
+					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
+						<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+						<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+						<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+						<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+					</select>
+				</div>
+				<div class="wc-setup-shipping-unit">
+					<p>
+						<label for="dimension_unit">
+							<?php
+								printf( wp_kses(
+									__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
+									array( 'strong' => array() )
+								) );
+							?>
+						</label>
+					</p>
+					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
+						<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+						<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+						<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+						<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+						<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+					</select>
+				</div>
 			</div>
 
 			<p class="wc-setup-actions step">
