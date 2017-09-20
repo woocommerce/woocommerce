@@ -729,14 +729,7 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 
 			<div>
-				<label for="weight_unit">
-					<span class="wc-wizard-setting-name">
-						<?php esc_html_e( 'Weight unit', 'woocommerce' ); ?>
-					</span>
-					<span class="wc-wizard-setting-description">
-						<?php echo esc_html_x( '— used to calculate shipping rates.', 'Weight unit setting description', 'woocommerce' ); ?>
-					</span>
-				</label>
+				<label for="weight_unit"><?php esc_html_e( 'Weight unit—used to calculate shipping rates, and more.', 'woocommerce' ); ?></label>
 				<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
 					<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
 					<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
@@ -745,14 +738,7 @@ class WC_Admin_Setup_Wizard {
 				</select>
 			</div>
 			<div>
-				<label for="dimension_unit">
-					<span class="wc-wizard-setting-name">
-						<?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?>
-					</span>
-					<span class="wc-wizard-setting-description">
-						<?php echo esc_html_x( '— used to select accurate packages.', 'Dimension unit setting description', 'woocommerce' ); ?>
-					</span>
-				</label>
+				<label for="dimension_unit"><?php esc_html_e( 'Dimension unit—helps for accurate package selection.', 'woocommerce' ); ?></label>
 				<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
 					<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
 					<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
