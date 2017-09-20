@@ -380,7 +380,13 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Sort coupons so discounts apply consistently.
+	 * Sort coupons so discounts apply consistently across installs.
+	 *
+	 * In order of priority;
+	 * 	- sort param
+	 *  - usage restriction
+	 *  - coupon value
+	 *  - ID
 	 *
 	 * @param WC_Coupon $a Coupon object.
 	 * @param WC_Coupon $b Coupon object.
@@ -388,7 +394,13 @@ final class WC_Cart_Totals {
 	 */
 	protected function sort_coupons_callback( $a, $b ) {
 		if ( $a->sort === $b->sort ) {
-			return $a->get_id() - $b->get_id();
+			if ( $a->get_limit_usage_to_x_items() === $b->get_limit_usage_to_x_items() ) {
+				if ( $a->get_amount() === $b->get_amount() ) {
+					return $b->get_id() - $a->get_id();
+				}
+				return ( $a->get_amount() < $b->get_amount() ) ? -1 : 1;
+			}
+			return ( $a->get_limit_usage_to_x_items() < $b->get_limit_usage_to_x_items() ) ? -1 : 1;
 		}
 		return ( $a->sort < $b->sort ) ? -1 : 1;
 	}

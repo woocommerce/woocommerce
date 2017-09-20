@@ -828,15 +828,15 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					),
 					'coupons' => array(
 						array(
+							'code'                   => 'test1',
+							'discount_type'          => 'percent',
+							'amount'                 => '20',
+						),
+						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
 							'amount'                 => '30',
 							'limit_usage_to_x_items' => 5,
-						),
-						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
 						),
 					),
 					'expected_total_discount' => 18.30,
