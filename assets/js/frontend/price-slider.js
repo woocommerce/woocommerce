@@ -65,7 +65,7 @@ jQuery( function( $ ) {
 
 	init_price_filter();
 
-	hasSelectiveRefresh = (
+	var hasSelectiveRefresh = (
 		'undefined' !== typeof wp &&
 		wp.customize &&
 		wp.customize.selectiveRefresh &&
