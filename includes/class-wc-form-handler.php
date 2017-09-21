@@ -672,7 +672,12 @@ class WC_Form_Handler {
 	 * Cancel a pending order.
 	 */
 	public static function cancel_order() {
-		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
+		if (
+			isset( $_GET['cancel_order'] ) &&
+			isset( $_GET['order'] ) &&
+			isset( $_GET['order_id'] ) &&
+			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) )
+		) {
 			nocache_headers();
 
 			$order_key        = $_GET['order'];
