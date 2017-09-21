@@ -377,7 +377,6 @@ body {
 .wc-setup .wc-setup-actions {
 	overflow: hidden;
 	.button {
-		float: right;
 		font-size: 1.25em;
 		padding: 0.5em 1em;
 		line-height: 1em;
@@ -391,7 +390,6 @@ body {
 		border-color: #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
-		float: right;
 		margin: 0;
 		opacity: 1;
 
@@ -701,4 +699,22 @@ h3.jetpack-reasons {
 	display: block;
 	margin: 1.75em auto 2em auto;
 	max-height: 175px;
+}
+
+.step {
+	text-align: center;
+}
+
+.wc-setup .wc-setup-actions .button-primary {
+	font-weight: 300;
+	font-size: 18px;
+	padding: 1em;
+	box-shadow: none;
+	min-width: 12em;
+
+	&:focus,
+	&:hover,
+	&:active {
+		box-shadow: none;
+	}
 }
