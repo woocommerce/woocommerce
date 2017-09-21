@@ -100,7 +100,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	 */
 	private function parse_update_notice( $content, $new_version ) {
 		$version_parts     = explode( '.', $new_version );
-		$check_for_notices = array(
+		$check_for_notices ss= array(
 			$version_parts[0] . '.0', // Major
 			$version_parts[0] . '.0.0', // Major
 			$version_parts[0] . '.' . $version_parts[1], // Minor
