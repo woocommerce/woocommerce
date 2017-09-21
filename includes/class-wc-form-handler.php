@@ -1071,11 +1071,6 @@ class WC_Form_Handler {
 					throw new Exception( $validation_error->get_error_message() );
 				}
 
-				// Anti-spam trap
-				if ( ! empty( $_POST['email_2'] ) ) {
-					throw new Exception( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
-				}
-
 				$new_customer = wc_create_new_customer( sanitize_email( $email ), wc_clean( $username ), $password );
 
 				if ( is_wp_error( $new_customer ) ) {
