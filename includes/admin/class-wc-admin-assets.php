@@ -346,7 +346,7 @@ class WC_Admin_Assets {
 
 		// API settings
 		if ( $wc_screen_id . '_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'keys' == $_GET['section'] ) {
-			wp_register_script( 'wc-api-keys', WC()->plugin_url() . '/assets/js/admin/api-keys' . $suffix . '.js', array( 'jquery', 'woocommerce_admin', 'underscore', 'backbone', 'wp-util', 'qrcode', 'zeroclipboard' ), WC_VERSION, true );
+			wp_register_script( 'wc-api-keys', WC()->plugin_url() . '/assets/js/admin/api-keys' . $suffix . '.js', array( 'jquery', 'woocommerce_admin', 'underscore', 'backbone', 'wp-util', 'qrcode' ), WC_VERSION, true );
 			wp_enqueue_script( 'wc-api-keys' );
 			wp_localize_script(
 				'wc-api-keys',
