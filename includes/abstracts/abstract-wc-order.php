@@ -1017,7 +1017,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupons           = $this->get_items( 'coupon' );
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
-		$item_discounts    = $discounts->get_discounts_by_item();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
 
 		if ( $coupon_discounts ) {
