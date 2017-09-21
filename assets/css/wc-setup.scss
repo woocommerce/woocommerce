@@ -653,3 +653,46 @@ body {
 .hide {
 	display: none;
 }
+
+.wc-wizard-features {
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+
+	.wc-wizard-feature-item {
+		flex-basis: calc( 50% - 4em - 3px); // two columns, account for padding and borders
+		border: 1px solid #eee;
+		padding: 2em;
+	}
+
+	.wc-wizard-feature-item:nth-child(1) {
+		border-radius: 4px 0 0 0;
+	}
+
+	.wc-wizard-feature-item:nth-child(2) {
+		border-left: 0;
+		border-radius: 0 4px 0 0;
+	}
+
+	.wc-wizard-feature-item:nth-child(3) {
+		border-top: 0;
+		border-radius: 0 0 0 4px;
+	}
+
+	.wc-wizard-feature-item:nth-child(4) {
+		border-top: 0;
+		border-left: 0;
+		border-radius: 0 0 4px 0;
+	}
+
+	p.wc-wizard-feature-name,
+	p.wc-wizard-feature-description {
+		margin: 0;
+	}
+}
+
+h3.jetpack-reasons {
+	text-align: center;
+	margin: 3em 0 1em 0;
+	font-size: 14px;
+}
