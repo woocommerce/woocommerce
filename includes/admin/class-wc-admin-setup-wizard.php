@@ -1303,8 +1303,12 @@ class WC_Admin_Setup_Wizard {
 			<?php if ( $description ) : ?>
 			<p><?php echo esc_html( $description ); ?></p>
 			<?php endif; ?>
+			<img
+				class="jetpack-logo"
+				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+				alt="Jetpack logo"
+			/>
 			<div>
-				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
 				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
 				<input type="hidden" name="save_step" value="activate" />
 
