@@ -569,6 +569,10 @@ body {
 			display: inline-block;
 		}
 	}
+
+	&.closed {
+		border-bottom: 0;
+	}
 }
 
 // Toggle display a list of services

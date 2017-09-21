@@ -1108,7 +1108,7 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 			<?php endif; ?>
 			<ul class="wc-wizard-services manual">
-				<li class="wc-wizard-services-list-toggle">
+				<li class="wc-wizard-services-list-toggle closed">
 					<div class="wc-wizard-service-name">
 						<?php esc_html_e( 'Offline Payments', 'woocommerce' ); ?>
 					</div>

@@ -38,6 +38,7 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
+			$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
 			$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 				.slideToggle()
 				.css( 'display', 'flex' );
