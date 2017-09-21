@@ -100,6 +100,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	 */
 	private function parse_update_notice( $content, $new_version ) {
 		$version_parts     = explode( '.', $new_version );
+		$upgrade_notice = '';
 		$check_for_notices = array(
 			$version_parts[0] . '.0', // Major
 			$version_parts[0] . '.0.0', // Major
@@ -113,7 +114,6 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 			}
 			$matches        = null;
 			$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
-			$upgrade_notice = '';
 
 			if ( preg_match( $regexp, $content, $matches ) ) {
 				$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
