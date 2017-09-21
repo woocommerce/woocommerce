@@ -587,10 +587,11 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon   Coupon data.
-	 * @param  float     $subtotal Items subtotal.
 	 * @return bool
 	 */
-	protected function validate_coupon_minimum_amount( $coupon, $subtotal = 0 ) {
+	protected function validate_coupon_minimum_amount( $coupon ) {
+		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) );
+
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -605,10 +606,11 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon   Coupon data.
-	 * @param  float     $subtotal Items subtotal.
 	 * @return bool
 	 */
-	protected function validate_coupon_maximum_amount( $coupon, $subtotal = 0 ) {
+	protected function validate_coupon_maximum_amount( $coupon ) {
+		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) );
+
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
