@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author      WooCommerce
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.7.0
+ * @version     3.0.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product' ) ) :
+if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -94,32 +94,11 @@ class WC_Admin_Duplicate_Product {
 			wp_die( sprintf( __( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $product_id ) );
 		}
 
-		$duplicate = clone $product;
-		$duplicate->set_id( 0 );
-		$duplicate->save();
-
-		$sku = $duplicate->get_sku();
-		if ( '' !== $duplicate->get_sku() ) {
-			wc_product_force_unique_sku( $duplicate->get_id() );
-		}
-
-		if ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) {
-			foreach( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				$child_duplicate = clone $child;
-				$child_duplicate->set_parent_id( $duplicate->get_id() );
-				$child_duplicate->set_id( 0 );
-				$child_duplicate->save();
-				if ( '' !== $child_duplicate->get_sku() ) {
-					wc_product_force_unique_sku( $child_duplicate->get_id() );
-				}
-			}
-		}
+		$duplicate = $this->product_duplicate( $product );
 
 		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
-		// New hook returns new id and old id.
 		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
-		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '2.7', 'Use woocommerce_product_duplicate action instead.' );
+		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '3.0', 'Use woocommerce_product_duplicate action instead.' );
 
 		// Redirect to the edit screen for the new draft page
 		wp_redirect( admin_url( 'post.php?action=edit&post=' . $duplicate->get_id() ) );
@@ -127,11 +106,74 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
+	 * Function to create the duplicate of the product.
+	 *
+	 * @param WC_Product $product
+	 * @return WC_Product
+	 */
+	public function product_duplicate( $product ) {
+		// Filter to allow us to unset/remove data we don't want to copy to the duplicate. @since 2.6
+		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
+
+		$duplicate = clone $product;
+		$duplicate->set_id( 0 );
+		$duplicate->set_name( sprintf( __( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
+		$duplicate->set_total_sales( 0 );
+		if ( '' !== $product->get_sku( 'edit' ) ) {
+			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
+		}
+		$duplicate->set_status( 'draft' );
+		$duplicate->set_date_created( null );
+		$duplicate->set_slug( '' );
+		$duplicate->set_rating_counts( 0 );
+		$duplicate->set_average_rating( 0 );
+		$duplicate->set_review_count( 0 );
+
+		foreach ( $meta_to_exclude as $meta_key ) {
+			$duplicate->delete_meta_data( $meta_key );
+		}
+
+		// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
+		do_action( 'woocommerce_product_duplicate_before_save', $duplicate, $product );
+
+		// Save parent product.
+		$duplicate->save();
+
+		// Duplicate children of a variable product.
+		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( 'variable' ) ) {
+			foreach ( $product->get_children() as $child_id ) {
+				$child           = wc_get_product( $child_id );
+				$child_duplicate = clone $child;
+				$child_duplicate->set_parent_id( $duplicate->get_id() );
+				$child_duplicate->set_id( 0 );
+
+				if ( '' !== $child->get_sku( 'edit' ) ) {
+					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
+				}
+
+				foreach ( $meta_to_exclude as $meta_key ) {
+					$child_duplicate->delete_meta_data( $meta_key );
+				}
+
+				// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
+				do_action( 'woocommerce_product_duplicate_before_save', $child_duplicate, $child );
+
+				$child_duplicate->save();
+			}
+
+			// Get new object to reflect new children.
+			$duplicate = wc_get_product( $duplicate->get_id() );
+		}
+
+		return $duplicate;
+	}
+
+	/**
 	 * Get a product from the database to duplicate.
 	 *
-	 * @deprecated 2.7.0
+	 * @deprecated 3.0.0
 	 * @param mixed $id
-	 * @return WP_Post|bool
+	 * @return object|bool
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {
@@ -143,14 +185,14 @@ class WC_Admin_Duplicate_Product {
 			return false;
 		}
 
-		$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
+		$post = $wpdb->get_row( $wpdb->prepare( "SELECT {$wpdb->posts}.* FROM {$wpdb->posts} WHERE ID = %d", $id ) );
 
 		if ( isset( $post->post_type ) && 'revision' === $post->post_type ) {
 			$id   = $post->post_parent;
-			$post = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE ID=$id" );
+			$post = $wpdb->get_row( $wpdb->prepare( "SELECT {$wpdb->posts}.* FROM {$wpdb->posts} WHERE ID = %d", $id ) );
 		}
 
-		return $post[0];
+		return $post;
 	}
 }
 

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Products' ) ) :
+if ( ! class_exists( 'WC_Settings_Products', false ) ) :
 
 /**
  * WC_Settings_Products.
@@ -23,14 +23,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'products';
 		$this->label = __( 'Products', 'woocommerce' );
 
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
-		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
-		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
+		parent::__construct();
 	}
 
 	/**
@@ -73,6 +69,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 	/**
 	 * Get settings array.
+	 *
+	 * @param string $current_section
 	 *
 	 * @return array
 	 */
@@ -335,16 +333,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Stock display format', 'woocommerce' ),
-					'desc'     => __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
+					'desc'     => __( 'This controls how stock quantities are displayed on the frontend.', 'woocommerce' ),
 					'id'       => 'woocommerce_stock_format',
 					'css'      => 'min-width:150px;',
 					'class'    => 'wc-enhanced-select',
 					'default'  => '',
 					'type'     => 'select',
 					'options'  => array(
-						''           => __( 'Always show stock e.g. "12 in stock"', 'woocommerce' ),
-						'low_amount' => __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In stock"', 'woocommerce' ),
-						'no_amount'  => __( 'Never show stock amount', 'woocommerce' ),
+						''           => __( 'Always show quantity remaining in stock e.g. "12 in stock"', 'woocommerce' ),
+						'low_amount' => __( 'Only show quantity remaining in stock when low e.g. "Only 2 left in stock"', 'woocommerce' ),
+						'no_amount'  => __( 'Never show quantity remaining in stock', 'woocommerce' ),
 					),
 					'desc_tip' => true,
 				),
@@ -366,7 +364,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'File download method', 'woocommerce' ),
-					'desc'     => __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
+					'desc'     => sprintf(
+						/* translators: 1: X-Accel-Redirect 2: X-Sendfile 3: mod_xsendfile */
+						__( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, %1$s / %2$s can be used to serve downloads instead (server requires %3$s).', 'woocommerce' ),
+						'<code>X-Accel-Redirect</code>',
+						'<code>X-Sendfile</code>',
+						'<code>mod_xsendfile</code>'
+					),
 					'id'       => 'woocommerce_file_download_method',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
@@ -465,9 +469,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'           => __( 'Product ratings', 'woocommerce' ),
-					'desc'            => __( 'Enable ratings on reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_enable_review_rating',
+					'title'           => __( 'Enable reviews', 'woocommerce' ),
+					'desc'            => __( 'Enable product reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_reviews',
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
@@ -475,17 +479,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'desc'            => __( 'Ratings are required to leave a review', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_required',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => '',
-					'show_if_checked' => 'yes',
-					'autoload'        => false,
-				),
-
-				array(
-					'desc'            => __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
+					'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_verification_label',
 					'default'         => 'yes',
 					'type'            => 'checkbox',
@@ -495,9 +489,29 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'desc'            => __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
+					'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_verification_required',
 					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
+
+				array(
+					'title'           => __( 'Product ratings', 'woocommerce' ),
+					'desc'            => __( 'Enable star rating on reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_review_rating',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+				),
+
+				array(
+					'desc'            => __( 'Star ratings should be required, not optional', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_required',
+					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
 					'show_if_checked' => 'yes',

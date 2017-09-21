@@ -6,17 +6,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (product).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -96,7 +96,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_subtotal( $value ) {
-		$this->set_prop( 'subtotal', wc_format_decimal( $value ) );
+		$this->set_prop( 'subtotal', floatval( wc_format_decimal( $value ) ) );
 	}
 
 	/**
@@ -106,10 +106,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+		$this->set_prop( 'total', floatval( wc_format_decimal( $value ) ) );
 
 		// Subtotal cannot be less than total
-		if ( ! $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
+		if ( '' === $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
 			$this->set_subtotal( $value );
 		}
 	}
@@ -165,9 +165,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @param array $data Key/Value pairs
 	 */
-	public function set_variation( $data ) {
-		foreach ( $data as $key => $value ) {
-			$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+	public function set_variation( $data = array() ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+			}
 		}
 	}
 
@@ -198,7 +200,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
 
@@ -298,7 +300,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get fee taxes.
+	 * Get taxes.
 	 *
 	 * @param  string $context
 	 * @return array
@@ -310,7 +312,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the associated product.
 	 *
-	 * @param  string $context
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
@@ -351,26 +352,32 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return array
 	 */
 	public function get_item_downloads() {
-		global $wpdb;
-
-		$files   = array();
-		$product = $this->get_product();
-		$order   = $this->get_order();
+		$files      = array();
+		$product    = $this->get_product();
+		$order      = $this->get_order();
+		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
 			$data_store         = WC_Data_Store::load( 'customer-download' );
 			$customer_downloads = $data_store->get_downloads( array(
 				'user_email' => $order->get_billing_email(),
 				'order_id'   => $order->get_id(),
-				'product_id' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+				'product_id' => $product_id,
 			) );
 			foreach ( $customer_downloads as $customer_download ) {
 				$download_id = $customer_download->get_download_id();
 
 				if ( $product->has_file( $download_id ) ) {
-					$file                                  = $product->get_file( $download_id );
-					$files[ $download_id ]                 = $file->get_data();
-					$files[ $download_id ]['download_url'] = $this->get_item_download_url( $download_id );
+					$file                                         = $product->get_file( $download_id );
+					$files[ $download_id ]                        = $file->get_data();
+					$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
+					$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
+					$files[ $download_id ]['download_url']        = add_query_arg( array(
+						'download_file' => $product_id,
+						'order'         => $order->get_order_key(),
+						'email'         => urlencode( $order->get_billing_email() ),
+						'key'           => $download_id,
+					), trailingslashit( home_url() ) );
 				}
 			}
 		}
@@ -392,7 +399,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

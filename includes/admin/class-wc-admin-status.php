@@ -35,8 +35,6 @@ class WC_Admin_Status {
 	 * Handles output of tools.
 	 */
 	public static function status_tools() {
-		global $wpdb;
-
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -153,8 +151,9 @@ class WC_Admin_Status {
 		$file_data = str_replace( "\r", "\n", $file_data );
 		$version   = '';
 
-		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
 			$version = _cleanup_header_comment( $match[1] );
+		}
 
 		return $version ;
 	}
@@ -293,7 +292,7 @@ class WC_Admin_Status {
 	/**
 	 * Clear DB log table.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	private static function flush_db_logs() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
@@ -309,7 +308,7 @@ class WC_Admin_Status {
 	/**
 	 * Bulk DB log table actions.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	private static function log_table_bulk_actions() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {

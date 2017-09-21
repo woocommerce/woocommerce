@@ -2,31 +2,36 @@ language: php
 
 sudo: false
 
-# Test main supported versions of PHP and HHVM against latest WP. 5.2 is min supported version.
+# Test main supported versions of PHP against latest WP.
 php:
-  - 5.2
-  - 5.3
   - 5.6
   - 7.0
   - 7.1
-  - hhvm
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
 
-# Additonal tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
+# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
 matrix:
   include:
   - php: 5.6
     env: WP_VERSION=latest WP_MULTISITE=1 PHP_LATEST_STABLE=7.1
+    dist: precise
+  - php: 5.3
+    env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
+    dist: precise
+  - php: 5.2
+    env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
+    dist: precise
 
 before_script:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
 script:
-  - bash tests/bin/phpunit.sh
-  - bash tests/bin/travis.sh during
+  - phpunit --version
+  - phpunit -c phpunit.xml
 
 after_script:
   - bash tests/bin/travis.sh after

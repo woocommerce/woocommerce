@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -110,7 +110,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * A list of avaiable tools for use in the system status section.
+	 * A list of available tools for use in the system status section.
 	 * 'button' becomes 'action' in the API.
 	 *
 	 * @return array
@@ -118,19 +118,24 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	public function get_tools() {
 		$tools = array(
 			'clear_transients' => array(
-				'name'    => __( 'WC transients', 'woocommerce' ),
+				'name'    => __( 'WooCommerce transients', 'woocommerce' ),
 				'button'  => __( 'Clear transients', 'woocommerce' ),
 				'desc'    => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
 			'clear_expired_transients' => array(
 				'name'    => __( 'Expired transients', 'woocommerce' ),
-				'button'  => __( 'Clear expired transients', 'woocommerce' ),
+				'button'  => __( 'Clear transients', 'woocommerce' ),
 				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'delete_orphaned_variations' => array(
-				'name'      => __( 'Orphaned variations', 'woocommerce' ),
-				'button'    => __( 'Delete orphaned variations', 'woocommerce' ),
-				'desc'      => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+				'name'    => __( 'Orphaned variations', 'woocommerce' ),
+				'button'  => __( 'Delete orphaned variations', 'woocommerce' ),
+				'desc'    => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+			),
+			'add_order_indexes' => array(
+				'name'    => __( 'Order address indexes', 'woocommerce' ),
+				'button'  => __( 'Index orders', 'woocommerce' ),
+				'desc'    => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'    => __( 'Term counts', 'woocommerce' ),
@@ -143,8 +148,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
 			'clear_sessions' => array(
-				'name'    => __( 'Customer sessions', 'woocommerce' ),
-				'button'  => __( 'Clear all sessions', 'woocommerce' ),
+				'name'    => __( 'Clear customer sessions', 'woocommerce' ),
+				'button'  => __( 'Clear', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
@@ -152,8 +157,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				),
 			),
 			'install_pages' => array(
-				'name'    => __( 'Install WooCommerce pages', 'woocommerce' ),
-				'button'  => __( 'Install pages', 'woocommerce' ),
+				'name'    => __( 'Create default WooCommerce pages', 'woocommerce' ),
+				'button'  => __( 'Create pages', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
@@ -161,17 +166,26 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				),
 			),
 			'delete_taxes' => array(
-				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
-				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
+				'name'    => __( 'Delete WooCommerce tax rates', 'woocommerce' ),
+				'button'  => __( 'Delete tax rates', 'woocommerce' ),
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
-					__( 'This option will delete ALL of your tax rates, use with caution.', 'woocommerce' )
+					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
+				),
+			),
+			'delete_webhook_logs' => array(
+				'name'    => __( 'Delete WebHook logs', 'woocommerce' ),
+				'button'  => __( 'Delete logs', 'woocommerce' ),
+				'desc'    => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce' ),
+					__( 'This tool removes WebHook logs. This will not delete the WebHooks themselves.', 'woocommerce' )
 				),
 			),
 			'reset_tracking' => array(
-				'name'    => __( 'Reset usage tracking settings', 'woocommerce' ),
-				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
+				'name'    => __( 'Reset usage tracking', 'woocommerce' ),
+				'button'  => __( 'Reset', 'woocommerce' ),
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			),
 		);
@@ -213,11 +227,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response( $this->prepare_item_for_response( array(
-		   'id'          => $request['id'],
-		   'name'        => $tool['name'],
-		   'action'      => $tool['button'],
-		   'description' => $tool['desc'],
-	   ), $request ) );
+			'id'          => $request['id'],
+			'name'        => $tool['name'],
+			'action'      => $tool['button'],
+			'description' => $tool['desc'],
+		), $request ) );
 	}
 
 	/**
@@ -374,28 +388,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$message = __( 'Product transients cleared', 'woocommerce' );
 			break;
 			case 'clear_expired_transients' :
-				/*
-				 * Deletes all expired transients. The multi-table delete syntax is used.
-				 * to delete the transient record from table a, and the corresponding.
-				 * transient_timeout record from table b.
-				 *
-				 * Based on code inside core's upgrade_network() function.
-				 */
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-					AND b.option_value < %d";
-				$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
-					AND b.option_value < %d";
-				$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
-
-				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), $rows + $rows2 );
+				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
 			break;
 			case 'delete_orphaned_variations' :
 				/**
@@ -406,6 +399,24 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
 					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';" ) );
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
+			break;
+			case 'add_order_indexes' :
+				/**
+				 * Add billing and shipping address indexes containing the customer name for orders
+				 * that don't have address indexes yet.
+				 */
+				$sql = "INSERT INTO {$wpdb->postmeta}( post_id, meta_key, meta_value )
+					SELECT post_id, '%1\$s', GROUP_CONCAT( meta_value SEPARATOR ' ' )
+					FROM {$wpdb->postmeta}
+					WHERE meta_key IN ( '%2\$s', '%3\$s' )
+					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%1\$s' )
+						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%3\$s' ) )
+					GROUP BY post_id";
+				$rows = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name' ) );
+				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name' ) );
+
+				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 			break;
 			case 'reset_roles' :
 				// Remove then re-add caps and roles
@@ -427,7 +438,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			break;
 			case 'install_pages' :
 				WC_Install::create_pages();
-				return __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' );
+				$message = __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
 			break;
 			case 'delete_taxes' :
 
@@ -435,6 +446,12 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 				WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 				$message = __( 'Tax rates successfully deleted', 'woocommerce' );
+			break;
+			case 'delete_webhook_logs' :
+
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->comments} WHERE comment_type='webhook_delivery';" ) );
+				$wpdb->query( "DELETE commentmeta FROM {$wpdb->commentmeta} commentmeta LEFT JOIN {$wpdb->comments} comments ON comments.comment_ID = commentmeta.comment_id WHERE comments.comment_ID IS NULL;" );
+				$message = sprintf( __( '%d logs deleted', 'woocommerce' ), $result );
 			break;
 			case 'reset_tracking' :
 				delete_option( 'woocommerce_allow_tracking' );
@@ -446,7 +463,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				if ( isset( $tools[ $tool ]['callback'] ) ) {
 					$callback = $tools[ $tool ]['callback'];
 					$return = call_user_func( $callback );
-					if ( false === $return ) {
+					if ( is_string( $return ) ) {
+						$message = $return;
+					} elseif ( false === $return ) {
 						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
 						$ran = false;
 						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );

@@ -327,7 +327,8 @@ class WC_Admin_Taxonomies {
 	 * @param string $columns
 	 * @param string $column
 	 * @param int $id
-	 * @return array
+	 *
+	 * @return string
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
 

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 	 * Register the routes for Shipping Zone Locations.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)/locations', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/locations', array(
 			'args' => array(
 				'id' => array(
 					'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
@@ -86,14 +86,28 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 			return $zone;
 		}
 
+		if ( 0 === $zone->get_id() ) {
+			return new WP_Error( "woocommerce_rest_shipping_zone_locations_invalid_zone", __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+		}
+
 		$raw_locations = $request->get_json_params();
 		$locations     = array();
 
 		foreach ( (array) $raw_locations as $raw_location ) {
-			if ( empty( $raw_location['code'] ) || empty( $raw_location['type'] ) ) {
+			if ( empty( $raw_location['code'] ) ) {
 				continue;
 			}
-			$locations[] = $raw_location;
+
+			$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
+
+			if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+				continue;
+			}
+
+			$locations[] = array(
+				'code' => sanitize_text_field( $raw_location['code'] ),
+				'type' => sanitize_text_field( $type ),
+			);
 		}
 
 		$zone->set_locations( $locations );
@@ -157,25 +171,18 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 					'description' => __( 'Shipping zone location code.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
 				'type' => array(
 					'description' => __( 'Shipping zone location type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
+					'default'     => 'country',
 					'enum'        => array(
 						'postcode',
 						'state',
 						'country',
 						'continent',
 					),
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 		);

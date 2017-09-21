@@ -1,31 +1,58 @@
-filter:
-  excluded_paths:
-  - tests/*
-  - apigen/*
-  - dummy-data/*
-  - i18n/*
-  - includes/api/legacy/*
-  - includes/libraries/*
-  - includes/updates/*
-  - includes/gateways/simplify-commerce/*
-  - includes/shipping/legacy-*
-  - includes/wc-deprecated-functions.php
-  - includes/class-wc-legacy-api.php
-
+build:
+  environment:
+    php: "7.1"
+    mysql: true
+    postgresql: false
+    redis: false
+    apache2:
+      modules:
+        - rewrite
+    variables:
+      WP_VERSION: latest
+  dependencies:
+    before:
+      - "bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION"
+  tests:
+    override:
+      -
+        command: "vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.clover"
+        coverage:
+          file: coverage.clover
+          format: php-clover
+tools:
+  php_code_sniffer:
+    config:
+      standard: WordPress
+  sensiolabs_security_checker: true
 checks:
   php:
+    avoid_closing_tag: false
+    avoid_superglobals: false
+    coding_standard:
+      name: WordPress
+    no_exit: false
+    no_global_keyword: false
+    one_class_per_file: false
+    psr2_class_declaration: false
+    psr2_control_structure_declaration: false
+    psr2_switch_declaration: false
     variable_existence: false
     verify_access_scope_valid: false
     verify_argument_usable_as_reference: false
     verify_property_names: false
-    no_global_keyword: false
-    psr2_switch_declaration: false
-    psr2_control_structure_declaration: false
-    psr2_class_declaration: false
-    one_class_per_file: false
-    no_exit: false
-    avoid_superglobals: false
-    avoid_closing_tag: false
-
-tools:
-  sensiolabs_security_checker: true
+filter:
+  excluded_paths:
+    - apigen/
+    - dummy-data/
+    - i18n/
+    - includes/api/legacy/
+    - includes/class-wc-legacy-api.php
+    - includes/gateways/simplify-commerce-deprecated/
+    - includes/gateways/simplify-commerce/includes/
+    - includes/legacy/
+    - includes/libraries/
+    - includes/shipping/legacy-*
+    - includes/updates/
+    - includes/vendor/
+    - includes/wc-deprecated-functions.php
+    - tests/

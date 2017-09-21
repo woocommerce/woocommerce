@@ -41,7 +41,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_validate_reports_request_arg() {
-		$request = new WP_REST_Request( 'GET', '/wc/v1/foo', array(
+		$request = new WP_REST_Request( 'GET', '/wc/v2/foo', array(
 			'args' => array(
 				'date' => array(
 					'type'   => 'string',
@@ -64,7 +64,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_urlencode_rfc3986() {
-		$this->assertEquals( 'https%253A%252F%252Fwoocommerce.com%252F', wc_rest_urlencode_rfc3986( 'https://woocommerce.com/' ) );
+		$this->assertEquals( 'https%3A%2F%2Fwoocommerce.com%2F', wc_rest_urlencode_rfc3986( 'https://woocommerce.com/' ) );
 	}
 
 	/**
@@ -73,7 +73,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_check_post_permissions() {
-		$this->isFalse( wc_rest_check_post_permissions( 'shop_order' ) );
+		$this->assertFalse( wc_rest_check_post_permissions( 'shop_order' ) );
 	}
 
 	/**
@@ -82,7 +82,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_check_user_permissions() {
-		$this->isFalse( wc_rest_check_user_permissions() );
+		$this->assertFalse( wc_rest_check_user_permissions() );
 	}
 
 	/**
@@ -91,7 +91,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_check_product_term_permissions() {
-		$this->isFalse( wc_rest_check_product_term_permissions( 'product_cat' ) );
+		$this->assertFalse( wc_rest_check_product_term_permissions( 'product_cat' ) );
 	}
 
 	/**
@@ -100,6 +100,6 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_check_manager_permissions() {
-		$this->isFalse( wc_rest_check_manager_permissions( 'reports' ) );
+		$this->assertFalse( wc_rest_check_manager_permissions( 'reports' ) );
 	}
 }

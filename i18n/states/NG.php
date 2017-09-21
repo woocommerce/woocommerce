@@ -5,10 +5,14 @@
  * @author   hoshomoh
  * @category i18n
  * @package  WooCommerce/i18n
- * @version  2.7.0
+ * @version  3.0.0
  */
 
 global $states;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 $states['NG'] = array(
 	'AB' => __( 'Abia', 'woocommerce' ),

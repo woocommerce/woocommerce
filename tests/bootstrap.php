@@ -102,6 +102,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-factory.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-data.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-object-query.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-payment-token-stub.php' );
 		require_once( $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php' );
 

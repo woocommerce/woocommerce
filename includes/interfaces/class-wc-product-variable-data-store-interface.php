@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by product variable store classes.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Interface
  * @author   WooThemes
  */
@@ -43,7 +43,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * @param WC_Product $product
 	 * @param string $previous_name
 	 * @param string $new_name
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function sync_variation_names( &$product, $previous_name = '', $new_name = '' );
 
@@ -66,7 +66,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * Delete variations of a product.
 	 *
 	 * @param int $product_id
-	 * @param $force_delete False to trash.
+	 * @param bool $force_delete False to trash.
 	 */
 	public function delete_variations( $product_id, $force_delete = false );
 

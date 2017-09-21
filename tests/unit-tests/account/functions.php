@@ -33,7 +33,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 			'order-date'    => 'Date',
 			'order-status'  => 'Status',
 			'order-total'   => 'Total',
-			'order-actions' => '&nbsp;',
+			'order-actions' => 'Actions',
 		), wc_get_account_orders_columns() );
 	}
 
@@ -44,7 +44,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_account_downloads_columns() {
 		$this->assertEquals( array(
-			'download-file'      => 'File',
+			'download-file'      => 'Download',
 			'download-remaining' => 'Downloads remaining',
 			'download-expires'   => 'Expires',
 			'download-product'   => 'Product',

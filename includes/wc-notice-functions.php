@@ -92,6 +92,8 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 /**
  * Set all notices at once.
  * @since 2.6.0
+ *
+ * @param mixed $notices
  */
 function wc_set_notices( $notices ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {

@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['JP'] = array(
 	'JP01' => __( 'Hokkaido', 'woocommerce' ),
 	'JP02' => __( 'Aomori', 'woocommerce' ),

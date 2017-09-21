@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Page' ) ) :
+if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 /**
  * WC_Settings_Page.
@@ -45,7 +45,7 @@ abstract class WC_Settings_Page {
 
 	/**
 	 * Get settings page ID.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_id() {
@@ -54,7 +54,7 @@ abstract class WC_Settings_Page {
 
 	/**
 	 * Get settings page label.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_label() {
@@ -63,6 +63,10 @@ abstract class WC_Settings_Page {
 
 	/**
 	 * Add this page to settings.
+	 *
+	 * @param array $pages
+	 *
+	 * @return mixed
 	 */
 	public function add_settings_page( $pages ) {
 		$pages[ $this->id ] = $this->label;

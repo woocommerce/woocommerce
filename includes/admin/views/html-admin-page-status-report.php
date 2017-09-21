@@ -8,14 +8,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $wpdb;
-$system_status  = new WC_REST_System_Status_Controller;
-$environment    = $system_status->get_environment_info();
-$database       = $system_status->get_database_info();
-$active_plugins = $system_status->get_active_plugins();
-$theme          = $system_status->get_theme_info();
-$security       = $system_status->get_security_info();
-$settings       = $system_status->get_settings();
-$pages          = $system_status->get_pages();
+
+if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
+}
+
+$system_status    = new WC_REST_System_Status_Controller;
+$environment      = $system_status->get_environment_info();
+$database         = $system_status->get_database_info();
+$post_type_counts = $system_status->get_post_type_counts();
+$active_plugins   = $system_status->get_active_plugins();
+$theme            = $system_status->get_theme_info();
+$security         = $system_status->get_security_info();
+$settings         = $system_status->get_settings();
+$pages            = $system_status->get_pages();
+$plugin_updates   = new WC_Plugin_Updates;
+$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
@@ -36,7 +44,7 @@ $pages          = $system_status->get_pages();
 	<tbody>
 		<tr>
 			<td data-export-label="Home URL"><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The URL of your site\'s homepage.', 'woocommerce' ) ); ?></td>
+			<td class="help"><?php echo wc_help_tip( __( 'The homepage URL of your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['home_url'] ) ?></td>
 		</tr>
 		<tr>
@@ -258,7 +266,7 @@ $pages          = $system_status->get_pages();
 				if ( $environment['remote_post_successful'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'wp_remote_post() failed. Contact your hosting provider.', 'woocommerce' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
 				} ?>
 			</td>
 		</tr>
@@ -269,64 +277,134 @@ $pages          = $system_status->get_pages();
 				if ( $environment['remote_get_successful'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'wp_remote_get() failed. Contact your hosting provider.', 'woocommerce' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
 				} ?>
 			</td>
 		</tr>
+		<?php
+		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
+		foreach ( $rows as $row ) {
+			if ( ! empty( $row['success'] ) ) {
+				$css_class = 'yes';
+				$icon = '<span class="dashicons dashicons-yes"></span>';
+			} else {
+				$css_class = 'error';
+				$icon = '<span class="dashicons dashicons-no-alt"></span>';
+			}
+			?>
+			<tr>
+				<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
+				<td class="help"><?php echo isset( $row['help'] ) ? $row['help'] : ''; ?></td>
+				<td>
+					<mark class="<?php echo esc_attr( $css_class ); ?>">
+						<?php echo $icon; ?>  <?php echo ! empty( $row['note'] ) ? wp_kses_data( $row['note'] ) : ''; ?>
+					</mark>
+				</td>
+			</tr><?php
+		} ?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
-	<thead>
-		<tr>
-			<th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td data-export-label="WC Database Version"><?php _e( 'WC database version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); ?></td>
-			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="WC Database Prefix"><?php _e( 'Database prefix', 'woocommerce' ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td><?php
-				if ( strlen( $database['database_prefix'] ) > 20 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
-		<?php
-		foreach ( $database['database_tables'] as $table => $table_exists ) {
+    <thead>
+    <tr>
+        <th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td data-export-label="WC Database Version"><?php _e( 'WC database version', 'woocommerce' ); ?>:</td>
+        <td class="help"><?php echo wc_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); ?></td>
+        <td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
+    </tr>
+    <tr>
+        <td data-export-label="WC Database Prefix"><?php _e( 'Database prefix', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php
+			if ( strlen( $database['database_prefix'] ) > 20 ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+			} else {
+				echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
+			}
 			?>
-			<tr>
-				<td><?php echo esc_html( $table ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td><?php echo ! $table_exists ? '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>' : '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>'; ?></td>
-			</tr>
-			<?php
-		}
+        </td>
+    </tr>
 
-		if ( $settings['geolocation_enabled'] ) {
-			?>
-			<tr>
-				<td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
-				<td><?php
-					if ( file_exists( $database['maxmind_geoip_database'] ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
-					} else {
-						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
-					}
-				?></td>
-			</tr>
-			<?php
-		}
+    <?php if ( $settings['geolocation_enabled'] ) { ?>
+        <tr>
+            <td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
+            <td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
+            <td><?php
+			    if ( file_exists( $database['maxmind_geoip_database'] ) ) {
+				    echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
+			    } else {
+				    printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
+			    }
+			    ?></td>
+        </tr>
+    <?php } ?>
+
+    <tr>
+        <td><?php _e( 'Total Database Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] + $database['database_size']['index'] ); ?></td>
+    </tr>
+
+    <tr>
+        <td><?php _e( 'Database Data Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['data'] ); ?></td>
+    </tr>
+
+    <tr>
+        <td><?php _e( 'Database Index Size', 'woocommerce' ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td><?php printf( '%.2fMB', $database['database_size']['index'] ); ?></td>
+    </tr>
+
+	<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
+    <tr>
+        <td><?php echo esc_html( $table ); ?></td>
+        <td class="help">&nbsp;</td>
+        <td>
+			<?php if( ! $table_data ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
+			} else {
+				printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
+			} ?>
+        </td>
+        </tr>
+    <?php } ?>
+
+    <?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
+        <tr>
+            <td><?php echo esc_html( $table ); ?></td>
+            <td class="help">&nbsp;</td>
+            <td>
+			    <?php printf( __( 'Data: %.2fMB + Index: %.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) ); ?>
+            </td>
+        </tr>
+    <?php } ?>
+    </tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+    <thead>
+    <tr>
+        <th colspan="3" data-export-label="Post Type Counts"><h2><?php _e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
+    </tr>
+    </thead>
+    <tbody>
+	<?php
+	foreach ( $post_type_counts as $post_type ) {
 		?>
-	</tbody>
+        <tr>
+            <td><?php echo esc_html( $post_type->type ); ?></td>
+            <td class="help">&nbsp;</td>
+            <td><?php echo absint( $post_type->count ); ?></td>
+        </tr>
+		<?php
+	}
+	?>
+    </tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
@@ -389,6 +467,10 @@ $pages          = $system_status->get_pages();
 						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
+				}
 				?>
 				<tr>
 					<td><?php echo $plugin_name; ?></td>
@@ -396,7 +478,7 @@ $pages          = $system_status->get_pages();
 					<td><?php
 						/* translators: %s: plugin author */
 						printf( __( 'by %s', 'woocommerce' ), $plugin['author_name'] );
-						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $network_string;
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $untested_string . $network_string;
 					?></td>
 				</tr>
 				<?php
@@ -458,6 +540,17 @@ $pages          = $system_status->get_pages();
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 			?></td>
 		</tr>
+		<tr>
+			<td data-export-label="Taxonomies: Product Visibility"><?php _e( 'Taxonomies: Product visibility', 'woocommerce' ); ?></th>
+			<td class="help"><?php echo wc_help_tip( __( 'A list of taxonomy terms used for product visibility.', 'woocommerce' ) ); ?></td>
+			<td><?php
+				$display_terms = array();
+				foreach ( $settings['product_visibility_terms'] as $slug => $name ) {
+					$display_terms[] = strtolower( $name ) . ' (' . $slug . ')';
+				}
+				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+			?></td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -479,7 +572,7 @@ $pages          = $system_status->get_pages();
 				}
 
 				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
-				echo '<td class="help">' . wc_help_tip( sprintf( __( 'The URL of your WooCommerce shop\'s %s (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
+				echo '<td class="help">' . wc_help_tip( sprintf( __( 'The URL of your %s page (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
 
 				// Page ID check.
 				if ( ! $page['page_set'] ) {
@@ -489,7 +582,7 @@ $pages          = $system_status->get_pages();
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
 					$error = true;
 				} elseif ( ! $page['page_visible'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %1$spublic%2$s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
 					$error = true;
 				} else {
 					// Shortcode check
@@ -501,7 +594,9 @@ $pages          = $system_status->get_pages();
 					}
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				if ( ! $error ) {
+					echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) . '</mark>';
+				}
 
 				echo '</td></tr>';
 			}
@@ -540,7 +635,7 @@ $pages          = $system_status->get_pages();
 			<td data-export-label="Child Theme"><?php _e( 'Child theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); ?></td>
 			<td><?php
-				echo $theme['is_child_theme'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce on a parent theme you didn\'t build personally, then we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' );
+				echo $theme['is_child_theme'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' );
 			?></td>
 		</tr>
 		<?php
@@ -571,13 +666,13 @@ $pages          = $system_status->get_pages();
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); ?></td>
-			<td><?php
-				if ( ! $theme['has_woocommerce_support'] ) {
+			<td>
+				<?php if ( ! $theme['has_woocommerce_support'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
-				}
-			?></td>
+				} ?>
+			</td>
 		</tr>
 	</tbody>
 </table>

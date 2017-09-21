@@ -91,7 +91,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 
 	// Map endpoint to options
 	$endpoint = ! empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
-	$value    = ( 'edit-address' == $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
+	$value    = ( get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ) === $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
 		if ( strstr( $permalink, '?' ) ) {

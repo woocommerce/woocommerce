@@ -48,11 +48,14 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-post-types.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-menus.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-customize.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-notices.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-assets.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
@@ -72,6 +75,14 @@ class WC_Admin {
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		}
+
+		// Helper
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-options.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-api.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php' );
+		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper.php' );
 	}
 
 	/**
@@ -88,6 +99,12 @@ class WC_Admin {
 			break;
 			case 'options-permalink' :
 				include( 'class-wc-admin-permalink-settings.php' );
+			break;
+			case 'plugins' :
+				include ( 'plugin-updates/class-wc-plugins-screen-updates.php' );
+			break;
+			case 'update-core' :
+				include( 'plugin-updates/class-wc-updates-screen-updates.php' );
 			break;
 			case 'users' :
 			case 'user' :
@@ -165,8 +182,6 @@ class WC_Admin {
 
 	/**
 	 * Preview email template.
-	 *
-	 * @return string
 	 */
 	public function preview_emails() {
 
@@ -219,7 +234,12 @@ class WC_Admin {
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
-				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %1$s&#9733;&#9733;&#9733;&#9733;&#9733;%2$s rating. A huge thanks in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">', '</a>' );
+				$footer_text = sprintf(
+					/* translators: 1: WooCommerce 2:: five stars */
+					__( 'If you like %1$s please leave us a %2$s rating. A huge thanks in advance!', 'woocommerce' ),
+					sprintf( '<strong>%s<strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
+					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
+				);
 				wc_enqueue_js( "
 					jQuery( 'a.wc-rating-link' ).click( function() {
 						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );

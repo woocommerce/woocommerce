@@ -47,7 +47,7 @@ class WC_Template_Loader {
 			/**
 			 * Filter hook to choose which files to find before WooCommerce does it's own logic.
 			 *
-			 * @since 2.7.0
+			 * @since 3.0.0
 			 * @var array
 			 */
 			$search_files = self::get_template_loader_files( $default_file );
@@ -64,7 +64,7 @@ class WC_Template_Loader {
 	/**
 	 * Get the default filename for a template.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
@@ -89,13 +89,17 @@ class WC_Template_Loader {
 	/**
 	 * Get an array of filenames to search for a given template.
 	 *
-	 * @since  2.7.0
-	 * @param  string $file The default file name.
+	 * @since  3.0.0
+	 * @param  string $default_file The default file name.
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
 		$search_files   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
 		$search_files[] = 'woocommerce.php';
+
+		if ( is_page_template() ) {
+			$search_files[] = get_page_template_slug();
+		}
 
 		if ( is_product_taxonomy() ) {
 			$term   = get_queried_object();

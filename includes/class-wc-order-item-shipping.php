@@ -6,16 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (shipping).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Shipping extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -27,6 +27,27 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			'total' => array(),
 		),
 	);
+
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'], $calculate_tax_for['tax_class'] ) ) {
+			return false;
+		}
+		if ( wc_tax_enabled() ) {
+			$tax_rates = WC_Tax::find_shipping_rates( $calculate_tax_for );
+			$taxes     = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+			$this->set_taxes( array( 'total' => $taxes ) );
+		} else {
+			$this->set_taxes( false );
+		}
+		return true;
+	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -51,6 +72,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_method_title( $value ) {
+		$this->set_prop( 'name', wc_clean( $value ) );
 		$this->set_prop( 'method_title', wc_clean( $value ) );
 	}
 
@@ -96,8 +118,11 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$tax_data     = array(
 			'total'    => array(),
 		);
-		if ( ! empty( $raw_tax_data['total'] ) ) {
+		if ( isset( $raw_tax_data['total'] ) ) {
 			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
+			// Older versions just used an array.
+			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data );
 		}
 		$this->set_prop( 'taxes', $tax_data );
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
@@ -106,8 +131,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in shipping rate object.
 	 *
-	 * @param WC_Shipping_Rate $tax_rate_id
-	 * @throws WC_Data_Exception
+	 * @param WC_Shipping_Rate $shipping_rate
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
 		$this->set_method_title( $shipping_rate->label );
@@ -197,12 +221,22 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		return $this->get_prop( 'taxes', $context );
 	}
 
+	/**
+	 * Get tax class.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_tax_class( $context = 'view' ) {
+		return get_option( 'woocommerce_shipping_tax_class' );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

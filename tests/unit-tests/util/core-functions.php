@@ -241,7 +241,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_logger().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_logger() {
 		// This filter should have no effect because the class does not implement WC_Logger_Interface
@@ -319,7 +319,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_print_r()
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_print_r() {
 		$arr = array( 1, 2, 'a', 'b', 'c' => 'd' );

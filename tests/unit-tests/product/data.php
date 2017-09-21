@@ -2,13 +2,13 @@
 /**
  * Data Functions.
  * @package WooCommerce\Tests\Product
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product setters and getters
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_getters_and_setters() {
 		global $wpdb;
@@ -34,8 +34,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'sku'                => 'TEST SKU',
 			'regular_price'      => 15.00,
 			'sale_price'         => 10.00,
-			'date_on_sale_from'  => '1475798400',
-			'date_on_sale_to'    => '1477267200',
 			'total_sales'        => 20,
 			'tax_status'         => 'none',
 			'tax_class'          => '',
@@ -64,11 +62,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		foreach ( $getters_and_setters as $function => $value ) {
 			$product->{"set_{$function}"}( $value );
 		}
+		$product->set_date_on_sale_from( '1475798400' );
+		$product->set_date_on_sale_to( '1477267200' );
 		$product->save();
 		$product = new WC_Product_Simple( $product->get_id() );
 		foreach ( $getters_and_setters as $function => $value ) {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
+		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
+		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );
 
 		$image_url = media_sideload_image( "https://cldup.com/Dr1Bczxq4q.png", $product->get_id(), '', 'src' );
 		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid='%s';", $image_url ) );
@@ -79,7 +81,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test product term setters and getters
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_product_term_getters_and_setters() {
 		$test_cat_1 = wp_insert_term( 'Testing 1', 'product_cat' );
@@ -89,7 +91,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$test_tag_2 = wp_insert_term( 'Tag 2', 'product_tag' );
 
 		$getters_and_setters = array(
-			'tag_ids'      => array( 'Tag 1', 'Tag 2' ),
+			'tag_ids'      => array( $test_tag_1['term_id'], $test_tag_2['term_id'] ),
 			'category_ids' => array( $test_cat_1['term_id'], $test_cat_2['term_id'] ),
 		);
 		$product = new WC_Product_Simple;
@@ -105,7 +107,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test grouped product setters and getters
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	 public function test_grouped_product_getters_and_setters() {
 		$getters_and_setters = array(
@@ -121,13 +123,13 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test external product setters and getters
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	 public function test_external_product_getters_and_setters() {
 		 $time = time();
 		 $getters_and_setters = array(
 			 'button_text' => 'Test Button Text',
-			 'product_url' => 'http://wordpress.org',
+			 'product_url' => 'https://wordpress.org',
 		 );
 		 $product = new WC_Product_External;
 		  foreach ( $getters_and_setters as $function => $value ) {
