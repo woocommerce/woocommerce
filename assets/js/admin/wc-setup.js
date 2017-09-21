@@ -45,16 +45,16 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select .method', function( e ) {
-		var $zone = $( this ).parent( 'div' );
+		var zone = $( this ).closest( '.wc-wizard-service-description' );
 		var selectedMethod = e.target.value;
 
-		var $descriptions = $zone.find( '.shipping-method-description' );
-		$descriptions.find( 'p' ).hide();
-		$descriptions.find( 'p.' + selectedMethod ).show();
+		var description = zone.find( '.shipping-method-descriptions' );
+		description.find( '.shipping-method-description' ).addClass( 'hide' );
+		description.find( '.' + selectedMethod ).removeClass( 'hide' );
 
-		var $settings = $zone.find( '.shipping-method-settings' );
-		$settings.find( 'div' ).hide();
-		$settings.find( 'div.' + selectedMethod ).show();
+		var settings = zone.find( '.shipping-method-settings' );
+		settings.find( '.shipping-method-setting' ).addClass( 'hide' );
+		settings.find( '.' + selectedMethod ).removeClass( 'hide' );
 	} );
 
 	function submitActivateForm() {

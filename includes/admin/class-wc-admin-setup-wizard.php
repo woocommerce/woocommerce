@@ -622,9 +622,9 @@ class WC_Admin_Setup_Wizard {
 				</select>
 		</div>
 
-			<div class="shipping-method-description">
+			<div class="shipping-method-descriptions">
 			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<p class="<?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+				<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
 					<?php echo esc_html( $method['description'] ); ?>
 				</p>
 			<?php endforeach; ?>
@@ -633,7 +633,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="shipping-method-settings">
 			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 				<?php if ( empty( $method['settings'] ) ) continue; ?>
-				<div class="<?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+				<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
 				<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
 					<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
 					<input type="<?php echo esc_attr( $setting['type'] ); ?>" id="<?php echo esc_attr( $method_setting_id ); ?>" name="<?php echo esc_attr( $method_setting_id ); ?>" />
