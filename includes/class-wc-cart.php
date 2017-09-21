@@ -1282,7 +1282,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
-		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+		$this->set_shipping_tax( array_sum( $merged_taxes ) );
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
