@@ -92,10 +92,10 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_store_setup' ),
 				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
-			'payments' => array(
-				'name'    => __( 'Payments', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_payments' ),
-				'handler' => array( $this, 'wc_setup_payments_save' ),
+			'payment' => array(
+				'name'    => __( 'Payment', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payment' ),
+				'handler' => array( $this, 'wc_setup_payment_save' ),
 			),
 			'shipping' => array(
 				'name'    => __( 'Shipping', 'woocommerce' ),
@@ -228,7 +228,7 @@ class WC_Admin_Setup_Wizard {
 			<?php if ( 'store_setup' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 			<?php elseif ( 'next_steps' === $this->step ) : ?>
-				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to the WordPress Dashboard', 'woocommerce' ); ?></a>
+				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to the WP Admin', 'woocommerce' ); ?></a>
 			<?php elseif ( 'activate' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
@@ -291,7 +291,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php esc_html_e( "This quick setup wizard will help you configure the basic settings, and shouldn't take longer than five minutes. To get started, we need to know a few details about your store.", 'woocommerce' ); ?></p>
+			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
 			<div>
 				<label><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
 			</div>
@@ -316,7 +316,7 @@ class WC_Admin_Setup_Wizard {
 				<input type="text" id="store_postcode" name="store_postcode" required value="<?php echo esc_attr( $postcode ); ?>" />
 			</div>
 			<div>
-				<label for="currency_code"><?php esc_html_e( 'Store currency', 'woocommerce' ); ?></label>
+				<label for="currency_code"><?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?></label>
 				<select id="currency_code" name="currency_code" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 					<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
@@ -333,7 +333,6 @@ class WC_Admin_Setup_Wizard {
 					<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
 				</select>
 			</div>
-			<p><?php esc_html_e( 'Transforming your site into an online store requires WooCommerce to create a few pages for you. These pages are: shop, cart, my account, and checkout.', 'woocommerce' ); ?></p>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 				<div>
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
@@ -622,7 +621,7 @@ class WC_Admin_Setup_Wizard {
 		if ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in the %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment. Live rates are powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
+				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
 				$country_name,
 				$wcs_carrier
 			);
@@ -678,7 +677,14 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 
 			<div>
-				<label for="weight_unit"><?php esc_html_e( 'Weight unit', 'woocommerce' ); ?></label>
+				<label for="weight_unit">
+					<span class="wc-wizard-setting-name">
+						<?php esc_html_e( 'Weight unit', 'woocommerce' ); ?>
+					</span>
+					<span class="wc-wizard-setting-description">
+						<?php echo esc_html_x( '— used to calculate shipping rates.', 'Weight unit setting description', 'woocommerce' ); ?>
+					</span>
+				</label>
 				<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
 					<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
 					<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
@@ -687,7 +693,14 @@ class WC_Admin_Setup_Wizard {
 				</select>
 			</div>
 			<div>
-				<label for="dimension_unit"><?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?></label>
+				<label for="dimension_unit">
+					<span class="wc-wizard-setting-name">
+						<?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?>
+					</span>
+					<span class="wc-wizard-setting-description">
+						<?php echo esc_html_x( '— used to select accurate packages.', 'Dimension unit setting description', 'woocommerce' ); ?>
+					</span>
+				</label>
 				<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
 					<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
 					<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
@@ -854,16 +867,23 @@ class WC_Admin_Setup_Wizard {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
-			__( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more about Stripe</a>.', 'woocommerce' ),
+			__( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-stripe/'
 		) . '</p>';
-		$stripe_fee_notice  = '<p class="payment-gateway-fee">' . __( 'Fee: 2.9%% + 30¢ per transaction', 'woocommerce' ) . '</p>';
+		$paypal_bt_description = '<p>' . sprintf(
+			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/'
+		) . '</p>';
+		$paypal_ec_description = '<p>' . sprintf(
+			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
+		) . '</p>';
 
 		$gateways = array(
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => $stripe_description . $stripe_fee_notice,
+				'description' => $stripe_description,
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'email' => array(
@@ -878,13 +898,13 @@ class WC_Admin_Setup_Wizard {
 			'braintree_paypal' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>.',
+				'description' => $paypal_bt_description,
 				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
 			),
 			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-				'description' => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ) . ' <a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">' . __( 'Learn more about PayPal', 'woocommerce' ) . '</a>',
+				'description' => $paypal_ec_description,
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			),
 			'paypal' => array(
@@ -1000,20 +1020,19 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step.
+	 * Payment Step.
 	 */
-	public function wc_setup_payments() {
+	public function wc_setup_payment() {
 		$featured_gateways = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_featured_service' ) );
 		$in_cart_gateways  = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_not_featured_service' ) );
 		$manual_gateways   = $this->get_wizard_manual_payment_gateways();
 		?>
-		<h1><?php esc_html_e( 'Payments', 'woocommerce' ); ?></h1>
+		<h1><?php esc_html_e( 'Payment', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
 			<p>
 				<?php printf( __(
-					'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later and managed from the <a href="%2$s" target="_blank">checkout settings</a> screen.', 'woocommerce' ),
-					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) ),
-					esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) )
+					'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later.', 'woocommerce' ),
+					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) )
 				); ?>
 			</p>
 			<?php if ( $featured_gateways ) : ?>
@@ -1036,7 +1055,7 @@ class WC_Admin_Setup_Wizard {
 						<?php esc_html_e( 'Offline Payments', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-service-description">
-						<?php esc_html_e( 'Collect payments from customers outside your online store.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Collect payments from customers offline.', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
 							<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
@@ -1056,9 +1075,9 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step save.
+	 * Payment Step save.
 	 */
-	public function wc_setup_payments_save() {
+	public function wc_setup_payment_save() {
 		check_admin_referer( 'wc-setup' );
 
 		// Install WooCommerce Services with Stripe to enable deferred account creation.
@@ -1097,15 +1116,20 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_extras() {
 		?>
 		<h1><?php esc_html_e( 'Extras', 'woocommerce' ); ?></h1>
-		<p><?php esc_html_e( 'Enhance your store with these extra features and themes.', 'woocommerce' ); ?></p>
+		<p><?php esc_html_e( 'Make the most of your store.', 'woocommerce' ); ?></p>
 		<form method="post">
 			<?php if ( $this->should_show_theme_extra() ) : ?>
 			<ul class="wc-wizard-services featured">
 				<li class="wc-wizard-service-item">
 					<div class="wc-wizard-service-description">
-						<h3><?php esc_html_e( 'Storefront (Recommended)', 'woocommerce' ); ?></h3>
+						<h3><?php esc_html_e( 'Storefront Theme', 'woocommerce' ); ?></h3>
 						<p>
-							<?php esc_html_e( 'Your theme is not compatible with WooCommerce. We recommend you switch over to Storefront, a free WordPress theme built and maintained by the makers of WooCommerce. If enabled, Storefront will be installed and activated for you.', 'woocommerce' ); ?>
+							<?php esc_html_e( 'Your theme is not compatible with WooCommerce. We recommend you switch to Storefront, a free WordPress theme built and maintained by the makers of WooCommerce. If toggled on, Storefront will be installed and activated for you.', 'woocommerce' ); ?>
+						</p>
+						<p class="wc-wizard-service-learn-more">
+							<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank">
+								<?php esc_html_e( 'Learn more about Storefront', 'woocommerce' ); ?>
+							</a>
 						</p>
 					</div>
 
@@ -1201,19 +1225,19 @@ class WC_Admin_Setup_Wizard {
 		$rates_enabled   = $domestic_rates || $intl_rates;
 
 		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like Stripe payments, automated taxes, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $stripe_enabled && $taxes_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments and automated taxes.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like Stripe payments and automated taxes, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $stripe_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments, live rates, and discounted shipping labels.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like Stripe payments, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $stripe_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to Stripe payments.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like Stripe payments, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $taxes_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes, live rates, and discounted shipping labels.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like automated taxes, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $taxes_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to automated taxes.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like automated taxes, just connect with Jetpack.', 'woocommerce' );
 		} else if ( $rates_enabled ) {
-			$description = __( 'Your store is almost ready. Connect to Jetpack for full access to live rates and discounted shipping labels.', 'woocommerce' );
+			$description = __( 'Your store is almost ready! To activate services like live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
 		}
 		?>
 		<form method="post" class="activate-jetpack">
@@ -1223,9 +1247,9 @@ class WC_Admin_Setup_Wizard {
 			<?php endif; ?>
 			<div>
 				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
-				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect to Jetpack through WordPress.com', 'woocommerce' ); ?>" />
+				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
 				<input type="hidden" name="save_step" value="activate" />
-				<h3><?php esc_html_e( "Reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
+				<h3><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			</div>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item first">
@@ -1233,15 +1257,15 @@ class WC_Admin_Setup_Wizard {
 						<strong><?php esc_html_e( 'Better security', 'woocommerce' ); ?></strong>
 					</p>
 					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Automatically block attacks and protect your store from unauthorized access.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Protect your store from unauthorized access.', 'woocommerce' ); ?>
 					</p>
 				</li>
 				<li class="wc-wizard-feature-item last">
 					<p class="wc-wizard-feature-name">
-						<strong><?php esc_html_e( 'Store management', 'woocommerce' ); ?></strong>
+						<strong><?php esc_html_e( 'Store stats', 'woocommerce' ); ?></strong>
 					</p>
 					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Manage multiple stores and update extensions from a single dashboard.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Get insights on how your store is doing, including total sales, top products, and more.', 'woocommerce' ); ?>
 					</p>
 				</li>
 				<li class="wc-wizard-feature-item first">
@@ -1249,7 +1273,7 @@ class WC_Admin_Setup_Wizard {
 						<strong><?php esc_html_e( 'Store monitoring', 'woocommerce' ); ?></strong>
 					</p>
 					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Get an alert if any downtime is detected on your store.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Get an alert if your store is down for even a few minutes.', 'woocommerce' ); ?>
 					</p>
 				</li>
 				<li class="wc-wizard-feature-item last">
@@ -1314,24 +1338,23 @@ class WC_Admin_Setup_Wizard {
 			$docs_url
 		);
 		?>
-		<h1><?php esc_html_e( 'Your store is ready!', 'woocommerce' ); ?></h1>
-		<p><?php esc_html_e( 'Your WooCommerce store is all set to go. You can start adding products to your store.', 'woocommerce' ); ?></p>
+		<h1><?php esc_html_e( "You're ready to start selling!", 'woocommerce' ); ?></h1>
+		<p><?php esc_html_e( 'Your WooCommerce store is ready to go.', 'woocommerce' ); ?></p>
 
 		<div class="woocommerce-message woocommerce-newsletter">
-			<p><?php esc_html_e( 'Join the WooCommerce mailing list for help getting started, tips, and product updates.', 'woocommerce' ); ?></p>
+			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
 			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
 				<input type="email" value="<?php echo esc_attr( $user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required>
-				<input type="submit" value="<?php esc_html_e( 'Subscribe', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+				<input type="submit" value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
 			</form>
 		</div>
 
 		<ul class="wc-wizard-next-steps">
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
-					<?php // TODO: tailor this text based on number of products? ?>
 					<p><small><?php esc_html_e( 'Next step', 'woocommerce' ); ?></small></p>
 					<h3><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( "Your site doesn't have any products listed. Add a product to start selling.", 'woocommerce' ); ?></p>
+					<p><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
@@ -1343,7 +1366,7 @@ class WC_Admin_Setup_Wizard {
 				<div class="wc-wizard-next-step-description">
 					<p><small><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></small></p>
 					<h3><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( 'You can transfer your existing products over by importing them with a CSV file.', 'woocommerce' ); ?></p>
+					<p><?php esc_html_e( 'Transfer existing products to your new store — just import a CSV file.', 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
