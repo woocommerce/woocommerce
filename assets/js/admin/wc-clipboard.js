@@ -15,7 +15,7 @@ function wcSetClipboard( data, $el ) {
 	if ( 'undefined' === typeof $el ) {
 		$el = jQuery( document );
 	}
-	var $temp_input = jQuery( '<textarea style="visibility:none">' );
+	var $temp_input = jQuery( '<textarea style="opacity:0">' );
 	jQuery( 'body' ).append( $temp_input );
 	$temp_input.val( data ).select();
 
