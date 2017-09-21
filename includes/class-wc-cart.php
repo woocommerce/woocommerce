@@ -1753,7 +1753,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_fees() {
-		return $this->fees_api()->get_fees();
+		$fees = $this->fees_api()->get_fees();
+
+		if ( ! empty( $this->fees ) ) {
+			wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'Fees should only be added through the Fees API (%s)', 'WC_Cart::add_fee()' ) );
+			$fees = $fees + $this->fees;
+		}
+		return $fees;
 	}
 
 	/**
