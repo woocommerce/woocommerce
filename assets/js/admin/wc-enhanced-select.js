@@ -136,16 +136,16 @@ jQuery( function( $ ) {
 						$( this ).on( 'change', function(){
 							var $children = $( this ).children();
 							$children.sort(function(a, b){
- 								var atext = a.text.toLowerCase();
-       							var btext = b.text.toLowerCase();
+								var atext = a.text.toLowerCase();
+								var btext = b.text.toLowerCase();
 
-       							if (atext > btext) {
-         							return 1;
-       							}
-       							if (atext < btext) {
-         							return -1;
-       							}
-       							return 0;
+								if ( atext > btext ) {
+									return 1;
+								}
+								if ( atext < btext ) {
+									return -1;
+								}
+								return 0;
 							});
 							$( this ).html( $children );
 						});
@@ -164,7 +164,7 @@ jQuery( function( $ ) {
 						ajax: {
 							url:         wc_enhanced_select_params.ajax_url,
 							dataType:    'json',
-							delay:       250,
+							delay:       1000,
 							data:        function( params ) {
 								return {
 									term:     params.term,

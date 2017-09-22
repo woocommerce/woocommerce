@@ -525,6 +525,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'download_limit'    => 'absint',
 			'download_expiry'   => 'absint',
 			'product_url'       => 'esc_url_raw',
+			'menu_order'        => 'intval',
 		);
 
 		/**
@@ -581,12 +582,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function expand_data( $data ) {
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
-		// Status is mapped from a special published field.
-		if ( isset( $data['published'] ) ) {
-			$data['status'] = ( $data['published'] ? 'publish' : 'draft' );
-			unset( $data['published'] );
-		}
-
 		// Images field maps to image and gallery id fields.
 		if ( isset( $data['images'] ) ) {
 			$images               = $data['images'];
@@ -606,6 +601,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// Convert type to string.
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
+		}
+
+		// Status is mapped from a special published field.
+		if ( isset( $data['published'] ) ) {
+			$non_published_status = isset( $data['type'] ) && 'variation' === $data['type'] ? 'private' : 'draft';
+			$data['status']       = ( $data['published'] ? 'publish' : $non_published_status );
+			unset( $data['published'] );
 		}
 
 		if ( isset( $data['stock_quantity'] ) ) {
@@ -805,6 +807,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+			do_action( 'woocommerce_product_import_before_import', $parsed_data );
+
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
 			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 			$id_exists  = false;

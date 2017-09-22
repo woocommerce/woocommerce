@@ -41,7 +41,7 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function populate_untested_plugins( $plugins, $header ) {
-		if ( $this->updates::VERSION_TESTED_HEADER === $header && ! empty( $this->plugins ) ) {
+		if ( WC_Plugin_Updates::VERSION_TESTED_HEADER === $header && ! empty( $this->plugins ) ) {
 			$plugins = $this->plugins;
 			update_option( 'active_plugins', array_keys( $this->plugins ) );
 		}
@@ -58,20 +58,20 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$this->plugins = array(
 			'test/test.php' => array(
-				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.0.0',
+				'Name'                                   => 'Test plugin',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.0.0',
 			),
 			'test2/test2.php' => array(
-				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '5.0',
+				'Name'                                   => 'Test plugin 2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '5.0',
 			),
 			'test3/test3.php' => array(
-				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				'Name'                                   => 'Test plugin 3',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test4/test4.php' => array(
-				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => '4.0.1',
+				'Name'                                   => 'Test plugin 4',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.0.1',
 			),
 		);
 		$new_version = '4.0.0';
@@ -113,26 +113,31 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$this->plugins = array(
 			'test/test.php' => array(
-				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '3.0.0',
+				'Name'                                   => 'Test plugin',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0.0',
 			),
 			'test2/test2.php' => array(
-				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '3.9.9',
+				'Name'                                   => 'Test plugin 2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.9.9',
 			),
 			'test3/test3.php' => array(
-				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '3.0',
+				'Name'                                   => 'Test plugin 3',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0',
 			),
 		);
+		$plugin_keys = array_keys( $this->plugins );
+
 		$new_version = '4.0.0';
-		$this->assertArraySubset( $this->plugins, $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		$new_version = '4.3.0';
-		$this->assertArraySubset( $this->plugins, $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		$new_version = '4.0.2';
-		$this->assertArraySubset( $this->plugins, $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 	}
 
 	/**
@@ -145,30 +150,42 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$this->plugins = array(
 			'test/test.php' => array(
-				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				'Name'                                   => 'Test plugin',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test2/test2.php' => array(
-				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '5.0.0',
+				'Name'                                   => 'Test plugin 2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '5.0.0',
 			),
 			'test3/test3.php' => array(
-				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.1',
+				'Name'                                   => 'Test plugin 3',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.1',
 			),
 			'test4/test4.php' => array(
-				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => '4.2.1',
+				'Name'                                   => 'Test plugin 4',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.2.1',
 			),
 		);
 		$new_version = '4.1.0';
-		$this->assertEquals( array(), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
+		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '4.2.0';
-		$this->assertEquals( 2, count( $this->updates->get_untested_plugins( $new_version, $release ) ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
+		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '4.1.5';
-		$this->assertEquals( array(), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
+		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 	}
 
 	/**
@@ -181,29 +198,33 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$this->plugins = array(
 			'test/test.php' => array(
-				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4.1.0',
+				'Name'                                   => 'Test plugin',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.1.0',
 			),
 			'test2/test2.php' => array(
-				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => '3.9.0',
+				'Name'                                   => 'Test plugin 2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.9.0',
 			),
 			'test3/test3.php' => array(
-				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => '4.2',
+				'Name'                                   => 'Test plugin 3',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4.2',
 			),
 		);
+		$plugin_keys = array_keys( $this->plugins );
+
 		$new_version = '4.3.0';
-		$this->assertEquals( $this->plugins, $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		$new_version = '4.3.1';
-		$this->assertEquals( $this->plugins, $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		$new_version = '4.1.0';
-		$this->assertEquals( array( 'test2/test2.php' => $this->plugins['test2/test2.php'] ), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$this->assertArrayHasKey( 'test2/test2.php', $this->updates->get_untested_plugins( $new_version, $release ) );
 
 		$new_version = '4.1.5';
-		$this->assertEquals( array( 'test2/test2.php' => $this->plugins['test2/test2.php'] ), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$this->assertArrayHasKey( 'test2/test2.php', $this->updates->get_untested_plugins( $new_version, $release ) );
 	}
 
 	/**
@@ -217,29 +238,33 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$this->plugins = array(
 			'test/test.php' => array(
-				'Name'                                => 'Test plugin',
-				$this->updates::VERSION_TESTED_HEADER => '4',
+				'Name'                                   => 'Test plugin',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => '4',
 			),
 			'test2/test2.php' => array(
-				'Name'                                => 'Test plugin 2',
-				$this->updates::VERSION_TESTED_HEADER => 'Latest release',
+				'Name'                                   => 'Test plugin 2',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => 'Latest release',
 			),
 			'test3/test3.php' => array(
-				'Name'                                => 'Test plugin 3',
-				$this->updates::VERSION_TESTED_HEADER => 'WC 3.0.0',
+				'Name'                                   => 'Test plugin 3',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => 'WC 3.0.0',
 			),
 			'test4/test4.php' => array(
-				'Name'                                => 'Test plugin 4',
-				$this->updates::VERSION_TESTED_HEADER => ' ',
+				'Name'                                   => 'Test plugin 4',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => ' ',
 			),
 		);
 
 		$release = 'major';
 		$new_version = '5.0.0';
-		$this->assertArraySubset( array( 'test/test.php' => $this->plugins['test/test.php'] ), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$this->assertArrayHasKey( 'test/test.php', $this->updates->get_untested_plugins( $new_version, $release ) );
 
 		$release = 'minor';
 		$new_version = '4.1.0';
-		$this->assertEquals( array(), $this->updates->get_untested_plugins( $new_version, $release ) );
+		$untested = $this->updates->get_untested_plugins( $new_version, $release );
+		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
+		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 	}
 }

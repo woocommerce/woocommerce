@@ -129,7 +129,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		 $time = time();
 		 $getters_and_setters = array(
 			 'button_text' => 'Test Button Text',
-			 'product_url' => 'http://wordpress.org',
+			 'product_url' => 'https://wordpress.org',
 		 );
 		 $product = new WC_Product_External;
 		  foreach ( $getters_and_setters as $function => $value ) {

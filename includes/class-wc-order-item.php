@@ -265,7 +265,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( ! $include_all && $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
 				continue;
 			}
 

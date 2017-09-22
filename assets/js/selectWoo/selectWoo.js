@@ -772,6 +772,14 @@ S2.define('select2/utils',[
     $element.append($nodes);
   };
 
+  // Determine whether the browser is on a touchscreen device.
+  Utils.isTouchscreen = function() {
+    if ('undefined' === typeof Utils._isTouchscreenCache) {
+      Utils._isTouchscreenCache = 'ontouchstart' in document.documentElement;
+    }
+    return Utils._isTouchscreenCache;
+  }
+
   return Utils;
 });
 
@@ -791,7 +799,7 @@ S2.define('select2/results',[
 
   Results.prototype.render = function () {
     var $results = $(
-      '<ul class="select2-results__options" role="listbox"></ul>'
+      '<ul class="select2-results__options" role="listbox" tabindex="-1"></ul>'
     );
 
     if (this.options.get('multiple')) {
@@ -949,7 +957,8 @@ S2.define('select2/results',[
 
     var attrs = {
       'role': 'option',
-      'data-selected': 'false'
+      'data-selected': 'false',
+      'tabindex': -1
     };
 
     if (data.disabled) {
@@ -988,6 +997,7 @@ S2.define('select2/results',[
 
       var $label = $(label);
       this.template(data, label);
+      $label.attr('role', 'presentation');
 
       var $children = [];
 
@@ -1000,10 +1010,11 @@ S2.define('select2/results',[
       }
 
       var $childrenContainer = $('<ul></ul>', {
-        'class': 'select2-results__options select2-results__options--nested'
+        'class': 'select2-results__options select2-results__options--nested',
+        'role': 'listbox'
       });
-
       $childrenContainer.append($children);
+      $option.attr('role', 'list');
 
       $option.append(label);
       $option.append($childrenContainer);
@@ -1695,7 +1706,7 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
-      var formatted = this.display(selection, $selection);
+      var formatted = this.display(selection, $selection).trim();
 
       $selection.append(formatted);
       $selection.prop('title', selection.title || selection.text);
@@ -5400,9 +5411,16 @@ S2.define('select2/core',[
       });
     });
 
-    this.on('keypress', function (evt) {
-      var key = evt.which;
+    this.on('open', function(){
+      // Focus on the active element when opening dropdown.
+      // Needs 1 ms delay because of other 1 ms setTimeouts when rendering.
+      setTimeout(function(){
+        self.focusOnActiveElement();
+      },1);
+    });
 
+    $(document).on('keydown', function (evt) {
+      var key = evt.which;
       if (self.isOpen()) {
         if (key === KEYS.ESC || key === KEYS.TAB ||
             (key === KEYS.UP && evt.altKey)) {
@@ -5426,15 +5444,40 @@ S2.define('select2/core',[
 
           evt.preventDefault();
         }
-      } else {
+
+        // Move the focus to the selected element on keyboard navigation.
+        // Required for screen readers to work properly.
+        if (key === KEYS.DOWN || key === KEYS.UP) {
+            self.focusOnActiveElement();
+        } else {
+          // Focus on the search if user starts typing.
+          var $searchField = self.$dropdown.find('.select2-search__field');
+          if (! $searchField.length) {
+            $searchField = self.$container.find('.select2-search__field');
+          }
+          $searchField.focus();
+          // Focus back to active selection when finished typing.
+          // Small delay so typed character can be read by screen reader.
+          setTimeout(function(){
+              self.focusOnActiveElement();
+          }, 1000);
+        }
+
+      } else if (self.hasFocus()) {
         if (key === KEYS.ENTER || key === KEYS.SPACE ||
             (key === KEYS.DOWN && evt.altKey)) {
           self.open();
-
           evt.preventDefault();
         }
       }
     });
+  };
+
+  Select2.prototype.focusOnActiveElement = function () {
+    // Don't mess with the focus on touchscreens because it causes havoc with on-screen keyboards.
+    if (! Utils.isTouchscreen()) {
+      this.$results.find('li.select2-results__option--highlighted').focus();
+    }
   };
 
   Select2.prototype._syncAttributes = function () {

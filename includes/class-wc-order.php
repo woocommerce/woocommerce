@@ -1300,7 +1300,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function has_downloadable_item() {
 		foreach ( $this->get_items() as $item ) {
-			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->has_file() ) {
 				return true;
 			}
 		}
@@ -1751,7 +1751,7 @@ class WC_Order extends WC_Abstract_Order {
 				$refunded_item_id = (int) $refunded_item->get_meta( '_refunded_item_id' );
 				if ( $refunded_item_id === $item_id ) {
 					$taxes = $refunded_item->get_taxes();
-					$total += isset( $taxes['total'][ $tax_id ] ) ? $taxes['total'][ $tax_id ] : 0;
+					$total += isset( $taxes['total'][ $tax_id ] ) ? (float) $taxes['total'][ $tax_id ] : 0;
 					break;
 				}
 			}
@@ -1838,6 +1838,7 @@ class WC_Order extends WC_Abstract_Order {
 		$total_rows  = array();
 
 		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );

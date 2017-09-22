@@ -25,7 +25,6 @@ class WC_Admin_Assets {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_head',            array( $this, 'product_taxonomy_styles' ) );
 	}
 
 	/**
@@ -306,6 +305,7 @@ class WC_Admin_Assets {
 				'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 				'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
 				'i18n_apply_coupon'             => __( 'Enter a coupon code to apply to this order.', 'woocommerce' ),
+				'i18n_add_fee'                  => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -384,27 +384,6 @@ class WC_Admin_Assets {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Admin Head.
-	 *
-	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
-	 */
-	public function product_taxonomy_styles() {
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-		?>
-		<style type="text/css">
-			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset( $_GET['taxonomy'] ) && 'product_tag' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -301px -5px !important; }
-			<?php endif; ?>
-		</style>
-		<?php
 	}
 }
 

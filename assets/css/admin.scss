@@ -21,6 +21,19 @@
 
 .wc_addons_wrap {
 
+	.update-plugins .update-count  {
+		background-color: #d54e21;
+		border-radius: 10px;
+		color: #fff;
+		display: inline-block;
+		font-size: 9px;
+		font-weight: 600;
+		line-height: 17px;
+		margin: 1px 0 0 2px;
+		padding: 0 6px;
+		vertical-align: text-top;
+	}
+
 	.addons-featured {
 		max-width: 1140px;
 		margin: -1%;
@@ -566,7 +579,6 @@ table.wc_status_table {
 	}
 
 	td, th {
-		padding: 2em;
 		font-size: 1.1em;
 		font-weight: normal;
 
@@ -602,6 +614,12 @@ table.wc_status_table {
 
 	.help_tip {
 		cursor: help;
+	}
+}
+
+table.wc_status_table--tools {
+	td, th {
+		padding: 2em;
 	}
 }
 
@@ -3099,7 +3117,6 @@ img.help_tip {
 		input[type="text"],
 		input[type="number"],
 		input[type="email"] {
-			padding: 6px;
 			height: auto;
 		}
 
@@ -3120,6 +3137,18 @@ img.help_tip {
 			margin: 0;
 			padding: 6px;
 			box-sizing: border-box;
+		}
+
+		// Ignore nested inputs.
+		table {
+			select,
+			textarea,
+			input[type="text"],
+			input[type="email"],
+			input[type="number"],
+			input.regular-input {
+				width: auto;
+			}
 		}
 
 		textarea.wide-input {
@@ -3222,6 +3251,10 @@ img.help_tip {
 
 			label {
 				margin-left: 10px;
+			}
+
+			input {
+				width: auto;
 			}
 		}
 
@@ -4333,7 +4366,7 @@ img.help_tip {
 		width: 100%;
 		vertical-align: middle;
 		margin: 2px 0 0;
-		padding: 6px;
+		padding: 5px;
 	}
 
 	select {

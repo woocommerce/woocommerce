@@ -41,7 +41,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
-			this.$checkout_form.on( 'change keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
+			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
 
 			// Address fields
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
@@ -247,7 +247,17 @@ jQuery( function( $ ) {
 				s_postcode		 = postcode,
 				s_city			 = city,
 				s_address		 = address,
-				s_address_2		 = address_2;
+				s_address_2		 = address_2,
+				$required_inputs = $( wc_checkout_form.$checkout_form ).find( '.address-field.validate-required:visible' ),
+				has_full_address = true;
+
+			if ( $required_inputs.length ) {
+				$required_inputs.each( function() {
+					if ( $( this ).find( ':input' ).val() === '' ) {
+						has_full_address = false;
+					}
+				});
+			}
 
 			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
 				s_country		 = $( '#shipping_country' ).val();
@@ -259,21 +269,22 @@ jQuery( function( $ ) {
 			}
 
 			var data = {
-				security:					wc_checkout_params.update_order_review_nonce,
-				payment_method:				wc_checkout_form.get_payment_method(),
-				country:					country,
-				state:						state,
-				postcode:					postcode,
-				city:						city,
-				address:					address,
-				address_2:					address_2,
-				s_country:					s_country,
-				s_state:					s_state,
-				s_postcode:					s_postcode,
-				s_city:						s_city,
-				s_address:					s_address,
-				s_address_2:				s_address_2,
-				post_data:					$( 'form.checkout' ).serialize()
+				security        : wc_checkout_params.update_order_review_nonce,
+				payment_method  : wc_checkout_form.get_payment_method(),
+				country         : country,
+				state           : state,
+				postcode        : postcode,
+				city            : city,
+				address         : address,
+				address_2       : address_2,
+				s_country       : s_country,
+				s_state         : s_state,
+				s_postcode      : s_postcode,
+				s_city          : s_city,
+				s_address       : s_address,
+				s_address_2     : s_address_2,
+				has_full_address: has_full_address,
+				post_data       : $( 'form.checkout' ).serialize()
 			};
 
 			if ( false !== args.update_shipping_method ) {

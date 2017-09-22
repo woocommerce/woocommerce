@@ -816,7 +816,11 @@ class WC_Tax {
 	private static function prepare_tax_rate( $tax_rate ) {
 		foreach ( $tax_rate as $key => $value ) {
 			if ( method_exists( __CLASS__, 'format_' . $key ) ) {
-				$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
+				if ( 'tax_rate_state' === $key ) {
+					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), sanitize_key( $value ) );
+				} else {
+					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
+				}
 			}
 		}
 		return $tax_rate;

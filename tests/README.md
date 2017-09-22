@@ -47,8 +47,8 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
 ## Automated Tests
 
-Tests are automatically run with [Travis-CI](https://travis-ci.org) for each commit and pull request.
+Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
 
 ## Code Coverage
 
-Code coverage is available on [Coveralls](https://coveralls.io/) which receives updated data after each Travis build.
+Code coverage is available on [Scrutinizer](https://scrutinizer-ci.com/g/woocommerce/woocommerce/) and [Code Climate](https://codeclimate.com/github/woocommerce/woocommerce) which receives updated data after each Travis build.

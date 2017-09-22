@@ -36,26 +36,27 @@ class WC_Helper_Plugin_Info {
 			return $response;
 		}
 
-		$found_plugin = null;
-
-		// Look through local Woo plugins by slugs.
-		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
-			$slug = dirname( $plugin['_filename'] );
-			if ( dirname( $plugin['_filename'] ) === $args->slug ) {
-				$plugin['_slug'] = $args->slug;
-				$found_plugin = $plugin;
-				break;
-			}
-		}
-
-		if ( ! $found_plugin ) {
+		// Only for slugs that start with woo-
+		if ( 0 !== strpos( $args->slug, 'woocommerce-com-' ) ) {
 			return $response;
 		}
 
+		$clean_slug = str_replace( 'woocommerce-com-', '', $args->slug );
+
+		// Look through update data by slug.
+		$update_data = WC_Helper_Updater::get_update_data();
+		$products = wp_list_filter( $update_data, array( 'slug' => $clean_slug ) );
+
+		if ( empty( $products ) ) {
+			return $response;
+		}
+
+		$product_id = array_keys( $products );
+		$product_id = array_shift( $product_id );
+
 		// Fetch the product information from the Helper API.
 		$request = WC_Helper_API::get( add_query_arg( array(
-			'product_id' => absint( $plugin['_product_id'] ),
-			'product_slug' => rawurlencode( $plugin['_slug'] ),
+			'product_id' => absint( $product_id ),
 		), 'info' ), array( 'authenticated' => true ) );
 
 		$results = json_decode( wp_remote_retrieve_body( $request ), true );

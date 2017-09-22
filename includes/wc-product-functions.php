@@ -560,14 +560,12 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
  * Get product ID by SKU.
  *
  * @since  2.3.0
- * @param  string $sku
+ * @param  string $sku Product SKU.
  * @return int
  */
 function wc_get_product_id_by_sku( $sku ) {
 	$data_store = WC_Data_Store::load( 'product' );
-	$product_id = $data_store->get_product_id_by_sku( $sku );
-
-	return ( $product_id ) ? intval( $product_id ) : 0;
+	return $data_store->get_product_id_by_sku( $sku );
 }
 
 /**

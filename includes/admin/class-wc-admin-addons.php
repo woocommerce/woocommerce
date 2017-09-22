@@ -477,6 +477,15 @@ class WC_Admin_Addons {
 		$theme           = wp_get_theme();
 		$section_keys    = array_keys( $sections );
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
+
+		/**
+		 * Addon page view.
+		 *
+		 * @uses $sections
+		 * @uses $theme
+		 * @uses $section_keys
+		 * @uses $current_section
+		 */
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-addons.php' );
 	}
 

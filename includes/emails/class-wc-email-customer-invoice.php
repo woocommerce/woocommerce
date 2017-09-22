@@ -20,20 +20,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 class WC_Email_Customer_Invoice extends WC_Email {
 
 	/**
-	 * Strings to find in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $find;
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $replace;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {

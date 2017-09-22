@@ -192,7 +192,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			$column = 'meta_key';
 		}
 
-		$key = $this->identifier . '_batch_%';
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
 		$count = $wpdb->get_var( $wpdb->prepare( "
 		SELECT COUNT(*)
@@ -267,7 +267,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			$value_column = 'meta_value';
 		}
 
-		$key = $this->identifier . '_batch_%';
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
 		$query = $wpdb->get_row( $wpdb->prepare( "
 		SELECT *

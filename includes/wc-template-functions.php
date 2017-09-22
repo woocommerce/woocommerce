@@ -821,7 +821,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
 
-		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() || $wp_query->is_search() ) {
+		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
@@ -835,6 +835,11 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
+
+		if ( $wp_query->is_search() ) {
+			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
+			unset( $catalog_orderby_options['menu_order'] );
+		}
 
 		if ( ! $show_default_orderby ) {
 			unset( $catalog_orderby_options['menu_order'] );

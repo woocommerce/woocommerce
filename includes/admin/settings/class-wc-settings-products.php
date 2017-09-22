@@ -364,7 +364,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'File download method', 'woocommerce' ),
-					'desc'     => __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
+					'desc'     => sprintf(
+						/* translators: 1: X-Accel-Redirect 2: X-Sendfile 3: mod_xsendfile */
+						__( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, %1$s / %2$s can be used to serve downloads instead (server requires %3$s).', 'woocommerce' ),
+						'<code>X-Accel-Redirect</code>',
+						'<code>X-Sendfile</code>',
+						'<code>mod_xsendfile</code>'
+					),
 					'id'       => 'woocommerce_file_download_method',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',

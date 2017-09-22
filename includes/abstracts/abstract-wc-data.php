@@ -277,7 +277,7 @@ abstract class WC_Data {
 	 */
 	protected function is_internal_meta_key( $key ) {
 		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.2.0' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
 
 			return true;
 		}

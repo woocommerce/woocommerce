@@ -721,6 +721,8 @@ jQuery( function( $ ) {
 						} else {
 							data.value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
 						}
+					} else {
+						return;
 					}
 					break;
 				case 'variable_regular_price' :
@@ -736,6 +738,8 @@ jQuery( function( $ ) {
 
 					if ( value != null ) {
 						data.value = value;
+					} else {
+						return;
 					}
 					break;
 				case 'variable_sale_schedule' :
@@ -748,6 +752,10 @@ jQuery( function( $ ) {
 
 					if ( null === data.date_to ) {
 						data.date_to = false;
+					}
+
+					if ( false === data.date_to && false === data.date_from ) {
+						return;
 					}
 					break;
 				default :
