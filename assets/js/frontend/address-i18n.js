@@ -65,7 +65,13 @@ jQuery( function( $ ) {
 
 							if ( locale['default'][ key ].placeholder ) {
 								field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].placeholder );
+
+							// Use the label as a placeholder if there is no label element and no placeholder.
+							} else if ( locale['default'][ key ].label && ! field.find( 'label' ).length ) {
+								field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].label );
+								field.find( '.select2-selection__placeholder' ).text( locale['default'][ key ].label );
 							}
+
 						}
 
 						if ( locale['default'][ key ].required === true ) {
