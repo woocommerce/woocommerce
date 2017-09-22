@@ -21,9 +21,9 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_rating_filter';
-		$this->widget_description = __( 'Filter products by rating when viewing product archives and categories.', 'woocommerce' );
+		$this->widget_description = __( 'Display a list of star ratings to filter products in your store.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_rating_filter';
-		$this->widget_name        = __( 'WooCommerce average rating filter', 'woocommerce' );
+		$this->widget_name        = __( 'Filter Products by Rating', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',

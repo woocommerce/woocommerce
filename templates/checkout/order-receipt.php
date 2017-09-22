@@ -42,6 +42,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 </ul>
 
-<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
+<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order->get_id() ); ?>
 
 <div class="clear"></div>

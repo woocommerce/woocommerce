@@ -45,13 +45,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * An array of fees.
-	 *
-	 * @var array
-	 */
-	public $fees = array();
-
-	/**
 	 * Are prices in the cart displayed inc or excl tax.
 	 *
 	 * @var string
@@ -102,10 +95,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $session;
 
 	/**
+	 * Reference to the cart fees API class.
+	 *
+	 * @var WC_Cart_Fees
+	 */
+	protected $fees_api;
+
+	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
 		$this->session          = new WC_Cart_Session( $this );
+		$this->fees_api         = new WC_Cart_Fees( $this );
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
@@ -184,13 +185,24 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get a total.
+	 *
+	 * @since 3.2.0
+	 * @param string $key Key of element in $totals array.
+	 * @return mixed
+	 */
+	protected function get_totals_var( $key ) {
+		return isset( $this->totals[ $key ] ) ? $this->totals[ $key ] : $this->default_totals[ $key ];
+	}
+
+	/**
 	 * Get subtotal.
 	 *
 	 * @since 3.2.0
 	 * @return float
 	 */
 	public function get_subtotal() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'subtotal' ) );
 	}
 
 	/**
@@ -200,7 +212,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_subtotal_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['subtotal_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'subtotal_tax' ) );
 	}
 
 	/**
@@ -210,7 +222,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_discount_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_total'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'discount_total' ) );
 	}
 
 	/**
@@ -220,7 +232,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_discount_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['discount_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'discount_tax' ) );
 	}
 
 	/**
@@ -230,7 +242,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_shipping_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_total'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'shipping_total' ) );
 	}
 
 	/**
@@ -240,7 +252,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'shipping_tax' ) );
 	}
 
 	/**
@@ -250,7 +262,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_contents_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_total'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_total' ) );
 	}
 
 	/**
@@ -260,7 +272,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_cart_contents_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_tax' ) );
 	}
 
 	/**
@@ -271,7 +283,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_total( $context = 'view' ) {
-		$total = apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total'] );
+		$total = apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'total' ) );
 		return 'view' === $context ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
 	}
 
@@ -282,7 +294,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_total_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['total_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'total_tax' ) );
 	}
 
 	/**
@@ -292,7 +304,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_fee_total() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_total'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_total' ) );
 	}
 
 	/**
@@ -302,7 +314,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float
 	 */
 	public function get_fee_tax() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_tax'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_tax' ) );
 	}
 
 	/**
@@ -311,7 +323,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_shipping_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['shipping_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'shipping_taxes' ) );
 	}
 
 	/**
@@ -320,7 +332,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_cart_contents_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['cart_contents_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_taxes' ) );
 
 	}
 
@@ -330,7 +342,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 */
 	public function get_fee_taxes() {
-		return apply_filters( 'woocommerce_cart_' . __METHOD__, $this->totals['fee_taxes'] );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_taxes' ) );
 	}
 
 	/*
@@ -609,7 +621,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_totals     = array();
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
-		$this->fees                       = array();
 		$this->totals                     = $this->default_totals;
 
 		if ( $clear_persistent_cart ) {
@@ -919,7 +930,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
 
-			if ( $code || apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) === $key ) {
+			if ( $code || $key === apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) ) {
 				if ( ! isset( $tax_totals[ $code ] ) ) {
 					$tax_totals[ $code ] = new stdClass();
 					$tax_totals[ $code ]->amount = 0;
@@ -1195,12 +1206,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 		if ( 0 === $quantity || $quantity < 0 ) {
-			do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
+			do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key, $this );
 			unset( $this->cart_contents[ $cart_item_key ] );
 		} else {
 			$old_quantity = $this->cart_contents[ $cart_item_key ]['quantity'];
 			$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
-			do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity );
+			do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
 		}
 
 		if ( $refresh_totals ) {
@@ -1382,7 +1393,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function needs_shipping_address() {
-		return apply_filters( 'woocommerce_cart_needs_shipping_address', $this->needs_shipping() === true && ! wc_ship_to_billing_address_only() );
+		return apply_filters( 'woocommerce_cart_needs_shipping_address', true === $this->needs_shipping() && ! wc_ship_to_billing_address_only() );
 	}
 
 	/**
@@ -1695,61 +1706,60 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Add additional fee to the cart.
+	 * Trigger an action so 3rd parties can add custom fees.
 	 *
-	 * Fee is an amount of money charged for a particular piece of work
-	 * or for a particular right or service, and not supposed to be negative.
+	 * @since 2.0.0
+	 */
+	public function calculate_fees() {
+		do_action( 'woocommerce_cart_calculate_fees', $this );
+	}
+
+	/**
+	 * Return reference to fees API.
+	 *
+	 * @since  3.2.0
+	 * @return WC_Cart_Fees
+	 */
+	public function fees_api() {
+		return $this->fees_api;
+	}
+
+	/**
+	 * Add additional fee to the cart.
 	 *
 	 * This method should be called on a callback attached to the
 	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
 	 * persist.
 	 *
+	 * @uses WC_Cart_Fees::add_fee
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
 	 * @param bool   $taxable   Is the fee taxable? (default: false).
 	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-		$new_fee_id = sanitize_title( $name );
-
-		// Only add each fee once.
-		foreach ( $this->fees as $fee ) {
-			if ( $fee->id === $new_fee_id ) {
-				return;
-			}
-		}
-
-		$new_fee            = new stdClass();
-		$new_fee->id        = $new_fee_id;
-		$new_fee->name      = esc_attr( $name );
-		$new_fee->amount    = (float) esc_attr( $amount );
-		$new_fee->tax_class = $tax_class;
-		$new_fee->taxable   = $taxable ? true : false;
-		$new_fee->tax       = 0;
-		$new_fee->tax_data  = array();
-		$this->fees[]       = $new_fee;
+		$this->fees_api()->add_fee( array(
+			'name'      => $name,
+			'amount'    => (float) $amount,
+			'taxable'   => $taxable,
+			'tax_class' => $tax_class,
+		) );
 	}
 
 	/**
-	 * Get fees.
+	 * Return all added fees from the Fees API.
 	 *
+	 * @uses WC_Cart_Fees::get_fees
 	 * @return array
 	 */
 	public function get_fees() {
-		return array_filter( (array) $this->fees );
-	}
+		$fees = $this->fees_api()->get_fees();
 
-	/**
-	 * Calculate fees.
-	 */
-	public function calculate_fees() {
-		$this->fees = array();
-		$this->set_fee_total( 0 );
-		$this->set_fee_tax( 0 );
-		$this->set_fee_taxes( array() );
-
-		// Fire an action where developers can add their fees.
-		do_action( 'woocommerce_cart_calculate_fees', $this );
+		if ( ! empty( $this->fees ) ) {
+			wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'Fees should only be added through the Fees API (%s)', 'WC_Cart::add_fee()' ) );
+			$fees = $fees + $this->fees;
+		}
+		return $fees;
 	}
 
 	/**

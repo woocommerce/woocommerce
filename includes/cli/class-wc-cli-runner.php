@@ -233,9 +233,7 @@ class WC_CLI_Runner {
 			$before_invoke = null;
 			if ( empty( $command_args['when'] ) && \WP_CLI::get_config( 'debug' ) ) {
 				$before_invoke = function() {
-					if ( ! defined( 'SAVEQUERIES' ) ) {
-						define( 'SAVEQUERIES', true );
-					}
+					wc_maybe_define_constant( 'SAVEQUERIES', true );
 				};
 			}
 

@@ -215,7 +215,7 @@ class WC_Countries {
 	 */
 	public function get_allowed_countries() {
 		if ( 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
-			return $this->countries;
+			return apply_filters( 'woocommerce_countries_allowed_countries', $this->countries );
 		}
 
 		if ( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {

@@ -162,7 +162,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		'post_mime_type' => $info['type'],
 		'guid'           => $upload['url'],
 		'post_parent'    => $id,
-		'post_title'     => $title,
+		'post_title'     => $title ? $title : basename( $upload['file'] ),
 		'post_content'   => $content,
 	);
 

@@ -354,7 +354,7 @@ class WC_REST_Authentication {
 		if ( substr( $request_path, 0, strlen( $wp_base ) ) === $wp_base ) {
 			$request_path = substr( $request_path, strlen( $wp_base ) );
 		}
-		$base_request_uri = rawurlencode( get_home_url( null, $request_path ) );
+		$base_request_uri = rawurlencode( get_home_url( null, $request_path, is_ssl() ? 'https' : 'http' ) );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature.
 		$consumer_signature = rawurldecode( str_replace( ' ', '+', $params['oauth_signature'] ) );

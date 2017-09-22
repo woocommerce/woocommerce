@@ -1190,7 +1190,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set download limit.
 	 *
 	 * @since 3.0.0
-	 * @param int $download_limit
+	 * @param int|string $download_limit
 	 */
 	public function set_download_limit( $download_limit ) {
 		$this->set_prop( 'download_limit', -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit ) );
@@ -1200,7 +1200,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set download expiry.
 	 *
 	 * @since 3.0.0
-	 * @param int $download_expiry
+	 * @param int|string $download_limit
 	 */
 	public function set_download_expiry( $download_expiry ) {
 		$this->set_prop( 'download_expiry', -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry ) );
@@ -1743,7 +1743,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$image = '';
 		}
-		return str_replace( array( 'https://', 'http://' ), '//', $image );
+		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder );
 	}
 
 	/**

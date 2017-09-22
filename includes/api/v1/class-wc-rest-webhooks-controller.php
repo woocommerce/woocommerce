@@ -140,7 +140,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return string
 	 */
 	protected function get_default_api_version() {
-		return 'wp_api_v2';
+		return 'wp_api_v1';
 	}
 
 	/**

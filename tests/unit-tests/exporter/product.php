@@ -41,8 +41,8 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 	public function test_format_data() {
 		$exporter = new WC_Product_CSV_Exporter();
 
-		$data = "test";
-		$this->assertEquals( "test", $exporter->format_data( $data ) );
+		$data = 'test';
+		$this->assertEquals( 'test', $exporter->format_data( $data ) );
 
 		$time = time();
 		$data = new WC_DateTime( "@{$time}", new DateTimeZone( 'UTC' ) );
@@ -66,16 +66,16 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$term2 = wp_insert_category( array( 'cat_name' => 'cat2' ) );
 		$term3 = wp_insert_category( array( 'cat_name' => 'cat3' ) );
 
-		$expected = "cat1, cat2, cat3";
+		$expected = 'cat1, cat2, cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 
 		wp_insert_category( array( 'cat_ID' => $term2, 'cat_name' => 'cat2', 'category_parent' => $term1 ) );
 
-		$expected = "cat1, cat1 > cat2, cat3";
+		$expected = 'cat1, cat1 > cat2, cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 
 		wp_insert_category( array( 'cat_ID' => $term3, 'cat_name' => 'cat3', 'category_parent' => $term2 ) );
-		$expected = "cat1, cat1 > cat2, cat1 > cat2 > cat3";
+		$expected = 'cat1, cat1 > cat2, cat1 > cat2 > cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 	}
 
@@ -130,6 +130,7 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$this->assertEquals( $product->get_date_on_sale_to(), $row['date_on_sale_to'] );
 		$this->assertEquals( 'publish' === $product->get_status(), $row['published'] );
 		$this->assertEquals( 'instock' === $product->get_stock_status(), $row['stock_status'] );
+		$this->assertEquals( $product->get_menu_order(), $row['menu_order'] );
 
 		$this->assertContains( $row['catalog_visibility'], array( 'visible', 'catalog', 'search', 'hidden' ) );
 		$this->assertContains( $row['backorders'], array( 1, 0, 'notify' ) );

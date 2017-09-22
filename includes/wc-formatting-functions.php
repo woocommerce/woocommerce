@@ -489,9 +489,10 @@ function wc_price( $price, $args = array() ) {
 		'price_format'       => get_woocommerce_price_format(),
 	) ) ) );
 
-	$negative        = $price < 0;
-	$price           = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
-	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $decimals, $decimal_separator, $thousand_separator ), $price, $decimals, $decimal_separator, $thousand_separator );
+	$unformatted_price = $price;
+	$negative          = $price < 0;
+	$price             = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
+	$price             = apply_filters( 'formatted_woocommerce_price', number_format( $price, $decimals, $decimal_separator, $thousand_separator ), $price, $decimals, $decimal_separator, $thousand_separator );
 
 	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $decimals > 0 ) {
 		$price = wc_trim_zeros( $price );
@@ -504,7 +505,15 @@ function wc_price( $price, $args = array() ) {
 		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
-	return apply_filters( 'wc_price', $return, $price, $args );
+	/**
+	 * Filters the string of price markup.
+	 *
+	 * @param string $return 			Price HTML markup.
+	 * @param string $price	            Formatted price.
+	 * @param array  $args     			Pass on the args.
+	 * @param float  $unformatted_price	Price as float to allow plugins custom formatting. Since 3.2.0.
+	 */
+	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price );
 }
 
 /**
