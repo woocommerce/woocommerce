@@ -665,6 +665,10 @@ body {
 	.shipping-method-setting .description {
 		color: #7e7e7e;
 	}
+
+	.shipping-method-setting input::placeholder {
+		color: #e1e1e1;
+	}
 }
 .wc-setup-shipping-units {
 	p {
