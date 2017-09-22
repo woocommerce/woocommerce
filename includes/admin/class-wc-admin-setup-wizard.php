@@ -678,30 +678,33 @@ class WC_Admin_Setup_Wizard {
 					</option>
 				<?php endforeach; ?>
 				</select>
+			</div>
+			<div class="shipping-method-descriptions">
+				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+					<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+						<?php echo esc_html( $method['description'] ); ?>
+					</p>
+				<?php endforeach; ?>
+			</div>
 		</div>
 
-			<div class="shipping-method-descriptions">
-			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
-					<?php echo esc_html( $method['description'] ); ?>
+		<div class="shipping-method-settings">
+		<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+			<?php if ( empty( $method['settings'] ) ) continue; ?>
+			<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+			<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
+				<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
+				<input
+					type="<?php echo esc_attr( $setting['type'] ); ?>"
+					id="<?php echo esc_attr( $method_setting_id ); ?>"
+					name="<?php echo esc_attr( $method_setting_id ); ?>"
+				/>
+				<p class="description">
+					<?php echo esc_html( $setting['description'] ); ?>
 				</p>
 			<?php endforeach; ?>
 			</div>
-
-			<div class="shipping-method-settings">
-			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<?php if ( empty( $method['settings'] ) ) continue; ?>
-				<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
-				<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
-					<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
-					<input type="<?php echo esc_attr( $setting['type'] ); ?>" id="<?php echo esc_attr( $method_setting_id ); ?>" name="<?php echo esc_attr( $method_setting_id ); ?>" />
-					<p class="description">
-						<?php echo esc_html( $setting['description'] ); ?>
-					</p>
-				<?php endforeach; ?>
-				</div>
-			<?php endforeach; ?>
-			</div>
+		<?php endforeach; ?>
 		</div>
 		<?php
 	}
