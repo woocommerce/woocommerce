@@ -1109,6 +1109,8 @@ class WC_Admin_Setup_Wizard {
 							<input
 								type="<?php echo esc_attr( $setting['type'] ); ?>"
 								id="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+								class="payment-<?php echo esc_attr( $setting['type'] ); ?>-input "
+									+ "<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
 								name="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
 								value="<?php echo esc_attr( $setting['value'] ); ?>"
 								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
