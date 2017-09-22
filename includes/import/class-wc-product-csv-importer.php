@@ -243,7 +243,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return array
 	 */
 	public function parse_comma_field( $value ) {
-		if ( empty( $value ) ) {
+		if ( empty( $value ) && $value !== '0' ) {
 			return array();
 		}
 
