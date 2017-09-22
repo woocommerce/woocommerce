@@ -798,7 +798,7 @@ class WC_Admin_Setup_Wizard {
 							?>
 						</label>
 					</p>
-					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
+					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
 						<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
 						<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
 						<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
@@ -816,7 +816,7 @@ class WC_Admin_Setup_Wizard {
 							?>
 						</label>
 					</p>
-					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
+					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
 						<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
 						<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
 						<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
