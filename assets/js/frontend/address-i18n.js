@@ -88,7 +88,9 @@ jQuery( function( $ ) {
 
 						if ( thislocale[ key ].placeholder ) {
 							field.find( 'input' ).attr( 'placeholder', thislocale[ key ].placeholder );
-						// Use the i18n label as a placeholder if there is no label element or i18n placeholder.
+							field.find( '.select2-selection__placeholder' ).text( thislocale[ key ].placeholder );
+
+						// Use the i18n label as a placeholder if there is no label element and no i18n placeholder.
 						} else if ( thislocale[ key ].label && ! field.find( 'label' ).length ) {
 							field.find( 'input' ).attr( 'placeholder', thislocale[ key ].label );
 							field.find( '.select2-selection__placeholder' ).text( thislocale[ key ].label );
