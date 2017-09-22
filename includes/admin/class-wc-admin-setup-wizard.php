@@ -293,49 +293,107 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
-		<form method="post">
+		<form method="post" class="address-step">
 			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
-			<div>
-				<label><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
-			</div>
-			<div>
-				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
-				<input type="text" id="store_address" name="store_address" style="width:100%;" required value="<?php echo esc_attr( $address ); ?>" />
-				<label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
-				<input type="text" id="store_address_2" name="store_address_2" style="width:100%;" value="<?php echo esc_attr( $address_2 ); ?>" />
-			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
-				<input type="text" id="store_city" name="store_city" required value="<?php echo esc_attr( $city ); ?>" />
-			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_country_state"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label>
-				<select id="store_country_state" name="store_country_state" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+			<label for="store_country_state" class="location-prompt">
+				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="store_country_state"
+				name="store_country_state"
+				required
+				data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>"
+				aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
 					<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-				</select>
+			</select>
+
+			<div class="store-address-container">
+			<label class="location-prompt" for="store_address">
+				<?php esc_html_e( 'Address', 'woocommerce' ); ?>
+			</label>
+			<input
+				type="text"
+				id="store_address"
+				class="location-input"
+				name="store_address"
+				required
+				value="<?php echo esc_attr( $address ); ?>"
+			/>
+			<label class="location-prompt" for="store_address_2">
+				<?php esc_html_e( 'Address line 2', 'woocommerce' ); ?>
+			</label>
+			<input
+				type="text"
+				id="store_address_2"
+				class="location-input"
+				name="store_address_2"
+				value="<?php echo esc_attr( $address_2 ); ?>"
+			/>
+			<div class="city-and-postcode">
+				<div>
+					<label class="location-prompt" for="store_city">
+						<?php esc_html_e( 'City', 'woocommerce' ); ?>
+					</label>
+					<input
+						type="text"
+						id="store_city"
+						class="location-input"
+						name="store_city"
+						required
+						value="<?php echo esc_attr( $city ); ?>"
+					/>
+				</div>
+				<div>
+					<label class="location-prompt" for="store_postcode">
+						<?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?>
+					</label>
+					<input
+						type="text"
+						id="store_postcode"
+						class="location-input"
+						name="store_postcode"
+						required
+						value="<?php echo esc_attr( $postcode ); ?>"
+					/>
+				</div>
 			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
-				<input type="text" id="store_postcode" name="store_postcode" required value="<?php echo esc_attr( $postcode ); ?>" />
-			</div>
-			<div>
-				<label for="currency_code"><?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?></label>
-				<select id="currency_code" name="currency_code" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
+		</div>
+
+			<label class="location-prompt" for="currency_code">
+				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="currency_code"
+				name="currency_code"
+				required
+				data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
+				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
+						<?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?>
+					</option>
 				<?php endforeach; ?>
-				</select>
-			</div>
-			<div>
-				<label for="product_type"><?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?></label>
-				<select id="product_type" name="product_type" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
-					<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
-					<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-					<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
-				</select>
-			</div>
+			</select>
+
+			<label class="location-prompt" for="product_type">
+				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="product_type"
+				name="product_type"
+				required
+				data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
+				<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
+				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
+				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+			</select>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 				<div>
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
