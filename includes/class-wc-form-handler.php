@@ -1086,7 +1086,15 @@ class WC_Form_Handler {
 					wc_set_customer_auth_cookie( $new_customer );
 				}
 
-				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : wc_get_page_permalink( 'myaccount' ) ) );
+				if ( ! empty( $_POST['redirect'] ) ) {
+					$redirect = $_POST['redirect'];
+				} elseif ( wc_get_raw_referer() ) {
+					$redirect = wc_get_raw_referer();
+				} else {
+					$redirect = wc_get_page_permalink( 'myaccount' );
+				}
+
+				wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 
 			} catch ( Exception $e ) {
