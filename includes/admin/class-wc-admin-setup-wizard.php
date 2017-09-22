@@ -638,8 +638,9 @@ class WC_Admin_Setup_Wizard {
 				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
 				'settings'    => array(
 					'cost' => array(
-						'type'        => 'text',
-						'description' => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
+						'type'          => 'text',
+						'default_value' => __( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
+						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
 					),
 				),
 			),
@@ -696,6 +697,7 @@ class WC_Admin_Setup_Wizard {
 				<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
 				<input
 					type="<?php echo esc_attr( $setting['type'] ); ?>"
+					placeholder="<?php echo esc_attr( $setting['default_value'] ); ?>"
 					id="<?php echo esc_attr( $method_setting_id ); ?>"
 					name="<?php echo esc_attr( $method_setting_id ); ?>"
 				/>
