@@ -644,7 +644,11 @@ body {
 	}
 
 	.wc-setup-shipping-unit {
-		margin-bottom: 1.75em
+		margin-bottom: 1.75em;
+
+		.select2 {
+			min-width: 100%; // widen dropdowns
+		}
 	}
 }
 
