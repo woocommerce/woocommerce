@@ -1087,7 +1087,7 @@ class WC_Form_Handler {
 				}
 
 				if ( ! empty( $_POST['redirect'] ) ) {
-					$redirect = $_POST['redirect'];
+					$redirect = wp_sanitize_redirect( $_POST['redirect'] );
 				} elseif ( wc_get_raw_referer() ) {
 					$redirect = wc_get_raw_referer();
 				} else {
