@@ -24,6 +24,9 @@ class WC_Admin_Setup_Wizard {
 	/** @var array Steps for the setup wizard */
 	private $steps  = array();
 
+	/** @var array Actions to be executed after the HTTP response has completed */
+	private $deferred_actions  = array();
+
 	/** @var array Tweets user can optionally send after install */
 	private $tweets = array(
 		'Someone give me woo-t, I just set up a new store with #WordPress and @WooCommerce!',
@@ -447,39 +450,86 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Helper method to queue the background install of a plugin.
-	 *
-	 * @param string $plugin_id  Plugin id used for background install.
-	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
-	 * @param bool   $background Optional. Whether or not to queue the install in the background.
+	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
+	 * @see https://core.trac.wordpress.org/ticket/41358
 	 */
-	protected function install_plugin( $plugin_id, $plugin_info, $background = true ) {
-		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
-			return;
+	protected function close_http_connection() {
+		// Only 1 PHP process can access a session object at a time, close this so the next request isn't kept waiting.
+		if ( session_id() ) {
+			session_write_close();
 		}
-
-		if ( $background ) {
-			wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $plugin_id, $plugin_info ) );
+		set_time_limit( 0 );
+		// fastcgi_finish_request is the cleanest way to send the response and keep the script running, but not every server has it.
+		if ( is_callable( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
 		} else {
-			WC_Install::background_installer( $plugin_id, $plugin_info );
+			// Fallback: send headers and flush buffers.
+			if ( ! headers_sent() ) {
+				header( 'Connection: close' );
+			}
+			@ob_end_flush();
+			flush();
 		}
 	}
 
 	/**
-	 * Helper method to install Jetpack.
-	 *
-	 * @param bool $now Optional. Whether or not to queue the install.
+	 * Function called after the HTTP request is finished, so it's executed without the client having to wait for it.
+	 * @see WC_Admin_Setup_Wizard::install_plugin
+	 * @see WC_Admin_Setup_Wizard::install_theme
 	 */
-	protected function install_jetpack( $now = false ) {
+	public function run_deferred_actions() {
+		$this->close_http_connection();
+		foreach ( $this->deferred_actions as $action ) {
+			call_user_func_array( $action['func'], $action['args'] );
+		}
+	}
+
+	/**
+	 * Helper method to queue the background install of a plugin.
+	 *
+	 * @param string $plugin_id  Plugin id used for background install.
+	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
+	 */
+	protected function install_plugin( $plugin_id, $plugin_info ) {
+		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
+			return;
+		}
+		if ( empty( $this->deferred_actions ) ) {
+			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
+		}
+		array_push( $this->deferred_actions, array(
+			'func' => array( 'WC_Install', 'background_installer' ),
+			'args' => array( $plugin_id, $plugin_info )
+		) );
+	}
+
+
+	/**
+	 * Helper method to queue the background install of a theme.
+	 *
+	 * @param string $theme_id  Theme id used for background install.
+	 */
+	protected function install_theme( $theme_id ) {
+		if ( empty( $this->deferred_actions ) ) {
+			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
+		}
+		array_push( $this->deferred_actions, array(
+			'func' => array( 'WC_Install', 'theme_background_installer' ),
+			'args' => array( $theme_id )
+		) );
+	}
+
+	/**
+	 * Helper method to install Jetpack.
+	 */
+	protected function install_jetpack() {
 		$this->install_plugin( 'jetpack', array(
 			'file'      => 'jetpack/jetpack.php',
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
-		), ! $now );
+		) );
 
-		if ( ! $now ) {
-			update_option( 'woocommerce_setup_queued_jetpack_install', true );
-		}
+		update_option( 'woocommerce_setup_queued_jetpack_install', true );
 	}
 
 	/**
@@ -1188,7 +1238,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( $install_storefront ) {
-			wp_schedule_single_event( time() + 1, 'woocommerce_theme_background_installer', array( 'storefront' ) );
+			$this->install_theme( 'storefront' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
