@@ -370,11 +370,14 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-		$ordering  = $this->get_catalog_ordering_args();
-		$q->set( 'orderby', $ordering['orderby'] );
-		$q->set( 'order', $ordering['order'] );
-		if ( isset( $ordering['meta_key'] ) ) {
-			$q->set( 'meta_key', $ordering['meta_key'] );
+		if ( ! is_feed() ) {
+			$ordering  = $this->get_catalog_ordering_args();
+			$q->set( 'orderby', $ordering['orderby'] );
+			$q->set( 'order', $ordering['order'] );
+
+			if ( isset( $ordering['meta_key'] ) ) {
+				$q->set( 'meta_key', $ordering['meta_key'] );
+			}
 		}
 
 		// Query vars that affect posts shown
