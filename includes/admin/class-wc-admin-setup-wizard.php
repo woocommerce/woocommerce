@@ -1526,7 +1526,7 @@ class WC_Admin_Setup_Wizard {
 				</div>
 			</li>
 		</ul>
-		<p><?php echo wp_kses_post( $help_text ); ?></p>
+		<p class="next-steps-help-text"><?php echo wp_kses_post( $help_text ); ?></p>
 		<?php
 	}
 }
