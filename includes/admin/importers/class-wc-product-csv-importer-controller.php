@@ -416,14 +416,14 @@ class WC_Product_CSV_Importer_Controller {
 
 		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
 			array(
-				__( 'attribute %d name', 'woocommerce' )     => 'attributes:name',
-				__( 'attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
-				__( 'attribute %d visible', 'woocommerce' )  => 'attributes:visible',
-				__( 'attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
-				__( 'attribute %d default', 'woocommerce' )  => 'attributes:default',
-				__( 'download %d name', 'woocommerce' )      => 'downloads:name',
-				__( 'download %d url', 'woocommerce' )       => 'downloads:url',
-				__( 'meta: %s', 'woocommerce' )              => 'meta:',
+				strtolower( __( 'Attribute %d name', 'woocommerce' ) )     => 'attributes:name',
+				strtolower( __( 'Attribute %d value(s)', 'woocommerce' ) ) => 'attributes:value',
+				strtolower( __( 'Attribute %d visible', 'woocommerce' ) )  => 'attributes:visible',
+				strtolower( __( 'Attribute %d global', 'woocommerce' ) )   => 'attributes:taxonomy',
+				strtolower( __( 'Attribute %d default', 'woocommerce' ) )  => 'attributes:default',
+				strtolower( __( 'Download %d name', 'woocommerce' ) )      => 'downloads:name',
+				strtolower( __( 'Download %d URL', 'woocommerce' ) )       => 'downloads:url',
+				strtolower( __( 'Meta: %s', 'woocommerce' ) )              => 'meta:',
 			)
 		) );
 
