@@ -459,10 +459,10 @@ class WC_AJAX {
 			$status = sanitize_text_field( $_GET['status'] );
 			$order  = wc_get_order( absint( $_GET['order_id'] ) );
 
-			// Initialize payment gateways in case order has hooked status transition actions.
-			wc()->payment_gateways();
-
 			if ( wc_is_order_status( 'wc-' . $status ) && $order ) {
+				// Initialize payment gateways in case order has hooked status transition actions.
+				wc()->payment_gateways();
+
 				$order->update_status( $status, '', true );
 				do_action( 'woocommerce_order_edit_status', $order->get_id(), $status );
 			}
