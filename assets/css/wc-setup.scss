@@ -312,15 +312,6 @@ body {
 		p:last-child {
 			margin: 0 0 24px;
 		}
-		form {
-			input[type="email"] {
-				padding: .25em .5em;
-				margin: 0 1% 0 0;
-				font-size: 1.05em;
-				width: 49%;
-				box-sizing: border-box;
-			}
-		}
 	}
 	.woocommerce-tracker + .woocommerce-newsletter {
 		margin-top: -24px;
@@ -818,5 +809,36 @@ h3.jetpack-reasons {
 		color: #444;
 		background-color: #fff;
 		display: inline-block;
+	}
+}
+
+.newsletter-form-container {
+	display: flex;
+
+	.newsletter-form-email {
+		border: 1px solid #aaa;
+		border-color: #ddd;
+		border-radius: 4px;
+		height: 42px;
+		padding: 0 8px;
+		font-size: 16px;
+		color: #666;
+		background-color: #fff;
+		display: inline-block;
+		margin-right: 6px;
+		flex-grow: 1;
+	}
+
+	.newsletter-form-button-container {
+		flex-grow: 0;
+	}
+}
+
+.wc-setup .wc-setup-actions .button-primary {
+	&.newsletter-form-button {
+		min-width: auto;
+		height: 42px;
+		padding: 0 1em;
+		margin: 0;
 	}
 }

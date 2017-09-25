@@ -1474,8 +1474,25 @@ class WC_Admin_Setup_Wizard {
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
 			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
-				<input type="email" value="<?php echo esc_attr( $user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required>
-				<input type="submit" value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+				<div class="newsletter-form-container">
+					<input
+						class="newsletter-form-email"
+						type="email"
+						value="<?php echo esc_attr( $user_email ); ?>"
+						name="EMAIL"
+						placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>"
+						required
+					>
+					<p class="wc-setup-actions step newsletter-form-button-container">
+						<input
+							type="submit"
+							value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>"
+							name="subscribe"
+							id="mc-embedded-subscribe"
+							class="button-primary button newsletter-form-button"
+						>
+					</p>
+				</div>
 			</form>
 		</div>
 
