@@ -734,7 +734,7 @@ h3.jetpack-reasons {
 	text-align: center;
 }
 
-.wc-setup .wc-setup-actions .button-primary {
+.wc-setup .wc-setup-actions .button {
 	font-weight: 300;
 	font-size: 18px;
 	padding: 1em;
@@ -834,11 +834,68 @@ h3.jetpack-reasons {
 	}
 }
 
-.wc-setup .wc-setup-actions .button-primary {
+.wc-setup .wc-setup-actions .button {
+	min-width: auto;
+
 	&.newsletter-form-button {
-		min-width: auto;
 		height: 42px;
 		padding: 0 1em;
 		margin: 0;
+	}
+}
+
+.wc-wizard-next-steps {
+	border: 1px solid #eee;
+	border-radius: 4px;
+	list-style: none;
+	padding: 0;
+
+	li {
+		padding: 0;
+	}
+
+	.wc-wizard-next-step-item {
+		display: flex;
+		border-top: 1px solid #eee;
+
+		&:first-child {
+			border-top: 0;
+		}
+	}
+
+	.wc-wizard-next-step-description {
+		flex-grow: 1;
+		margin: 1.5em;
+	}
+
+	.wc-wizard-next-step-action {
+		flex-grow: 0;
+		display: flex;
+		align-items: center;
+
+		.button {
+			margin: 1em;
+		}
+	}
+
+	p {
+		&.next-step-heading {
+			margin: 0;
+			font-size: 0.95em;
+			font-weight: 400;
+			font-variant: all-petite-caps;
+		}
+
+		&.next-step-extra-info {
+			margin: 0;
+		}
+	}
+
+	h3 {
+		&.next-step-description {
+			margin: 0;
+			font-size: 18px;
+			font-weight: 600;
+		}
 	}
 }
