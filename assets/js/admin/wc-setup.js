@@ -84,7 +84,7 @@ jQuery( function( $ ) {
 
 	// Wait for a pending Jetpack install to finish before triggering a "save"
 	// on the activate step, which launches the Jetpack connection flow.
-	$( '.button-jetpack-connect' ).on( 'click', function( e ) {
+	$( '.activate-jetpack' ).on( 'click', '.button-primary', function( e ) {
 		blockWizardUI();
 
 		if ( 'no' === wc_setup_params.pending_jetpack_install ) {
