@@ -177,7 +177,7 @@ class WC_Admin_Help {
 		}
 
 		if ( isset( $video_map[ $video_key ] ) ) {
-			$embed_code = wp_oembed_get( 'http://www.youtube.com/watch?v=' . $video_map[ $video_key ]['id'] . '&color=white&hl=' . get_locale() . '&modestbranding=1' );
+			$embed_code = str_replace( '?feature=oembed', '?feature=oembed&modestbranding=1&scolor=white', wp_oembed_get( 'http://www.youtube.com/watch?v=' . $video_map[ $video_key ]['id'], array( 'width' => '420px' ) ) );
 
 			$screen->add_help_tab( array(
 				'id'      => 'woocommerce_guided_tour_tab',
