@@ -422,7 +422,7 @@ class WC_Product_CSV_Importer_Controller {
 				strtolower( __( 'Attribute %d global', 'woocommerce' ) )   => 'attributes:taxonomy',
 				strtolower( __( 'Attribute %d default', 'woocommerce' ) )  => 'attributes:default',
 				strtolower( __( 'Download %d name', 'woocommerce' ) )      => 'downloads:name',
-				strtolower( __( 'Download %d url', 'woocommerce' ) )       => 'downloads:url',
+				strtolower( __( 'Download %d URL', 'woocommerce' ) )       => 'downloads:url',
 				strtolower( __( 'Meta: %s', 'woocommerce' ) )              => 'meta:',
 			)
 		) );
