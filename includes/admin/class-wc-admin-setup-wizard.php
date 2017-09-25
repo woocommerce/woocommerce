@@ -1499,26 +1499,30 @@ class WC_Admin_Setup_Wizard {
 		<ul class="wc-wizard-next-steps">
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
-					<p><small><?php esc_html_e( 'Next step', 'woocommerce' ); ?></small></p>
-					<h3><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
-					<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
-						<?php esc_html_e( 'Create a product', 'woocommerce' ); ?>
-					</a>
+					<p class="wc-setup-actions step">
+						<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
+							<?php esc_html_e( 'Create a product', 'woocommerce' ); ?>
+						</a>
+					</p>
 				</div>
 			</li>
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
-					<p><small><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></small></p>
-					<h3><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( 'Transfer existing products to your new store — just import a CSV file.', 'woocommerce' ); ?></p>
+					<p class="next-step-heading"><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( 'Transfer existing products to your new store — just import a CSV file.', 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
-					<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
-						<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
-					</a>
+					<p class="wc-setup-actions step">
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
+							<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
+						</a>
+					</p>
 				</div>
 			</li>
 		</ul>
