@@ -19,7 +19,7 @@ fi
 
 if [ $1 == 'during' ]; then
 
-	if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		phpunit -c phpunit.xml --coverage-clover=coverage.clover
 	else
 		phpunit -c phpunit.xml
@@ -29,7 +29,7 @@ fi
 
 if [ $1 == 'after' ]; then
 
-	if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+	if [[ ${TRAVIS_PHP_VERSION} == ${PHP_LATEST_STABLE} ]]; then
 		bash <(curl -s https://codecov.io/bash)
 	fi
 
