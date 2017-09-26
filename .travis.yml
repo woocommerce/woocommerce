@@ -25,9 +25,8 @@ matrix:
     dist: precise
 
 before_script:
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash tests/bin/travis.sh before
+  - travis_retry composer self-update
+  - travis_retry composer install --no-interaction --prefer-source --dev
 
 script:
   - phpunit --version
