@@ -1379,6 +1379,15 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
 			</p>
+			<p class="jetpack-terms">
+			<?php
+				printf(
+					__( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ),
+					'https://wordpress.com/tos',
+					'https://jetpack.com/support/what-data-does-jetpack-sync'
+				);
+			?>
+			</p>
 			<input type="hidden" name="save_step" value="activate" />
 			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			<ul class="wc-wizard-features">
