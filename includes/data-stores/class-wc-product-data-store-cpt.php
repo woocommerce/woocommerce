@@ -320,7 +320,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		) );
 
 		// Handle sale dates on the fly in case of missed cron schedule.
-		if ( $product->is_on_sale( 'edit' ) && $product->get_sale_price( 'edit' ) !== $product->get_price( 'edit' ) ) {
+		if ( $product->is_type( 'simple' ) && $product->is_on_sale( 'edit' ) && $product->get_sale_price( 'edit' ) !== $product->get_price( 'edit' ) ) {
 			update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 			$product->set_price( $product->get_sale_price( 'edit' ) );
 		}
