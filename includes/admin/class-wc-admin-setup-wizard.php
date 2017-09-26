@@ -293,49 +293,107 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
-		<form method="post">
+		<form method="post" class="address-step">
 			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
-			<div>
-				<label><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
-			</div>
-			<div>
-				<label for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
-				<input type="text" id="store_address" name="store_address" style="width:100%;" required value="<?php echo esc_attr( $address ); ?>" />
-				<label for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
-				<input type="text" id="store_address_2" name="store_address_2" style="width:100%;" value="<?php echo esc_attr( $address_2 ); ?>" />
-			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
-				<input type="text" id="store_city" name="store_city" required value="<?php echo esc_attr( $city ); ?>" />
-			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_country_state"><?php esc_html_e( 'Country / State', 'woocommerce' ); ?></label>
-				<select id="store_country_state" name="store_country_state" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+			<label for="store_country_state" class="location-prompt">
+				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="store_country_state"
+				name="store_country_state"
+				required
+				data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>"
+				aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
 					<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-				</select>
+			</select>
+
+			<div class="store-address-container">
+			<label class="location-prompt" for="store_address">
+				<?php esc_html_e( 'Address', 'woocommerce' ); ?>
+			</label>
+			<input
+				type="text"
+				id="store_address"
+				class="location-input"
+				name="store_address"
+				required
+				value="<?php echo esc_attr( $address ); ?>"
+			/>
+			<label class="location-prompt" for="store_address_2">
+				<?php esc_html_e( 'Address line 2', 'woocommerce' ); ?>
+			</label>
+			<input
+				type="text"
+				id="store_address_2"
+				class="location-input"
+				name="store_address_2"
+				value="<?php echo esc_attr( $address_2 ); ?>"
+			/>
+			<div class="city-and-postcode">
+				<div>
+					<label class="location-prompt" for="store_city">
+						<?php esc_html_e( 'City', 'woocommerce' ); ?>
+					</label>
+					<input
+						type="text"
+						id="store_city"
+						class="location-input"
+						name="store_city"
+						required
+						value="<?php echo esc_attr( $city ); ?>"
+					/>
+				</div>
+				<div>
+					<label class="location-prompt" for="store_postcode">
+						<?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?>
+					</label>
+					<input
+						type="text"
+						id="store_postcode"
+						class="location-input"
+						name="store_postcode"
+						required
+						value="<?php echo esc_attr( $postcode ); ?>"
+					/>
+				</div>
 			</div>
-			<div style="width:33%; float:left;">
-				<label for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
-				<input type="text" id="store_postcode" name="store_postcode" required value="<?php echo esc_attr( $postcode ); ?>" />
-			</div>
-			<div>
-				<label for="currency_code"><?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?></label>
-				<select id="currency_code" name="currency_code" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
+		</div>
+
+			<label class="location-prompt" for="currency_code">
+				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="currency_code"
+				name="currency_code"
+				required
+				data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
+				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
+						<?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?>
+					</option>
 				<?php endforeach; ?>
-				</select>
-			</div>
-			<div>
-				<label for="product_type"><?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?></label>
-				<select id="product_type" name="product_type" style="width:100%;" required data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-					<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
-					<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
-					<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-					<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
-				</select>
-			</div>
+			</select>
+
+			<label class="location-prompt" for="product_type">
+				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
+			</label>
+			<select
+				id="product_type"
+				name="product_type"
+				required
+				data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>"
+				class="location-input wc-enhanced-select dropdown"
+			>
+				<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
+				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
+				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+			</select>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 				<div>
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
@@ -580,8 +638,9 @@ class WC_Admin_Setup_Wizard {
 				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
 				'settings'    => array(
 					'cost' => array(
-						'type'        => 'text',
-						'description' => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
+						'type'          => 'text',
+						'default_value' => __( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
+						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
 					),
 				),
 			),
@@ -612,36 +671,42 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
-			<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
-			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
-					<?php echo esc_html( $method['name'] ); ?>
-				</option>
-			<?php endforeach; ?>
-			</select>
+			<div class="wc-wizard-shipping-method-dropdown">
+				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
+				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
+						<?php echo esc_html( $method['name'] ); ?>
+					</option>
+				<?php endforeach; ?>
+				</select>
+			</div>
+			<div class="shipping-method-descriptions">
+				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+					<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+						<?php echo esc_html( $method['description'] ); ?>
+					</p>
+				<?php endforeach; ?>
+			</div>
+		</div>
 
-			<div class="shipping-method-description">
-			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<p class="<?php echo esc_attr( $method_id ); ?>" <?php if ( $method_id !== $selected ) echo 'style="display:none"'; ?>>
-					<?php echo esc_html( $method['description'] ); ?>
+		<div class="shipping-method-settings">
+		<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
+			<?php if ( empty( $method['settings'] ) ) continue; ?>
+			<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) echo 'hide'; ?>">
+			<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
+				<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
+				<input
+					type="<?php echo esc_attr( $setting['type'] ); ?>"
+					placeholder="<?php echo esc_attr( $setting['default_value'] ); ?>"
+					id="<?php echo esc_attr( $method_setting_id ); ?>"
+					name="<?php echo esc_attr( $method_setting_id ); ?>"
+				/>
+				<p class="description">
+					<?php echo esc_html( $setting['description'] ); ?>
 				</p>
 			<?php endforeach; ?>
 			</div>
-
-			<div class="shipping-method-settings">
-			<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-				<?php if ( empty( $method['settings'] ) ) continue; ?>
-				<div class="<?php echo esc_attr( $method_id ); ?>" <?php if ( $method_id !== $selected ) echo 'style="display:none"'; ?>>
-				<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
-					<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
-					<input type="<?php echo esc_attr( $setting['type'] ); ?>" id="<?php echo esc_attr( $method_setting_id ); ?>" name="<?php echo esc_attr( $method_setting_id ); ?>" />
-					<p class="description">
-						<?php echo esc_html( $setting['description'] ); ?>
-					</p>
-				<?php endforeach; ?>
-				</div>
-			<?php endforeach; ?>
-			</div>
+		<?php endforeach; ?>
 		</div>
 		<?php
 	}
@@ -726,38 +791,44 @@ class WC_Admin_Setup_Wizard {
 				</li>
 			</ul>
 
-			<div>
-				<label for="weight_unit">
-					<span class="wc-wizard-setting-name">
-						<?php esc_html_e( 'Weight unit', 'woocommerce' ); ?>
-					</span>
-					<span class="wc-wizard-setting-description">
-						<?php echo esc_html_x( '— used to calculate shipping rates.', 'Weight unit setting description', 'woocommerce' ); ?>
-					</span>
-				</label>
-				<select id="weight_unit" name="weight_unit" class="wc-enhanced-select" style="width:100%">
-					<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-					<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-					<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-					<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-				</select>
-			</div>
-			<div>
-				<label for="dimension_unit">
-					<span class="wc-wizard-setting-name">
-						<?php esc_html_e( 'Dimension unit', 'woocommerce' ); ?>
-					</span>
-					<span class="wc-wizard-setting-description">
-						<?php echo esc_html_x( '— used to select accurate packages.', 'Dimension unit setting description', 'woocommerce' ); ?>
-					</span>
-				</label>
-				<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select" style="width:100%">
-					<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-					<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-					<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-					<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-					<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-				</select>
+			<div class="wc-setup-shipping-units">
+				<div class="wc-setup-shipping-unit">
+					<p>
+						<label for="weight_unit">
+							<?php
+								printf( wp_kses(
+									__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
+									array( 'strong' => array() )
+								) );
+							?>
+						</label>
+					</p>
+					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+						<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
+						<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
+						<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
+						<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
+					</select>
+				</div>
+				<div class="wc-setup-shipping-unit">
+					<p>
+						<label for="dimension_unit">
+							<?php
+								printf( wp_kses(
+									__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
+									array( 'strong' => array() )
+								) );
+							?>
+						</label>
+					</p>
+					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+						<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
+						<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
+						<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
+						<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
+						<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
+					</select>
+				</div>
 			</div>
 
 			<p class="wc-setup-actions step">
@@ -941,6 +1012,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'required'    => true,
 					),
 				),
 				'featured' => true,
@@ -967,6 +1039,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
+						'required'    => true,
 					),
 				),
 			),
@@ -1043,9 +1116,12 @@ class WC_Admin_Setup_Wizard {
 							<input
 								type="<?php echo esc_attr( $setting['type'] ); ?>"
 								id="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+								class="payment-<?php echo esc_attr( $setting['type'] ); ?>-input "
+									+ "<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
 								name="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
 								value="<?php echo esc_attr( $setting['value'] ); ?>"
 								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+								<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 							/>
 						<?php endforeach; ?>
 					</div>
@@ -1100,7 +1176,7 @@ class WC_Admin_Setup_Wizard {
 			</ul>
 			<?php endif; ?>
 			<ul class="wc-wizard-services manual">
-				<li class="wc-wizard-services-list-toggle">
+				<li class="wc-wizard-services-list-toggle closed">
 					<div class="wc-wizard-service-name">
 						<?php esc_html_e( 'Offline Payments', 'woocommerce' ); ?>
 					</div>
@@ -1295,14 +1371,18 @@ class WC_Admin_Setup_Wizard {
 			<?php if ( $description ) : ?>
 			<p><?php echo esc_html( $description ); ?></p>
 			<?php endif; ?>
-			<div>
-				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>" alt="Jetpack" />
-				<input type="submit" class="button-primary button button-large button-jetpack-connect" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
-				<input type="hidden" name="save_step" value="activate" />
-				<h3><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
-			</div>
+			<img
+				class="jetpack-logo"
+				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+				alt="Jetpack logo"
+			/>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
+			</p>
+			<input type="hidden" name="save_step" value="activate" />
+			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			<ul class="wc-wizard-features">
-				<li class="wc-wizard-feature-item first">
+				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
 						<strong><?php esc_html_e( 'Better security', 'woocommerce' ); ?></strong>
 					</p>
@@ -1310,7 +1390,7 @@ class WC_Admin_Setup_Wizard {
 						<?php esc_html_e( 'Protect your store from unauthorized access.', 'woocommerce' ); ?>
 					</p>
 				</li>
-				<li class="wc-wizard-feature-item last">
+				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
 						<strong><?php esc_html_e( 'Store stats', 'woocommerce' ); ?></strong>
 					</p>
@@ -1318,7 +1398,7 @@ class WC_Admin_Setup_Wizard {
 						<?php esc_html_e( 'Get insights on how your store is doing, including total sales, top products, and more.', 'woocommerce' ); ?>
 					</p>
 				</li>
-				<li class="wc-wizard-feature-item first">
+				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
 						<strong><?php esc_html_e( 'Store monitoring', 'woocommerce' ); ?></strong>
 					</p>
@@ -1326,7 +1406,7 @@ class WC_Admin_Setup_Wizard {
 						<?php esc_html_e( 'Get an alert if your store is down for even a few minutes.', 'woocommerce' ); ?>
 					</p>
 				</li>
-				<li class="wc-wizard-feature-item last">
+				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
 						<strong><?php esc_html_e( 'Product promotion', 'woocommerce' ); ?></strong>
 					</p>
@@ -1394,38 +1474,59 @@ class WC_Admin_Setup_Wizard {
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
 			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
-				<input type="email" value="<?php echo esc_attr( $user_email ); ?>" name="EMAIL" placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>" required>
-				<input type="submit" value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>" name="subscribe" id="mc-embedded-subscribe" class="button-primary button button-large">
+				<div class="newsletter-form-container">
+					<input
+						class="newsletter-form-email"
+						type="email"
+						value="<?php echo esc_attr( $user_email ); ?>"
+						name="EMAIL"
+						placeholder="<?php esc_attr_e( 'Email address', 'woocommerce' ); ?>"
+						required
+					>
+					<p class="wc-setup-actions step newsletter-form-button-container">
+						<input
+							type="submit"
+							value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>"
+							name="subscribe"
+							id="mc-embedded-subscribe"
+							class="button-primary button newsletter-form-button"
+						>
+					</p>
+				</div>
 			</form>
 		</div>
 
 		<ul class="wc-wizard-next-steps">
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
-					<p><small><?php esc_html_e( 'Next step', 'woocommerce' ); ?></small></p>
-					<h3><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
-					<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
-						<?php esc_html_e( 'Create a product', 'woocommerce' ); ?>
-					</a>
+					<p class="wc-setup-actions step">
+						<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>">
+							<?php esc_html_e( 'Create a product', 'woocommerce' ); ?>
+						</a>
+					</p>
 				</div>
 			</li>
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
-					<p><small><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></small></p>
-					<h3><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
-					<p><?php esc_html_e( 'Transfer existing products to your new store — just import a CSV file.', 'woocommerce' ); ?></p>
+					<p class="next-step-heading"><?php esc_html_e( 'Have an existing store?', 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Import products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( 'Transfer existing products to your new store — just import a CSV file.', 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
-					<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
-						<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
-					</a>
+					<p class="wc-setup-actions step">
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
+							<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
+						</a>
+					</p>
 				</div>
 			</li>
 		</ul>
-		<p><?php echo wp_kses_post( $help_text ); ?></p>
+		<p class="next-steps-help-text"><?php echo wp_kses_post( $help_text ); ?></p>
 		<?php
 	}
 }
