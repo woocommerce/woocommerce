@@ -31,7 +31,7 @@ before_script:
 
 script:
   - phpunit --version
-  - vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.clover
+  - phpunit -c phpunit.xml --coverage-clover=coverage.clover
 
 after_script:
   - bash tests/bin/travis.sh after
