@@ -268,6 +268,10 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$args['post_parent__not_in'] = $request['parent_exclude'];
 		$args['s']                   = $request['search'];
 
+		if ( 'date' === $args['orderby'] ) {
+			$args['orderby'] = 'date ID';
+		}
+
 		$args['date_query'] = array();
 		// Set before into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['before'] ) ) {

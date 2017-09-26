@@ -1088,6 +1088,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		}
 
 		$defaults = array(
+			'input_id'    => uniqid( 'quantity_' ),
 			'input_name'  => 'quantity',
 			'input_value' => '1',
 			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),

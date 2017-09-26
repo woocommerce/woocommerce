@@ -1011,7 +1011,7 @@ S2.define('select2/results',[
 
       var $childrenContainer = $('<ul></ul>', {
         'class': 'select2-results__options select2-results__options--nested',
-        'role': 'listbox'      
+        'role': 'listbox'
       });
       $childrenContainer.append($children);
       $option.attr('role', 'list');
@@ -1706,7 +1706,7 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
-      var formatted = this.display(selection, $selection);
+      var formatted = this.display(selection, $selection).trim();
 
       $selection.append(formatted);
       $selection.prop('title', selection.title || selection.text);

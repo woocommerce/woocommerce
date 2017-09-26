@@ -380,7 +380,13 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Sort coupons so discounts apply consistently.
+	 * Sort coupons so discounts apply consistently across installs.
+	 *
+	 * In order of priority;
+	 * 	- sort param
+	 *  - usage restriction
+	 *  - coupon value
+	 *  - ID
 	 *
 	 * @param WC_Coupon $a Coupon object.
 	 * @param WC_Coupon $b Coupon object.
@@ -388,7 +394,13 @@ final class WC_Cart_Totals {
 	 */
 	protected function sort_coupons_callback( $a, $b ) {
 		if ( $a->sort === $b->sort ) {
-			return $a->get_id() - $b->get_id();
+			if ( $a->get_limit_usage_to_x_items() === $b->get_limit_usage_to_x_items() ) {
+				if ( $a->get_amount() === $b->get_amount() ) {
+					return $b->get_id() - $a->get_id();
+				}
+				return ( $a->get_amount() < $b->get_amount() ) ? -1 : 1;
+			}
+			return ( $a->get_limit_usage_to_x_items() < $b->get_limit_usage_to_x_items() ) ? -1 : 1;
 		}
 		return ( $a->sort < $b->sort ) ? -1 : 1;
 	}
@@ -616,6 +628,10 @@ final class WC_Cart_Totals {
 
 		$this->set_total( 'items_total', array_sum( array_values( wp_list_pluck( $this->items, 'total' ) ) ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
+
+		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
+		$this->cart->set_cart_contents_tax( array_sum( $this->get_merged_taxes( false, 'items' ) ) );
+		$this->cart->set_cart_contents_taxes( $this->get_merged_taxes( false, 'items' ) );
 	}
 
 	/**
@@ -755,9 +771,6 @@ final class WC_Cart_Totals {
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) ) );
 
 		// Add totals to cart object.
-		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
-		$this->cart->set_cart_contents_tax( array_sum( $this->get_merged_taxes( false, 'items' ) ) );
-		$this->cart->set_cart_contents_taxes( $this->get_merged_taxes( false, 'items' ) );
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );

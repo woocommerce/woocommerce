@@ -76,7 +76,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->steps = array(
+		$default_steps = array(
 			'upload' => array(
 				'name'    => __( 'Upload CSV file', 'woocommerce' ),
 				'view'    => array( $this, 'upload_form' ),
@@ -98,6 +98,9 @@ class WC_Product_CSV_Importer_Controller {
 				'handler' => '',
 			),
 		);
+
+		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
+
 		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
@@ -405,26 +408,33 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Position', 'woocommerce' )                                => 'menu_order',
 		) );
 
+		// Normalize the columns so they are case-insensitive.
+		$normalized_default_columns = array();
+		foreach ( $default_columns as $key => $val ) {
+			$normalized_default_columns[ strtolower( $key ) ] = $val;
+		}
+
 		$special_columns = $this->get_special_columns( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
 			array(
-				__( 'Attribute %d name', 'woocommerce' )     => 'attributes:name',
-				__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
-				__( 'Attribute %d visible', 'woocommerce' )  => 'attributes:visible',
-				__( 'Attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
-				__( 'Attribute %d default', 'woocommerce' )  => 'attributes:default',
-				__( 'Download %d name', 'woocommerce' )      => 'downloads:name',
-				__( 'Download %d URL', 'woocommerce' )       => 'downloads:url',
-				__( 'Meta: %s', 'woocommerce' )              => 'meta:',
+				strtolower( __( 'Attribute %d name', 'woocommerce' ) )     => 'attributes:name',
+				strtolower( __( 'Attribute %d value(s)', 'woocommerce' ) ) => 'attributes:value',
+				strtolower( __( 'Attribute %d visible', 'woocommerce' ) )  => 'attributes:visible',
+				strtolower( __( 'Attribute %d global', 'woocommerce' ) )   => 'attributes:taxonomy',
+				strtolower( __( 'Attribute %d default', 'woocommerce' ) )  => 'attributes:default',
+				strtolower( __( 'Download %d name', 'woocommerce' ) )      => 'downloads:name',
+				strtolower( __( 'Download %d URL', 'woocommerce' ) )       => 'downloads:url',
+				strtolower( __( 'Meta: %s', 'woocommerce' ) )              => 'meta:',
 			)
 		) );
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
+			$field             = strtolower( $field );
 			$index             = $num_indexes ? $key : $field;
 			$headers[ $index ] = $field;
 
-			if ( isset( $default_columns[ $field ] ) ) {
-				$headers[ $index ] = $default_columns[ $field ];
+			if ( isset( $normalized_default_columns[ $field ] ) ) {
+				$headers[ $index ] = $normalized_default_columns[ $field ];
 			} else {
 				foreach ( $special_columns as $regex => $special_key ) {
 					if ( preg_match( $regex, $field, $matches ) ) {

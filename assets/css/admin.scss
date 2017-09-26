@@ -3117,7 +3117,6 @@ img.help_tip {
 		input[type="text"],
 		input[type="number"],
 		input[type="email"] {
-			padding: 6px;
 			height: auto;
 		}
 
@@ -3138,6 +3137,18 @@ img.help_tip {
 			margin: 0;
 			padding: 6px;
 			box-sizing: border-box;
+		}
+
+		// Ignore nested inputs.
+		table {
+			select,
+			textarea,
+			input[type="text"],
+			input[type="email"],
+			input[type="number"],
+			input.regular-input {
+				width: auto;
+			}
 		}
 
 		textarea.wide-input {
@@ -4355,7 +4366,7 @@ img.help_tip {
 		width: 100%;
 		vertical-align: middle;
 		margin: 2px 0 0;
-		padding: 6px;
+		padding: 5px;
 	}
 
 	select {

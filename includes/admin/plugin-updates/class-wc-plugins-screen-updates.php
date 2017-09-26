@@ -106,16 +106,16 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 			$version_parts[0] . '.' . $version_parts[1], // Minor
 			$version_parts[0] . '.' . $version_parts[1] . '.' . $version_parts[2], // Patch
 		);
+		$notice_regexp     = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
+		$upgrade_notice    = '';
 
 		foreach ( $check_for_notices as $check_version ) {
 			if ( version_compare( WC_VERSION, $check_version, '>' ) ) {
 				continue;
 			}
-			$matches        = null;
-			$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
-			$upgrade_notice = '';
 
-			if ( preg_match( $regexp, $content, $matches ) ) {
+			$matches = null;
+			if ( preg_match( $notice_regexp, $content, $matches ) ) {
 				$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 				if ( version_compare( trim( $matches[1] ), $check_version, '=' ) ) {
