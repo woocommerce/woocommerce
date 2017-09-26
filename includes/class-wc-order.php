@@ -259,7 +259,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function maybe_set_date_paid() {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
-			$this->set_date_paid( current_time( 'timestamp', true ) );
+			$this->set_date_paid( current_time( 'timestamp' ) );
 		}
 	}
 

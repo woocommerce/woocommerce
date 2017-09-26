@@ -281,13 +281,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
-			$on_sale_ids = wc_get_product_ids_on_sale();
-
-			// Use 0 when there's no on sale products to avoid return all products.
-			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
-
-			$args[ $on_sale_key ] += $on_sale_ids;
+			$on_sale_key           = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
