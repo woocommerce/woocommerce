@@ -1,24 +1,3 @@
-build:
-  environment:
-    php: "7.1"
-    mysql: true
-    postgresql: false
-    redis: false
-    apache2:
-      modules:
-        - rewrite
-    variables:
-      WP_VERSION: latest
-  dependencies:
-    before:
-      - "bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION"
-  tests:
-    override:
-      -
-        command: "vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.clover"
-        coverage:
-          file: coverage.clover
-          format: php-clover
 tools:
   php_code_sniffer:
     config:

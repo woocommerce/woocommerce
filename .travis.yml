@@ -32,6 +32,10 @@ before_script:
 script:
   - phpunit --version
   - phpunit -c phpunit.xml
+  - vendor/bin/phpunit --coverage-clover=coverage.xml
 
 after_script:
   - bash tests/bin/travis.sh after
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
