@@ -715,11 +715,12 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
-		$dimension_unit = get_option( 'woocommerce_dimension_unit', false );
-		$weight_unit    = get_option( 'woocommerce_weight_unit', false );
-		$country_code   = WC()->countries->get_base_country();
-		$country_name   = WC()->countries->countries[ $country_code ];
-		$wcs_carrier    = $this->get_wcs_shipping_carrier( $country_code );
+		$dimension_unit        = get_option( 'woocommerce_dimension_unit', false );
+		$weight_unit           = get_option( 'woocommerce_weight_unit', false );
+		$country_code          = WC()->countries->get_base_country();
+		$country_name          = WC()->countries->countries[ $country_code ];
+		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
+		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code );
 
 		// TODO: determine how to handle existing shipping zones (or choose not to)
 
@@ -735,16 +736,16 @@ class WC_Admin_Setup_Wizard {
 
 		if ( $wcs_carrier ) {
 			$intro_text = sprintf(
-			/* translators: %1$s: country name, %2$s: shipping carrier name */
+			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
 				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
-				$country_name,
+				$prefixed_country_name,
 				$wcs_carrier
 			);
 		} else {
 			$intro_text = sprintf(
-			/* translators: %s: country name */
-				__( "You can choose which countries you'll be shipping to and with which methods. We've started you up with shipping to %s and the rest of the world.", 'woocommerce' ),
-				$country_name
+			/* translators: %s: country name including the 'the' prefix if needed */
+				__( "You can choose which countries you'll be shipping to and with which methods. To get started, we've set you up with shipping inside and outside of %s.", 'woocommerce' ),
+				$prefixed_country_name
 			);
 		}
 
