@@ -1270,7 +1270,7 @@ class WC_Admin_Setup_Wizard {
 			<?php endif; ?>
 			<?php if ( $this->should_show_automated_tax_extra() ) : ?>
 				<ul class="wc-wizard-services featured">
-					<li class="wc-wizard-service-item">
+					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
 						<div class="wc-wizard-service-description">
 							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
 							<p>
@@ -1279,8 +1279,14 @@ class WC_Admin_Setup_Wizard {
 						</div>
 
 						<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="setup_automated_taxes" type="checkbox" name="setup_automated_taxes" value="yes" checked="checked" />
+						<span class="wc-wizard-service-toggle <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? '' : 'disabled'; ?>">
+							<input
+								id="setup_automated_taxes"
+								type="checkbox"
+								name="setup_automated_taxes"
+								value="yes"
+								<?php checked( get_option( 'woocommerce_setup_automated_taxes', 'no' ), 'yes' ); ?>
+							/>
 							<label for="setup_automated_taxes">
 						</span>
 						</div>
@@ -1304,13 +1310,11 @@ class WC_Admin_Setup_Wizard {
 		$setup_automated_tax = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
 		$install_storefront  = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
 
+		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
+
 		if ( $setup_automated_tax ) {
-			update_option( 'woocommerce_calc_taxes', 'yes' );
-
 			$this->install_woocommerce_services();
-
-			// Signal WooCommerce Services to setup automated taxes.
-			update_option( 'woocommerce_setup_automated_taxes', true );
 		}
 
 		if ( $install_storefront ) {
