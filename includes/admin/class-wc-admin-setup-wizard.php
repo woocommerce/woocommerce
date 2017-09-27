@@ -1474,8 +1474,11 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Determine if we need to install Jetpack synchronously here.
-
+		// Determine if we need to activate Jetpack synchronously.
+		$jetpack_status = validate_plugin( 'jetpack/jetpack.php' );
+		if ( 0 === $jetpack_status ) {
+			activate_plugin( 'jetpack/jetpack.php' );
+		}
 
 		if ( ! class_exists( 'Jetpack' ) ) {
 			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );
