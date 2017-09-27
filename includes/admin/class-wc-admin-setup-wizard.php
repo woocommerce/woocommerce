@@ -1101,10 +1101,19 @@ class WC_Admin_Setup_Wizard {
 	 * Display service item in list.
 	 */
 	public function display_service_item( $item_id, $item_info ) {
-		$enabled = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		$item_class = 'wc-wizard-service-item';
 		if ( isset( $item_info['class'] ) ) {
 			$item_class .= ' ' . $item_info['class'];
+		}
+
+		$settings_array = get_option( 'woocommerce_' . $item_id . '_settings' );
+
+		// Show the user-saved state if it was previously saved
+		// Otherwise, rely on the item info
+		if ( is_array( $settings_array ) ) {
+			$should_enable_toggle = 'yes' === $settings_array['enabled'];
+		} else {
+			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
 
 		?>
@@ -1139,8 +1148,8 @@ class WC_Admin_Setup_Wizard {
 				<?php endif; ?>
 			</div>
 			<div class="wc-wizard-service-enable">
-				<span class="wc-wizard-service-toggle <?php echo esc_attr( $enabled ? '' : 'disabled' ); ?>">
-					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $enabled ); ?>/>
+				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>">
+					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $should_enable_toggle ); ?>/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
 			</div>
@@ -1361,7 +1370,10 @@ class WC_Admin_Setup_Wizard {
 
 		$description     = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
-		$stripe_enabled  = $stripe_settings && ( 'yes' === $stripe_settings['create_account'] );
+		$stripe_enabled  = is_array( $stripe_settings )
+			&& ( 'yes' === $stripe_settings['create_account'] )
+			&& 'yes' === $stripe_settings['enabled']
+			&& ! empty( $stripe_settings[ 'email' ] );
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
