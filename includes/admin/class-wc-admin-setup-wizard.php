@@ -709,7 +709,7 @@ class WC_Admin_Setup_Wizard {
 			'stripe' => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. <a href="%s" target="_blank">Learn more about Stripe</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
+				'description' => sprintf( __( 'Accept all major debit and credit cards from customers in every country in 135+ currencies. Enable one touch payment through Apple Pay. Go beyond credit cards and support global payment methods like Alipay. <a href="%s" target="_blank">Learn more about Stripe</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/woocommerce-gateway-stripe/' ),
 				'class'       => 'featured featured-row-first',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
