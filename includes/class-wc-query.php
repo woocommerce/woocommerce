@@ -2,11 +2,9 @@
 /**
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
- * @class 		WC_Query
- * @version		2.6.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @version 3.2.0
+ * @package WooCommerce/Classes
+ * @author  Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,19 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Query {
 
-	/** @public array Query vars to add to wp */
+	/**
+	 * Query vars to add to wp.
+	 *
+	 * @var array
+	 */
 	public $query_vars = array();
 
 	/**
-	 * Stores chosen attributes
+	 * Stores chosen attributes.
+	 *
 	 * @var array
 	 */
 	private static $_chosen_attributes;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
-	 *
-	 * @access public
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
