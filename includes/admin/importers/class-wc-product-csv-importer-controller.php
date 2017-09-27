@@ -165,19 +165,37 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Add error message.
+	 *
+	 * @param string $message Error message.
+	 * @param array  $actions List of actions with 'url' and 'label'.
 	 */
-	protected function add_error( $error ) {
-		$this->errors[] = $error;
+	protected function add_error( $message, $actions = array() ) {
+		$this->errors[] = array(
+			'message' => $message,
+			'actions' => $actions,
+		);
 	}
 
 	/**
 	 * Add error message.
 	 */
 	protected function output_errors() {
-		if ( $this->errors ) {
-			foreach ( $this->errors as $error ) {
-				echo '<div class="error inline"><p>' . esc_html( $error ) . '</p></div>';
+		if ( ! $this->errors ) {
+			return;
+		}
+
+		foreach ( $this->errors as $error ) {
+			echo '<div class="error inline">';
+			echo '<p>' . esc_html( $error['message'] ) . '</p>';
+
+			if ( ! empty( $error['actions'] ) ) {
+				echo '<p>';
+				foreach ( $error['actions'] as $action ) {
+					echo '<a class="button button-primary" href="' . esc_url( $action['url'] ) . '">' . esc_html( $action['label'] ) . '</a> ';
+				}
+				echo '</p>';
 			}
+			echo '</div>';
 		}
 	}
 
@@ -298,7 +316,18 @@ class WC_Product_CSV_Importer_Controller {
 		$sample       = current( $importer->get_raw_data() );
 
 		if ( empty( $sample ) ) {
-			$this->add_error( __( 'The file is empty, please try again with a new file.', 'woocommerce' ) );
+			$this->add_error(
+				__( 'The file is empty or using a different encoding than UTF-8, please try again with a new file.', 'woocommerce' ),
+				array(
+					array(
+						'url'   => admin_url( 'edit.php?post_type=product&page=product_importer' ),
+						'label' => __( 'Upload a new file', 'woocommerce' ),
+					),
+				)
+			);
+
+			// Force output the errors in the same page.
+			$this->output_errors();
 			return;
 		}
 

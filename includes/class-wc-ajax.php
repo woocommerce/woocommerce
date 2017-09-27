@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) ), $request ) );
 	}
 
 	/**
@@ -928,8 +928,11 @@ class WC_AJAX {
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
+			$result   = $order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
-			$order->apply_coupon( wc_clean( $_POST['coupon'] ) );
+			if ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			}
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
