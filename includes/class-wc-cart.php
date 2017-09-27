@@ -333,7 +333,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart_contents_taxes() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_taxes' ) );
-
 	}
 
 	/**
