@@ -567,6 +567,7 @@ body {
 // Toggle display a list of services
 .wc-wizard-service-enable input {
 	visibility: hidden;
+	position: relative;
 
 	&:before {
 		content: "\f347"; // down chevron
@@ -575,12 +576,15 @@ body {
 		color: #666;
 		font-size: 25px;
 		margin-left: -5px; // center it
+		top: -6px;
+		position: absolute;
 	}
 }
 
 .wc-wizard-service-enable input:checked {
 	&:before {
 		content: "\f343"; // up chevron
+		top: -7px;
 	}
 }
 .wc-wizard-services.manual .wc-wizard-service-item {
