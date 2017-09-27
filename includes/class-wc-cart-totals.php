@@ -115,7 +115,7 @@ final class WC_Cart_Totals {
 	 *
 	 * @since 3.2.0
 	 * @throws Exception If missing WC_Cart object.
-	 * @param object $cart Cart object to calculate totals for.
+	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
 	public function __construct( &$cart = null ) {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {

@@ -55,7 +55,7 @@ final class WC_Cart_Fees {
 	 *
 	 * @since 3.2.0
 	 * @throws Exception If missing WC_Cart object.
-	 * @param object $cart Cart object.
+	 * @param WC_Cart $cart Cart object.
 	 */
 	public function __construct( &$cart ) {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
