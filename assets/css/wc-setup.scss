@@ -744,6 +744,7 @@ h3.jetpack-reasons {
 	padding: 1em;
 	box-shadow: none;
 	min-width: 12em;
+	min-width: auto;
 
 	&:focus,
 	&:hover,
@@ -838,14 +839,10 @@ h3.jetpack-reasons {
 	}
 }
 
-.wc-setup .wc-setup-actions .button {
-	min-width: auto;
-
-	&.newsletter-form-button {
-		height: 42px;
-		padding: 0 1em;
-		margin: 0;
-	}
+.wc-setup .wc-setup-actions .button.newsletter-form-button {
+	height: 42px;
+	padding: 0 1em;
+	margin: 0;
 }
 
 .wc-wizard-next-steps {
