@@ -1372,8 +1372,7 @@ class WC_Admin_Setup_Wizard {
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
 			&& ( 'yes' === $stripe_settings['create_account'] )
-			&& 'yes' === $stripe_settings['enabled']
-			&& ! empty( $stripe_settings[ 'email' ] );
+			&& 'yes' === $stripe_settings['enabled'];
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
