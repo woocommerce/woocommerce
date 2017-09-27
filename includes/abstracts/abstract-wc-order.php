@@ -897,11 +897,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
-			$code   = wc_format_coupon_code( $raw_coupon );
-			$coupon = new WC_Coupon( $code );
+			$code      = wc_format_coupon_code( $raw_coupon );
+			$coupon    = new WC_Coupon( $code );
 
-			if ( $coupon->get_code() !== $code || ! $coupon->is_valid() ) {
+			if ( $coupon->get_code() !== $code ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
+			}
+
+			$discounts = new WC_Discounts( $this );
+			$valid     = $discounts->is_coupon_valid( $coupon );
+
+			if ( is_wp_error( $valid ) ) {
+				return $valid;
 			}
 		} else {
 			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
