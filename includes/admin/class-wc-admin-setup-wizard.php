@@ -1243,7 +1243,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_extras() {
 		?>
 		<h1><?php esc_html_e( 'Recommended Extras', 'woocommerce' ); ?></h1>
-		<p><?php esc_html_e( 'Make the most of your store.', 'woocommerce' ); ?></p>
 		<form method="post">
 			<?php if ( $this->should_show_theme_extra() ) : ?>
 			<ul class="wc-wizard-services featured">
