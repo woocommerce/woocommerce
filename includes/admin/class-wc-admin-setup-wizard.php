@@ -1354,20 +1354,23 @@ class WC_Admin_Setup_Wizard {
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
 		$rates_enabled   = $domestic_rates || $intl_rates;
 
+		/* translators: %s: list of features, potentially comma separated */
+		$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
+
 		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like Stripe payments, automated taxes, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'Stripe payments, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $stripe_enabled && $taxes_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like Stripe payments and automated taxes, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'Stripe payments and automated taxes', 'woocommerce' ) );
 		} else if ( $stripe_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like Stripe payments, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'Stripe payments, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $stripe_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like Stripe payments, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'Stripe payments', 'woocommerce' ) );
 		} else if ( $taxes_enabled && $rates_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like automated taxes, live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $taxes_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like automated taxes, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'automated taxes', 'woocommerce' ) );
 		} else if ( $rates_enabled ) {
-			$description = __( 'Your store is almost ready! To activate services like live rates and discounted shipping labels, just connect with Jetpack.', 'woocommerce' );
+			$description = sprintf( $description_base, __( 'live rates and discounted shipping labels', 'woocommerce' ) );
 		}
 		?>
 		<form method="post" class="activate-jetpack">
@@ -1440,6 +1443,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
+
+		// Determine if we need to install Jetpack synchronously here.
+
 
 		if ( ! class_exists( 'Jetpack' ) ) {
 			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );
