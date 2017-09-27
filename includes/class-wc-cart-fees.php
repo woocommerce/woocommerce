@@ -32,7 +32,7 @@ final class WC_Cart_Fees {
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
-	 * @var array
+	 * @var WC_Cart
 	 */
 	private $cart;
 
@@ -54,9 +54,14 @@ final class WC_Cart_Fees {
 	 * Constructor. Reference to the cart.
 	 *
 	 * @since 3.2.0
+	 * @throws Exception If missing WC_Cart object.
 	 * @param object $cart Cart object.
 	 */
-	public function __construct( &$cart = null ) {
+	public function __construct( &$cart ) {
+		if ( ! is_a( $cart, 'WC_Cart' ) ) {
+			throw new Exception( 'A valid WC_Cart object is required' );
+		}
+
 		$this->cart = $cart;
 		add_action( 'woocommerce_cart_emptied', array( $this, 'remove_all_fees' ) );
 		add_action( 'woocommerce_cart_reset', array( $this, 'remove_all_fees' ) );

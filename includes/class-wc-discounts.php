@@ -58,7 +58,7 @@ class WC_Discounts {
 	 * Normalise cart items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $cart Cart object.
+	 * @param WC_Cart $cart Cart object.
 	 */
 	public function set_items_from_cart( $cart ) {
 		$this->items = $this->discounts = array();

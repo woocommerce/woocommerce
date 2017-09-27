@@ -24,7 +24,7 @@ final class WC_Cart_Totals {
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
-	 * @var array
+	 * @var WC_Cart
 	 */
 	protected $cart;
 
@@ -114,14 +114,17 @@ final class WC_Cart_Totals {
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
+	 * @throws Exception If missing WC_Cart object.
 	 * @param object $cart Cart object to calculate totals for.
 	 */
 	public function __construct( &$cart = null ) {
-		if ( is_a( $cart, 'WC_Cart' ) ) {
-			$this->cart          = $cart;
-			$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
-			$this->calculate();
+		if ( ! is_a( $cart, 'WC_Cart' ) ) {
+			throw new Exception( 'A valid WC_Cart object is required' );
 		}
+
+		$this->cart          = $cart;
+		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
+		$this->calculate();
 	}
 
 	/**
