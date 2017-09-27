@@ -1399,9 +1399,15 @@ class WC_Admin_Setup_Wizard {
 		}
 		?>
 		<form method="post" class="activate-jetpack">
-			<h1><?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?></h1>
 			<?php if ( $description ) : ?>
-			<p><?php echo esc_html( $description ); ?></p>
+				<h1>
+					<?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?>
+				</h1>
+				<p><?php echo esc_html( $description ); ?></p>
+			<?php else: ?>
+				<h1>
+					<?php esc_html_e( 'Connect your store to Jetpack to enable extra features', 'woocommerce' ); ?>
+				</h1>
 			<?php endif; ?>
 			<img
 				class="jetpack-logo"
