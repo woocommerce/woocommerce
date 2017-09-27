@@ -986,6 +986,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
+		$can_stripe = $this->is_stripe_supported_country( $country );
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
@@ -1006,16 +1007,18 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => $stripe_description,
+				'class'       => $can_stripe ? 'checked' : '',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
-					'email' => array(
-						'label'       => __( 'Stripe email address', 'woocommerce' ),
-						'type'        => 'email',
-						'value'       => $user_email,
-						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'required'    => true,
+					'create_account' => array(
+						'label'       => __( 'Create an account for me', 'woocommerce' ),
+						'type'        => 'checkbox',
+						'value'       => 'yes',
+						'placeholder' => '',
+						'required'    => false,
 					),
 				),
+				'enabled' => $can_stripe,
 				'featured' => true,
 			),
 			'braintree_paypal' => array(
@@ -1036,7 +1039,7 @@ class WC_Admin_Setup_Wizard {
 				'image'       => '',
 				'settings'    => array(
 					'email' => array(
-						'label'       => __( 'PayPal email address', 'woocommerce' ),
+						'label'       => __( 'PayPal email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
@@ -1046,7 +1049,7 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		if ( ! $this->is_stripe_supported_country( $country ) ) {
+		if ( ! $can_stripe ) {
 			unset( $gateways['stripe'] );
 		}
 
@@ -1099,8 +1102,13 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function display_service_item( $item_id, $item_info ) {
 		$enabled = isset( $item_info['enabled'] ) && $item_info['enabled'];
+		$item_class = 'wc-wizard-service-item';
+		if ( isset( $item_info['class'] ) ) {
+			$item_class .= ' ' . $item_info['class'];
+		}
+
 		?>
-		<li class="wc-wizard-service-item">
+		<li class="<?php echo esc_attr( $item_class ); ?>">
 			<div class="wc-wizard-service-name">
 				<?php if ( ! empty( $item_info['image'] ) ) : ?>
 					<img src="<?php echo esc_attr( $item_info['image'] ); ?>" alt="<?php echo esc_attr( $item_info['name'] ); ?>" />
@@ -1113,13 +1121,15 @@ class WC_Admin_Setup_Wizard {
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
 					<div class="wc-wizard-service-settings">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
-							<label for="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label>
+							<?php $input_id = $item_id . '_' . $setting_id; ?>
+							<label for="<?php echo esc_attr( $input_id ); ?>">
+								<?php echo esc_html( $setting['label'] ); ?>
+							</label>
 							<input
 								type="<?php echo esc_attr( $setting['type'] ); ?>"
-								id="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
-								class="payment-<?php echo esc_attr( $setting['type'] ); ?>-input "
-									+ "<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
-								name="<?php echo esc_attr( $item_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+								id="<?php echo esc_attr( $input_id ); ?>"
+								class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
+								name="<?php echo esc_attr( $input_id ); ?>"
 								value="<?php echo esc_attr( $setting['value'] ); ?>"
 								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 								<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
@@ -1208,7 +1218,10 @@ class WC_Admin_Setup_Wizard {
 		check_admin_referer( 'wc-setup' );
 
 		// Install WooCommerce Services with Stripe to enable deferred account creation.
-		if ( ! empty( $_POST['wc-wizard-service-stripe-enabled'] ) ) {
+		if (
+			! empty( $_POST['wc-wizard-service-stripe-enabled'] ) &&
+			! empty( $_POST['stripe_create_account'] )
+		) {
 			$this->install_woocommerce_services();
 		}
 
@@ -1348,7 +1361,7 @@ class WC_Admin_Setup_Wizard {
 
 		$description     = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
-		$stripe_enabled  = $stripe_settings && ! empty( $stripe_settings[ 'email' ] );
+		$stripe_enabled  = $stripe_settings && ( 'yes' === $stripe_settings['create_account'] );
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
