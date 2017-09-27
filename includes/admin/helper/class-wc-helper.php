@@ -330,6 +330,7 @@ class WC_Helper {
 			'all' => __( 'All', 'woocommerce' ),
 			'active' => __( 'Active', 'woocommerce' ),
 			'inactive' => __( 'Inactive', 'woocommerce' ),
+			'installed' => __( 'Installed', 'woocommerce' ),
 			'update-available' => __( 'Update Available', 'woocommerce' ),
 			'expiring' => __( 'Expiring Soon', 'woocommerce' ),
 			'expired' => __( 'Expired', 'woocommerce' ),
@@ -397,6 +398,14 @@ class WC_Helper {
 
 			case 'inactive':
 				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => false ) );
+				break;
+
+			case 'installed':
+				foreach ( $subscriptions as $key => $subscription ) {
+					if ( empty( $subscription['local']['installed'] ) ) {
+						unset( $subscriptions[ $key ] );
+					}
+				}
 				break;
 
 			case 'update-available':
