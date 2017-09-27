@@ -189,6 +189,22 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Improved order tracking page display and validation.
 * Tweak - Wizard improvements, with store-owner newsletter sign-up.
 * Tweak - Improved tax calculations on negative fees by apportioning to all items.
+* Tweak - Added logic to install the plugins and themes asynchronously without using wp-cron.
+* Tweak - Modify product API returned data by context.
+* Tweak - Move js clipboards off of zeroclipboard script.
+* Tweak - Remove spam trap field from registration form.
+* Tweak - Added screen reader text to quantity input template.
+* Fix - Improved error handling in the CSV importer when invalid files are uploaded.
+* Fix - Handle full refunds in tax report by date.
+* Fix - API - Return empty result when there is no on_sale products.
+* Fix - Fixed WC_Emails::wrap_message hooks .
+* Fix - Load up gateways on ajax order status transitions so PayPal funds capture when order is completed.
+* Fix - Replace wistia videos with youtube.
+* Fix - Handle sale dates on the fly in case of missed cron schedule. 
+* Fix - If sorting by date in the REST API, fallback to ID so searches are consistant.
+* Fix - Do not apply custom sorting to product feeds. 
+* Fix - Make importer columns case-insensitive.
+* Dev - Make parse_date_for_wp_query public.
 * Dev - API - Creating webhooks uses the current API version rather than the latest API version.
 * Dev - Product CRUD search helpers. 
 * Dev - Refactor shipping rate to include instance IDs, and pass instance IDs through filters.
