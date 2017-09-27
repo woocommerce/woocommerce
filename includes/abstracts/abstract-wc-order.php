@@ -992,7 +992,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( 'coupon' ) as $coupon_item ) {
 			$coupon_code   = $coupon_item->get_code();
 			$coupon_id     = wc_get_coupon_id_by_code( $coupon_code );
-			$coupon_object = false;
 
 			// If we have a coupon ID (loaded via wc_get_coupon_id_by_code) we can simply load the new coupon object using the ID.
 			if ( $coupon_id ) {
