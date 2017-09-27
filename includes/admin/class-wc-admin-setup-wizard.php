@@ -1494,7 +1494,7 @@ class WC_Admin_Setup_Wizard {
 			'from'           => 'wpcom',
 			'activate_error' => false,
 		) ) );
-		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce' );
+		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		wp_redirect( esc_url_raw( $connection_url ) );
 		exit;
