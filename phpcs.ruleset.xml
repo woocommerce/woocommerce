@@ -3,75 +3,16 @@
 	<!-- See https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
 	<!-- See https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/blob/develop/WordPress-Core/ruleset.xml -->
 
-	<description>WooCommerce PHP_CodeSniffer ruleset.</description>
+	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
 	<rule ref="WordPress">
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedCATCH" />
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedIF" />
 		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedELSE" />
 		<exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionalCall.NotAllowed" />
-		<exclude name="Generic.Commenting.DocComment.LongNotCapital" />
-		<exclude name="Generic.Commenting.DocComment.MissingShort" />
-		<exclude name="Generic.Commenting.DocComment.ShortNotCapital" />
-		<exclude name="Generic.Commenting.DocComment.SpacingAfter" />
-		<exclude name="Generic.Commenting.DocComment.SpacingBeforeTags" />
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />
-		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
-		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace" />
-		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
-		<exclude name="Generic.PHP.DeprecatedFunctions.Deprecated" />
-		<exclude name="Generic.PHP.ForbiddenFunctions.FoundWithAlternative" />
-		<exclude name="Generic.PHP.LowerCaseKeyword.Found" />
 		<exclude name="Generic.PHP.NoSilencedErrors.Discouraged" />
-		<exclude name="Generic.Strings.UnnecessaryStringConcat.Found" />
-		<exclude name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" />
-		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
-		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
-		<exclude name="Squiz.Commenting.BlockComment.WrongEnd" />
-		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
-		<exclude name="Squiz.Commenting.ClassComment.Missing" />
-		<exclude name="Squiz.Commenting.ClosingDeclarationComment.Abstract" />
-		<exclude name="Squiz.Commenting.EmptyCatchComment.Missing" />
-		<exclude name="Squiz.Commenting.FileComment.Missing" />
-		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
-		<exclude name="Squiz.Commenting.FileComment.SpacingAfterComment" />
-		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
-		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
-		<exclude name="Squiz.Commenting.FunctionComment.ExtraParamComment" />
-		<exclude name="Squiz.Commenting.FunctionComment.InvalidNoReturn" />
-		<exclude name="Squiz.Commenting.FunctionComment.InvalidReturnVoid" />
-		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamName" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
-		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
-		<exclude name="Squiz.Commenting.FunctionComment.ParamNameNoCaseMatch" />
-		<exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch" />
-		<exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
-		<exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
-		<exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
-		<exclude name="Squiz.Commenting.FunctionComment.ThrowsNotCapital" />
-		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.Missing" />
-		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber" />
-		<exclude name="Squiz.Commenting.FunctionComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.InlineComment.Empty" />
-		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
-		<exclude name="Squiz.Commenting.InlineComment.NotCapital" />
-		<exclude name="Squiz.Commenting.InlineComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.VariableComment.Missing" />
-		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
-		<exclude name="Squiz.Commenting.VariableComment.WrongStyle" />
-		<exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterKeyword" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceAfterDefault" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterOpen" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterOpenHint" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeEquals" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
-		<exclude name="Squiz.PHP.CommentedOutCode.Found" />
-		<exclude name="Squiz.Strings.DoubleQuoteUsage.NotRequired" />
 		<exclude name="WordPress.Classes.ClassOpeningStatement.BraceOnNewLine" />
 		<exclude name="WordPress.CSRF.NonceVerification.NoNonceVerification" />
 		<exclude name="WordPress.DB.RestrictedFunctions.mysql" />

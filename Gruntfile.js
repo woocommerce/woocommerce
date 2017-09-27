@@ -288,12 +288,6 @@ module.exports = function( grunt ) {
 					'!tmp/**',                                                   // Exclude tmp/
 					'!vendor/**'                                                 // Exclude vendor/
 				]
-			},
-			dev: {
-				options: {
-					standard: './dev.ruleset.xml'
-				},
-				src: '<%= phpcs.dist.src %>'
 			}
 		},
 
