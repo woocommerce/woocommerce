@@ -391,6 +391,11 @@ body {
 		}
 	}
 }
+
+.wc-setup-content p:last-of-type {
+	margin-bottom: 0;
+}
+
 .wc-return-to-dashboard {
 	font-size: 0.85em;
 	color: #b5b5b5;
