@@ -30,6 +30,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 	}
 
 	/**
@@ -252,6 +253,19 @@ class WC_Admin {
 		}
 
 		return $footer_text;
+	}
+
+	/**
+	 * Check on a Jetpack install queued by the Setup Wizard.
+	 *
+	 * See: WC_Admin_Setup_Wizard::install_jetpack()
+	 */
+	public function setup_wizard_check_jetpack() {
+		$jetpack_active = class_exists( 'Jetpack' );
+
+		wp_send_json_success( array(
+			'is_active' => $jetpack_active ? 'yes' : 'no',
+		) );
 	}
 }
 
