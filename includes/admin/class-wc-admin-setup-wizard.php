@@ -1478,7 +1478,6 @@ class WC_Admin_Setup_Wizard {
 		);
 		?>
 		<h1><?php esc_html_e( "You're ready to start selling!", 'woocommerce' ); ?></h1>
-		<p><?php esc_html_e( 'Your WooCommerce store is ready to go.', 'woocommerce' ); ?></p>
 
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
