@@ -203,13 +203,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 *
 	 * @since  3.2.0
 	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @param  bool $is_vat_exempt Indicates if the order should not have VAT applied to it.
 	 * @return bool  True if taxes were calculated.
 	 */
-	public function calculate_taxes( $calculate_tax_for = array() ) {
+	public function calculate_taxes( $calculate_tax_for = array(), $is_vat_exempt = false ) {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
-		if ( '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
+		if ( ! $is_vat_exempt && '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
 			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
 			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
