@@ -8,66 +8,28 @@
 class WC_Tests_Order_Item_Fee extends WC_Unit_Test_Case {
 
 	/**
-	 * Test set_amount and get_amount methods of WC_Order_Item_Fee.
+	 * Test WC_Order_Item_Fee setters and getters.
 	 *
 	 * @since 3.2.0
 	 */
-	public function test_set_get_amount() {
+	public function test_setters_getters() {
 		$fee = new WC_Order_Item_Fee;
+
 		$fee->set_amount( '20.00' );
 		$this->assertEquals( '20.00', $fee->get_amount() );
-	}
 
-	/**
-	 * Test set_tax_class and get_tax_class methods of WC_Order_Item_Fee.
-	 *
-	 * @since 3.2.0
-	 */
-	public function test_set_get_tax_class() {
-		$old_classes = get_option( 'woocommerce_tax_classes' );
-		update_option( 'woocommerce_tax_classes', 'testclass' );
+		$fee->set_tax_class( 'reduced-rate' );
+		$this->assertEquals( 'reduced-rate', $fee->get_tax_class() );
 
-		$fee = new WC_Order_Item_Fee;
-		$fee->set_tax_class( 'testclass' );
-		$this->assertEquals( 'testclass', $fee->get_tax_class() );
-
-		// Clean up.
-		update_option( 'woocommerce_tax_classes', $old_classes );
-	}
-
-	/**
-	 * Test set_total and get_total methods of WC_Order_Item_Fee.
-	 *
-	 * @since 3.2.0
-	 */
-	public function test_set_get_total() {
-		$fee = new WC_Order_Item_Fee;
 		$fee->set_total( '15.01' );
 		$this->assertEquals( '15.01', $fee->get_total() );
-	}
 
-	/**
-	 * Test set_total_tax and get_total_tax methods of WC_Order_Item_Fee.
-	 *
-	 * @since 3.2.0
-	 */
-	public function test_set_get_total_tax() {
-		$fee = new WC_Order_Item_Fee;
 		$fee->set_total_tax( '5.01' );
 		$this->assertEquals( '5.01', $fee->get_total_tax() );
-	}
 
-	/**
-	 * Test set_taxes and get_taxes methods of WC_Order_Item_Fee.
-	 *
-	 * @since 3.2.0
-	 */
-	public function test_set_get_taxes() {
 		$taxes = array(
 			'total' => array( '10', '2.4' ),
 		);
-
-		$fee = new WC_Order_Item_Fee;
 		$fee->set_taxes( $taxes );
 		$this->assertEquals( $taxes, $fee->get_taxes() );
 		$this->assertEquals( '12.4', $fee->get_total_tax() );
