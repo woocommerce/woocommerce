@@ -767,6 +767,9 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					$attribute_id   = absint( $attribute['id'] );
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 				} elseif ( ! empty( $attribute['name'] ) ) {
+					if($attribute['global']) {
+						$attribute_id   = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
+					}
 					$attribute_name = wc_clean( $attribute['name'] );
 				}
 
