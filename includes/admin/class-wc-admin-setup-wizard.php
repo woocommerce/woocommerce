@@ -1362,12 +1362,7 @@ class WC_Admin_Setup_Wizard {
 		}
 	}
 
-	/**
-	 * Activate step.
-	 */
-	public function wc_setup_activate() {
-		$this->wc_setup_activate_actions();
-
+	protected function wc_setup_activate_get_description() {
 		$description     = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
@@ -1396,36 +1391,66 @@ class WC_Admin_Setup_Wizard {
 		} else if ( $rates_enabled ) {
 			$description = sprintf( $description_base, __( 'live rates and discounted shipping labels', 'woocommerce' ) );
 		}
+
+		return $description;
+	}
+
+	/**
+	 * Activate step.
+	 */
+	public function wc_setup_activate() {
+		$this->wc_setup_activate_actions();
+
+		$has_jetpack_error = false;
+		if ( isset( $_GET['activate_error'] ) ) {
+			$has_jetpack_error = true;
+
+			$title = __( "Sorry, We couldn't connect your store to Jetpack", 'woocommerce' );
+
+			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
+			$description = $error_message;
+		} else {
+			$description = $this->wc_setup_activate_get_description();
+			if ( $description ) {
+				$title = $description ?
+					__( 'Connect your store to Jetpack', 'woocommerce' ) :
+					__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
+			}
+		}
 		?>
-		<form method="post" class="activate-jetpack">
-			<?php if ( $description ) : ?>
-				<h1>
-					<?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?>
-				</h1>
-				<p><?php echo esc_html( $description ); ?></p>
-			<?php else: ?>
-				<h1>
-					<?php esc_html_e( 'Connect your store to Jetpack to enable extra features', 'woocommerce' ); ?>
-				</h1>
-			<?php endif; ?>
-			<img
-				class="jetpack-logo"
-				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
-				alt="Jetpack logo"
-			/>
-			<p class="jetpack-terms">
-			<?php
-				printf(
-					__( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ),
-					'https://wordpress.com/tos',
-					'https://jetpack.com/support/what-data-does-jetpack-sync'
-				);
-			?>
-			</p>
+		<h1><?php echo esc_html( $title ); ?></h1>
+		<p><?php echo esc_html( $description ); ?></p>
+		<img
+			class="jetpack-logo"
+			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+			alt="Jetpack logo"
+		/>
+		<?php if ( $has_jetpack_error ) : ?>
 			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
+				<a
+					href="<?php echo esc_url( $this->get_next_step_link() ); ?>"
+					class="button-primary button button-large"
+				>
+					<?php esc_html_e( 'Finish setting up your store', 'woocommerce' ); ?>
+				</a>
 			</p>
-			<input type="hidden" name="save_step" value="activate" />
+		<?php else : ?>
+			<p class="jetpack-terms">
+				<?php
+					printf(
+						wp_kses_post( __( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ) ),
+						'https://wordpress.com/tos',
+						'https://jetpack.com/support/what-data-does-jetpack-sync'
+					);
+				?>
+			</p>
+			<form method="post" class="activate-jetpack">
+				<p class="wc-setup-actions step">
+					<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
+				</p>
+				<input type="hidden" name="save_step" value="activate" />
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</form>
 			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item">
@@ -1461,9 +1486,8 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</li>
 			</ul>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
-		</form>
-		<?php
+		<?php endif; ?>
+	<?php
 	}
 
 	protected function get_all_activate_errors() {
