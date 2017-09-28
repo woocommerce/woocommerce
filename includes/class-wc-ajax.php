@@ -1521,6 +1521,8 @@ class WC_AJAX {
 
 	/**
 	 * Handle a refund via the edit order screen.
+	 *
+	 * @throws Exception To return errors.
 	 */
 	public static function refund_line_items() {
 		ob_start();
@@ -1533,6 +1535,7 @@ class WC_AJAX {
 
 		$order_id               = absint( $_POST['order_id'] );
 		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ), wc_get_price_decimals() );
+		$refunded_amount        = wc_format_decimal( sanitize_text_field( $_POST['refunded_amount'] ), wc_get_price_decimals() );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
@@ -1551,7 +1554,11 @@ class WC_AJAX {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
-			// Prepare line items which we are refunding
+			if ( $refunded_amount !== wc_format_decimal( $order->get_total_refunded(), wc_get_price_decimals() ) ) {
+				throw new exception( __( 'Error processing refund. Please try again.', 'woocommerce' ) );
+			}
+
+			// Prepare line items which we are refunding.
 			$line_items = array();
 			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys, $line_item_totals ) ) );
 
