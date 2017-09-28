@@ -37,8 +37,10 @@ If you think something could be improved and you're able to do so, make your cha
 
 * Fork the repository on GitHub
 * Make the changes to your forked repository
-  * **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/coding-standards/php/).**
+  * **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/coding-standards/php/)**
+    * Install our pre-commit hook using composer, it'll help with the Coding Standards. To install just run `composer install`
   * Ensure you use LF line endings - no crazy Windows line endings please :)
+    * Optionally it's possible install [EditorConfig](http://editorconfig.org/) on your editor to auto configure with indentation, line endings and other settings
 * When committing, reference your issue number (#1234) and include a note about the fix
 * Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained by WooCommerce developers
 * Please **don't** modify the changelog - this will be maintained by the WooCommerce developers.
