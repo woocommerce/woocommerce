@@ -200,7 +200,7 @@ class WC_Admin_Setup_Wizard {
 			return '';
 		}
 
-		return add_query_arg( 'step', $keys[ $step_index + 1 ] );
+		return add_query_arg( 'step', $keys[ $step_index + 1 ], remove_query_arg( 'activate_error' ) );
 	}
 
 	/**
