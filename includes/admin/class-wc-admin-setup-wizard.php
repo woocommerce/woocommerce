@@ -1474,6 +1474,10 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
+		// Clean up temporary Jetpack queued install option.
+		// This happens after the connection button is clicked
+		// and we waited for the pending install to finish.
+		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 		// Determine if we need to install Jetpack synchronously here.
 
 
@@ -1506,6 +1510,9 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
+
+		// We're definitely done waiting for queued Jetpack install.
+		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
