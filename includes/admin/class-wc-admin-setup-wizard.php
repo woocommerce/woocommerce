@@ -1466,6 +1466,20 @@ class WC_Admin_Setup_Wizard {
 		<?php
 	}
 
+	protected function get_all_activate_errors() {
+		return array(
+			'default' => __( "Sorry! We tried, but we couldn't connect Jetpack just now 😭. Please go to the Plugins tab to connect Jetpack, so that you can finish setting up your store.", 'woocommerce' ),
+			'jetpack_cant_be_installed' => __( "Sorry! We tried, but we couldn't install Jetpack for you 😭. Please go to the Plugins tab to install it, and finish setting up your store.", 'woocommerce' ),
+			'register_http_request_failed' => __( "Sorry! We couldn't contact Jetpack just now 😭. Please make sure that your site is visible over the internet, and that it accepts incoming and outgoing requests via curl. You can also try to connect to Jetpack again, and if you run into any more issues, please contact support.", 'woocommerce' ),
+			'siteurl_private_ip_dev' => __( "Whoops! We couldn't connect. Your site is probably on a private network. Jetpack can only connect to public sites. Please make sure your site is visible over the internet, and then try connecting again 🙏." , 'woocommerce' ),
+		);
+	}
+
+	protected function get_activate_error_message( $code = '' ) {
+		$errors = $this->get_all_activate_errors();
+		return array_key_exists( $code, $errors ) ? $errors[ $code ] : $errors['default'];
+	}
+
 	/**
 	 * Activate step save.
 	 *
@@ -1478,19 +1492,26 @@ class WC_Admin_Setup_Wizard {
 		// This happens after the connection button is clicked
 		// and we waited for the pending install to finish.
 		delete_option( 'woocommerce_setup_queued_jetpack_install' );
-		// Determine if we need to install Jetpack synchronously here.
 
+		WC_Install::background_installer( 'jetpack', array(
+			'file'      => 'jetpack/jetpack.php',
+			'name'      => __( 'Jetpack', 'woocommerce' ),
+			'repo-slug' => 'jetpack',
+		) );
 
+		// Did Jetpack get successfully installed?
 		if ( ! class_exists( 'Jetpack' ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'jetpack_cant_be_installed' ) ) );
 			exit;
 		}
 
 		Jetpack::maybe_set_version_option();
-		$registered = Jetpack::try_registration();
+		$register_result = Jetpack::try_registration();
 
-		if ( is_wp_error( $registered ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'register' ) ) );
+		if ( is_wp_error( $register_result ) ) {
+			$result_error_code = $register_result->get_error_code();
+			$jetpack_error_code = array_key_exists( $result_error_code, $this->get_all_activate_errors() ) ? $result_error_code : 'register';
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', $jetpack_error_code ) ) );
 			exit;
 		}
 
