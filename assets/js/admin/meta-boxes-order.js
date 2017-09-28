@@ -688,8 +688,9 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.block();
 
 				if ( window.confirm( woocommerce_admin_meta_boxes.i18n_do_refund ) ) {
-					var refund_amount = $( 'input#refund_amount' ).val();
-					var refund_reason = $( 'input#refund_reason' ).val();
+					var refund_amount   = $( 'input#refund_amount' ).val();
+					var refund_reason   = $( 'input#refund_reason' ).val();
+					var refunded_amount = $( 'input#refunded_amount' ).val();
 
 					// Get line item refunds
 					var line_item_qtys       = {};
@@ -723,16 +724,17 @@ jQuery( function ( $ ) {
 					});
 
 					var data = {
-						action:                 'woocommerce_refund_line_items',
-						order_id:               woocommerce_admin_meta_boxes.post_id,
-						refund_amount:          refund_amount,
-						refund_reason:          refund_reason,
-						line_item_qtys:         JSON.stringify( line_item_qtys, null, '' ),
-						line_item_totals:       JSON.stringify( line_item_totals, null, '' ),
-						line_item_tax_totals:   JSON.stringify( line_item_tax_totals, null, '' ),
-						api_refund:             $( this ).is( '.do-api-refund' ),
-						restock_refunded_items: $( '#restock_refunded_items:checked' ).length ? 'true' : 'false',
-						security:               woocommerce_admin_meta_boxes.order_item_nonce
+						action                : 'woocommerce_refund_line_items',
+						order_id              : woocommerce_admin_meta_boxes.post_id,
+						refund_amount         : refund_amount,
+						refunded_amount       : refunded_amount,
+						refund_reason         : refund_reason,
+						line_item_qtys        : JSON.stringify( line_item_qtys, null, '' ),
+						line_item_totals      : JSON.stringify( line_item_totals, null, '' ),
+						line_item_tax_totals  : JSON.stringify( line_item_tax_totals, null, '' ),
+						api_refund            : $( this ).is( '.do-api-refund' ),
+						restock_refunded_items: $( '#restock_refunded_items:checked' ).length ? 'true': 'false',
+						security              : woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
 					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
@@ -745,6 +747,7 @@ jQuery( function ( $ ) {
 							}
 						} else {
 							window.alert( response.data.error );
+							wc_meta_boxes_order_items.reload_items();
 							wc_meta_boxes_order_items.unblock();
 						}
 					});
