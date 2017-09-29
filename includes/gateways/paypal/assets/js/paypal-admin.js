@@ -2,7 +2,7 @@ jQuery( function( $ ) {
 	'use strict';
 
 	/**
-	 * Object to handle Stripe admin functions.
+	 * Object to handle PayPal admin functions.
 	 */
 	var wc_paypal_admin = {
 		isTestMode: function() {
