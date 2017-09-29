@@ -55,6 +55,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		self::$log_enabled    = $this->debug;
 
+		if ( $this->testmode ) {
+			$this->description .= ' ' . sprintf( __( 'TEST MODE ENABLED. In test mode, you can use the Sandbox accounts created on your developer dashboard. See the "<a href="%s">PayPal Sandbox Testing Guide</a>" for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
+			$this->description  = trim( $this->description );
+		}
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_payment' ) );
@@ -271,9 +277,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	protected function init_api() {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php' );
 
-		WC_Gateway_Paypal_API_Handler::$api_username  = $this->get_option( 'api_username' );
-		WC_Gateway_Paypal_API_Handler::$api_password  = $this->get_option( 'api_password' );
-		WC_Gateway_Paypal_API_Handler::$api_signature = $this->get_option( 'api_signature' );
+		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
+		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
+		WC_Gateway_Paypal_API_Handler::$api_signature = $this->testmode ? $this->get_option( 'sandbox_api_signature' ) : $this->get_option( 'api_signature' );
 		WC_Gateway_Paypal_API_Handler::$sandbox       = $this->testmode;
 	}
 
@@ -347,5 +353,21 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Load admin scripts.
+	 *
+	 * @since 3.X.X
+	 * @version 3.X.X
+	 */
+	public function admin_scripts() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), WC_VERSION, true );
 	}
 }
