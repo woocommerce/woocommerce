@@ -859,7 +859,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
 		// For now, limit this setup to the first run.
-		if ( empty( $existing_zones ) ) {
+		if ( ! empty( $existing_zones ) ) {
 			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
