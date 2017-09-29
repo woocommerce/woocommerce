@@ -109,6 +109,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 										'input_value' => $cart_item['quantity'],
 										'max_value'   => $_product->get_max_purchase_quantity(),
 										'min_value'   => '0',
+                                                                                'product_name' => $_product->get_name()        
 									), $_product, false );
 								}
 
