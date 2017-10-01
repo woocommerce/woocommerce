@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.1.0
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -109,6 +109,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 										'input_value' => $cart_item['quantity'],
 										'max_value'   => $_product->get_max_purchase_quantity(),
 										'min_value'   => '0',
+										'product_name'   => $_product->get_name(),
 									), $_product, false );
 								}
 
