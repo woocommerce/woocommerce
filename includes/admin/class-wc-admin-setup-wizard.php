@@ -845,6 +845,11 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
+		// If going through this step again, remove the live rates options
+		// in case the user saved different settings this time
+		delete_option( 'woocommerce_setup_domestic_live_rates_zone' );
+		delete_option( 'woocommerce_setup_intl_live_rates_zone' );
+
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
 		$domestic_method  = sanitize_text_field( $_POST['shipping_zones']['domestic']['method'] );
 		$setup_intl       = isset( $_POST['shipping_zones']['intl']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['intl']['enabled'] );
