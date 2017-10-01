@@ -398,6 +398,10 @@ body {
 	margin-bottom: 0;
 }
 
+.wc-setup-content p.store-setup {
+	margin-top: 0;
+}
+
 .wc-return-to-dashboard {
 	font-size: 0.85em;
 	color: #b5b5b5;
@@ -798,7 +802,7 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-bottom: .4em;
+	margin-bottom: 24px; // match margin-bottom on top paragraph
 
 	.city-and-postcode {
 		display: flex;
