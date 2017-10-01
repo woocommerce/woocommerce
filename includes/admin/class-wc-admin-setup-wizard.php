@@ -294,6 +294,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<form method="post" class="address-step">
+			<?php wp_nonce_field( 'wc-setup' ); ?>
 			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
 			<label for="store_country_state" class="location-prompt">
 				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
@@ -403,7 +404,6 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step" />
 			</p>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
 	}
@@ -1398,6 +1398,7 @@ class WC_Admin_Setup_Wizard {
 		}
 		?>
 		<form method="post" class="activate-jetpack">
+			<?php wp_nonce_field( 'wc-setup' ); ?>
 			<?php if ( $description ) : ?>
 				<h1>
 					<?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?>
@@ -1461,7 +1462,6 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</li>
 			</ul>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
 	}

@@ -394,8 +394,8 @@ body {
 	}
 }
 
-.wc-setup-content p:last-of-type {
-
+.wc-setup-content p:last-child {
+	margin-bottom: 0;
 }
 
 .wc-return-to-dashboard {
