@@ -292,10 +292,9 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		?>
-		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<form method="post" class="address-step">
 			<?php wp_nonce_field( 'wc-setup' ); ?>
-			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
+			<p class="store-setup"><?php esc_html_e( "The following wizard will help you configure your store and get you started quickly.", 'woocommerce' ); ?></p>
 			<label for="store_country_state" class="location-prompt">
 				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
 			</label>
