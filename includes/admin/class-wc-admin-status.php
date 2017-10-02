@@ -37,7 +37,7 @@ class WC_Admin_Status {
 	public static function status_tools() {
 		$tools = self::get_tools();
 
-		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+		if ( ! empty( $_REQUEST['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 			$tools_controller = new WC_REST_System_Status_Tools_Controller;
 			$action           = wc_clean( $_GET['action'] );
 
