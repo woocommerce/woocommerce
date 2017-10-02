@@ -248,13 +248,12 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
-	 *
-	 * @param mixed $meta
-	 *
+	 * @param mixed $meta Meta value to check.
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
-		return ! is_null( $meta->value );
+		$meta = (array) $meta;
+		return ! is_null( $meta['value'] );
 	}
 
 	/**
@@ -265,7 +264,7 @@ abstract class WC_Data {
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();
-		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
+		return array_filter( wc_list_pluck( $this->meta_data, 'get_data' ), array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
