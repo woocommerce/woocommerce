@@ -18,6 +18,7 @@ test.describe( 'Add New Product Page', function() {
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
 		driver = manager.getDriver();
+		driver.manage().window().maximize();
 
 		helper.clearCookiesAndDeleteLocalStorage( driver );
 	} );
@@ -66,14 +67,14 @@ test.describe( 'Add New Product Page', function() {
 		attr1.toggle();
 
 		const attr2 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr2.displayed() );
 		attr2.setName( 'attr #2' );
 		attr2.checkVisibleOnTheProductPage();
 		attr2.checkUsedForVariations();
 		attr2.setValue( 'val1 | val2' );
 
 		const attr3 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr3.displayed() );
 		attr3.setName( 'attr #3' );
 		attr3.checkVisibleOnTheProductPage();
 		attr3.checkUsedForVariations();
@@ -92,11 +93,15 @@ test.describe( 'Add New Product Page', function() {
 		var1.checkVirtual();
 		var1.setRegularPrice( '9.99' );
 
+		helper.scrollDown( driver );
+
 		const var2 = panelVaritions.getRow( 2 );
 		var2.toggle();
 		var2.checkEnabled();
 		var2.checkVirtual();
 		var2.setRegularPrice( '11.99' );
+
+		helper.scrollDown( driver );
 
 		const var3 = panelVaritions.getRow( 3 );
 		var3.toggle();

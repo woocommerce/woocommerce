@@ -18,6 +18,7 @@ test.describe( 'WooCommerce General Settings', function() {
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
 		driver = manager.getDriver();
+		driver.manage().window().maximize();
 
 		helper.clearCookiesAndDeleteLocalStorage( driver );
 	} );
@@ -38,11 +39,13 @@ test.describe( 'WooCommerce General Settings', function() {
 		// Set selling location to all countries first, so we can choose california
 		// as base location.
 		settings.selectSellingLocation( 'Sell to all countries' );
+		helper.scrollDown( driver );
 		settings.saveChanges();
 		assert.eventually.ok( settings.hasNotice( 'Your settings have been saved.' ) );
 
 		// Set base location with state CA.
 		settings.selectBaseLocation( 'california', 'United States (US) — California' );
+		helper.scrollDown( driver );
 		settings.saveChanges();
 		assert.eventually.ok( settings.hasNotice( 'Your settings have been saved.' ) );
 
@@ -52,6 +55,7 @@ test.describe( 'WooCommerce General Settings', function() {
 		settings.selectSellingLocation( 'Sell to specific countries' );
 		settings.removeChoiceInSellToSpecificCountries( 'United States (US)' );
 		settings.setSellToSpecificCountries( 'united states', 'United States (US)' );
+		helper.scrollDown( driver );
 		settings.saveChanges();
 		assert.eventually.ok( settings.hasNotice( 'Your settings have been saved.' ) );
 
@@ -60,6 +64,7 @@ test.describe( 'WooCommerce General Settings', function() {
 		settings.setDecimalSeparator( '.' );
 		settings.setNumberOfDecimals( '2' );
 
+		helper.scrollDown( driver );
 		settings.saveChanges();
 		assert.eventually.ok( settings.hasNotice( 'Your settings have been saved.' ) );
 	} );

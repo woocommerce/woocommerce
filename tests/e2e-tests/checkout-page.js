@@ -3,7 +3,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import test from 'selenium-webdriver/testing';
 import { WebDriverManager, WebDriverHelper as helper } from 'wp-e2e-webdriver';
-import { Helper, PageMap, CheckoutOrderReceivedPage, StoreOwnerFlow, GuestCustomerFlow } from 'wc-e2e-page-objects';
+import { Helper as wcHelper, PageMap, CheckoutOrderReceivedPage, StoreOwnerFlow, GuestCustomerFlow } from 'wc-e2e-page-objects';
 
 chai.use( chaiAsPromised );
 
@@ -31,6 +31,7 @@ test.describe( 'Checkout Page', function() {
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
 		driver = manager.getDriver();
+		driver.manage().window().maximize();
 
 		helper.clearCookiesAndDeleteLocalStorage( driver );
 
@@ -59,7 +60,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.openCheckout();
-		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
 
 		const orderReview = checkoutPage.components.orderReview;
 		assertOrderItem( orderReview, 'Flying Ninja', { qty: '1', total: '$12.00' } );
@@ -72,7 +73,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.openCheckout();
-		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'PayPal' ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'Direct bank transfer' ) );
 		assert.eventually.ok( checkoutPage.selectPaymentMethod( 'Cash on delivery' ) );
@@ -83,7 +84,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
-		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
 
 		const billingDetails = checkoutPage.components.billingDetails;
 		assert.eventually.ok( billingDetails.setFirstName( 'John' ) );
@@ -104,7 +105,7 @@ test.describe( 'Checkout Page', function() {
 		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
-		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
+		assert.eventually.ok( wcHelper.waitTillUIBlockNotPresent( driver ) );
 		assert.eventually.ok( checkoutPage.checkShipToDifferentAddress() );
 
 		const shippingDetails = checkoutPage.components.shippingDetails;
@@ -114,6 +115,7 @@ test.describe( 'Checkout Page', function() {
 		assert.eventually.ok( shippingDetails.selectCountry( 'united states', 'United States (US)' ) );
 		assert.eventually.ok( shippingDetails.setAddress1( 'addr 1' ) );
 		assert.eventually.ok( shippingDetails.setAddress2( 'addr 2' ) );
+		helper.scrollDown( driver );
 		assert.eventually.ok( shippingDetails.setCity( 'San Francisco' ) );
 		assert.eventually.ok( shippingDetails.selectState( 'cali', 'California' ) );
 		assert.eventually.ok( shippingDetails.setZip( '94107' ) );
@@ -125,7 +127,7 @@ test.describe( 'Checkout Page', function() {
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
 		const billingDetails = checkoutPage.components.billingDetails;
-		Helper.waitTillUIBlockNotPresent( driver );
+		wcHelper.waitTillUIBlockNotPresent( driver );
 		billingDetails.setFirstName( 'John' );
 		billingDetails.setLastName( 'Doe' );
 		billingDetails.setCompany( 'Automattic' );
@@ -138,8 +140,9 @@ test.describe( 'Checkout Page', function() {
 		billingDetails.selectState( 'cali', 'California' );
 		billingDetails.setZip( '94107' );
 		checkoutPage.selectPaymentMethod( 'Cash on delivery' );
+		helper.scrollDown( driver );
 		checkoutPage.placeOrder();
-		Helper.waitTillUIBlockNotPresent( driver );
+		wcHelper.waitTillUIBlockNotPresent( driver );
 
 		const orderReceivedPage = new CheckoutOrderReceivedPage( driver, { visit: false } );
 
