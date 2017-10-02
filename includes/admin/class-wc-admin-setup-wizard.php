@@ -1280,7 +1280,9 @@ class WC_Admin_Setup_Wizard {
 
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
-					$settings[ $setting_id ] = wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] );
+					$settings[ $setting_id ] = 'yes' === $settings['enabled']
+						? wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] )
+						: false;
 				}
 			}
 
