@@ -105,11 +105,11 @@ do_action( 'woocommerce_before_cart' ); ?>
 									$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
 								} else {
 									$product_quantity = woocommerce_quantity_input( array(
-										'input_name'  => "cart[{$cart_item_key}][qty]",
-										'input_value' => $cart_item['quantity'],
-										'max_value'   => $_product->get_max_purchase_quantity(),
-										'min_value'   => '0',
-										'product_name'   => $_product->get_name(),
+										'input_name'    => "cart[{$cart_item_key}][qty]",
+										'input_value'   => $cart_item['quantity'],
+										'max_value'     => $_product->get_max_purchase_quantity(),
+										'min_value'     => '0',
+                                        'product_name'  => $_product->get_name()
 									), $_product, false );
 								}
 
