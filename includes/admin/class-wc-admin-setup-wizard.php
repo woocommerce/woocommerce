@@ -1117,12 +1117,12 @@ class WC_Admin_Setup_Wizard {
 			$item_class .= ' ' . $item_info['class'];
 		}
 
-		$settings_array = get_option( 'woocommerce_' . $item_id . '_settings' );
+		$previously_saved_settings = get_option( 'woocommerce_' . $item_id . '_settings' );
 
 		// Show the user-saved state if it was previously saved
 		// Otherwise, rely on the item info
-		if ( is_array( $settings_array ) ) {
-			$should_enable_toggle = 'yes' === $settings_array['enabled'];
+		if ( is_array( $previously_saved_settings ) ) {
+			$should_enable_toggle = 'yes' === $previously_saved_settings['enabled'];
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
@@ -1141,6 +1141,19 @@ class WC_Admin_Setup_Wizard {
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
 					<div class="wc-wizard-service-settings <?php echo $should_enable_toggle ? '' : 'hide'; ?>">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
+							<?php
+							if( 'checkbox' === $setting['type'] ) {
+								$checked = false;
+								if ( array_key_exists( $setting_id, $previously_saved_settings ) ) {
+									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
+								}
+							}
+							if( 'email' === $setting['type'] ) {
+								$value = empty( $previously_saved_settings[ $setting_id ] )
+									? $settings['value']
+									: $previously_saved_settings[ $setting_id ];
+							}
+							?>
 							<?php $input_id = $item_id . '_' . $setting_id; ?>
 							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?> <?php echo esc_attr( $setting['class'] ); ?>">
 								<label
@@ -1154,9 +1167,12 @@ class WC_Admin_Setup_Wizard {
 									id="<?php echo esc_attr( $input_id ); ?>"
 									class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
 									name="<?php echo esc_attr( $input_id ); ?>"
-								value="<?php echo esc_attr( $setting['value'] ); ?>"
+									value="<?php echo esc_attr( isset( $value ) ? $value : $setting['value'] ); ?>"
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
+									<?php if( 'checkbox' === $setting['type'] ) {
+										checked( isset( $checked ) && $checked );
+									} ?>
 								/>
 							</div>
 						<?php endforeach; ?>
