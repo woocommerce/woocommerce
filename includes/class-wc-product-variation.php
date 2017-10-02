@@ -90,7 +90,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$identifier = '#' . $this->get_id();
 		}
 
-		$formatted_variation_list = wc_get_formatted_variation( $this, true, true );
+		$formatted_variation_list = wc_get_formatted_variation( $this, true, true, true );
 
 		return sprintf( '%2$s (%1$s)', $identifier, $this->get_name() ) . '<span class="description">' . $formatted_variation_list . '</span>';
 	}
