@@ -290,7 +290,7 @@ abstract class WC_Legacy_Cart {
 		$cart_item_key = $values['key'];
 		$cart_item     = $this->cart_contents[ $cart_item_key ];
 
-		return $cart_item->get_line_total();
+		return $cart_item['line_total'];
 	}
 
 	/**

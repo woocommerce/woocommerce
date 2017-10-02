@@ -293,19 +293,22 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  *
  * Gets a formatted version of variation data or item meta.
  *
- * @param array|WC_Product_Variation $variation
- * @param bool $flat (default: false)
- * @param bool $include_names include attribute names/labels
+ * @param array|WC_Product_Variation $variation Variation object.
+ * @param bool $flat (default: false) Should this be a flat list or HTML list?
+ * @param bool $include_names include attribute names/labels in the list.
+ * @param bool $skip_attributes_in_name Do not list attributes already part of the variation name.
  * @return string
  */
-function wc_get_formatted_variation( $variation, $flat = false, $include_names = true ) {
+function wc_get_formatted_variation( $variation, $flat = false, $include_names = true, $skip_attributes_in_name = false ) {
 	$return = '';
 
 	if ( is_a( $variation, 'WC_Product_Variation' ) ) {
 		$variation_attributes = $variation->get_attributes();
 		$product              = $variation;
+		$variation_name       = $variation->get_name();
 	} else {
-		$product              = false;
+		$product        = false;
+		$variation_name = '';
 		// Remove attribute_ prefix from names.
 		$variation_attributes = array();
 		if ( is_array( $variation ) ) {
@@ -326,16 +329,17 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 		$variation_list = array();
 
 		foreach ( $variation_attributes as $name => $value ) {
-			if ( ! $value ) {
-				continue;
-			}
-
-			// If this is a term slug, get the term's nice name
+			// If this is a term slug, get the term's nice name.
 			if ( taxonomy_exists( $name ) ) {
 				$term = get_term_by( 'slug', $value, $name );
 				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
 				}
+			}
+
+			// Do not list attributes already part of the variation name.
+			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name ) ) ) {
+				continue;
 			}
 
 			if ( $include_names ) {
