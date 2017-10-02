@@ -101,4 +101,12 @@ class WC_Meta_Data {
 		return $changes;
 	}
 
+	/**
+	 * Return all data as an array.
+	 *
+	 * @return array
+	 */
+	public function get_data() {
+		return $this->data;
+	}
 }
