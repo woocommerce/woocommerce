@@ -1132,21 +1132,26 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-service-description">
 				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
-					<div class="wc-wizard-service-settings">
+					<div class="wc-wizard-service-settings <?php echo $should_enable_toggle ? '' : 'hide'; ?>">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
 							<?php $input_id = $item_id . '_' . $setting_id; ?>
-							<label for="<?php echo esc_attr( $input_id ); ?>">
-								<?php echo esc_html( $setting['label'] ); ?>
-							</label>
-							<input
-								type="<?php echo esc_attr( $setting['type'] ); ?>"
-								id="<?php echo esc_attr( $input_id ); ?>"
-								class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
-								name="<?php echo esc_attr( $input_id ); ?>"
+							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?> <?php echo esc_attr( $setting['class'] ); ?>">
+								<label
+									for="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( $input_id ); ?>"
+								>
+									<?php echo esc_html( $setting['label'] ); ?>
+								</label>
+								<input
+									type="<?php echo esc_attr( $setting['type'] ); ?>"
+									id="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
+									name="<?php echo esc_attr( $input_id ); ?>"
 								value="<?php echo esc_attr( $setting['value'] ); ?>"
-								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
-								<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
-							/>
+									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
+								/>
+							</div>
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
