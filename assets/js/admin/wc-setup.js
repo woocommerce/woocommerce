@@ -24,9 +24,13 @@ jQuery( function( $ ) {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-toggle' ).removeClass( 'disabled' );
 			$( this ).closest( '.wc-wizard-service-item' ).addClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-item' )
+				.find( '.wc-wizard-service-settings' ).removeClass( 'hide' );
 		} else {
 			$( this ).closest( '.wc-wizard-service-toggle' ).addClass( 'disabled' );
 			$( this ).closest( '.wc-wizard-service-item' ).removeClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-item' )
+				.find( '.wc-wizard-service-settings' ).addClass( 'hide' );
 		}
 	} );
 
