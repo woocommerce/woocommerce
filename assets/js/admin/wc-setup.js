@@ -99,4 +99,16 @@ jQuery( function( $ ) {
 		e.preventDefault();
 		waitForJetpackInstall();
 	} );
+
+	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account', function() {
+		if ( $( this ).is( ':checked' ) ) {
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( 'input.payment-email-input' )
+				.prop( 'required', true );
+		} else {
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( 'input.payment-email-input' )
+				.prop( 'required', false );
+		}
+	} );
 } );
