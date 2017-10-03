@@ -1,5 +1,5 @@
 body {
-	margin: 100px auto 24px;
+	margin: 65px auto 24px;
 	box-shadow: none;
 	background: #f1f1f1;
 	padding: 0;
@@ -10,7 +10,7 @@ body {
 	padding: 0;
 	text-align: center;
 	img {
-		max-width: 50%;
+		max-width: 30%;
 	}
 }
 .wc-setup-content {
@@ -22,14 +22,15 @@ body {
 	zoom: 1;
 
 	h1, h2, h3, table {
-		margin: 0 0 24px;
+		margin: 0 0 20px;
 		border: 0;
 		padding: 0;
 		color: #666;
 		clear: none;
+		font-weight: 500;
 	}
 	p {
-		margin: 24px 0;
+		margin: 20px 0;
 		font-size: 1em;
 		line-height: 1.75em;
 		color: #666;
@@ -367,6 +368,7 @@ body {
 }
 .wc-setup .wc-setup-actions {
 	overflow: hidden;
+	margin: 20px 0 0;
 	.button {
 		font-size: 1.25em;
 		padding: 0.5em 1em;
@@ -392,8 +394,12 @@ body {
 	}
 }
 
-.wc-setup-content p:last-of-type {
+.wc-setup-content p:last-child {
 	margin-bottom: 0;
+}
+
+.wc-setup-content p.store-setup {
+	margin-top: 0;
 }
 
 .wc-return-to-dashboard {
@@ -664,6 +670,7 @@ body {
 	.shipping-method-description,
 	.shipping-method-setting .description {
 		color: #7e7e7e;
+		font-size: .9em;
 	}
 
 	.shipping-method-setting input::placeholder {
@@ -673,7 +680,7 @@ body {
 .wc-setup-shipping-units {
 	p {
 		line-height: 1.5em;
-		font-size: 14px;
+		font-size: 13px;
 		margin-bottom: 0.25em;
 	}
 
@@ -694,6 +701,7 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	list-style: none;
+	padding: 0;
 
 	.wc-wizard-feature-item {
 		flex-basis: calc( 50% - 4em - 3px); // two columns, account for padding and borders
@@ -724,6 +732,7 @@ body {
 	p.wc-wizard-feature-name,
 	p.wc-wizard-feature-description {
 		margin: 0;
+		line-height: 1.5em;
 	}
 }
 
@@ -745,11 +754,12 @@ h3.jetpack-reasons {
 
 .wc-setup .wc-setup-actions .button {
 	font-weight: 300;
-	font-size: 18px;
-	padding: 1em;
+	font-size: 16px;
+	padding: 1em 2em;
 	box-shadow: none;
 	min-width: 12em;
 	min-width: auto;
+	margin-top:10px;
 
 	&:focus,
 	&:hover,
@@ -760,8 +770,8 @@ h3.jetpack-reasons {
 
 .location-prompt {
 	color: #666;
-	font-size: 14px;
-	font-weight: bold;
+	font-size: 13px;
+	font-weight: 500;
 	margin-bottom: 0.5em;
 	margin-top: 1em;
 	display: inline-block;
@@ -792,7 +802,7 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-bottom: 1em;
+	margin-bottom: 24px; // match margin-bottom on top paragraph
 
 	.city-and-postcode {
 		display: flex;
@@ -900,7 +910,7 @@ h3.jetpack-reasons {
 	h3 {
 		&.next-step-description {
 			margin: 0;
-			font-size: 18px;
+			font-size: 16px;
 			font-weight: 600;
 		}
 	}
@@ -910,6 +920,7 @@ p.next-steps-help-text {
 	color: #9f9f9f;
 	padding: 0 2em;
 	text-align: center;
+	font-size: .9em;
 }
 
 p.jetpack-terms {
@@ -918,4 +929,11 @@ p.jetpack-terms {
 	max-width: 480px;
 	margin: 0 auto;
 	line-height: 1.5em;
+}
+
+.allow-tracking {
+	color: #9f9f9f;
+	margin-top: 2em;
+	text-align: center;
+	font-size: 0.9em;
 }
