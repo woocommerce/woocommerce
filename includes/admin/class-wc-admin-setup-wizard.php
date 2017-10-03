@@ -1150,12 +1150,12 @@ class WC_Admin_Setup_Wizard {
 							}
 							if( 'email' === $setting['type'] ) {
 								$value = empty( $previously_saved_settings[ $setting_id ] )
-									? $settings['value']
+									? $setting['value']
 									: $previously_saved_settings[ $setting_id ];
 							}
 							?>
 							<?php $input_id = $item_id . '_' . $setting_id; ?>
-							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?> <?php echo esc_attr( $setting['class'] ); ?>">
+							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?>">
 								<label
 									for="<?php echo esc_attr( $input_id ); ?>"
 									class="<?php echo esc_attr( $input_id ); ?>"
