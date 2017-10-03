@@ -1411,11 +1411,9 @@ class WC_Admin_Setup_Wizard {
 			$description = $error_message;
 		} else {
 			$description = $this->wc_setup_activate_get_description();
-			if ( $description ) {
-				$title = $description ?
-					__( 'Connect your store to Jetpack', 'woocommerce' ) :
-					__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
-			}
+			$title = $description ?
+				__( 'Connect your store to Jetpack', 'woocommerce' ) :
+				__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
 		}
 		?>
 		<h1><?php echo esc_html( $title ); ?></h1>
