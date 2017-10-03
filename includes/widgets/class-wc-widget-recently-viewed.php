@@ -91,9 +91,13 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
 
+			$template_args = array(
+				'widget_id' => $args['widget_id']
+			);
+
 			while ( $r->have_posts() ) {
 				$r->the_post();
-				wc_get_template( 'content-widget-product.php' );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
 			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );

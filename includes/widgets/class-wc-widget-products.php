@@ -191,9 +191,14 @@ class WC_Widget_Products extends WC_Widget {
 
 			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
 
+			$template_args = array(
+				'widget_id' => $args['widget_id'],
+				'show_rating' => true
+			);
+
 			while ( $products->have_posts() ) {
 				$products->the_post();
-				wc_get_template( 'content-widget-product.php', array( 'show_rating' => false ) );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
 			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
