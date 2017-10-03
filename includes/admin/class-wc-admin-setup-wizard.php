@@ -292,9 +292,9 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		?>
-		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<form method="post" class="address-step">
-			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
+			<?php wp_nonce_field( 'wc-setup' ); ?>
+			<p class="store-setup"><?php esc_html_e( "The following wizard will help you configure your store and get you started quickly.", 'woocommerce' ); ?></p>
 			<label for="store_country_state" class="location-prompt">
 				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
 			</label>
@@ -392,10 +392,10 @@ class WC_Admin_Setup_Wizard {
 				<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
 			</select>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
-				<div>
+				<div class="allow-tracking">
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
 					<label for="wc_tracker_optin"><?php _e( 'Allow WooCommerce to collect non-sensitive diagnostic data and usage information.', 'woocommerce' ); ?></label>
 				</div>
@@ -403,7 +403,6 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step" />
 			</p>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
 	}
@@ -845,6 +844,11 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
+
+		// If going through this step again, remove the live rates options
+		// in case the user saved different settings this time
+		delete_option( 'woocommerce_setup_domestic_live_rates_zone' );
+		delete_option( 'woocommerce_setup_intl_live_rates_zone' );
 
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
 		$domestic_method  = sanitize_text_field( $_POST['shipping_zones']['domestic']['method'] );
@@ -1398,6 +1402,7 @@ class WC_Admin_Setup_Wizard {
 		}
 		?>
 		<form method="post" class="activate-jetpack">
+			<?php wp_nonce_field( 'wc-setup' ); ?>
 			<?php if ( $description ) : ?>
 				<h1>
 					<?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?>
@@ -1461,7 +1466,6 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</li>
 			</ul>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
 	}
