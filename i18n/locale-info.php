@@ -479,7 +479,6 @@ return array(
 		),
 	),
 	'TH' => array(
-		'currency_code'  => 'THB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
@@ -492,7 +491,7 @@ return array(
 					'country'  => 'TH',
 					'state'    => '',
 					'rate'     => '7.0000',
-					'name'     => 'VAT',
+					'name'     => 'ภาษี',
 					'shipping' => true,
 				),
 			),
