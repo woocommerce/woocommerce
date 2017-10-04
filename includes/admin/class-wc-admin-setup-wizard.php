@@ -1018,11 +1018,18 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create an account for me', 'woocommerce' ),
+						'label'       => __( 'Create an account for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+					),
+					'email' => array(
+						'label'       => __( 'Stripe email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'required'    => true,
 					),
 				),
 				'enabled' => $can_stripe,
@@ -1113,12 +1120,12 @@ class WC_Admin_Setup_Wizard {
 			$item_class .= ' ' . $item_info['class'];
 		}
 
-		$settings_array = get_option( 'woocommerce_' . $item_id . '_settings' );
+		$previously_saved_settings = get_option( 'woocommerce_' . $item_id . '_settings' );
 
 		// Show the user-saved state if it was previously saved
 		// Otherwise, rely on the item info
-		if ( is_array( $settings_array ) ) {
-			$should_enable_toggle = 'yes' === $settings_array['enabled'];
+		if ( is_array( $previously_saved_settings ) ) {
+			$should_enable_toggle = 'yes' === $previously_saved_settings['enabled'];
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
@@ -1135,28 +1142,54 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-service-description">
 				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
-					<div class="wc-wizard-service-settings">
+					<div class="wc-wizard-service-settings <?php echo $should_enable_toggle ? '' : 'hide'; ?>">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
+							<?php
+							$is_checkbox = 'checkbox' === $setting['type'];
+
+							if ( $is_checkbox ) {
+								$checked = false;
+								if ( isset( $previously_saved_settings[ $setting_id ] ) ) {
+									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
+								}
+							}
+							if ( 'email' === $setting['type'] ) {
+								$value = empty( $previously_saved_settings[ $setting_id ] )
+									? $setting['value']
+									: $previously_saved_settings[ $setting_id ];
+							}
+							?>
 							<?php $input_id = $item_id . '_' . $setting_id; ?>
-							<label for="<?php echo esc_attr( $input_id ); ?>">
-								<?php echo esc_html( $setting['label'] ); ?>
-							</label>
-							<input
-								type="<?php echo esc_attr( $setting['type'] ); ?>"
-								id="<?php echo esc_attr( $input_id ); ?>"
-								class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
-								name="<?php echo esc_attr( $input_id ); ?>"
-								value="<?php echo esc_attr( $setting['value'] ); ?>"
-								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
-								<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
-							/>
+							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?>">
+								<label
+									for="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( $input_id ); ?>"
+								>
+									<?php echo esc_html( $setting['label'] ); ?>
+								</label>
+								<input
+									type="<?php echo esc_attr( $setting['type'] ); ?>"
+									id="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
+									name="<?php echo esc_attr( $input_id ); ?>"
+									value="<?php echo esc_attr( isset( $value ) ? $value : $setting['value'] ); ?>"
+									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
+									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
+								/>
+							</div>
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
 			</div>
 			<div class="wc-wizard-service-enable">
 				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>">
-					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $should_enable_toggle ); ?>/>
+					<input
+						id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>"
+						type="checkbox"
+						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
+						value="yes" <?php checked( $should_enable_toggle ); ?>
+					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
 			</div>
@@ -1255,7 +1288,9 @@ class WC_Admin_Setup_Wizard {
 
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
-					$settings[ $setting_id ] = wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] );
+					$settings[ $setting_id ] = 'yes' === $settings['enabled']
+						? wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] )
+						: false;
 				}
 			}
 

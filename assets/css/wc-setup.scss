@@ -562,11 +562,19 @@ body {
 		display: none;
 		margin-bottom: 0;
 		cursor: default;
+
+		&.hide {
+			display: none;
+		}
 	}
 
 	&.checked {
 		.wc-wizard-service-settings {
 			display: inline-block;
+
+			&.hide {
+				display: none;
+			}
 		}
 	}
 
@@ -936,4 +944,37 @@ p.jetpack-terms {
 	margin-top: 2em;
 	text-align: center;
 	font-size: 0.9em;
+}
+
+.wc-wizard-service-setting-stripe_create_account {
+	display: flex;
+	align-items: flex-end;
+	margin-bottom: 0.75em;
+	margin-top: 0.75em;
+
+	.payment-checkbox-input {
+		order: 1;
+		margin-left: 0;
+		margin-right: 0;
+		width: 1.5em;
+	}
+
+	.stripe_create_account {
+		order: 2;
+		margin-left: 0.3em;
+	}
+}
+
+.wc-wizard-service-setting-stripe_email {
+	display: flex;
+
+	label.stripe_email {
+		visibility: hidden;
+		width: 0;
+	}
+
+	input.payment-email-input {
+		margin-left: 1.5em;
+		width: 100%;
+	}
 }
