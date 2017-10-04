@@ -1142,13 +1142,15 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-service-settings <?php echo $should_enable_toggle ? '' : 'hide'; ?>">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
 							<?php
-							if( 'checkbox' === $setting['type'] ) {
+							$is_checkbox = 'checkbox' === $setting['type'];
+
+							if ( $is_checkbox ) {
 								$checked = false;
-								if ( array_key_exists( $setting_id, $previously_saved_settings ) ) {
+								if ( isset( $previously_saved_settings[ $setting_id ] ) ) {
 									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
 								}
 							}
-							if( 'email' === $setting['type'] ) {
+							if ( 'email' === $setting['type'] ) {
 								$value = empty( $previously_saved_settings[ $setting_id ] )
 									? $setting['value']
 									: $previously_saved_settings[ $setting_id ];
@@ -1170,9 +1172,7 @@ class WC_Admin_Setup_Wizard {
 									value="<?php echo esc_attr( isset( $value ) ? $value : $setting['value'] ); ?>"
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
-									<?php if( 'checkbox' === $setting['type'] ) {
-										checked( isset( $checked ) && $checked );
-									} ?>
+									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
 								/>
 							</div>
 						<?php endforeach; ?>
@@ -1181,7 +1181,12 @@ class WC_Admin_Setup_Wizard {
 			</div>
 			<div class="wc-wizard-service-enable">
 				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>">
-					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $should_enable_toggle ); ?>/>
+					<input
+						id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>"
+						type="checkbox"
+						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
+						value="yes" <?php checked( $should_enable_toggle ); ?>
+					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
 			</div>
