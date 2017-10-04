@@ -266,7 +266,6 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 /**
  * Get the placeholder image URL for products etc.
  *
- * @access public
  * @return string
  */
 function wc_placeholder_img_src() {
@@ -276,10 +275,7 @@ function wc_placeholder_img_src() {
 /**
  * Get the placeholder image.
  *
- * @access public
- *
- * @param string $size
- *
+ * @param  string $size
  * @return string
  */
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {

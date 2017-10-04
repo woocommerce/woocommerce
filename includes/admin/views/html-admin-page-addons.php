@@ -5,6 +5,7 @@
  * @var string $view
  * @var object $addons
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

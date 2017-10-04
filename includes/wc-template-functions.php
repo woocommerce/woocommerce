@@ -1209,7 +1209,7 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 
 		// Make sure the $tabs parameter is an array
 		if ( ! is_array( $tabs ) ) {
-			trigger_error( "Function woocommerce_sort_product_tabs() expects an array as the first parameter. Defaulting to empty array." );
+			trigger_error( 'Function woocommerce_sort_product_tabs() expects an array as the first parameter. Defaulting to empty array.' );
 			$tabs = array();
 		}
 

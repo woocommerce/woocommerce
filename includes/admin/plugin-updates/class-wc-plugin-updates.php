@@ -241,7 +241,7 @@ class WC_Plugin_Updates {
 		$matches = array();
 
 		foreach ( $plugins as $file => $plugin ) {
-			if ( $plugin['Name'] !== 'WooCommerce' && ( stristr( $plugin['Name'], 'woocommerce' ) || stristr( $plugin['Description'], 'woocommerce' ) ) ) {
+			if ( 'WooCommerce' !== $plugin['Name'] && ( stristr( $plugin['Name'], 'woocommerce' ) || stristr( $plugin['Description'], 'woocommerce' ) ) ) {
 				$matches[ $file ] = $plugin;
 			}
 		}

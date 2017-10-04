@@ -64,8 +64,7 @@ abstract class WC_Settings_Page {
 	/**
 	 * Add this page to settings.
 	 *
-	 * @param array $pages
-	 *
+	 * @param  array $pages
 	 * @return mixed
 	 */
 	public function add_settings_page( $pages ) {

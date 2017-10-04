@@ -136,7 +136,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  *
  * Loops though the woocommerce options array and outputs each field.
  *
- * @param array $options Opens array to output
+ * @param array $options Opens array to output.
  */
 function woocommerce_admin_fields( $options ) {
 
