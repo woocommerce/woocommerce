@@ -24,9 +24,13 @@ jQuery( function( $ ) {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-toggle' ).removeClass( 'disabled' );
 			$( this ).closest( '.wc-wizard-service-item' ).addClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-item' )
+				.find( '.wc-wizard-service-settings' ).removeClass( 'hide' );
 		} else {
 			$( this ).closest( '.wc-wizard-service-toggle' ).addClass( 'disabled' );
 			$( this ).closest( '.wc-wizard-service-item' ).removeClass( 'checked' );
+			$( this ).closest( '.wc-wizard-service-item' )
+				.find( '.wc-wizard-service-settings' ).addClass( 'hide' );
 		}
 	} );
 
@@ -94,5 +98,17 @@ jQuery( function( $ ) {
 
 		e.preventDefault();
 		waitForJetpackInstall();
+	} );
+
+	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account', function() {
+		if ( $( this ).is( ':checked' ) ) {
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( 'input.payment-email-input' )
+				.prop( 'required', true );
+		} else {
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( 'input.payment-email-input' )
+				.prop( 'required', false );
+		}
 	} );
 } );
