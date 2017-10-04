@@ -805,7 +805,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * woocommerce_remove_roles function.
+	 * Remove roles and capabilities.
 	 */
 	public static function remove_roles() {
 		global $wp_roles;

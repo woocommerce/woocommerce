@@ -11,6 +11,7 @@
  * @category Class
  * @author   WooCommerce
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

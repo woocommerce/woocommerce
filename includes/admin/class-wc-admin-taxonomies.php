@@ -182,7 +182,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Edit category thumbnail field.
 	 *
-	 * @param mixed $term Term (category) being edited
+	 * @param mixed $term Term (category) being edited.
 	 */
 	public function edit_category_fields( $term ) {
 
@@ -275,7 +275,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @param mixed $term_id Term ID being saved
+	 * @param mixed $term_id Term ID being saved.
 	 * @param mixed $tt_id
 	 * @param string $taxonomy
 	 */

@@ -1901,7 +1901,7 @@ class WC_Admin_Post_Types {
 	 * it, so we want to hide the useless UI from the screen options tab.
 	 *
 	 * @since 2.6
-	 * @param  array $post_types Array of post types supporting view mode
+	 * @param  array $post_types Array of post types supporting view mode.
 	 * @return array             Array of post types supporting view mode, without products, orders, and coupons
 	 */
 	public function disable_view_mode_options( $post_types ) {
