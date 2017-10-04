@@ -248,9 +248,7 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
-	 *
-	 * @param mixed $meta
-	 *
+	 * @param mixed $meta Meta value to check.
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -261,7 +259,7 @@ abstract class WC_Data {
 	 * Get All Meta Data.
 	 *
 	 * @since 2.6.0
-	 * @return array
+	 * @return array of objects.
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();

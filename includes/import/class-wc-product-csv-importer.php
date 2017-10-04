@@ -7,6 +7,7 @@
  * @package  WooCommerce/Import
  * @version  3.1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -26,8 +27,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Initialize importer.
 	 *
-	 * @param string $file File to read.
-	 * @param array  $args Arguments for the parser.
+	 * @param string $file   File to read.
+	 * @param array  $params Arguments for the parser.
 	 */
 	public function __construct( $file, $params = array() ) {
 		$default_args = array(
@@ -141,9 +142,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( $original_id ) {
 				return absint( $original_id );
-
-			// If we're not updating existing posts, we need a placeholder.
 			} elseif ( ! $this->params['update_existing'] ) {
+				// If we're not updating existing posts, we need a placeholder.
 				$product = new WC_Product_Simple();
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
@@ -243,7 +243,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return array
 	 */
 	public function parse_comma_field( $value ) {
-		if ( empty( $value ) && $value !== '0' ) {
+		if ( empty( $value ) && '0' !== $value ) {
 			return array();
 		}
 
@@ -616,7 +616,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['stock_status'] = isset( $data['stock_status'] ) ? $data['stock_status'] : true;
 			} else {
 				$data['manage_stock'] = true;
-				$data['stock_status'] = 0 < $data['stock_quantity'];
+
+				// Only auto set status when stock_status is empty.
+				if ( ! isset( $data['stock_status'] ) || isset( $data['stock_status'] ) && '' === $data['stock_status'] ) {
+					$data['stock_status'] = 0 < $data['stock_quantity'];
+				}
 			}
 		}
 
@@ -637,7 +641,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$meta_data  = array();
 
 		foreach ( $data as $key => $value ) {
-			// Attributes.
 			if ( $this->starts_with( $key, 'attributes:name' ) ) {
 				if ( ! empty( $value ) ) {
 					$attributes[ str_replace( 'attributes:name', '', $key ) ]['name'] = $value;
@@ -662,7 +665,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 				unset( $data[ $key ] );
 
-			// Downloads.
 			} elseif ( $this->starts_with( $key, 'downloads:name' ) ) {
 				if ( ! empty( $value ) ) {
 					$downloads[ str_replace( 'downloads:name', '', $key ) ]['name'] = $value;
@@ -675,7 +677,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 				unset( $data[ $key ] );
 
-			// Meta data.
 			} elseif ( $this->starts_with( $key, 'meta:' ) ) {
 				$meta_data[] = array(
 					'key'   => str_replace( 'meta:', '', $key ),
@@ -764,7 +765,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Get a string to identify the row from parsed data.
 	 *
-	 * @param  array $parsed_data
+	 * @param  array $parsed_data Parsed data.
 	 * @return string
 	 */
 	protected function get_row_id( $parsed_data ) {

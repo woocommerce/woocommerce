@@ -2013,7 +2013,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
+					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
 
 				} else {
 
@@ -2039,7 +2039,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field_container = '<p class="form-row %1$s" id="%2$s" style="display: none">%3$s</p>';
 
-					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
+					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" readonly="readonly" />';
 
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
@@ -2294,15 +2294,17 @@ if ( ! function_exists( 'woocommerce_account_content' ) ) {
 	function woocommerce_account_content() {
 		global $wp;
 
-		foreach ( $wp->query_vars as $key => $value ) {
-			// Ignore pagename param.
-			if ( 'pagename' === $key ) {
-				continue;
-			}
+		if ( ! empty( $wp->query_vars ) ) {
+			foreach ( $wp->query_vars as $key => $value ) {
+				// Ignore pagename param.
+				if ( 'pagename' === $key ) {
+					continue;
+				}
 
-			if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-				return;
+				if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+					do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+					return;
+				}
 			}
 		}
 

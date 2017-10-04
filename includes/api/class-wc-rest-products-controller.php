@@ -1078,6 +1078,11 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				if ( ! empty( $image['name'] ) ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
 				}
+
+				// Set the image source if present, for future reference.
+				if ( ! empty( $image['src'] ) ) {
+					update_post_meta( $attachment_id, '_wc_attachment_source', esc_url_raw( $image['src'] ) );
+				}
 			}
 
 			$product->set_gallery_image_ids( $gallery );

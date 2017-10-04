@@ -292,9 +292,9 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		?>
-		<h1><?php esc_html_e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<form method="post" class="address-step">
-			<p><?php esc_html_e( "Go through this quick setup wizard to configure basic settings — shouldn't take longer than five minutes.", 'woocommerce' ); ?></p>
+			<?php wp_nonce_field( 'wc-setup' ); ?>
+			<p class="store-setup"><?php esc_html_e( "The following wizard will help you configure your store and get you started quickly.", 'woocommerce' ); ?></p>
 			<label for="store_country_state" class="location-prompt">
 				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
 			</label>
@@ -392,10 +392,10 @@ class WC_Admin_Setup_Wizard {
 				<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
 			</select>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
-				<div>
+				<div class="allow-tracking">
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
 					<label for="wc_tracker_optin"><?php _e( 'Allow WooCommerce to collect non-sensitive diagnostic data and usage information.', 'woocommerce' ); ?></label>
 				</div>
@@ -403,7 +403,6 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step" />
 			</p>
-			<?php wp_nonce_field( 'wc-setup' ); ?>
 		</form>
 		<?php
 	}
@@ -721,8 +720,7 @@ class WC_Admin_Setup_Wizard {
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code );
-
-		// TODO: determine how to handle existing shipping zones (or choose not to)
+		$existing_zones        = WC_Shipping_Zones::get_zones();
 
 		if ( false === $dimension_unit || false === $weight_unit ) {
 			if ( 'US' === $country_code ) {
@@ -734,7 +732,9 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		if ( $wcs_carrier ) {
+		if ( ! empty( $existing_zones ) ) {
+			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
+		} elseif ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
 				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
@@ -753,44 +753,46 @@ class WC_Admin_Setup_Wizard {
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<p><?php echo esc_html( $intro_text ); ?></p>
 		<form method="post">
-			<ul class="wc-wizard-services shipping">
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
-					</div>
-				</li>
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html( $country_name ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
-					</div>
-					<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
-							<label for="shipping_zones[domestic][enabled]">
-						</span>
-					</div>
-				</li>
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
-					</div>
-					<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
-							<label for="shipping_zones[intl][enabled]">
-						</span>
-					</div>
-				</li>
-			</ul>
+			<?php if ( empty( $existing_zones ) ) : ?>
+				<ul class="wc-wizard-services shipping">
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
+						</div>
+					</li>
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html( $country_name ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
+						</div>
+						<div class="wc-wizard-service-enable">
+							<span class="wc-wizard-service-toggle">
+								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
+								<label for="shipping_zones[domestic][enabled]">
+							</span>
+						</div>
+					</li>
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
+						</div>
+						<div class="wc-wizard-service-enable">
+							<span class="wc-wizard-service-toggle">
+								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
+								<label for="shipping_zones[intl][enabled]">
+							</span>
+						</div>
+					</li>
+				</ul>
+			<?php endif; ?>
 
 			<div class="wc-setup-shipping-units">
 				<div class="wc-setup-shipping-unit">
@@ -846,6 +848,11 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
+		// If going through this step again, remove the live rates options
+		// in case the user saved different settings this time
+		delete_option( 'woocommerce_setup_domestic_live_rates_zone' );
+		delete_option( 'woocommerce_setup_intl_live_rates_zone' );
+
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
 		$domestic_method  = sanitize_text_field( $_POST['shipping_zones']['domestic']['method'] );
 		$setup_intl       = isset( $_POST['shipping_zones']['intl']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['intl']['enabled'] );
@@ -859,7 +866,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
 		// For now, limit this setup to the first run.
-		if ( empty( $existing_zones ) ) {
+		if ( ! empty( $existing_zones ) ) {
 			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
@@ -1011,11 +1018,18 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create an account for me', 'woocommerce' ),
+						'label'       => __( 'Create an account for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+					),
+					'email' => array(
+						'label'       => __( 'Stripe email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'required'    => true,
 					),
 				),
 				'enabled' => $can_stripe,
@@ -1106,12 +1120,12 @@ class WC_Admin_Setup_Wizard {
 			$item_class .= ' ' . $item_info['class'];
 		}
 
-		$settings_array = get_option( 'woocommerce_' . $item_id . '_settings' );
+		$previously_saved_settings = get_option( 'woocommerce_' . $item_id . '_settings' );
 
 		// Show the user-saved state if it was previously saved
 		// Otherwise, rely on the item info
-		if ( is_array( $settings_array ) ) {
-			$should_enable_toggle = 'yes' === $settings_array['enabled'];
+		if ( is_array( $previously_saved_settings ) ) {
+			$should_enable_toggle = 'yes' === $previously_saved_settings['enabled'];
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
@@ -1128,28 +1142,54 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-service-description">
 				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
-					<div class="wc-wizard-service-settings">
+					<div class="wc-wizard-service-settings <?php echo $should_enable_toggle ? '' : 'hide'; ?>">
 						<?php foreach ( $item_info['settings'] as $setting_id => $setting ) : ?>
+							<?php
+							$is_checkbox = 'checkbox' === $setting['type'];
+
+							if ( $is_checkbox ) {
+								$checked = false;
+								if ( isset( $previously_saved_settings[ $setting_id ] ) ) {
+									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
+								}
+							}
+							if ( 'email' === $setting['type'] ) {
+								$value = empty( $previously_saved_settings[ $setting_id ] )
+									? $setting['value']
+									: $previously_saved_settings[ $setting_id ];
+							}
+							?>
 							<?php $input_id = $item_id . '_' . $setting_id; ?>
-							<label for="<?php echo esc_attr( $input_id ); ?>">
-								<?php echo esc_html( $setting['label'] ); ?>
-							</label>
-							<input
-								type="<?php echo esc_attr( $setting['type'] ); ?>"
-								id="<?php echo esc_attr( $input_id ); ?>"
-								class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
-								name="<?php echo esc_attr( $input_id ); ?>"
-								value="<?php echo esc_attr( $setting['value'] ); ?>"
-								placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
-								<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
-							/>
+							<div class="<?php echo esc_attr( 'wc-wizard-service-setting-' . $input_id ); ?>">
+								<label
+									for="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( $input_id ); ?>"
+								>
+									<?php echo esc_html( $setting['label'] ); ?>
+								</label>
+								<input
+									type="<?php echo esc_attr( $setting['type'] ); ?>"
+									id="<?php echo esc_attr( $input_id ); ?>"
+									class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
+									name="<?php echo esc_attr( $input_id ); ?>"
+									value="<?php echo esc_attr( isset( $value ) ? $value : $setting['value'] ); ?>"
+									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
+									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
+								/>
+							</div>
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
 			</div>
 			<div class="wc-wizard-service-enable">
 				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>">
-					<input id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>" type="checkbox" name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled" value="yes" <?php checked( $should_enable_toggle ); ?>/>
+					<input
+						id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>"
+						type="checkbox"
+						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
+						value="yes" <?php checked( $should_enable_toggle ); ?>
+					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
 			</div>
@@ -1248,7 +1288,9 @@ class WC_Admin_Setup_Wizard {
 
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
-					$settings[ $setting_id ] = wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] );
+					$settings[ $setting_id ] = 'yes' === $settings['enabled']
+						? wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] )
+						: false;
 				}
 			}
 
@@ -1366,8 +1408,8 @@ class WC_Admin_Setup_Wizard {
 		$description     = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
-			&& ( 'yes' === $stripe_settings['create_account'] )
-			&& 'yes' === $stripe_settings['enabled'];
+			&& isset( $stripe_settings['create_account'] ) && 'yes' === $stripe_settings['create_account']
+			&& isset( $stripe_settings['enabled'] ) && 'yes' === $stripe_settings['enabled'];
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );

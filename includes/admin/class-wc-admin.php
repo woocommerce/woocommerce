@@ -238,7 +238,7 @@ class WC_Admin {
 				$footer_text = sprintf(
 					/* translators: 1: WooCommerce 2:: five stars */
 					__( 'If you like %1$s please leave us a %2$s rating. A huge thanks in advance!', 'woocommerce' ),
-					sprintf( '<strong>%s<strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
+					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
 				);
 				wc_enqueue_js( "
