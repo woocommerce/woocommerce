@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Meta_Data class.
  */
-class WC_Meta_Data {
+class WC_Meta_Data implements JsonSerializable {
 
 	/**
 	 * Current data for metadata
@@ -44,6 +44,15 @@ class WC_Meta_Data {
 	public function __construct( $meta = array() ) {
 		$this->current_data = $meta;
 		$this->apply_changes();
+	}
+
+	/**
+	 * When converted to JSON.
+	 *
+	 * @return object
+	 */
+	public function jsonSerialize() {
+		return $this->get_data();
 	}
 
 	/**
