@@ -754,7 +754,7 @@ class WC_Admin_Setup_Wizard {
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<p><?php echo esc_html( $intro_text ); ?></p>
 		<form method="post">
-			<?php if ( empty( $existing_zones ) ) { ?>
+			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
 					<li class="wc-wizard-service-item">
 						<div class="wc-wizard-service-name">
@@ -793,7 +793,7 @@ class WC_Admin_Setup_Wizard {
 						</div>
 					</li>
 				</ul>
-			<?php } ?>
+			<?php endif; ?>
 
 			<div class="wc-setup-shipping-units">
 				<div class="wc-setup-shipping-unit">
