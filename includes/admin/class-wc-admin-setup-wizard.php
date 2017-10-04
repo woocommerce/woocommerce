@@ -720,8 +720,7 @@ class WC_Admin_Setup_Wizard {
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code );
-
-		// TODO: determine how to handle existing shipping zones (or choose not to)
+		$existing_zones        = WC_Shipping_Zones::get_zones();
 
 		if ( false === $dimension_unit || false === $weight_unit ) {
 			if ( 'US' === $country_code ) {
@@ -733,7 +732,9 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		if ( $wcs_carrier ) {
+		if ( ! empty( $existing_zones ) ) {
+			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
+		} elseif ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
 				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
@@ -752,44 +753,46 @@ class WC_Admin_Setup_Wizard {
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<p><?php echo esc_html( $intro_text ); ?></p>
 		<form method="post">
-			<ul class="wc-wizard-services shipping">
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
-					</div>
-				</li>
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html( $country_name ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
-					</div>
-					<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
-							<label for="shipping_zones[domestic][enabled]">
-						</span>
-					</div>
-				</li>
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-name">
-						<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
-					</div>
-					<div class="wc-wizard-service-description">
-						<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
-					</div>
-					<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
-							<label for="shipping_zones[intl][enabled]">
-						</span>
-					</div>
-				</li>
-			</ul>
+			<?php if ( empty( $existing_zones ) ) : ?>
+				<ul class="wc-wizard-services shipping">
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
+						</div>
+					</li>
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html( $country_name ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
+						</div>
+						<div class="wc-wizard-service-enable">
+							<span class="wc-wizard-service-toggle">
+								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
+								<label for="shipping_zones[domestic][enabled]">
+							</span>
+						</div>
+					</li>
+					<li class="wc-wizard-service-item">
+						<div class="wc-wizard-service-name">
+							<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
+						</div>
+						<div class="wc-wizard-service-description">
+							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
+						</div>
+						<div class="wc-wizard-service-enable">
+							<span class="wc-wizard-service-toggle">
+								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
+								<label for="shipping_zones[intl][enabled]">
+							</span>
+						</div>
+					</li>
+				</ul>
+			<?php endif; ?>
 
 			<div class="wc-setup-shipping-units">
 				<div class="wc-setup-shipping-unit">
@@ -863,7 +866,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
 		// For now, limit this setup to the first run.
-		if ( empty( $existing_zones ) ) {
+		if ( ! empty( $existing_zones ) ) {
 			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
