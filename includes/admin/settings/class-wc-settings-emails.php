@@ -109,7 +109,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',
 				/* translators: %s: site name */
-				'default'     => sprintf( __( '%s - Powered by WooCommerce', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
+				'default'     => sprintf( __( '%s', 'woocommerce' ), get_bloginfo( 'name', 'display' ) ),
 				'autoload'    => false,
 				'desc_tip'    => true,
 			),
