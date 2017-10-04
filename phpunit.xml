@@ -34,6 +34,7 @@
 				<directory suffix=".php">./includes/updates</directory>
 				<directory suffix=".php">./includes/vendor</directory>
 				<directory suffix=".php">./includes/widgets</directory>
+				<file>./includes/wc-deprecated-functions.php</file>
 			</exclude>
 		</whitelist>
 	</filter>
