@@ -313,7 +313,7 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$fee->taxes = apply_filters( 'woocommerce_get_fees_from_cart_taxes', $fee->taxes, $fee, $this );
+			$fee->taxes = apply_filters( 'woocommerce_cart_totals_get_fees_from_cart_taxes', $fee->taxes, $fee, $this );
 
 			$fee->total_tax = array_sum( $fee->taxes );
 
