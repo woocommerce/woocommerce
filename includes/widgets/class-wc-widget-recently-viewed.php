@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  3.3.0
  * @extends  WC_Widget
  */
 class WC_Widget_Recently_Viewed extends WC_Widget {
