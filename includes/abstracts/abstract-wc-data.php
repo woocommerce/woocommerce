@@ -310,7 +310,7 @@ abstract class WC_Data {
 		if ( ! empty( $array_keys ) ) {
 			// We don't use the $this->meta_data property directly here because we don't want meta with a null value (i.e. meta which has been deleted via $this->delete_meta_data())
 			if ( $single ) {
-				$value = $meta_data[ current( $array_keys ) ]->value;
+				$value = $meta_data[ current( $array_keys ) ]['value'];
 			} else {
 				$value = array_intersect_key( $meta_data, array_flip( $array_keys ) );
 			}
