@@ -252,19 +252,18 @@ abstract class WC_Data {
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
-		$meta = (array) $meta;
-		return ! is_null( $meta['value'] );
+		return ! is_null( $meta->value );
 	}
 
 	/**
 	 * Get All Meta Data.
 	 *
 	 * @since 2.6.0
-	 * @return array
+	 * @return array of objects.
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();
-		return array_filter( wc_list_pluck( $this->meta_data, 'get_data' ), array( $this, 'filter_null_meta' ) );
+		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
 	}
 
 	/**
