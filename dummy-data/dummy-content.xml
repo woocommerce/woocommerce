@@ -5,8 +5,8 @@
 <!-- This file is not intended to serve as a complete backup of your site. -->
 
 <!-- To import this information into a WordPress site follow these steps: -->
-<!-- 1. Log in to that site as an administrator. -->
-<!-- 2. Go to Tools: Import in the WordPress admin panel. -->
+<!-- 1. Log in to that site as an wooteamistrator. -->
+<!-- 2. Go to Tools: Import in the WordPress wooteam panel. -->
 <!-- 3. Install the "WordPress" importer from the list. -->
 <!-- 4. Activate & Run Importer. -->
 <!-- 5. Upload this file using the form provided on that page. -->
@@ -16,7 +16,7 @@
 <!-- 7. WordPress will then import each of the posts, pages, comments, categories, etc. -->
 <!--    contained in this file into your site. -->
 
-<!-- generator="WordPress/4.8.1" created="2017-08-16 15:09" -->
+<!-- generator="WordPress/4.8.2" created="2017-10-05 15:33" -->
 <rss version="2.0"
 	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
@@ -29,23 +29,16 @@
 	<title>WooCommerce Dummy Data</title>
 	<link>https://demo.woothemes.com/woocommerce</link>
 	<description>Just another WooCommerce shop</description>
-	<pubDate>Wed, 16 Aug 2017 15:09:28 +0000</pubDate>
+	<pubDate>Thu, 05 Oct 2017 15:33:45 +0000</pubDate>
 	<language>en-US</language>
 	<wp:wxr_version>1.2</wp:wxr_version>
 	<wp:base_site_url>http://demo.woothemes.com/</wp:base_site_url>
 	<wp:base_blog_url>https://demo.woothemes.com/woocommerce</wp:base_blog_url>
 
-	<wp:term>
-		<wp:term_id><![CDATA[17]]></wp:term_id>
-		<wp:term_taxonomy><![CDATA[pa_color]]></wp:term_taxonomy>
-		<wp:term_slug><![CDATA[black]]></wp:term_slug>
-		<wp:term_parent><![CDATA[]]></wp:term_parent>
-		<wp:term_name><![CDATA[Black]]></wp:term_name>
-		<wp:termmeta>
-			<wp:meta_key><![CDATA[order_pa_color]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:termmeta>
-	</wp:term>
+	<wp:author><wp:author_id>3</wp:author_id><wp:author_login><![CDATA[wooteam]]></wp:author_login><wp:author_email><![CDATA[team@woothemes.com]]></wp:author_email><wp:author_display_name><![CDATA[WooThemes]]></wp:author_display_name><wp:author_first_name><![CDATA[Woo]]></wp:author_first_name><wp:author_last_name><![CDATA[Themes]]></wp:author_last_name></wp:author>
+
+<!-- WC Categories, Attributes, Product Types, Visibility -->
+
 	<wp:term>
 		<wp:term_id><![CDATA[19]]></wp:term_id>
 		<wp:term_taxonomy><![CDATA[pa_color]]></wp:term_taxonomy>
@@ -56,6 +49,20 @@
 			<wp:meta_key><![CDATA[order_pa_color]]></wp:meta_key>
 			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:termmeta>
+	</wp:term>
+	<wp:term>
+		<wp:term_id><![CDATA[35]]></wp:term_id>
+		<wp:term_taxonomy><![CDATA[product_type]]></wp:term_taxonomy>
+		<wp:term_slug><![CDATA[bundle]]></wp:term_slug>
+		<wp:term_parent><![CDATA[]]></wp:term_parent>
+		<wp:term_name><![CDATA[bundle]]></wp:term_name>
+	</wp:term>
+	<wp:term>
+		<wp:term_id><![CDATA[37]]></wp:term_id>
+		<wp:term_taxonomy><![CDATA[product_type]]></wp:term_taxonomy>
+		<wp:term_slug><![CDATA[composite]]></wp:term_slug>
+		<wp:term_parent><![CDATA[]]></wp:term_parent>
+		<wp:term_name><![CDATA[composite]]></wp:term_name>
 	</wp:term>
 	<wp:term>
 		<wp:term_id><![CDATA[24]]></wp:term_id>
@@ -197,7 +204,7 @@
 		</wp:termmeta>
 	</wp:term>
 	<wp:term>
-		<wp:term_id><![CDATA[18]]></wp:term_id>
+		<wp:term_id><![CDATA[45]]></wp:term_id>
 		<wp:term_taxonomy><![CDATA[product_cat]]></wp:term_taxonomy>
 		<wp:term_slug><![CDATA[hoodies]]></wp:term_slug>
 		<wp:term_parent><![CDATA[]]></wp:term_parent>
@@ -207,10 +214,6 @@
 			<wp:meta_value><![CDATA[1]]></wp:meta_value>
 		</wp:termmeta>
 		<wp:termmeta>
-			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
-			<wp:meta_value><![CDATA[4]]></wp:meta_value>
-		</wp:termmeta>
-		<wp:termmeta>
 			<wp:meta_key><![CDATA[display_type]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:termmeta>
@@ -218,9 +221,13 @@
 			<wp:meta_key><![CDATA[thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[193]]></wp:meta_value>
 		</wp:termmeta>
+		<wp:termmeta>
+			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
+			<wp:meta_value><![CDATA[3]]></wp:meta_value>
+		</wp:termmeta>
 	</wp:term>
 	<wp:term>
-		<wp:term_id><![CDATA[32]]></wp:term_id>
+		<wp:term_id><![CDATA[44]]></wp:term_id>
 		<wp:term_taxonomy><![CDATA[product_cat]]></wp:term_taxonomy>
 		<wp:term_slug><![CDATA[accessories]]></wp:term_slug>
 		<wp:term_parent><![CDATA[]]></wp:term_parent>
@@ -230,10 +237,6 @@
 			<wp:meta_value><![CDATA[2]]></wp:meta_value>
 		</wp:termmeta>
 		<wp:termmeta>
-			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
-			<wp:meta_value><![CDATA[6]]></wp:meta_value>
-		</wp:termmeta>
-		<wp:termmeta>
 			<wp:meta_key><![CDATA[display_type]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:termmeta>
@@ -241,20 +244,20 @@
 			<wp:meta_key><![CDATA[thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[184]]></wp:meta_value>
 		</wp:termmeta>
+		<wp:termmeta>
+			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
+			<wp:meta_value><![CDATA[4]]></wp:meta_value>
+		</wp:termmeta>
 	</wp:term>
 	<wp:term>
-		<wp:term_id><![CDATA[34]]></wp:term_id>
+		<wp:term_id><![CDATA[46]]></wp:term_id>
 		<wp:term_taxonomy><![CDATA[product_cat]]></wp:term_taxonomy>
-		<wp:term_slug><![CDATA[tshirts]]></wp:term_slug>
+		<wp:term_slug><![CDATA[t-shirts]]></wp:term_slug>
 		<wp:term_parent><![CDATA[]]></wp:term_parent>
-		<wp:term_name><![CDATA[T-Shirts]]></wp:term_name>
+		<wp:term_name><![CDATA[T-shirts]]></wp:term_name>
 		<wp:termmeta>
 			<wp:meta_key><![CDATA[order]]></wp:meta_key>
 			<wp:meta_value><![CDATA[3]]></wp:meta_value>
-		</wp:termmeta>
-		<wp:termmeta>
-			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
-			<wp:meta_value><![CDATA[5]]></wp:meta_value>
 		</wp:termmeta>
 		<wp:termmeta>
 			<wp:meta_key><![CDATA[display_type]]></wp:meta_key>
@@ -264,9 +267,13 @@
 			<wp:meta_key><![CDATA[thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[198]]></wp:meta_value>
 		</wp:termmeta>
+		<wp:termmeta>
+			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
+			<wp:meta_value><![CDATA[4]]></wp:meta_value>
+		</wp:termmeta>
 	</wp:term>
 	<wp:term>
-		<wp:term_id><![CDATA[13]]></wp:term_id>
+		<wp:term_id><![CDATA[47]]></wp:term_id>
 		<wp:term_taxonomy><![CDATA[product_cat]]></wp:term_taxonomy>
 		<wp:term_slug><![CDATA[music]]></wp:term_slug>
 		<wp:term_parent><![CDATA[]]></wp:term_parent>
@@ -281,7 +288,7 @@
 		</wp:termmeta>
 		<wp:termmeta>
 			<wp:meta_key><![CDATA[thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[238]]></wp:meta_value>
 		</wp:termmeta>
 		<wp:termmeta>
 			<wp:meta_key><![CDATA[product_count_product_cat]]></wp:meta_key>
@@ -289,13 +296,15 @@
 		</wp:termmeta>
 	</wp:term>
 
-	<generator>https://wordpress.org/?v=4.8.1</generator>
+	<generator>https://wordpress.org/?v=4.8.2</generator>
+
+<!-- Media -->
 
 	<item>
 		<title>accessories</title>
 		<link>https://demo.woothemes.com/woocommerce/accessories/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:33 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/accessories.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -326,7 +335,7 @@
 		<title>beanie</title>
 		<link>https://demo.woothemes.com/woocommerce/beanie-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:34 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/beanie.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -357,7 +366,7 @@
 		<title>belt</title>
 		<link>https://demo.woothemes.com/woocommerce/belt-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:35 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/belt.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -388,7 +397,7 @@
 		<title>cap</title>
 		<link>https://demo.woothemes.com/woocommerce/cap-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:36 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/cap.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -419,7 +428,7 @@
 		<title>hoodie-with-logo</title>
 		<link>https://demo.woothemes.com/woocommerce/hoodie-with-logo-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:38 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/hoodie-with-logo.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -450,7 +459,7 @@
 		<title>hoodie-with-pocket</title>
 		<link>https://demo.woothemes.com/woocommerce/hoodie-with-pocket-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:39 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/hoodie-with-pocket.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -481,7 +490,7 @@
 		<title>hoodie-with-zipper</title>
 		<link>https://demo.woothemes.com/woocommerce/hoodie-with-zipper-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:40 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/hoodie-with-zipper.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -512,7 +521,7 @@
 		<title>hoodie</title>
 		<link>https://demo.woothemes.com/woocommerce/hoodie-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:41 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/hoodie.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -543,7 +552,7 @@
 		<title>hoodies</title>
 		<link>https://demo.woothemes.com/woocommerce/hoodies/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/hoodies.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -574,7 +583,7 @@
 		<title>long-sleeve-tee</title>
 		<link>https://demo.woothemes.com/woocommerce/long-sleeve-tee-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:44 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/long-sleeve-tee.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -605,7 +614,7 @@
 		<title>polo</title>
 		<link>https://demo.woothemes.com/woocommerce/polo-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:45 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/polo.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -636,7 +645,7 @@
 		<title>sunglasses</title>
 		<link>https://demo.woothemes.com/woocommerce/sunglasses-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:45 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/sunglasses.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -667,7 +676,7 @@
 		<title>tshirt</title>
 		<link>https://demo.woothemes.com/woocommerce/tshirt-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:46 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/tshirt.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -698,7 +707,7 @@
 		<title>tshirts</title>
 		<link>https://demo.woothemes.com/woocommerce/tshirts/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:48 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/tshirts.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -729,7 +738,7 @@
 		<title>vneck-tee</title>
 		<link>https://demo.woothemes.com/woocommerce/vneck-tee-2/</link>
 		<pubDate>Tue, 08 Aug 2017 12:42:49 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/vneck-tee.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
@@ -757,45 +766,200 @@
 		</wp:postmeta>
 	</item>
 	<item>
-		<title>placeholder</title>
-		<link>https://demo.woothemes.com/woocommerce/placeholder/</link>
-		<pubDate>Tue, 08 Aug 2017 12:42:49 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/placeholder1.png</guid>
+		<title>single</title>
+		<link>https://demo.woothemes.com/woocommerce/product/single/single-2/</link>
+		<pubDate>Thu, 05 Oct 2017 13:34:18 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/single.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
-		<wp:post_id>200</wp:post_id>
-		<wp:post_date><![CDATA[2017-08-08 12:42:49]]></wp:post_date>
-		<wp:post_date_gmt><![CDATA[2017-08-08 12:42:49]]></wp:post_date_gmt>
+		<wp:post_id>237</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:34:18]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:34:18]]></wp:post_date_gmt>
 		<wp:comment_status><![CDATA[open]]></wp:comment_status>
 		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
-		<wp:post_name><![CDATA[placeholder]]></wp:post_name>
+		<wp:post_name><![CDATA[single-2]]></wp:post_name>
 		<wp:status><![CDATA[inherit]]></wp:status>
-		<wp:post_parent>0</wp:post_parent>
+		<wp:post_parent>159</wp:post_parent>
 		<wp:menu_order>0</wp:menu_order>
 		<wp:post_type><![CDATA[attachment]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/placeholder1.png]]></wp:attachment_url>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg]]></wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
-			<wp:meta_value><![CDATA[2017/08/placeholder1.png]]></wp:meta_value>
+			<wp:meta_value><![CDATA[2017/08/single.jpg]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:2400;s:6:"height";i:2400;s:4:"file";s:24:"2017/08/placeholder1.png";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:18:"2017/08/single.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+		</wp:postmeta>
+	</item>
+	<item>
+		<title>album</title>
+		<link>https://demo.woothemes.com/woocommerce/product/album/album-2/</link>
+		<pubDate>Thu, 05 Oct 2017 13:35:38 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/album.jpg</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>238</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:35:38]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:35:38]]></wp:post_date_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[album-2]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>158</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/album.jpg]]></wp:attachment_url>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+			<wp:meta_value><![CDATA[2017/08/album.jpg]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:17:"2017/08/album.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+		</wp:postmeta>
+	</item>
+	<item>
+		<title>vnech-tee-blue</title>
+		<link>https://demo.woothemes.com/woocommerce/?attachment_id=239</link>
+		<pubDate>Thu, 05 Oct 2017 13:36:37 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/vnech-tee-blue.jpg</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>239</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:36:37]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:36:37]]></wp:post_date_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[vnech-tee-blue]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>173</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/vnech-tee-blue.jpg]]></wp:attachment_url>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+			<wp:meta_value><![CDATA[2017/08/vnech-tee-blue.jpg]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:26:"2017/08/vnech-tee-blue.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+		</wp:postmeta>
+	</item>
+	<item>
+		<title>vnech-tee-green</title>
+		<link>https://demo.woothemes.com/woocommerce/?attachment_id=240</link>
+		<pubDate>Thu, 05 Oct 2017 13:36:38 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/08/vnech-tee-green.jpg</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>240</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:36:38]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:36:38]]></wp:post_date_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[vnech-tee-green]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>173</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/vnech-tee-green.jpg]]></wp:attachment_url>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+			<wp:meta_value><![CDATA[2017/08/vnech-tee-green.jpg]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:27:"2017/08/vnech-tee-green.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+		</wp:postmeta>
+	</item>
+	<item>
+		<title>hoodie-blue</title>
+		<link>https://demo.woothemes.com/woocommerce/product/hoodie/hoodie-blue-2/</link>
+		<pubDate>Thu, 05 Oct 2017 13:38:33 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/05/hoodie-blue.jpg</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>241</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:38:33]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:38:33]]></wp:post_date_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[hoodie-blue-2]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>148</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/05/hoodie-blue.jpg]]></wp:attachment_url>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+			<wp:meta_value><![CDATA[2017/05/hoodie-blue.jpg]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:23:"2017/05/hoodie-blue.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
+		</wp:postmeta>
+	</item>
+	<item>
+		<title>hoodie-green</title>
+		<link>https://demo.woothemes.com/woocommerce/product/hoodie/hoodie-green-2/</link>
+		<pubDate>Thu, 05 Oct 2017 13:38:34 +0000</pubDate>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">https://demo.woothemes.com/wp-content/uploads/sites/56/2017/05/hoodie-green.jpg</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>242</wp:post_id>
+		<wp:post_date><![CDATA[2017-10-05 13:38:34]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2017-10-05 13:38:34]]></wp:post_date_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[hoodie-green-2]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>148</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+		<wp:attachment_url><![CDATA[https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/05/hoodie-green.jpg]]></wp:attachment_url>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+			<wp:meta_value><![CDATA[2017/05/hoodie-green.jpg]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+			<wp:meta_value><![CDATA[a:5:{s:5:"width";i:800;s:6:"height";i:800;s:4:"file";s:24:"2017/05/hoodie-green.jpg";s:5:"sizes";a:0:{}s:10:"image_meta";a:12:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}}}]]></wp:meta_value>
 		</wp:postmeta>
 	</item>
 
-<!-- Products -->
+	<!-- WC Products -->
 
 	<item>
 		<title>Beanie</title>
 		<link>https://demo.woothemes.com/woocommerce/product/beanie/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=28</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -851,10 +1015,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -936,7 +1096,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -979,10 +1139,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1064,7 +1220,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1086,13 +1242,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Belt</title>
 		<link>https://demo.woothemes.com/woocommerce/product/belt/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=29</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -1147,10 +1307,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1232,7 +1388,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1275,10 +1431,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1360,7 +1512,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1378,12 +1530,16 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 		<wp:comment>
 			<wp:comment_id>254</wp:comment_id>
 			<wp:comment_author><![CDATA[Customer 1]]></wp:comment_author>
 			<wp:comment_author_email><![CDATA[customer1@woo.com]]></wp:comment_author_email>
 			<wp:comment_author_url></wp:comment_author_url>
-			<wp:comment_author_IP></wp:comment_author_IP>
+			<wp:comment_author_IP><![CDATA[196.41.85.251]]></wp:comment_author_IP>
 			<wp:comment_date><![CDATA[2017-08-08 13:50:11]]></wp:comment_date>
 			<wp:comment_date_gmt><![CDATA[2017-08-08 13:50:11]]></wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[Keeps my pants just in the right spot.]]></wp:comment_content>
@@ -1392,6 +1548,14 @@
 			<wp:comment_parent>0</wp:comment_parent>
 			<wp:comment_user_id>2189</wp:comment_user_id>
 			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_error]]></wp:meta_key>
+				<wp:meta_value><![CDATA[1502200211]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";d:1502200211.8320109844207763671875;s:5:"event";s:11:"check-error";s:4:"user";s:9:"wooteam";s:4:"meta";a:1:{s:8:"response";s:7:"invalid";}}]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
 				<wp:meta_key><![CDATA[rating]]></wp:meta_key>
 				<wp:meta_value><![CDATA[5]]></wp:meta_value>
 			</wp:commentmeta>
@@ -1399,14 +1563,22 @@
 				<wp:meta_key><![CDATA[verified]]></wp:meta_key>
 				<wp:meta_value><![CDATA[0]]></wp:meta_value>
 			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200537.336163997650146484375;s:5:"event";s:17:"status-unapproved";s:4:"user";s:9:"wooteam";}]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200538.512444972991943359375;s:5:"event";s:15:"status-approved";s:4:"user";s:9:"wooteam";}]]></wp:meta_value>
+			</wp:commentmeta>
 		</wp:comment>
 	</item>
 	<item>
 		<title>Cap</title>
 		<link>https://demo.woothemes.com/woocommerce/product/cap/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=30</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -1464,10 +1636,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1549,7 +1717,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1592,10 +1760,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1677,7 +1841,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1699,12 +1863,16 @@
 			<wp:meta_key><![CDATA[_product_attributes]]></wp:meta_key>
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:0;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 		<wp:comment>
 			<wp:comment_id>253</wp:comment_id>
 			<wp:comment_author><![CDATA[Customer 2]]></wp:comment_author>
 			<wp:comment_author_email><![CDATA[customer2@woo.com]]></wp:comment_author_email>
 			<wp:comment_author_url></wp:comment_author_url>
-			<wp:comment_author_IP></wp:comment_author_IP>
+			<wp:comment_author_IP><![CDATA[196.41.85.251]]></wp:comment_author_IP>
 			<wp:comment_date><![CDATA[2017-08-08 13:49:31]]></wp:comment_date>
 			<wp:comment_date_gmt><![CDATA[2017-08-08 13:49:31]]></wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[I can stare in the distance now.]]></wp:comment_content>
@@ -1718,7 +1886,7 @@
 			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
-				<wp:meta_value><![CDATA[a:4:{s:4:"time";d:1502200171.69357395172119140625;s:5:"event";s:11:"check-error";s:4:"user";s:9:"jobthomas";s:4:"meta";a:1:{s:8:"response";s:7:"invalid";}}]]></wp:meta_value>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";d:1502200171.69357395172119140625;s:5:"event";s:11:"check-error";s:4:"user";s:9:"wooteam";s:4:"meta";a:1:{s:8:"response";s:7:"invalid";}}]]></wp:meta_value>
 			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[rating]]></wp:meta_key>
@@ -1730,11 +1898,11 @@
 			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
-				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200540.2666580677032470703125;s:5:"event";s:17:"status-unapproved";s:4:"user";s:9:"jobthomas";}]]></wp:meta_value>
+				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200540.2666580677032470703125;s:5:"event";s:17:"status-unapproved";s:4:"user";s:9:"wooteam";}]]></wp:meta_value>
 			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
-				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200541.1828670501708984375;s:5:"event";s:15:"status-approved";s:4:"user";s:9:"jobthomas";}]]></wp:meta_value>
+				<wp:meta_value><![CDATA[a:3:{s:4:"time";d:1502200541.1828670501708984375;s:5:"event";s:15:"status-approved";s:4:"user";s:9:"wooteam";}]]></wp:meta_value>
 			</wp:commentmeta>
 		</wp:comment>
 	</item>
@@ -1742,8 +1910,8 @@
 		<title>Sunglasses</title>
 		<link>https://demo.woothemes.com/woocommerce/product/sunglasses/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=31</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -1799,10 +1967,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -1884,7 +2048,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -1927,10 +2091,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2012,7 +2172,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2030,13 +2190,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Hoodie with Logo</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie-with-logo/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=32</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -2092,10 +2256,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2177,7 +2337,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2220,10 +2380,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2305,7 +2461,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2327,13 +2483,17 @@
 			<wp:meta_key><![CDATA[_product_attributes]]></wp:meta_key>
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:0;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Hoodie with Pocket</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie-with-pocket/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=33</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -2392,10 +2552,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2477,7 +2633,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2520,10 +2676,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2605,7 +2757,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2627,13 +2779,17 @@
 			<wp:meta_key><![CDATA[_product_attributes]]></wp:meta_key>
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:0;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Hoodie with Zipper</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie-with-zipper/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=34</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -2689,10 +2845,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2774,7 +2926,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2817,10 +2969,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -2902,7 +3050,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -2920,13 +3068,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Long Sleeve Tee</title>
 		<link>https://demo.woothemes.com/woocommerce/product/long-sleeve-tee/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=36</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -2944,7 +3096,7 @@
 		<wp:is_sticky>0</wp:is_sticky>
 		<category domain="pa_color" nicename="green"><![CDATA[Green]]></category>
 		<category domain="product_type" nicename="simple"><![CDATA[simple]]></category>
-		<category domain="product_cat" nicename="tshirts"><![CDATA[T-Shirts]]></category>
+		<category domain="product_cat" nicename="t-shirts"><![CDATA[T-shirts]]></category>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[194]]></wp:meta_value>
@@ -2980,10 +3132,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -3067,7 +3215,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3110,10 +3258,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -3195,7 +3339,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3217,13 +3361,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Polo</title>
 		<link>https://demo.woothemes.com/woocommerce/product/polo/</link>
 		<pubDate>Tue, 23 May 2017 11:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=37</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3241,7 +3389,7 @@
 		<wp:is_sticky>0</wp:is_sticky>
 		<category domain="pa_color" nicename="blue"><![CDATA[Blue]]></category>
 		<category domain="product_type" nicename="simple"><![CDATA[simple]]></category>
-		<category domain="product_cat" nicename="tshirts"><![CDATA[T-Shirts]]></category>
+		<category domain="product_cat" nicename="t-shirts"><![CDATA[T-shirts]]></category>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[195]]></wp:meta_value>
@@ -3277,10 +3425,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -3364,7 +3508,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3411,10 +3555,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -3496,7 +3636,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3518,13 +3658,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>T-Shirt</title>
 		<link>https://demo.woothemes.com/woocommerce/product/tshirt/</link>
 		<pubDate>Tue, 23 May 2017 11:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=38</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple product.]]></excerpt:encoded>
@@ -3542,7 +3686,7 @@
 		<wp:is_sticky>0</wp:is_sticky>
 		<category domain="pa_color" nicename="gray"><![CDATA[Gray]]></category>
 		<category domain="product_type" nicename="simple"><![CDATA[simple]]></category>
-		<category domain="product_cat" nicename="tshirts"><![CDATA[T-Shirts]]></category>
+		<category domain="product_cat" nicename="t-shirts"><![CDATA[T-shirts]]></category>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[197]]></wp:meta_value>
@@ -3578,10 +3722,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -3665,7 +3805,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3712,10 +3852,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -3797,7 +3933,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -3819,13 +3955,17 @@
 			<wp:meta_key><![CDATA[_product_attributes]]></wp:meta_key>
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:0;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>V-Neck T-Shirt</title>
 		<link>https://demo.woothemes.com/woocommerce/product/vneck-tee/</link>
 		<pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/bookings/?p=39</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a variable product.]]></excerpt:encoded>
@@ -3846,7 +3986,7 @@
 		<category domain="pa_color" nicename="green"><![CDATA[Green]]></category>
 		<category domain="pa_color" nicename="red"><![CDATA[Red]]></category>
 		<category domain="product_type" nicename="variable"><![CDATA[variable]]></category>
-		<category domain="product_cat" nicename="tshirts"><![CDATA[T-Shirts]]></category>
+		<category domain="product_cat" nicename="t-shirts"><![CDATA[T-shirts]]></category>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[199]]></wp:meta_value>
@@ -3882,10 +4022,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -3949,7 +4085,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[239,240]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
@@ -3969,7 +4105,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
@@ -4018,10 +4154,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -4085,7 +4217,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[239,240]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
@@ -4105,7 +4237,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
@@ -4118,14 +4250,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_attributes]]></wp:meta_key>
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:1;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -4135,12 +4259,16 @@
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
 			<wp:meta_value><![CDATA[20]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 		<wp:comment>
 			<wp:comment_id>250</wp:comment_id>
 			<wp:comment_author><![CDATA[Customer 1]]></wp:comment_author>
 			<wp:comment_author_email><![CDATA[customer1@woo.com]]></wp:comment_author_email>
 			<wp:comment_author_url></wp:comment_author_url>
-			<wp:comment_author_IP></wp:comment_author_IP>
+			<wp:comment_author_IP><![CDATA[196.41.85.251]]></wp:comment_author_IP>
 			<wp:comment_date><![CDATA[2017-08-08 12:47:33]]></wp:comment_date>
 			<wp:comment_date_gmt><![CDATA[2017-08-08 12:47:33]]></wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[Super comfortable]]></wp:comment_content>
@@ -4162,7 +4290,7 @@
 		<title>Hoodie</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie/</link>
 		<pubDate>Tue, 23 May 2017 15:53:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
 		<guid isPermaLink="false"></guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -4221,10 +4349,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -4286,7 +4410,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[241,242]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
@@ -4306,7 +4430,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
@@ -4353,10 +4477,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -4418,7 +4538,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[241,242]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
@@ -4438,7 +4558,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
@@ -4449,6 +4569,14 @@
 			<wp:meta_value><![CDATA[a:1:{s:8:"pa_color";a:6:{s:4:"name";s:8:"pa_color";s:5:"value";s:0:"";s:8:"position";i:0;s:10:"is_visible";i:1;s:12:"is_variation";i:1;s:11:"is_taxonomy";i:1;}}]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
+			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_enabled]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
 			<wp:meta_value><![CDATA[42]]></wp:meta_value>
 		</wp:postmeta>
@@ -4457,646 +4585,16 @@
 			<wp:meta_value><![CDATA[45]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-	</item>
-	<item>
-		<title>Design your outfit</title>
-		<link>https://demo.woothemes.com/woocommerce/product/design-your-outfit/</link>
-		<pubDate>Mon, 07 Aug 2017 13:42:43 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
-		<description></description>
-		<content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
-		<excerpt:encoded><![CDATA[This is a grouped product.]]></excerpt:encoded>
-		<wp:post_id>156</wp:post_id>
-		<wp:post_date><![CDATA[2017-08-07 13:42:43]]></wp:post_date>
-		<wp:post_date_gmt><![CDATA[2017-08-07 13:42:43]]></wp:post_date_gmt>
-		<wp:comment_status><![CDATA[open]]></wp:comment_status>
-		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
-		<wp:post_name><![CDATA[design-your-outfit]]></wp:post_name>
-		<wp:status><![CDATA[publish]]></wp:status>
-		<wp:post_parent>0</wp:post_parent>
-		<wp:menu_order>0</wp:menu_order>
-		<wp:post_type><![CDATA[product]]></wp:post_type>
-		<wp:post_password><![CDATA[]]></wp:post_password>
-		<wp:is_sticky>0</wp:is_sticky>
-		<category domain="product_type" nicename="grouped"><![CDATA[grouped]]></category>
-		<category domain="product_cat" nicename="hoodies"><![CDATA[Hoodies]]></category>
-		<category domain="product_cat" nicename="accessories"><![CDATA[Accessories]]></category>
-		<category domain="product_cat" nicename="tshirts"><![CDATA[T-Shirts]]></category>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_review_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_rating_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_average_rating]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
-			<wp:meta_value><![CDATA[2189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_children]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:3:{i:0;i:151;i:1;i:141;i:2;i:145;}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
-			<wp:meta_value><![CDATA[woo-design-your-outfit]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_regular_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_from]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
 			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_class]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_manage_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_backorders]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sold_individually]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_weight]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_length]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_width]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_height]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_upsell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_crosssell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_purchase_note]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_default_attributes]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_virtual]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_downloadable]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[197,185,189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_expiry]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[instock]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wp_old_slug]]></wp:meta_key>
-			<wp:meta_value><![CDATA[total-dress]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_review_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_rating_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_average_rating]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
-			<wp:meta_value><![CDATA[2189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_children]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:3:{i:0;i:151;i:1;i:141;i:2;i:145;}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
-			<wp:meta_value><![CDATA[woo-design-your-outfit]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_regular_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_from]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_class]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_manage_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_backorders]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sold_individually]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_weight]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_length]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_width]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_height]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_upsell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_crosssell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_purchase_note]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_default_attributes]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_virtual]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_downloadable]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[197,185,189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_expiry]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[instock]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wp_old_slug]]></wp:meta_key>
-			<wp:meta_value><![CDATA[total-dress]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wp_old_slug]]></wp:meta_key>
-			<wp:meta_value><![CDATA[design-your-outfit__trashed]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[18]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[45]]></wp:meta_value>
-		</wp:postmeta>
-	</item>
-	<item>
-		<title>Accessorize yourself</title>
-		<link>https://demo.woothemes.com/woocommerce/product/accessorize-yourself/</link>
-		<pubDate>Mon, 07 Aug 2017 15:49:18 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
-		<description></description>
-		<content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
-		<excerpt:encoded><![CDATA[This is a grouped product]]></excerpt:encoded>
-		<wp:post_id>157</wp:post_id>
-		<wp:post_date><![CDATA[2017-08-07 15:49:18]]></wp:post_date>
-		<wp:post_date_gmt><![CDATA[2017-08-07 15:49:18]]></wp:post_date_gmt>
-		<wp:comment_status><![CDATA[open]]></wp:comment_status>
-		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
-		<wp:post_name><![CDATA[accessorize-yourself]]></wp:post_name>
-		<wp:status><![CDATA[publish]]></wp:status>
-		<wp:post_parent>0</wp:post_parent>
-		<wp:menu_order>0</wp:menu_order>
-		<wp:post_type><![CDATA[product]]></wp:post_type>
-		<wp:post_password><![CDATA[]]></wp:post_password>
-		<wp:is_sticky>0</wp:is_sticky>
-		<category domain="product_type" nicename="grouped"><![CDATA[grouped]]></category>
-		<category domain="product_cat" nicename="accessories"><![CDATA[Accessories]]></category>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_review_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_rating_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_average_rating]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
-			<wp:meta_value><![CDATA[2189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_children]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:4:{i:0;i:141;i:1;i:144;i:2;i:142;i:3;i:143;}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
-			<wp:meta_value><![CDATA[woo-accessorize]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_regular_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_from]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_class]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_manage_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_backorders]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sold_individually]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_weight]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_length]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_width]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_height]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_upsell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_crosssell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_purchase_note]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_default_attributes]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_virtual]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_downloadable]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[185,196,186,187]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_expiry]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[instock]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_review_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_rating_count]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wc_average_rating]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
-			<wp:meta_value><![CDATA[2189]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_children]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:4:{i:0;i:141;i:1;i:144;i:2;i:142;i:3;i:143;}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
-			<wp:meta_value><![CDATA[woo-accessorize]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_regular_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_from]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_tax_class]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_manage_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_backorders]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_sold_individually]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_weight]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_length]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_width]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_height]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_upsell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_crosssell_ids]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_purchase_note]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_default_attributes]]></wp:meta_key>
-			<wp:meta_value><![CDATA[a:0:{}]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_virtual]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_downloadable]]></wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_image_gallery]]></wp:meta_key>
-			<wp:meta_value><![CDATA[185,196,186,187]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_limit]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_download_expiry]]></wp:meta_key>
-			<wp:meta_value><![CDATA[-1]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
-			<wp:meta_value><![CDATA[instock]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_wp_old_slug]]></wp:meta_key>
-			<wp:meta_value><![CDATA[accessorize-yourself__trashed]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[16]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
-			<wp:meta_value><![CDATA[90]]></wp:meta_value>
 		</wp:postmeta>
 	</item>
 	<item>
 		<title>Album</title>
 		<link>https://demo.woothemes.com/woocommerce/product/album/</link>
 		<pubDate>Mon, 07 Aug 2017 15:52:10 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/?post_type=product&#038;p=150</guid>
 		<description></description>
 		<content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple, virtual product.]]></excerpt:encoded>
@@ -5151,10 +4649,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -5236,7 +4730,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -5279,10 +4773,6 @@
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
 			<wp:meta_value><![CDATA[taxable]]></wp:meta_value>
 		</wp:postmeta>
@@ -5364,7 +4854,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -5380,14 +4870,18 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[238]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:comment>
 			<wp:comment_id>251</wp:comment_id>
 			<wp:comment_author><![CDATA[Customer 2]]></wp:comment_author>
 			<wp:comment_author_email><![CDATA[customer2@woo.com]]></wp:comment_author_email>
 			<wp:comment_author_url></wp:comment_author_url>
-			<wp:comment_author_IP></wp:comment_author_IP>
+			<wp:comment_author_IP><![CDATA[196.41.85.251]]></wp:comment_author_IP>
 			<wp:comment_date><![CDATA[2017-08-08 13:02:30]]></wp:comment_date>
 			<wp:comment_date_gmt><![CDATA[2017-08-08 13:02:30]]></wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[I could listen to this for hours]]></wp:comment_content>
@@ -5395,6 +4889,14 @@
 			<wp:comment_type><![CDATA[]]></wp:comment_type>
 			<wp:comment_parent>0</wp:comment_parent>
 			<wp:comment_user_id>2189</wp:comment_user_id>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_error]]></wp:meta_key>
+				<wp:meta_value><![CDATA[1502197350]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";d:1502197350.5794689655303955078125;s:5:"event";s:11:"check-error";s:4:"user";s:9:"wooteam";s:4:"meta";a:1:{s:8:"response";s:7:"invalid";}}]]></wp:meta_value>
+			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[rating]]></wp:meta_key>
 				<wp:meta_value><![CDATA[5]]></wp:meta_value>
@@ -5409,7 +4911,7 @@
 			<wp:comment_author><![CDATA[Customer 1]]></wp:comment_author>
 			<wp:comment_author_email><![CDATA[customer1@woo.com]]></wp:comment_author_email>
 			<wp:comment_author_url></wp:comment_author_url>
-			<wp:comment_author_IP></wp:comment_author_IP>
+			<wp:comment_author_IP><![CDATA[196.41.85.251]]></wp:comment_author_IP>
 			<wp:comment_date><![CDATA[2017-08-08 13:02:47]]></wp:comment_date>
 			<wp:comment_date_gmt><![CDATA[2017-08-08 13:02:47]]></wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[What a performer!]]></wp:comment_content>
@@ -5417,6 +4919,14 @@
 			<wp:comment_type><![CDATA[]]></wp:comment_type>
 			<wp:comment_parent>0</wp:comment_parent>
 			<wp:comment_user_id>2189</wp:comment_user_id>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_error]]></wp:meta_key>
+				<wp:meta_value><![CDATA[1502197367]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";d:1502197367.9154179096221923828125;s:5:"event";s:11:"check-error";s:4:"user";s:9:"wooteam";s:4:"meta";a:1:{s:8:"response";s:7:"invalid";}}]]></wp:meta_value>
+			</wp:commentmeta>
 			<wp:commentmeta>
 				<wp:meta_key><![CDATA[rating]]></wp:meta_key>
 				<wp:meta_value><![CDATA[4]]></wp:meta_value>
@@ -5431,8 +4941,8 @@
 		<title>Single</title>
 		<link>https://demo.woothemes.com/woocommerce/product/single/</link>
 		<pubDate>Mon, 07 Aug 2017 15:53:06 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/?post_type=product&#038;p=151</guid>
 		<description></description>
 		<content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
 		<excerpt:encoded><![CDATA[This is a simple, virtual product.]]></excerpt:encoded>
@@ -5468,7 +4978,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[237]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
@@ -5489,10 +4999,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -5576,7 +5082,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -5600,7 +5106,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[237]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sku]]></wp:meta_key>
@@ -5621,10 +5127,6 @@
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_sale_price_dates_to]]></wp:meta_key>
 			<wp:meta_value><![CDATA[]]></wp:meta_value>
-		</wp:postmeta>
-		<wp:postmeta>
-			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_tax_status]]></wp:meta_key>
@@ -5708,7 +5210,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_price]]></wp:meta_key>
@@ -5722,13 +5224,17 @@
 			<wp:meta_key><![CDATA[_woocommerce_product_gallery_slider_archives_enabled]]></wp:meta_key>
 			<wp:meta_value><![CDATA[no]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[total_sales]]></wp:meta_key>
+			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>V-Neck T-Shirt - Red</title>
 		<link>https://demo.woothemes.com/woocommerce/product/vneck-tee/?attribute_pa_color=red</link>
 		<pubDate>Mon, 29 May 2017 13:54:24 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/product/vneck-tee/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -5740,7 +5246,7 @@
 		<wp:post_name><![CDATA[vneck-tshirt-red]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>152</wp:post_parent>
-		<wp:menu_order>1</wp:menu_order>
+		<wp:menu_order>2</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -5881,6 +5387,34 @@
 			<wp:meta_value><![CDATA[199]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
 			<wp:meta_key><![CDATA[attribute_pa_color]]></wp:meta_key>
 			<wp:meta_value><![CDATA[red]]></wp:meta_value>
 		</wp:postmeta>
@@ -5889,8 +5423,8 @@
 		<title>V-Neck T-Shirt - Green</title>
 		<link>https://demo.woothemes.com/woocommerce/product/vneck-tee/?attribute_pa_color=green</link>
 		<pubDate>Mon, 29 May 2017 13:54:24 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/product/vneck-tee/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -5902,7 +5436,7 @@
 		<wp:post_name><![CDATA[vneck-tshirt-green]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>152</wp:post_parent>
-		<wp:menu_order>2</wp:menu_order>
+		<wp:menu_order>3</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -6008,7 +5542,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
@@ -6036,11 +5570,39 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[240]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[attribute_pa_color]]></wp:meta_key>
@@ -6051,8 +5613,8 @@
 		<title>V-Neck T-Shirt - Blue</title>
 		<link>https://demo.woothemes.com/woocommerce/product/vneck-tee/?attribute_pa_color=blue</link>
 		<pubDate>Mon, 07 Aug 2017 13:27:42 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/shop/hoodies/vneck-tee/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -6064,7 +5626,7 @@
 		<wp:post_name><![CDATA[vneck-tshirt]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>152</wp:post_parent>
-		<wp:menu_order>0</wp:menu_order>
+		<wp:menu_order>1</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -6170,7 +5732,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_stock]]></wp:meta_key>
-			<wp:meta_value><![CDATA[0]]></wp:meta_value>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_stock_status]]></wp:meta_key>
@@ -6198,7 +5760,39 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
+			<wp:meta_value><![CDATA[239]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[attribute_pa_color]]></wp:meta_key>
@@ -6209,8 +5803,8 @@
 		<title>Hoodie - Red</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie/?attribute_pa_color=red</link>
 		<pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -6222,7 +5816,7 @@
 		<wp:post_name><![CDATA[hoodie-red]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>148</wp:post_parent>
-		<wp:menu_order>0</wp:menu_order>
+		<wp:menu_order>1</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -6366,13 +5960,41 @@
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
 			<wp:meta_value><![CDATA[192]]></wp:meta_value>
 		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
 	</item>
 	<item>
 		<title>Hoodie - Green</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie/?attribute_pa_color=green</link>
 		<pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -6384,7 +6006,7 @@
 		<wp:post_name><![CDATA[hoodie-green]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>148</wp:post_parent>
-		<wp:menu_order>1</wp:menu_order>
+		<wp:menu_order>2</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -6522,19 +6144,47 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[242]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
 		</wp:postmeta>
 	</item>
 	<item>
 		<title>Hoodie - Blue</title>
 		<link>https://demo.woothemes.com/woocommerce/product/hoodie/?attribute_pa_color=blue</link>
 		<pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false"></guid>
+		<dc:creator><![CDATA[wooteam]]></dc:creator>
+		<guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -6546,7 +6196,7 @@
 		<wp:post_name><![CDATA[hoodie-blue]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>148</wp:post_parent>
-		<wp:menu_order>2</wp:menu_order>
+		<wp:menu_order>3</wp:menu_order>
 		<wp:post_type><![CDATA[product_variation]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
@@ -6684,12 +6334,41 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_product_version]]></wp:meta_key>
-			<wp:meta_value><![CDATA[3.0.7]]></wp:meta_value>
+			<wp:meta_value><![CDATA[3.1.1]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-			<wp:meta_value><![CDATA[200]]></wp:meta_value>
+			<wp:meta_value><![CDATA[241]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[min_max_rules]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minimum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_maximum_allowed_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_group_of_quantity]]></wp:meta_key>
+			<wp:meta_value><![CDATA[]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_do_not_count]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_cart_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+		</wp:postmeta>
+		<wp:postmeta>
+			<wp:meta_key><![CDATA[variation_minmax_category_group_of_exclude]]></wp:meta_key>
+			<wp:meta_value><![CDATA[no]]></wp:meta_value>
 		</wp:postmeta>
 	</item>
+
 </channel>
 </rss>
