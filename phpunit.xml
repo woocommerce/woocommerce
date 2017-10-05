@@ -40,6 +40,7 @@
 				<directory suffix=".php">./includes/widgets</directory>
 				<file>./includes/wc-deprecated-functions.php</file>
 				<file>./includes/wc-template-hooks.php</file>
+				<file>./includes/wc-widget-functions.php</file>
 			</exclude>
 		</whitelist>
 	</filter>
