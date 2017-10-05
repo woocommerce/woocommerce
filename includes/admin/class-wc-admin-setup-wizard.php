@@ -200,7 +200,7 @@ class WC_Admin_Setup_Wizard {
 			return '';
 		}
 
-		return add_query_arg( 'step', $keys[ $step_index + 1 ] );
+		return add_query_arg( 'step', $keys[ $step_index + 1 ], remove_query_arg( 'activate_error' ) );
 	}
 
 	/**
@@ -1404,17 +1404,12 @@ class WC_Admin_Setup_Wizard {
 		}
 	}
 
-	/**
-	 * Activate step.
-	 */
-	public function wc_setup_activate() {
-		$this->wc_setup_activate_actions();
-
+	protected function wc_setup_activate_get_description() {
 		$description     = false;
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
-			&& ( 'yes' === $stripe_settings['create_account'] )
-			&& 'yes' === $stripe_settings['enabled'];
+			&& isset( $stripe_settings['create_account'] ) && 'yes' === $stripe_settings['create_account']
+			&& isset( $stripe_settings['enabled'] ) && 'yes' === $stripe_settings['enabled'];
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
@@ -1438,37 +1433,64 @@ class WC_Admin_Setup_Wizard {
 		} else if ( $rates_enabled ) {
 			$description = sprintf( $description_base, __( 'live rates and discounted shipping labels', 'woocommerce' ) );
 		}
+
+		return $description;
+	}
+
+	/**
+	 * Activate step.
+	 */
+	public function wc_setup_activate() {
+		$this->wc_setup_activate_actions();
+
+		$has_jetpack_error = false;
+		if ( isset( $_GET['activate_error'] ) ) {
+			$has_jetpack_error = true;
+
+			$title = __( "Sorry, We couldn't connect your store to Jetpack", 'woocommerce' );
+
+			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
+			$description = $error_message;
+		} else {
+			$description = $this->wc_setup_activate_get_description();
+			$title = $description ?
+				__( 'Connect your store to Jetpack', 'woocommerce' ) :
+				__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
+		}
 		?>
-		<form method="post" class="activate-jetpack">
-			<?php wp_nonce_field( 'wc-setup' ); ?>
-			<?php if ( $description ) : ?>
-				<h1>
-					<?php esc_html_e( 'Connect your store to Jetpack', 'woocommerce' ); ?>
-				</h1>
-				<p><?php echo esc_html( $description ); ?></p>
-			<?php else: ?>
-				<h1>
-					<?php esc_html_e( 'Connect your store to Jetpack to enable extra features', 'woocommerce' ); ?>
-				</h1>
-			<?php endif; ?>
-			<img
-				class="jetpack-logo"
-				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
-				alt="Jetpack logo"
-			/>
-			<p class="jetpack-terms">
-			<?php
-				printf(
-					__( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ),
-					'https://wordpress.com/tos',
-					'https://jetpack.com/support/what-data-does-jetpack-sync'
-				);
-			?>
-			</p>
+		<h1><?php echo esc_html( $title ); ?></h1>
+		<p><?php echo esc_html( $description ); ?></p>
+		<img
+			class="jetpack-logo"
+			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+			alt="Jetpack logo"
+		/>
+		<?php if ( $has_jetpack_error ) : ?>
 			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
+				<a
+					href="<?php echo esc_url( $this->get_next_step_link() ); ?>"
+					class="button-primary button button-large"
+				>
+					<?php esc_html_e( 'Finish setting up your store', 'woocommerce' ); ?>
+				</a>
 			</p>
-			<input type="hidden" name="save_step" value="activate" />
+		<?php else : ?>
+			<p class="jetpack-terms">
+				<?php
+					printf(
+						wp_kses_post( __( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ) ),
+						'https://wordpress.com/tos',
+						'https://jetpack.com/support/what-data-does-jetpack-sync'
+					);
+				?>
+			</p>
+			<form method="post" class="activate-jetpack">
+				<p class="wc-setup-actions step">
+					<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>" />
+				</p>
+				<input type="hidden" name="save_step" value="activate" />
+				<?php wp_nonce_field( 'wc-setup' ); ?>
+			</form>
 			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item">
@@ -1504,8 +1526,22 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</li>
 			</ul>
-		</form>
-		<?php
+		<?php endif; ?>
+	<?php
+	}
+
+	protected function get_all_activate_errors() {
+		return array(
+			'default' => __( "Sorry! We tried, but we couldn't connect Jetpack just now 😭. Please go to the Plugins tab to connect Jetpack, so that you can finish setting up your store.", 'woocommerce' ),
+			'jetpack_cant_be_installed' => __( "Sorry! We tried, but we couldn't install Jetpack for you 😭. Please go to the Plugins tab to install it, and finish setting up your store.", 'woocommerce' ),
+			'register_http_request_failed' => __( "Sorry! We couldn't contact Jetpack just now 😭. Please make sure that your site is visible over the internet, and that it accepts incoming and outgoing requests via curl. You can also try to connect to Jetpack again, and if you run into any more issues, please contact support.", 'woocommerce' ),
+			'siteurl_private_ip_dev' => __( "Your site might be on a private network. Jetpack can only connect to public sites. Please make sure your site is visible over the internet, and then try connecting again 🙏." , 'woocommerce' ),
+		);
+	}
+
+	protected function get_activate_error_message( $code = '' ) {
+		$errors = $this->get_all_activate_errors();
+		return array_key_exists( $code, $errors ) ? $errors[ $code ] : $errors['default'];
 	}
 
 	/**
@@ -1516,19 +1552,30 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Determine if we need to install Jetpack synchronously here.
+		// Clean up temporary Jetpack queued install option.
+		// This happens after the connection button is clicked
+		// and we waited for the pending install to finish.
+		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
+		WC_Install::background_installer( 'jetpack', array(
+			'file'      => 'jetpack/jetpack.php',
+			'name'      => __( 'Jetpack', 'woocommerce' ),
+			'repo-slug' => 'jetpack',
+		) );
 
+		// Did Jetpack get successfully installed?
 		if ( ! class_exists( 'Jetpack' ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'install' ) ) );
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'jetpack_cant_be_installed' ) ) );
 			exit;
 		}
 
 		Jetpack::maybe_set_version_option();
-		$registered = Jetpack::try_registration();
+		$register_result = Jetpack::try_registration();
 
-		if ( is_wp_error( $registered ) ) {
-			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', 'register' ) ) );
+		if ( is_wp_error( $register_result ) ) {
+			$result_error_code = $register_result->get_error_code();
+			$jetpack_error_code = array_key_exists( $result_error_code, $this->get_all_activate_errors() ) ? $result_error_code : 'register';
+			wp_redirect( esc_url_raw( add_query_arg( 'activate_error', $jetpack_error_code ) ) );
 			exit;
 		}
 
@@ -1548,6 +1595,9 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
+
+		// We're definitely done waiting for queued Jetpack install.
+		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
