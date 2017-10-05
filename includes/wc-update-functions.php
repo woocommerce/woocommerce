@@ -1371,13 +1371,15 @@ function wc_update_320_mexican_states() {
 	);
 
 	foreach ( $mx_states as $old => $new ) {
-		$wpdb->update(
-			$wpdb->postmeta,
-			array(
-				'meta_value' => $new,
-			),
-			array(
-				'meta_value' => $old,
+		$wpdb->query(
+			$wpdb->prepare(
+				"
+					UPDATE $wpdb->postmeta
+					SET meta_value = %s
+		 			WHERE meta_key IN ( '_billing_state', '_shipping_state' )
+		 			AND meta_value = %s
+				",
+				$new, $old
 			)
 		);
 		$wpdb->update(
