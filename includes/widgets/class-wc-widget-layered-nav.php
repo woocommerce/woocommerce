@@ -508,7 +508,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			if ( $count > 0 || $option_is_set ) {
 				$link      = esc_url( apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy ) );
-				$term_html = '<a href="' . $link . '">' . esc_html( $term->name ) . '</a>';
+				$term_html = '<a rel="nofollow" href="' . $link . '">' . esc_html( $term->name ) . '</a>';
 			} else {
 				$link      = false;
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';
