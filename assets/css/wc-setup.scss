@@ -939,6 +939,31 @@ p.jetpack-terms {
 	line-height: 1.5em;
 }
 
+.woocommerce-error {
+	background: #ffe6e5;
+	border-color: #ffc5c2;
+	padding: 1em;
+	margin-bottom: 1em;
+
+	p {
+		margin-top: 0;
+		margin-bottom: 0.5em;
+		color: #444;
+	}
+
+	a {
+		color: #ff645c;
+	}
+
+	.reconnect-reminder {
+		font-size: 0.85em;
+	}
+
+	.wc-setup-actions .button {
+		font-size: 14px;
+	}
+}
+
 .allow-tracking {
 	color: #9f9f9f;
 	margin-top: 2em;
