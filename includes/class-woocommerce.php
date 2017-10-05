@@ -367,7 +367,7 @@ final class WooCommerce {
 		/**
 		 * REST API.
 		 */
-		include_once( WC_ABSPATH . 'includes/class-wc-legacy-api.php' );
+		include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class.
 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class.
 		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
