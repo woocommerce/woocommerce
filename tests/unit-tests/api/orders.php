@@ -91,6 +91,13 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		// Test meta data is set.
+		$this->assertEquals( 'key', $data['meta_data'][0]->key );
+		$this->assertEquals( 'value', $data['meta_data'][0]->value );
+		$this->assertEquals( 'key2', $data['meta_data'][1]->key );
+		$this->assertEquals( 'value2', $data['meta_data'][1]->value );
+
 		$this->stoppit_and_tidyup();
 	}
 
