@@ -290,8 +290,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
 							placeholder: '" . esc_html( $any_label ) . "',
 							minimumResultsForSearch: 5,
-							width: '100%',
-							allowClear: true
+							width: '100%'"
+							. ( $multiple ? '' : ', allowClear: true' ) .
+							"
 						} );
 					};
 					wc_layered_nav_select();
