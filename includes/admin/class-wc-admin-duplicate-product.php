@@ -43,6 +43,17 @@ class WC_Admin_Duplicate_Product {
 			return $actions;
 		}
 
+		// Add Class to Delete Permanently link in row actions.
+		if( 'trash' === $post->post_status || ! EMPTY_TRASH_DAYS ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete delete-permanently" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID, '', true ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Delete &#8220;%s&#8221; permanently' ), $post->post_title ) ),
+				__( 'Delete Permanently' )
+			);
+		}
+
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" aria-label="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
 			. '" rel="permalink">' . __( 'Duplicate', 'woocommerce' ) . '</a>';
 
