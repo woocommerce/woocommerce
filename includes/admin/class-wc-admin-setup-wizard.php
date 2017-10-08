@@ -132,6 +132,11 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
+		// Hide the activate step if Jetpack is already active
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() ) {
+			unset( $default_steps['activate'] );
+		}
+
 		// Whether or not there is a pending background install of Jetpack.
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
 
