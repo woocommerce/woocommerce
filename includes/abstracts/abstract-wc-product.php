@@ -890,13 +890,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function set_tax_class( $class ) {
 		$class         = sanitize_title( $class );
 		$class         = 'standard' === $class ? '' : $class;
-		$valid_classes = WC_Tax::get_tax_class_slugs();
+		$valid_classes = $this->get_valid_tax_classes();
 
 		if ( ! in_array( $class, $valid_classes ) ) {
 			$class = '';
 		}
 
 		$this->set_prop( 'tax_class', $class );
+	}
+
+	/**
+	 * Return an array of valid tax classes
+	 *
+	 * @return array valid tax classes
+	 */
+	protected function get_valid_tax_classes() {
+		return WC_Tax::get_tax_class_slugs();
 	}
 
 	/**
