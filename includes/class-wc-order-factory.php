@@ -46,6 +46,7 @@ class WC_Order_Factory {
 		try {
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
+			do_action( 'woocommerce_get_order_error', $e, $order_id, $classname );
 			return false;
 		}
 	}
