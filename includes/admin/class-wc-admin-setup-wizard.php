@@ -144,7 +144,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// Whether or not there is a pending background install of Jetpack.
-		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
+		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
@@ -615,8 +615,6 @@ class WC_Admin_Setup_Wizard {
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
 		) );
-
-		update_option( 'woocommerce_setup_queued_jetpack_install', true );
 	}
 
 	/**
@@ -1582,11 +1580,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Clean up temporary Jetpack queued install option.
-		// This happens after the connection button is clicked
-		// and we waited for the pending install to finish.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
-
 		// Leave a note for WooCommerce Services that Jetpack has been opted into.
 		update_option( 'woocommerce_setup_jetpack_opted_in', true );
 
@@ -1628,9 +1621,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
-
-		// We're definitely done waiting for queued Jetpack install.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
