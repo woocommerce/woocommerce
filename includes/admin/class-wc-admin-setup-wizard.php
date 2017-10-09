@@ -132,7 +132,7 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
-		// Hide the activate step if Jetpack is already active
+		// Hide the activate step if Jetpack is already active.
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() ) {
 			unset( $default_steps['activate'] );
 		}
