@@ -1562,6 +1562,9 @@ class WC_Admin_Setup_Wizard {
 		// and we waited for the pending install to finish.
 		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
+		// Leave a note for WooCommerce Services that Jetpack has been opted into.
+		update_option( 'woocommerce_setup_jetpack_opted_in', true );
+
 		WC_Install::background_installer( 'jetpack', array(
 			'file'      => 'jetpack/jetpack.php',
 			'name'      => __( 'Jetpack', 'woocommerce' ),
