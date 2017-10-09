@@ -44,13 +44,14 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		// Add Class to Delete Permanently link in row actions.
-		if( 'trash' === $post->post_status || ! EMPTY_TRASH_DAYS ) {
-			$actions['delete'] = sprintf(
-				'<a href="%s" class="submitdelete delete-permanently" aria-label="%s">%s</a>',
-				get_delete_post_link( $post->ID, '', true ),
+		$total_sales = get_post_meta( $post->ID, 'total_sales', true );
+		if( 'publish' === $post->post_status && 0 < $total_sales ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID, '', false ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Delete &#8220;%s&#8221; permanently' ), $post->post_title ) ),
-				__( 'Delete Permanently' )
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash' ), $post->post_title ) ),
+				__( 'Trash' )
 			);
 		}
 
