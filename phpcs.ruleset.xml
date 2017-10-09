@@ -67,10 +67,6 @@
 		<exclude name="WordPress.VIP.ValidatedSanitizedInput.MissingUnslash" />
 		<exclude name="WordPress.Variables.GlobalVariables.OverrideProhibited" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedScript" />
-		<exclude name="WordPress.WP.I18n.MissingSingularPlaceholder" />
-		<exclude name="WordPress.WP.I18n.MismatchedPlaceholders" />
-		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralPlural" />
-		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralText" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet" />
 		<exclude name="WordPress.WP.PreparedSQL.NotPrepared" />
 		<exclude name="WordPress.XSS.EscapeOutput.OutputNotEscaped" />
