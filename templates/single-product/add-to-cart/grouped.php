@@ -70,8 +70,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 								<?php echo $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink( $grouped_product->get_id() ), $grouped_product->get_id() ) ) . '">' . $grouped_product->get_name() . '</a>' : $grouped_product->get_name(); ?>
 							</label>
 						</td>
-						<?php do_action( 'woocommerce_grouped_product_list_before_price', $grouped_product ); ?>
 						<td class="price">
+							<?php do_action( 'woocommerce_grouped_product_list_before_price', $grouped_product ); ?>
 							<?php
 								echo $grouped_product->get_price_html();
 								echo wc_get_stock_html( $grouped_product );
