@@ -487,4 +487,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	public function variation_is_visible() {
 		return apply_filters( 'woocommerce_variation_is_visible', 'publish' === get_post_status( $this->get_id() ) && '' !== $this->get_price(), $this->get_id(), $this->get_parent_id(), $this );
 	}
+
+	/**
+	 * Return valid tax classes. Adds 'parent' to the default list of valid tax classes.
+	 *
+	 * @return array valid tax classes
+	 */
+	protected function get_valid_tax_classes() {
+		$valid_classes = WC_Tax::get_tax_class_slugs();
+		$valid_classes[] = 'parent';
+
+		return $valid_classes;
+	}
 }
