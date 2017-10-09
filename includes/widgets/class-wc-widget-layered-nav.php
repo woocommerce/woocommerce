@@ -294,7 +294,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
 							language: {
 								noResults: function() {
-									return '" . addslashes( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
 								}
 							}
 						} );
