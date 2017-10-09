@@ -119,7 +119,7 @@ jQuery(function( $ ) {
 
 	});
 
-	$( '#wpbody' ).on( 'click', '.delete-permanently', function() {
+	$( '#wpbody' ).on( 'click', '.trash-product', function() {
 		var confirm_delete = confirm( woocommerce_admin.delete_product_message );
 
 		// Stop redirection, if user denies to delete the product.
