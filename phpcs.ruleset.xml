@@ -14,7 +14,6 @@
 		<exclude name="Generic.Files.LowercasedFilename.NotFound" />
 		<exclude name="Generic.PHP.NoSilencedErrors.Discouraged" />
 		<exclude name="WordPress.Classes.ClassOpeningStatement.BraceOnNewLine" />
-		<exclude name="WordPress.CSRF.NonceVerification.NoNonceVerification" />
 		<exclude name="WordPress.DB.RestrictedFunctions.mysql" />
 		<exclude name="WordPress.Files.FileName.UnderscoresNotAllowed" />
 		<exclude name="WordPress.Functions.DontExtract.extract" />
@@ -62,9 +61,6 @@
 		<exclude name="WordPress.VIP.SessionFunctionsUsage.session_write_close" />
 		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query" />
 		<exclude name="WordPress.VIP.SuperGlobalInputUsage.AccessDetected" />
-		<exclude name="WordPress.VIP.ValidatedSanitizedInput.InputNotSanitized" />
-		<exclude name="WordPress.VIP.ValidatedSanitizedInput.InputNotValidated" />
-		<exclude name="WordPress.VIP.ValidatedSanitizedInput.MissingUnslash" />
 		<exclude name="WordPress.Variables.GlobalVariables.OverrideProhibited" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedScript" />
 		<exclude name="WordPress.WP.I18n.MissingSingularPlaceholder" />
@@ -73,8 +69,12 @@
 		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralText" />
 		<exclude name="WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet" />
 		<exclude name="WordPress.WP.PreparedSQL.NotPrepared" />
-		<exclude name="WordPress.XSS.EscapeOutput.OutputNotEscaped" />
-		<exclude name="WordPress.XSS.EscapeOutput.UnsafePrintingFunction" />
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+	</rule>
+
+	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
+		<properties>
+			<property name="customSanitizingFunctions" type="array" value="wc_clean" />
+		</properties>
 	</rule>
 </ruleset>
