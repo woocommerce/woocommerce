@@ -23,6 +23,7 @@ matrix:
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - if [[ $TRAVIS_PHP_VERSION == '7.1' ]]; then composer install; fi
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
@@ -31,3 +32,4 @@ script:
 
 after_script:
   - bash tests/bin/travis.sh after
+  - bash tests/bin/phpcs.sh
