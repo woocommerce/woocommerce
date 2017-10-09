@@ -291,7 +291,12 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 							placeholder: '" . esc_html( $any_label ) . "',
 							minimumResultsForSearch: 5,
 							width: '100%',
-							allowClear: " . ( $multiple ? 'false' : 'true' ) . "
+							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+							language: {
+								noResults: function() {
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+								}
+							}
 						} );
 					};
 					wc_layered_nav_select();
