@@ -549,6 +549,15 @@ class WC_Admin_Setup_Wizard {
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
 			call_user_func_array( $action['func'], $action['args'] );
+
+			// Clear the background installation flag if this is a plugin.
+			if (
+				isset( $action['func'][1] ) &&
+				'background_installer' === $action['func'][1] &&
+				isset( $action['args'][0] )
+			) {
+				delete_option( 'woocommerce_setup_background_installing_' . $action['args'][0] );
+			}
 		}
 	}
 
@@ -559,16 +568,26 @@ class WC_Admin_Setup_Wizard {
 	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info ) {
+		// Make sure we don't trigger multiple simultaneous installs.
+		if ( get_option( 'woocommerce_setup_background_installing_' . $plugin_id ) ) {
+			return;
+		}
+
 		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
 			return;
 		}
+
 		if ( empty( $this->deferred_actions ) ) {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
+
 		array_push( $this->deferred_actions, array(
 			'func' => array( 'WC_Install', 'background_installer' ),
 			'args' => array( $plugin_id, $plugin_info )
 		) );
+
+		// Set the background installation flag for this plugin.
+		update_option( 'woocommerce_setup_background_installing_' . $plugin_id, true );
 	}
 
 
