@@ -526,7 +526,9 @@ class WC_Admin_Setup_Wizard {
 		if ( session_id() ) {
 			session_write_close();
 		}
-		set_time_limit( 0 );
+
+		wc_set_time_limit( 0 );
+
 		// fastcgi_finish_request is the cleanest way to send the response and keep the script running, but not every server has it.
 		if ( is_callable( 'fastcgi_finish_request' ) ) {
 			fastcgi_finish_request();
