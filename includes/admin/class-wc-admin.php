@@ -261,12 +261,8 @@ class WC_Admin {
 	 * See: WC_Admin_Setup_Wizard::install_jetpack()
 	 */
 	public function setup_wizard_check_jetpack() {
-		// Clean up temporary Jetpack queued install option.
-		// This happens after the connection button is clicked
-		// and we waited for the pending install to finish.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
-
 		$jetpack_active = class_exists( 'Jetpack' );
+
 		wp_send_json_success( array(
 			'is_active' => $jetpack_active ? 'yes' : 'no',
 		) );
