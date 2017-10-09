@@ -144,7 +144,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		// Whether or not there is a pending background install of Jetpack.
-		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
+		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
@@ -526,7 +526,9 @@ class WC_Admin_Setup_Wizard {
 		if ( session_id() ) {
 			session_write_close();
 		}
-		set_time_limit( 0 );
+
+		wc_set_time_limit( 0 );
+
 		// fastcgi_finish_request is the cleanest way to send the response and keep the script running, but not every server has it.
 		if ( is_callable( 'fastcgi_finish_request' ) ) {
 			fastcgi_finish_request();
@@ -549,6 +551,15 @@ class WC_Admin_Setup_Wizard {
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
 			call_user_func_array( $action['func'], $action['args'] );
+
+			// Clear the background installation flag if this is a plugin.
+			if (
+				isset( $action['func'][1] ) &&
+				'background_installer' === $action['func'][1] &&
+				isset( $action['args'][0] )
+			) {
+				delete_option( 'woocommerce_setup_background_installing_' . $action['args'][0] );
+			}
 		}
 	}
 
@@ -559,16 +570,26 @@ class WC_Admin_Setup_Wizard {
 	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info ) {
+		// Make sure we don't trigger multiple simultaneous installs.
+		if ( get_option( 'woocommerce_setup_background_installing_' . $plugin_id ) ) {
+			return;
+		}
+
 		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
 			return;
 		}
+
 		if ( empty( $this->deferred_actions ) ) {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
+
 		array_push( $this->deferred_actions, array(
 			'func' => array( 'WC_Install', 'background_installer' ),
 			'args' => array( $plugin_id, $plugin_info )
 		) );
+
+		// Set the background installation flag for this plugin.
+		update_option( 'woocommerce_setup_background_installing_' . $plugin_id, true );
 	}
 
 
@@ -596,8 +617,6 @@ class WC_Admin_Setup_Wizard {
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
 		) );
-
-		update_option( 'woocommerce_setup_queued_jetpack_install', true );
 	}
 
 	/**
@@ -1563,11 +1582,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Clean up temporary Jetpack queued install option.
-		// This happens after the connection button is clicked
-		// and we waited for the pending install to finish.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
-
 		// Leave a note for WooCommerce Services that Jetpack has been opted into.
 		update_option( 'woocommerce_setup_jetpack_opted_in', true );
 
@@ -1609,9 +1623,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
-
-		// We're definitely done waiting for queued Jetpack install.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
