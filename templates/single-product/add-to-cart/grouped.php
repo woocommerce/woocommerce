@@ -76,6 +76,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 								echo $grouped_product->get_price_html();
 								echo wc_get_stock_html( $grouped_product );
 							?>
+							<?php do_action( 'woocommerce_grouped_product_list_after_price', $grouped_product ); ?>
 						</td>
 					</tr>
 					<?php
