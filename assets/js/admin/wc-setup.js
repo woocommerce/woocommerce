@@ -122,10 +122,18 @@ jQuery( function( $ ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', true );
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( '.wc-wizard-service-setting-stripe_email' )
+				.show();
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', false );
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( '.wc-wizard-service-setting-stripe_email' )
+				.hide();
 		}
 	} );
+
+	$( '.wc-wizard-services input#stripe_create_account' ).change();
 } );

@@ -1022,6 +1022,7 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * Simple array of "in cart" gateways to show in wizard.
+	 *
 	 * @return array
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
@@ -1030,7 +1031,7 @@ class WC_Admin_Setup_Wizard {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
-			__( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
+			__( 'Accept all major debit &amp; credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-stripe/'
 		) . '</p>';
 		$paypal_bt_description = '<p>' . sprintf(
@@ -1051,7 +1052,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create an account for me using this email:', 'woocommerce' ),
+						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
 						'placeholder' => '',
@@ -1062,6 +1063,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll create an account for you. Powered by WooCommerce Services.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1210,6 +1212,9 @@ class WC_Admin_Setup_Wizard {
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
 								/>
+								<?php if ( ! empty( $setting['description'] ) ) : ?>
+									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
+								<?php endif; ?>
 							</div>
 						<?php endforeach; ?>
 					</div>
