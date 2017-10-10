@@ -29,7 +29,7 @@ before_script:
 
 script:
   - bash tests/bin/phpunit.sh
+  - bash tests/bin/phpcs.sh
 
 after_script:
   - bash tests/bin/travis.sh after
-  - bash tests/bin/phpcs.sh
