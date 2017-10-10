@@ -123,7 +123,7 @@ jQuery(function( $ ) {
 		var confirm_delete = confirm( woocommerce_admin.delete_product_message );
 
 		// Stop redirection, if user denies to delete the product.
-		if( ! confirm_delete ) {
+		if ( ! confirm_delete ) {
 			return false;
 		}
 	});
