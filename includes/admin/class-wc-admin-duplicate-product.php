@@ -44,7 +44,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		// Add Class to Delete Permanently link in row actions.
-		$product     = new WC_Product( $post->ID );
+		$product = new WC_Product( $post->ID );
 		if( 'publish' === $post->post_status && 0 < $product->get_total_sales() ) {
 			$actions['trash'] = sprintf(
 				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
