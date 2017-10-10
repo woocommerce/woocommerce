@@ -154,7 +154,7 @@ class WC_Admin_Assets {
 				'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
 				'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
-				'delete_product_message'            => __( 'This product has produced sales. Deleting the product may cause issues with your orders. Are you sure you want to delete?', 'woocommerce' ),
+				'delete_product_message'            => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 				'strings' => array(
