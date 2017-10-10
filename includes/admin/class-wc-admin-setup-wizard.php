@@ -1368,7 +1368,7 @@ class WC_Admin_Setup_Wizard {
 						<div class="wc-wizard-service-description">
 							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
 							<p>
-								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out.', 'woocommerce' ); ?>
+								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out. Powered by WooCommerce Services.', 'woocommerce' ); ?>
 							</p>
 						</div>
 
