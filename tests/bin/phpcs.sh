@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
 if [[ $TRAVIS_PHP_VERSION == '7.1' ]]; then
-	composer install
-
 	CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $TRAVIS_COMMIT_RANGE | grep \\\\.php | awk '{print}' ORS=' '`
 	IGNORE="tests/cli/,apigen/,includes/gateways/simplify-commerce/includes/,includes/libraries/,includes/api/legacy/"
+
+	echo "TRAVIS_COMMIT_RANGE:"
+	echo $TRAVIS_COMMIT_RANGE
+	echo "CHANGED_FILES:"
+	echo $CHANGED_FILES
 
 	if [ "$CHANGED_FILES" != "" ]; then
 		echo "Running Code Sniffer."
