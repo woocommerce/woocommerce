@@ -57,8 +57,25 @@ jQuery( function( $ ) {
 		description.find( '.' + selectedMethod ).removeClass( 'hide' );
 
 		var settings = zone.find( '.shipping-method-settings' );
-		settings.find( '.shipping-method-setting' ).addClass( 'hide' );
-		settings.find( '.' + selectedMethod ).removeClass( 'hide' );
+		settings
+			.find( '.shipping-method-setting' )
+			.addClass( 'hide' )
+			.find( '.shipping-method-required-field' )
+			.prop( 'required', false );
+		settings
+			.find( '.' + selectedMethod )
+			.removeClass( 'hide' )
+			.find( '.shipping-method-required-field' )
+			.prop( 'required', true );
+	} );
+
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function( e ) {
+		var checked = $( this ).is( ':checked' );
+
+		$( this )
+			.closest( '.wc-wizard-service-item' )
+			.find( '.shipping-method-required-field' )
+			.prop( 'required', checked );
 	} );
 
 	function submitActivateForm() {
