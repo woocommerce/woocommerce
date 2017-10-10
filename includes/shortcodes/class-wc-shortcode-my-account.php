@@ -114,7 +114,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/my-account.php', array(
 			'current_user' => get_user_by( 'id', get_current_user_id() ),
-			'order_count'  => 'all' == $order_count ? - 1 : $order_count,
+			'order_count'  => 'all' == $order_count ? -1 : $order_count,
 		) );
 	}
 
