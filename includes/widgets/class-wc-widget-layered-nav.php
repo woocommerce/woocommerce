@@ -20,9 +20,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav woocommerce-widget-layered-nav';
-		$this->widget_description = __( 'Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories.', 'woocommerce' );
+		$this->widget_description = __( 'Display a list of attributes to filter products in your store.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_layered_nav';
-		$this->widget_name        = __( 'WooCommerce layered nav', 'woocommerce' );
+		$this->widget_name        = __( 'Filter Products by Attribute', 'woocommerce' );
 		parent::__construct();
 	}
 
@@ -290,7 +290,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
 							placeholder: '" . esc_html( $any_label ) . "',
 							minimumResultsForSearch: 5,
-							width: '100%'
+							width: '100%',
+							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+							language: {
+								noResults: function() {
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+								}
+							}
 						} );
 					};
 					wc_layered_nav_select();

@@ -25,7 +25,6 @@ class WC_Admin_Assets {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_head',            array( $this, 'product_taxonomy_styles' ) );
 	}
 
 	/**
@@ -111,6 +110,7 @@ class WC_Admin_Assets {
 		wp_register_script( 'wc-shipping-zones', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zones' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-enhanced-select', 'wc-backbone-modal' ), WC_VERSION );
 		wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), WC_VERSION );
 		wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
+		wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
 		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
@@ -306,6 +306,7 @@ class WC_Admin_Assets {
 				'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 				'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
 				'i18n_apply_coupon'             => __( 'Enter a coupon code to apply to this order.', 'woocommerce' ),
+				'i18n_add_fee'                  => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -346,7 +347,7 @@ class WC_Admin_Assets {
 
 		// API settings
 		if ( $wc_screen_id . '_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'keys' == $_GET['section'] ) {
-			wp_register_script( 'wc-api-keys', WC()->plugin_url() . '/assets/js/admin/api-keys' . $suffix . '.js', array( 'jquery', 'woocommerce_admin', 'underscore', 'backbone', 'wp-util', 'qrcode', 'zeroclipboard' ), WC_VERSION, true );
+			wp_register_script( 'wc-api-keys', WC()->plugin_url() . '/assets/js/admin/api-keys' . $suffix . '.js', array( 'jquery', 'woocommerce_admin', 'underscore', 'backbone', 'wp-util', 'qrcode', 'wc-clipboard' ), WC_VERSION, true );
 			wp_enqueue_script( 'wc-api-keys' );
 			wp_localize_script(
 				'wc-api-keys',
@@ -361,7 +362,7 @@ class WC_Admin_Assets {
 
 		// System status.
 		if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
-			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'zeroclipboard' ), WC_VERSION );
+			wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'wc-clipboard' ), WC_VERSION );
 			wp_enqueue_script( 'wc-admin-system-status' );
 			wp_localize_script(
 				'wc-admin-system-status',
@@ -384,27 +385,6 @@ class WC_Admin_Assets {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Admin Head.
-	 *
-	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
-	 */
-	public function product_taxonomy_styles() {
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-		?>
-		<style type="text/css">
-			<?php if ( isset( $_GET['taxonomy'] ) && 'product_cat' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -243px -5px !important; }
-			<?php elseif ( isset( $_GET['taxonomy'] ) && 'product_tag' === $_GET['taxonomy'] ) : ?>
-				.icon32-posts-product { background-position: -301px -5px !important; }
-			<?php endif; ?>
-		</style>
-		<?php
 	}
 }
 

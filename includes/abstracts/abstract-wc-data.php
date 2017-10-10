@@ -248,9 +248,7 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
-	 *
-	 * @param mixed $meta
-	 *
+	 * @param mixed $meta Meta value to check.
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -261,7 +259,7 @@ abstract class WC_Data {
 	 * Get All Meta Data.
 	 *
 	 * @since 2.6.0
-	 * @return array
+	 * @return array of objects.
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();
@@ -277,7 +275,7 @@ abstract class WC_Data {
 	 */
 	protected function is_internal_meta_key( $key ) {
 		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Meta properties should not be accessed directly. Use getters and setters.', 'woocommerce' ), '3.2.0' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
 
 			return true;
 		}

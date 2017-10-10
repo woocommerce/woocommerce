@@ -110,7 +110,32 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'   => 'get_results',
 			'filter_range' => true,
 			'order_types'  => wc_get_order_types( 'sales-reports' ),
-			'order_status' => array( 'completed', 'processing', 'on-hold' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+		) );
+
+		$tax_rows_full_refunds = $this->get_order_report_data( array(
+			'data'         => array(
+				'ID' => array(
+					'type'     => 'post_data',
+					'distinct' => true,
+					'function' => '',
+					'name'     => 'ID',
+				),
+				'post_parent' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_parent',
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date',
+				),
+			),
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_types'         => array( 'shop_order_refund' ),
+			'parent_order_status' => array( 'refunded' ),
 		) );
 
 		$tax_rows_partial_refunds = $this->get_order_report_data( array(
@@ -120,13 +145,12 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
 			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),// Partial refunds inside refunded orders should be ignored
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored.
 		) );
 
-		// Merge
 		$tax_rows = array();
 
-		foreach ( $tax_rows_orders as $tax_row ) {
+		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
 			$key                                   = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
 			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
@@ -136,13 +160,22 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			$tax_rows[ $key ]->total_orders        += $tax_row->total_orders;
 		}
 
-		foreach ( $tax_rows_partial_refunds as $tax_row ) {
-			$key                                   = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
-			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
-			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
-			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
-			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
-			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
+		foreach ( $tax_rows_orders as $tax_row ) {
+			$key                            =  date( ( 'month' === $this->chart_groupby ) ? 'Ym': 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ]->total_orders += $tax_row->total_orders;
+		}
+
+		foreach ( $tax_rows_full_refunds as $tax_row ) {
+			$key              = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
+			$parent_order     = wc_get_order( $tax_row->post_parent );
+
+			if ( $parent_order ) {
+				$tax_rows[ $key ]->tax_amount          += $parent_order->get_cart_tax() * -1;
+				$tax_rows[ $key ]->shipping_tax_amount += $parent_order->get_shipping_tax() * -1;
+				$tax_rows[ $key ]->total_sales         += $parent_order->get_total() * -1;
+				$tax_rows[ $key ]->total_shipping      += $parent_order->get_shipping_total() * -1;
+			}
 		}
 		?>
 		<table class="widefat">

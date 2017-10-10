@@ -144,7 +144,8 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = $this->get_product_data( $object );
+		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data = $this->get_product_data( $object, $context );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -156,7 +157,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			$data['grouped_products'] = $object->get_children();
 		}
 
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
@@ -281,8 +281,13 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key           = $request['on_sale'] ? 'post__in' : 'post__not_in';
-			$args[ $on_sale_key ] += wc_get_product_ids_on_sale();
+			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$on_sale_ids = wc_get_product_ids_on_sale();
+
+			// Use 0 when there's no on sale products to avoid return all products.
+			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
+
+			$args[ $on_sale_key ] += $on_sale_ids;
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -542,70 +547,71 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
+	 * @param string $context 'view' or 'edit'
 	 * @return array
 	 */
-	protected function get_product_data( $product ) {
+	protected function get_product_data( $product, $context = 'view' ) {
 		$data = array(
 			'id'                    => $product->get_id(),
-			'name'                  => $product->get_name(),
-			'slug'                  => $product->get_slug(),
+			'name'                  => $product->get_name( $context ),
+			'slug'                  => $product->get_slug( $context ),
 			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created(), false ),
-			'date_created_gmt'      => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
-			'date_modified_gmt'     => wc_rest_prepare_date_response( $product->get_date_modified() ),
+			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created( $context ), false ),
+			'date_created_gmt'      => wc_rest_prepare_date_response( $product->get_date_created( $context ) ),
+			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified( $context ), false ),
+			'date_modified_gmt'     => wc_rest_prepare_date_response( $product->get_date_modified( $context ) ),
 			'type'                  => $product->get_type(),
-			'status'                => $product->get_status(),
+			'status'                => $product->get_status( $context ),
 			'featured'              => $product->is_featured(),
-			'catalog_visibility'    => $product->get_catalog_visibility(),
-			'description'           => wpautop( do_shortcode( $product->get_description() ) ),
-			'short_description'     => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
-			'sku'                   => $product->get_sku(),
-			'price'                 => $product->get_price(),
-			'regular_price'         => $product->get_regular_price(),
-			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'date_on_sale_from'     => wc_rest_prepare_date_response( $product->get_date_on_sale_from(), false ),
-			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from() ),
-			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to(), false ),
-			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to() ),
+			'catalog_visibility'    => $product->get_catalog_visibility( $context ),
+			'description'           => 'view' === $context ? wpautop( do_shortcode( $product->get_description() ) ) : $product->get_description( $context ),
+			'short_description'     => 'view' === $context ? apply_filters( 'woocommerce_short_description', $product->get_short_description() ) : $product->get_short_description( $context ),
+			'sku'                   => $product->get_sku( $context ),
+			'price'                 => $product->get_price( $context ),
+			'regular_price'         => $product->get_regular_price( $context ),
+			'sale_price'            => $product->get_sale_price( $context ) ? $product->get_sale_price( $context ) : '',
+			'date_on_sale_from'     => wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ), false ),
+			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ) ),
+			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ), false ),
+			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ) ),
 			'price_html'            => $product->get_price_html(),
-			'on_sale'               => $product->is_on_sale(),
+			'on_sale'               => $product->is_on_sale( $context ),
 			'purchasable'           => $product->is_purchasable(),
-			'total_sales'           => $product->get_total_sales(),
+			'total_sales'           => $product->get_total_sales( $context ),
 			'virtual'               => $product->is_virtual(),
 			'downloadable'          => $product->is_downloadable(),
 			'downloads'             => $this->get_downloads( $product ),
-			'download_limit'        => $product->get_download_limit(),
-			'download_expiry'       => $product->get_download_expiry(),
-			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
-			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'tax_status'            => $product->get_tax_status(),
-			'tax_class'             => $product->get_tax_class(),
+			'download_limit'        => $product->get_download_limit( $context ),
+			'download_expiry'       => $product->get_download_expiry( $context ),
+			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url( $context ) : '',
+			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text( $context ) : '',
+			'tax_status'            => $product->get_tax_status( $context ),
+			'tax_class'             => $product->get_tax_class( $context ),
 			'manage_stock'          => $product->managing_stock(),
-			'stock_quantity'        => $product->get_stock_quantity(),
+			'stock_quantity'        => $product->get_stock_quantity( $context ),
 			'in_stock'              => $product->is_in_stock(),
-			'backorders'            => $product->get_backorders(),
+			'backorders'            => $product->get_backorders( $context ),
 			'backorders_allowed'    => $product->backorders_allowed(),
 			'backordered'           => $product->is_on_backorder(),
 			'sold_individually'     => $product->is_sold_individually(),
-			'weight'                => $product->get_weight(),
+			'weight'                => $product->get_weight( $context ),
 			'dimensions'            => array(
-				'length' => $product->get_length(),
-				'width'  => $product->get_width(),
-				'height' => $product->get_height(),
+				'length' => $product->get_length( $context ),
+				'width'  => $product->get_width( $context ),
+				'height' => $product->get_height( $context ),
 			),
 			'shipping_required'     => $product->needs_shipping(),
 			'shipping_taxable'      => $product->is_shipping_taxable(),
 			'shipping_class'        => $product->get_shipping_class(),
-			'shipping_class_id'     => $product->get_shipping_class_id(),
-			'reviews_allowed'       => $product->get_reviews_allowed(),
-			'average_rating'        => wc_format_decimal( $product->get_average_rating(), 2 ),
+			'shipping_class_id'     => $product->get_shipping_class_id( $context ),
+			'reviews_allowed'       => $product->get_reviews_allowed( $context ),
+			'average_rating'        => 'view' === $context ? wc_format_decimal( $product->get_average_rating(), 2 ) : $product->get_average_rating( $context ),
 			'rating_count'          => $product->get_rating_count(),
 			'related_ids'           => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
-			'upsell_ids'            => array_map( 'absint', $product->get_upsell_ids() ),
-			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sell_ids() ),
-			'parent_id'             => $product->get_parent_id(),
-			'purchase_note'         => wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ),
+			'upsell_ids'            => array_map( 'absint', $product->get_upsell_ids( $context ) ),
+			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sell_ids( $context ) ),
+			'parent_id'             => $product->get_parent_id( $context ),
+			'purchase_note'         => 'view' === $context ? wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ) : $product->get_purchase_note( $context ),
 			'categories'            => $this->get_taxonomy_terms( $product ),
 			'tags'                  => $this->get_taxonomy_terms( $product, 'tag' ),
 			'images'                => $this->get_images( $product ),
@@ -613,7 +619,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'default_attributes'    => $this->get_default_attributes( $product ),
 			'variations'            => array(),
 			'grouped_products'      => array(),
-			'menu_order'            => $product->get_menu_order(),
+			'menu_order'            => $product->get_menu_order( $context ),
 			'meta_data'             => $product->get_meta_data(),
 		);
 
@@ -1033,7 +1039,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * @return WC_Product
 	 */
 	protected function set_product_images( $product, $images ) {
-		if ( is_array( $images ) ) {
+		if ( is_array( $images ) && ! empty( $images ) ) {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
@@ -1071,6 +1077,11 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				// Set the image name if present.
 				if ( ! empty( $image['name'] ) ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
+				}
+
+				// Set the image source if present, for future reference.
+				if ( ! empty( $image['src'] ) ) {
+					update_post_meta( $attachment_id, '_wc_attachment_source', esc_url_raw( $image['src'] ) );
 				}
 			}
 

@@ -388,28 +388,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$message = __( 'Product transients cleared', 'woocommerce' );
 			break;
 			case 'clear_expired_transients' :
-				/*
-				 * Deletes all expired transients. The multi-table delete syntax is used.
-				 * to delete the transient record from table a, and the corresponding.
-				 * transient_timeout record from table b.
-				 *
-				 * Based on code inside core's upgrade_network() function.
-				 */
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-					AND b.option_value < %d";
-				$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
-					AND b.option_value < %d";
-				$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
-
-				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), $rows + $rows2 );
+				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
 			break;
 			case 'delete_orphaned_variations' :
 				/**

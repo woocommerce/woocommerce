@@ -62,10 +62,8 @@ class WC_Shortcode_Cart {
 	 * @param array $atts
 	 */
 	public static function output( $atts ) {
-		// Constants
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
+		// Constants.
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 
 		$atts = shortcode_atts( array(), $atts, 'woocommerce_cart' );
 

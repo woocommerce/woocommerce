@@ -17,6 +17,7 @@ class WC_Helper_Updater {
 	public static function load() {
 		add_action( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'transient_update_plugins' ), 21, 1 );
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
+		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 	}
 
 	/**
@@ -39,8 +40,8 @@ class WC_Helper_Updater {
 			$filename = $plugin['_filename'];
 
 			$item = array(
-				'id' => 'woo-' . $plugin['_product_id'],
-				'slug' => $data['slug'],
+				'id' => 'woocommerce-com-' . $plugin['_product_id'],
+				'slug' => 'woocommerce-com-' . $data['slug'],
 				'plugin' => $filename,
 				'new_version' => $data['version'],
 				'url' => $data['url'],
@@ -230,10 +231,98 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Get the number of products that have updates.
+	 *
+	 * @return int The number of products with updates.
+	 */
+	public static function get_updates_count() {
+		$cache_key = '_woocommerce_helper_updates_count';
+		if ( false !== ( $count = get_transient( $cache_key ) ) ) {
+			return $count;
+		}
+
+		// Don't fetch any new data since this function in high-frequency.
+		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
+			return 0;
+		}
+
+		if ( ! get_transient( '_woocommerce_helper_updates' ) ) {
+			return 0;
+		}
+
+		$count = 0;
+		$update_data = self::get_update_data();
+
+		if ( empty( $update_data ) ) {
+			set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
+			return $count;
+		}
+
+		// Scan local plugins.
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
+				$count++;
+			}
+		}
+
+		// Scan local themes.
+		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
+			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( version_compare( $theme['Version'], $update_data[ $theme['_product_id'] ]['version'], '<' ) ) {
+				$count++;
+			}
+		}
+
+		set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
+		return $count;
+	}
+
+	/**
+	 * Return the updates count markup.
+	 *
+	 * @return string Updates count markup, empty string if no updates avairable.
+	 */
+	public static function get_updates_count_html() {
+		$count = self::get_updates_count();
+		if ( ! $count ) {
+			return '';
+		}
+
+		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+		return $count_html;
+	}
+
+	/**
 	 * Flushes cached update data.
 	 */
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
+		delete_transient( '_woocommerce_helper_updates_count' );
+
+		// Refresh update transients
+		$update_plugins = get_site_transient( 'update_plugins' );
+		if ( ! empty( $update_plugins ) ) {
+			set_site_transient( 'update_plugins', $update_plugins );
+		}
+
+		$update_themes = get_site_transient( 'update_themes' );
+		if ( ! empty( $update_themes ) ) {
+			set_site_transient( 'update_themes', $update_themes );
+		}
+	}
+
+	/**
+	 * Fires when a user successfully updated a theme or a plugin.
+	 */
+	public static function upgrader_process_complete() {
+		delete_transient( '_woocommerce_helper_updates_count' );
 	}
 }
 

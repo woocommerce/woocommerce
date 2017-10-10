@@ -629,6 +629,17 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Add prefix to table.
+	 *
+	 * @param string $table table name
+	 * @return stromg
+	 */
+	protected function add_db_table_prefix( $table ) {
+		global $wpdb;
+		return $wpdb->prefix . $table;
+	}
+
+	/**
 	 * Get array of database information. Version, prefix, and table existence.
 	 *
 	 * @return array
@@ -637,11 +648,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		global $wpdb;
 
 		$database_table_sizes = $wpdb->get_results( $wpdb->prepare( "
-			SELECT 
-			    table_name AS 'name', 
+			SELECT
+			    table_name AS 'name',
 			    round( ( data_length / 1024 / 1024 ), 2 ) 'data',
 			    round( ( index_length / 1024 / 1024 ), 2 ) 'index'
-			FROM information_schema.TABLES 
+			FROM information_schema.TABLES
 			WHERE table_schema = %s
 			ORDER BY name ASC;
 		", DB_NAME ) );
@@ -673,10 +684,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		 *
 		 * If we changed the tables above to include the prefix, then any filters against that table could break.
 		 */
-		$core_tables = array_map( function( $table ) {
-			global $wpdb;
-			return $wpdb->prefix . $table;
-		}, $core_tables );
+		$core_tables = array_map( array( $this, 'add_db_table_prefix' ), $core_tables );
 
 		/**
 		 * Organize WooCommerce and non-WooCommerce tables separately for display purposes later.

@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/' ) ) ), $request ) );
 	}
 
 	/**
@@ -284,38 +284,38 @@ class WC_AJAX {
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
 		WC()->customer->set_props( array(
-			'billing_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
-			'billing_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
-			'billing_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
-			'billing_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
-			'billing_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
-			'billing_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+			'billing_country'   => isset( $_POST['country'] ) ? wp_unslash( $_POST['country'] )    	: null,
+			'billing_state'     => isset( $_POST['state'] ) ? wp_unslash( $_POST['state'] )        	: null,
+			'billing_postcode'  => isset( $_POST['postcode'] ) ? wp_unslash( $_POST['postcode'] )  	: null,
+			'billing_city'      => isset( $_POST['city'] ) ? wp_unslash( $_POST['city'] )           : null,
+			'billing_address_1' => isset( $_POST['address'] ) ? wp_unslash( $_POST['address'] )    	: null,
+			'billing_address_2' => isset( $_POST['address_2'] ) ? wp_unslash( $_POST['address_2'] ) : null,
 		) );
 
 		if ( wc_ship_to_billing_address_only() ) {
 			WC()->customer->set_props( array(
-				'shipping_country'   => isset( $_POST['country'] ) ? $_POST['country']     : null,
-				'shipping_state'     => isset( $_POST['state'] ) ? $_POST['state']         : null,
-				'shipping_postcode'  => isset( $_POST['postcode'] ) ? $_POST['postcode']   : null,
-				'shipping_city'      => isset( $_POST['city'] ) ? $_POST['city']           : null,
-				'shipping_address_1' => isset( $_POST['address'] ) ? $_POST['address']     : null,
-				'shipping_address_2' => isset( $_POST['address_2'] ) ? $_POST['address_2'] : null,
+				'shipping_country'   => isset( $_POST['country'] ) ? wp_unslash( $_POST['country'] )    : null,
+				'shipping_state'     => isset( $_POST['state'] ) ? wp_unslash( $_POST['state'] )        : null,
+				'shipping_postcode'  => isset( $_POST['postcode'] ) ? wp_unslash( $_POST['postcode'] )  : null,
+				'shipping_city'      => isset( $_POST['city'] ) ? wp_unslash( $_POST['city'] )          : null,
+				'shipping_address_1' => isset( $_POST['address'] ) ? wp_unslash( $_POST['address'] )    : null,
+				'shipping_address_2' => isset( $_POST['address_2'] ) ? wp_unslash( $_POST['address_2'] ): null,
 			) );
-			if ( ! empty( $_POST['country'] ) ) {
-				WC()->customer->set_calculated_shipping( true );
-			}
 		} else {
 			WC()->customer->set_props( array(
-				'shipping_country'   => isset( $_POST['s_country'] ) ? $_POST['s_country']     : null,
-				'shipping_state'     => isset( $_POST['s_state'] ) ? $_POST['s_state']         : null,
-				'shipping_postcode'  => isset( $_POST['s_postcode'] ) ? $_POST['s_postcode']   : null,
-				'shipping_city'      => isset( $_POST['s_city'] ) ? $_POST['s_city']           : null,
-				'shipping_address_1' => isset( $_POST['s_address'] ) ? $_POST['s_address']     : null,
-				'shipping_address_2' => isset( $_POST['s_address_2'] ) ? $_POST['s_address_2'] : null,
+				'shipping_country'   => isset( $_POST['s_country'] ) ? wp_unslash( $_POST['s_country'] )    : null,
+				'shipping_state'     => isset( $_POST['s_state'] ) ? wp_unslash( $_POST['s_state'] )        : null,
+				'shipping_postcode'  => isset( $_POST['s_postcode'] ) ? wp_unslash( $_POST['s_postcode'] )  : null,
+				'shipping_city'      => isset( $_POST['s_city'] ) ? wp_unslash( $_POST['s_city'] )          : null,
+				'shipping_address_1' => isset( $_POST['s_address'] ) ? wp_unslash( $_POST['s_address'] )    : null,
+				'shipping_address_2' => isset( $_POST['s_address_2'] ) ? wp_unslash( $_POST['s_address_2'] ): null,
 			) );
-			if ( ! empty( $_POST['s_country'] ) ) {
-				WC()->customer->set_calculated_shipping( true );
-			}
+		}
+
+		if ( wc_string_to_bool( $_POST['has_full_address'] ) ) {
+			WC()->customer->set_calculated_shipping( true );
+		} else {
+			WC()->customer->set_calculated_shipping( false );
 		}
 
 		WC()->customer->save();
@@ -460,6 +460,9 @@ class WC_AJAX {
 			$order  = wc_get_order( absint( $_GET['order_id'] ) );
 
 			if ( wc_is_order_status( 'wc-' . $status ) && $order ) {
+				// Initialize payment gateways in case order has hooked status transition actions.
+				wc()->payment_gateways();
+
 				$order->update_status( $status, '', true );
 				do_action( 'woocommerce_order_edit_status', $order->get_id(), $status );
 			}
@@ -775,21 +778,21 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			ob_start();
-
 			foreach ( $items_to_add as $item_to_add ) {
 				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
 					continue;
 				}
-				$item_id     = $order->add_product( wc_get_product( $item_to_add ) );
-				$item        = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
-				$order_taxes = $order->get_taxes();
-				$class       = 'new_row';
-
-				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-				include( 'admin/meta-boxes/views/html-order-item.php' );
+				$item_id        = $order->add_product( wc_get_product( $item_to_add ) );
+				$item           = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
 
+			do_action( 'woocommerce_ajax_added_order_items', $item_id, $item, $order );
+
+			$data = get_post_meta( $order_id );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
 			) );
@@ -809,15 +812,34 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id    = absint( $_POST['order_id'] );
-			$order       = wc_get_order( $order_id );
-			$order_taxes = $order->get_taxes();
-			$item        = new WC_Order_Item_Fee();
-			$item->set_order_id( $order_id );
-			$item_id     = $item->save();
+			$order_id = absint( $_POST['order_id'] );
+			$amount   = wc_clean( $_POST['amount'] );
+			$order    = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				throw new exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			if ( strstr( $amount, '%' ) ) {
+				$formatted_amount = $amount;
+				$percent          = floatval( trim( $amount, '%' ) );
+				$amount           = $order->get_total() * ( $percent / 100 );
+			} else {
+				$amount           = floatval( $amount );
+				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
+			}
+
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_amount( $amount );
+			$fee->set_total( $amount );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+
+			$order->add_item( $fee );
+			$order->calculate_totals( true );
+			$order->save();
 
 			ob_start();
-			include( 'admin/meta-boxes/views/html-order-fee.php' );
+			include( 'admin/meta-boxes/views/html-order-items.php' );
 
 			wp_send_json_success( array(
 				'html' => ob_get_clean(),
@@ -906,8 +928,11 @@ class WC_AJAX {
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
+			$result   = $order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
-			$order->apply_coupon( wc_clean( $_POST['coupon'] ) );
+			if ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			}
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
@@ -1496,6 +1521,8 @@ class WC_AJAX {
 
 	/**
 	 * Handle a refund via the edit order screen.
+	 *
+	 * @throws Exception To return errors.
 	 */
 	public static function refund_line_items() {
 		ob_start();
@@ -1508,6 +1535,7 @@ class WC_AJAX {
 
 		$order_id               = absint( $_POST['order_id'] );
 		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ), wc_get_price_decimals() );
+		$refunded_amount        = wc_format_decimal( sanitize_text_field( $_POST['refunded_amount'] ), wc_get_price_decimals() );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
@@ -1526,7 +1554,11 @@ class WC_AJAX {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
-			// Prepare line items which we are refunding
+			if ( $refunded_amount !== wc_format_decimal( $order->get_total_refunded(), wc_get_price_decimals() ) ) {
+				throw new exception( __( 'Error processing refund. Please try again.', 'woocommerce' ) );
+			}
+
+			// Prepare line items which we are refunding.
 			$line_items = array();
 			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys, $line_item_totals ) ) );
 
@@ -2208,6 +2240,9 @@ class WC_AJAX {
 				'tax_rate_shipping' => 1,
 				'tax_rate_order'    => 1,
 			) );
+
+			// Format the rate.
+			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
 
 			if ( isset( $data['newRow'] ) ) {
 				// Hurrah, shiny and new!

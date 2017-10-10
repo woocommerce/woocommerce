@@ -602,3 +602,16 @@ function wc_get_customer_last_order( $customer_id ) {
 
 	return wc_get_order( $id );
 }
+
+/**
+ * Add support for searching by display_name.
+ *
+ * @since 3.2.0
+ * @param array $search_columns Column names.
+ * @return array
+ */
+function wc_user_search_columns( $search_columns ) {
+	$search_columns[] = 'display_name';
+	return $search_columns;
+}
+add_filter( 'user_search_columns', 'wc_user_search_columns' );

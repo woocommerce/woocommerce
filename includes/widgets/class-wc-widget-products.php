@@ -20,9 +20,9 @@ class WC_Widget_Products extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_products';
-		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
+		$this->widget_description = __( "A list of your store's products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce products', 'woocommerce' );
+		$this->widget_name        = __( 'Products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',

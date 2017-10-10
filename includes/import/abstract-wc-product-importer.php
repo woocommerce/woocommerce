@@ -504,24 +504,20 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$base_url   = $upload_dir['baseurl'] . '/';
 
 		// Check first if attachment is on WordPress uploads directory.
-		if ( false === strpos( $url, $base_url ) ) {
+		if ( false !== strpos( $url, $base_url ) ) {
 			// Search for yyyy/mm/slug.extension.
-			$file = str_replace( $base_url, '', $url );
 			$args = array(
 				'post_type'   => 'attachment',
 				'post_status' => 'any',
 				'fields'      => 'ids',
 				'meta_query'  => array(
 					array(
-						'value'   => $file,
+						'value'   => str_replace( $base_url, '', $url ),
 						'compare' => 'LIKE',
 						'key'     => '_wp_attached_file',
 					),
 				),
 			);
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
 		} else {
 			$args = array(
 				'post_type'   => 'attachment',
@@ -534,9 +530,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					),
 				),
 			);
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
+		}
+
+		if ( $ids = get_posts( $args ) ) {
+			$id = current( $ids );
 		}
 
 		// Upload if attachment does not exists.

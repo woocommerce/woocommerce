@@ -172,15 +172,9 @@ class WC_Cache_Helper {
 	 * @return array
 	 */
 	public static function set_nocache_constants( $value ) {
-		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-			define( "DONOTCACHEPAGE", true );
-		}
-		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
-			define( "DONOTCACHEOBJECT", true );
-		}
-		if ( ! defined( 'DONOTCACHEDB' ) ) {
-			define( "DONOTCACHEDB", true );
-		}
+		wc_maybe_define_constant( 'DONOTCACHEPAGE', true );
+		wc_maybe_define_constant( 'DONOTCACHEOBJECT', true );
+		wc_maybe_define_constant( 'DONOTCACHEDB', true );
 		return $value;
 	}
 

@@ -21,7 +21,7 @@ final class WC_Cart_Session {
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
-	 * @var array
+	 * @var WC_Cart
 	 */
 	protected $cart;
 
@@ -29,9 +29,14 @@ final class WC_Cart_Session {
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param object $cart Cart object to calculate totals for.
+	 * @throws Exception If missing WC_Cart object.
+	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
-	public function __construct( &$cart = null ) {
+	public function __construct( &$cart ) {
+		if ( ! is_a( $cart, 'WC_Cart' ) ) {
+			throw new Exception( 'A valid WC_Cart object is required' );
+		}
+
 		$this->cart = $cart;
 
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
@@ -87,13 +92,14 @@ final class WC_Cart_Session {
 
 					} else {
 						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data = array_merge( $values, array( 'data' => $product ) );
+						$session_data          = array_merge( $values, array( 'data' => $product ) );
 						$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+
+						// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
+						$this->cart->set_cart_contents( $cart_contents );
 					}
 				}
 			}
-
-			$this->cart->set_cart_contents( $cart_contents );
 		}
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );

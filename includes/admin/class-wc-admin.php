@@ -30,6 +30,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 	}
 
 	/**
@@ -99,6 +100,12 @@ class WC_Admin {
 			break;
 			case 'options-permalink' :
 				include( 'class-wc-admin-permalink-settings.php' );
+			break;
+			case 'plugins' :
+				include ( 'plugin-updates/class-wc-plugins-screen-updates.php' );
+			break;
+			case 'update-core' :
+				include( 'plugin-updates/class-wc-updates-screen-updates.php' );
 			break;
 			case 'users' :
 			case 'user' :
@@ -228,8 +235,12 @@ class WC_Admin {
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
-				/* translators: %s: five stars */
-				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %s rating. A huge thanks in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>' );
+				$footer_text = sprintf(
+					/* translators: 1: WooCommerce 2:: five stars */
+					__( 'If you like %1$s please leave us a %2$s rating. A huge thanks in advance!', 'woocommerce' ),
+					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
+					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
+				);
 				wc_enqueue_js( "
 					jQuery( 'a.wc-rating-link' ).click( function() {
 						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
@@ -242,6 +253,19 @@ class WC_Admin {
 		}
 
 		return $footer_text;
+	}
+
+	/**
+	 * Check on a Jetpack install queued by the Setup Wizard.
+	 *
+	 * See: WC_Admin_Setup_Wizard::install_jetpack()
+	 */
+	public function setup_wizard_check_jetpack() {
+		$jetpack_active = class_exists( 'Jetpack' );
+
+		wp_send_json_success( array(
+			'is_active' => $jetpack_active ? 'yes' : 'no',
+		) );
 	}
 }
 

@@ -13,7 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap woocommerce wc_addons_wrap">
 	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>" class="nav-tab nav-tab-active"><?php _e( 'Browse Extensions', 'woocommerce' ); ?></a>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php _e( 'WooCommerce.com Subscriptions', 'woocommerce' ); ?></a>
+
+		<?php
+			$count_html = WC_Helper_Updater::get_updates_count_html();
+			$menu_title = sprintf( __( 'WooCommerce.com Subscriptions %s', 'woocommerce' ), $count_html );
+		?>
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo $menu_title; ?></a>
 	</nav>
 
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>

@@ -228,6 +228,10 @@ function wc_save_order_items( $order_id, $items ) {
 				),
 			) );
 
+			if ( 'fee' === $item->get_type() ) {
+				$item->set_amount( $item_data['line_total'] );
+			}
+
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';

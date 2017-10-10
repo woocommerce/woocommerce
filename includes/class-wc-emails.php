@@ -254,23 +254,23 @@ class WC_Emails {
 	/**
 	 * Wraps a message in the woocommerce mail template.
 	 *
-	 * @param mixed $email_heading
-	 * @param string $message
-	 * @param bool $plain_text
+	 * @param string $email_heading Heading text.
+	 * @param string $message       Email message.
+	 * @param bool   $plain_text    Set true to send as plain text. Default to false.
 	 *
 	 * @return string
 	 */
 	public function wrap_message( $email_heading, $message, $plain_text = false ) {
-		// Buffer
+		// Buffer.
 		ob_start();
 
-		do_action( 'woocommerce_email_header', $email_heading );
+		do_action( 'woocommerce_email_header', $email_heading, null );
 
 		echo wpautop( wptexturize( $message ) );
 
-		do_action( 'woocommerce_email_footer' );
+		do_action( 'woocommerce_email_footer', null );
 
-		// Get contents
+		// Get contents.
 		$message = ob_get_clean();
 
 		return $message;

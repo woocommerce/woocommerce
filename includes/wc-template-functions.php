@@ -821,7 +821,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
 
-		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() || $wp_query->is_search() ) {
+		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
@@ -835,6 +835,11 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
+
+		if ( $wp_query->is_search() ) {
+			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
+			unset( $catalog_orderby_options['menu_order'] );
+		}
 
 		if ( ! $show_default_orderby ) {
 			unset( $catalog_orderby_options['menu_order'] );
@@ -1083,6 +1088,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		}
 
 		$defaults = array(
+			'input_id'    => uniqid( 'quantity_' ),
 			'input_name'  => 'quantity',
 			'input_value' => '1',
 			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
@@ -2007,7 +2013,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
+					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
 
 				} else {
 
@@ -2033,7 +2039,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field_container = '<p class="form-row %1$s" id="%2$s" style="display: none">%3$s</p>';
 
-					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
+					$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" readonly="readonly" />';
 
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
@@ -2288,15 +2294,17 @@ if ( ! function_exists( 'woocommerce_account_content' ) ) {
 	function woocommerce_account_content() {
 		global $wp;
 
-		foreach ( $wp->query_vars as $key => $value ) {
-			// Ignore pagename param.
-			if ( 'pagename' === $key ) {
-				continue;
-			}
+		if ( ! empty( $wp->query_vars ) ) {
+			foreach ( $wp->query_vars as $key => $value ) {
+				// Ignore pagename param.
+				if ( 'pagename' === $key ) {
+					continue;
+				}
 
-			if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-				return;
+				if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+					do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+					return;
+				}
 			}
 		}
 

@@ -25,11 +25,11 @@ $color_button_secondary: $woo_pink2;
 /*------------------------------------------------------------------------------
   Tab navigation
 ------------------------------------------------------------------------------*/
-
 .wc-helper {
 	.nav-tab-wrapper {
 		margin-bottom: 22px;
 	}
+
 	@media only screen and (max-width : 784px) {
 		.nav-tab {
 			max-width: 40%;
@@ -88,24 +88,17 @@ $color_button_secondary: $woo_pink2;
 			line-height: 1;
 			padding: 0;
 			position: absolute;
-				top: 12px;
-				right: 12px;
+				top: 10px;
+				right: 14px;
 		}
 	}
-
-	span {
-		font-weight: bold;
-		padding-right: 4px;
-	}
-
-	a {
+	li {
 		color: #0073AA;
 		display: inline-block;
 		padding: 0 4px 0 8px;
 		position: relative;
-		text-decoration: none;
 
-		&:before {
+		&::before {
 			background-color: #979797;
 			content: " ";
 			position: absolute;
@@ -114,21 +107,48 @@ $color_button_secondary: $woo_pink2;
 				bottom: 0;
 			width: 1px;
 		}
+
+		&:first-of-type {
+			&::before {
+				display: none;
+			}
+		}
+	}
+
+	a{
+		color: #0073AA;
+		text-decoration: none;
+
+		&.current{
+			color: #000;
+			font-weight: 600;
+		}
+	}
+
+	.count{
+		color: #555d66;
+		font-weight: 400;
 	}
 
 	@media only screen and (max-width : 600px) {
 		background-color: #fff;
 		border: 1px solid #E1E1E1;
-		border-radius: 2px;
+		border-radius: 4px;
 		font-size: 14px;
 
 		label,
-		span,
-		a {
-			border-bottom: 1px solid #E1E1E1;
-			line-height: 2;
+		li {
+			line-height: 21px;
 			padding: 8px 16px;
 			margin: 0;
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+
+		li {
+			border-bottom: 1px solid #E1E1E1;
 		}
 
 		label,
@@ -136,27 +156,39 @@ $color_button_secondary: $woo_pink2;
 			display: block;
 		}
 
-		span,
-		a {
+		label {
+			text-decoration: none;
+		}
+
+		li {
 			display: none;
 		}
 
-		a {
-			cursor: pointer;
-
+		li {
 			&::before {
 				display: none;
 			}
 		}
 
+		a {
+			cursor: pointer;
+		}
+
 		span.chevron {
-			transform: rotateX(0deg);
+			color: #555555;
+			opacity: 0.5;
+			transform: rotateX(180deg);
 		}
 
 		&:focus,
 		&:hover {
-			span,
-			a {
+			box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+
+			label {
+				border-bottom: 1px solid #E1E1E1;
+			}
+
+			li {
 				display: block;
 			}
 
@@ -447,7 +479,7 @@ $color_button_secondary: $woo_pink2;
 	.wp-list-table__ext-title {
 		color: $color_text_blue;
 		font-size: 18px;
-		font-weight: 784;
+		font-weight: 600;
 			width: 60%;
 
 		@media only screen and (max-width : 782px) {
@@ -472,7 +504,7 @@ $color_button_secondary: $woo_pink2;
 	.wp-list-table__ext-status {
 		position: relative;
 
-		&.update-available:after {
+		&.update-available::after {
 			background-color: #FFC322;
 			content: " ";
 			position: absolute;
@@ -482,7 +514,7 @@ $color_button_secondary: $woo_pink2;
 			width: 5px;
 		}
 
-		&.expired:after {
+		&.expired::after {
 			background-color: #B81C23;
 			content: " ";
 			position: absolute;
@@ -532,7 +564,7 @@ $color_button_secondary: $woo_pink2;
 		td {
 			position: relative;
 
-			&:before {
+			&::before {
 				background-color: #E1E1E1;
 				content: " ";
 				height: 1px;
@@ -545,13 +577,13 @@ $color_button_secondary: $woo_pink2;
 
 		td.wp-list-table__ext-status,
 		td.wp-list-table__licence-container {
-			&:before {
+			&::before {
 				left: 22px !important;
 				width: auto !important;
 			}
 		}
 
-		td.wp-list-table__ext-actions:before {
+		td.wp-list-table__ext-actions::before {
 			right: 22px;
 		}
 
@@ -839,6 +871,7 @@ $color_button_secondary: $woo_pink2;
 		line-height: 37px;
 		min-width: 124px;
 		padding: 0 13px;
+		text-shadow: none;
 
 		&:hover,
 		&:active,
@@ -896,8 +929,8 @@ $color_button_secondary: $woo_pink2;
 	transition: all .4s ease, box-shadow 0s;
 	vertical-align: middle;
 
-	&:before,
-	&:after {
+	&::before,
+	&::after {
 		content: "";
 		display: block;
 		position: relative;
@@ -905,14 +938,14 @@ $color_button_secondary: $woo_pink2;
 		height: 20px;
 	}
 
-	&:after {
+	&::after {
 		border-radius: 50%;
 		background: $white;
 		left: 0;
 		transition: all .2s ease;
 	}
 
-	&:before {
+	&::before {
 		display: none;
 	}
 
@@ -967,7 +1000,7 @@ $color_button_secondary: $woo_pink2;
 		+ .form-toggle__label .form-toggle__switch {
 			background: $woo_pink1;
 
-			&:after {
+			&::after {
 				left: 8px;
 			}
 		}
@@ -1002,15 +1035,15 @@ $color_button_secondary: $woo_pink2;
 		width: 24px;
 		height: 16px;
 
-		&:before,
-		&:after {
+		&::before,
+		&::after {
 			height: 12px;
 			width: 12px;
 		}
 	}
 	&:checked {
 		+ .form-toggle__label .form-toggle__switch {
-			&:after {
+			&::after {
 				left: 8px;
 			}
 		}

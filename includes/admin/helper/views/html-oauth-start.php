@@ -7,7 +7,7 @@
 
 		<div class="start-container">
 			<div class="text">
-				<img src="https://woocommerce.com/wp-content/themes/woomattic/images/logo-woocommerce@2x.png" alt="WooCommerce" style="width:180px;">
+				<img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce" style="width:180px;">
 
 				<?php if ( ! empty( $_GET['wc-helper-status'] ) && 'helper-disconnected' === $_GET['wc-helper-status'] ) : ?>
 					<p><?php _e( '<strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
