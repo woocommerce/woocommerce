@@ -670,6 +670,7 @@ class WC_Admin_Setup_Wizard {
 						'type'          => 'text',
 						'default_value' => __( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
 						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
+						'required'      => true,
 					),
 				),
 			),
@@ -729,6 +730,8 @@ class WC_Admin_Setup_Wizard {
 					placeholder="<?php echo esc_attr( $setting['default_value'] ); ?>"
 					id="<?php echo esc_attr( $method_setting_id ); ?>"
 					name="<?php echo esc_attr( $method_setting_id ); ?>"
+					class="<?php echo $setting['required'] ? 'shipping-method-required-field' : ''; ?>"
+					<?php echo ( $method_id === $selected && $setting['required'] ) ? 'required' : ''; ?>
 				/>
 				<p class="description">
 					<?php echo esc_html( $setting['description'] ); ?>
@@ -802,7 +805,7 @@ class WC_Admin_Setup_Wizard {
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
+								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable" />
 								<label for="shipping_zones[domestic][enabled]">
 							</span>
 						</div>
@@ -816,7 +819,7 @@ class WC_Admin_Setup_Wizard {
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
+								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable"/>
 								<label for="shipping_zones[intl][enabled]">
 							</span>
 						</div>
