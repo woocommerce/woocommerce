@@ -730,7 +730,7 @@ class WC_Admin_Setup_Wizard {
 					placeholder="<?php echo esc_attr( $setting['default_value'] ); ?>"
 					id="<?php echo esc_attr( $method_setting_id ); ?>"
 					name="<?php echo esc_attr( $method_setting_id ); ?>"
-					class="<?php echo $setting['required'] ? 'shipping-method-required-field' : ''; ?>"
+					class="<?php echo esc_attr( $setting['required'] ? 'shipping-method-required-field' : '' ); ?>"
 					<?php echo ( $method_id === $selected && $setting['required'] ) ? 'required' : ''; ?>
 				/>
 				<p class="description">
