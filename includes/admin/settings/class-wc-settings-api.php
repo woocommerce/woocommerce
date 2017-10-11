@@ -95,12 +95,7 @@ if ( ! class_exists( 'WC_Settings_Rest_API', false ) ) :
 
 			if ( 'webhooks' == $current_section ) {
 				if ( isset( $_GET['edit-webhook'] ) ) {
-					$webhook_id = absint( $_GET['edit-webhook'] );
-					$webhook    = new WC_Webhook( $webhook_id );
-
-					if ( 'trash' != $webhook->get_status() ) {
-						return 'post';
-					}
+					return 'post';
 				}
 
 				return 'get';
