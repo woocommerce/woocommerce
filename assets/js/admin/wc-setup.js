@@ -69,7 +69,7 @@ jQuery( function( $ ) {
 			.prop( 'required', true );
 	} );
 
-	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function( e ) {
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
 
 		$( this )

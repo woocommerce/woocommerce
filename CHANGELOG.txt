@@ -1,5 +1,50 @@
 == Changelog ==
 
+= 3.1.2 - 2017-08-15 =
+* Fix - Importer: Prevent multiple placeholders being created when mixing IDs and SKUs.
+* Fix - Importer: correctly set stock management props.
+* Fix - Importer: Allow "unfiltered_html" for name, description and short description fields.
+* Fix - Fix filename image handling.
+* Fix - Rest API: Allow OPTIONS requests.
+* Fix - Fixed missing reviews in product_page shortcode when querying by SKU.
+* Fix - Don't subtract negative taxes in net sales report.
+* Fix - Sort by order + zone ID as a fallback in shipping zones so the zones always match in the same order.
+* Fix - Corrected subject and heading in customer refunded email.
+* Fix - Corrected handling of custom checkbox fields in checkout get_posted_data method.
+* Fix - Fix admin help videos async property.
+* Fix - Fixed price filters by introducing precision.
+* Fix - Improved customer IP address detection.
+* Fix - Fix dark theme readability.
+* Fix - CLI tools command.
+* Fix - Adjusted shop manager role to prevent unfiltered HTML being used.
+* Fix - Various notices/warnings.
+* Dev - Correctly invalidate cache after saving order items.
+* Dev - Added `woocommerce_data_store_wp_{$this->meta_type}_read_meta` filter.
+
+= 3.1.1 - 2017-07-11 =
+* Fix - Product importer: fixed handling of non UTF8 characters in descriptions.
+* Fix - Product importer: Allow times in date fields.
+* Fix - Product exporter: fixed meta data checkbox option.
+* Fix - Helper: Styling and connect button in non-english languages.
+* Fix - Tweak terms and conditions template to check for disallowed shortcodes.
+* Fix - Fixed order helper queries when before_date and after_date args are both, corrected use of "paged", and corrected use of filters.
+* Fix - Gallery; Trigger resize after main image loads to ensure correct gallery size.
+* Fix - Prevent extra slashes being added to meta values when using the CRUD.
+* Fix - Appends "where" clauses in the comment feed to prevent a notice.
+* Fix - Fixed structured data output for variable product prices.
+* Fix - 3.x issue: Changed state validation logic to work for MX states.
+* Fix - 3.x issue: 7day reports should start from midnight, not the current time.
+* Fix - 3.x issue: Status changes made by admin should be marked as a manual in the order notes.
+* Fix - 3.x issue: Allow unsetting product shipping class in REST API.
+* Fix - 3.x issue: Corrected error handling in zones shippingMethodView.
+* Tweak - Avoid CloudFlare email obfuscation in admin.
+* Tweak - Improved detection of DOING_AUTOSAVE in admin meta box code.
+* Tweak - Improved my-account redirects and fallbacks.
+* Tweak - Add `cart_subtotal` to the shipping package so prices are recalculated when needed.
+* Dev - Add search_customers() filter in customer data store.
+* Dev - Product exporter: woocommerce_product_export_skip_meta_keys filter to control what gets exported.
+* Dev - Pass correct value to woocommerce_shipping_classes_save_class when inserting a new term
+
 = 3.1.0 - 2017-06-28 =
 * Feature - Built-in product CSV importer and exporter for products.
 * Feature - Display (toggle-able) terms inline on the checkout rather than showing a link.

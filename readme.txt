@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.8
-Stable tag: 3.1.2
+Stable tag: 3.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -91,8 +91,7 @@ And, finally, consider joining or spearheading a WooCommerce Meetup locally, mor
 * PHP version 5.2.4 or greater (PHP 5.6 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 * Some payment gateways require fsockopen support (for IPN access)
-* WooCommerce 2.5 requires WordPress 4.1+
-* WooCommerce 2.6 requires WordPress 4.4+
+* WordPress 4.4+
 
 Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/) for a detailed list of server requirements.
 
@@ -161,7 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.0 - 2017-XX-XX =
+= 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
 * Feature - Simplified the ability to resend order details to customers with a single "Resend Order Details" action.
 * Feature - Added store street address, city and postal code to settings for use by plugins.
