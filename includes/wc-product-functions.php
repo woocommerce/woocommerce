@@ -126,8 +126,17 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		// Does this product have a parent?
 		$product = wc_get_product( $post_id );
 
-		if ( $product && $product->get_parent_id() > 0 ) {
-			wc_delete_product_transients( $product->get_parent_id() );
+		if ( $product ) {
+			if ( $product->get_parent_id() > 0 ) {
+				wc_delete_product_transients( $product->get_parent_id() );
+			}
+
+			if ( 'variable' === $product->get_type() ) {
+				wp_cache_delete(
+					WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id(),
+					'products'
+				);
+			}
 		}
 	}
 

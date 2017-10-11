@@ -98,6 +98,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$variation_attributes = array();
 		$attributes           = $product->get_attributes();
 		$child_ids            = $product->get_children();
+		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id();
+		$cache_group          = 'products';
+		$cached_data          = wp_cache_get( $cache_key, $cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
 
 		if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
 			foreach ( $attributes as $attribute ) {
@@ -139,6 +146,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$variation_attributes[ $attribute['name'] ] = array_unique( $values );
 			}
 		}
+
+		wp_cache_set( $cache_key, $variation_attributes, $cache_group );
 
 		return $variation_attributes;
 	}
