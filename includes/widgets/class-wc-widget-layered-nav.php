@@ -504,6 +504,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( ! empty( $current_filter ) ) {
+                asort($current_filter);
 				$link = add_query_arg( $filter_name, implode( ',', $current_filter ), $link );
 
 				// Add Query type Arg to URL
