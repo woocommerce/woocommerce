@@ -510,6 +510,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				if ( 'or' === $query_type && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
 					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
 				}
+				$link = str_replace('%2C', ',', $link);
 			}
 
 			if ( $count > 0 || $option_is_set ) {
