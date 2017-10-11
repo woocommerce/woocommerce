@@ -1016,8 +1016,6 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
-			usort( $products, 'wc_products_array_orderby_menu_order' );
-
 			wc_get_template( 'single-product/add-to-cart/grouped.php', array(
 				'grouped_product'    => $product,
 				'grouped_products'   => $products,
