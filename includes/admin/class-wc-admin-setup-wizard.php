@@ -468,56 +468,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Tout WooCommerce Services for North American stores.
-	 */
-	protected function wc_setup_wcs_tout() {
-		$base_location = wc_get_base_location();
-
-		if ( false === $base_location['country'] ) {
-			$base_location = WC_Geolocation::geolocate_ip();
-		}
-
-		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
-			return;
-		}
-
-		$default_content = array(
-			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
-		);
-
-		switch ( $base_location['country'] ) {
-			case 'CA':
-				$local_content = array(
-					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
-				);
-				break;
-			default:
-				$local_content = array();
-		}
-
-		$content = wp_parse_args( $local_content, $default_content );
-		?>
-		<ul class="wc-wizard-shipping-methods">
-			<li class="wc-wizard-shipping">
-				<div class="wc-wizard-shipping-enable">
-					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
-					<label>
-						<?php echo esc_html( $content['title'] ) ?>
-					</label>
-				</div>
-				<div class="wc-wizard-shipping-description">
-					<p>
-						<?php echo esc_html( $content['description'] ); ?>
-					</p>
-				</div>
-			</li>
-		</ul>
-		<?php
-	}
-
-	/**
 	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
 	 * @see https://core.trac.wordpress.org/ticket/41358
 	 */
