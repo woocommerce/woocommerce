@@ -1374,9 +1374,14 @@ class WC_Admin_Setup_Wizard {
 				<ul class="wc-wizard-services featured">
 					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
 						<div class="wc-wizard-service-description">
-							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
+							<h3><?php esc_html_e( 'Automated Taxes (powered by WooCommerce Services)', 'woocommerce' ); ?></h3>
 							<p>
-								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out. Powered by WooCommerce Services.', 'woocommerce' ); ?>
+								<?php esc_html_e( 'Automatically calculate and charge the correct rate of tax for each time a customer checks out. If toggled on, WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ); ?>
+							</p>
+							<p class="wc-wizard-service-learn-more">
+								<a href="<?php echo esc_url( 'https://wordpress.org/plugins/woocommerce-services/' ); ?>" target="_blank">
+									<?php esc_html_e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?>
+								</a>
 							</p>
 						</div>
 
