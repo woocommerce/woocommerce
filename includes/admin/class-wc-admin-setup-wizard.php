@@ -1063,7 +1063,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll create an account for you. Powered by WooCommerce Services.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
