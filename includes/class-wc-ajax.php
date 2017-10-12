@@ -2234,18 +2234,15 @@ class WC_AJAX {
 				'tax_rate_order'    => 1,
 			) );
 
-			// Format the rate.
-			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
+			if ( isset( $tax_rate['tax_rate'] ) ) {
+				$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
+			}
 
 			if ( isset( $data['newRow'] ) ) {
-				// Hurrah, shiny and new!
 				$tax_rate['tax_rate_class'] = $current_class;
-				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
-			} else {
-				// Updating an existing rate ...
-				if ( ! empty( $tax_rate ) ) {
-					WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
-				}
+				$tax_rate_id                = WC_Tax::_insert_tax_rate( $tax_rate );
+			} elseif ( ! empty( $tax_rate ) ) {
+				WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 			}
 
 			if ( isset( $data['postcode'] ) ) {
