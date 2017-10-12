@@ -610,7 +610,7 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods = array(
 			'live_rates' => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Live Rates powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
+				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
 			),
 			'flat_rate' => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -720,7 +720,7 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
+				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
 				$prefixed_country_name,
 				$wcs_carrier
 			);
@@ -734,7 +734,7 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
-		<p><?php echo esc_html( $intro_text ); ?></p>
+		<p><?php echo wp_kses_post( $intro_text ); ?></p>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
