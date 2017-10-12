@@ -185,7 +185,7 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $base ); ?>;
+	color: <?php echo esc_attr( $base_text ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }
