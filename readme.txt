@@ -160,6 +160,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.2.1 - 2017-10-xx =
+* Fix - Made grouped products display in the saved order, vs the menu order.
+* Fix - Made variations with 'same as parent' tax class calculate taxes correctly.
+* Fix - Fixed tax rate reverting to 0 when the tax rate itself is not changed and the row is saved.
+* Fix - Made tax rates sort correctly when defining postcodes and cities.
+* Fix - Made guided tour help tab videos lazy-load to prevent performance issues.
+* Fix - Added SelectWoo dependency to admin meta box scripts.
+* Fix - Fixed cart subtotal 1p rounding error.
+* Fix - Fixed discount logic to also look at variation parent categories when validating coupons.
+
 = 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
 * Feature - Simplified the ability to resend order details to customers with a single "Resend Order Details" action.
