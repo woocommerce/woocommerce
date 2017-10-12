@@ -76,6 +76,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->ids['tax_rate_ids'][] = $tax_rate_id;
 		$this->ids['products'][]     = $product;
 		$this->ids['products'][]     = $product2;
+		$this->ids['products'][]     = $product3;
 		$this->ids['coupons'][]      = $coupon;
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
