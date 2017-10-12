@@ -660,7 +660,7 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods = array(
 			'live_rates' => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ),
+				'description' => __( 'Live Rates powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
 			),
 			'flat_rate' => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
