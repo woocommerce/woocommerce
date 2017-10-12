@@ -423,7 +423,7 @@ final class WC_Cart_Totals {
 	 * @return object
 	 */
 	protected function adjust_non_base_location_price( $item ) {
-		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'edit' ) );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
 		if ( $item->tax_rates !== $base_tax_rates ) {
 			// Work out a new base price without the shop's base tax.
