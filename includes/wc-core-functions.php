@@ -1472,7 +1472,7 @@ function wc_add_number_precision( $value ) {
  */
 function wc_remove_number_precision( $value ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+	return $value / $precision;
 }
 
 /**
