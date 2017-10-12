@@ -53,6 +53,16 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		$product  = WC_Helper_Product::create_simple_product();
 		$product2 = WC_Helper_Product::create_simple_product();
+		// Variations with parent tax class.
+		$product3 = WC_Helper_Product::create_variation_product();
+		$variations = $product3->get_available_variations();
+
+		// Update product3 so that each variation has the parent tax class.
+		foreach ( $variations as $variation ) {
+			$child = wc_get_product( $variation['variation_id'] );
+			$child->set_tax_class( 'parent' );
+			$child->save();
+		}
 
 		WC_Helper_Shipping::create_simple_flat_rate();
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
@@ -70,6 +80,10 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_to_cart( $product2->get_id(), 2 );
+		$variations = $product3->get_available_variations();
+		$variation  = array_shift( $variations );
+		WC()->cart->add_to_cart( $product3->get_id(), 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) );
+
 		WC()->cart->add_discount( $coupon->get_code() );
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
@@ -119,15 +133,15 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( array(
 			'fees_total'          => 40.00,
 			'fees_total_tax'      => 6.00,
-			'items_subtotal'      => 30.00,
-			'items_subtotal_tax'  => 6.00,
-			'items_total'         => 27.00,
-			'items_total_tax'     => 5.40,
-			'total'               => 90.40,
+			'items_subtotal'      => 40.00,
+			'items_subtotal_tax'  => 8.00,
+			'items_total'         => 36.00,
+			'items_total_tax'     => 7.20,
+			'total'               => 101.20,
 			'shipping_total'      => 10,
 			'shipping_tax_total'  => 2,
-			'discounts_total'     => 3.00,
-			'discounts_tax_total' => 0.60,
+			'discounts_total'     => 4.00,
+			'discounts_tax_total' => 0.80,
 		), $this->totals->get_totals() );
 	}
 
@@ -138,26 +152,26 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$cart = WC()->cart;
 
 		$this->assertEquals( 40.00, $cart->get_fee_total() );
-		$this->assertEquals( 27.00, $cart->get_cart_contents_total() );
-		$this->assertEquals( 90.40, $cart->get_total( 'edit' ) );
-		$this->assertEquals( 30.00, $cart->get_subtotal() );
-		$this->assertEquals( 6.00, $cart->get_subtotal_tax() );
-		$this->assertEquals( 5.40, $cart->get_cart_contents_tax() );
-		$this->assertEquals( 5.40, array_sum( $cart->get_cart_contents_taxes() ) );
+		$this->assertEquals( 36.00, $cart->get_cart_contents_total() );
+		$this->assertEquals( 101.20, $cart->get_total( 'edit' ) );
+		$this->assertEquals( 40.00, $cart->get_subtotal() );
+		$this->assertEquals( 8.00, $cart->get_subtotal_tax() );
+		$this->assertEquals( 7.20, $cart->get_cart_contents_tax() );
+		$this->assertEquals( 7.20, array_sum( $cart->get_cart_contents_taxes() ) );
 		$this->assertEquals( 6.00, $cart->get_fee_tax() );
 		$this->assertEquals( 6.00, array_sum( $cart->get_fee_taxes() ) );
-		$this->assertEquals( 3, $cart->get_discount_total() );
-		$this->assertEquals( 0.60, $cart->get_discount_tax() );
+		$this->assertEquals( 4, $cart->get_discount_total() );
+		$this->assertEquals( 0.80, $cart->get_discount_tax() );
 		$this->assertEquals( 10, $cart->get_shipping_total() );
 		$this->assertEquals( 2, $cart->get_shipping_tax() );
 
-		$this->assertEquals( 27.00, $cart->cart_contents_total );
-		$this->assertEquals( 90.40, $cart->total );
-		$this->assertEquals( 36.00, $cart->subtotal );
-		$this->assertEquals( 30.00, $cart->subtotal_ex_tax );
-		$this->assertEquals( 11.40, $cart->tax_total );
-		$this->assertEquals( 3, $cart->discount_cart );
-		$this->assertEquals( 0.60, $cart->discount_cart_tax );
+		$this->assertEquals( 36.00, $cart->cart_contents_total );
+		$this->assertEquals( 101.20, $cart->total );
+		$this->assertEquals( 48.00, $cart->subtotal );
+		$this->assertEquals( 40.00, $cart->subtotal_ex_tax );
+		$this->assertEquals( 13.20, $cart->tax_total );
+		$this->assertEquals( 4, $cart->discount_cart );
+		$this->assertEquals( 0.80, $cart->discount_cart_tax );
 		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 10, $cart->shipping_total );
 		$this->assertEquals( 2, $cart->shipping_tax_total );
