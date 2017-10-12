@@ -50,8 +50,8 @@ class WC_Admin_Duplicate_Product {
 				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
 				get_delete_post_link( $post->ID, '', false ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash' ), $post->post_title ) ),
-				__( 'Trash' )
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $post->post_title ) ),
+				__( 'Trash', 'woocommerce' )
 			);
 		}
 
