@@ -120,11 +120,6 @@ jQuery(function( $ ) {
 	});
 
 	$( '#wpbody' ).on( 'click', '.trash-product', function() {
-		var confirm_delete = confirm( woocommerce_admin.delete_product_message );
-
-		// Stop redirection, if user denies to delete the product.
-		if ( ! confirm_delete ) {
-			return false;
-		}
+		return window.confirm( woocommerce_admin.i18_delete_product_notice );
 	});
 });
