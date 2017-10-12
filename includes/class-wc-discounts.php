@@ -665,6 +665,10 @@ class WC_Discounts {
 
 				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
 
+				if ( $item->product->get_parent_id() ) {
+					$product_cats = array_merge( $product_cats, wc_get_product_cat_ids( $item->product->get_parent_id() ) );
+				}
+
 				// If we find an item with a cat in our allowed cat list, the coupon is valid.
 				if ( count( array_intersect( $product_cats, $coupon->get_product_categories() ) ) > 0 ) {
 					$valid = true;
@@ -797,6 +801,11 @@ class WC_Discounts {
 				}
 
 				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
+
+				if ( $item->product->get_parent_id() ) {
+					$product_cats = array_merge( $product_cats, wc_get_product_cat_ids( $item->product->get_parent_id() ) );
+				}
+
 				$cat_id_list  = array_intersect( $product_cats, $coupon->get_excluded_product_categories() );
 				if ( count( $cat_id_list ) > 0 ) {
 					foreach ( $cat_id_list as $cat_id ) {
