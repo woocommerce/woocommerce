@@ -79,6 +79,7 @@ abstract class WC_Legacy_Cart {
 				break;
 			case 'prices_include_tax' :
 				$value = wc_prices_include_tax();
+				break;
 			case 'round_at_subtotal' :
 				$value = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 				break;
