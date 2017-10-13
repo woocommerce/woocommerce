@@ -73,4 +73,10 @@
 			<property name="customSanitizingFunctions" type="array" value="wc_clean" />
 		</properties>
 	</rule>
+
+	<rule ref="WordPress.XSS.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array" value="wc_help_tip" />
+		</properties>
+	</rule>
 </ruleset>
