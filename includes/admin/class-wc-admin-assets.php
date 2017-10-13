@@ -156,6 +156,7 @@ class WC_Admin_Assets {
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+				'hexa_color_error'					=> __( 'Invalid hexa color', 'woocommerce' ),
 				'strings' => array(
 					'import_products' => __( 'Import', 'woocommerce' ),
 					'export_products' => __( 'Export', 'woocommerce' ),
