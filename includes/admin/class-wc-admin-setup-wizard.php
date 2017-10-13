@@ -1387,8 +1387,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function wc_setup_activate_actions() {
 		if (
-			isset( $_GET['from'] ) &&
-			'wpcom' === $_GET['from'] &&
 			class_exists( 'Jetpack' ) &&
 			Jetpack::is_active()
 		) {
