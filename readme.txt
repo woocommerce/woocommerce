@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fixed cart subtotal 1p rounding error.
 * Fix - Fixed discount logic to also look at variation parent categories when validating coupons.
 * Fix - Product import filename based matching, and full URL based matching where the date part would still be present.
+* Fix - Make sure image zoom is enable for calling initZoomForTarget
 * Tweak - Replace settings screenshot on wp.org listing.
 * Tweak - Clearly describe when a feature is powered by WooCommerce Services.
 * Tweak - Add back option to send admin new order email, include order number in order emails.
