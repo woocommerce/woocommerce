@@ -124,7 +124,32 @@ if ( wc_tax_enabled() ) {
 		}
 	?>
 	<table class="wc-order-totals">
+		<?php if ( 0 < $order->get_total_discount() ) : ?>
+			<tr>
+				<td class="label"><?php _e( 'Discount:', 'woocommerce' ); ?></td>
+				<td width="1%"></td>
+				<td class="total">
+					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
+				</td>
+			</tr>
+		<?php endif; ?>
+
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
+
+		<?php if ( $order->get_shipping_methods() ) : ?>
+			<tr>
+				<td class="label"><?php _e( 'Shipping:', 'woocommerce' ); ?></td>
+				<td width="1%"></td>
+				<td class="total"><?php
+					if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
+						echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
+					} else {
+						echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
+					}
+				?></td>
+			</tr>
+		<?php endif; ?>
+
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->get_id() ); ?>
 
 		<?php if ( wc_tax_enabled() ) : ?>
@@ -146,7 +171,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_id() ); ?>
 
 		<tr>
-			<td class="label"><?php _e( 'Order total', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php _e( 'Total', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
 				<?php echo $order->get_formatted_order_total(); ?>
