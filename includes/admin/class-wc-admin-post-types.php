@@ -176,7 +176,7 @@ class WC_Admin_Post_Types {
 			  	'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
 			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
-			11 => __( 'Order updated and sent to the customer.', 'woocommerce' ),
+			11 => __( 'Order updated and sent.', 'woocommerce' ),
 		);
 
 		$messages['shop_coupon'] = array(
