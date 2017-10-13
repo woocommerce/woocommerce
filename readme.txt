@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Added SelectWoo dependency to admin meta box scripts.
 * Fix - Fixed cart subtotal 1p rounding error.
 * Fix - Fixed discount logic to also look at variation parent categories when validating coupons.
+* Tweak - Replace settings screenshot on wp.org listing.
 
 = 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
@@ -209,20 +210,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fixed WC_Emails::wrap_message hooks .
 * Fix - Load up gateways on ajax order status transitions so PayPal funds capture when order is completed.
 * Fix - Replace wistia videos with youtube.
-* Fix - Handle sale dates on the fly in case of missed cron schedule. 
+* Fix - Handle sale dates on the fly in case of missed cron schedule.
 * Fix - If sorting by date in the REST API, fallback to ID so searches are consistant.
-* Fix - Do not apply custom sorting to product feeds. 
+* Fix - Do not apply custom sorting to product feeds.
 * Fix - Make importer columns case-insensitive.
 * Dev - Make parse_date_for_wp_query public.
 * Dev - API - Creating webhooks uses the current API version rather than the latest API version.
-* Dev - Product CRUD search helpers. 
+* Dev - Product CRUD search helpers.
 * Dev - Refactor shipping rate to include instance IDs, and pass instance IDs through filters.
 * Dev - New attribute helper functions.
 * Dev - Order note helper functions.
 * Dev - Added the "Terms and conditions" page to the api system status report.
 * Dev - Made date inputs reusable.
 * Dev - Added option for merging when using 'Order Again' via filter `woocommerce_empty_cart_when_order_again`.
-* Dev - Added system status tool for re-populating order address search indexes. 
+* Dev - Added system status tool for re-populating order address search indexes.
 * Dev - Added system status tool for clearing webhook logs.
 * Dev - Added woocommerce_get_asset_url filter.
 * Dev - Show notice when internal meta props are accessed directly.
@@ -234,7 +235,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - Refactored cart to use new WC_Cart_Session/WC_Cart_Totals/WC_Cart_Fees/WC_Discounts classes.
 * Dev - New `WC_Shortcode_Products` class to handle all product based shortcodes.
 * Theming - Display downloads in their own table, universally, using a new template file.
-* Theming - Checkout: Order pay template 
+* Theming - Checkout: Order pay template
 * Localization - Added cantons of Switzerland.
 * Localization - Updated XAF and XOF currency codes.
 * Localization - Added rtl support for activation.css.
