@@ -183,6 +183,10 @@ jQuery( function( $ ) {
 	 * Init zoom.
 	 */
 	ProductGallery.prototype.initZoomForTarget = function( zoomTarget ) {
+		if ( ! this.zoom_enabled ) {
+			return false;
+		}
+
 		var galleryWidth = this.$target.width(),
 			zoomEnabled  = false;
 
