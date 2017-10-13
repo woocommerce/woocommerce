@@ -28,21 +28,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="woocommerce-column woocommerce-column--1 woocommerce-column--billing-address col-1">
 
-				<?php endif; ?>
+    <?php endif; ?>
 
-				<h2 class="woocommerce-column__title"><?php _e( 'Billing address', 'woocommerce' ); ?></h2>
+    <h2 class="woocommerce-column__title"><?php _e( 'Billing address', 'woocommerce' ); ?></h2>
 
-				<address>
-					<?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
-					<?php if ( $order->get_billing_phone() ) : ?>
-						<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_billing_phone() ); ?></p>
-					<?php endif; ?>
-					<?php if ( $order->get_billing_email() ) : ?>
-						<p class="woocommerce-customer-details--email"><?php echo esc_html( $order->get_billing_email() ); ?></p>
-					<?php endif; ?>
-				</address>
+    <address>
+        <?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
+        <?php if ( $order->get_billing_phone() ) : ?>
+            <p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_billing_phone() ); ?></p>
+        <?php endif; ?>
+        <?php if ( $order->get_billing_email() ) : ?>
+            <p class="woocommerce-customer-details--email"><?php echo esc_html( $order->get_billing_email() ); ?></p>
+        <?php endif; ?>
+    </address>
 
-				<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() ) : ?>
+    <?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() ) : ?>
 
 			</div><!-- /.col-1 -->
 
