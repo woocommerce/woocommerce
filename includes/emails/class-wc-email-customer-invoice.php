@@ -51,7 +51,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		if ( $paid ) {
 			return __( 'Your {site_title} order from {order_date}', 'woocommerce' );
 		} else {
-			return __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
+			return __( 'Invoice for order #{order_number}', 'woocommerce' );
 		}
 	}
 
@@ -63,9 +63,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 */
 	public function get_default_heading( $paid = false ) {
 		if ( $paid ) {
-			return __( 'Order {order_number} details', 'woocommerce' );
+			return __( 'Your order details', 'woocommerce' );
 		} else {
-			return __( 'Invoice for order {order_number}', 'woocommerce' );
+			return __( 'Invoice for order #{order_number}', 'woocommerce' );
 		}
 	}
 
