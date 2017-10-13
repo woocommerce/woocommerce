@@ -298,7 +298,7 @@ jQuery( function ( $ ) {
 	});
 
 	// Validate email colors settings
-	$('#woocommerce_email_base_color[type=text], #woocommerce_email_background_color[type=text], #woocommerce_email_body_background_color[type=text], #woocommerce_email_text_color[type=text]').on( 'change', function() {
+	$( '#woocommerce_email_base_color[type=text], #woocommerce_email_background_color[type=text], #woocommerce_email_body_background_color[type=text], #woocommerce_email_text_color[type=text]' ).on( 'change', function() {
 		var hexcolor = jQuery(this).val();
 		if (! hexcolor.match(/^\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/)) {
 			jQuery( document.body ).triggerHandler( 'wc_add_error_tip', [ jQuery(this), 'hexa_color_error' ] );
