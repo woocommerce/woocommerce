@@ -468,56 +468,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Tout WooCommerce Services for North American stores.
-	 */
-	protected function wc_setup_wcs_tout() {
-		$base_location = wc_get_base_location();
-
-		if ( false === $base_location['country'] ) {
-			$base_location = WC_Geolocation::geolocate_ip();
-		}
-
-		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
-			return;
-		}
-
-		$default_content = array(
-			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
-		);
-
-		switch ( $base_location['country'] ) {
-			case 'CA':
-				$local_content = array(
-					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
-				);
-				break;
-			default:
-				$local_content = array();
-		}
-
-		$content = wp_parse_args( $local_content, $default_content );
-		?>
-		<ul class="wc-wizard-shipping-methods">
-			<li class="wc-wizard-shipping">
-				<div class="wc-wizard-shipping-enable">
-					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
-					<label>
-						<?php echo esc_html( $content['title'] ) ?>
-					</label>
-				</div>
-				<div class="wc-wizard-shipping-description">
-					<p>
-						<?php echo esc_html( $content['description'] ); ?>
-					</p>
-				</div>
-			</li>
-		</ul>
-		<?php
-	}
-
-	/**
 	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
 	 * @see https://core.trac.wordpress.org/ticket/41358
 	 */
@@ -660,7 +610,7 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods = array(
 			'live_rates' => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ),
+				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
 			),
 			'flat_rate' => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -770,7 +720,7 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
+				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
 				$prefixed_country_name,
 				$wcs_carrier
 			);
@@ -784,7 +734,7 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
-		<p><?php echo esc_html( $intro_text ); ?></p>
+		<p><?php echo wp_kses_post( $intro_text ); ?></p>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
@@ -1063,7 +1013,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll create an account for you. Powered by WooCommerce Services.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1374,9 +1324,14 @@ class WC_Admin_Setup_Wizard {
 				<ul class="wc-wizard-services featured">
 					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
 						<div class="wc-wizard-service-description">
-							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
+							<h3><?php esc_html_e( 'Automated Taxes (powered by WooCommerce Services)', 'woocommerce' ); ?></h3>
 							<p>
-								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out. Powered by WooCommerce Services.', 'woocommerce' ); ?>
+								<?php esc_html_e( 'Automatically calculate and charge the correct rate of tax for each time a customer checks out. If toggled on, WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ); ?>
+							</p>
+							<p class="wc-wizard-service-learn-more">
+								<a href="<?php echo esc_url( 'https://wordpress.org/plugins/woocommerce-services/' ); ?>" target="_blank">
+									<?php esc_html_e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?>
+								</a>
 							</p>
 						</div>
 
