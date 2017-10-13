@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.8
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,7 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.1 - 2017-10-xx =
+= 3.2.1 - 2017-10-13 =
 * Fix - Made grouped products display in the saved order, vs the menu order.
 * Fix - Made variations with 'same as parent' tax class calculate taxes correctly.
 * Fix - Fixed tax rate reverting to 0 when the tax rate itself is not changed and the row is saved.
@@ -174,7 +174,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Added styling for screen-reader-text for themes which do not define it.
 * Fix - Fixed legacy cart `prices_include_tax` variable.
 * Fix -  Hide cat-parent class when category will show no children due to the new depth setting.
-* Fix - Make sure image zoom is enable for calling initZoomForTarget
+* Fix - Make sure image zoom is enable for calling initZoomForTarget.
+* Fix - {blogname} email placeholder.
+* Fix - API - Use edit context when updating prices.
 * Tweak - Clearly describe when a feature is powered by WooCommerce Services in the setup wizard.
 * Tweak - Restored discount total line in order screen when discounts are present.
 * Tweak - Add back option to send admin new order email, and include order number and customer email in order emails.
