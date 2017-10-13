@@ -169,7 +169,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Added SelectWoo dependency to admin meta box scripts.
 * Fix - Fixed cart subtotal 1p rounding error.
 * Fix - Fixed discount logic to also look at variation parent categories when validating coupons.
+* Fix - Product import filename based matching, and full URL based matching where the date part would still be present.
 * Tweak - Replace settings screenshot on wp.org listing.
+* Tweak - Clearly describe when a feature is powered by WooCommerce Services.
 
 = 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
