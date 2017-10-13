@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Product import filename based matching, and full URL based matching where the date part would still be present.
 * Tweak - Replace settings screenshot on wp.org listing.
 * Tweak - Clearly describe when a feature is powered by WooCommerce Services.
+* Tweak - Add back option to send admin new order email, include order number in order emails.
 
 = 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
