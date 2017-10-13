@@ -170,9 +170,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fixed cart subtotal 1p rounding error.
 * Fix - Fixed discount logic to also look at variation parent categories when validating coupons.
 * Fix - Product import filename based matching, and full URL based matching where the date part would still be present.
-* Tweak - Replace settings screenshot on wp.org listing.
-* Tweak - Clearly describe when a feature is powered by WooCommerce Services.
-* Tweak - Add back option to send admin new order email, include order number in order emails.
+* Fix - Fixed storage of cart discounts when prices include tax.
+* Fix - Added styling for screen-reader-text for themes which do not define it.
+* Fix - Fixed legacy cart `prices_include_tax` variable.
+* Fix -  Hide cat-parent class when category will show no children due to the new depth setting.
+* Tweak - Clearly describe when a feature is powered by WooCommerce Services in the setup wizard.
+* Tweak - Restored discount total line in order screen when discounts are present.
+* Tweak - Add back option to send admin new order email, and include order number and customer email in order emails.
 
 = 3.2.0 - 2017-10-11 =
 * Feature - Coupons can now be applied and removed in admin when editing unpaid orders.
