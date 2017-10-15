@@ -386,7 +386,7 @@ jQuery( function( $ ) {
 
 						// Scroll to top
 						$( 'html, body' ).animate( {
-							scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+							scrollTop: ( $( 'form.checkout' ).offset().top - ( $( '.woocommerce-NoticeGroup-checkout' ).outerHeight() + 100 ) )
 						}, 1000 );
 
 					}
@@ -506,7 +506,7 @@ jQuery( function( $ ) {
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
 			$( 'html, body' ).animate({
-				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+				scrollTop: ( $( 'form.checkout' ).offset().top - ( $( '.woocommerce-NoticeGroup-checkout' ).outerHeight() + 100 ) )
 			}, 1000 );
 			$( document.body ).trigger( 'checkout_error' );
 		}
