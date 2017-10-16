@@ -1495,9 +1495,11 @@ class WC_Cart extends WC_Legacy_Cart {
 					$users_query = new WP_User_Query( array(
 						'fields'       => 'ID',
 						'meta_query'   => array(
-							'key'      => '_billing_email',
-							'value'    => $check_emails,
-							'compare'  => 'IN',
+							array(
+								'key'      => '_billing_email',
+								'value'    => $check_emails,
+								'compare'  => 'IN',
+							),
 						),
 					) );
 
