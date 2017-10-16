@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="woocommerce-column woocommerce-column--1 woocommerce-column--billing-address col-1">
 
-				<?php endif; ?>
+    <?php endif; ?>
 
 				<h2 class="woocommerce-column__title"><?php _e( 'Billing address', 'woocommerce' ); ?></h2>
 
@@ -58,6 +58,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		</section><!-- /.col2-set -->
 
-	<?php endif; ?>
+	            <?php endif; ?>
 
 </section>
