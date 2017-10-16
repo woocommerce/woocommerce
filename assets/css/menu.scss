@@ -155,6 +155,11 @@ span.mce_woocommerce_shortcodes_button {
 		padding: 0 2em;
 	}
 
+	.plugin-details-table-container {
+		max-height: 40vh;
+		overflow-y: auto;
+	}
+
 	table.plugin-details-table {
 		margin: 20px 0;
 		th, td {
