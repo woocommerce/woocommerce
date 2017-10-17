@@ -21,7 +21,6 @@ class WC_Cache_Helper {
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
-		add_filter( 'nocache_headers', array( __CLASS__, 'set_nocache_constants' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
 	}
@@ -159,6 +158,7 @@ class WC_Cache_Helper {
 		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
 
 		if ( isset( $_GET['download_file'] ) || isset( $_GET['add-to-cart'] ) || is_page( $page_ids ) ) {
+			add_filter( 'nocache_headers', array( __CLASS__, 'set_nocache_constants' ) );
 			nocache_headers();
 		}
 	}
