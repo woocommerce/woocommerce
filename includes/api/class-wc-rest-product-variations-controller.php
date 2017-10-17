@@ -687,7 +687,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'readonly'    => true,
 				),
 				'visible' => array(
-					'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
+					'description' => __( "Define if the variation is visible on the product's page.", 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
