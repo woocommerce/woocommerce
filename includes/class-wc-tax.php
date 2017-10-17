@@ -737,10 +737,21 @@ class WC_Tax {
 
 	/**
 	 * Get store tax classes.
+	 *
 	 * @return array Array of class names ("Reduced rate", "Zero rate", etc).
 	 */
 	public static function get_tax_classes() {
-		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ), array( __CLASS__, 'is_valid_tax_class' ) );
+	}
+
+	/**
+	 * Filter out invalid tax classes.
+	 *
+	 * @param string $tax_class Tax class name.
+	 * @return boolean
+	 */
+	private static function is_valid_tax_class( $tax_class ) {
+		return ! empty( $tax_class ) && sanitize_title( $tax_class );
 	}
 
 	/**
@@ -750,7 +761,7 @@ class WC_Tax {
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
-		return array_map( 'sanitize_title', self::get_tax_classes() );
+		return array_filter( array_map( 'sanitize_title', self::get_tax_classes() ) );
 	}
 
 	/**
