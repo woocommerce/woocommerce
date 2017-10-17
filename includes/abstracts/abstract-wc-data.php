@@ -142,7 +142,7 @@ abstract class WC_Data {
 			foreach ( $this->meta_data as $array_key => $meta ) {
 				$this->meta_data[ $array_key ] = clone $meta;
 				if ( ! empty( $meta->id ) ) {
-					unset( $this->meta_data[ $array_key ]->id );
+					$this->meta_data[ $array_key ]->id = null;
 				}
 			}
 		}
