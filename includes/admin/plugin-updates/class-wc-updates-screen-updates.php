@@ -35,14 +35,26 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 			return;
 		}
 
-		$this->new_version = wc_clean( $updateable_plugins['woocommerce/woocommerce.php']->update->new_version );
+		$this->new_version            = wc_clean( $updateable_plugins['woocommerce/woocommerce.php']->update->new_version );
 		$this->major_untested_plugins = $this->get_untested_plugins( $this->new_version, 'major' );
-		if ( empty( $this->major_untested_plugins ) ) {
+
+		$current_version_parts = explode( '.', WC_VERSION );
+		$new_version_parts     = explode( '.', $this->new_version );
+
+		// If user has already moved to the minor version, we don't need to flag up anything.
+		if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.' . $new_version_parts[1], '=' ) ) {
 			return;
 		}
 
-		echo $this->get_extensions_modal_warning();
-		$this->update_screen_modal_js();
+		// If user has already moved to the major version, we should only shown minor notices and assume everything is "ok" for major.
+		if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
+			$this->major_untested_plugins = array();
+		}
+
+		if ( ! empty( $this->major_untested_plugins ) ) {
+			echo $this->get_extensions_modal_warning();
+			$this->update_screen_modal_js();
+		}
 	}
 
 	/**
