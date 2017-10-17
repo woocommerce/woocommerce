@@ -589,11 +589,11 @@ class WC_Admin_Setup_Wizard {
 	 * @param $country_code
 	 * @return bool|string Carrier name if supported, boolean False otherwise.
 	 */
-	protected function get_wcs_shipping_carrier( $country_code ) {
-		switch ( $country_code ) {
-			case 'US':
+	protected function get_wcs_shipping_carrier( $country_code, $currency ) {
+		switch ( array( $country_code, $currency ) ) {
+			case array( 'US', 'USD' ):
 				return 'USPS';
-			case 'CA':
+			case array( 'CA', 'CAD' ):
 				return 'Canada Post';
 			default:
 				return false;
@@ -606,7 +606,7 @@ class WC_Admin_Setup_Wizard {
 	 * @param $country_code
 	 * @return array
 	 */
-	protected function get_wizard_shipping_methods( $country_code ) {
+	protected function get_wizard_shipping_methods( $country_code, $currency ) {
 		$shipping_methods = array(
 			'live_rates' => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
@@ -630,7 +630,7 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency );
 
 		if ( false === $live_rate_carrier || ! current_user_can('install_plugins') ) {
 			unset( $shipping_methods['live_rates'] );
@@ -645,10 +645,10 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $country_code
 	 * @param string $input_prefix
 	 */
-	protected function shipping_method_selection_form( $country_code, $input_prefix ) {
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+	protected function shipping_method_selection_form( $country_code, $currency, $input_prefix ) {
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency );
 		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
-		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code );
+		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency );
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
@@ -702,7 +702,8 @@ class WC_Admin_Setup_Wizard {
 		$country_code          = WC()->countries->get_base_country();
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
-		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code );
+		$currency              = get_woocommerce_currency();
+		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
 		if ( false === $dimension_unit || false === $weight_unit ) {
@@ -751,7 +752,7 @@ class WC_Admin_Setup_Wizard {
 							<p><?php echo esc_html( $country_name ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
-							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
+							<?php $this->shipping_method_selection_form( $country_code, $currency, 'shipping_zones[domestic]' ); ?>
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
@@ -765,7 +766,7 @@ class WC_Admin_Setup_Wizard {
 							<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
-							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
+							<?php $this->shipping_method_selection_form( $country_code, $currency, 'shipping_zones[intl]' ); ?>
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
