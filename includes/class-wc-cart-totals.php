@@ -411,6 +411,27 @@ final class WC_Cart_Totals {
 	}
 
 	/**
+	 * Ran to remove all base taxes from an item. Used when prices include tax, and the customer is tax exempt.
+	 *
+	 * @since 3.2.2
+	 * @param object $item Item to adjust the prices of.
+	 * @return object
+	 */
+	protected function remove_item_base_taxes( $item ) {
+		if ( $item->price_includes_tax ) {
+			$base_tax_rates           = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+
+			// Work out a new base price without the shop's base tax.
+			$taxes                    = WC_Tax::calc_tax( $item->subtotal, $base_tax_rates, true, true );
+
+			// Now we have a new item price (excluding TAX).
+			$item->subtotal           = $item->subtotal - array_sum( $taxes );
+			$item->price_includes_tax = false;
+		}
+		return $item;
+	}
+
+	/**
 	 * Only ran if woocommerce_adjust_non_base_location_prices is true.
 	 *
 	 * If the customer is outside of the base location, this removes the base
@@ -423,15 +444,17 @@ final class WC_Cart_Totals {
 	 * @return object
 	 */
 	protected function adjust_non_base_location_price( $item ) {
-		$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+		if ( $item->price_includes_tax ) {
+			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
-		if ( $item->tax_rates !== $base_tax_rates ) {
-			// Work out a new base price without the shop's base tax.
-			$taxes                    = WC_Tax::calc_tax( $item->subtotal, $base_tax_rates, true, true );
+			if ( $item->tax_rates !== $base_tax_rates ) {
+				// Work out a new base price without the shop's base tax.
+				$taxes                    = WC_Tax::calc_tax( $item->subtotal, $base_tax_rates, true, true );
 
-			// Now we have a new item price (excluding TAX).
-			$item->subtotal           = $item->subtotal - array_sum( $taxes );
-			$item->price_includes_tax = false;
+				// Now we have a new item price (excluding TAX).
+				$item->subtotal           = $item->subtotal - array_sum( $taxes );
+				$item->price_includes_tax = false;
+			}
 		}
 		return $item;
 	}
@@ -655,8 +678,12 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_item_subtotals() {
 		foreach ( $this->items as $item_key => $item ) {
-			if ( $item->price_includes_tax && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-				$item = $this->adjust_non_base_location_price( $item );
+			if ( $item->price_includes_tax ) {
+				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
+					$item = $this->remove_item_base_taxes( $item );
+				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+					$item = $this->adjust_non_base_location_price( $item );
+				}
 			}
 
 			$subtotal_taxes = array();
