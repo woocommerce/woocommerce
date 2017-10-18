@@ -276,7 +276,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
-		call_user_func( $this->steps[ $this->step ]['view'], $this );
+		if ( ! empty( $this->steps[ $this->step ]['view'] ) ) {
+			call_user_func( $this->steps[ $this->step ]['view'], $this );
+		}
 		echo '</div>';
 	}
 
