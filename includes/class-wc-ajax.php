@@ -1748,7 +1748,7 @@ class WC_AJAX {
 		$product_object = wc_get_product( $product_id );
 		$per_page       = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
 		$page           = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-		$variations     = wc_get_products( array(
+		$variations     = apply_filters( 'woocommerce_admin_product_variations', wc_get_products( array(
 			'status'         => array( 'private', 'publish' ),
 			'type'           => 'variation',
 			'parent'         => $product_id,
@@ -1759,7 +1759,7 @@ class WC_AJAX {
 				'ID'         => 'DESC',
 			),
 			'return'         => 'objects',
-		) );
+		) ), $product_id, $per_page, $page );
 
 		if ( $variations ) {
 			foreach ( $variations as $variation_object ) {
