@@ -985,9 +985,18 @@ class WC_AJAX {
 		try {
 			$order_id       = absint( $_POST['order_id'] );
 			$order_item_ids = $_POST['order_item_ids'];
+			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
+			}
+
+			// If we passed through items it means we need to save first before deleting.
+			if ( ! empty( $items ) ) {
+				$save_items = array();
+				parse_str( $items, $save_items );
+				// Save order items
+				wc_save_order_items( $order_id, $save_items );
 			}
 
 			if ( sizeof( $order_item_ids ) > 0 ) {
