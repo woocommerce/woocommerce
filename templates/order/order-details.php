@@ -34,6 +34,8 @@ if ( $show_downloads ) {
 }
 ?>
 <section class="woocommerce-order-details">
+	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
+
 	<h2 class="woocommerce-order-details__title"><?php _e( 'Order details', 'woocommerce' ); ?></h2>
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
@@ -46,6 +48,7 @@ if ( $show_downloads ) {
 		</thead>
 
 		<tbody>
+			<?php do_action( 'woocommerce_order_items_table_before', $order ); ?>
 			<?php
 				foreach ( $order_items as $item_id => $item ) {
 					$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
