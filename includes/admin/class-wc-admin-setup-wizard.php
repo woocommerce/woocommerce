@@ -1576,12 +1576,12 @@ class WC_Admin_Setup_Wizard {
 			exit;
 		}
 
-		$redirect_url   = add_query_arg( array(
+		$redirect_url = add_query_arg( array(
 			'page'           => 'wc-setup',
 			'step'           => 'activate',
 			'from'           => 'wpcom',
 			'activate_error' => false,
-		), get_admin_url() );
+		), admin_url() );
 		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		wp_redirect( esc_url_raw( $connection_url ) );
