@@ -136,4 +136,11 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services input#stripe_create_account' ).change();
+
+	$( 'select#store_country_state' ).on( 'change', function() {
+		var countryCode = this.value.split( ':' )[ 0 ];
+		var currencyCode = $( 'input#currency_by_country' ).data( 'map' )[ countryCode ];
+		$( 'select#currency_code' ).val( currencyCode ).change();
+	} );
+	$( 'select#store_country_state' ).change();
 } );
