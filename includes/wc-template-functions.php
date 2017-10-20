@@ -850,6 +850,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		if ( $wp_query->is_search() ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 			unset( $catalog_orderby_options['menu_order'] );
+			$orderby = 'relevance';
 		}
 
 		if ( ! $show_default_orderby ) {
