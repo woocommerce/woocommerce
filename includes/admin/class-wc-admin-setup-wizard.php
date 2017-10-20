@@ -291,7 +291,6 @@ class WC_Admin_Setup_Wizard {
 		$state          = WC()->countries->get_base_state();
 		$country        = WC()->countries->get_base_country();
 		$postcode       = WC()->countries->get_base_postcode();
-		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$product_type   = get_option( 'woocommerce_product_type' );
 
 		if ( empty( $country ) ) {
@@ -301,6 +300,12 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( empty( $state ) ) {
 			$state = '*';
 		}
+
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		function get_currency_code( $country ) {
+			return $country[ 'currency_code' ];
+		}
+		$currency_by_country = array_map( 'get_currency_code', $locale_info );
 
 		?>
 		<form method="post" class="address-step">
@@ -384,11 +389,16 @@ class WC_Admin_Setup_Wizard {
 			>
 				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
+					<option value="<?php echo esc_attr( $code ); ?>">
 						<?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?>
 					</option>
 				<?php endforeach; ?>
 			</select>
+			<input
+				id="currency_by_country"
+				type="hidden"
+				data-map="<?php esc_attr_e( json_encode( $currency_by_country ) ); ?>"
+			/>
 
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
