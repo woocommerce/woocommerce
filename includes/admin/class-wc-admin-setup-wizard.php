@@ -1398,6 +1398,9 @@ class WC_Admin_Setup_Wizard {
 			class_exists( 'Jetpack' ) &&
 			Jetpack::is_active()
 		) {
+			// Leave a note for WooCommerce Services that Jetpack has been opted into.
+			update_option( 'woocommerce_setup_jetpack_opted_in', true );
+
 			wp_redirect( esc_url_raw( remove_query_arg( 'from', $this->get_next_step_link() ) ) );
 			exit;
 		}
@@ -1550,9 +1553,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
-
-		// Leave a note for WooCommerce Services that Jetpack has been opted into.
-		update_option( 'woocommerce_setup_jetpack_opted_in', true );
 
 		WC_Install::background_installer( 'jetpack', array(
 			'file'      => 'jetpack/jetpack.php',
