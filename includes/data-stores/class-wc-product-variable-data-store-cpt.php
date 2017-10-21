@@ -89,49 +89,58 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected function read_variation_attributes( &$product ) {
 		global $wpdb;
 
-		$variation_attributes = array();
-		$attributes           = $product->get_attributes();
-		$child_ids            = $product->get_children();
+		$variation_attributes_transient_name = 'wc_product_variations_attributes_' . $product->get_id();
+		$variation_attributes                = get_transient( $variation_attributes_transient_name );
 
-		if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
-			foreach ( $attributes as $attribute ) {
-				if ( empty( $attribute['is_variation'] ) ) {
-					continue;
-				}
+		if ( empty( $variation_attributes ) ) {
+			$attributes = $product->get_attributes();
+			$child_ids  = $product->get_children();
 
-				// Get possible values for this attribute, for only visible variations.
-				$values = array_unique( $wpdb->get_col( $wpdb->prepare(
-					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ")",
-					wc_variation_attribute_name( $attribute['name'] )
-				) ) );
+			if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
+				foreach ( $attributes as $attribute ) {
+					if ( empty( $attribute['is_variation'] ) ) {
+						continue;
+					}
 
-				// Empty value indicates that all options for given attribute are available.
-				if ( in_array( '', $values ) || empty( $values ) ) {
-					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
-				// Get custom attributes (non taxonomy) as defined.
-				} elseif ( ! $attribute['is_taxonomy'] ) {
-					$text_attributes          = wc_get_text_attributes( $attribute['value'] );
-					$assigned_text_attributes = $values;
-					$values                   = array();
+					// Get possible values for this attribute, for only visible variations.
+					$values = array_unique( $wpdb->get_col( $wpdb->prepare(
+						"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',',
+							array_map( 'absint', $child_ids ) ) . ")",
+						wc_variation_attribute_name( $attribute['name'] )
+					) ) );
 
-					// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
-					if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
-						$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
-						foreach ( $text_attributes as $text_attribute ) {
-							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
-								$values[] = $text_attribute;
+					// Empty value indicates that all options for given attribute are available.
+					if ( in_array( '', $values ) || empty( $values ) ) {
+						$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(),
+							$attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
+						// Get custom attributes (non taxonomy) as defined.
+					} elseif ( ! $attribute['is_taxonomy'] ) {
+						$text_attributes          = wc_get_text_attributes( $attribute['value'] );
+						$assigned_text_attributes = $values;
+						$values                   = array();
+
+						// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+						if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0',
+							'<' ) ) {
+							$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+							foreach ( $text_attributes as $text_attribute ) {
+								if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
+									$values[] = $text_attribute;
+								}
 							}
-						}
-					} else {
-						foreach ( $text_attributes as $text_attribute ) {
-							if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
-								$values[] = $text_attribute;
+						} else {
+							foreach ( $text_attributes as $text_attribute ) {
+								if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
+									$values[] = $text_attribute;
+								}
 							}
 						}
 					}
+					$variation_attributes[ $attribute['name'] ] = array_unique( $values );
 				}
-				$variation_attributes[ $attribute['name'] ] = array_unique( $values );
 			}
+
+			set_transient( $variation_attributes_transient_name, $variation_attributes );
 		}
 
 		return $variation_attributes;

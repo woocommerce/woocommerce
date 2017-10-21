@@ -109,6 +109,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	// Transient names that include an ID
 	$post_transient_names = array(
 		'wc_product_children_',
+		'wc_product_variations_attributes_',
 		'wc_var_prices_',
 		'wc_related_',
 		'wc_child_has_weight_',
