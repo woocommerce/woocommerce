@@ -1282,6 +1282,100 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					'expected_total_discount' => 20,
 				),
 			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons with limits of 1. Discounting sequentially.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'wc_options' => array(
+						'woocommerce_calc_discounts_sequentially' => array(
+							'set'    => 'yes',
+							'revert' => 'no',
+						),
+					),
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 4,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'one',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'two',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'three',
+							'discount_type'          => 'percent',
+							'amount'                 => '100',
+							'limit_usage_to_x_items' => 1,
+						),
+					),
+					'expected_total_discount' => 30,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons with limits of 1.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 4,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'one',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'two',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'three',
+							'discount_type'          => 'percent',
+							'amount'                 => '100',
+							'limit_usage_to_x_items' => 1,
+						),
+					),
+					'expected_total_discount' => 30,
+				),
+			),
 		);
 	}
 
