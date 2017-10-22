@@ -52,6 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<address>
 					<?php echo ( $address = $order->get_formatted_shipping_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
+					<?php do_action( 'woocommerce_customer_details_after_shipping_address', $order ); ?>
 				</address>
 
 			</div><!-- /.col-2 -->
