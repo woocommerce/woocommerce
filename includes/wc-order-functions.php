@@ -26,6 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
+	do_action("get_orders_hook");
 	$map_legacy = array(
 		'numberposts'    => 'limit',
 		'post_type'      => 'type',
@@ -78,6 +79,7 @@ function wc_get_orders( $args ) {
  * @return bool|WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
+	do_action("get_orders_hook");
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action)', '2.5' );
 		return false;

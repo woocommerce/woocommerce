@@ -70,6 +70,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_product_id( $value ) {
+		do_action("set_product_id_hook");
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
