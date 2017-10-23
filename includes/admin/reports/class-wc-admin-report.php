@@ -74,7 +74,8 @@ class WC_Admin_Report {
 	 */
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
-
+		do_action('get_order_report_data_hook');
+		
 		$default_args = array(
 			'data'                => array(),
 			'where'               => array(),
