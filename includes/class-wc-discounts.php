@@ -45,12 +45,10 @@ class WC_Discounts {
 	 * @param array $object Cart or order object.
 	 */
 	public function __construct( $object = array() ) {
-		$this->object = $object;
-
-		if ( is_a( $this->object, 'WC_Cart' ) ) {
-			$this->set_items_from_cart( $this->object );
-		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
-			$this->set_items_from_order( $this->object );
+		if ( is_a( $object, 'WC_Cart' ) ) {
+			$this->set_items_from_cart( $object );
+		} elseif ( is_a( $object, 'WC_Order' ) ) {
+			$this->set_items_from_order( $object );
 		}
 	}
 
@@ -66,6 +64,8 @@ class WC_Discounts {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
 		}
+
+		$this->object = $cart;
 
 		foreach ( $cart->get_cart() as $key => $cart_item ) {
 			$item                = new stdClass();
@@ -87,11 +87,13 @@ class WC_Discounts {
 	 * @param array $order Cart object.
 	 */
 	public function set_items_from_order( $order ) {
-		$this->items     = $this->discounts      = array();
+		$this->items = $this->discounts = array();
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
+
+		$this->object = $order;
 
 		foreach ( $order->get_items() as $order_item ) {
 			$item                = new stdClass();
