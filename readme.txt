@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.2.2 - ? =
+* Fix - Fixed issue where VAT exempt users where still being charged VAT on the totals.
 * Tweak - Correct spelling errors in on sale date descriptions for the legacy v1 REST API.
 
 = 3.2.1 - 2017-10-13 =
