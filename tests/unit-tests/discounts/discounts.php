@@ -1343,4 +1343,55 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$all_discounts = $discounts->get_discounts();
 		$this->assertEquals( 0, count( $all_discounts['freeshipping'] ), 'Free shipping coupon should not have any discounts.' );
 	}
+
+	public function filter_woocommerce_coupon_get_discount_amount( $discount ) {
+		return $discount / 2;
+	}
+
+	public function test_coupon_discount_amount_filter() {
+		$discounts = new WC_Discounts();
+
+		add_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_regular_price( 100 );
+		$product2->set_tax_status( 'taxable' );
+		$product2->save();
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+		$coupon->set_props( array(
+			'code'                   => 'test',
+			'discount_type'          => 'percent',
+			'amount'                 => '20',
+		) );
+
+		$discounts->set_items_from_cart( WC()->cart );
+		$discounts->apply_coupon( $coupon );
+
+		$all_discounts = $discounts->get_discounts();
+
+		$discount_total = 0;
+		foreach ( $all_discounts as $code_name => $discounts_by_coupon ) {
+			$discount_total += array_sum( $discounts_by_coupon );
+		}
+
+		$this->assertEquals( 20, $discount_total );
+
+		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$product2->delete( true );
+		$coupon->delete( true );
+
+		// Temporarily necessary until https://github.com/woocommerce/woocommerce/pull/16767 is implemented.
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_test', 'coupons' );
+	}
 }
