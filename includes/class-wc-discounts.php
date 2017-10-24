@@ -320,10 +320,11 @@ class WC_Discounts {
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
-		$total_discount  = 0;
-		$cart_total      = 0;
-		$limit_usage_qty = 0;
-		$applied_count   = 0;
+		$total_discount        = 0;
+		$cart_total            = 0;
+		$limit_usage_qty       = 0;
+		$applied_count         = 0;
+		$adjust_final_discount = true;
 
 		if ( null !== $coupon->get_limit_usage_to_x_items() ) {
 			$limit_usage_qty = $coupon->get_limit_usage_to_x_items();
@@ -348,7 +349,12 @@ class WC_Discounts {
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
-				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+				$filtered_discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+
+				if ( $filtered_discount !== $discount ) {
+					$discount              = $filtered_discount;
+					$adjust_final_discount = false;
+				}
 			}
 
 			$discount       = min( $discounted_price, $discount );
@@ -363,7 +369,7 @@ class WC_Discounts {
 		// Work out how much discount would have been given to the cart as a whole and compare to what was discounted on all line items.
 		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon_amount / 100 ), 0 );
 
-		if ( $total_discount < $cart_total_discount ) {
+		if ( $total_discount < $cart_total_discount && $adjust_final_discount ) {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
 		}
 
