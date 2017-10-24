@@ -160,6 +160,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.2.2 - ? =
+* Tweak - Correct spelling errors in on sale date descriptions for the legacy v1 REST API.
+
 = 3.2.1 - 2017-10-13 =
 * Fix - Made grouped products display in the saved order, vs the menu order.
 * Fix - Made variations with 'same as parent' tax class calculate taxes correctly.
