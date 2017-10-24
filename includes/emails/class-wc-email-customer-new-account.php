@@ -90,6 +90,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 * @param bool $password_generated
 	 */
 	public function trigger( $user_id, $user_pass = '', $password_generated = false ) {
+		$this->setup_locale();
 
 		if ( $user_id ) {
 			$this->object             = new WP_User( $user_id );
@@ -101,12 +102,10 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			$this->password_generated = $password_generated;
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
-		$this->setup_locale();
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		$this->restore_locale();
 	}
 
