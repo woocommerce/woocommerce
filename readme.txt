@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.3.0 - 2017-XX-XX =
+* Feature - Template overrides via the wc_get_template filter now also appear in the System Status under the Templates section.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
