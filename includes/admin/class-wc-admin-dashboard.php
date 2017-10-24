@@ -37,6 +37,9 @@ class WC_Admin_Dashboard {
 			wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce recent reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 		}
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
+
+		// Network Order Widget
+		wp_add_dashboard_widget( 'woocommerce_network_orders', __( "WooCommerce Network Orders", 'woocommerce' ), array( $this, 'network_orders' ) );
 	}
 
 	/**
@@ -286,6 +289,53 @@ class WC_Admin_Dashboard {
 			echo '<p>' . __( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 		}
 	}
+
+	/**
+	 * Network orders widget
+	 */
+	public function network_orders() {
+		// @todo move to proper location
+		wp_enqueue_script( 'network-orders', '/wp-content/plugins/woocommerce/assets/js/admin/network-orders.js', array( 'jquery', 'underscore' ), time(), true );
+		wp_localize_script( 'network-orders', 'woocommerce_network_orders', array(
+			'nonce' => wp_create_nonce( 'wp_rest' ),
+			'sites' => array( 1, 2 ), // @todo get dynamically
+			'order_endpoint' => get_rest_url( null, 'wc/v2/orders/network' ),
+		) );
+		?>
+		<div class="post-type-shop_order">
+			<table class="wp-list-table">
+				<thead>
+					<tr>
+						<td>Order</td>
+						<td>Status</td>
+						<td>Total</td>
+					</tr>
+				</thead>
+				<tbody id="network-orders-tbody">
+
+				</tbody>
+			</table>
+			<script type="text/template" id="network-orders-row-template">
+				<tr>
+					<td>
+						<a href="<%- edit_url %>" class="order-view"><strong>#<%- id %> <%- buyer %></strong></a>
+						<br>
+						<em>
+							<%- blog.blogname %>
+						</em>
+					</td>
+					<td>
+						<mark class="order-status status-<%- status %>"><span><%- status_name %></span></mark>
+					</td>
+					<td>
+						<%= formatted_total %>
+					</td>
+				</tr>
+			</script>
+		</div>
+		<?php
+	}
+
 }
 
 endif;

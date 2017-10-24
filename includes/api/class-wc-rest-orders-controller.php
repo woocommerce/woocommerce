@@ -121,6 +121,16 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			),
 			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/network', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'network_orders' ),
+				'permission_callback' => array( $this, 'network_orders_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
 	}
 
 	/**
@@ -1656,4 +1666,53 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		return $params;
 	}
+
+	/**
+	 * Does a permissions check for the proper requested blog
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool $permission
+	 */
+	public function network_orders_permissions_check( $request ) {
+		$blog_id = $request->get_param( 'blog_id' );
+		$blog_id = $blog_id ?: get_current_blog_id();
+
+		switch_to_blog( $blog_id );
+
+		$permission = $this->get_items_permissions_check( $request );
+
+		restore_current_blog();
+
+		return $permission;
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return mixed|WP_REST_Response
+	 */
+	public function network_orders( $request ) {
+		$blog_id = $request->get_param( 'blog_id' );
+		$blog_id = $blog_id ?: get_current_blog_id();
+
+		switch_to_blog( $blog_id );
+
+		$items = $this->get_items( $request );
+
+		foreach( $items->data as &$current_order ) {
+			$order = wc_get_order( $current_order['id'] );
+
+			$current_order['blog'] = get_blog_details( get_current_blog_id() );
+			$current_order['edit_url'] = get_admin_url( $blog_id, 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' );
+			$current_order['buyer'] = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $order->get_billing_first_name(), $order->get_billing_last_name() ) );
+			$current_order['status_name'] = wc_get_order_status_name( $order->get_status() );
+			$current_order['formatted_total'] = $order->get_formatted_order_total();
+		}
+
+		restore_current_blog();
+
+		return $items;
+	}
+
 }
