@@ -134,7 +134,6 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate() {
 		$this->calculate_item_totals();
-		$this->calculate_shipping_totals();
 		$this->calculate_fee_totals();
 		$this->calculate_totals();
 	}
@@ -810,6 +809,10 @@ final class WC_Cart_Totals {
 		// Add totals to cart object. Note: Discount total for cart is excl tax.
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
+
+		// Calculate shipping after discounts have been calculated.
+		$this->calculate_shipping_totals();
+
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
