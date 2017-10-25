@@ -50,7 +50,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 			'parent'      => (int) $item->parent,
 			'description' => $item->description,
 			'display'     => $display_type ? $display_type : 'default',
-			'image'       => array(),
+			'image'       => null,
 			'menu_order'  => (int) $menu_order,
 			'count'       => (int) $item->count,
 		);
