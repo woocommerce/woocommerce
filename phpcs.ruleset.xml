@@ -6,7 +6,8 @@
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
 	<rule ref="WordPress">
-		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_by_get_term_by" />
+		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.OrderByRand" />
 	</rule>
 
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
