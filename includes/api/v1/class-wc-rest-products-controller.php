@@ -1829,7 +1829,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
+					'description' => __( 'End date of sale price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -2314,7 +2314,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'date_on_sale_to' => array(
-								'description' => __( 'End data of sale price.', 'woocommerce' ),
+								'description' => __( 'End date of sale price.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),

@@ -549,6 +549,10 @@ jQuery( function ( $ ) {
 					action        : 'woocommerce_remove_order_item',
 					security      : woocommerce_admin_meta_boxes.order_item_nonce
 				};
+				// Check if items have changed, if so pass them through so we can save them before deleting.
+				if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {
+					data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
+				}
 
 				$.ajax({
 					url:     woocommerce_admin_meta_boxes.ajax_url,
@@ -556,7 +560,7 @@ jQuery( function ( $ ) {
 					type:    'POST',
 					success: function( response ) {
 						if ( response.success ) {
-						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 							wc_meta_boxes_order.init_tiptip();
 							wc_meta_boxes_order_items.unblock();
@@ -1078,6 +1082,7 @@ jQuery( function ( $ ) {
 			init: function( e, target ) {
 				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
+					$( '#add_item_id' ).selectWoo( 'open' ).selectWoo( 'focus' );
 				}
 			},
 
