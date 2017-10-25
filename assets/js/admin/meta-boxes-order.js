@@ -1082,6 +1082,7 @@ jQuery( function ( $ ) {
 			init: function( e, target ) {
 				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
+					$( '#add_item_id' ).selectWoo( 'open' ).selectWoo( 'focus' );
 				}
 			},
 
