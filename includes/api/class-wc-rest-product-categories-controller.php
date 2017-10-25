@@ -32,9 +32,9 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 	/**
 	 * Prepare a single product category output for response.
 	 *
-	 * @param WP_Term $item Term object.
-	 * @param WP_REST_Request $request
-	 * @return WP_REST_Response $response
+	 * @param WP_Term         $item    Term object.
+	 * @param WP_REST_Request $request Request instance.
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get category display type.
@@ -56,7 +56,8 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 		);
 
 		// Get category image.
-		if ( $image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' ) ) {
+		$image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' );
+		if ( $image_id ) {
 			$attachment = get_post( $image_id );
 
 			$data['image'] = array(
