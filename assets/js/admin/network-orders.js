@@ -5,7 +5,8 @@
 	}
 
 	var orders = [],
-		deferred = [],
+		promises = [], // Track completion (pass or fail) of ajax requests
+		deferred = [], // Tracks the ajax deferreds
 		$tbody = $( document.getElementById( 'network-orders-tbody' ) ),
 		template = _.template( $( document.getElementById( 'network-orders-row-template') ).text() );
 
@@ -15,6 +16,7 @@
 	}
 
 	$.each( woocommerce_network_orders.sites, function( index, value ) {
+		promises[ index ] = $.Deferred();
 		deferred.push( $.ajax( {
 			url : woocommerce_network_orders.order_endpoint,
 			data: {
@@ -29,25 +31,25 @@
 			for ( orderindex in response ) {
 				orders.push( response[ orderindex ] );
 			}
+
+			promises[ index ].resolve();
+		}).fail(function (){
+			promises[ index ].resolve();
 		}) );
 	} );
 
-	if ( deferred ) {
-		$.when.apply( $, deferred ).done( function() {
+	if ( promises.length > 0 ) {
+		$.when.apply( $, promises ).done( function() {
 			var orderindex,
 				currentOrder;
 
 			for ( orderindex in orders ) {
 				currentOrder = orders[ orderindex ];
 
-				window.currentOrder = currentOrder
-
 				$tbody.append( template( currentOrder ) );
 			}
 
 		} );
-	} else {
-			// @todo no sites
 	}
 
 })( jQuery, _ );

@@ -296,9 +296,14 @@ class WC_Admin_Dashboard {
 	public function network_orders() {
 		// @todo move to proper location
 		wp_enqueue_script( 'network-orders', '/wp-content/plugins/woocommerce/assets/js/admin/network-orders.js', array( 'jquery', 'underscore' ), time(), true );
+
+		$user = wp_get_current_user();
+		$blogs = get_blogs_of_user( $user->ID );
+		$blog_ids = wp_list_pluck( $blogs, 'userblog_id' );
+
 		wp_localize_script( 'network-orders', 'woocommerce_network_orders', array(
 			'nonce' => wp_create_nonce( 'wp_rest' ),
-			'sites' => array( 1, 2 ), // @todo get dynamically
+			'sites' => array_values( $blog_ids ),
 			'order_endpoint' => get_rest_url( null, 'wc/v2/orders/network' ),
 		) );
 		?>
