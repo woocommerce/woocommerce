@@ -1,4 +1,5 @@
 /*global wc_setup_params */
+/*global wc_setup_currencies */
 jQuery( function( $ ) {
 	function blockWizardUI() {
 		$('.wc-setup-content').block({
@@ -139,8 +140,7 @@ jQuery( function( $ ) {
 
 	$( 'select#store_country_state' ).on( 'change', function() {
 		var countryCode = this.value.split( ':' )[ 0 ];
-		var currencyCode = $( 'input#currency_by_country' ).data( 'map' )[ countryCode ];
-		$( 'select#currency_code' ).val( currencyCode ).change();
+		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
 	} );
 	$( 'select#store_country_state' ).change();
 } );
