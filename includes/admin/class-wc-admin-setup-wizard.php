@@ -391,11 +391,9 @@ class WC_Admin_Setup_Wizard {
 					</option>
 				<?php endforeach; ?>
 			</select>
-			<input
-				id="currency_by_country"
-				type="hidden"
-				data-map="<?php esc_attr_e( json_encode( $currency_by_country ) ); ?>"
-			/>
+			<script type="text/javascript">
+				var wc_setup_currencies = <?php echo json_encode( $currency_by_country ); ?>;
+			</script>
 
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
