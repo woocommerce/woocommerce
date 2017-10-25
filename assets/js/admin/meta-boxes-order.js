@@ -550,8 +550,8 @@ jQuery( function ( $ ) {
 					security      : woocommerce_admin_meta_boxes.order_item_nonce
 				};
 				// Check if items have changed, if so pass them through so we can save them before deleting.
-				if( $( 'button.cancel-action' ).attr( 'data-reload' ) == "true" ) {
-					data['items'] = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
+				if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {
+					data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
 				}
 
 				$.ajax({
