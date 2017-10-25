@@ -304,10 +304,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-		function get_currency_code( $country ) {
-			return $country[ 'currency_code' ];
-		}
-		$currency_by_country = array_map( 'get_currency_code', $locale_info );
+		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
 
 		?>
 		<form method="post" class="address-step">
