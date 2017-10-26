@@ -763,6 +763,10 @@ final class WC_Cart_Totals {
 
 		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
 		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
+
+		// Add totals to cart object. Note: Discount total for cart is excl tax.
+		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
+		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
 	}
 
 	/**
@@ -806,10 +810,6 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_totals() {
 		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ) ) );
-
-		// Add totals to cart object. Note: Discount total for cart is excl tax.
-		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
-		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
