@@ -219,6 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Move js clipboards off of zeroclipboard script.
 * Tweak - Remove spam trap field from registration form.
 * Tweak - Added screen reader text to quantity input template.
+* Tweak - Streamlined the email templates content, moving billing email with the billing address, and order note into the order totals table.
 * Fix - Improved error handling in the CSV importer when invalid files are uploaded.
 * Fix - Handle full refunds in tax report by date.
 * Fix - API - Return empty result when there is no on_sale products.
