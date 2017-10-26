@@ -713,9 +713,10 @@ class WC_Admin_Setup_Wizard {
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
-		if ( 'US' === $country_code ) {
-			$dimension_unit = 'in';
-			$weight_unit    = 'oz';
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		if ( isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
 		} else {
 			$dimension_unit = 'cm';
 			$weight_unit    = 'kg';
