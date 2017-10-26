@@ -304,6 +304,9 @@ class WC_Admin_Setup_Wizard {
 			$state = '*';
 		}
 
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
+
 		?>
 		<form method="post" class="address-step">
 			<?php wp_nonce_field( 'wc-setup' ); ?>
@@ -391,6 +394,9 @@ class WC_Admin_Setup_Wizard {
 					</option>
 				<?php endforeach; ?>
 			</select>
+			<script type="text/javascript">
+				var wc_setup_currencies = <?php echo json_encode( $currency_by_country ); ?>;
+			</script>
 
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
