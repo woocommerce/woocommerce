@@ -1684,7 +1684,7 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  */
 function wc_get_permalink_structure() {
 	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
-	$permalinks       = wp_parse_args( $saved_permalinks, array(
+	$permalinks       = wp_parse_args( array_filter( $saved_permalinks ), array(
 		'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
 		'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
 		'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
