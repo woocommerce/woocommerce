@@ -142,5 +142,4 @@ jQuery( function( $ ) {
 		var countryCode = this.value.split( ':' )[ 0 ];
 		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
 	} );
-	$( 'select#store_country_state' ).change();
 } );
