@@ -220,7 +220,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Move js clipboards off of zeroclipboard script.
 * Tweak - Remove spam trap field from registration form.
 * Tweak - Added screen reader text to quantity input template.
-* Tweak - Streamlined the email templates content, moving billing email with the billing address, and order note into the order totals table.
 * Fix - Improved error handling in the CSV importer when invalid files are uploaded.
 * Fix - Handle full refunds in tax report by date.
 * Fix - API - Return empty result when there is no on_sale products.
@@ -252,6 +251,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - Refactored cart to use new WC_Cart_Session/WC_Cart_Totals/WC_Cart_Fees/WC_Discounts classes.
 * Dev - New `WC_Shortcode_Products` class to handle all product based shortcodes.
 * Theming - Display downloads in their own table, universally, using a new template file.
+* Theming - Streamlined email templates content: using the new downloads table, moved billing email with the billing address, order notes into the order totals table, and removed the need for 'downloadable' subjects/headings.
 * Theming - Checkout: Order pay template
 * Localization - Added cantons of Switzerland.
 * Localization - Updated XAF and XOF currency codes.
