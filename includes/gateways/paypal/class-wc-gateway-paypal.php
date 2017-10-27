@@ -56,7 +56,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled    = $this->debug;
 
 		if ( $this->testmode ) {
-			$this->description .= ' ' . sprintf( __( 'TEST MODE ENABLED. In test mode, you can use the Sandbox accounts created on your developer dashboard. See the "<a href="%s">PayPal Sandbox Testing Guide</a>" for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
+			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
 			$this->description  = trim( $this->description );
 		}
 
@@ -358,11 +358,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Load admin scripts.
 	 *
-	 * @since 3.X.X
-	 * @version 3.X.X
+	 * @since 3.3.0
 	 */
 	public function admin_scripts() {
-		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id: '';
+
+		if ( 'woocommerce_page_wc-settings' !== $screen_id ) {
 			return;
 		}
 
