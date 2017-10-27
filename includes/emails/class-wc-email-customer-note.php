@@ -75,6 +75,8 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @param array $args
 	 */
 	public function trigger( $args ) {
+		$this->setup_locale();
+
 		if ( ! empty( $args ) ) {
 			$defaults = array(
 				'order_id'      => '',
@@ -90,17 +92,13 @@ class WC_Email_Customer_Note extends WC_Email {
 				$this->customer_note                  = $customer_note;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
-			} else {
-				return;
 			}
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
-		$this->setup_locale();
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		$this->restore_locale();
 	}
 

@@ -371,12 +371,12 @@ class WC_Tracker {
 			foreach ( $files as $file ) {
 				if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 					$theme_file = get_stylesheet_directory() . '/' . $file;
-				} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_template_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
 				} else {
 					$theme_file = false;
 				}

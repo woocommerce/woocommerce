@@ -88,21 +88,20 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 * @param string $reset_key
 	 */
 	public function trigger( $user_login = '', $reset_key = '' ) {
+		$this->setup_locale();
+
 		if ( $user_login && $reset_key ) {
 			$this->object     = get_user_by( 'login', $user_login );
-
 			$this->user_login = $user_login;
 			$this->reset_key  = $reset_key;
 			$this->user_email = stripslashes( $this->object->user_email );
 			$this->recipient  = $this->user_email;
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
-		$this->setup_locale();
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		$this->restore_locale();
 	}
 

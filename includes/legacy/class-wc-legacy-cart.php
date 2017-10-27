@@ -79,6 +79,7 @@ abstract class WC_Legacy_Cart {
 				break;
 			case 'prices_include_tax' :
 				$value = wc_prices_include_tax();
+				break;
 			case 'round_at_subtotal' :
 				$value = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 				break;
@@ -142,10 +143,17 @@ abstract class WC_Legacy_Cart {
 				$value = &$this->coupon_discount_tax_totals;
 				break;
 			case 'fees' :
-				$this->fees = $this->get_fees();
+				wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'the fees API (%s)', 'WC_Cart::get_fees' ) );
+
+				// Grab fees from the new API.
+				$new_fees   = $this->fees_api()->get_fees();
+
+				// Add new fees to the legacy prop so it can be adjusted via legacy property.
+				$this->fees = $new_fees;
+
+				// Return by reference.
 				$value = &$this->fees;
 				break;
-
 			// Deprecated args. TODO: Remove in 4.0.
 			case 'tax' :
 				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax directly' );
@@ -212,7 +220,8 @@ abstract class WC_Legacy_Cart {
 				$this->set_coupon_discount_tax_totals( $value );
 				break;
 			case 'fees' :
-				$this->fees_api->set_fees( $value );
+				wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'the fees API (%s)', 'WC_Cart::add_fee' ) );
+				$this->fees = $value;
 				break;
 			default :
 				$this->$name = $value;

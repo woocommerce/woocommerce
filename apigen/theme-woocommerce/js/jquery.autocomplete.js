@@ -13,7 +13,7 @@
  */
 
 ;(function($) {
-
+    'use strict';
 $.fn.extend({
 	autocomplete: function(urlOrData, options) {
 		var isUrl = typeof urlOrData == "string";

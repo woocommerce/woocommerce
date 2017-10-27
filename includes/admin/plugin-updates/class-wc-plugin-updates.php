@@ -169,18 +169,27 @@ class WC_Plugin_Updates {
 	/**
 	 * Get active plugins that have a tested version lower than the input version.
 	 *
-	 * @param string $version
+	 * @param string $new_version
 	 * @param string $release 'major' or 'minor'.
 	 * @return array of plugin info arrays
 	 */
-	public function get_untested_plugins( $version, $release ) {
-		$extensions    = array_merge( $this->get_plugins_with_header( self::VERSION_TESTED_HEADER ), $this->get_plugins_for_woocommerce() );
-		$untested      = array();
-		$version_parts = explode( '.', $version );
-		$version       = $version_parts[0];
+	public function get_untested_plugins( $new_version, $release ) {
+		$extensions        = array_merge( $this->get_plugins_with_header( self::VERSION_TESTED_HEADER ), $this->get_plugins_for_woocommerce() );
+		$untested          = array();
+		$new_version_parts = explode( '.', $new_version );
+		$version           = $new_version_parts[0];
 
 		if ( 'minor' === $release ) {
-			$version .= '.' . $version_parts[1];
+			$version .= '.' . $new_version_parts[1];
+		}
+
+		if ( 'major' === $release ) {
+			$current_version_parts = explode( '.', WC_VERSION );
+
+			// If user has already moved to the major version, we don't need to flag up anything.
+			if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
+				return array();
+			}
 		}
 
 		foreach ( $extensions as $file => $plugin ) {
