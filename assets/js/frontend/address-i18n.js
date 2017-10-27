@@ -51,8 +51,6 @@ jQuery( function( $ ) {
 					var field       = thisform.find( value ),
 						fieldLocale = $.extend( true, {}, locale['default'][ key ], thislocale[ key ] );
 
-					window.console.log( fieldLocale );
-
 					// Labels.
 					if ( typeof fieldLocale.label !== 'undefined' ) {
 						field.find( 'label' ).html( fieldLocale.label );
