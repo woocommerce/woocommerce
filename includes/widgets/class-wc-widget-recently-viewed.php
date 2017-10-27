@@ -89,10 +89,10 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 			$this->widget_start( $args, $instance );
 
-			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
 			$template_args = array(
-				'widget_id' => $args['widget_id']
+				'widget_id' => $args['widget_id'],
 			);
 
 			while ( $r->have_posts() ) {
@@ -100,7 +100,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );
 		}
