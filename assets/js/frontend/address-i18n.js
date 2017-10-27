@@ -11,8 +11,10 @@ jQuery( function( $ ) {
 
 		function field_is_required( field, is_required ) {
 			if ( is_required ) {
-				field.find( 'label' ).append( ' <abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
-				field.addClass( 'validate-required' );
+				if ( field.find( 'label abbr.required' ).length === 0 ) {
+					field.find( 'label' ).append( ' <abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
+					field.addClass( 'validate-required' );
+				}
 			} else {
 				field.find( 'label abbr' ).remove();
 				field.removeClass( 'validate-required' );
@@ -46,86 +48,46 @@ jQuery( function( $ ) {
 
 				$.each( locale_fields, function( key, value ) {
 
-					var field = thisform.find( value );
+					var field       = thisform.find( value ),
+						fieldLocale = $.extend( true, {}, locale['default'][ key ], thislocale[ key ] );
 
-					// Set to defaults.
-					if ( locale['default'][ key ] ) {
-						if ( 'state' !== key ) {
-							if ( typeof locale['default'][ key ].hidden === 'undefined' || locale['default'][ key ].hidden === false ) {
-								field.show();
-							} else if ( locale['default'][ key ].hidden === true ) {
-								field.hide().find( 'input' ).val( '' );
-							}
-						}
-
-						if ( 'postcode' === key || 'city' === key || 'state' === key ) {
-							if ( locale['default'][ key ].label ) {
-								field.find( 'label' ).html( locale['default'][ key ].label );
-							}
-
-							if ( locale['default'][ key ].placeholder ) {
-								field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].placeholder );
-
-							// Use the label as a placeholder if there is no label element and no placeholder.
-							} else if ( locale['default'][ key ].label && ! field.find( 'label' ).length ) {
-								field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].label );
-								field.find( '.select2-selection__placeholder' ).text( locale['default'][ key ].label );
-							}
-
-						}
-
-						if ( locale['default'][ key ].required === true ) {
-							if ( field.find( 'label abbr' ).length === 0 ) {
-								field_is_required( field, true );
-							}
-						}
-
-						if ( locale['default'][ key ].priority ) {
-							field.data( 'priority', locale['default'][ key ].priority );
-						}
+					// Labels.
+					if ( typeof fieldLocale.label !== 'undefined' ) {
+						field.find( 'label' ).html( fieldLocale.label );
 					}
 
-					// Set to locale.
-					if ( thislocale[ key ] ) {
+					// Placeholders.
+					if ( typeof fieldLocale.placeholder !== 'undefined' ) {
+						field.find( 'input' ).attr( 'placeholder', fieldLocale.placeholder );
+						field.find( '.select2-selection__placeholder' ).text( fieldLocale.placeholder );
+					}
 
-						if ( thislocale[ key ].label ) {
-							field.find( 'label' ).html( thislocale[ key ].label );
-						}
+					// Use the i18n label as a placeholder if there is no label element and no i18n placeholder.
+					if ( typeof fieldLocale.placeholder === 'undefined' && typeof fieldLocale.label !== 'undefined' && ! field.find( 'label' ).length ) {
+						field.find( 'input' ).attr( 'placeholder', fieldLocale.label );
+						field.find( '.select2-selection__placeholder' ).text( fieldLocale.label );
+					}
 
-						if ( thislocale[ key ].placeholder ) {
-							field.find( 'input' ).attr( 'placeholder', thislocale[ key ].placeholder );
-							field.find( '.select2-selection__placeholder' ).text( thislocale[ key ].placeholder );
-
-						// Use the i18n label as a placeholder if there is no label element and no i18n placeholder.
-						} else if ( thislocale[ key ].label && ! field.find( 'label' ).length ) {
-							field.find( 'input' ).attr( 'placeholder', thislocale[ key ].label );
-							field.find( '.select2-selection__placeholder' ).text( thislocale[ key ].label );
-						}
-
+					// Required.
+					if ( typeof fieldLocale.required !== 'undefined' ) {
+						field_is_required( field, fieldLocale.required );
+					} else {
 						field_is_required( field, false );
-
-						if ( typeof thislocale[ key ].required === 'undefined' && locale['default'][ key ].required === true ) {
-							field_is_required( field, true );
-						} else if ( thislocale[ key ].required === true ) {
-							field_is_required( field, true );
-						}
-
-						if ( key !== 'state' ) {
-							if ( thislocale[ key ].hidden === true ) {
-								field.hide().find( 'input' ).val( '' );
-							} else {
-								field.show();
-							}
-						}
-
-						if ( thislocale[ key ].priority ) {
-							field.data( 'priority', thislocale[ key ].priority );
-						} else if ( locale['default'][ key ].priority ) {
-							field.data( 'priority', locale['default'][ key ].priority );
-						}
-
 					}
 
+					// Priority.
+					if ( typeof fieldLocale.priority !== 'undefined' ) {
+						field.data( 'priority', fieldLocale.priority );
+					}
+
+					// Hidden fields.
+					if ( 'state' !== key ) {
+						if ( typeof fieldLocale.hidden !== 'undefined' && true === fieldLocale.hidden ) {
+							field.hide().find( 'input' ).val( '' );
+						} else {
+							field.show();
+						}
+					}
 				});
 
 				var fieldsets = $('.woocommerce-billing-fields__field-wrapper, .woocommerce-shipping-fields__field-wrapper, .woocommerce-address-fields__field-wrapper, .woocommerce-additional-fields__field-wrapper .woocommerce-account-fields');

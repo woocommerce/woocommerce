@@ -92,7 +92,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' current-cat';
 		}
 
-		if ( $args['has_children'] && $args['hierarchical'] ) {
+		if ( $args['has_children'] && $args['hierarchical'] && ( empty( $args['max_depth'] ) || $args['max_depth'] > $depth + 1 ) ) {
 			$output .= ' cat-parent';
 		}
 

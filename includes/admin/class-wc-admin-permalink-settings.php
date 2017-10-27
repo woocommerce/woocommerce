@@ -194,7 +194,7 @@ class WC_Admin_Permalink_Settings {
 					$product_base = '/' . _x( 'product', 'slug', 'woocommerce' ) . $product_base;
 				}
 			} elseif ( empty( $product_base ) ) {
-				$product_base = false;
+				$product_base = _x( 'product', 'slug', 'woocommerce' );
 			}
 
 			$permalinks['product_base'] = wc_sanitize_permalink( $product_base );

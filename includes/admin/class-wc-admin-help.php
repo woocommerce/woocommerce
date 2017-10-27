@@ -177,7 +177,10 @@ class WC_Admin_Help {
 		}
 
 		if ( isset( $video_map[ $video_key ] ) ) {
-			$embed_code = str_replace( '?feature=oembed', '?feature=oembed&modestbranding=1&scolor=white', wp_oembed_get( 'https://www.youtube.com/watch?v=' . $video_map[ $video_key ]['id'], array( 'width' => '420px' ) ) );
+			$embed_code = '
+				<a href="https://www.youtube.com/watch?v=' . esc_attr( $video_map[ $video_key ]['id'] ) . '" target="_blank" class="wc-guided-tour-embed" data-video_id="' . esc_attr( $video_map[ $video_key ]['id'] ) . '">
+					<img src="https://img.youtube.com/vi/' . esc_attr( $video_map[ $video_key ]['id'] ) . '/maxresdefault.jpg" width="560" height="315" />
+				</a>';
 
 			$screen->add_help_tab( array(
 				'id'      => 'woocommerce_guided_tour_tab',
