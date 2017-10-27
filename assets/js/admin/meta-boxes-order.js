@@ -1111,6 +1111,11 @@ jQuery( function ( $ ) {
 						data       : $( '#wc-backbone-modal-dialog form' ).serialize()
 					};
 
+					// Check if items have changed, if so pass them through so we can save them before adding a new item.
+					if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {
+						data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
+					}
+
 					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 						if ( response.success ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).empty();

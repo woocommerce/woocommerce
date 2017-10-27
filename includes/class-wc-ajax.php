@@ -773,9 +773,18 @@ class WC_AJAX {
 			$order_id     = absint( $_POST['order_id'] );
 			$order        = wc_get_order( $order_id );
 			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
+			$items        = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			// If we passed through items it means we need to save first before adding a new one.
+			if ( ! empty( $items ) ) {
+				$save_items = array();
+				parse_str( $items, $save_items );
+				// Save order items.
+				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
 			foreach ( $items_to_add as $item_to_add ) {
