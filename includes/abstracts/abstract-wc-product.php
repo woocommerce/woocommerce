@@ -1420,7 +1420,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$visible = false;
 		}
 
-		// Check if the product has a parent, meaning it is a variation and if it's parent is published.
 		if ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && 'publish' !== get_post_status( $parent_id ) ) {
 			$visible = false;
 		}
