@@ -270,17 +270,25 @@ abstract class WC_Data {
 	 * Check if the key is an internal one.
 	 *
 	 * @since  3.2.0
-	 * @param  string $key
+	 * @param  string $key Key to check.
 	 * @return bool   true if it's an internal key, false otherwise
 	 */
 	protected function is_internal_meta_key( $key ) {
-		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+		$internal_meta_key = ! empty( $key ) && $this->data_store && in_array( $key, $this->data_store->get_internal_meta_keys() );
 
-			return true;
+		if ( ! $internal_meta_key ) {
+			return false;
 		}
 
-		return false;
+		$has_setter_or_getter = is_callable( array( $this, 'set_' . $key ) ) || is_callable( array( $this, 'get_' . $key ) );
+
+		if ( ! $has_setter_or_getter ) {
+			return false;
+		}
+
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+
+		return true;
 	}
 
 	/**
