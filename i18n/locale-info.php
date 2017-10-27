@@ -524,7 +524,7 @@ return array(
 		'thousand_sep'	=> ',',
 		'decimal_sep'	 => '.',
 		'num_decimals'	=> 2,
-		'weight_unit'	 => 'lbs',
+		'weight_unit'	 => 'oz',
 		'dimension_unit' => 'in',
 		'tax_rates'		=> array(
 			'AL' => array(
