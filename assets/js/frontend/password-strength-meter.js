@@ -106,4 +106,4 @@
 	};
 
 	wc_password_strength_meter.init();
-});
+})( jQuery );
