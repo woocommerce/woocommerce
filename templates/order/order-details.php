@@ -48,22 +48,24 @@ if ( $show_downloads ) {
 		</thead>
 
 		<tbody>
-			<?php do_action( 'woocommerce_order_items_table_before', $order ); ?>
 			<?php
-				foreach ( $order_items as $item_id => $item ) {
-					$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
+			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
-					wc_get_template( 'order/order-details-item.php', array(
-						'order'			     => $order,
-						'item_id'		     => $item_id,
-						'item'			     => $item,
-						'show_purchase_note' => $show_purchase_note,
-						'purchase_note'	     => $product ? $product->get_purchase_note() : '',
-						'product'	         => $product,
-					) );
-				}
+			foreach ( $order_items as $item_id => $item ) {
+				$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
+
+				wc_get_template( 'order/order-details-item.php', array(
+					'order'			     => $order,
+					'item_id'		     => $item_id,
+					'item'			     => $item,
+					'show_purchase_note' => $show_purchase_note,
+					'purchase_note'	     => $product ? $product->get_purchase_note() : '',
+					'product'	         => $product,
+				) );
+			}
+
+			do_action( 'woocommerce_order_details_after_order_table_items', $order );
 			?>
-			<?php do_action( 'woocommerce_order_items_table', $order ); ?>
 		</tbody>
 
 		<tfoot>
