@@ -163,6 +163,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 = 3.3.0 - 2017-XX-XX =
 * Feature - Template overrides via the wc_get_template filter now also appear in the System Status under the Templates section.
+* Feature - New default dummy data.
+* Feature - Added sandbox and live API details to the PayPal standard data, as well as an indication on the checkout to what mode is currently active.
+* Tweak - Added nofollow tags in layered nav to prevent duplicate indexed content.
+* Tweak - Hide "incl. VAT" when no rates are defined in "single total" display mode.
+* Dev - Bumped minimum WP version requirement to 4.5 and removed legacy API files.
+* Dev - New actions - `woocommerce_order_details_before_order_table_items`,  `woocommerce_order_details_after_order_table_items` and `woocommerce_order_details_before_order_table`
+* Dev - Passed `widget_id` to `content-widget-product.php` so actions can be ran conditionally, and added sanitisation to `woocommerce_before_widget_product_list` and `woocommerce_after_widget_product_list`.
+* Dev - Improved the `is_internal_meta_key` checks to consider getters and setters.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
