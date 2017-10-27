@@ -1043,4 +1043,4 @@
 	wc_meta_boxes_product_variations_ajax.init();
 	wc_meta_boxes_product_variations_pagenav.init();
 
-});
+})( jQuery );
