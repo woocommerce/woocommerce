@@ -2,8 +2,8 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, claudiulodro, woothemes, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
-Tested up to: 4.8
-Stable tag: 3.2.1
+Tested up to: 4.9
+Stable tag: 3.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,10 +160,32 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.2 - ? =
+= 3.2.2 - 2017-10-xx =
+* Fix - Properly escape commas while exporting products.
+* Fix - Fixed emails template with extra padding in order table on Outlook.
+* Fix - SelectWoo updated to allow better support for keyboard controls on AJAX multiselect elements.
+* Fix - Calculate shipping after discounts.
+* Fix - Fixed issue when customer is VAT exempt and prices include tax.
+* Fix - Reverted Flexslider support for RTL languages.
+* Fix - Zoom target on Chrome.
+* Fix - Sync prices for grouped products.
+* Fix - Filter and remove invalid tax classes names.
+* Fix - Stop showing "major" update notification for minor or patch releases.
+* Fix - Meta data clone for products.
+* Fix - Allow scroll bar in untested plugins list.
+* Fix - Clean "Filter Products by Attribute" widget cache when updating attributes.
 * Fix - Fixed issue where VAT exempt users where still being charged VAT on the totals.
 * Fix - Escape attributes with commas in their names when exporting products.
-* Tweak - Correct spelling errors in on sale date descriptions for the legacy v1 REST API.
+* Fix - Fixes and improvements on coupons user limit and calculations.
+* Fix - Smalls fixes with Jetpack and currencies on Setup wizard.
+* Fix - Fixed and improved warnings while trying to reset password with an invalid key.
+* Tweak - Allow shortcodes and relative URLs for downloads in product importer.
+* Tweak - Save unsaved items first while deleting order items.
+* Tweak - Use "relevance" as default sorting criteria for searching products.
+* Tweak - Correct spelling errors in REST API schema.
+* Tweak - Only change `nocacheheaders` when on a cart/checkout page.
+* Tweak - Setup locale before generating settings placeholders.
+* Dev - Fixed orders date query when querying by meta data.
 
 = 3.2.1 - 2017-10-13 =
 * Fix - Made grouped products display in the saved order, vs the menu order.
