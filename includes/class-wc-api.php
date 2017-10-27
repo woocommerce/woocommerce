@@ -14,10 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * API class.
+ */
 class WC_API extends WC_Legacy_API {
 
 	/**
 	 * Setup class.
+	 *
 	 * @since 2.0
 	 */
 	public function __construct() {
@@ -43,7 +47,7 @@ class WC_API extends WC_Legacy_API {
 	 * Add new query vars.
 	 *
 	 * @since 2.0
-	 * @param array $vars
+	 * @param array $vars Query vars.
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
@@ -54,6 +58,7 @@ class WC_API extends WC_Legacy_API {
 
 	/**
 	 * WC API for payment gateway IPNs, etc.
+	 *
 	 * @since 2.0
 	 */
 	public static function add_endpoint() {
@@ -70,8 +75,8 @@ class WC_API extends WC_Legacy_API {
 	public function handle_api_requests() {
 		global $wp;
 
-		if ( ! empty( $_GET['wc-api'] ) ) {
-			$wp->query_vars['wc-api'] = $_GET['wc-api'];
+		if ( ! empty( $_GET['wc-api'] ) ) { // WPCS: input var okay, CSRF ok.
+			$wp->query_vars['wc-api'] = sanitize_key( wp_unslash( $_GET['wc-api'] ) ); // WPCS: input var okay, CSRF ok.
 		}
 
 		// wc-api endpoint requests.
@@ -84,7 +89,7 @@ class WC_API extends WC_Legacy_API {
 			nocache_headers();
 
 			// Clean the API request.
-			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
+			$api_request = $wp->query_vars['wc-api'];
 
 			// Trigger generic action before request hook.
 			do_action( 'woocommerce_api_request', $api_request );
@@ -103,6 +108,7 @@ class WC_API extends WC_Legacy_API {
 
 	/**
 	 * Init WP REST API.
+	 *
 	 * @since 2.6.0
 	 */
 	private function rest_api_init() {
@@ -128,12 +134,6 @@ class WC_API extends WC_Legacy_API {
 
 		// Authentication.
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php' );
-
-		// WP-API classes and functions.
-		include_once( dirname( __FILE__ ) . '/vendor/wp-rest-functions.php' );
-		if ( ! class_exists( 'WP_REST_Controller' ) ) {
-			include_once( dirname( __FILE__ ) . '/vendor/abstract-wp-rest-controller.php' );
-		}
 
 		// Abstract controllers.
 		include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php' );
@@ -205,6 +205,7 @@ class WC_API extends WC_Legacy_API {
 
 	/**
 	 * Register REST API routes.
+	 *
 	 * @since 2.6.0
 	 */
 	public function register_rest_routes() {
@@ -275,6 +276,7 @@ class WC_API extends WC_Legacy_API {
 
 	/**
 	 * Register WC settings from WP-API to the REST API.
+	 *
 	 * @since  3.0.0
 	 */
 	public function register_wp_admin_settings() {
