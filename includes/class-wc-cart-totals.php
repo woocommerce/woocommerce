@@ -338,6 +338,10 @@ final class WC_Cart_Totals {
 	protected function get_shipping_from_cart() {
 		$this->shipping = array();
 
+		if ( ! $this->cart->show_shipping() ) {
+			return;
+		}
+
 		foreach ( $this->cart->calculate_shipping() as $key => $shipping_object ) {
 			$shipping_line            = $this->get_default_shipping_props();
 			$shipping_line->object    = $shipping_object;
