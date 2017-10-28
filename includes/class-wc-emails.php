@@ -177,6 +177,9 @@ class WC_Emails {
 		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
+		//Hook for replacing {site_title} in email-footer
+		add_filter( 'woocommerce_email_footer_text' , array( $this, 'email_footer_replace_site_title' ) );
+
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
 	}
@@ -249,6 +252,15 @@ class WC_Emails {
 	 */
 	public function email_footer() {
 		wc_get_template( 'emails/email-footer.php' );
+	}
+
+	/**
+	 * Filter callback to replace {site_title} in email footer 
+	 * @param  string $string Email footer text
+	 * @return string         Email footer text with any replacements done.
+	 */
+	public function email_footer_replace_site_title( $string ) {
+		return str_replace( '{site_title}', $this->get_blogname(), $string );
 	}
 
 	/**
