@@ -174,38 +174,41 @@ class WC_Meta_Box_Order_Data {
 						$order->get_order_number()
 					);
 				?></h2>
-				<p class="order_number"><?php
+				<p class="order_meta order_number"><?php
+					$order_meta = array();
 
 					if ( $payment_method ) {
 						/* translators: %s: payment method */
-						printf(
+						$order_meta['payment_method']['gateway'] = sprintf(
 							__( 'Payment via %s', 'woocommerce' ),
 							( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) )
 						);
 
 						if ( $transaction_id = $order->get_transaction_id() ) {
-								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
-								echo ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+							if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
+								$order_meta['payment_method']['transaction_id'] = '(<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 							} else {
-								echo ' (' . esc_html( $transaction_id ) . ')';
+								$order_meta['payment_method']['transaction_id'] = '(' . esc_html( $transaction_id ) . ')';
 							}
 						}
 
 						if ( $order->get_date_paid() ) {
 							/* translators: 1: date 2: time */
-							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), wc_format_datetime( $order->get_date_paid() ), wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) ) );
+							$order_meta['payment_method']['date_paid'] = sprintf( __( 'on %1$s @ %2$s', 'woocommerce' ), wc_format_datetime( $order->get_date_paid() ), wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) ) );
 						}
 
-						echo '. ';
+						$order_meta['payment_method'] = implode( ' ', $order_meta['payment_method'] );
 					}
 
 					if ( $ip_address = $order->get_customer_ip_address() ) {
 						/* translators: %s: IP address */
-						printf(
+						$order_meta['ip_address'] = sprintf(
 							__( 'Customer IP: %s', 'woocommerce' ),
 							'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
 						);
 					}
+
+					echo implode( '. ', $order_meta );
 				?></p>
 
 				<div class="order_data_column_container">
