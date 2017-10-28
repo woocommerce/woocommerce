@@ -1191,7 +1191,7 @@ function wc_format_datetime( $date, $format = '' ) {
 		$format = wc_date_format();
 	}
 	if ( ! is_a( $date, 'WC_DateTime' ) ) {
-		return '';
+		return date_i18n( $format );
 	}
 	return $date->date_i18n( $format );
 }
