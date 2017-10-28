@@ -66,17 +66,18 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 *
 	 * @since  3.2.0
 	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @param  bool $is_vat_exempt Indicates if the order should not have VAT applied to it.
 	 * @return bool  True if taxes were calculated.
 	 */
-	public function calculate_taxes( $calculate_tax_for = array() ) {
+	public function calculate_taxes( $calculate_tax_for = array(), $is_vat_exempt = false ) {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
 		// Use regular calculation unless the fee is negative.
 		if ( 0 <= $this->get_total() ) {
-			return parent::calculate_taxes( $calculate_tax_for );
+			return parent::calculate_taxes( $calculate_tax_for, $is_vat_exempt );
 		}
-		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
+		if ( ! $is_vat_exempt && wc_tax_enabled() && ( $order = $this->get_order() ) ) {
 			// Apportion taxes to order items, shipping, and fees.
 			$order           = $this->get_order();
 			$tax_class_costs = $this->get_tax_class_costs( $order );
