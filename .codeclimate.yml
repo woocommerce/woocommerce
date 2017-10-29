@@ -27,7 +27,6 @@ exclude_paths:
 - "includes/gateways/simplify-commerce/"
 - "includes/shipping/legacy-*"
 - "includes/wc-deprecated-functions.php"
-- "includes/class-wc-legacy-api.php"
 - "assets/js/accounting/"
 - "assets/js/jquery-*"
 - "assets/js/prettyPhoto/"

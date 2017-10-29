@@ -897,11 +897,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
-			$code   = wc_format_coupon_code( $raw_coupon );
-			$coupon = new WC_Coupon( $code );
+			$code      = wc_format_coupon_code( $raw_coupon );
+			$coupon    = new WC_Coupon( $code );
 
-			if ( $coupon->get_code() !== $code || ! $coupon->is_valid() ) {
+			if ( $coupon->get_code() !== $code ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
+			}
+
+			$discounts = new WC_Discounts( $this );
+			$valid     = $discounts->is_coupon_valid( $coupon );
+
+			if ( is_wp_error( $valid ) ) {
+				return $valid;
 			}
 		} else {
 			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
@@ -985,7 +992,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( 'coupon' ) as $coupon_item ) {
 			$coupon_code   = $coupon_item->get_code();
 			$coupon_id     = wc_get_coupon_id_by_code( $coupon_code );
-			$coupon_object = false;
 
 			// If we have a coupon ID (loaded via wc_get_coupon_id_by_code) we can simply load the new coupon object using the ID.
 			if ( $coupon_id ) {

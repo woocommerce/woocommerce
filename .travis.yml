@@ -14,9 +14,6 @@ env:
 # Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
 matrix:
   include:
-  - php: 5.6
-    env: WP_VERSION=latest WP_MULTISITE=1 PHP_LATEST_STABLE=7.1
-    dist: precise
   - php: 5.3
     env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
     dist: precise
@@ -30,8 +27,7 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  - phpunit --version
-  - phpunit -c phpunit.xml
+  - bash tests/bin/phpunit.sh
 
 after_script:
   - bash tests/bin/travis.sh after

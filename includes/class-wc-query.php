@@ -2,11 +2,9 @@
 /**
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
- * @class 		WC_Query
- * @version		2.6.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @version 3.2.0
+ * @package WooCommerce/Classes
+ * @author  Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,19 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Query {
 
-	/** @public array Query vars to add to wp */
+	/**
+	 * Query vars to add to wp.
+	 *
+	 * @var array
+	 */
 	public $query_vars = array();
 
 	/**
-	 * Stores chosen attributes
+	 * Stores chosen attributes.
+	 *
 	 * @var array
 	 */
 	private static $_chosen_attributes;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
-	 *
-	 * @access public
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
@@ -370,11 +371,14 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-		$ordering  = $this->get_catalog_ordering_args();
-		$q->set( 'orderby', $ordering['orderby'] );
-		$q->set( 'order', $ordering['order'] );
-		if ( isset( $ordering['meta_key'] ) ) {
-			$q->set( 'meta_key', $ordering['meta_key'] );
+		if ( ! is_feed() ) {
+			$ordering  = $this->get_catalog_ordering_args();
+			$q->set( 'orderby', $ordering['orderby'] );
+			$q->set( 'order', $ordering['order'] );
+
+			if ( isset( $ordering['meta_key'] ) ) {
+				$q->set( 'meta_key', $ordering['meta_key'] );
+			}
 		}
 
 		// Query vars that affect posts shown

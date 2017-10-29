@@ -390,7 +390,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		echo '<p class="product woocommerce add_to_cart_inline ' . esc_attr( $atts['class'] ) . '" style="' . empty( $atts['style'] ) ? '' : esc_attr( $atts['style'] ) . '">';
+		echo '<p class="product woocommerce add_to_cart_inline ' . esc_attr( $atts['class'] ) . '" style="' . ( empty( $atts['style'] ) ? '' : esc_attr( $atts['style'] ) ) . '">';
 
 		if ( wc_string_to_bool( $atts['show_price'] ) ) {
 			// @codingStandardsIgnoreStart

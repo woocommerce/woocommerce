@@ -378,7 +378,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 			$parent = get_term( (int) $request['parent'], $taxonomy );
 
-			if ( ! $parent ) {
+			// If is null or WP_Error is invalid parent term.
+			if ( ! $parent || is_wp_error( $parent ) ) {
 				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 

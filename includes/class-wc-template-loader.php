@@ -97,6 +97,10 @@ class WC_Template_Loader {
 		$search_files   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
 		$search_files[] = 'woocommerce.php';
 
+		if ( is_page_template() ) {
+			$search_files[] = get_page_template_slug();
+		}
+
 		if ( is_product_taxonomy() ) {
 			$term   = get_queried_object();
 			$search_files[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';

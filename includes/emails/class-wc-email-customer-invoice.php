@@ -20,20 +20,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 class WC_Email_Customer_Invoice extends WC_Email {
 
 	/**
-	 * Strings to find in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $find;
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $replace;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -65,7 +51,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		if ( $paid ) {
 			return __( 'Your {site_title} order from {order_date}', 'woocommerce' );
 		} else {
-			return __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
+			return __( 'Invoice for order {order_number}', 'woocommerce' );
 		}
 	}
 
@@ -77,7 +63,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 */
 	public function get_default_heading( $paid = false ) {
 		if ( $paid ) {
-			return __( 'Order {order_number} details', 'woocommerce' );
+			return __( 'Your order details', 'woocommerce' );
 		} else {
 			return __( 'Invoice for order {order_number}', 'woocommerce' );
 		}
@@ -124,6 +110,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @param WC_Order $order Order object.
 	 */
 	public function trigger( $order_id, $order = false ) {
+		$this->setup_locale();
+
 		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
 			$order = wc_get_order( $order_id );
 		}
@@ -135,12 +123,10 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
-		if ( ! $this->get_recipient() ) {
-			return;
+		if ( $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
-		$this->setup_locale();
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		$this->restore_locale();
 	}
 

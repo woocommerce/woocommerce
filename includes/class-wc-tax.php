@@ -301,17 +301,24 @@ class WC_Tax {
 	}
 
 	/**
-	 * Does the sort comparison.
+	 * Does the sort comparison. Compares (in this order):
+	 * 	- Priority
+	 *  - Country
+	 *  - State
+	 *  - Number of postcodes
+	 *  - Number of cities
+	 *  - ID
 	 *
-	 * @param object $rate1
-	 * @param object $rate2
-	 *
+	 * @param object $rate1 First rate to compare.
+	 * @param object $rate2 Second rate to compare.
 	 * @return int
 	 */
 	private static function sort_rates_callback( $rate1, $rate2 ) {
 		if ( $rate1->tax_rate_priority !== $rate2->tax_rate_priority ) {
 			return $rate1->tax_rate_priority < $rate2->tax_rate_priority ? -1 : 1; // ASC
-		} elseif ( $rate1->tax_rate_country !== $rate2->tax_rate_country ) {
+		}
+
+		if ( $rate1->tax_rate_country !== $rate2->tax_rate_country ) {
 			if ( '' === $rate1->tax_rate_country ) {
 				return 1;
 			}
@@ -319,7 +326,9 @@ class WC_Tax {
 				return -1;
 			}
 			return strcmp( $rate1->tax_rate_country, $rate2->tax_rate_country ) > 0 ? 1 : -1;
-		} elseif ( $rate1->tax_rate_state !== $rate2->tax_rate_state ) {
+		}
+
+		if ( $rate1->tax_rate_state !== $rate2->tax_rate_state ) {
 			if ( '' === $rate1->tax_rate_state ) {
 				return 1;
 			}
@@ -327,17 +336,23 @@ class WC_Tax {
 				return -1;
 			}
 			return strcmp( $rate1->tax_rate_state, $rate2->tax_rate_state ) > 0 ? 1 : -1;
-		} else {
-			return $rate1->tax_rate_id < $rate2->tax_rate_id ? -1 : 1; // Identical - use ID
 		}
+
+		if ( isset( $rate1->postcode_count, $rate2->postcode_count ) && $rate1->postcode_count !== $rate2->postcode_count ) {
+			return $rate1->postcode_count < $rate2->postcode_count ? 1 : -1;
+		}
+
+		if ( isset( $rate1->city_count, $rate2->city_count ) && $rate1->city_count !== $rate2->city_count ) {
+			return $rate1->city_count < $rate2->city_count ? 1 : -1;
+		}
+
+		return $rate1->tax_rate_id < $rate2->tax_rate_id ? -1 : 1;
 	}
 
 	/**
-	 * Logical sort order for tax rates based on the following in order of priority:
-	 * 		- Priority
-	 * 		- County code
-	 * 		- State code
-	 * @param  array $rates
+	 * Logical sort order for tax rates based on the following in order of priority.
+	 *
+	 * @param  array $rates Rates to be sorted.
 	 * @return array
 	 */
 	private static function sort_rates( $rates ) {
@@ -352,21 +367,21 @@ class WC_Tax {
 	/**
 	 * Loop through a set of tax rates and get the matching rates (1 per priority).
 	 *
-	 * @param  string $country
-	 * @param  string $state
-	 * @param  string $postcode
-	 * @param  string $city
-	 * @param  string $tax_class
+	 * @param  string $country Country code to match against.
+	 * @param  string $state State code to match against.
+	 * @param  string $postcode Postcode to match against.
+	 * @param  string $city City to match against.
+	 * @param  string $tax_class Tax class to match against.
 	 * @return array
 	 */
 	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class ) {
 		global $wpdb;
 
-		// Query criteria - these will be ANDed
+		// Query criteria - these will be ANDed.
 		$criteria   = array();
 		$criteria[] = $wpdb->prepare( "tax_rate_country IN ( %s, '' )", strtoupper( $country ) );
 		$criteria[] = $wpdb->prepare( "tax_rate_state IN ( %s, '' )", strtoupper( $state ) );
-		$criteria[] = $wpdb->prepare( "tax_rate_class = %s", sanitize_title( $tax_class ) );
+		$criteria[] = $wpdb->prepare( 'tax_rate_class = %s', sanitize_title( $tax_class ) );
 
 		// Pre-query postcode ranges for PHP based matching.
 		$postcode_search = wc_get_wildcard_postcodes( $postcode, $country );
@@ -392,7 +407,7 @@ class WC_Tax {
 		 * 	- rates with matching city, no postcode
 		 */
 		$locations_criteria   = array();
-		$locations_criteria[] = "locations.location_type IS NULL";
+		$locations_criteria[] = 'locations.location_type IS NULL';
 		$locations_criteria[] = "
 			locations.location_type = 'postcode' AND locations.location_code IN ('" . implode( "','", array_map( 'esc_sql', $postcode_search ) ) . "')
 			AND (
@@ -415,7 +430,7 @@ class WC_Tax {
 		$criteria[] = '( ( ' . implode( ' ) OR ( ', $locations_criteria ) . ' ) )';
 
 		$found_rates = $wpdb->get_results( "
-			SELECT tax_rates.*
+			SELECT tax_rates.*, COUNT( locations.location_id ) as postcode_count, COUNT( locations2.location_id ) as city_count
 			FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
@@ -429,7 +444,7 @@ class WC_Tax {
 		$found_priority    = array();
 
 		foreach ( $found_rates as $found_rate ) {
-			if ( in_array( $found_rate->tax_rate_priority, $found_priority ) ) {
+			if ( in_array( $found_rate->tax_rate_priority, $found_priority, true ) ) {
 				continue;
 			}
 
@@ -722,10 +737,21 @@ class WC_Tax {
 
 	/**
 	 * Get store tax classes.
+	 *
 	 * @return array Array of class names ("Reduced rate", "Zero rate", etc).
 	 */
 	public static function get_tax_classes() {
-		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ), array( __CLASS__, 'is_valid_tax_class' ) );
+	}
+
+	/**
+	 * Filter out invalid tax classes.
+	 *
+	 * @param string $tax_class Tax class name.
+	 * @return boolean
+	 */
+	private static function is_valid_tax_class( $tax_class ) {
+		return ! empty( $tax_class ) && sanitize_title( $tax_class );
 	}
 
 	/**
@@ -735,7 +761,7 @@ class WC_Tax {
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
-		return array_map( 'sanitize_title', self::get_tax_classes() );
+		return array_filter( array_map( 'sanitize_title', self::get_tax_classes() ) );
 	}
 
 	/**
@@ -816,7 +842,11 @@ class WC_Tax {
 	private static function prepare_tax_rate( $tax_rate ) {
 		foreach ( $tax_rate as $key => $value ) {
 			if ( method_exists( __CLASS__, 'format_' . $key ) ) {
-				$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
+				if ( 'tax_rate_state' === $key ) {
+					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), sanitize_key( $value ) );
+				} else {
+					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
+				}
 			}
 		}
 		return $tax_rate;
@@ -1007,7 +1037,7 @@ class WC_Tax {
 		global $wpdb;
 
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = self::sort_rates( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) ) );
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		if ( ! empty( $rates ) ) {
@@ -1027,6 +1057,13 @@ class WC_Tax {
 			}
 			$rates[ $location->tax_rate_id ]->{$location->location_type}[] = $location->location_code;
 		}
+
+		foreach ( $rates as $rate_id => $rate ) {
+			$rates[ $rate_id ]->postcode_count = isset( $rates[ $rate_id ]->postcode ) ? count( $rates[ $rate_id ]->postcode ) : 0;
+			$rates[ $rate_id ]->city_count     = isset( $rates[ $rate_id ]->city ) ? count( $rates[ $rate_id ]->city ) : 0;
+		}
+
+		$rates = self::sort_rates( $rates );
 
 		return $rates;
 	}
