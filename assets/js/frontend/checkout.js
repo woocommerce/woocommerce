@@ -32,7 +32,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'input blur change', '.input-text, select, input:checkbox', this.validate_field );
+			this.$checkout_form.on( 'input validate change', '.input-text, select, input:checkbox', this.validate_field );
 
 			// Manual trigger
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
@@ -189,7 +189,7 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' );
 			}
 
-			if ( 'focusout' === event_type || 'change' === event_type ) {
+			if ( 'validate' === event_type || 'change' === event_type ) {
 
 				if ( validate_required ) {
 					if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
@@ -382,7 +382,7 @@ jQuery( function( $ ) {
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select, input:checkbox' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 
 						// Scroll to top
 						$( 'html, body' ).animate( {
@@ -504,7 +504,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 			$( 'html, body' ).animate({
 				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
 			}, 1000 );

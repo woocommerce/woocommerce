@@ -271,7 +271,7 @@ module.exports = function( grunt ) {
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
-				bin: 'vendor/bin/phpcs',
+				bin: 'vendor/bin/phpcs'
 			},
 			dist: {
 				options: {

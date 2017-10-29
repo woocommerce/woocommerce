@@ -34,6 +34,7 @@ class WC_Meta_Box_Order_Actions {
 
 		$order_actions = apply_filters( 'woocommerce_order_actions', array(
 			'send_order_details'              => __( 'Email order details to customer', 'woocommerce' ),
+			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
 			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
 		) );
 		?>
@@ -81,7 +82,7 @@ class WC_Meta_Box_Order_Actions {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		// Order data saved, now get it so we can manipulate status
+		// Order data saved, now get it so we can manipulate status.
 		$order = wc_get_order( $post_id );
 
 		// Handle button actions
@@ -101,6 +102,19 @@ class WC_Meta_Box_Order_Actions {
 				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true );
 
 				do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
+
+				// Change the post saved message.
+				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
+
+			} elseif ( 'send_order_details_admin' === $action ) {
+
+				do_action( 'woocommerce_before_resend_order_emails', $order, 'new_order' );
+
+				WC()->payment_gateways();
+				WC()->shipping();
+				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order );
+
+				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 
 				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
