@@ -537,12 +537,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				$i = 1;
 				foreach ( $meta_data as $meta ) {
-					if ( ! is_scalar( $meta->value ) || in_array( $meta->key, $meta_keys_to_skip ) ) {
+					// Allow 3rd parties to process the meta, e.g. to transform non-scalar values to scalar, thus allowing
+					// them to be exported
+					$meta_value = apply_filters( 'woocommerce_product_export_meta_value', $meta->value, $meta, $product, $row );
+
+					if ( ! is_scalar( $meta_value ) || in_array( $meta->key, $meta_keys_to_skip ) ) {
 						continue;
 					}
 					$column_key                        = 'meta:' . esc_attr( $meta->key );
 					$this->column_names[ $column_key ] = sprintf( __( 'Meta: %s', 'woocommerce' ), $meta->key );
-					$row[ $column_key ]                = $meta->value;
+					$row[ $column_key ]                = $meta_value;
 					$i++;
 				}
 			}
