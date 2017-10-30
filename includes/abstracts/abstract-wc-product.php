@@ -1420,9 +1420,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$visible = false;
 		}
 
-		$parent_id = $this->get_parent_id();
-		if ( ! empty( $parent_id ) ) {
-			if ( ( $parent_product = wc_get_product( $parent_id ) ) && 'publish' !== $parent_product->get_status() ) {
+		if ( $this->get_parent_id() ) {
+			if ( ( $parent_product = wc_get_product( $this->get_parent_id() ) ) && 'publish' !== $parent_product->get_status() ) {
 				$visible = false;
 			}
 		}
