@@ -197,6 +197,12 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
+	$result = apply_filters( 'woocommerce_customer_bought_product', null, $customer_email, $user_id, $product_id );
+
+	if ( null !== $result ) {
+		return $result;
+	}
+
 	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
 
 	if ( false === ( $result = get_transient( $transient_name ) ) ) {
