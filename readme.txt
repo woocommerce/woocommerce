@@ -160,32 +160,33 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.2 - 2017-10-xx =
-* Fix - Properly escape commas while exporting products.
-* Fix - Fixed emails template with extra padding in order table on Outlook.
-* Fix - SelectWoo updated to allow better support for keyboard controls on AJAX multiselect elements.
-* Fix - Calculate shipping after discounts.
-* Fix - Fixed issue when customer is VAT exempt and prices include tax.
-* Fix - Reverted Flexslider support for RTL languages.
-* Fix - Zoom target on Chrome.
-* Fix - Sync prices for grouped products.
+= 3.2.2 - 2017-10-30 =
+* Fix - Properly escape commas when exporting products to CSV.
+* Fix - Fixed email template padding in Outlook.
+* Fix - Flexslider support for RTL languages and fixes for zoom target in Chrome.
+* Fix - Correctly sync prices for grouped products.
 * Fix - Filter and remove invalid tax classes names.
 * Fix - Stop showing "major" update notification for minor or patch releases.
-* Fix - Meta data clone for products.
-* Fix - Allow scroll bar in untested plugins list.
+* Fix - Allow scroll bar in untested plugins list on the bulk plugin updates screen.
+* Fix - Fixed meta data cloning when duplicating products.
 * Fix - Clean "Filter Products by Attribute" widget cache when updating attributes.
-* Fix - Fixed issue where VAT exempt users where still being charged VAT on the totals.
-* Fix - Escape attributes with commas in their names when exporting products.
-* Fix - Fixes and improvements on coupons user limit and calculations.
-* Fix - Smalls fixes with Jetpack and currencies on Setup wizard.
-* Fix - Fixed and improved warnings while trying to reset password with an invalid key.
-* Tweak - Allow shortcodes and relative URLs for downloads in product importer.
+* Fix - Fixed warning messages when reseting passwords with an invalid key.
+* Fix - Cart totals: Don't add shipping costs unless show_shipping is true.
+* Fix - Cart totals: Calculate shipping after discounts so discount amounts are available.
+* Fix - Cart totals: Fixed issue where VAT exempt users where still being charged VAT on the totals.
+* Fix - Cart totals: Fixed the coupons user limit and calculations.
+* Fix - Fixed "relevance" default sorting in search results.
+* Tweak - Allow shortcodes and relative URLs for downloads in product CSV importer.
 * Tweak - Save unsaved items first while deleting order items.
-* Tweak - Use "relevance" as default sorting criteria for searching products.
-* Tweak - Correct spelling errors in REST API schema.
 * Tweak - Only change `nocacheheaders` when on a cart/checkout page.
-* Tweak - Setup locale before generating settings placeholders.
+* Tweak - Setup locale before generating settings placeholders in email templates.
+* Tweak - On checkout, improved the field locale logic to work without clearing default values.
+* Tweak - Change title of customer invoice email for clarity.
+* Tweak - Use custom event instead of blur to trigger validation.
+* Tweak - Various selectWoo usibility improvements and better support for keyboard controls on AJAX multiselect elements.
+* Tweak - Various setup Wizard improvements.
 * Dev - Fixed orders date query when querying by meta data.
+* Dev - In the CSV exporter, added a filter to process meta values before export.
 
 = 3.2.1 - 2017-10-13 =
 * Fix - Made grouped products display in the saved order, vs the menu order.
