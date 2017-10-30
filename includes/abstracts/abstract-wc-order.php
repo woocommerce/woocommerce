@@ -1236,8 +1236,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$found_tax_classes = array();
 
 		foreach ( $this->get_items() as $item ) {
-			if ( ( $product = $item->get_product() ) && ( $product->is_taxable() || $product->is_shipping_taxable() ) ) {
-				$found_tax_classes[] = $product->get_tax_class();
+			if ( $item->get_tax_status() == 'taxable' && ( $tax_class = $item->get_tax_class() ) ) {
+				$found_tax_classes[] = $tax_class;
 			}
 		}
 
