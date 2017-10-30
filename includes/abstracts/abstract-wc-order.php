@@ -1236,8 +1236,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$found_tax_classes = array();
 
 		foreach ( $this->get_items() as $item ) {
-			if ( ( $product = $item->get_product() ) && ( $product->is_taxable() || $product->is_shipping_taxable() ) ) {
-				$found_tax_classes[] = $product->get_tax_class();
+			if ( is_callable( array( $item, 'get_tax_status' ) ) && in_array( $item->get_tax_status(), array( 'taxable', 'shipping' ), true ) ) {
+				$found_tax_classes[] = $item->get_tax_class();
 			}
 		}
 
@@ -1292,7 +1292,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
 		if ( 'inherit' === $shipping_tax_class ) {
-			$shipping_tax_class = current( array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() ) );
+			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax  :: get_tax_class_slugs() ), $this->get_items_tax_classes() );
+			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ): false;
 		}
 
 		// Trigger tax recalculation for all items.
@@ -1301,7 +1302,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
-			$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
+			if ( false !== $shipping_tax_class ) {
+				$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
+			} else {
+				$item->set_taxes( false );
+			}
 		}
 
 		$this->update_taxes();
