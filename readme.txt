@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Cart totals: Fixed issue where VAT exempt users where still being charged VAT on the totals.
 * Fix - Cart totals: Fixed the coupons user limit and calculations.
 * Fix - Fixed "relevance" default sorting in search results.
+* Fix - Use item tax class rather than product tax class when recalculating order totals.
 * Tweak - Allow shortcodes and relative URLs for downloads in product CSV importer.
 * Tweak - Save unsaved items first while deleting order items.
 * Tweak - Only change `nocacheheaders` when on a cart/checkout page.
