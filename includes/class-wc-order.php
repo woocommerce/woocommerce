@@ -814,25 +814,23 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get a formatted billing address for the order.
 	 *
-	 * @since 3.3.0
-	 * @param string $empty_html Content to show if no address is present.
+	 * @param string $empty_content Content to show if no address is present. @since 3.3.0.
 	 * @return string
 	 */
-	public function get_formatted_billing_address( $empty_html = '' ) {
+	public function get_formatted_billing_address( $empty_content = '' ) {
 		$address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
 		$address = WC()->countries->get_formatted_address( $address );
 
-		return $address ? $address : $empty_html;
+		return $address ? $address : $empty_content;
 	}
 
 	/**
 	 * Get a formatted shipping address for the order.
 	 *
-	 * @since 3.3.0
-	 * @param string $empty_html Content to show if no address is present.
+	 * @param string $empty_content Content to show if no address is present. @since 3.3.0.
 	 * @return string
 	 */
-	public function get_formatted_shipping_address( $empty_html = '' ) {
+	public function get_formatted_shipping_address( $empty_content = '' ) {
 		$address = '';
 
 		if ( $this->has_shipping_address() ) {
@@ -840,7 +838,7 @@ class WC_Order extends WC_Abstract_Order {
 			$address = WC()->countries->get_formatted_address( $address );
 		}
 
-		return $address ? $address : $empty_html;
+		return $address ? $address : $empty_content;
 	}
 
 	/**
