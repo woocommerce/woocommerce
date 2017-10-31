@@ -160,7 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.2 - 2017-10-30 =
+= 3.2.2 - 2017-10-31 =
 * Fix - Properly escape commas when exporting products to CSV.
 * Fix - Fixed email template padding in Outlook.
 * Fix - Flexslider support for RTL languages and fixes for zoom target in Chrome.
