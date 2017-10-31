@@ -3117,7 +3117,6 @@ img.help_tip {
 		input[type="text"],
 		input[type="number"],
 		input[type="email"] {
-			padding: 6px;
 			height: auto;
 		}
 
@@ -3138,6 +3137,18 @@ img.help_tip {
 			margin: 0;
 			padding: 6px;
 			box-sizing: border-box;
+		}
+
+		// Ignore nested inputs.
+		table {
+			select,
+			textarea,
+			input[type="text"],
+			input[type="email"],
+			input[type="number"],
+			input.regular-input {
+				width: auto;
+			}
 		}
 
 		textarea.wide-input {
@@ -5663,6 +5674,34 @@ table.bar_chart {
 		}
 	}
 
+	.button {
+		font-size: 1.25em;
+		padding: 0.5em 1em !important;
+		line-height: 1.5em !important;
+		margin-right: 0.5em;
+		margin-bottom: 2px;
+		height: auto !important;
+		border-radius: 4px;
+		background-color: #bb77ae;
+		border-color: #a36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
+		margin: 0;
+		opacity: 1;
+
+		&:hover, &:focus, &:active {
+			background: #a36597;
+			border-color: #a36597;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		}
+	}
+
+	.error .button {
+		font-size: 1em;
+	}
+
 	.wc-actions {
 		overflow: hidden;
 		border-top: 1px solid #eee;
@@ -5672,27 +5711,6 @@ table.bar_chart {
 
 		.button {
 			float: right;
-			font-size: 1.25em;
-			padding: 0.5em 1em !important;
-			line-height: 1.5em !important;
-			margin-right: 0.5em;
-			margin-bottom: 2px;
-			height: auto !important;
-			border-radius: 4px;
-			background-color: #bb77ae;
-			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
-			margin: 0;
-			opacity: 1;
-
-			&:hover, &:focus, &:active {
-				background: #a36597;
-				border-color: #a36597;
-				-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			}
 		}
 
 		.woocommerce-importer-toggle-advanced-options {

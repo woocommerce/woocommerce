@@ -9,7 +9,7 @@ jQuery( function( $ ) {
 	 * AddToCartHandler class.
 	 */
 	var AddToCartHandler = function() {
-		$( document )
+		$( document.body )
 			.on( 'click', '.add_to_cart_button', this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )

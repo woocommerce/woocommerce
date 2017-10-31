@@ -86,7 +86,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content table td {
-	padding: 48px;
+	padding: 48px 48px 0;
 }
 
 #body_content table td td {
@@ -185,7 +185,7 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $base ); ?>;
+	color: <?php echo esc_attr( $base_text ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }

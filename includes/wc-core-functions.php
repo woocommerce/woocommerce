@@ -57,9 +57,9 @@ add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 /**
  * Define a constant if it is not already defined.
  *
- * @since  3.0.0
- * @param  string $name
- * @param  string $value
+ * @since 3.0.0
+ * @param string $name  Constant name.
+ * @param string $value Value.
  */
 function wc_maybe_define_constant( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -115,11 +115,15 @@ function wc_create_order( $args = array() ) {
 			$order->set_cart_hash( sanitize_text_field( $args['cart_hash'] ) );
 		}
 
+		// Set these fields when creating a new order but not when updating an existing order.
+		if ( ! $args['order_id'] ) {
+			$order->set_currency( get_woocommerce_currency() );
+			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+			$order->set_customer_user_agent( wc_get_user_agent() );
+		}
+
 		// Update other order props set automatically
-		$order->set_currency( get_woocommerce_currency() );
-		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->save();
 	} catch ( Exception $e ) {
 		return new WP_Error( 'error', $e->getMessage() );
@@ -135,7 +139,7 @@ function wc_create_order( $args = array() ) {
  * @return string | WC_Order
  */
 function wc_update_order( $args ) {
-	if ( ! $args['order_id'] ) {
+	if ( empty( $args['order_id'] ) ) {
 		return new WP_Error( __( 'Invalid order ID.', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
@@ -882,12 +886,9 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
-	$post = get_post( $post_id );
-	if ( 'product' === get_post_type( $post->post_parent ) ) {
-		$permalinks = wc_get_permalink_structure();
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $permalinks['product_rewrite_slug'], $matches ) ) {
-			$link = home_url( '/?attachment_id=' . $post->ID );
-		}
+	$parent_type = get_post_type( wp_get_post_parent_id( $post_id ) );
+	if ( 'product' === $parent_type || 'product_variation' === $parent_type ) {
+		$link = home_url( '/?attachment_id=' . $post_id );
 	}
 	return $link;
 }
@@ -1151,9 +1152,7 @@ function wc_transaction_query( $type = 'start' ) {
 
 	$wpdb->hide_errors();
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		define( 'WC_USE_TRANSACTIONS', true );
-	}
+	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
 	if ( WC_USE_TRANSACTIONS ) {
 		switch ( $type ) {
@@ -1470,7 +1469,7 @@ function wc_add_number_precision( $value ) {
  */
 function wc_remove_number_precision( $value ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+	return $value / $precision;
 }
 
 /**
@@ -1672,33 +1671,36 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 }
 
 /**
- * Get permalink settings for WooCommerce independent of the user locale.
+ * Get permalink settings for things like products and taxonomies.
+ *
+ * As of 3.3.0, the permalink settings are stored to the option instead of
+ * being blank and inheritting from the locale. This speeds up page loading
+ * times by negating the need to switch locales on each page load.
+ *
+ * This is more inline with WP core behavior which does not localize slugs.
  *
  * @since  3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( did_action( 'admin_init' ) ) {
-		wc_switch_to_site_locale();
-	}
-
-	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
-		'product_base'           => '',
-		'category_base'          => '',
-		'tag_base'               => '',
+	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
+	$permalinks       = wp_parse_args( array_filter( $saved_permalinks ), array(
+		'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
+		'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
+		'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
 		'attribute_base'         => '',
 		'use_verbose_page_rules' => false,
 	) );
 
-	// Ensure rewrite slugs are set.
-	$permalinks['product_rewrite_slug']   = untrailingslashit( empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' )             : $permalinks['product_base'] );
-	$permalinks['category_rewrite_slug']  = untrailingslashit( empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' )   : $permalinks['category_base'] );
-	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
-	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
-
-	if ( did_action( 'admin_init' ) ) {
-		wc_restore_locale();
+	if ( $saved_permalinks !== $permalinks ) {
+		update_option( 'woocommerce_permalinks', $permalinks );
 	}
+
+	$permalinks['product_rewrite_slug']   = untrailingslashit( $permalinks['product_base'] );
+	$permalinks['category_rewrite_slug']  = untrailingslashit( $permalinks['category_base'] );
+	$permalinks['tag_rewrite_slug']       = untrailingslashit( $permalinks['tag_base'] );
+	$permalinks['attribute_rewrite_slug'] = untrailingslashit( $permalinks['attribute_base'] );
+
 	return $permalinks;
 }
 
@@ -1822,3 +1824,60 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 	return $should_update;
 }
 add_filter( 'auto_update_plugin', 'wc_prevent_dangerous_auto_updates', 99, 2 );
+
+/**
+ * Delete expired transients.
+ *
+ * Deletes all expired transients. The multi-table delete syntax is used.
+ * to delete the transient record from table a, and the corresponding.
+ * transient_timeout record from table b.
+ *
+ * Based on code inside core's upgrade_network() function.
+ *
+ * @since 3.2.0
+ * @return int Number of transients that were cleared.
+ */
+function wc_delete_expired_transients() {
+	global $wpdb;
+
+	$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+		WHERE a.option_name LIKE %s
+		AND a.option_name NOT LIKE %s
+		AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
+		AND b.option_value < %d";
+	$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
+
+	$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+		WHERE a.option_name LIKE %s
+		AND a.option_name NOT LIKE %s
+		AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
+		AND b.option_value < %d";
+	$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
+
+	return absint( $rows + $rows2 );
+}
+add_action( 'woocommerce_installed', 'wc_delete_expired_transients' );
+
+/**
+ * Make a URL relative, if possible.
+ *
+ * @since 3.2.0
+ * @param string $url URL to make relative.
+ * @return string
+ */
+function wc_get_relative_url( $url ) {
+	return wc_is_external_resource( $url ) ? $url : str_replace( array( 'http://', 'https://' ), '//', $url );
+}
+
+/**
+ * See if a resource is remote.
+ *
+ * @since 3.2.0
+ * @param string $url URL to check.
+ * @return bool
+ */
+function wc_is_external_resource( $url ) {
+	$wp_base = str_replace( array( 'http://', 'https://' ), '//', get_home_url( null, '/', 'http' ) );
+
+	return strstr( $url, '://' ) && strstr( $wp_base, $url );
+}

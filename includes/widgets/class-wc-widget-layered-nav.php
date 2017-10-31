@@ -290,7 +290,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
 							placeholder: '" . esc_html( $any_label ) . "',
 							minimumResultsForSearch: 5,
-							width: '100%'
+							width: '100%',
+							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+							language: {
+								noResults: function() {
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+								}
+							}
 						} );
 					};
 					wc_layered_nav_select();
@@ -498,17 +504,19 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( ! empty( $current_filter ) ) {
+				asort( $current_filter );
 				$link = add_query_arg( $filter_name, implode( ',', $current_filter ), $link );
 
 				// Add Query type Arg to URL
 				if ( 'or' === $query_type && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
 					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
 				}
+				$link = str_replace( '%2C', ',', $link );
 			}
 
 			if ( $count > 0 || $option_is_set ) {
 				$link      = esc_url( apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy ) );
-				$term_html = '<a href="' . $link . '">' . esc_html( $term->name ) . '</a>';
+				$term_html = '<a rel="nofollow" href="' . $link . '">' . esc_html( $term->name ) . '</a>';
 			} else {
 				$link      = false;
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';
