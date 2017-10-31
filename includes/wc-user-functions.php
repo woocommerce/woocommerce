@@ -190,6 +190,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 /**
  * Checks if a user (by email or ID or both) has bought an item.
  *
+ * @param string $customer_email
  * @param int $user_id
  * @param int $product_id
  * @return bool
