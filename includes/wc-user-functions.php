@@ -189,7 +189,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
  * Checks if a user (by email or ID or both) has bought an item.
- * @param string $customer_email
+ *
  * @param int $user_id
  * @param int $product_id
  * @return bool
@@ -197,46 +197,14 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
+	$bought_products = $wpdb->get_row( $wpdb->prepare( "
+		SELECT *
+		FROM {$wpdb->prefix}woocommerce_bought_products
+		WHERE ( user_id = %s OR user_email = %s ) AND product_id = %d
+		LIMIT 1
+	", absint( $user_id ), esc_sql( $customer_email ), absint( $product_id ) ) );
 
-	if ( false === ( $result = get_transient( $transient_name ) ) ) {
-		$customer_data = array( $user_id );
-
-		if ( $user_id ) {
-			$user = get_user_by( 'id', $user_id );
-
-			if ( isset( $user->user_email ) ) {
-				$customer_data[] = $user->user_email;
-			}
-		}
-
-		if ( is_email( $customer_email ) ) {
-			$customer_data[] = $customer_email;
-		}
-
-		$customer_data = array_map( 'esc_sql', array_filter( array_unique( $customer_data ) ) );
-		$statuses      = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-
-		if ( sizeof( $customer_data ) == 0 ) {
-			return false;
-		}
-
-		$result = $wpdb->get_col( "
-			SELECT im.meta_value FROM {$wpdb->posts} AS p
-			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-			AND im.meta_key IN ( '_product_id', '_variation_id' )
-			AND im.meta_value != 0
-			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-		" );
-		$result = array_map( 'absint', $result );
-
-		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
-	}
-	return in_array( absint( $product_id ), $result );
+	return ! empty( $bought_products );
 }
 
 /**
