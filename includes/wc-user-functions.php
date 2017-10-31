@@ -209,6 +209,43 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 }
 
 /**
+ * Marks all products in an existing order as purchased in the bought table.
+ *
+ * @param WC_Order $order
+ */
+function wc_customer_mark_bought_order( $order ) {
+	global $wpdb;
+
+	$order_items = $order->get_items();
+
+	foreach ( $order_items as $item_id => $item ) {
+		$item_product_id = $item->get_product_id();
+
+		if ( ! empty( $item_product_id ) ) {
+			$data = array(
+				'user_email'           => $order->get_billing_email(),
+				'order_id'             => $order->get_id(),
+				'user_id'              => $order->get_customer_id(),
+				'product_id'           => $item_product_id,
+				'parent_order_item_id' => $item_id,
+			);
+
+			$wpdb->insert(
+				$wpdb->prefix . 'woocommerce_bought_products',
+				$data,
+				array(
+					'%s',
+					'%d',
+					'%d',
+					'%d',
+					'%d',
+				)
+			);
+		}
+	}
+}
+
+/**
  * Checks if a user has a certain capability.
  *
  * @access public
