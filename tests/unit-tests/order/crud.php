@@ -794,7 +794,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( 100 );
 		$object->set_currency( 'USD' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>100.00</span>', $object->get_formatted_order_total() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>&#x200e;100.00</span>', $object->get_formatted_order_total() );
 	}
 
 	/**
