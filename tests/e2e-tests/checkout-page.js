@@ -62,9 +62,9 @@ test.describe( 'Checkout Page', function() {
 		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 
 		const orderReview = checkoutPage.components.orderReview;
-		assertOrderItem( orderReview, 'Beanie', { qty: '1', total: '$18.00' } );
-		assertOrderItem( orderReview, 'Long Sleeve Tee', { qty: '1', total: '$25.00' } );
-		assert.eventually.ok( orderReview.hasSubtotal( '$43.00' ), 'Could not find subtotal $43.00' );
+		assertOrderItem( orderReview, 'Beanie', { qty: '1', total: '18.00' } );
+		assertOrderItem( orderReview, 'Long Sleeve Tee', { qty: '1', total: '25.00' } );
+		assert.eventually.ok( orderReview.hasSubtotal( '43.00' ), 'Could not find subtotal 43.00' );
 	} );
 
 	test.it( 'allows customer to choose available payment methods', () => {

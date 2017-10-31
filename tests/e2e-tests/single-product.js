@@ -33,7 +33,7 @@ test.describe( 'Single Product Page', function() {
 		productPage.addToCart();
 
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		assert.eventually.equal( cartPage.hasItem( 'Happy Ninja', { qty: 5 } ), true );
+		assert.eventually.equal( cartPage.hasItem( 'T-Shirt', { qty: 5 } ), true );
 	} );
 
 	test.it( 'should be able to add variation products to the cart', () => {
