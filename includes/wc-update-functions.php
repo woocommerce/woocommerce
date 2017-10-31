@@ -1411,10 +1411,60 @@ function wc_update_320_db_version() {
 }
 
 /**
- * Synchronize bought products database table.
- * @todo
+ * Synchronize bought products database table from order meta.
  */
 function wc_update_330_bought_products() {
+	global $wpdb;
+
+	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
+	$orders = array();
+
+	$results = $wpdb->get_results( "
+		SELECT
+		p.id AS order_id,
+		pm.meta_key AS postmeta_key,
+		pm.meta_value AS postmeta_value,
+		im.meta_key AS itemmeta_key,
+		im.meta_value AS itemmeta_value
+		FROM {$wpdb->posts} AS p
+		INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+		WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+		AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+		AND im.meta_key IN ( '_product_id', '_variation_id' )
+		AND im.meta_value != 0
+	" );
+
+	// TODO: Test if this can cause a lot of performance issues during upgrade process.
+	foreach ( $results as $result ) {
+		$orders[ $result->order_id ][ $result->postmeta_key ] = $result->postmeta_value;
+
+		if ( ! isset( $orders[ $result->order_id ][ $result->itemmeta_key ] )
+			|| ! in_array( $result->itemmeta_value, $orders[ $result->order_id ][ $result->itemmeta_key ] ) ) {
+			$orders[ $result->order_id ][ $result->itemmeta_key ][] = $result->itemmeta_value;
+		}
+	}
+
+	// $wpdb->insert to bought table for every record in $results. Sample data:
+	/*
+	array (size=2)
+	  125 =>
+	    array (size=3)
+	      '_billing_email' => string 'user1@user1.com' (length=15)
+	      '_product_id' =>
+		array (size=1)
+		  0 => string '124' (length=3)
+	      '_customer_user' => string '0' (length=1)
+	  132 =>
+	    array (size=3)
+	      '_billing_email' => string 'my@mail.com' (length=20)
+	      '_product_id' =>
+		array (size=2)
+		  0 => string '124' (length=3)
+		  1 => string '116' (length=3)
+	      '_customer_user' => string '1' (length=1)
+	*/
 }
 
 /**
