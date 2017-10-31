@@ -1038,6 +1038,46 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get_formatted_billing_address and has_billing_address.
+	 *
+	 * @since 3.3
+	 */
+	function test_get_has_formatted_billing_address() {
+		$order = new WC_Order;
+
+		$this->assertEquals( 'none', $order->get_formatted_billing_address( 'none' ) );
+
+		$order->set_billing_address_1( '123 Test St.' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_city( 'Portland' );
+		$order->set_billing_postcode( '97266' );
+		$this->assertEquals( '123 Test St.<br/>Portland, 97266<br/>United States (US)', $order->get_formatted_billing_address( 'none' ) );
+
+		$this->assertTrue( $order->has_billing_address() );
+		$this->assertFalse( $order->has_shipping_address() );
+	}
+
+	/**
+	 * Test get_formatted_shipping_address and has_shipping_address.
+	 *
+	 * @since 3.3
+	 */
+	function test_get_has_formatted_shipping_address() {
+		$order = new WC_Order;
+
+		$this->assertEquals( 'none', $order->get_formatted_shipping_address( 'none' ) );
+
+		$order->set_shipping_address_1( '123 Test St.' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_city( 'Portland' );
+		$order->set_shipping_postcode( '97266' );
+		$this->assertEquals( '123 Test St.<br/>Portland, 97266<br/>United States (US)', $order->get_formatted_shipping_address( 'none' ) );
+
+		$this->assertFalse( $order->has_billing_address() );
+		$this->assertTrue( $order->has_shipping_address() );
+	}
+
+	/**
 	 * Test: Setting/getting shipping settings after an order is saved
 	 */
 	function test_set_shipping_after_save() {

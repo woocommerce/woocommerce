@@ -142,7 +142,7 @@ abstract class WC_Data {
 			foreach ( $this->meta_data as $array_key => $meta ) {
 				$this->meta_data[ $array_key ] = clone $meta;
 				if ( ! empty( $meta->id ) ) {
-					unset( $this->meta_data[ $array_key ]->id );
+					$this->meta_data[ $array_key ]->id = null;
 				}
 			}
 		}
@@ -248,9 +248,7 @@ abstract class WC_Data {
 	 * Filter null meta values from array.
 	 *
 	 * @since  3.0.0
-	 *
-	 * @param mixed $meta
-	 *
+	 * @param mixed $meta Meta value to check.
 	 * @return bool
 	 */
 	protected function filter_null_meta( $meta ) {
@@ -261,7 +259,7 @@ abstract class WC_Data {
 	 * Get All Meta Data.
 	 *
 	 * @since 2.6.0
-	 * @return array
+	 * @return array of objects.
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();
@@ -272,17 +270,25 @@ abstract class WC_Data {
 	 * Check if the key is an internal one.
 	 *
 	 * @since  3.2.0
-	 * @param  string $key
+	 * @param  string $key Key to check.
 	 * @return bool   true if it's an internal key, false otherwise
 	 */
 	protected function is_internal_meta_key( $key ) {
-		if ( $this->data_store && ! empty( $key ) && in_array( $key, $this->data_store->get_internal_meta_keys() ) ) {
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+		$internal_meta_key = ! empty( $key ) && $this->data_store && in_array( $key, $this->data_store->get_internal_meta_keys() );
 
-			return true;
+		if ( ! $internal_meta_key ) {
+			return false;
 		}
 
-		return false;
+		$has_setter_or_getter = is_callable( array( $this, 'set_' . $key ) ) || is_callable( array( $this, 'get_' . $key ) );
+
+		if ( ! $has_setter_or_getter ) {
+			return false;
+		}
+
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+
+		return true;
 	}
 
 	/**

@@ -494,7 +494,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
 							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
-							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute;
+							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? str_replace( ',', '\\,', $option_term->name ) : $attribute;
 							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
 							$row[ 'attributes:value' . $i ]    = $attribute;
@@ -525,8 +525,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Export meta data.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
-	 * @param array $row
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row Row data.
 	 */
 	protected function prepare_meta_for_export( $product, &$row ) {
 		if ( $this->enable_meta_export ) {
@@ -537,13 +537,21 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				$i = 1;
 				foreach ( $meta_data as $meta ) {
-					if ( ! is_scalar( $meta->value ) || in_array( $meta->key, $meta_keys_to_skip ) ) {
+					if ( in_array( $meta->key, $meta_keys_to_skip, true ) ) {
 						continue;
 					}
+
+					// Allow 3rd parties to process the meta, e.g. to transform non-scalar values to scalar.
+					$meta_value = apply_filters( 'woocommerce_product_export_meta_value', $meta->value, $meta, $product, $row );
+
+					if ( ! is_scalar( $meta_value ) ) {
+						continue;
+					}
+
 					$column_key                        = 'meta:' . esc_attr( $meta->key );
 					$this->column_names[ $column_key ] = sprintf( __( 'Meta: %s', 'woocommerce' ), $meta->key );
-					$row[ $column_key ]                = $meta->value;
-					$i++;
+					$row[ $column_key ]                = $meta_value;
+					$i ++;
 				}
 			}
 		}

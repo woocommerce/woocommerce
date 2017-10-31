@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/' ) ) ), $request ) );
 	}
 
 	/**
@@ -773,9 +773,18 @@ class WC_AJAX {
 			$order_id     = absint( $_POST['order_id'] );
 			$order        = wc_get_order( $order_id );
 			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
+			$items        = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			// If we passed through items it means we need to save first before adding a new one.
+			if ( ! empty( $items ) ) {
+				$save_items = array();
+				parse_str( $items, $save_items );
+				// Save order items.
+				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
 			foreach ( $items_to_add as $item_to_add ) {
@@ -985,9 +994,18 @@ class WC_AJAX {
 		try {
 			$order_id       = absint( $_POST['order_id'] );
 			$order_item_ids = $_POST['order_item_ids'];
+			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
+			}
+
+			// If we passed through items it means we need to save first before deleting.
+			if ( ! empty( $items ) ) {
+				$save_items = array();
+				parse_str( $items, $save_items );
+				// Save order items
+				wc_save_order_items( $order_id, $save_items );
 			}
 
 			if ( sizeof( $order_item_ids ) > 0 ) {
@@ -1521,6 +1539,8 @@ class WC_AJAX {
 
 	/**
 	 * Handle a refund via the edit order screen.
+	 *
+	 * @throws Exception To return errors.
 	 */
 	public static function refund_line_items() {
 		ob_start();
@@ -1533,6 +1553,7 @@ class WC_AJAX {
 
 		$order_id               = absint( $_POST['order_id'] );
 		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ), wc_get_price_decimals() );
+		$refunded_amount        = wc_format_decimal( sanitize_text_field( $_POST['refunded_amount'] ), wc_get_price_decimals() );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
@@ -1551,7 +1572,11 @@ class WC_AJAX {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
-			// Prepare line items which we are refunding
+			if ( $refunded_amount !== wc_format_decimal( $order->get_total_refunded(), wc_get_price_decimals() ) ) {
+				throw new exception( __( 'Error processing refund. Please try again.', 'woocommerce' ) );
+			}
+
+			// Prepare line items which we are refunding.
 			$line_items = array();
 			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys, $line_item_totals ) ) );
 
@@ -2234,18 +2259,15 @@ class WC_AJAX {
 				'tax_rate_order'    => 1,
 			) );
 
-			// Format the rate.
-			$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
+			if ( isset( $tax_rate['tax_rate'] ) ) {
+				$tax_rate['tax_rate'] = wc_format_decimal( $tax_rate['tax_rate'] );
+			}
 
 			if ( isset( $data['newRow'] ) ) {
-				// Hurrah, shiny and new!
 				$tax_rate['tax_rate_class'] = $current_class;
-				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
-			} else {
-				// Updating an existing rate ...
-				if ( ! empty( $tax_rate ) ) {
-					WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
-				}
+				$tax_rate_id                = WC_Tax::_insert_tax_rate( $tax_rate );
+			} elseif ( ! empty( $tax_rate ) ) {
+				WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 			}
 
 			if ( isset( $data['postcode'] ) ) {

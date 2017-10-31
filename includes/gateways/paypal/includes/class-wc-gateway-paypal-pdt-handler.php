@@ -29,8 +29,9 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 	/**
 	 * Validate a PDT transaction to ensure its authentic.
-	 * @param  string $transaction
-	 * @return bool|array False or result array
+	 *
+	 * @param  string $transaction TX ID.
+	 * @return bool|array False or result array if successful and valid.
 	 */
 	protected function validate_transaction( $transaction ) {
 		$pdt = array(
@@ -47,11 +48,11 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $pdt );
 
-		if ( is_wp_error( $response ) || ! strpos( $response['body'], "SUCCESS" ) === 0 ) {
+		if ( is_wp_error( $response ) || strpos( $response['body'], "SUCCESS" ) !== 0 ) {
 			return false;
 		}
 
-		// Parse transaction result data
+		// Parse transaction result data.
 		$transaction_result  = array_map( 'wc_clean', array_map( 'urldecode', explode( "\n", $response['body'] ) ) );
 		$transaction_results = array();
 
@@ -88,12 +89,12 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		$transaction_result = $this->validate_transaction( $transaction );
 
-		WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_print_r( $transaction_result, true ) );
-
-		update_post_meta( $order->get_id(), '_paypal_status', $status );
-		update_post_meta( $order->get_id(), '_transaction_id', $transaction );
-
 		if ( $transaction_result ) {
+			WC_Gateway_Paypal::log( 'PDT Transaction Result: ' . wc_print_r( $transaction_result, true ) );
+
+			update_post_meta( $order->get_id(), '_paypal_status', $status );
+			update_post_meta( $order->get_id(), '_transaction_id', $transaction );
+
 	 		if ( 'completed' === $status ) {
 				if ( $order->get_total() != $amount ) {
 					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
@@ -125,6 +126,8 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 					$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $transaction_result['pending_reason'] ) );
 				}
 			}
+		} else {
+			WC_Gateway_Paypal::log( 'Received invalid response from PayPal PDT' );
 		}
 	}
 }

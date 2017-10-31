@@ -928,11 +928,11 @@ class WC_Form_Handler {
 
 			try {
 				$creds = array(
+					'user_login'    => trim( $_POST['username'] ),
 					'user_password' => $_POST['password'],
 					'remember'      => isset( $_POST['rememberme'] ),
 				);
 
-				$username         = trim( $_POST['username'] );
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -940,29 +940,13 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $validation_error->get_error_message() );
 				}
 
-				if ( empty( $username ) ) {
+				if ( empty( $creds['user_login'] ) ) {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Username is required.', 'woocommerce' ) );
-				}
-
-				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-					$user = get_user_by( 'email', $username );
-
-					if ( ! $user ) {
-						$user = get_user_by( 'login', $username );
-					}
-
-					if ( isset( $user->user_login ) ) {
-						$creds['user_login'] = $user->user_login;
-					} else {
-						throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
-					}
-				} else {
-					$creds['user_login'] = $username;
 				}
 
 				// On multisite, ensure user exists on current site, if not add them before allowing login.
 				if ( is_multisite() ) {
-					$user_data = get_user_by( 'login', $username );
+					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
 
 					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
 						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
@@ -974,7 +958,7 @@ class WC_Form_Handler {
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $username ) . '</strong>', $message );
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', $message );
 					throw new Exception( $message );
 				} else {
 

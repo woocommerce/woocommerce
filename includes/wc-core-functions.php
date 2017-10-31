@@ -886,12 +886,9 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
-	$post = get_post( $post_id );
-	if ( 'product' === get_post_type( $post->post_parent ) ) {
-		$permalinks = wc_get_permalink_structure();
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/', $permalinks['product_rewrite_slug'], $matches ) ) {
-			$link = home_url( '/?attachment_id=' . $post->ID );
-		}
+	$parent_type = get_post_type( wp_get_post_parent_id( $post_id ) );
+	if ( 'product' === $parent_type || 'product_variation' === $parent_type ) {
+		$link = home_url( '/?attachment_id=' . $post_id );
 	}
 	return $link;
 }
@@ -1472,7 +1469,7 @@ function wc_add_number_precision( $value ) {
  */
 function wc_remove_number_precision( $value ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return wc_format_decimal( $value / $precision, wc_get_price_decimals() );
+	return $value / $precision;
 }
 
 /**
@@ -1674,33 +1671,36 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 }
 
 /**
- * Get permalink settings for WooCommerce independent of the user locale.
+ * Get permalink settings for things like products and taxonomies.
+ *
+ * As of 3.3.0, the permalink settings are stored to the option instead of
+ * being blank and inheritting from the locale. This speeds up page loading
+ * times by negating the need to switch locales on each page load.
+ *
+ * This is more inline with WP core behavior which does not localize slugs.
  *
  * @since  3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
-	if ( did_action( 'admin_init' ) ) {
-		wc_switch_to_site_locale();
-	}
-
-	$permalinks = wp_parse_args( (array) get_option( 'woocommerce_permalinks', array() ), array(
-		'product_base'           => '',
-		'category_base'          => '',
-		'tag_base'               => '',
+	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
+	$permalinks       = wp_parse_args( array_filter( $saved_permalinks ), array(
+		'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
+		'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
+		'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
 		'attribute_base'         => '',
 		'use_verbose_page_rules' => false,
 	) );
 
-	// Ensure rewrite slugs are set.
-	$permalinks['product_rewrite_slug']   = untrailingslashit( empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' )             : $permalinks['product_base'] );
-	$permalinks['category_rewrite_slug']  = untrailingslashit( empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' )   : $permalinks['category_base'] );
-	$permalinks['tag_rewrite_slug']       = untrailingslashit( empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' )             : $permalinks['tag_base'] );
-	$permalinks['attribute_rewrite_slug'] = untrailingslashit( empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'] );
-
-	if ( did_action( 'admin_init' ) ) {
-		wc_restore_locale();
+	if ( $saved_permalinks !== $permalinks ) {
+		update_option( 'woocommerce_permalinks', $permalinks );
 	}
+
+	$permalinks['product_rewrite_slug']   = untrailingslashit( $permalinks['product_base'] );
+	$permalinks['category_rewrite_slug']  = untrailingslashit( $permalinks['category_base'] );
+	$permalinks['tag_rewrite_slug']       = untrailingslashit( $permalinks['tag_base'] );
+	$permalinks['attribute_rewrite_slug'] = untrailingslashit( $permalinks['attribute_base'] );
+
 	return $permalinks;
 }
 

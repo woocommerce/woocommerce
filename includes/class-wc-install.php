@@ -165,6 +165,13 @@ class WC_Install {
 			return;
 		}
 
+		// Check if we are not already running this routine.
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+			return;
+		}
+
+		// If we made it till here nothing is running yet, lets set the transient now.
+		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
 		self::remove_admin_notices();
@@ -178,6 +185,8 @@ class WC_Install {
 		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+
+		delete_transient( 'wc_installing' );
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
