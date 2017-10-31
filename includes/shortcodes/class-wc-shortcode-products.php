@@ -430,12 +430,12 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get products.
+	 * Generate and return the transient name for this shortcode based on the query args.
 	 *
-	 * @since  3.2.0
-	 * @return WP_Query
+	 * @since 3.3.0
+	 * @return string
 	 */
-	protected function get_products() {
+	protected function get_transient_name() {
 		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
 
 		if ( 'rand' === $this->query_args['orderby'] ) {
@@ -445,7 +445,19 @@ class WC_Shortcode_Products {
 		}
 
 		$transient_name .= WC_Cache_Helper::get_transient_version( 'product_query' );
-		$products        = get_transient( $transient_name );
+
+		return $transient_name;
+	}
+
+	/**
+	 * Get products.
+	 *
+	 * @since  3.2.0
+	 * @return WP_Query
+	 */
+	protected function get_products() {
+		$transient_name = $this->get_transient_name();
+		$products       = get_transient( $transient_name );
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
 			if ( 'top_rated_products' === $this->type ) {
