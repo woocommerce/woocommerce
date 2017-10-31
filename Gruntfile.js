@@ -258,6 +258,9 @@ module.exports = function( grunt ) {
 			},
 			e2e_tests: {
 				command: 'npm run --silent test'
+			},
+			e2e_tests_grep: {
+				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
 			}
 		},
 
@@ -361,6 +364,10 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'e2e-tests', [
 		'shell:e2e_tests'
+	]);
+
+	grunt.registerTask( 'e2e-tests-grep', [
+		'shell:e2e_tests_grep'
 	]);
 
 	grunt.registerTask( 'e2e-test', [
