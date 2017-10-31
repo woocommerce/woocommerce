@@ -132,13 +132,19 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
-		// Hide the activate step if Jetpack is already active.
-		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() ) {
+		// Hide the activate step if Jetpack is already active, but not
+		// if we're returning from connecting Jetpack on WordPress.com.
+		if (
+			class_exists( 'Jetpack' ) &&
+			Jetpack::is_active() &&
+			! isset( $_GET['from'] ) &&
+			! isset( $_GET['activate_error'] )
+		) {
 			unset( $default_steps['activate'] );
 		}
 
 		// Whether or not there is a pending background install of Jetpack.
-		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_queued_jetpack_install' );
+		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
@@ -270,7 +276,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
-		call_user_func( $this->steps[ $this->step ]['view'], $this );
+		if ( ! empty( $this->steps[ $this->step ]['view'] ) ) {
+			call_user_func( $this->steps[ $this->step ]['view'], $this );
+		}
 		echo '</div>';
 	}
 
@@ -295,6 +303,9 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( empty( $state ) ) {
 			$state = '*';
 		}
+
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
 
 		?>
 		<form method="post" class="address-step">
@@ -383,6 +394,9 @@ class WC_Admin_Setup_Wizard {
 					</option>
 				<?php endforeach; ?>
 			</select>
+			<script type="text/javascript">
+				var wc_setup_currencies = <?php echo json_encode( $currency_by_country ); ?>;
+			</script>
 
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
@@ -462,56 +476,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Tout WooCommerce Services for North American stores.
-	 */
-	protected function wc_setup_wcs_tout() {
-		$base_location = wc_get_base_location();
-
-		if ( false === $base_location['country'] ) {
-			$base_location = WC_Geolocation::geolocate_ip();
-		}
-
-		if ( ! in_array( $base_location['country'], array( 'US', 'CA' ), true ) ) {
-			return;
-		}
-
-		$default_content = array(
-			'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-			'description' => __( 'Print labels and get discounted USPS shipping rates, right from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
-		);
-
-		switch ( $base_location['country'] ) {
-			case 'CA':
-				$local_content = array(
-					'title'       => __( 'Enable WooCommerce Shipping (recommended)', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
-				);
-				break;
-			default:
-				$local_content = array();
-		}
-
-		$content = wp_parse_args( $local_content, $default_content );
-		?>
-		<ul class="wc-wizard-shipping-methods">
-			<li class="wc-wizard-shipping">
-				<div class="wc-wizard-shipping-enable">
-					<input type="checkbox" name="woocommerce_install_services" class="input-checkbox" value="woo-services-enabled" checked />
-					<label>
-						<?php echo esc_html( $content['title'] ) ?>
-					</label>
-				</div>
-				<div class="wc-wizard-shipping-description">
-					<p>
-						<?php echo esc_html( $content['description'] ); ?>
-					</p>
-				</div>
-			</li>
-		</ul>
-		<?php
-	}
-
-	/**
 	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
 	 * @see https://core.trac.wordpress.org/ticket/41358
 	 */
@@ -520,7 +484,9 @@ class WC_Admin_Setup_Wizard {
 		if ( session_id() ) {
 			session_write_close();
 		}
-		set_time_limit( 0 );
+
+		wc_set_time_limit( 0 );
+
 		// fastcgi_finish_request is the cleanest way to send the response and keep the script running, but not every server has it.
 		if ( is_callable( 'fastcgi_finish_request' ) ) {
 			fastcgi_finish_request();
@@ -543,6 +509,15 @@ class WC_Admin_Setup_Wizard {
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
 			call_user_func_array( $action['func'], $action['args'] );
+
+			// Clear the background installation flag if this is a plugin.
+			if (
+				isset( $action['func'][1] ) &&
+				'background_installer' === $action['func'][1] &&
+				isset( $action['args'][0] )
+			) {
+				delete_option( 'woocommerce_setup_background_installing_' . $action['args'][0] );
+			}
 		}
 	}
 
@@ -553,16 +528,26 @@ class WC_Admin_Setup_Wizard {
 	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info ) {
+		// Make sure we don't trigger multiple simultaneous installs.
+		if ( get_option( 'woocommerce_setup_background_installing_' . $plugin_id ) ) {
+			return;
+		}
+
 		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
 			return;
 		}
+
 		if ( empty( $this->deferred_actions ) ) {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
+
 		array_push( $this->deferred_actions, array(
 			'func' => array( 'WC_Install', 'background_installer' ),
 			'args' => array( $plugin_id, $plugin_info )
 		) );
+
+		// Set the background installation flag for this plugin.
+		update_option( 'woocommerce_setup_background_installing_' . $plugin_id, true );
 	}
 
 
@@ -590,8 +575,6 @@ class WC_Admin_Setup_Wizard {
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
 		) );
-
-		update_option( 'woocommerce_setup_queued_jetpack_install', true );
 	}
 
 	/**
@@ -611,14 +594,15 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * Can also be used to determine if WCS supports a given country.
 	 *
-	 * @param $country_code
+	 * @param string $country_code
+	 * @param string $currency_code
 	 * @return bool|string Carrier name if supported, boolean False otherwise.
 	 */
-	protected function get_wcs_shipping_carrier( $country_code ) {
-		switch ( $country_code ) {
-			case 'US':
+	protected function get_wcs_shipping_carrier( $country_code, $currency_code ) {
+		switch ( array( $country_code, $currency_code ) ) {
+			case array( 'US', 'USD' ):
 				return 'USPS';
-			case 'CA':
+			case array( 'CA', 'CAD' ):
 				return 'Canada Post';
 			default:
 				return false;
@@ -628,14 +612,15 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Get shipping methods based on country code.
 	 *
-	 * @param $country_code
+	 * @param string $country_code
+	 * @param string $currency_code
 	 * @return array
 	 */
-	protected function get_wizard_shipping_methods( $country_code ) {
+	protected function get_wizard_shipping_methods( $country_code, $currency_code ) {
 		$shipping_methods = array(
 			'live_rates' => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Shipping rates updated in realtime. Powered by Jetpack.', 'woocommerce' ),
+				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
 			),
 			'flat_rate' => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -645,6 +630,7 @@ class WC_Admin_Setup_Wizard {
 						'type'          => 'text',
 						'default_value' => __( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
 						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
+						'required'      => true,
 					),
 				),
 			),
@@ -654,7 +640,7 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 
 		if ( false === $live_rate_carrier || ! current_user_can('install_plugins') ) {
 			unset( $shipping_methods['live_rates'] );
@@ -667,12 +653,13 @@ class WC_Admin_Setup_Wizard {
 	 * Render the available shipping methods for a given country code.
 	 *
 	 * @param string $country_code
+	 * @param string $currency_code
 	 * @param string $input_prefix
 	 */
-	protected function shipping_method_selection_form( $country_code, $input_prefix ) {
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code );
+	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
+		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
-		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code );
+		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
@@ -704,6 +691,8 @@ class WC_Admin_Setup_Wizard {
 					placeholder="<?php echo esc_attr( $setting['default_value'] ); ?>"
 					id="<?php echo esc_attr( $method_setting_id ); ?>"
 					name="<?php echo esc_attr( $method_setting_id ); ?>"
+					class="<?php echo esc_attr( $setting['required'] ? 'shipping-method-required-field' : '' ); ?>"
+					<?php echo ( $method_id === $selected && $setting['required'] ) ? 'required' : ''; ?>
 				/>
 				<p class="description">
 					<?php echo esc_html( $setting['description'] ); ?>
@@ -719,22 +708,20 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
-		$dimension_unit        = get_option( 'woocommerce_dimension_unit', false );
-		$weight_unit           = get_option( 'woocommerce_weight_unit', false );
 		$country_code          = WC()->countries->get_base_country();
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
-		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code );
+		$currency_code         = get_woocommerce_currency();
+		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
-		if ( false === $dimension_unit || false === $weight_unit ) {
-			if ( 'US' === $country_code ) {
-				$dimension_unit = 'in';
-				$weight_unit    = 'oz';
-			} else {
-				$dimension_unit = 'cm';
-				$weight_unit    = 'kg';
-			}
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		if ( isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
+		} else {
+			$dimension_unit = 'cm';
+			$weight_unit    = 'kg';
 		}
 
 		if ( ! empty( $existing_zones ) ) {
@@ -742,7 +729,7 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( $wcs_carrier ) {
 			$intro_text = sprintf(
 			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using live rates to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
+				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
 				$prefixed_country_name,
 				$wcs_carrier
 			);
@@ -756,7 +743,7 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
-		<p><?php echo esc_html( $intro_text ); ?></p>
+		<p><?php echo wp_kses_post( $intro_text ); ?></p>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
@@ -773,11 +760,11 @@ class WC_Admin_Setup_Wizard {
 							<p><?php echo esc_html( $country_name ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
-							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[domestic]' ); ?>
+							<?php $this->shipping_method_selection_form( $country_code, $currency_code, 'shipping_zones[domestic]' ); ?>
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" />
+								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable" />
 								<label for="shipping_zones[domestic][enabled]">
 							</span>
 						</div>
@@ -787,11 +774,11 @@ class WC_Admin_Setup_Wizard {
 							<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
-							<?php $this->shipping_method_selection_form( $country_code, 'shipping_zones[intl]' ); ?>
+							<?php $this->shipping_method_selection_form( $country_code, $currency_code, 'shipping_zones[intl]' ); ?>
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" />
+								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable"/>
 								<label for="shipping_zones[intl][enabled]">
 							</span>
 						</div>
@@ -994,6 +981,7 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * Simple array of "in cart" gateways to show in wizard.
+	 *
 	 * @return array
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
@@ -1002,8 +990,8 @@ class WC_Admin_Setup_Wizard {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
-			__( 'Accept all major debit and credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-stripe/'
+			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
 		$paypal_bt_description = '<p>' . sprintf(
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
@@ -1023,7 +1011,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create an account for me using this email:', 'woocommerce' ),
+						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
 						'placeholder' => '',
@@ -1034,6 +1022,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1182,6 +1171,9 @@ class WC_Admin_Setup_Wizard {
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
 								/>
+								<?php if ( ! empty( $setting['description'] ) ) : ?>
+									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
+								<?php endif; ?>
 							</div>
 						<?php endforeach; ?>
 					</div>
@@ -1341,9 +1333,14 @@ class WC_Admin_Setup_Wizard {
 				<ul class="wc-wizard-services featured">
 					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
 						<div class="wc-wizard-service-description">
-							<h3><?php esc_html_e( 'Automated Taxes', 'woocommerce' ); ?></h3>
+							<h3><?php esc_html_e( 'Automated Taxes (powered by WooCommerce Services)', 'woocommerce' ); ?></h3>
 							<p>
-								<?php esc_html_e( 'We’ll automatically calculate and charge the correct rate of tax for each time a customer checks out.', 'woocommerce' ); ?>
+								<?php esc_html_e( 'Automatically calculate and charge the correct rate of tax for each time a customer checks out. If toggled on, WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ); ?>
+							</p>
+							<p class="wc-wizard-service-learn-more">
+								<a href="<?php echo esc_url( 'https://wordpress.org/plugins/woocommerce-services/' ); ?>" target="_blank">
+									<?php esc_html_e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?>
+								</a>
 							</p>
 						</div>
 
@@ -1557,11 +1554,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Clean up temporary Jetpack queued install option.
-		// This happens after the connection button is clicked
-		// and we waited for the pending install to finish.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
-
 		// Leave a note for WooCommerce Services that Jetpack has been opted into.
 		update_option( 'woocommerce_setup_jetpack_opted_in', true );
 
@@ -1587,10 +1579,12 @@ class WC_Admin_Setup_Wizard {
 			exit;
 		}
 
-		$redirect_url   = site_url( add_query_arg( array(
+		$redirect_url = esc_url_raw( add_query_arg( array(
+			'page'           => 'wc-setup',
+			'step'           => 'activate',
 			'from'           => 'wpcom',
 			'activate_error' => false,
-		) ) );
+		), admin_url() ) );
 		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		wp_redirect( esc_url_raw( $connection_url ) );
@@ -1603,9 +1597,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install' );
-
-		// We're definitely done waiting for queued Jetpack install.
-		delete_option( 'woocommerce_setup_queued_jetpack_install' );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
