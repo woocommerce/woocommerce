@@ -113,9 +113,7 @@ class WC_Order extends WC_Abstract_Order {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
-				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp', true ) );
-				}
+				$this->maybe_set_date_paid();
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
@@ -258,11 +256,14 @@ class WC_Order extends WC_Abstract_Order {
 	 * This ensures the data exists even if a gateway does not use the
 	 * `payment_complete` method.
 	 *
+	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null sets date to now.
+	 *
 	 * @since 3.0.0
 	 */
-	public function maybe_set_date_paid() {
+	public function maybe_set_date_paid( $date = null ) {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
-			$this->set_date_paid( current_time( 'timestamp', true ) );
+			$this->set_date_paid( $date ?: current_time( 'timestamp', true ) );
+			// $wpdb->insert ...
 		}
 	}
 
