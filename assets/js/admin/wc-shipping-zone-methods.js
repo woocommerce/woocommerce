@@ -1,5 +1,7 @@
 /* global shippingZoneMethodsLocalizeScript, ajaxurl */
-( function( $, data, wp, ajaxurl ) {
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
 			$tbody          = $( '.wc-shipping-zone-method-rows' ),

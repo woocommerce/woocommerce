@@ -1,5 +1,7 @@
 /* global shippingClassesLocalizeScript, ajaxurl */
-( function( $, data, wp, ajaxurl ) {
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 		var $tbody          = $( '.wc-shipping-class-rows' ),
 			$save_button    = $( '.wc-shipping-class-save' ),

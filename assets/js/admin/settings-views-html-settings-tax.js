@@ -3,7 +3,9 @@
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
-( function( $, data, wp, ajaxurl ) {
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 
 		if ( ! String.prototype.trim ) {
