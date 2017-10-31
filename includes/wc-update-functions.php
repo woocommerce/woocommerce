@@ -1409,3 +1409,17 @@ function wc_update_320_mexican_states() {
 function wc_update_320_db_version() {
 	WC_Install::update_db_version( '3.2.0' );
 }
+
+/**
+ * Synchronize bought products database table.
+ * @todo
+ */
+function wc_update_330_bought_products() {
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_330_db_version() {
+	WC_Install::update_db_version( '3.3.0' );
+}
