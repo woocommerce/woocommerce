@@ -5,15 +5,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Purchased_Products_Helper class.
+ * WC_Product_Purchases_Helper class.
  *
- * @class     WC_Purchased_Products_Helper
+ * @class     WC_Product_Purchases_Helper
  * @version   3.3.0
  * @package   WooCommerce/Classes
  * @category  Class
  * @author    WooThemes
  */
-class WC_Purchased_Products_Helper {
+class WC_Product_Purchases_Helper {
 
 	/**
 	 * Hook in methods.
@@ -31,7 +31,7 @@ class WC_Purchased_Products_Helper {
 	public static function handle_delete_order( $order_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_purchased_products', array( 'order_id' => $order_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_product_purchases', array( 'order_id' => $order_id ), array( '%d' ) );
 	}
 
 	/**
@@ -45,7 +45,7 @@ class WC_Purchased_Products_Helper {
 
 		// Every order is marked as paid at most once.
 		// Only when this happens we're updating the purchased products table.
-		if ( ! in_array( 'date_paid', $updated_props ) ) {
+		if ( ! in_array( 'date_paid', $updated_props ) || empty( $order->get_date_paid() ) ) {
 			return;
 		}
 
@@ -68,7 +68,7 @@ class WC_Purchased_Products_Helper {
 			);
 
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_purchased_products',
+				$wpdb->prefix . 'woocommerce_product_purchases',
 				$data,
 				array(
 					'%s',
@@ -82,4 +82,4 @@ class WC_Purchased_Products_Helper {
 	}
 }
 
-WC_Purchased_Products_Helper::init();
+WC_Product_Purchases_Helper::init();

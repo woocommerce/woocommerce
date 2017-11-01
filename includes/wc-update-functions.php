@@ -1413,16 +1413,16 @@ function wc_update_320_db_version() {
 /**
  * Synchronize purchased products database table from order meta.
  */
-function wc_update_330_purchased_products() {
+function wc_update_330_product_purchases() {
 	global $wpdb;
 
 	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 
 	// TODO: Test if this can cause a lot of performance issues during upgrade process.
 	$wpdb->query( "
-		INSERT INTO {$wpdb->prefix}woocommerce_purchased_products
+		INSERT INTO {$wpdb->prefix}woocommerce_product_purchases
 		SELECT
-		'' AS purchased_id,
+		'' AS purchase_id,
 		pm.meta_value AS user_email,
 		p.id AS order_id,
 		pm2.meta_value AS user_id,

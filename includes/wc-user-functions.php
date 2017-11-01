@@ -198,14 +198,14 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$purchased_products = $wpdb->get_row( $wpdb->prepare( "
+	$product_purchases = $wpdb->get_row( $wpdb->prepare( "
 		SELECT *
-		FROM {$wpdb->prefix}woocommerce_purchased_products
+		FROM {$wpdb->prefix}woocommerce_product_purchases
 		WHERE ( user_id = %s OR user_email = %s ) AND product_id = %d
 		LIMIT 1
 	", absint( $user_id ), esc_sql( $customer_email ), absint( $product_id ) ) );
 
-	return ! empty( $purchased_products );
+	return ! empty( $product_purchases );
 }
 
 /**
