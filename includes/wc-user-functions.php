@@ -188,7 +188,7 @@ function wc_paying_customer( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
- * Checks if a user (by email or ID or both) has bought an item.
+ * Checks if a user (by email or ID or both) has purchased an item.
  *
  * @param string $customer_email
  * @param int $user_id
@@ -198,22 +198,22 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$bought_products = $wpdb->get_row( $wpdb->prepare( "
+	$purchased_products = $wpdb->get_row( $wpdb->prepare( "
 		SELECT *
-		FROM {$wpdb->prefix}woocommerce_bought_products
+		FROM {$wpdb->prefix}woocommerce_purchased_products
 		WHERE ( user_id = %s OR user_email = %s ) AND product_id = %d
 		LIMIT 1
 	", absint( $user_id ), esc_sql( $customer_email ), absint( $product_id ) ) );
 
-	return ! empty( $bought_products );
+	return ! empty( $purchased_products );
 }
 
 /**
- * Marks all products in an existing order as purchased in the bought table.
+ * Marks all products in an existing order as purchased in the purchased table.
  *
  * @param WC_Order $order
  */
-function wc_customer_mark_bought_order( $order ) {
+function wc_customer_mark_purchased_order( $order ) {
 	global $wpdb;
 
 	$order_items = $order->get_items();
@@ -231,7 +231,7 @@ function wc_customer_mark_bought_order( $order ) {
 			);
 
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_bought_products',
+				$wpdb->prefix . 'woocommerce_purchased_products',
 				$data,
 				array(
 					'%s',

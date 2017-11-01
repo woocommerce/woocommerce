@@ -1411,9 +1411,9 @@ function wc_update_320_db_version() {
 }
 
 /**
- * Synchronize bought products database table from order meta.
+ * Synchronize purchased products database table from order meta.
  */
-function wc_update_330_bought_products() {
+function wc_update_330_purchased_products() {
 	global $wpdb;
 
 	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
@@ -1429,7 +1429,7 @@ function wc_update_330_bought_products() {
 	foreach ( $results as $result ) {
 		$order = wc_get_order( $result->id );
 
-		wc_customer_mark_bought_order( $order );
+		wc_customer_mark_purchased_order( $order );
 	}
 }
 
