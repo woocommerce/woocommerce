@@ -326,9 +326,12 @@ class WC_Post_Data {
 				if ( $parent_id = wp_get_post_parent_id( $id ) ) {
 					wc_delete_product_transients( $parent_id );
 				}
+
+				do_action( 'woocommerce_delete_product', $id );
 				break;
 			case 'product_variation' :
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
+				do_action( 'woocommerce_delete_product_variation', $id );
 				break;
 			case 'shop_order' :
 				global $wpdb;
@@ -340,6 +343,8 @@ class WC_Post_Data {
 						wp_delete_post( $refund->ID, true );
 					}
 				}
+
+				do_action( 'woocommerce_delete_order', $id );
 				break;
 		}
 	}
