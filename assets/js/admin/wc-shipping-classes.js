@@ -1,5 +1,7 @@
-/* global shippingClassesLocalizeScript, ajaxurl */
-( function( $, data, wp, ajaxurl ) {
+/* global shippingClassesLocalizeScript, ajaxurl, wp, _, Backbone  */
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 		var $tbody          = $( '.wc-shipping-class-rows' ),
 			$save_button    = $( '.wc-shipping-class-save' ),
@@ -242,4 +244,4 @@
 
 		shippingClassView.render();
 	});
-})( jQuery, shippingClassesLocalizeScript, wp, ajaxurl );
+})( jQuery, shippingClassesLocalizeScript, wp, ajaxurl, _, Backbone);

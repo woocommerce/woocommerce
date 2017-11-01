@@ -1,5 +1,7 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl */
-( function( $, data, wp, ajaxurl ) {
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, wp, _, Backbone  */
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
 			$tbody          = $( '.wc-shipping-zone-method-rows' ),
@@ -391,4 +393,4 @@
 			scrollSensitivity: 40
 		});
 	});
-})( jQuery, shippingZoneMethodsLocalizeScript, wp, ajaxurl );
+})( jQuery, shippingZoneMethodsLocalizeScript, wp, ajaxurl,_, Backbone );

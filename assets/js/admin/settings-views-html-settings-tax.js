@@ -1,9 +1,11 @@
-/* global htmlSettingsTaxLocalizeScript, ajaxurl */
+/* global htmlSettingsTaxLocalizeScript, wp, ajaxurl, _, Backbone */
 
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
-( function( $, data, wp, ajaxurl ) {
+( function( $, data, wp, ajaxurl , _, Backbone ) {
+    'use strict';
+
 	$( function() {
 
 		if ( ! String.prototype.trim ) {
@@ -377,4 +379,4 @@
 		WCTaxTableInstance.render();
 
 	});
-})( jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl );
+})( jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl, _, Backbone);
