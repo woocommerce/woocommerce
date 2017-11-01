@@ -1422,6 +1422,7 @@ function wc_update_330_purchased_products() {
 	$wpdb->query( "
 		INSERT INTO {$wpdb->prefix}woocommerce_purchased_products
 		SELECT
+		'' AS purchased_id,
 		pm.meta_value AS user_email,
 		p.id AS order_id,
 		pm2.meta_value AS user_id,
