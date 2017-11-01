@@ -177,7 +177,7 @@ class WC_Emails {
 		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
-		//Hook for replacing {site_title} in email-footer
+		// Hook for replacing {site_title} in email-footer.
 		add_filter( 'woocommerce_email_footer_text' , array( $this, 'email_footer_replace_site_title' ) );
 
 		// Let 3rd parties unhook the above via this hook
@@ -255,8 +255,10 @@ class WC_Emails {
 	}
 
 	/**
-	 * Filter callback to replace {site_title} in email footer 
-	 * @param  string $string Email footer text
+	 * Filter callback to replace {site_title} in email footer
+	 *
+	 * @since  3.3.0
+	 * @param  string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
 	public function email_footer_replace_site_title( $string ) {
