@@ -212,6 +212,22 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_payment_methods_page' ) ) {
+
+	/**
+	 * Determines if the current page is Payment Methods.
+	 *
+	 * @since 3.3-dev
+	 *
+	 * @return bool
+	 */
+	function is_payment_methods_page() {
+		global $wp;
+
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['payment-methods'] ) );
+	}
+}
+
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
 	/**
