@@ -82,7 +82,7 @@ class WC_Purchased_Products_Helper {
 	 */
 	public static function handle_save_order( $order, $order_data_store ) {
 		// Every order is marked as paid at most once. Only when this happens we're updating the purchased products table.
-		if ( ! array_key_exists( 'date_paid', $this->get_changes() ) ) {
+		if ( ! array_key_exists( 'date_paid', $order->get_changes() ) ) {
 			return;
 		}
 
