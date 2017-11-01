@@ -50,7 +50,8 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ) );
+			$message = apply_filters( 'woocommerce-registration-error-email-exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ), $email );
+			return new WP_Error( 'registration-error-email-exists', $message );
 		}
 
 		// Handle username creation.
