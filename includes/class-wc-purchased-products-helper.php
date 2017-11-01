@@ -19,8 +19,8 @@ class WC_Purchased_Products_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ) );
-		add_action( 'woocommerce_before_order_object_save', array( __CLASS__, 'handle_save_order' ) );
+		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
+		add_action( 'woocommerce_order_object_updated_props', array( __CLASS__, 'handle_product_purchase' ), 10, 2 );
 	}
 
 	/**
@@ -74,15 +74,12 @@ class WC_Purchased_Products_Helper {
 	/**
 	 * Handler for saving an order, keep the purchased products table in sync.
 	 *
-	 * @todo Is it possible when an order is initially created (not yet saved, so $order->get_id() is not populated)
-	 * to be marked as paid right away? Perhaps we'll need to use a different action for this method.
-	 *
 	 * @param WC_Order $order
 	 * @param WC_Data_Store $order_data_store
 	 */
-	public static function handle_save_order( $order, $order_data_store ) {
+	public static function handle_product_purchase( $order, $updated_props ) {
 		// Every order is marked as paid at most once. Only when this happens we're updating the purchased products table.
-		if ( ! array_key_exists( 'date_paid', $order->get_changes() ) ) {
+		if ( ! in_array( 'date_paid', $updated_props ) ) {
 			return;
 		}
 
