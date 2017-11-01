@@ -1,4 +1,4 @@
-/* global htmlSettingsTaxLocalizeScript, ajaxurl */
+/* global htmlSettingsTaxLocalizeScript, wp, ajaxurl, _, Backbone */
 
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
@@ -379,4 +379,4 @@
 		WCTaxTableInstance.render();
 
 	});
-})( jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl );
+})( jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl, _, Backbone);

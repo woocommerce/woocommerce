@@ -1,4 +1,4 @@
-/* global shippingClassesLocalizeScript, ajaxurl */
+/* global shippingClassesLocalizeScript, ajaxurl, wp, _, Backbone  */
 ( function( $, data, wp, ajaxurl , _, Backbone ) {
     'use strict';
 
@@ -244,4 +244,4 @@
 
 		shippingClassView.render();
 	});
-})( jQuery, shippingClassesLocalizeScript, wp, ajaxurl );
+})( jQuery, shippingClassesLocalizeScript, wp, ajaxurl, _, Backbone);

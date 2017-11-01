@@ -1,4 +1,4 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl */
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, wp, _, Backbone  */
 ( function( $, data, wp, ajaxurl , _, Backbone ) {
     'use strict';
 
@@ -393,4 +393,4 @@
 			scrollSensitivity: 40
 		});
 	});
-})( jQuery, shippingZoneMethodsLocalizeScript, wp, ajaxurl );
+})( jQuery, shippingZoneMethodsLocalizeScript, wp, ajaxurl,_, Backbone );
