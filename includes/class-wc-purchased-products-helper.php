@@ -19,6 +19,8 @@ class WC_Purchased_Products_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ) );
+		add_action( 'woocommerce_before_order_object_save', array( __CLASS__, 'handle_save_order' ) );
 	}
 
 	/**
@@ -58,6 +60,33 @@ class WC_Purchased_Products_Helper {
 		}
 	}
 
+	/**
+	 * Handler for deleting an order, keep the purchased products table in sync.
+	 *
+	 * @param int $order_id
+	 */
+	public static function handle_delete_order( $order_id ) {
+		global $wpdb;
+
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_purchased_products', array( 'order_id' => $order_id ), array( '%d' ) );
+	}
+
+	/**
+	 * Handler for saving an order, keep the purchased products table in sync.
+	 *
+	 * @param WC_Order $order
+	 * @param WC_Data_Store $order_data_store
+	 */
+	public static function handle_save_order( $order, $order_data_store ) {
+		global $wpdb;
+
+		// Every order is marked as paid at most once. Only when this happens we're updating the purchased products table.
+		if ( ! array_key_exists( 'date_paid', $this->get_changes() ) ) {
+			return;
+		}
+
+		self::mark_order_purchased( $order );
+	}
 }
 
 WC_Purchased_Products_Helper::init();

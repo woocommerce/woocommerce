@@ -263,8 +263,6 @@ class WC_Order extends WC_Abstract_Order {
 	public function maybe_set_date_paid( $date = null ) {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			$this->set_date_paid( ! is_null( $date ) ? $date : current_time( 'timestamp', true ) );
-
-			WC_Purchased_Products_Helper::customer_mark_order_purchased( $this );
 		}
 	}
 
