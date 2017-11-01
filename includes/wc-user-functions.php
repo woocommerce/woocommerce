@@ -189,15 +189,16 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
  * Checks if a user (by email or ID or both) has bought an item.
- * @param string $customer_email
- * @param int $user_id
- * @param int $product_id
+ *
+ * @param string $customer_email Customer email to check.
+ * @param int    $user_id User ID to check.
+ * @param int    $product_id Product ID to check.
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$result = apply_filters( 'woocommerce_customer_bought_product', null, $customer_email, $user_id, $product_id );
+	$result = apply_filters( 'woocommerce_pre_customer_bought_product', null, $customer_email, $user_id, $product_id );
 
 	if ( null !== $result ) {
 		return $result;
