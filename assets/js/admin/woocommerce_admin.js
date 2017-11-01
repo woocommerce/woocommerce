@@ -296,4 +296,18 @@ jQuery( function ( $ ) {
 			$( this ).replaceWith( '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + video_id + '" frameborder="0" allowfullscreen></iframe>' );
 		} );
 	});
+
+	// Validate email colors settings
+	$( '#woocommerce_email_base_color[type=text], #woocommerce_email_background_color[type=text], #woocommerce_email_body_background_color[type=text], #woocommerce_email_text_color[type=text]' ).on( 'change', function() {
+		var hexcolor = $( this ).val();
+		if ( ! hexcolor.match( /^\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/ ) ) {
+			$( '.iris-picker' ).hide();
+			$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'hex_color_error' ] );
+        } else {
+			event.stopPropagation();
+			$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'hex_color_error' ] );
+		}
+	}).on ( 'focus click', function () {
+		$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
+	});
 });

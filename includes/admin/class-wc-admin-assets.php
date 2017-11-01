@@ -157,6 +157,7 @@ class WC_Admin_Assets {
 				'i18_delete_product_notice'         => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+				'hex_color_error'					=> __( 'Invalid hex color', 'woocommerce' ),
 				'strings' => array(
 					'import_products' => __( 'Import', 'woocommerce' ),
 					'export_products' => __( 'Export', 'woocommerce' ),
