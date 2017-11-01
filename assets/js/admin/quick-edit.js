@@ -118,4 +118,8 @@ jQuery(function( $ ) {
 		}
 
 	});
+
+	$( '#wpbody' ).on( 'click', '.trash-product', function() {
+		return window.confirm( woocommerce_admin.i18_delete_product_notice );
+	});
 });

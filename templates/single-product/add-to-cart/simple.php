@@ -31,7 +31,7 @@ if ( $product->is_in_stock() ) : ?>
 
 	<?php do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-	<form class="cart" method="post" enctype='multipart/form-data'>
+	<form class="cart" action="<?php echo esc_url( get_permalink() ); ?>" method="post" enctype='multipart/form-data'>
 		<?php
 			/**
 			 * @since 2.1.0.

@@ -14,9 +14,6 @@ env:
 # Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
 matrix:
   include:
-  - php: 5.6
-    env: WP_VERSION=latest WP_MULTISITE=1 PHP_LATEST_STABLE=7.1
-    dist: precise
   - php: 5.3
     env: WP_VERSION=latest WP_MULTISITE=0 PHP_LATEST_STABLE=7.1
     dist: precise
@@ -26,12 +23,13 @@ matrix:
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - if [[ $TRAVIS_PHP_VERSION == '7.1' ]]; then composer install; fi
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
 script:
-  - phpunit --version
-  - phpunit -c phpunit.xml
+  - bash tests/bin/phpunit.sh
+  - bash tests/bin/phpcs.sh
 
 after_script:
   - bash tests/bin/travis.sh after

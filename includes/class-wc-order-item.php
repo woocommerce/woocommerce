@@ -223,6 +223,9 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		} else {
 			$this->set_taxes( false );
 		}
+
+		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
+
 		return true;
 	}
 

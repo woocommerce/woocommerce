@@ -250,12 +250,14 @@ class WC_Data_Store_WP {
 	 * Map a valid date query var to WP_Query arguments.
 	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator from $valid_operators.
 	 * Also accepts a WC_DateTime object.
+	 *
+	 * @since 3.2.0
 	 * @param mixed $query_var A valid date format
 	 * @param string $key meta or db column key
 	 * @param array $wp_query_args WP_Query args
 	 * @return array Modified $wp_query_args
 	 */
-	protected function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
+	public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
 		$query_parse_regex = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 		$valid_operators   = array( '>', '>=', '=', '<=', '<', '...' );
 

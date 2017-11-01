@@ -190,7 +190,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	protected $placeholders = array();
 
-	/**
+ 	/**
 	 * Strings to find in subjects/headings.
 	 *
 	 * @deprecated 3.2.0 in favour of placeholders
@@ -250,14 +250,25 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Format email string.
 	 *
-	 * @param mixed $string
+	 * @param mixed $string Text to replace placeholders in.
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		// Legacy placeholders. @todo deprecate in 4.0.0.
+		$find    = array_keys( $this->placeholders );
+		$replace = array_values( $this->placeholders );
+
+		// If using legacy find replace, add those to our find/replace arrays first. @todo deprecate in 4.0.0.
+		$find    = array_merge( (array) $this->find, $find );
+		$replace = array_merge( (array) $this->replace, $replace );
+
+		// Take care of blogname which is no longer defined as a valid placeholder.
+		$find[]    = '{blogname}';
+		$replace[] = $this->get_blogname();
+
+		// If using the older style filters for find and replace, ensure the array is associative and then pass through filters. @todo deprecate in 4.0.0.
 		if ( has_filter( 'woocommerce_email_format_string_replace' ) || has_filter( 'woocommerce_email_format_string_find' ) ) {
-			$legacy_find    = array();
-			$legacy_replace = array();
+			$legacy_find    = $this->find;
+			$legacy_replace = $this->replace;
 
 			foreach ( $this->placeholders as $find => $replace ) {
 				$legacy_key                    = sanitize_title( str_replace( '_', '-', trim( $find, '{}' ) ) );
@@ -267,7 +278,13 @@ class WC_Email extends WC_Settings_API {
 
 			$string = str_replace( apply_filters( 'woocommerce_email_format_string_find', $legacy_find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $legacy_replace, $this ), $string );
 		}
-		return str_replace( $this->find, $this->replace, $string );
+
+		/**
+		 * woocommerce_email_format_string filter for main find/replace code.
+		 *
+		 * @since 3.2.0
+		 */
+		return apply_filters( 'woocommerce_email_format_string', str_replace( $find, $replace, $string ), $this );
 	}
 
 	/**
@@ -355,7 +372,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email attachments.
 	 *
-	 * @return string
+	 * @return array
 	 */
 	public function get_attachments() {
 		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
@@ -644,7 +661,7 @@ class WC_Email extends WC_Settings_API {
 	protected function save_template( $template_code, $template_path ) {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
-			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
+			$file   = get_stylesheet_directory() . '/' . WC()->template_path() . $template_path;
 			$code   = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {

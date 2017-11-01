@@ -38,8 +38,8 @@ class WC_Shortcode_Cart {
 				WC()->customer->set_location( $country, $state, $postcode, $city );
 				WC()->customer->set_shipping_location( $country, $state, $postcode, $city );
 			} else {
-				WC()->customer->set_to_base();
-				WC()->customer->set_shipping_to_base();
+				WC()->customer->set_billing_address_to_base();
+				WC()->customer->set_shipping_address_to_base();
 			}
 
 			WC()->customer->set_calculated_shipping( true );
@@ -62,10 +62,8 @@ class WC_Shortcode_Cart {
 	 * @param array $atts
 	 */
 	public static function output( $atts ) {
-		// Constants
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
+		// Constants.
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 
 		$atts = shortcode_atts( array(), $atts, 'woocommerce_cart' );
 

@@ -177,6 +177,9 @@ class WC_Emails {
 		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
+		// Hook for replacing {site_title} in email-footer.
+		add_filter( 'woocommerce_email_footer_text' , array( $this, 'email_footer_replace_site_title' ) );
+
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
 	}
@@ -252,25 +255,36 @@ class WC_Emails {
 	}
 
 	/**
+	 * Filter callback to replace {site_title} in email footer
+	 *
+	 * @since  3.3.0
+	 * @param  string $string Email footer text.
+	 * @return string         Email footer text with any replacements done.
+	 */
+	public function email_footer_replace_site_title( $string ) {
+		return str_replace( '{site_title}', $this->get_blogname(), $string );
+	}
+
+	/**
 	 * Wraps a message in the woocommerce mail template.
 	 *
-	 * @param mixed $email_heading
-	 * @param string $message
-	 * @param bool $plain_text
+	 * @param string $email_heading Heading text.
+	 * @param string $message       Email message.
+	 * @param bool   $plain_text    Set true to send as plain text. Default to false.
 	 *
 	 * @return string
 	 */
 	public function wrap_message( $email_heading, $message, $plain_text = false ) {
-		// Buffer
+		// Buffer.
 		ob_start();
 
-		do_action( 'woocommerce_email_header', $email_heading );
+		do_action( 'woocommerce_email_header', $email_heading, null );
 
 		echo wpautop( wptexturize( $message ) );
 
-		do_action( 'woocommerce_email_footer' );
+		do_action( 'woocommerce_email_footer', null );
 
-		// Get contents
+		// Get contents.
 		$message = ob_get_clean();
 
 		return $message;

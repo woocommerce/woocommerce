@@ -258,6 +258,9 @@ module.exports = function( grunt ) {
 			},
 			e2e_tests: {
 				command: 'npm run --silent test'
+			},
+			e2e_tests_grep: {
+				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
 			}
 		},
 
@@ -271,10 +274,12 @@ module.exports = function( grunt ) {
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
-				bin: 'vendor/bin/phpcs',
-				standard: './phpcs.ruleset.xml'
+				bin: 'vendor/bin/phpcs'
 			},
 			dist: {
+				options: {
+					standard: './phpcs.ruleset.xml'
+				},
 				src:  [
 					'**/*.php',                                                  // Include all files
 					'!apigen/**',                                                // Exclude apigen/
@@ -359,6 +364,10 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'e2e-tests', [
 		'shell:e2e_tests'
+	]);
+
+	grunt.registerTask( 'e2e-tests-grep', [
+		'shell:e2e_tests_grep'
 	]);
 
 	grunt.registerTask( 'e2e-test', [

@@ -21,7 +21,7 @@ final class WC_Cart_Session {
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
-	 * @var array
+	 * @var WC_Cart
 	 */
 	protected $cart;
 
@@ -29,9 +29,14 @@ final class WC_Cart_Session {
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
-	 * @param object $cart Cart object to calculate totals for.
+	 * @throws Exception If missing WC_Cart object.
+	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
-	public function __construct( &$cart = null ) {
+	public function __construct( &$cart ) {
+		if ( ! is_a( $cart, 'WC_Cart' ) ) {
+			throw new Exception( 'A valid WC_Cart object is required' );
+		}
+
 		$this->cart = $cart;
 
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );

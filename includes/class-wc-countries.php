@@ -215,7 +215,7 @@ class WC_Countries {
 	 */
 	public function get_allowed_countries() {
 		if ( 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
-			return $this->countries;
+			return apply_filters( 'woocommerce_countries_allowed_countries', $this->countries );
 		}
 
 		if ( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
@@ -1149,7 +1149,7 @@ class WC_Countries {
 				'label'        => __( 'Phone', 'woocommerce' ),
 				'required'     => true,
 				'type'         => 'tel',
-				'class'        => array( 'form-row-first' ),
+				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'phone' ),
 				'autocomplete' => 'tel',
 				'priority'     => 100,
@@ -1158,7 +1158,7 @@ class WC_Countries {
 				'label'        => __( 'Email address', 'woocommerce' ),
 				'required'     => true,
 				'type'         => 'email',
-				'class'        => array( 'form-row-last' ),
+				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
 				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
 				'priority'     => 110,

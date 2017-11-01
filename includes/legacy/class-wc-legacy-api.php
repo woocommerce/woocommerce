@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Legacy API.
+ */
 class WC_Legacy_API {
 
 	/**
@@ -41,6 +44,7 @@ class WC_Legacy_API {
 
 	/**
 	 * Setup class.
+	 *
 	 * @since 2.0
 	 */
 	public function __construct() {
@@ -51,7 +55,7 @@ class WC_Legacy_API {
 	 * Add new query vars.
 	 *
 	 * @since 2.0
-	 * @param array $vars
+	 * @param array $vars Vars.
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
@@ -91,8 +95,8 @@ class WC_Legacy_API {
 		// REST API request.
 		if ( ! empty( $wp->query_vars['wc-api-version'] ) && ! empty( $wp->query_vars['wc-api-route'] ) ) {
 
-			define( 'WC_API_REQUEST', true );
-			define( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
+			wc_maybe_define_constant( 'WC_API_REQUEST', true );
+			wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
 
 			// Legacy v1 API request.
 			if ( 1 === WC_API_REQUEST_VERSION ) {
@@ -151,7 +155,7 @@ class WC_Legacy_API {
 	 *
 	 * @since 2.1
 	 * @deprecated 2.6.0
-	 * @param WC_API_Server $server the REST server
+	 * @param WC_API_Server $server the REST server.
 	 */
 	public function register_resources( $server ) {
 

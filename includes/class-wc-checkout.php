@@ -299,7 +299,9 @@ class WC_Checkout {
 					$order->{"set_{$key}"}( $value );
 
 				// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+				// TODO: Fix conditional to only include shipping/billing address fields in a smarter way without str(i)pos.
+				} elseif ( ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
+					&& ! in_array( $key, array( 'shipping_method', 'shipping_total', 'shipping_tax' ) ) ) {
 					$order->update_meta_data( '_' . $key, $value );
 				}
 			}
@@ -467,7 +469,7 @@ class WC_Checkout {
 	 * @param WC_Cart $cart
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->taxes + $cart->shipping_taxes ) as $tax_rate_id ) {
+		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() ) as $tax_rate_id ) {
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
 				$item = new WC_Order_Item_Tax();
 				$item->set_props( array(
@@ -590,7 +592,7 @@ class WC_Checkout {
 		// BW compatibility.
 		$this->legacy_posted_data = $data;
 
-		return $data;
+		return apply_filters( 'woocommerce_checkout_posted_data', $data );
 	}
 
 	/**
@@ -647,7 +649,7 @@ class WC_Checkout {
 
 					if ( ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
 					}
 				}
@@ -667,14 +669,14 @@ class WC_Checkout {
 
 						if ( ! in_array( $data[ $key ], $valid_state_values ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
+							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
 						}
 					}
 				}
 
 				if ( $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), $field_label ) );
+					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
 				}
 			}
 		}

@@ -130,7 +130,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->calculate_totals();
-		$cart_item = current( WC()->cart->get_cart() );
 		$this->assertEquals( '16.55', WC()->cart->total );
 
 		// Cleanup
