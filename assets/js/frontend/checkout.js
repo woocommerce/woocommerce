@@ -391,11 +391,7 @@ jQuery( function( $ ) {
 						// Lose focus for all fields
 						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 
-						// Scroll to top
-						$( 'html, body' ).animate( {
-							scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
-						}, 1000 );
-
+						wc_checkout_form.scroll_to_notices();
 					}
 
 					// Re-init methods
@@ -512,10 +508,28 @@ jQuery( function( $ ) {
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
-			$( 'html, body' ).animate({
-				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
-			}, 1000 );
+			wc_checkout_form.scroll_to_notices();
 			$( document.body ).trigger( 'checkout_error' );
+		},
+		scroll_to_notices: function() {
+			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' ),
+				isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+
+			if ( ! scrollElement ) {
+				scrollElement = $( '.form.checkout' );
+			}
+
+			if ( scrollElement ) {
+				if ( isSmoothScrollSupported ) {
+					scrollElement[0].scrollIntoView({
+						behavior: 'smooth',
+					});
+				} else {
+					$( 'html, body' ).animate( {
+						scrollTop: ( scrollElement.offset().top - 100 )
+					}, 1000 );
+				}
+			}
 		}
 	};
 
