@@ -600,6 +600,57 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
+		$object->delete();
+	}
+
+	/**
+	 * Test: calculate_taxes_is_vat_excempt
+	 */
+	function test_calculate_taxes_is_vat_excempt() {
+		global $wpdb;
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$object = new WC_Order();
+		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
+		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item   = new WC_Order_Item_Shipping();
+		$item->set_props( array(
+			'method_title' => $rate->label,
+			'method_id'    => $rate->id,
+			'total'        => wc_format_decimal( $rate->cost ),
+			'taxes'        => $rate->taxes,
+		)  );
+		foreach ( $rate->get_meta_data() as $key => $value ) {
+			$item->add_meta_data( $key, $value, true );
+		}
+		$object->add_item( $item );
+
+		$object->calculate_taxes();
+		$this->assertEquals( 5, $object->get_total_tax() );
+
+		// Add VAT except meta.
+		$object->add_meta_data( 'is_vat_exempt', 'yes', true );
+		$object->save();
+		$object->calculate_taxes();
+		$this->assertEquals( 0, $object->get_total_tax() );
+
+		// Cleanup
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$object->delete();
 	}
 
 	function test_calculate_taxes_issue_with_addresses() {
@@ -794,7 +845,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( 100 );
 		$object->set_currency( 'USD' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>100.00</span>', $object->get_formatted_order_total() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>&#x200e;100.00</span>', $object->get_formatted_order_total() );
 	}
 
 	/**

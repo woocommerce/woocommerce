@@ -1288,6 +1288,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array $args Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
+		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
+
 		$calculate_tax_for  = $this->get_tax_location( $args );
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
@@ -1296,13 +1298,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ): false;
 		}
 
+		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ) );
+
 		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
-			$item->calculate_taxes( $calculate_tax_for );
+			if ( ! $is_vat_exempt ) {
+				$item->calculate_taxes( $calculate_tax_for );
+			} else {
+				$item->set_taxes( false );
+			}
 		}
 
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
-			if ( false !== $shipping_tax_class ) {
+			if ( false !== $shipping_tax_class && ! $is_vat_exempt ) {
 				$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
 			} else {
 				$item->set_taxes( false );
@@ -1372,6 +1380,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
+		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
+
 		$cart_subtotal      = 0;
 		$cart_total         = 0;
 		$fee_total          = 0;
