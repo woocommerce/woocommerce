@@ -45,6 +45,19 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test coupon accurately cleans up object cache upon deletion.
+	 */
+	public function test_coupon_cache_deletion() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+		$coupon->delete( true );
+
+		$cache_name = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code();
+		$ids = wp_cache_get( $cache_name, 'coupons' );
+
+		$this->assertEquals( false, $ids, sprintf( 'Object cache for %s was not removed upon deletion of coupon.', $cache_name ) );
+	}
+
+	/**
 	 * Test coupon update.
 	 * @since 3.0.0
 	 */

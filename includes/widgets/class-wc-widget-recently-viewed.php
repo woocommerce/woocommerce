@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  3.3.0
  * @extends  WC_Widget
  */
 class WC_Widget_Recently_Viewed extends WC_Widget {
@@ -20,13 +20,13 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_recently_viewed_products';
-		$this->widget_description = __( 'Display a list of recently viewed products.', 'woocommerce' );
+		$this->widget_description = __( "Display a list of a customer's recently viewed products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_recently_viewed_products';
-		$this->widget_name        = __( 'WooCommerce recently viewed', 'woocommerce' );
+		$this->widget_name        = __( 'Recent Viewed Products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Recently viewed products', 'woocommerce' ),
+				'std'   => __( 'Recently Viewed Products', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
@@ -89,14 +89,18 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 			$this->widget_start( $args, $instance );
 
-			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
+
+			$template_args = array(
+				'widget_id' => $args['widget_id'],
+			);
 
 			while ( $r->have_posts() ) {
 				$r->the_post();
-				wc_get_template( 'content-widget-product.php' );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );
 		}

@@ -298,15 +298,16 @@ function wc_cart_totals_coupon_html( $coupon ) {
 function wc_cart_totals_order_total_html() {
 	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
 
-	// If prices are tax inclusive, show taxes here
+	// If prices are tax inclusive, show taxes here.
 	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
 		$tax_string_array = array();
+		$cart_tax_totals  = WC()->cart->get_tax_totals();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
-			foreach ( WC()->cart->get_tax_totals() as $code => $tax ) {
+			foreach ( $cart_tax_totals as $code => $tax ) {
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 			}
-		} else {
+		} elseif ( ! empty( $cart_tax_totals ) ) {
 			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
@@ -328,7 +329,7 @@ function wc_cart_totals_order_total_html() {
  * @param object $fee
  */
 function wc_cart_totals_fee_html( $fee ) {
-	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->total ) : wc_price( $fee->total + $fee->tax );
 
 	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee );
 }
@@ -404,29 +405,45 @@ function wc_get_chosen_shipping_method_ids() {
  * Get chosen method for package from session.
  *
  * @since  3.2.0
- * @param  int $key
- * @param  array $package
+ * @param  int   $key Key of package.
+ * @param  array $package Package data array.
  * @return string|bool
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
 	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
 	$changed        = wc_shipping_methods_have_changed( $key, $package );
-	// If not set, not available, or available methods have changed, set to the DEFAULT option
-	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) ) {
+
+	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0
+	$method_counts  = WC()->session->get( 'shipping_method_counts' );
+
+	if ( ! empty( $method_counts[ $key ] ) ) {
+		$method_count = absint( $method_counts[ $key ] );
+	} else {
+		$method_count = 0;
+	}
+
+	// If not set, not available, or available methods have changed, set to the DEFAULT option.
+	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) || sizeof( $package['rates'] ) !== $method_count ) {
 		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
 		$chosen_methods[ $key ] = $chosen_method;
+		$method_counts[ $key ]  = sizeof( $package['rates'] );
+
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'shipping_method_counts', $method_counts );
+
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
 }
+
 /**
  * Choose the default method for a package.
  *
  * @since  3.2.0
- * @param  string $key
- * @param  array $package
+ * @param  int    $key Key of package.
+ * @param  array  $package Package data array.
+ * @param  string $chosen_method Cgosen method id.
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
@@ -446,12 +463,13 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	}
 	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
+
 /**
  * See if the methods have changed since the last request.
  *
  * @since  3.2.0
- * @param  int $key
- * @param  array $package
+ * @param  int   $key Key of package.
+ * @param  array $package Package data array.
  * @return bool
  */
 function wc_shipping_methods_have_changed( $key, $package ) {
@@ -463,5 +481,5 @@ function wc_shipping_methods_have_changed( $key, $package ) {
 	// Update session.
 	$previous_shipping_methods[ $key ] = $new_rates;
 	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
-	return $new_rates != $prev_rates;
+	return $new_rates !== $prev_rates;
 }

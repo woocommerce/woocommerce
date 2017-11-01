@@ -145,7 +145,7 @@ class WC_Admin_Notices {
 		$notices = self::get_notices();
 
 		if ( ! empty( $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
 
 			// Add RTL support
 			wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
@@ -235,12 +235,12 @@ class WC_Admin_Notices {
 			$theme_file = false;
 			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
-			} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-				$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+			} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+				$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
 			} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 				$theme_file = get_template_directory() . '/' . $file;
-			} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-				$theme_file = get_template_directory() . '/woocommerce/' . $file;
+			} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+				$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
 			}
 
 			if ( false !== $theme_file ) {

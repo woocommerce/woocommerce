@@ -13,7 +13,7 @@
 <!-- Mark completed items with an [x] -->
 
 - [ ] I have searched for similar issues in both open and closed tickets and cannot find a duplicate
-- [ ] The issue still exists against the latest `master` branch of WooCommerce on Github
+- [ ] The issue still exists against the latest `master` branch of WooCommerce on Github (this is **not** the same version as on WordPress.org!)
 - [ ] I have attempted to find the simplest possible steps to reproduce the issue
 - [ ] I have included a failing test as a pull request (Optional)
 

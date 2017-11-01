@@ -71,6 +71,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'Grouped products'                        => 'grouped_products',
 		'External URL'                            => 'product_url',
 		'Button text'                             => 'button_text',
+		'Position'                                => 'menu_order',
 	);
 
 	return array_merge( $mappings, $new_mappings );

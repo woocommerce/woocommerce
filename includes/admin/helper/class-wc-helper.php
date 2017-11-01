@@ -41,7 +41,6 @@ class WC_Helper {
 
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'woocommerce_in_plugin_update_message', array( __CLASS__, 'in_plugin_update_message' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
 	}
@@ -75,9 +74,11 @@ class WC_Helper {
 			'wc-helper-nonce' => wp_create_nonce( 'disconnect' ),
 		), admin_url( 'admin.php' ) );
 
+		$current_filter = self::get_current_filter();
 		$refresh_url = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => $current_filter,
 			'wc-helper-refresh' => 1,
 			'wc-helper-nonce' => wp_create_nonce( 'refresh' ),
 		), admin_url( 'admin.php' ) );
@@ -97,6 +98,7 @@ class WC_Helper {
 			$subscription['activate_url'] = add_query_arg( array(
 				'page' => 'wc-addons',
 				'section' => 'helper',
+				'filter' => $current_filter,
 				'wc-helper-activate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -106,6 +108,7 @@ class WC_Helper {
 			$subscription['deactivate_url'] = add_query_arg( array(
 				'page' => 'wc-addons',
 				'section' => 'helper',
+				'filter' => $current_filter,
 				'wc-helper-deactivate' => 1,
 				'wc-helper-product-key' => $subscription['product_key'],
 				'wc-helper-product-id' => $subscription['product_id'],
@@ -306,9 +309,125 @@ class WC_Helper {
 		uasort( $subscriptions, array( __CLASS__, '_sort_by_product_name' ) );
 		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
+		// Filters
+		self::get_filters_counts( $subscriptions ); // Warm it up.
+		self::_filter( $subscriptions, self::get_current_filter() );
+
 		// We have an active connection.
 		include( self::get_view_filename( 'html-main.php' ) );
 		return;
+	}
+
+	/**
+	 * Get available subscriptions filters.
+	 *
+	 * @param array Optional subscriptions array to generate counts.
+	 *
+	 * @return array An array of filter keys and labels.
+	 */
+	public static function get_filters( $subscriptions = null ) {
+		$filters = array(
+			'all' => __( 'All', 'woocommerce' ),
+			'active' => __( 'Active', 'woocommerce' ),
+			'inactive' => __( 'Inactive', 'woocommerce' ),
+			'installed' => __( 'Installed', 'woocommerce' ),
+			'update-available' => __( 'Update Available', 'woocommerce' ),
+			'expiring' => __( 'Expiring Soon', 'woocommerce' ),
+			'expired' => __( 'Expired', 'woocommerce' ),
+			'download' => __( 'Download', 'woocommerce' ),
+		);
+
+		return $filters;
+	}
+
+	/**
+	 * Get counts data for the filters array.
+	 *
+	 * @param array $subscriptions The array of all available subscriptions.
+	 *
+	 * @return array Filter counts (filter => count)
+	 */
+	public static function get_filters_counts( $subscriptions = null ) {
+		static $filters;
+
+		if ( isset( $filters ) ) {
+			return $filters;
+		}
+
+		$filters = array_fill_keys( array_keys( self::get_filters() ), 0 );
+		if ( empty( $subscriptions ) ) {
+			return array();
+		}
+
+		foreach ( $filters as $key => $count ) {
+			$_subs = $subscriptions;
+			self::_filter( $_subs, $key );
+			$filters[ $key ] = count( $_subs );
+		}
+
+		return $filters;
+	}
+
+	/**
+	 * Get current filter.
+	 *
+	 * @return string The current filter.
+	 */
+	public static function get_current_filter() {
+		$current_filter = 'all';
+		$valid_filters = array_keys( self::get_filters() );
+
+		if ( ! empty( $_GET['filter'] ) && in_array( $_GET['filter'], $valid_filters ) ) {
+			$current_filter = $_GET['filter'];
+		}
+
+		return $current_filter;
+	}
+
+	/**
+	 * Filter an array of subscriptions by $filter.
+	 *
+	 * @param array $subscriptions The subscriptions array, passed by ref.
+	 * @param string $filter The filter.
+	 */
+	private static function _filter( &$subscriptions, $filter ) {
+		switch ( $filter ) {
+			case 'active':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => true ) );
+				break;
+
+			case 'inactive':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'active' => false ) );
+				break;
+
+			case 'installed':
+				foreach ( $subscriptions as $key => $subscription ) {
+					if ( empty( $subscription['local']['installed'] ) ) {
+						unset( $subscriptions[ $key ] );
+					}
+				}
+				break;
+
+			case 'update-available':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'has_update' => true ) );
+				break;
+
+			case 'expiring':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'expiring' => true ) );
+				break;
+
+			case 'expired':
+				$subscriptions = wp_list_filter( $subscriptions, array( 'expired' => true ) );
+				break;
+
+			case 'download':
+				foreach ( $subscriptions as $key => $subscription ) {
+					if ( $subscription['local']['installed'] || $subscription['expired'] ) {
+						unset( $subscriptions[ $key ] );
+					}
+				}
+				break;
+		}
 	}
 
 	/**
@@ -368,6 +487,7 @@ class WC_Helper {
 					$deactivate_plugin_url = add_query_arg( array(
 						'page' => 'wc-addons',
 						'section' => 'helper',
+						'filter' => self::get_current_filter(),
 						'wc-helper-deactivate-plugin' => 1,
 						'wc-helper-product-id' => $subscription['product_id'],
 						'wc-helper-nonce' => wp_create_nonce( 'deactivate-plugin:' . $subscription['product_id'] ),
@@ -616,7 +736,7 @@ class WC_Helper {
 			'wc-helper-status' => 'helper-disconnected',
 		), admin_url( 'admin.php' ) );
 
-		$result = WC_Helper_API::post( 'oauth/invalidate_token', array(
+		WC_Helper_API::post( 'oauth/invalidate_token', array(
 			'authenticated' => true,
 		) );
 
@@ -645,6 +765,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => 'helper-refreshed',
 		), admin_url( 'admin.php' ) );
 
@@ -691,6 +812,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $activated ? 'activate-success' : 'activate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -728,6 +850,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $deactivated ? 'deactivate-success' : 'deactivate-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -768,6 +891,7 @@ class WC_Helper {
 		$redirect_uri = add_query_arg( array(
 			'page' => 'wc-addons',
 			'section' => 'helper',
+			'filter' => self::get_current_filter(),
 			'wc-helper-status' => $deactivated ? 'deactivate-plugin-success' : 'deactivate-plugin-error',
 			'wc-helper-product-id' => $product_id,
 		), admin_url( 'admin.php' ) );
@@ -989,7 +1113,7 @@ class WC_Helper {
 			}
 
 			// No more sites available in this subscription.
-			if ( $_sub['sites_active'] >= $_sub['sites_max'] ) {
+			if ( $_sub['sites_max'] && $_sub['sites_active'] >= $_sub['sites_max'] ) {
 				continue;
 			}
 
@@ -1105,22 +1229,6 @@ class WC_Helper {
 	}
 
 	/**
-	 * Add an upgrade notice if there are extensions with updates.
-	 *
-	 * @param string $message An existing update notice or an empty string.
-	 *
-	 * @return string The resulting message.
-	 */
-	public static function in_plugin_update_message( $message ) {
-		$notice = self::_get_extensions_update_notice();
-		if ( ! empty( $notice ) ) {
-			$message .= '</p><p class="wc_plugin_upgrade_notice">' . $notice;
-		}
-
-		return $message;
-	}
-
-	/**
 	 * Get an update notice if one or more Woo extensions has an update available.
 	 *
 	 * @return string|null The update notice or null if everything is up to date.
@@ -1146,7 +1254,7 @@ class WC_Helper {
 		}
 
 		/* translators: %1$s: helper url, %2$d: number of extensions */
-		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
+		return sprintf( _n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
 			admin_url( 'admin.php?page=wc-addons&section=helper' ), $available );
 	}
 

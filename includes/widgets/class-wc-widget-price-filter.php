@@ -22,9 +22,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_price_filter';
-		$this->widget_description = __( 'Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories.', 'woocommerce' );
+		$this->widget_description = __( 'Display a slider to filter products in your store by price.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_price_filter';
-		$this->widget_name        = __( 'WooCommerce price filter', 'woocommerce' );
+		$this->widget_name        = __( 'Filter Products by Price', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
@@ -37,14 +37,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-			'min_price'			           => isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-			'max_price'			           => isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '',
 			'currency_format_num_decimals' => 0,
 			'currency_format_symbol'       => get_woocommerce_currency_symbol(),
 			'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
 			'currency_format_thousand_sep' => esc_attr( wc_get_price_thousand_separator() ),
 			'currency_format'              => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ),
 		) );
+
+		if ( is_customize_preview() ) {
+			wp_enqueue_script( 'wc-price-slider' );
+		}
+
 		parent::__construct();
 	}
 
@@ -67,12 +70,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '';
-		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '';
-
 		wp_enqueue_script( 'wc-price-slider' );
 
-		// Find min and max price in current result set
+		// Find min and max price in current result set.
 		$prices = $this->get_filtered_price();
 		$min    = floor( $prices->min_price );
 		$max    = ceil( $prices->max_price );
@@ -106,6 +106,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 			$max = $class_max;
 		}
+
+		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min );
+		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max );
 
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">

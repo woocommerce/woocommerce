@@ -124,7 +124,9 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ),  __( 'Extensions', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		$count_html = WC_Helper_Updater::get_updates_count_html();
+		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
 
 	/**

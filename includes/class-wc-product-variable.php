@@ -64,7 +64,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
 	 * @param  bool $include_taxes Should taxes be included in the prices.
-	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
+	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $include_taxes = false ) {
 		$prices = $this->data_store->read_price_data( $this, $include_taxes );
@@ -510,7 +510,7 @@ class WC_Product_Variable extends WC_Product {
 	 * upwards (from child to parent) when the variation is saved.
 	 *
 	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
-	 * @param bool $save If true, the prouduct object will be saved to the DB before returning it.
+	 * @param bool $save If true, the product object will be saved to the DB before returning it.
 	 * @return WC_Product Synced product object.
 	 */
 	public static function sync( $product, $save = true ) {

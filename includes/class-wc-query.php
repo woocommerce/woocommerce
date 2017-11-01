@@ -2,11 +2,9 @@
 /**
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
- * @class 		WC_Query
- * @version		2.6.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @version 3.2.0
+ * @package WooCommerce/Classes
+ * @author  Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,19 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Query {
 
-	/** @public array Query vars to add to wp */
+	/**
+	 * Query vars to add to wp.
+	 *
+	 * @var array
+	 */
 	public $query_vars = array();
 
 	/**
-	 * Stores chosen attributes
+	 * Stores chosen attributes.
+	 *
 	 * @var array
 	 */
 	private static $_chosen_attributes;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
-	 *
-	 * @access public
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
@@ -291,9 +292,7 @@ class WC_Query {
 			}
 
 			// Define a variable so we know this is the front page shop later on
-			if ( ! defined( 'SHOP_IS_ON_FRONT' ) ) {
-				define( 'SHOP_IS_ON_FRONT', true );
-			}
+			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
 			// Get the actual WP page to avoid errors and let us use is_front_page()
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
@@ -372,16 +371,14 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-		// Ordering query vars
-		if ( ! $q->is_search() ) {
+		if ( ! is_feed() ) {
 			$ordering  = $this->get_catalog_ordering_args();
 			$q->set( 'orderby', $ordering['orderby'] );
 			$q->set( 'order', $ordering['order'] );
+
 			if ( isset( $ordering['meta_key'] ) ) {
 				$q->set( 'meta_key', $ordering['meta_key'] );
 			}
-		} else {
-			$q->set( 'orderby', 'relevance' );
 		}
 
 		// Query vars that affect posts shown
@@ -443,12 +440,18 @@ class WC_Query {
 
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
-		$args    = array();
+		$args    = array(
+			'orderby'  => 'relevance',
+			'order'    => 'DESC',
+			'meta_key' => '',
+		);
 
-		// default - menu_order
-		$args['orderby']  = 'menu_order title';
-		$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-		$args['meta_key'] = '';
+		// Set to default. Menu order for non-searches, relevance for searches.
+		if ( ! is_search() ) {
+			$args['orderby']  = 'menu_order title';
+			$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
+			$args['meta_key'] = '';
+		}
 
 		switch ( $orderby ) {
 			case 'rand' :
@@ -482,6 +485,10 @@ class WC_Query {
 				$args['orderby'] = 'title';
 				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				break;
+			case 'relevance' :
+				$args['orderby'] = 'relevance';
+				$args['order']   = 'DESC';
+				break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
@@ -509,9 +516,27 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
-		global $wpdb;
-		$args['join']    .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+		global $wpdb, $wp_query;
+
+		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
+			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
+			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
+			$args['join'] .= " INNER JOIN (
+				SELECT post_id, max( meta_value+0 ) price
+				FROM $wpdb->postmeta
+				INNER JOIN (
+					SELECT $wpdb->term_relationships.object_id
+					FROM $wpdb->term_relationships
+					WHERE 1=1
+					AND $wpdb->term_relationships.term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $search_within_terms ) ) . ")
+				) as products_within_terms ON $wpdb->postmeta.post_id = products_within_terms.object_id
+				WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+		} else {
+			$args['join'] .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+		}
+
 		$args['orderby'] = " price_query.price DESC ";
+
 		return $args;
 	}
 

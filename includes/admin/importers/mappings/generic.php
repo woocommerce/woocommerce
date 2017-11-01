@@ -18,6 +18,7 @@ function wc_importer_generic_mappings( $mappings ) {
 		__( 'Price', 'woocommerce' )         => 'regular_price',
 		__( 'Parent SKU', 'woocommerce' )    => 'parent_id',
 		__( 'Quantity', 'woocommerce' )      => 'stock_quantity',
+		__( 'Menu order', 'woocommerce' )    => 'menu_order',
 	);
 
 	return array_merge( $mappings, $generic_mappings );

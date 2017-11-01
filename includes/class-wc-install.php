@@ -17,7 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Install {
 
-	/** @var array DB updates and callbacks that need to be run per version */
+	/**
+	 * DB updates and callbacks that need to be run per version.
+	 *
+	 * @var array
+	 */
 	private static $db_updates = array(
 		'2.0.0' => array(
 			'wc_update_200_file_paths',
@@ -94,7 +98,11 @@ class WC_Install {
 		),
 	);
 
-	/** @var object Background update class */
+	/**
+	 * Background update class.
+	 *
+	 * @var object
+	 */
 	private static $background_updater;
 
 	/**
@@ -104,7 +112,6 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
-		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
@@ -154,81 +161,112 @@ class WC_Install {
 	 * Install WC.
 	 */
 	public static function install() {
-		global $wpdb;
-
 		if ( ! is_blog_installed() ) {
 			return;
 		}
 
-		if ( ! defined( 'WC_INSTALLING' ) ) {
-			define( 'WC_INSTALLING', true );
+		// Check if we are not already running this routine.
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+			return;
 		}
 
-		// Ensure needed classes are loaded
-		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
+		// If we made it till here nothing is running yet, lets set the transient now.
+		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
+		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
+		self::remove_admin_notices();
 		self::create_options();
 		self::create_tables();
 		self::create_roles();
+		self::setup_environment();
+		self::create_terms();
+		self::create_cron_jobs();
+		self::create_files();
+		self::maybe_enable_setup_wizard();
+		self::update_wc_version();
+		self::maybe_update_db_version();
 
-		// Register post types
+		delete_transient( 'wc_installing' );
+
+		do_action( 'woocommerce_flush_rewrite_rules' );
+		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Reset any notices added to admin.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function remove_admin_notices() {
+		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
+		WC_Admin_Notices::remove_all_notices();
+	}
+
+	/**
+	 * Setup WC environment - post types, taxonomies, endpoints.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function setup_environment() {
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
-
-		// Also register endpoints - this needs to be done prior to rewrite rule flush
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
+	}
 
-		self::create_terms();
-		self::create_cron_jobs();
-		self::create_files();
+	/**
+	 * Is this a brand new WC install?
+	 *
+	 * @since 3.2.0
+	 * @return boolean
+	 */
+	private static function is_new_install() {
+		return is_null( get_option( 'woocommerce_version', null ) ) && is_null( get_option( 'woocommerce_db_version', null ) );
+	}
 
-		// Queue upgrades/setup wizard
-		$current_wc_version    = get_option( 'woocommerce_version', null );
-		$current_db_version    = get_option( 'woocommerce_db_version', null );
+	/**
+	 * Is a DB update needed?
+	 *
+	 * @since 3.2.0
+	 * @return boolean
+	 */
+	private static function needs_db_update() {
+		$current_db_version = get_option( 'woocommerce_db_version', null );
+		$updates            = self::get_db_update_callbacks();
 
-		WC_Admin_Notices::remove_all_notices();
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( $updates ) ), '<' );
+	}
 
-		// No versions? This is a new install :)
-		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
+	/**
+	 * See if we need the wizard or not.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function maybe_enable_setup_wizard() {
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', self::is_new_install() ) ) {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_activation_redirect', 1, 30 );
-
-		// No page? Let user run wizard again..
-		} elseif ( ! get_option( 'woocommerce_cart_page_id' ) ) {
-			WC_Admin_Notices::add_notice( 'install' );
 		}
+	}
 
-		if ( ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( self::$db_updates ) ), '<' ) ) {
-			WC_Admin_Notices::add_notice( 'update' );
+	/**
+	 * See if we need to show or run database updates during install.
+	 *
+	 * @since 3.2.0
+	 */
+	private static function maybe_update_db_version() {
+		if ( self::needs_db_update() ) {
+			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
+				self::init_background_updater();
+				self::update();
+			} else {
+				WC_Admin_Notices::add_notice( 'update' );
+			}
 		} else {
 			self::update_db_version();
 		}
-
-		self::update_wc_version();
-
-		// Flush rules after install
-		do_action( 'woocommerce_flush_rewrite_rules' );
-		delete_transient( 'wc_attribute_taxonomies' );
-
-		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used
-		 * to delete the transient record from table a, and the corresponding
-		 * transient_timeout record from table b.
-		 *
-		 * Based on code inside core's upgrade_network() function.
-		 */
-		$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-			WHERE a.option_name LIKE %s
-			AND a.option_name NOT LIKE %s
-			AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-			AND b.option_value < %d";
-		$wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-		// Trigger action
-		do_action( 'woocommerce_installed' );
 	}
 
 	/**
@@ -309,7 +347,7 @@ class WC_Install {
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
 
-		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
+		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
@@ -797,6 +835,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
+		// Bypass if filesystem is read-only and/or non-standard upload system is used
+		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
+			return;
+		}
+
 		// Install files and folders for uploading files and prevent hotlinking
 		$upload_dir      = wp_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
@@ -835,67 +878,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				}
 			}
 		}
-	}
-
-	/**
-	 * Show plugin changes. Code adapted from W3 Total Cache.
-	 *
-	 * @param array $args
-	 */
-	public static function in_plugin_update_message( $args ) {
-		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
-
-		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
-			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
-
-			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-				$upgrade_notice = self::parse_update_notice( $response['body'], $args['new_version'] );
-				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
-			}
-		}
-
-		echo apply_filters( 'woocommerce_in_plugin_update_message', wp_kses_post( $upgrade_notice ) );
-	}
-
-	/**
-	 * Parse update notice from readme file.
-	 *
-	 * @param  string $content
-	 * @param  string $new_version
-	 * @return string
-	 */
-	private static function parse_update_notice( $content, $new_version ) {
-		// Output Upgrade Notice.
-		$matches        = null;
-		$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
-		$upgrade_notice = '';
-
-		if ( preg_match( $regexp, $content, $matches ) ) {
-			$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
-
-			// Convert the full version strings to minor versions.
-			$notice_version_parts  = explode( '.', trim( $matches[1] ) );
-			$current_version_parts = explode( '.', WC_VERSION );
-
-			if ( 3 !== sizeof( $notice_version_parts ) ) {
-				return;
-			}
-
-			$notice_version  = $notice_version_parts[0] . '.' . $notice_version_parts[1];
-			$current_version = $current_version_parts[0] . '.' . $current_version_parts[1];
-
-			// Check the latest stable version and ignore trunk.
-			if ( version_compare( $current_version, $notice_version, '<' ) ) {
-
-				$upgrade_notice .= '</p><p class="wc_plugin_upgrade_notice">';
-
-				foreach ( $notices as $index => $line ) {
-					$upgrade_notice .= preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line );
-				}
-			}
-		}
-
-		return wp_kses_post( $upgrade_notice );
 	}
 
 	/**
