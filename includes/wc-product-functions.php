@@ -903,7 +903,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 * Either remove the base or the user taxes depending on woocommerce_adjust_non_base_location_prices setting.
 			 */
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
-				$remove_taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
+				$remove_taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true, $product->get_id() ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
 				$remove_tax   = array_sum( $remove_taxes );
 				$return_price = round( $line_price - $remove_tax, wc_get_price_decimals() );
 
@@ -912,7 +912,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
 			 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
 			 */
-			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true, $product->get_id() ) ) {
 				$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
 				$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
 				$return_price = round( $line_price - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
