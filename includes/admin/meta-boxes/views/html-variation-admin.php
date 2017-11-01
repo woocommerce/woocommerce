@@ -4,7 +4,7 @@
  *
  * @var int $variation_id
  * @var WP_POST $variation
- * @var WP_Product_Variation $variation_object
+ * @var WC_Product_Variation $variation_object
  * @var array $variation_data array of variation data @deprecated.
  */
 if ( ! defined( 'ABSPATH' ) ) {
