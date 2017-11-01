@@ -1426,10 +1426,11 @@ function wc_update_330_purchased_products() {
 	" );
 
 	// TODO: Test if this can cause a lot of performance issues during upgrade process.
+	// Could it be done with SQL moving data from old method to new?
 	foreach ( $results as $result ) {
 		$order = wc_get_order( $result->id );
 
-		wc_customer_mark_purchased_order( $order );
+		WC_Purchased_Products_Helper::mark_order_purchased( $order );
 	}
 }
 
