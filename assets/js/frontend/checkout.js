@@ -522,7 +522,7 @@ jQuery( function( $ ) {
 			if ( scrollElement ) {
 				if ( isSmoothScrollSupported ) {
 					scrollElement[0].scrollIntoView({
-						behavior: 'smooth',
+						behavior: 'smooth'
 					});
 				} else {
 					$( 'html, body' ).animate( {
