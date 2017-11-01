@@ -34,23 +34,24 @@
 	}).change();
 
 	// Color picker
-	$( '.colorpick' ).iris({
-		change: function( event, ui ) {
-			$( this ).parent().find( '.colorpickpreview' ).css({ backgroundColor: ui.color.toString() });
-		},
-		hide: true,
-		border: true
-	}).click( function() {
-		$( '.iris-picker' ).hide();
-		$( this ).closest( 'td' ).find( '.iris-picker' ).show();
-	});
+	$( '.colorpick' )
 
-	$( 'body' ).click( function() {
-		$( '.iris-picker' ).hide();
-	});
+		.iris({
+			change: function( event, ui ) {
+				$( this ).parent().find( '.colorpickpreview' ).css({ backgroundColor: ui.color.toString() });
+			},
+			hide: true,
+			border: true
+		})
 
-	$( '.colorpick' ).click( function( event ) {
-		event.stopPropagation();
+		.on( 'click focus', function( event ) {
+			event.stopPropagation();
+			$( '.iris-picker' ).hide();
+			$( this ).closest( 'td' ).find( '.iris-picker' ).show();
+		});
+
+	$( 'body' ).on( 'click', function() {
+		$( '.iris-picker' ).hide();
 	});
 
 	// Edit prompt
