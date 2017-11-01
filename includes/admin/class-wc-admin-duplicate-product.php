@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     3.0.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
+if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
+	return new WC_Admin_Duplicate_Product();
+}
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -30,11 +32,14 @@ class WC_Admin_Duplicate_Product {
 
 	/**
 	 * Show the "Duplicate" link in admin products list.
-	 * @param  array   $actions
-	 * @param  WP_Post $post Post object
+	 *
+	 * @param array   $actions Array of actions.
+	 * @param WP_Post $post Post object.
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
+		global $the_product;
+
 		if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) {
 			return $actions;
 		}
@@ -44,13 +49,16 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		// Add Class to Delete Permanently link in row actions.
-		$product = new WC_Product( $post->ID );
-		if( 'publish' === $post->post_status && 0 < $product->get_total_sales() ) {
+		if ( empty( $the_product ) || $the_product->get_id() !== $post->ID ) {
+			$the_product = wc_get_product( $post );
+		}
+
+		if ( 'publish' === $post->post_status && $the_product && 0 < $the_product->get_total_sales() ) {
 			$actions['trash'] = sprintf(
 				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
-				get_delete_post_link( $post->ID, '', false ),
+				get_delete_post_link( $the_product->get_id(), '', false ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $post->post_title ) ),
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $the_product->get_name() ) ),
 				__( 'Trash', 'woocommerce' )
 			);
 		}
@@ -207,7 +215,5 @@ class WC_Admin_Duplicate_Product {
 		return $post;
 	}
 }
-
-endif;
 
 return new WC_Admin_Duplicate_Product();
