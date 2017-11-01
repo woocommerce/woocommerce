@@ -11,6 +11,7 @@ jQuery( function( $ ) {
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
+		selectedPaymentMethod: false,
 		xhr: false,
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
@@ -58,7 +59,7 @@ jQuery( function( $ ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
 			}
 		},
-		init_payment_methods: function( selectedPaymentMethod ) {
+		init_payment_methods: function() {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
 			// If there is one method, we can hide the radio input
@@ -67,8 +68,8 @@ jQuery( function( $ ) {
 			}
 
 			// If there was a previously selected method, check that one.
-			if ( selectedPaymentMethod ) {
-				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
+			if ( wc_checkout_form.selectedPaymentMethod ) {
+				$( '#' + wc_checkout_form.selectedPaymentMethod ).prop( 'checked', true );
 			}
 
 			// If there are none selected, select the first.
@@ -102,6 +103,14 @@ jQuery( function( $ ) {
 			} else {
 				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
 			}
+
+			var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
+
+			if ( selectedPaymentMethod !== wc_checkout_form.selectedPaymentMethod ) {
+				$( document.body ).trigger( 'payment_method_selected' );
+			}
+
+			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
 		toggle_create_account: function() {
 			$( 'div.create-account' ).hide();
@@ -311,8 +320,6 @@ jQuery( function( $ ) {
 				data:		data,
 				success:	function( data ) {
 
-					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
-
 					// Reload the page if requested
 					if ( true === data.reload ) {
 						window.location.reload();
@@ -392,7 +399,7 @@ jQuery( function( $ ) {
 					}
 
 					// Re-init methods
-					wc_checkout_form.init_payment_methods( selectedPaymentMethod );
+					wc_checkout_form.init_payment_methods();
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
