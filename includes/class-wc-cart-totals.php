@@ -685,7 +685,7 @@ final class WC_Cart_Totals {
 			if ( $item->price_includes_tax ) {
 				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
 					$item = $this->remove_item_base_taxes( $item );
-				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true, $item->object[ 'product_id' ] ) ) {
 					$item = $this->adjust_non_base_location_price( $item );
 				}
 			}
