@@ -1418,20 +1418,26 @@ function wc_update_330_purchased_products() {
 
 	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 
-	$results = $wpdb->get_results( "
-		SELECT
-		id
-		FROM {$wpdb->posts}
-		WHERE post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-	" );
-
 	// TODO: Test if this can cause a lot of performance issues during upgrade process.
-	// Could it be done with SQL moving data from old method to new?
-	foreach ( $results as $result ) {
-		$order = wc_get_order( $result->id );
-
-		WC_Purchased_Products_Helper::mark_order_purchased( $order );
-	}
+	$wpdb->query( "
+		INSERT INTO {$wpdb->prefix}woocommerce_purchased_products
+		SELECT
+		pm.meta_value AS user_email,
+		p.id AS order_id,
+		pm2.meta_value AS user_id,
+		im.meta_value AS product_id,
+		i.order_item_id AS parent_order_item_id
+		FROM {$wpdb->posts} AS p
+		INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+		INNER JOIN {$wpdb->postmeta} AS pm2 ON p.ID = pm2.post_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+		WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+		AND pm.meta_key = '_billing_email'
+		AND pm2.meta_key = '_customer_user'
+		AND im.meta_key IN ( '_product_id', '_variation_id' )
+		AND im.meta_value != 0
+	" );
 }
 
 /**
