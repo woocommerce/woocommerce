@@ -677,6 +677,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_bought_products (
   user_id bigint(20) NOT NULL DEFAULT 0,
   product_id bigint(20) NOT NULL DEFAULT 0,
   parent_order_item_id bigint(20) DEFAULT NULL,
+  PRIMARY KEY (bought_id),
   KEY order_id (order_id)
 ) $collate;
 		";
