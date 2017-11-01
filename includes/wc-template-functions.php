@@ -695,8 +695,6 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 
 	/**
 	 * Show a shop page description on product archives.
-	 *
-	 * @subpackage	Archives
 	 */
 	function woocommerce_product_archive_description() {
 		// Don't display the description on search results page.
@@ -705,11 +703,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		}
 
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
-			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = wc_format_content( $shop_page->post_content );
 				if ( $description ) {
-					echo '<div class="page-description">' . wp_kses_post( $description ) . '</div>';
+					echo '<div class="page-description">' . $description . '</div>'; // WPCS: XSS ok.
 				}
 			}
 		}
