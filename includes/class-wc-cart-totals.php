@@ -454,11 +454,11 @@ final class WC_Cart_Totals {
 
 			if ( $item->tax_rates !== $base_tax_rates ) {
 				// Work out a new base price without the shop's base tax.
-				$taxes                    = WC_Tax::calc_tax( $item->price, $base_tax_rates, true, true );
+				$taxes       = WC_Tax::calc_tax( $item->price, $base_tax_rates, true, true );
+				$new_taxes   = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false, true );
 
-				// Now we have a new item price (excluding TAX).
-				$item->price              = absint( $item->price - array_sum( $taxes ) );
-				$item->price_includes_tax = false;
+				// Now we have a new item price.
+				$item->price = $item->price - array_sum( $taxes ) + array_sum( $new_taxes );
 			}
 		}
 		return $item;
@@ -743,7 +743,7 @@ final class WC_Cart_Totals {
 
 					if ( $item->product->is_taxable() ) {
 						// Item subtotals were sent, so set 3rd param.
-						$item_tax = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
+						$item_tax = wc_round_tax_total( array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) ), 0 );
 
 						// Sum total tax.
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
