@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.2.3 - 2017-11-02 =
+* Fix - Fixed a conflict with some slider plugins due to sanitization of archive/term descriptions. 
+* Fix - Fixed a flexslider bug when there is only 1 image on the product page (no gallery).
+* Fix - Prevent potential notices when someone extends product tabs wrongly.
+* Fix - Fixed display of shipping calculator under some conditions.
 
 = 3.2.2 - 2017-10-31 =
 * Fix - Properly escape commas when exporting products to CSV.
