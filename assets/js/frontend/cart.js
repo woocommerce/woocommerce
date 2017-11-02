@@ -131,9 +131,9 @@ jQuery( function( $ ) {
 	 */
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
-			$target = $( '.woocommerce-cart-form' );
-		}
-		$target.before( html_element );
+			target = jQuery( '#content' ).find( 'div.woocommerce' ).first();
+		}		
+        target.prepend( html_element );
 	};
 
 

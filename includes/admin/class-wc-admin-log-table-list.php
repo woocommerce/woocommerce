@@ -335,6 +335,11 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$where_values[]     = wc_clean( $_REQUEST['source'] );
 		}
 
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$where_conditions[] = 'message like %s';
+			$where_values[]     = '%' . wc_clean( $_REQUEST['s'] ) . '%';
+		}
+
 		if ( ! empty( $where_conditions ) ) {
 			return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );
 		} else {
