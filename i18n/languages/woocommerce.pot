@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.2.2\n"
+"Project-Id-Version: WooCommerce 3.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-10-30 14:27:52+00:00\n"
+"POT-Creation-Date: 2017-11-02 19:00:59+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n1.0.0\n"
+"X-Generator: grunt-wp-i18n1.0.1\n"
 
 #: i18n/continents.php:19
 msgid "Africa"
@@ -5538,7 +5538,7 @@ msgid "Invalid coupon code"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:914
-#: includes/class-wc-discounts.php:216
+#: includes/class-wc-discounts.php:228
 msgid "Invalid coupon"
 msgstr ""
 
@@ -6134,7 +6134,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:83
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1188
+#: includes/wc-template-functions.php:1186
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -8182,7 +8182,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:136
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:2046
+#: includes/wc-template-functions.php:2044
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -9245,7 +9245,7 @@ msgstr ""
 #: includes/class-wc-emails.php:364
 #: includes/legacy/abstract-wc-legacy-order.php:507
 #: includes/wc-account-functions.php:205
-#: includes/wc-template-functions.php:2560
+#: includes/wc-template-functions.php:2558
 msgid "Download"
 msgstr ""
 
@@ -18962,7 +18962,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-cart.php:1089 includes/class-wc-frontend-scripts.php:539
-#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1505
+#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1503
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -19228,11 +19228,11 @@ msgstr ""
 msgid "Coupon code removed successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:898 includes/class-wc-discounts.php:876
+#: includes/class-wc-coupon.php:898 includes/class-wc-discounts.php:888
 msgid "Coupon is not valid."
 msgstr ""
 
-#: includes/class-wc-coupon.php:902 includes/class-wc-discounts.php:527
+#: includes/class-wc-coupon.php:902 includes/class-wc-discounts.php:539
 #. translators: %s: coupon code
 msgid "Coupon \"%s\" does not exist!"
 msgstr ""
@@ -19258,21 +19258,21 @@ msgid ""
 "conjunction with other coupons."
 msgstr ""
 
-#: includes/class-wc-coupon.php:920 includes/class-wc-discounts.php:543
-#: includes/class-wc-discounts.php:570
+#: includes/class-wc-coupon.php:920 includes/class-wc-discounts.php:555
+#: includes/class-wc-discounts.php:582
 msgid "Coupon usage limit has been reached."
 msgstr ""
 
-#: includes/class-wc-coupon.php:923 includes/class-wc-discounts.php:587
+#: includes/class-wc-coupon.php:923 includes/class-wc-discounts.php:599
 msgid "This coupon has expired."
 msgstr ""
 
-#: includes/class-wc-coupon.php:927 includes/class-wc-discounts.php:606
+#: includes/class-wc-coupon.php:927 includes/class-wc-discounts.php:618
 #. translators: %s: coupon minimum amount
 msgid "The minimum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:931 includes/class-wc-discounts.php:625
+#: includes/class-wc-coupon.php:931 includes/class-wc-discounts.php:637
 #. translators: %s: coupon maximum amount
 msgid "The maximum spend for this coupon is %s."
 msgstr ""
@@ -19281,17 +19281,17 @@ msgstr ""
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
 
-#: includes/class-wc-coupon.php:948 includes/class-wc-discounts.php:788
+#: includes/class-wc-coupon.php:948 includes/class-wc-discounts.php:800
 #. translators: %s: products list
 msgid "Sorry, this coupon is not applicable to the products: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:968 includes/class-wc-discounts.php:829
+#: includes/class-wc-coupon.php:968 includes/class-wc-discounts.php:841
 #. translators: %s: categories list
 msgid "Sorry, this coupon is not applicable to the categories: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:971 includes/class-wc-discounts.php:716
+#: includes/class-wc-coupon.php:971 includes/class-wc-discounts.php:728
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
@@ -19321,8 +19321,8 @@ msgstr ""
 msgid "Invalid data store."
 msgstr ""
 
-#: includes/class-wc-discounts.php:651 includes/class-wc-discounts.php:689
-#: includes/class-wc-discounts.php:743
+#: includes/class-wc-discounts.php:663 includes/class-wc-discounts.php:701
+#: includes/class-wc-discounts.php:755
 msgid "Sorry, this coupon is not applicable to selected products."
 msgstr ""
 
@@ -19408,7 +19408,7 @@ msgstr ""
 msgid "Buy now"
 msgstr ""
 
-#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2674
+#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2672
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:166
 #. translators: %s: average rating
 #. translators: %s: rating
@@ -19570,7 +19570,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:516
-#: includes/wc-template-functions.php:1987
+#: includes/wc-template-functions.php:1985
 msgid "required"
 msgstr ""
 
@@ -21490,7 +21490,7 @@ msgid "No matching product exists to update."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:2560
+#: includes/wc-template-functions.php:2558
 #. translators: 1: current item count
 msgid "Download %d"
 msgstr ""
@@ -22851,75 +22851,75 @@ msgstr ""
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:842
+#: includes/wc-template-functions.php:840
 msgid "Default sorting"
 msgstr ""
 
-#: includes/wc-template-functions.php:843
+#: includes/wc-template-functions.php:841
 msgid "Sort by popularity"
 msgstr ""
 
-#: includes/wc-template-functions.php:844
+#: includes/wc-template-functions.php:842
 msgid "Sort by average rating"
 msgstr ""
 
-#: includes/wc-template-functions.php:845
+#: includes/wc-template-functions.php:843
 msgid "Sort by newness"
 msgstr ""
 
-#: includes/wc-template-functions.php:846
+#: includes/wc-template-functions.php:844
 msgid "Sort by price: low to high"
 msgstr ""
 
-#: includes/wc-template-functions.php:847
+#: includes/wc-template-functions.php:845
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:851
+#: includes/wc-template-functions.php:849
 msgid "Relevance"
 msgstr ""
 
-#: includes/wc-template-functions.php:1197
+#: includes/wc-template-functions.php:1195
 #: templates/checkout/form-shipping.php:63
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1206
+#: includes/wc-template-functions.php:1204
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1517
+#: includes/wc-template-functions.php:1515
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1646
+#: includes/wc-template-functions.php:1644
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:2054
+#: includes/wc-template-functions.php:2052
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:2073
+#: includes/wc-template-functions.php:2071
 #: templates/cart/shipping-calculator.php:64
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2118
-#: includes/wc-template-functions.php:2270
-#: includes/wc-template-functions.php:2280
+#: includes/wc-template-functions.php:2116
+#: includes/wc-template-functions.php:2268
+#: includes/wc-template-functions.php:2278
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2671
+#: includes/wc-template-functions.php:2669
 #. translators: 1: rating 2: rating count
 msgid "Rated %1$s out of 5 based on %2$s customer rating"
 msgid_plural "Rated %1$s out of 5 based on %2$s customer ratings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:2718
+#: includes/wc-template-functions.php:2716
 msgid "Your cart is currently empty."
 msgstr ""
 
@@ -24315,12 +24315,12 @@ msgid_plural "Shipping %d"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:1592
+#: includes/wc-template-functions.php:1590
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2689
+#: includes/wc-template-functions.php:2687
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
