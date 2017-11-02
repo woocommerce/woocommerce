@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fixed a flexslider bug when there is only 1 image on the product page (no gallery).
 * Fix - Prevent potential notices when someone extends product tabs wrongly.
 * Fix - Fixed display of shipping calculator under some conditions.
+* Fix - Fix discount calculation when customer is not within the base location and prices include tax.
 
 = 3.2.2 - 2017-10-31 =
 * Fix - Properly escape commas when exporting products to CSV.
