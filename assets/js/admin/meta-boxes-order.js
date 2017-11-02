@@ -632,7 +632,7 @@ jQuery( function ( $ ) {
 				country:  country,
 				state:    state,
 				postcode: postcode,
-				city:     city,
+				city:     city
 			};
 		},
 
