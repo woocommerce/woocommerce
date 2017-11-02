@@ -631,7 +631,7 @@ class WC_Checkout {
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
-						$errors->add( 'validation', __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
 				}
 
