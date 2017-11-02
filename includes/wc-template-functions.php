@@ -686,7 +686,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 		if ( is_product_taxonomy() && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$description = wc_format_content( term_description() );
 			if ( $description ) {
-				echo '<div class="term-description">' . wp_kses_post( $description ) . '</div>';
+				echo '<div class="term-description">' . $description . '</div>'; // WPCS: XSS ok.
 			}
 		}
 	}
