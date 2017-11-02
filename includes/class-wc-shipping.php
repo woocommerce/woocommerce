@@ -282,6 +282,12 @@ class WC_Shipping {
 	 * @return boolean
 	 */
 	protected function is_package_shippable( $package ) {
+
+		// Packages are shippable until proven otherwise.
+		if ( empty( $package['destination']['country'] ) ) {
+			return true;
+		}
+
 		$allowed = array_keys( WC()->countries->get_shipping_countries() );
 		return in_array( $package['destination']['country'], $allowed );
 	}
@@ -297,7 +303,7 @@ class WC_Shipping {
 	 * @return array|bool
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		if ( ! $this->enabled || empty( $package ) || ( $package['destination']['country'] && ! $this->is_package_shippable( $package ) ) ) {
+		if ( ! $this->enabled || empty( $package ) || ! $this->is_package_shippable( $package ) ) {
 			return false;
 		}
 
