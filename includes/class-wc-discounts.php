@@ -53,6 +53,18 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Set items directly. Used by WC_Cart_Totals.
+	 *
+	 * @since 3.2.3
+	 * @param array $items Items to set.
+	 */
+	public function set_items( $items ) {
+		$this->items     = $items;
+		$this->discounts = array();
+		uasort( $this->items, array( $this, 'sort_by_price' ) );
+	}
+
+	/**
 	 * Normalise cart items which will be discounted.
 	 *
 	 * @since 3.2.0
