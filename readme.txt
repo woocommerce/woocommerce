@@ -171,6 +171,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - New actions - `woocommerce_order_details_before_order_table_items`,  `woocommerce_order_details_after_order_table_items` and `woocommerce_order_details_before_order_table`
 * Dev - Passed `widget_id` to `content-widget-product.php` so actions can be ran conditionally, and added sanitisation to `woocommerce_before_widget_product_list` and `woocommerce_after_widget_product_list`.
 * Dev - Improved the `is_internal_meta_key` checks to consider getters and setters.
+* Dev - Cleaned up the Order Customer Details template.
+* Performance - Added cache when loading product variation attributes.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

@@ -686,7 +686,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 		if ( is_product_taxonomy() && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$description = wc_format_content( term_description() );
 			if ( $description ) {
-				echo '<div class="term-description">' . wp_kses_post( $description ) . '</div>';
+				echo '<div class="term-description">' . $description . '</div>'; // WPCS: XSS ok.
 			}
 		}
 	}
@@ -695,8 +695,6 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 
 	/**
 	 * Show a shop page description on product archives.
-	 *
-	 * @subpackage	Archives
 	 */
 	function woocommerce_product_archive_description() {
 		// Don't display the description on search results page.
@@ -705,11 +703,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		}
 
 		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
-			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = wc_format_content( $shop_page->post_content );
 				if ( $description ) {
-					echo '<div class="page-description">' . wp_kses_post( $description ) . '</div>';
+					echo '<div class="page-description">' . $description . '</div>'; // WPCS: XSS ok.
 				}
 			}
 		}
@@ -1239,7 +1237,7 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 			 * @return bool
 			 */
 			function _sort_priority_callback( $a, $b ) {
-				if ( $a['priority'] === $b['priority'] ) {
+				if ( ! isset( $a['priority'], $b['priority'] ) || $a['priority'] === $b['priority'] ) {
 					return 0;
 				}
 				return ( $a['priority'] < $b['priority'] ) ? -1 : 1;

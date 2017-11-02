@@ -19,7 +19,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order.
 	 *
-	 * @param  mixed $order_id (default: false)
+	 * @param  mixed $order_id (default: false) Order ID to get.
 	 * @return WC_Order|bool
 	 */
 	public static function get_order( $order_id = false ) {
@@ -46,13 +46,15 @@ class WC_Order_Factory {
 		try {
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
+			wc_caught_exception( $e, __FUNCTION__, func_get_args() );
 			return false;
 		}
 	}
 
 	/**
 	 * Get order item.
-	 * @param int
+	 *
+	 * @param int $item_id Order item ID to get.
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
@@ -108,7 +110,7 @@ class WC_Order_Factory {
 	 * Get the order ID depending on what was passed.
 	 *
 	 * @since 3.0.0
-	 * @param  mixed $order
+	 * @param  mixed $order Order data to convert to an ID.
 	 * @return int|bool false on failure
 	 */
 	public static function get_order_id( $order ) {

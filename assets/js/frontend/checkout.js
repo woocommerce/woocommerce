@@ -11,6 +11,7 @@ jQuery( function( $ ) {
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
+		selectedPaymentMethod: false,
 		xhr: false,
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
@@ -32,7 +33,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'input blur change', '.input-text, select, input:checkbox', this.validate_field );
+			this.$checkout_form.on( 'input validate change', '.input-text, select, input:checkbox', this.validate_field );
 
 			// Manual trigger
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
@@ -58,7 +59,7 @@ jQuery( function( $ ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
 			}
 		},
-		init_payment_methods: function( selectedPaymentMethod ) {
+		init_payment_methods: function() {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
 			// If there is one method, we can hide the radio input
@@ -67,8 +68,8 @@ jQuery( function( $ ) {
 			}
 
 			// If there was a previously selected method, check that one.
-			if ( selectedPaymentMethod ) {
-				$( '#' + selectedPaymentMethod ).prop( 'checked', true );
+			if ( wc_checkout_form.selectedPaymentMethod ) {
+				$( '#' + wc_checkout_form.selectedPaymentMethod ).prop( 'checked', true );
 			}
 
 			// If there are none selected, select the first.
@@ -102,6 +103,14 @@ jQuery( function( $ ) {
 			} else {
 				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
 			}
+
+			var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
+
+			if ( selectedPaymentMethod !== wc_checkout_form.selectedPaymentMethod ) {
+				$( document.body ).trigger( 'payment_method_selected' );
+			}
+
+			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
 		toggle_create_account: function() {
 			$( 'div.create-account' ).hide();
@@ -189,7 +198,7 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' );
 			}
 
-			if ( 'focusout' === event_type || 'change' === event_type ) {
+			if ( 'validate' === event_type || 'change' === event_type ) {
 
 				if ( validate_required ) {
 					if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
@@ -311,8 +320,6 @@ jQuery( function( $ ) {
 				data:		data,
 				success:	function( data ) {
 
-					var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );
-
 					// Reload the page if requested
 					if ( true === data.reload ) {
 						window.location.reload();
@@ -382,7 +389,7 @@ jQuery( function( $ ) {
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select, input:checkbox' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 
 						// Scroll to top
 						$( 'html, body' ).animate( {
@@ -392,7 +399,7 @@ jQuery( function( $ ) {
 					}
 
 					// Re-init methods
-					wc_checkout_form.init_payment_methods( selectedPaymentMethod );
+					wc_checkout_form.init_payment_methods();
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
@@ -504,7 +511,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 			$( 'html, body' ).animate({
 				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
 			}, 1000 );

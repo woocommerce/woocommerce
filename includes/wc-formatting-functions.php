@@ -439,16 +439,16 @@ function get_woocommerce_price_format() {
 
 	switch ( $currency_pos ) {
 		case 'left' :
-			$format = '%1$s%2$s';
+			$format = '%1$s&#x200e;%2$s';
 		break;
 		case 'right' :
-			$format = '%2$s%1$s';
+			$format = '%2$s%1$s&#x200f;';
 		break;
 		case 'left_space' :
-			$format = '%1$s&nbsp;%2$s';
+			$format = '%1$s&#x200e;&nbsp;%2$s';
 		break;
 		case 'right_space' :
-			$format = '%2$s&nbsp;%1$s';
+			$format = '%2$s&nbsp;%1$s&#x200f;';
 		break;
 	}
 
@@ -867,9 +867,6 @@ function wc_format_postcode( $postcode, $country ) {
 			break;
 		case 'US' :
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
-			break;
-		case 'PL' :
-			$postcode = trim( substr_replace( $postcode, '-', 2, 0 ) );
 			break;
 	}
 

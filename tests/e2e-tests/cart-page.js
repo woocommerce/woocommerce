@@ -30,66 +30,66 @@ test.describe( 'Cart page', function() {
 
 	test.it( 'should adds the product to the cart when "Add to cart" is clicked', () => {
 		const shopPage = new ShopPage( driver, { url: manager.getPageUrl( '/shop' ) } );
-		assert.eventually.equal( shopPage.addProductToCart( 'Flying Ninja' ), true );
-		assert.eventually.equal( shopPage.addProductToCart( 'Happy Ninja' ), true );
+		assert.eventually.equal( shopPage.addProductToCart( 'Album' ), true );
+		assert.eventually.equal( shopPage.addProductToCart( 'Polo' ), true );
 
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		assert.eventually.equal( cartPage.hasItem( 'Flying Ninja' ), true );
-		assert.eventually.equal( cartPage.hasItem( 'Happy Ninja' ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Album' ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Polo' ), true );
 	} );
 
 	test.it( 'should increases item qty when "Add to cart" of the same product is clicked', () => {
 		const shopPage = new ShopPage( driver, { url: manager.getPageUrl( '/shop' ) } );
-		assert.eventually.equal( shopPage.addProductToCart( 'Flying Ninja' ), true );
+		assert.eventually.equal( shopPage.addProductToCart( 'Album' ), true );
 
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		assert.eventually.equal( cartPage.hasItem( 'Flying Ninja', { qty: 2 } ), true );
-		assert.eventually.equal( cartPage.hasItem( 'Happy Ninja', { qty: 1 } ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Album', { qty: 2 } ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Polo', { qty: 1 } ), true );
 	} );
 
 	test.it( 'should updates qty when updated via qty input', () => {
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		cartPage.getItem( 'Flying Ninja', { qty: 2 } ).setQty( 4 );
+		cartPage.getItem( 'Album', { qty: 2 } ).setQty( 4 );
 		cartPage.update();
-		cartPage.getItem( 'Happy Ninja', { qty: 1 } ).setQty( 3 );
+		cartPage.getItem( 'Polo', { qty: 1 } ).setQty( 3 );
 		cartPage.update();
 
-		assert.eventually.equal( cartPage.hasItem( 'Flying Ninja', { qty: 4 } ), true );
-		assert.eventually.equal( cartPage.hasItem( 'Happy Ninja', { qty: 3 } ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Album', { qty: 4 } ), true );
+		assert.eventually.equal( cartPage.hasItem( 'Polo', { qty: 3 } ), true );
 	} );
 
 	test.it( 'should remove the item from the cart when remove is clicked', () => {
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		cartPage.getItem( 'Flying Ninja', { qty: 4 } ).remove();
-		cartPage.getItem( 'Happy Ninja', { qty: 3 } ).remove();
+		cartPage.getItem( 'Album', { qty: 4 } ).remove();
+		cartPage.getItem( 'Polo', { qty: 3 } ).remove();
 
 		assert.eventually.equal( cartPage.hasNoItem(), true );
 	} );
 
 	test.it( 'should update subtotal in cart totals when adding product to the cart', () => {
 		const shopPage = new ShopPage( driver, { url: manager.getPageUrl( '/shop' ) } );
-		assert.eventually.equal( shopPage.addProductToCart( 'Flying Ninja' ), true );
+		assert.eventually.equal( shopPage.addProductToCart( 'Album' ), true );
 
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
 		assert.eventually.equal(
-			cartPage.hasItem( 'Flying Ninja', { qty: 1 } ),
+			cartPage.hasItem( 'Album', { qty: 1 } ),
 			true,
-			'Cart item "Flying Ninja" with qty 1 is not displayed'
+			'Cart item "Album" with qty 1 is not displayed'
 		);
 
 		assert.eventually.equal(
-			cartPage.hasSubtotal( '12.00' ),
+			cartPage.hasSubtotal( '15.00' ),
 			true,
-			'Cart totals does not display subtotal of 12.00'
+			'Cart totals does not display subtotal of 15.00'
 		);
 
-		cartPage.getItem( 'Flying Ninja', { qty: 1 } ).setQty( 2 );
+		cartPage.getItem( 'Album', { qty: 1 } ).setQty( 2 );
 		cartPage.update();
 
 		assert.eventually.equal(
-			cartPage.hasSubtotal( '24.00' ),
+			cartPage.hasSubtotal( '30.00' ),
 			true,
-			'Cart totals does not display subtotal of 24.00'
+			'Cart totals does not display subtotal of 30.00'
 		);
 	} );
 

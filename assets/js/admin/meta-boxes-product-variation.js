@@ -1,6 +1,7 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, accounting */
-( function( $ ) {
+jQuery( function( $ ) {
     'use strict';
+
 	/**
 	 * Variations actions
 	 */

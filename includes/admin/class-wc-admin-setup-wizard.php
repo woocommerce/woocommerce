@@ -708,8 +708,6 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
-		$dimension_unit        = get_option( 'woocommerce_dimension_unit', false );
-		$weight_unit           = get_option( 'woocommerce_weight_unit', false );
 		$country_code          = WC()->countries->get_base_country();
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
@@ -717,14 +715,13 @@ class WC_Admin_Setup_Wizard {
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
-		if ( false === $dimension_unit || false === $weight_unit ) {
-			if ( 'US' === $country_code ) {
-				$dimension_unit = 'in';
-				$weight_unit    = 'oz';
-			} else {
-				$dimension_unit = 'cm';
-				$weight_unit    = 'kg';
-			}
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		if ( isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
+		} else {
+			$dimension_unit = 'cm';
+			$weight_unit    = 'kg';
 		}
 
 		if ( ! empty( $existing_zones ) ) {
