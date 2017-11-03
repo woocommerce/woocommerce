@@ -291,9 +291,6 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		} else {
 			echo '&ndash;';
 		}
-		if ( $this->object->get_billing_phone() ) {
-			echo '<small class="meta">' . esc_html__( 'Phone:', 'woocommerce' ) . ' ' . esc_html( $this->object->get_billing_phone() ) . '</small>';
-		}
 	}
 
 	/**
@@ -304,9 +301,6 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			echo '<a target="_blank" href="' . esc_url( $this->object->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
 		} else {
 			echo '&ndash;';
-		}
-		if ( $this->object->get_shipping_method() ) {
-			echo '<small class="meta">' . esc_html__( 'Via', 'woocommerce' ) . ' ' . esc_html( $this->object->get_shipping_method() ) . '</small>';
 		}
 	}
 
