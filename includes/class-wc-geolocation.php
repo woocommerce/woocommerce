@@ -237,7 +237,16 @@ class WC_Geolocation {
 						fwrite( $handle, $string, strlen( $string ) );
 					}
 					gzclose( $gzhandle );
+					$s_array = fstat( $handle );
 					fclose( $handle );
+					if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
+						$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
+						// Delete empty DB, we do not want to keep empty files around.
+						@unlink( self::get_local_database_path( $tmp_database_version ) );
+						// Reschedule download of DB.
+						wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+						wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
+					}
 				} else {
 					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
 				}
@@ -265,10 +274,16 @@ class WC_Geolocation {
 
 		if ( self::is_IPv6( $ip_address ) ) {
 			$database = self::get_local_database_path( 'v6' );
+			if ( ! self::get_file_size( $database ) ) {
+				return false;
+			}
 			$gi->geoip_open( $database, 0 );
 			$country_code = $gi->geoip_country_code_by_addr_v6( $ip_address );
 		} else {
 			$database = self::get_local_database_path();
+			if ( ! self::get_file_size( $database ) ) {
+				return false;
+			}
 			$gi->geoip_open( $database, 0 );
 			$country_code = $gi->geoip_country_code_by_addr( $ip_address );
 		}
@@ -276,6 +291,25 @@ class WC_Geolocation {
 		$gi->geoip_close();
 
 		return sanitize_text_field( strtoupper( $country_code ) );
+	}
+
+	/**
+	 * Check file size
+	 * Check the file size, if empty file also delete it.
+	 *
+	 * @param string $filename Name of the file to check.
+	 * @return bool|int
+	 */
+	private static function get_file_size( $filename ) {
+		$handle   = @fopen( $filename, 'r' );
+		$s_array  = fstat( $handle );
+		@fclose( $handle );
+		if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
+			// Delete the file as we do not want to keep empty files around.
+			@unlink( $filename );
+			return false;
+		}
+		return $s_array['size'];
 	}
 
 	/**
