@@ -11,7 +11,7 @@ jQuery( function( $ ) {
 	var WCOrdersTable = function() {
 		$( document )
 			.on( 'click', '.post-type-shop_order .wp-list-table tbody td', this.onRowClick )
-			.on( 'click', '.order-preview', this.onPreview );
+			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
 	};
 
 	/**
@@ -33,7 +33,8 @@ jQuery( function( $ ) {
 	 */
 	WCOrdersTable.prototype.onPreview = function() {
 		var $previewButton    = $( this ),
-			$order_id         = $previewButton.data( 'order-id' );
+			$order_id         = $previewButton.data( 'order-id' ),
+			$order_table      = $previewButton.closest( 'table' );
 
 		if ( $previewButton.data( 'order-data' ) ) {
 			$( this ).WCBackboneModal({
@@ -41,13 +42,7 @@ jQuery( function( $ ) {
 				variable : $previewButton.data( 'order-data' )
 			});
 		} else {
-			$previewButton.closest( 'table' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+			$previewButton.addClass( 'disabled' );
 
 			$.ajax({
 				url:     wc_orders_params.ajax_url,
@@ -58,6 +53,8 @@ jQuery( function( $ ) {
 				},
 				type:    'GET',
 				success: function( response ) {
+					$( '.order-preview' ).removeClass( 'disabled' );
+
 					if ( response.success ) {
 						$previewButton.data( 'order-data', response.data );
 
@@ -66,7 +63,6 @@ jQuery( function( $ ) {
 							variable : response.data
 						});
 					}
-					$previewButton.closest( 'table' ).unblock();
 				}
 			});
 		}

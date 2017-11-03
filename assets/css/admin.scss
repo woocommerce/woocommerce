@@ -1902,23 +1902,25 @@ ul.wc_coupon_list_block {
 	.wp-list-table {
 		margin-top: 1em;
 		th {
-			padding: 1em;
+			padding: .75em 1em;
 		}
 		th.sortable a, th.sorted a {
 			padding: 0;
 		}
 		.check-column {
-			width: 48px;
-			padding: 1em 0 1em 0 !important;
+			width: 1px;
+			white-space: nowrap;
+			padding: 1em 1em 1em 2em !important;
 			vertical-align: middle;
 			input {
 				vertical-align: text-top;
-				margin: 1px 16px 0 2em;
+				margin: 1px 0;
 			}
 		}
 		.column-order_number {
 			width: 35ch;
 			line-height: 26px;
+
 			.order-preview {
 				float:right;
 				width: 16px;
@@ -1926,7 +1928,7 @@ ul.wc_coupon_list_block {
 				height: 0;
 				overflow: hidden;
 				position: relative;
-				border: 2px solid #F9F9F9;
+				border: 2px solid transparent;
 				border-radius: 4px;
 
 				&::before {
@@ -1939,6 +1941,12 @@ ul.wc_coupon_list_block {
 				}
 				&:hover {
 					border: 2px solid #00a0d2;
+				}
+			}
+			.order-preview.disabled {
+				&::before {
+					content: '';
+					background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
 				}
 			}
 		}
@@ -1961,7 +1969,7 @@ ul.wc_coupon_list_block {
 		}
 		tbody {
 			tr:nth-child(odd), .alternate {
-				background-color: #fff;
+				//background-color: #fff;
 			}
 			th, td {
 				border-top: 1px solid #f5f5f5;
@@ -1982,6 +1990,7 @@ ul.wc_coupon_list_block {
 					background: #E5E5E5;
 					border-radius: 4px;
 					border-bottom: 1px solid rgba(0,0,0,0.05);
+					margin: -.5em 0;
 
 					&.status-completed {
 						background: #C8D7E1;
@@ -2006,7 +2015,7 @@ ul.wc_coupon_list_block {
 			}
 			tr:hover {
 				td, th {
-					background: #F9F9F9;
+					//background: #F9F9F9;
 					cursor: pointer;
 				}
 			}
