@@ -870,4 +870,47 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $iu_coupon1->get_code() );
 		WC_Helper_Coupon::delete_coupon( $iu_coupon2->get_code() );
 	}
+
+	public function test_clone_cart() {
+		$cart              = wc()->cart;
+		$new_cart          = clone $cart;
+		$is_identical_cart = $cart === $new_cart;
+
+		// Cloned carts should not be identical.
+		$this->assertFalse( $is_identical_cart, 'Cloned cart not identical to original cart' );
+	}
+
+	public function test_cloned_cart_session() {
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Allow accessing protected properties.
+		$reflected_cart = new ReflectionClass( $cart );
+		$cart_session   = $reflected_cart->getProperty( 'session' );
+		$cart_session->setAccessible( true );
+		$reflected_new_cart = new ReflectionClass( $new_cart );
+		$new_cart_session   = $reflected_new_cart->getProperty( 'session' );
+		$new_cart_session->setAccessible( true );
+
+		// Ensure that cloned properties are not identical.
+		$identical_sessions = $cart_session->getValue( $cart ) === $new_cart_session->getValue( $new_cart );
+		$this->assertFalse( $identical_sessions, 'Cloned cart sessions should not be identical to original cart' );
+	}
+
+	public function test_cloned_cart_fees() {
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Allow accessing protected properties.
+		$reflected_cart = new ReflectionClass( $cart );
+		$cart_fees      = $reflected_cart->getProperty( 'fees_api' );
+		$cart_fees->setAccessible( true );
+		$reflected_new_cart = new ReflectionClass( $new_cart );
+		$new_cart_fees      = $reflected_new_cart->getProperty( 'fees_api' );
+		$new_cart_fees->setAccessible( true );
+
+		// Ensure that cloned properties are not identical.
+		$identical_fees = $cart_fees->getValue( $cart ) === $new_cart_fees->getValue( $new_cart );
+		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
+	}
 }
