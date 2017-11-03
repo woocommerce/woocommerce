@@ -305,6 +305,8 @@ class WC_Geolocation {
 		$s_array  = fstat( $handle );
 		@fclose( $handle );
 		if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
+			$logger = wc_get_logger();
+			$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
 			// Delete the file as we do not want to keep empty files around.
 			@unlink( $filename );
 			return false;
