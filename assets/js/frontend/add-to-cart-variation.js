@@ -548,14 +548,15 @@
 		var $form             = this,
 			$product          = $form.closest( '.product' ),
 			$product_gallery  = $product.find( '.images' ),
-			$gallery_img      = $product.find( '.flex-control-nav li:eq(0) img' ),
+			$gallery_nav      = $product.find( '.flex-control-nav' ),
+			$gallery_img      = $gallery_nav.find( 'li:eq(0) img' ),
 			$product_img_wrap = $product_gallery.find( '.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder' ).eq( 0 ),
 			$product_img      = $product_img_wrap.find( '.wp-post-image' ),
 			$product_link     = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
-			if ( $( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' ).length > 0 ) {
-				$( '.flex-control-nav li img[src="' + variation.image.thumb_src + '"]' ).trigger( 'click' );
+			if ( $gallery_nav.find( 'li img[src="' + variation.image.thumb_src + '"]' ).length > 0 ) {
+				$gallery_nav.find( 'li img[src="' + variation.image.thumb_src + '"]' ).trigger( 'click' );
 				$form.attr( 'current-image', variation.image_id );
 				return;
 			} else {
