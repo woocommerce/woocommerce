@@ -1284,6 +1284,37 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
+					'desc' => 'Test single fixed product coupon on one item to illustrate type conversion precision bug.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 8.95,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+						),
+					),
+					'expected_total_discount' => 8.95,
+				),
+			),
+			array(
+				array(
 					'desc' => 'Test multiple coupons with limits of 1.',
 					'tax_rate' => array(
 						'tax_rate_country'  => '',
