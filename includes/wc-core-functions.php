@@ -1472,7 +1472,7 @@ function wc_get_rounding_precision() {
  */
 function wc_add_number_precision( $value ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return $value * $precision;
+	return intval( round( $value * $precision ) );
 }
 
 /**
