@@ -52,7 +52,7 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Define primary column;
+	 * Define primary column.
 	 *
 	 * @return array
 	 */

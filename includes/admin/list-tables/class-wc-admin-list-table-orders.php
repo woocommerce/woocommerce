@@ -56,7 +56,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Define primary column;
+	 * Define primary column.
 	 *
 	 * @return array
 	 */
@@ -95,9 +95,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	public function define_sortable_columns( $columns ) {
 		$custom = array(
-			'order_title' => 'ID',
-			'order_total' => 'order_total',
-			'order_date'  => 'date',
+			'order_number' => 'ID',
+			'order_total'  => 'order_total',
+			'order_date'   => 'date',
 		);
 		unset( $columns['comments'] );
 
@@ -414,7 +414,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 
 		$redirect_to = add_query_arg( array(
-			'post_type'    => 'shop_order',
+			'post_type'    => $this->list_table_type,
 			$report_action => true,
 			'changed'      => $changed,
 			'ids'          => join( ',', $ids ),
