@@ -285,17 +285,13 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
 	}
 
-	if ( false === $dp && '' === $number ) {
-		return '';
+	if ( false !== $dp ) {
+		$dp     = intval( '' === $dp ? wc_get_price_decimals() : $dp );
+		$number = number_format( floatval( $number ), $dp, '.', '' );
+	} elseif ( is_float( $number ) ) {
+		// DP is false - don't use number format, just return a string in our format.
+		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
 	}
-
-	if ( false === $dp ) {
-		$dp = wc_get_rounding_precision();
-	} elseif ( '' === $dp ) {
-		$dp = wc_get_price_decimals();
-	}
-
-	$number = number_format( floatval( $number ), $dp, '.', '' );
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
 		$number = rtrim( rtrim( $number, '0' ), '.' );
