@@ -293,7 +293,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 					</tbody>
 				</table>
 				<p class="submit">
-					<input type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import', 'woocommerce' ); ?>" />
+					<button type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import', 'woocommerce' ); ?>"><?php esc_html_e( 'Upload file and import', 'woocommerce' ); ?></button>
 				</p>
 			</form>
 			<?php
