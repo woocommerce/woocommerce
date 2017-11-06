@@ -1447,6 +1447,21 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 	return ( $a->method_order < $b->method_order ) ? -1 : 1;
 }
 
+/**
+ * Get rounding mode for internal tax calculations.
+ *
+ * @since 3.2.4
+ * @return int
+ */
+function wc_get_tax_rounding_mode() {
+	$constant = WC_TAX_ROUNDING_MODE;
+
+	if ( 'auto' === $constant ) {
+		return 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1;
+	}
+
+	return intval( $constant );
+}
 
 /**
  * Get rounding precision for internal WC calculations.
