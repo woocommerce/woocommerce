@@ -11,10 +11,14 @@
 		$tbody = $( document.getElementById( 'network-orders-tbody' ) ),
 		template = _.template( $( document.getElementById( 'network-orders-row-template') ).text() ),
 		$loadingIndicator = $( document.getElementById( 'woocommerce-network-order-table-loading' ) ),
-		$orderTable = $( document.getElementById( 'woocommerce-network-order-table' ) );
+		$orderTable = $( document.getElementById( 'woocommerce-network-order-table' ) ),
+		$noneFound = $( document.getElementById( 'woocommerce-network-orders-no-orders' ) );
 
 	// No sites, so bail
 	if ( ! woocommerce_network_orders.sites.length ) {
+		$loadingIndicator.removeClass( 'is-active' );
+		$orderTable.removeClass( 'is-active' );
+		$noneFound.addClass( 'is-active' );
 		return;
 	}
 
@@ -64,14 +68,22 @@
 				}
 			});
 
-			for ( orderindex in orders ) {
-				currentOrder = orders[ orderindex ];
+			if ( orders.length > 0 ) {
+				for ( orderindex in orders ) {
+					currentOrder = orders[ orderindex ];
 
-				$tbody.append( template( currentOrder ) );
+					$tbody.append( template( currentOrder ) );
+				}
+
+				$noneFound.removeClass( 'is-active' );
+				$loadingIndicator.removeClass( 'is-active' );
+				$orderTable.addClass( 'is-active' );
+			} else {
+				$noneFound.addClass( 'is-active' );
+				$loadingIndicator.removeClass( 'is-active' );
+				$orderTable.removeClass( 'is-active' );
 			}
 
-			$loadingIndicator.removeClass( 'is-active' );
-			$orderTable.addClass( 'is-active' );
 		} );
 	}
 

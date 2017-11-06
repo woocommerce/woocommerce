@@ -311,13 +311,13 @@ class WC_Admin_Dashboard {
 		) );
 		?>
 		<div class="post-type-shop_order">
-			<div id="woocommerce-network-order-table-loading" class="is-active">
+			<div id="woocommerce-network-order-table-loading" class="woocommerce-network-order-table-loading is-active">
 				<p>
 					<span class="spinner is-active"></span> <?php esc_html_e( 'Loading Network Orders', 'woocommerce' ); ?>
 				</p>
 
 			</div>
-			<table id="woocommerce-network-order-table" class="wp-list-table">
+			<table id="woocommerce-network-order-table" class="woocommerce-network-order-table wp-list-table">
 				<thead>
 					<tr>
 						<td>Order</td>
@@ -329,6 +329,11 @@ class WC_Admin_Dashboard {
 
 				</tbody>
 			</table>
+			<div id="woocommerce-network-orders-no-orders" class="woocommerce-network-orders-no-orders">
+				<p>
+					<?php esc_html_e( "No orders found", 'woocommerce' ); ?>
+				</p>
+			</div>
 			<script type="text/template" id="network-orders-row-template">
 				<tr>
 					<td>

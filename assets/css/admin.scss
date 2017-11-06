@@ -5977,7 +5977,9 @@ table.bar_chart {
 }
 
 #woocommerce_network_orders {
-	#woocommerce-network-order-table-loading {
+	.woocommerce-network-orders-no-orders,
+	.woocommerce-network-order-table-loading,
+	.woocommerce-network-order-table {
 		display: none;
 
 		&.is-active {
@@ -5986,19 +5988,12 @@ table.bar_chart {
 
 		p {
 			margin: 0;
-		}
-
-		.spinner {
-			margin-top: 0;
-			float: none;
+			text-align: center;
 		}
 	}
 
-	.wp-list-table {
-		display: none;
-
-		&.is-active {
-			display: block;
-		}
+	.spinner {
+		margin-top: 0;
+		float: none;
 	}
 }
