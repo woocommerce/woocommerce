@@ -42,7 +42,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertEquals( $this->wc->version, WC_VERSION );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
 		$this->assertEquals( 4, WC_ROUNDING_PRECISION );
-		$this->assertContains( WC_TAX_ROUNDING_MODE, array( 2, 1 ) );
+		$this->assertContains( WC_TAX_ROUNDING_MODE, array( 2, 1, 'auto' ) );
 		$this->assertEquals( '|', WC_DELIMITER );
 		$this->assertNotEquals( WC_LOG_DIR, '' );
 	}
