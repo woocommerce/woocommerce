@@ -1,6 +1,6 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
-<div class="wrap woocommerce wc_addons_wrap wc-helper">
+<div class="wrap woocommerce wc_extensions_wrap wc-helper">
 	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
@@ -28,7 +28,7 @@
 					continue;
 				}
 
-				$url = admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key );
+				$url = admin_url( 'admin.php?page=wc-extensions&section=helper&filter=' . $key );
 				$class_html = $current_filter === $key ? 'class="current"' : '';
 			?>
 			<li>

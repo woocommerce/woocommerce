@@ -29,8 +29,8 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
-		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
-			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
+		if ( apply_filters( 'woocommerce_show_extensions_page', true ) ) {
+			add_action( 'admin_menu', array( $this, 'extensions_menu' ), 70 );
 		}
 
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
@@ -121,12 +121,12 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Addons menu item.
+	 * Extensions menu item.
 	 */
-	public function addons_menu() {
+	public function extensions_menu() {
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-extensions', array( $this, 'extensions_page' ) );
 	}
 
 	/**
@@ -244,10 +244,10 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Init the addons page.
+	 * Init the extensions page.
 	 */
-	public function addons_page() {
-		WC_Admin_Addons::output();
+	public function extensions_page() {
+		WC_Admin_Extensions::output();
 	}
 
 	/**
