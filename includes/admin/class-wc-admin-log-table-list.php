@@ -336,7 +336,8 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		}
 		if ( ! empty( $_REQUEST['s'] ) ) {
 			$where_conditions[] = 'message like %s';
-			$where_values[]     = '%' . wc_clean( $_REQUEST['s'] ) . '%';
+			$s = wp_unslash( trim( $_REQUEST[ 's' ] ) );
+			$where_values[]     = $wpdb->esc_like( $s );
 		}
 
 		if ( ! empty( $where_conditions ) ) {
