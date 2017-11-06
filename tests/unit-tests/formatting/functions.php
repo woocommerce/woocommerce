@@ -294,6 +294,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Trim zeros and round.
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
 
+		// Floats.
+		$this->assertEquals( '0.2222222222222222', wc_format_decimal( 0.2222222222222222 ) );
+
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 	}
