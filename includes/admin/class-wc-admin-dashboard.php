@@ -39,7 +39,9 @@ class WC_Admin_Dashboard {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 		// Network Order Widget
-		wp_add_dashboard_widget( 'woocommerce_network_orders', __( "WooCommerce Network Orders", 'woocommerce' ), array( $this, 'network_orders' ) );
+		if ( is_multisite() ) {
+			wp_add_dashboard_widget( 'woocommerce_network_orders', __( "WooCommerce Network Orders", 'woocommerce' ), array( $this, 'network_orders' ) );
+		}
 	}
 
 	/**

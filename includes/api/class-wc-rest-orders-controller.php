@@ -122,15 +122,17 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/network', array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'network_orders' ),
-				'permission_callback' => array( $this, 'network_orders_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+		if ( is_multisite() ) {
+			register_rest_route( $this->namespace, '/' . $this->rest_base . '/network', array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'network_orders' ),
+					'permission_callback' => array( $this, 'network_orders_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			) );
+		}
 	}
 
 	/**
