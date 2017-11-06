@@ -296,7 +296,6 @@ class WC_Admin_Dashboard {
 	 * Network orders widget
 	 */
 	public function network_orders() {
-		// @todo move to proper location
 		wp_enqueue_script( 'network-orders', '/wp-content/plugins/woocommerce/assets/js/admin/network-orders.js', array( 'jquery', 'underscore' ), time(), true );
 
 		$user = wp_get_current_user();
