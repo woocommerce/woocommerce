@@ -311,7 +311,13 @@ class WC_Admin_Dashboard {
 		) );
 		?>
 		<div class="post-type-shop_order">
-			<table class="wp-list-table">
+			<div id="woocommerce-network-order-table-loading" class="is-active">
+				<p>
+					<span class="spinner is-active"></span> <?php esc_html_e( 'Loading Network Orders', 'woocommerce' ); ?>
+				</p>
+
+			</div>
+			<table id="woocommerce-network-order-table" class="wp-list-table">
 				<thead>
 					<tr>
 						<td>Order</td>

@@ -9,7 +9,9 @@
 		promises = [], // Track completion (pass or fail) of ajax requests
 		deferred = [], // Tracks the ajax deferreds
 		$tbody = $( document.getElementById( 'network-orders-tbody' ) ),
-		template = _.template( $( document.getElementById( 'network-orders-row-template') ).text() );
+		template = _.template( $( document.getElementById( 'network-orders-row-template') ).text() ),
+		$loadingIndicator = $( document.getElementById( 'woocommerce-network-order-table-loading' ) ),
+		$orderTable = $( document.getElementById( 'woocommerce-network-order-table' ) );
 
 	// No sites, so bail
 	if ( ! woocommerce_network_orders.sites.length ) {
@@ -68,6 +70,8 @@
 				$tbody.append( template( currentOrder ) );
 			}
 
+			$loadingIndicator.removeClass( 'is-active' );
+			$orderTable.addClass( 'is-active' );
 		} );
 	}
 
