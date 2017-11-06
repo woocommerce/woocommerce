@@ -12,6 +12,12 @@
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
+	public function tearDown() {
+		update_option( 'woocommerce_price_num_decimals', '2' );
+		update_option( 'woocommerce_price_decimal_sep', '.' );
+		update_option( 'woocommerce_price_thousand_sep', ',' );
+	}
+
 	/**
 	 * Test wc_string_to_bool().
 	 *
