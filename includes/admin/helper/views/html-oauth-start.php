@@ -1,6 +1,6 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
-<div class="wrap woocommerce wc_addons_wrap wc-helper">
+<div class="wrap woocommerce wc_extensions_wrap wc-helper">
 	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 	<?php include( WC_Helper::get_view_filename( 'html-section-notices.php' ) ); ?>

@@ -162,7 +162,7 @@ class WC_Helper_Compat {
 	 */
 	public static function render_compat_menu() {
 		$helper_url = add_query_arg( array(
-			'page' => 'wc-addons',
+			'page' => 'wc-extensions',
 			'section' => 'helper',
 		), admin_url( 'admin.php' ) );
 		include( WC_Helper::get_view_filename( 'html-helper-compat.php' ) );
