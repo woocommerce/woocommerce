@@ -89,7 +89,7 @@ abstract class WC_Admin_List_Table {
 	 * it, so we want to hide the useless UI from the screen options tab.
 	 *
 	 * @param  array $post_types Array of post types supporting view mode.
-	 * @return array             Array of post types supporting view mode, without products, orders, and coupons.
+	 * @return array             Array of post types supporting view mode, without this type.
 	 */
 	public function disable_view_mode( $post_types ) {
 		unset( $post_types[ $this->list_table_type ] );
@@ -192,7 +192,7 @@ abstract class WC_Admin_List_Table {
 	}
 
 	/**
-	 * Define primary column;
+	 * Define primary column.
 	 *
 	 * @return array
 	 */
