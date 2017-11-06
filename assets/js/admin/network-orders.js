@@ -1,3 +1,4 @@
+/*global woocommerce_network_orders */
 (function( $, _, undefined ) {
 
 	if ( 'undefined' === typeof woocommerce_network_orders ) {
@@ -12,7 +13,7 @@
 
 	// No sites, so bail
 	if ( ! woocommerce_network_orders.sites.length ) {
-		return
+		return;
 	}
 
 	$.each( woocommerce_network_orders.sites, function( index, value ) {
