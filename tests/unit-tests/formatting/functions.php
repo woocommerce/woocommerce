@@ -6,6 +6,48 @@
  * @since 2.2
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
+
+	public function tearDown() {
+		update_option( 'woocommerce_price_num_decimals', '2' );
+		update_option( 'woocommerce_price_decimal_sep', '.' );
+		update_option( 'woocommerce_price_thousand_sep', ',' );
+	}
+
+	/**
+	 * Test wc_string_to_bool().
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_wc_string_to_bool() {
+		$this->assertTrue( wc_string_to_bool( 1 ) );
+		$this->assertTrue( wc_string_to_bool( 'yes' ) );
+		$this->assertTrue( wc_string_to_bool( 'true' ) );
+		$this->assertFalse( wc_string_to_bool( 0 ) );
+		$this->assertFalse( wc_string_to_bool( 'no' ) );
+		$this->assertFalse( wc_string_to_bool( 'false' ) );
+	}
+
+	/**
+	 * Test wc_bool_to_string().
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_wc_bool_to_string() {
+		$this->assertEquals( array( 'yes', 'no' ), array( wc_bool_to_string( true ), wc_bool_to_string( false )	) );
+	}
+
+	/**
+	 * Test wc_string_to_array().
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_wc_string_to_array() {
+		$this->assertEquals( array(
+			'foo',
+			'bar',
+		), wc_string_to_array( 'foo|bar', '|' ) );
+	}
+
 	/**
 	 * Test wc_sanitize_taxonomy_name().
 	 *

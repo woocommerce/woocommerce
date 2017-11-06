@@ -283,7 +283,10 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 
 	// DP is false - don't use number format, just return a string in our format
 	} elseif ( is_float( $number ) ) {
-		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
+		// DP is false - don't use number format, just return a string using whatever is given. Remove scientific notation using sprintf.
+		$number     = str_replace( $decimals, '.', sprintf( '%.' . wc_get_rounding_precision() . 'f', $number ) );
+		// We already had a float, so trailing zeros are not needed.
+		$trim_zeros = true;
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
