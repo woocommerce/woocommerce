@@ -774,7 +774,7 @@ return array(
 				array(
 					'country'  => 'US',
 					'state'    => 'NJ',
-					'rate'     => '7.0000',
+					'rate'     => '6.8750',
 					'name'     => 'State Tax',
 					'shipping' => true,
 				),
