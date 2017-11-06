@@ -43,6 +43,24 @@
 			var orderindex,
 				currentOrder;
 
+			// Sort orders, newest first
+			orders.sort(function( a, b ) {
+				var adate, bdate;
+
+				adate = Date.parse( a.date_created_gmt );
+				bdate = Date.parse( b.date_created_gmt );
+
+				if ( adate === bdate ) {
+					return 0;
+				}
+
+				if ( adate < bdate ) {
+					return 1;
+				} else {
+					return -1;
+				}
+			});
+
 			for ( orderindex in orders ) {
 				currentOrder = orders[ orderindex ];
 
