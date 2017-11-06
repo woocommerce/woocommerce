@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Importer - CSV mapping
+ *
+ * @package WooCommerce/Admin
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,8 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<table class="widefat wc-importer-mapping-table">
 			<thead>
 				<tr>
-					<th><?php _e( 'Column name', 'woocommerce' ); ?></th>
-					<th><?php _e( 'Map to field', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Column name', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Map to field', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -26,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<td class="wc-importer-mapping-table-name">
 							<?php echo esc_html( $name ); ?>
 							<?php if ( ! empty( $sample[ $index ] ) ) : ?>
-								<span class="description"><?php _e( 'Sample:', 'woocommerce' ); ?> <code><?php echo esc_html( $sample[ $index ] ); ?></code></span>
+								<span class="description"><?php esc_html_e( 'Sample:', 'woocommerce' ); ?> <code><?php echo esc_html( $sample[ $index ] ); ?></code></span>
 							<?php endif; ?>
 						</td>
 						<td class="wc-importer-mapping-table-field">
