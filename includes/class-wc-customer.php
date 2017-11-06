@@ -846,7 +846,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$shipping             = $this->get_prop( 'shipping', 'edit' );
 		$shipping['country']  = $country;
-		$shipping['state']    =  stripslashes( $state );
+		$shipping['state']    = $state;
 		$shipping['postcode'] = $postcode;
 		$shipping['city']     = $city;
 		$this->set_prop( 'shipping', $shipping );
