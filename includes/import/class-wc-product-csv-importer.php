@@ -481,6 +481,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse download file urls, we should allow shortcodes here.
+	 *
+	 * Allow shortcodes if present, othersiwe esc_url the value.
+	 *
+	 * @param string $value Field value.
+	 * @return string
+	 */
+	public function parse_download_file_field( $value ) {
+		// Absolute file paths.
+		if ( 0 === strpos( $value, 'http' ) ) {
+			return esc_url_raw( $value );
+		}
+		// Relative and shortcode paths.
+		return wc_clean( $value );
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -535,7 +552,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
 			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
 			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => 'esc_url',
+			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
 			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
 		);
 

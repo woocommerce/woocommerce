@@ -56,20 +56,20 @@ test.describe( 'Checkout Page', function() {
 
 	test.it( 'should displays cart items in order review', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
+		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
 
 		const checkoutPage = guest.openCheckout();
 		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
 
 		const orderReview = checkoutPage.components.orderReview;
-		assertOrderItem( orderReview, 'Flying Ninja', { qty: '1', total: '$12.00' } );
-		assertOrderItem( orderReview, 'Happy Ninja', { qty: '1', total: '$18.00' } );
-		assert.eventually.ok( orderReview.hasSubtotal( '$30.00' ), 'Could not find subtotal $30.00' );
+		assertOrderItem( orderReview, 'Beanie', { qty: '1', total: '18.00' } );
+		assertOrderItem( orderReview, 'Long Sleeve Tee', { qty: '1', total: '25.00' } );
+		assert.eventually.ok( orderReview.hasSubtotal( '43.00' ), 'Could not find subtotal 43.00' );
 	} );
 
 	test.it( 'allows customer to choose available payment methods', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
+		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
 
 		const checkoutPage = guest.openCheckout();
 		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
@@ -80,7 +80,7 @@ test.describe( 'Checkout Page', function() {
 
 	test.it( 'allows customer to fill billing details', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
+		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
 		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
@@ -101,7 +101,7 @@ test.describe( 'Checkout Page', function() {
 
 	test.it( 'allows customer to fill shipping details', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
+		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
 		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
@@ -121,7 +121,7 @@ test.describe( 'Checkout Page', function() {
 
 	test.it( 'allows guest customer to place order', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Flying Ninja', 'Happy Ninja' );
+		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
 
 		const checkoutPage = guest.open( PAGE.CHECKOUT );
 		const billingDetails = checkoutPage.components.billingDetails;

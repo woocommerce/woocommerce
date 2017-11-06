@@ -1,4 +1,5 @@
 /*global wc_setup_params */
+/*global wc_setup_currencies */
 jQuery( function( $ ) {
 	function blockWizardUI() {
 		$('.wc-setup-content').block({
@@ -136,4 +137,9 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services input#stripe_create_account' ).change();
+
+	$( 'select#store_country_state' ).on( 'change', function() {
+		var countryCode = this.value.split( ':' )[ 0 ];
+		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
+	} );
 } );

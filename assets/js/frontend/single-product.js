@@ -100,6 +100,11 @@ jQuery( function( $ ) {
 			this.photoswipe_enabled = false === args.photoswipe_enabled ? false : this.photoswipe_enabled;
 		}
 
+		// ...and what is in the gallery.
+		if ( 1 === this.$images.length ) {
+			this.flexslider_enabled = false;
+		}
+
 		// Bind functions to this.
 		this.initFlexslider       = this.initFlexslider.bind( this );
 		this.initZoom             = this.initZoom.bind( this );

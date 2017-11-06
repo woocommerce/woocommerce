@@ -644,8 +644,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
-				foreach ( $existing_queries as $query_index => $query_contents ) {
-					unset( $wp_query_args['meta_query'][ $query_index ] );
+				$meta_query_index = array_search( $db_key, $existing_queries );
+				if ( false !== $meta_query_index ) {
+					unset( $wp_query_args['meta_query'][ $meta_query_index ] );
 				}
 
 				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );

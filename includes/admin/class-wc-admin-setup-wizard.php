@@ -304,6 +304,9 @@ class WC_Admin_Setup_Wizard {
 			$state = '*';
 		}
 
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
+
 		?>
 		<form method="post" class="address-step">
 			<?php wp_nonce_field( 'wc-setup' ); ?>
@@ -391,6 +394,9 @@ class WC_Admin_Setup_Wizard {
 					</option>
 				<?php endforeach; ?>
 			</select>
+			<script type="text/javascript">
+				var wc_setup_currencies = <?php echo json_encode( $currency_by_country ); ?>;
+			</script>
 
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
@@ -702,8 +708,6 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
-		$dimension_unit        = get_option( 'woocommerce_dimension_unit', false );
-		$weight_unit           = get_option( 'woocommerce_weight_unit', false );
 		$country_code          = WC()->countries->get_base_country();
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
@@ -711,14 +715,13 @@ class WC_Admin_Setup_Wizard {
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
-		if ( false === $dimension_unit || false === $weight_unit ) {
-			if ( 'US' === $country_code ) {
-				$dimension_unit = 'in';
-				$weight_unit    = 'oz';
-			} else {
-				$dimension_unit = 'cm';
-				$weight_unit    = 'kg';
-			}
+		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		if ( isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
+		} else {
+			$dimension_unit = 'cm';
+			$weight_unit    = 'kg';
 		}
 
 		if ( ! empty( $existing_zones ) ) {
@@ -987,8 +990,8 @@ class WC_Admin_Setup_Wizard {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
-			__( 'Accept all major debit &amp; credit cards from customers in 135+ countries on your site. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-stripe/'
+			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
 		$paypal_bt_description = '<p>' . sprintf(
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
@@ -1576,10 +1579,12 @@ class WC_Admin_Setup_Wizard {
 			exit;
 		}
 
-		$redirect_url   = site_url( add_query_arg( array(
+		$redirect_url = esc_url_raw( add_query_arg( array(
+			'page'           => 'wc-setup',
+			'step'           => 'activate',
 			'from'           => 'wpcom',
 			'activate_error' => false,
-		) ) );
+		), admin_url() ) );
 		$connection_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		wp_redirect( esc_url_raw( $connection_url ) );
