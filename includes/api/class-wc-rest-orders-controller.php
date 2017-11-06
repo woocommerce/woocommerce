@@ -402,6 +402,16 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			}
 		}
 
+		/**
+		 * Filter the query arguments for a request.
+		 *
+		 * Enables adding extra arguments or setting defaults for an order collection request.
+		 *
+		 * @param array           $args    Key value array of query var to query value.
+		 * @param WP_REST_Request $request The request used.
+		 */
+		$args = apply_filters( "woocommerce_rest_orders_prepare_object_query", $args, $request );
+
 		return $args;
 	}
 
@@ -1690,7 +1700,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	}
 
 	/**
-	 * @param $request
+	 * @param WP_REST_Request $request
 	 *
 	 * @return mixed|WP_REST_Response
 	 */
@@ -1700,7 +1710,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		switch_to_blog( $blog_id );
 
+		add_filter( 'woocommerce_rest_orders_prepare_object_query', array( $this, 'network_orders_filter_args' ) );
 		$items = $this->get_items( $request );
+		remove_filter( 'woocommerce_rest_orders_prepare_object_query', array( $this, 'network_orders_filter_args' ) );
 
 		foreach( $items->data as &$current_order ) {
 			$order = wc_get_order( $current_order['id'] );
@@ -1715,6 +1727,15 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		restore_current_blog();
 
 		return $items;
+	}
+
+	public function network_orders_filter_args( $args ) {
+		$args['post_status'] = array(
+			'wc-on-hold',
+			'wc-processing',
+		);
+
+		return $args;
 	}
 
 }
