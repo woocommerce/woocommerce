@@ -296,7 +296,7 @@ class WC_Admin_Dashboard {
 	 * Network orders widget
 	 */
 	public function network_orders() {
-		wp_enqueue_script( 'network-orders', '/wp-content/plugins/woocommerce/assets/js/admin/network-orders.js', array( 'jquery', 'underscore' ), time(), true );
+		wp_enqueue_script( 'network-orders', '/wp-content/plugins/woocommerce/assets/js/admin/network-orders.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
 
 		$user = wp_get_current_user();
 		$blogs = get_blogs_of_user( $user->ID );
