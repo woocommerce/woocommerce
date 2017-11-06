@@ -13,14 +13,14 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-$template = get_option( 'template' );
+$template = wc_get_theme_slug_for_templates();
 
 switch ( $template ) {
 	case 'twentyeleven' :
@@ -40,6 +40,9 @@ switch ( $template ) {
 		break;
 	case 'twentysixteen' :
 		echo '<div id="primary" class="content-area twentysixteen"><main id="main" class="site-main" role="main">';
+		break;
+	case 'underscores' :
+		echo '<div id="primary" class="content-area"><main id="main" class="site-main" role="main">';
 		break;
 	default :
 		echo '<div id="container"><div id="content" role="main">';
