@@ -213,7 +213,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							?>
 						</select>
 						<?php // @codingStandardsIgnoreStart ?>
-						<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
+						<button type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>"><?php esc_html_e( 'Show', 'woocommerce' ); ?></button>
 						<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( wp_unslash( $_GET['range'] ) ) : ''; ?>" />
 						<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( wp_unslash( $_GET['start_date'] ) ) : ''; ?>" />
 						<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( wp_unslash( $_GET['end_date'] ) ) : ''; ?>" />
@@ -461,7 +461,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var order_data = jQuery.parseJSON( '<?php echo esc_html( $chart_data ); ?>' );
+				var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );<?php // @codingStandardsIgnoreLine ?>
 
 				var drawGraph = function( highlight ) {
 					var series = [
@@ -481,7 +481,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,
-							<?php echo esc_js( $this->get_currency_tooltip() ); ?>
+							<?php echo $this->get_currency_tooltip(); ?><?php // @codingStandardsIgnoreLine ?>
 						}
 					];
 
