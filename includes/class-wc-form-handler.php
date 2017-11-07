@@ -67,7 +67,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		WC_Cache_Helper::do_not_cache_page();
 
 		$user_id = get_current_user_id();
 
@@ -181,7 +181,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		WC_Cache_Helper::do_not_cache_page();
 
 		$errors       = new WP_Error();
 		$user         = new stdClass();
@@ -278,7 +278,7 @@ class WC_Form_Handler {
 	 */
 	public static function checkout_action() {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 
 			if ( WC()->cart->is_empty() ) {
 				wp_redirect( wc_get_page_permalink( 'cart' ) );
@@ -298,7 +298,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 			ob_start();
 
 			// Pay for existing order
@@ -377,7 +377,7 @@ class WC_Form_Handler {
 	 */
 	public static function add_payment_method_action() {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 			ob_start();
 
 			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
@@ -422,7 +422,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 
 			$token_id = absint( $wp->query_vars['delete-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -447,7 +447,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 
 			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -473,7 +473,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		WC_Cache_Helper::do_not_cache_page();
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
@@ -587,7 +587,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		WC_Cache_Helper::do_not_cache_page();
 
 		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
 			WC()->cart->empty_cart();
@@ -678,7 +678,7 @@ class WC_Form_Handler {
 			isset( $_GET['order_id'] ) &&
 			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) )
 		) {
-			nocache_headers();
+			WC_Cache_Helper::do_not_cache_page();
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
@@ -725,7 +725,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		WC_Cache_Helper::do_not_cache_page();
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
