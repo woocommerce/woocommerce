@@ -270,7 +270,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo '</select>';
 
 			if ( $multiple ) {
-				echo '<input class="woocommerce-widget-layered-nav-dropdown__submit" type="submit" value="' . esc_attr__( 'Apply', 'woocommerce' ) . '" />';
+				echo '<button class="woocommerce-widget-layered-nav-dropdown__submit" type="submit" value="' . esc_attr__( 'Apply', 'woocommerce' ) . '">' . esc_html__( 'Apply', 'woocommerce' ) . '</button>';
 			}
 
 			if ( 'or' === $query_type ) {
