@@ -549,7 +549,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_placeholder_img() {
-		$this->assertTrue( strstr( wc_placeholder_img(), wc_placeholder_img_src() ) );
+		$this->assertTrue( (bool) strstr( wc_placeholder_img(), wc_placeholder_img_src() ) );
 	}
 
 	/**
