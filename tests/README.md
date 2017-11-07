@@ -4,11 +4,15 @@
 
 1) Install [PHPUnit](http://phpunit.de/) by following their [installation guide](https://phpunit.de/getting-started.html). If you've installed it correctly, this should display the version:
 
+    ```
     $ phpunit --version
+    ```
 
 2) Install WordPress and the WP Unit Test lib using the `install.sh` script. Change to the plugin root directory and type:
 
+    ```
     $ tests/bin/install.sh <db-name> <db-user> <db-password> [db-host]
+    ```
 
 Sample usage:
 

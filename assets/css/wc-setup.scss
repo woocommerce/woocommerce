@@ -513,12 +513,27 @@ body {
 	.wc-wizard-service-description {
 		flex-grow: 1;
 		padding: 0 1em;
+
+		p {
+			margin-bottom: 0;
+		}
+
+		.wc-wizard-service-settings {
+			margin-top: 1em;
+		}
+
+		.wc-wizard-service-settings-description {
+			display: block;
+			font-style: italic;
+			color: #999;
+		}
 	}
 
 	.wc-wizard-service-enable {
 		flex-basis: 0;
 		min-width: 75px;
 		text-align: center;
+		cursor: pointer;
 	}
 
 	.wc-wizard-service-toggle {
@@ -974,7 +989,6 @@ p.jetpack-terms {
 .wc-wizard-service-setting-stripe_create_account {
 	display: flex;
 	align-items: flex-end;
-	margin-bottom: 0.75em;
 	margin-top: 0.75em;
 
 	.payment-checkbox-input {
@@ -991,15 +1005,26 @@ p.jetpack-terms {
 }
 
 .wc-wizard-service-setting-stripe_email {
-	display: flex;
+	margin-top: 0.75em;
 
 	label.stripe_email {
-		visibility: hidden;
-		width: 0;
+		position: absolute;
+		margin: -1px;
+		padding: 0;
+		height: 1px;
+		width: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		border: 0;
 	}
 
 	input.payment-email-input {
 		margin-left: 1.5em;
+		margin-bottom: .5em;
 		width: 100%;
+	}
+
+	.wc-wizard-service-settings-description {
+		margin-left: 1.5em;
 	}
 }

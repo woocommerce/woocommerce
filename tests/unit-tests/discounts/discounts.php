@@ -839,7 +839,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'limit_usage_to_x_items' => 5,
 						),
 					),
-					'expected_total_discount' => 18.30,
+					'expected_total_discount' => 18.60,
 				),
 			),
 			array(
@@ -1282,6 +1282,81 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 					'expected_total_discount' => 20,
 				),
 			),
+			array(
+				array(
+					'desc' => 'Test single fixed product coupon on one item to illustrate type conversion precision bug.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 8.95,
+							'qty'   => 1,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'test',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+						),
+					),
+					'expected_total_discount' => 8.95,
+				),
+			),
+			array(
+				array(
+					'desc' => 'Test multiple coupons with limits of 1.',
+					'tax_rate' => array(
+						'tax_rate_country'  => '',
+						'tax_rate_state'    => '',
+						'tax_rate'          => '20.0000',
+						'tax_rate_name'     => 'VAT',
+						'tax_rate_priority' => '1',
+						'tax_rate_compound' => '0',
+						'tax_rate_shipping' => '1',
+						'tax_rate_order'    => '1',
+						'tax_rate_class'    => '',
+					),
+					'prices_include_tax' => false,
+					'cart' => array(
+						array(
+							'price' => 10,
+							'qty'   => 4,
+						),
+					),
+					'coupons' => array(
+						array(
+							'code'                   => 'one',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'two',
+							'discount_type'          => 'fixed_product',
+							'amount'                 => '10',
+							'limit_usage_to_x_items' => 1,
+						),
+						array(
+							'code'                   => 'three',
+							'discount_type'          => 'percent',
+							'amount'                 => '100',
+							'limit_usage_to_x_items' => 1,
+						),
+					),
+					'expected_total_discount' => 30,
+				),
+			),
 		);
 	}
 
@@ -1298,5 +1373,56 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		$all_discounts = $discounts->get_discounts();
 		$this->assertEquals( 0, count( $all_discounts['freeshipping'] ), 'Free shipping coupon should not have any discounts.' );
+	}
+
+	public function filter_woocommerce_coupon_get_discount_amount( $discount ) {
+		return $discount / 2;
+	}
+
+	public function test_coupon_discount_amount_filter() {
+		$discounts = new WC_Discounts();
+
+		add_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_regular_price( 100 );
+		$product2->set_tax_status( 'taxable' );
+		$product2->save();
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+		$coupon->set_props( array(
+			'code'                   => 'test',
+			'discount_type'          => 'percent',
+			'amount'                 => '20',
+		) );
+
+		$discounts->set_items_from_cart( WC()->cart );
+		$discounts->apply_coupon( $coupon );
+
+		$all_discounts = $discounts->get_discounts();
+
+		$discount_total = 0;
+		foreach ( $all_discounts as $code_name => $discounts_by_coupon ) {
+			$discount_total += array_sum( $discounts_by_coupon );
+		}
+
+		$this->assertEquals( 20, $discount_total );
+
+		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$product2->delete( true );
+		$coupon->delete( true );
+
+		// Temporarily necessary until https://github.com/woocommerce/woocommerce/pull/16767 is implemented.
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_test', 'coupons' );
 	}
 }

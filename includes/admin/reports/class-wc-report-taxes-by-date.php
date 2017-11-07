@@ -157,7 +157,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
 			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
 			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
-			$tax_rows[ $key ]->total_orders        += $tax_row->total_orders;
 		}
 
 		foreach ( $tax_rows_orders as $tax_row ) {

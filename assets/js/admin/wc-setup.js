@@ -1,4 +1,5 @@
 /*global wc_setup_params */
+/*global wc_setup_currencies */
 jQuery( function( $ ) {
 	function blockWizardUI() {
 		$('.wc-setup-content').block({
@@ -69,7 +70,7 @@ jQuery( function( $ ) {
 			.prop( 'required', true );
 	} );
 
-	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function( e ) {
+	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
 
 		$( this )
@@ -122,10 +123,23 @@ jQuery( function( $ ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', true );
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( '.wc-wizard-service-setting-stripe_email' )
+				.show();
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', false );
+			$( this ).closest( '.wc-wizard-service-settings' )
+				.find( '.wc-wizard-service-setting-stripe_email' )
+				.hide();
 		}
+	} );
+
+	$( '.wc-wizard-services input#stripe_create_account' ).change();
+
+	$( 'select#store_country_state' ).on( 'change', function() {
+		var countryCode = this.value.split( ':' )[ 0 ];
+		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
 	} );
 } );
