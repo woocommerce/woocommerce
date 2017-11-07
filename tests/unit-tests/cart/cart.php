@@ -901,16 +901,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$cart     = wc()->cart;
 		$new_cart = clone $cart;
 
-		// Allow accessing protected properties.
-		$reflected_cart = new ReflectionClass( $cart );
-		$cart_fees      = $reflected_cart->getProperty( 'fees_api' );
-		$cart_fees->setAccessible( true );
-		$reflected_new_cart = new ReflectionClass( $new_cart );
-		$new_cart_fees      = $reflected_new_cart->getProperty( 'fees_api' );
-		$new_cart_fees->setAccessible( true );
+		// Get the properties from each object.
+		$cart_fees = $cart->fees_api();
+		$new_cart_fees = $new_cart->fees_api();
 
 		// Ensure that cloned properties are not identical.
-		$identical_fees = $cart_fees->getValue( $cart ) === $new_cart_fees->getValue( $new_cart );
+		$identical_fees = $cart_fees === $new_cart_fees;
 		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
 	}
 }
