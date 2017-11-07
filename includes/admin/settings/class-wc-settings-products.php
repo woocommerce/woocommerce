@@ -164,75 +164,52 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			$theme_support           = get_theme_support( 'woocommerce' );
 			$theme_support           = is_array( $theme_support ) ? $theme_support[0]: false;
-			$theme_defines_all_sizes = false;
-			$image_settings          = array();
-
-			if ( isset( $theme_support['shop_thumbnail_image_size'], $theme_support['shop_single_image_size'], $theme_support['shop_catalog_image_size'] ) ) {
-				$theme_defines_all_sizes = true;
-			}
-
-			if ( ! $theme_defines_all_sizes ) {
-				$image_settings[] = array(
+			$image_settings          = array(
+				array(
 					'title' => __( 'Product images', 'woocommerce' ),
 					'type' 	=> 'title',
-					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a target="_blank" href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/regenerate-thumbnails/' ),
+					'desc' 	=> __( 'These settings change how product images are displayed in your catalog.', 'woocommerce' ),
 					'id' 	=> 'image_options',
-				);
-			}
-
-			if ( ! isset( $theme_support['shop_catalog_image_size'] ) ) {
-				$image_settings[] = array(
-					'title'    => __( 'Catalog images', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used in product listings. (W x H)', 'woocommerce' ),
-					'id'       => 'shop_catalog_image_size',
+				),
+				'single_image_width' => array(
+					'title'    => __( 'Main image width', 'woocommerce' ),
+					'desc'     => __( 'This is the width used by the main image on single product pages. These images will be uncropped.', 'woocommerce' ),
+					'id'       => 'woocommerce_single_image_width',
 					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '300',
-						'height' => '300',
-						'crop'   => 1,
-					),
+					'type'     => 'width_in_pixels',
+					'default'  => 600,
 					'desc_tip' => true,
-				);
-			}
-
-			if ( ! isset( $theme_support['shop_single_image_size'] ) ) {
-				$image_settings[] = array(
-					'title'    => __( 'Single product image', 'woocommerce' ),
-					'desc'     => __( 'This is the size used by the main image on the product page. (W x H)', 'woocommerce' ),
-					'id'       => 'shop_single_image_size',
+				),
+				'thumbnail_image_width' => array(
+					'title'    => __( 'Thumbnail width', 'woocommerce' ),
+					'desc'     => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
+					'id'       => 'woocommerce_thumbnail_image_width',
 					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '600',
-						'height' => '600',
-						'crop'   => 1,
-					),
+					'type'     => 'width_in_pixels',
+					'default'  => 300,
 					'desc_tip' => true,
-				);
-			}
-
-			if ( ! isset( $theme_support['shop_thumbnail_image_size'] ) ) {
-				$image_settings[] = array(
-					'title'    => __( 'Product thumbnails', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used for the gallery of images on the product page. (W x H)', 'woocommerce' ),
-					'id'       => 'shop_thumbnail_image_size',
+				),
+				array(
+					'title'    => __( 'Thumbnail cropping', 'woocommerce' ),
+					'desc'     => __( 'This determines how thumbnails appear. Widths will be fixed, whilst heights may vary.', 'woocommerce' ),
+					'id'       => 'woocommerce_thumbnail_cropping',
 					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '180',
-						'height' => '180',
-						'crop'   => 1,
-					),
-					'desc_tip' => true,
-				);
-			}
-
-			if ( ! $theme_defines_all_sizes ) {
-				$image_settings[] = array(
+					'type'     => 'thumbnail_cropping',
+					'default'  => '1:1',
+					'desc_tip' => false,
+				),
+				array(
 					'type' 	=> 'sectionend',
 					'id' 	=> 'image_options',
-				);
+				),
+			);
+
+			if ( isset( $theme_support['single_image_width'] ) ) {
+				unset( $image_settings['single_image_width'] );
+			}
+
+			if ( isset( $theme_support['thumbnail_image_width'] ) ) {
+				unset( $image_settings['thumbnail_image_width'] );
 			}
 
 			$settings = apply_filters( 'woocommerce_product_settings', array_merge( $settings, $image_settings ) );

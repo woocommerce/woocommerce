@@ -666,30 +666,57 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  * defines sizes.
  *
  * @param array|string $image_size Name of the image size to get, or an array of dimensions.
- * @return array Array of dimensions including width, height, and cropping mode.  Cropping mode is 0 for no crop, and 1 for hard crop.
+ * @return array Array of dimensions including width, height, and cropping mode. Cropping mode is 0 for no crop, and 1 for hard crop.
  */
 function wc_get_image_size( $image_size ) {
 	$theme_support = get_theme_support( 'woocommerce' );
-	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-	$size          = $image_size_defaults = array(
-		'width'  => 500,
-		'height' => 500,
+	$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+	$size          = array(
+		'width'  => 600,
+		'height' => 600,
 		'crop'   => 1,
 	);
 
 	if ( is_array( $image_size ) ) {
 		$size = array(
-			'width'  => isset( $image_size[0] ) ? $image_size[0] : 500,
-			'height' => isset( $image_size[1] ) ? $image_size[1] : 500,
+			'width'  => isset( $image_size[0] ) ? $image_size[0] : 600,
+			'height' => isset( $image_size[1] ) ? $image_size[1] : 600,
 			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( isset( $theme_support[ $image_size . '_image_size' ] ) ) {
-		$size = wp_parse_args( $theme_support[ $image_size . '_image_size' ], $image_size_defaults ); // If the theme supports woocommerce, take image sizes from that definition.
-	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
-		$size = wp_parse_args( get_option( $image_size . '_image_size', array() ), $image_size_defaults );
-	} else {
-		$size = $image_size_defaults;
+	} elseif ( in_array( $image_size, array( 'single', 'shop_single' ), true ) ) {
+		// If the theme supports woocommerce, take image sizes from that definition.
+		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
+			$size['width'] = $theme_support[ 'single_image_width' ];
+		} else {
+			$size['width'] = get_option( 'woocommerce_single_image_width', 600 );
+		}
+		$size['height'] = 9999999999;
+		$size['crop']   = 0;
+		$image_size     = 'single';
+	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog' ), true ) ) {
+		// If the theme supports woocommerce, take image sizes from that definition.
+		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
+			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
+		} else {
+			$size['width'] = get_option( 'woocommerce_thumbnail_image_width', 300 );
+		}
+
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+
+		if ( '1:1' === $cropping ) {
+			$size['height'] = $size['width'];
+			$size['crop']   = 1;
+		} elseif ( 'uncropped' === $cropping ) {
+			$size['height'] = 9999999999;
+			$size['crop']   = 0;
+		} else {
+			$width_ratio    = max( 1, get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_width', 4 ) );
+			$height_ratio   = max( 1, get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_height', 3 ) );
+			$size['height'] = round( ( $size['width'] / $width_ratio ) * $height_ratio );
+			$size['crop']   = 1;
+		}
+		$image_size = 'thumbnail';
 	}
 
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );

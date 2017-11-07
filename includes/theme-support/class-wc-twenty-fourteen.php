@@ -29,21 +29,8 @@ class WC_Twenty_Fourteen {
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
 		add_theme_support( 'woocommerce', array(
-			'shop_catalog_image_size' => array(
-				'width'  => 105,
-				'height' => 105,
-				'crop'   => 1,
-			),
-			'shop_thumbnail_image_size' => array(
-				'width'  => 60,
-				'height' => 60,
-				'crop'   => 1,
-			),
-			'shop_single_image_size' => array(
-				'width'  => 228,
-				'height' => 228,
-				'crop'   => 0,
-			),
+			'thumbnail_image_width' => 105,
+			'single_image_width'    => 228,
 		) );
 	}
 

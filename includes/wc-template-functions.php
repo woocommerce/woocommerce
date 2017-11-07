@@ -1856,7 +1856,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * @subpackage	Loop
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
-		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'shop_catalog' );
+		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
 		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 

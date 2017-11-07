@@ -545,22 +545,24 @@ final class WooCommerce {
 	 * and defining an array of args. If these are not defined, we will use defaults. This is
 	 * handled in wc_get_image_size function.
 	 *
-	 * Supported sizes:
+	 * 3.3 sizes:
 	 *
-	 * shop_thumbnail - This is used for gallery thumbnails and in widgets.
-	 * shop_catalog - This is the size used in archives/catalog/grid based listings of products.
-	 * shop_single - This is the size used on single product pages for the main product image.
+	 * thumbnail - Used in product listings.
+	 * single - Used on single product pages for the main image.
+	 *
+	 * shop_thumbnail, shop_single, shop_catalog registered for bw compat. @todo remove in 4.0.
 	 *
 	 * @since 2.3
 	 */
 	private function add_image_sizes() {
-		$shop_thumbnail = wc_get_image_size( 'shop_thumbnail' );
-		$shop_catalog	= wc_get_image_size( 'shop_catalog' );
-		$shop_single	= wc_get_image_size( 'shop_single' );
+		$thumbnail = wc_get_image_size( 'thumbnail' );
+		$single	   = wc_get_image_size( 'single' );
 
-		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
-		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
-		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
+		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
+		add_image_size( 'shop_thumbnail', $thumbnail['width'], $thumbnail['height'], $shop_thumbnail['crop'] );
+		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
 	}
 
 	/**
