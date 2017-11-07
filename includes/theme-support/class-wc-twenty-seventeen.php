@@ -68,22 +68,20 @@ class WC_Twenty_Seventeen {
 	/**
 	 * Open the Twenty Seventeen wrapper.
 	 */
-	public static function output_content_wrapper() { ?>
-		<div class="wrap">
-			<div id="primary" class="content-area twentyseventeen">
-				<main id="main" class="site-main" role="main">
-		<?php
+	public static function output_content_wrapper() {
+		echo '<div class="wrap">';
+		echo '<div id="primary" class="content-area twentyseventeen">';
+		echo '<main id="main" class="site-main" role="main">';
 	}
 
 	/**
 	 * Close the Twenty Seventeen wrapper.
 	 */
-	public static function output_content_wrapper_end() { ?>
-				</main>
-			</div>
-			<?php get_sidebar(); ?>
-		</div>
-		<?php
+	public static function output_content_wrapper_end() {
+		echo '</main>';
+		echo '</div>';
+		get_sidebar();
+		echo '</div>';
 	}
 
 	/**

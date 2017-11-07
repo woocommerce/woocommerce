@@ -896,11 +896,11 @@ add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
 /**
  * Protect downloads from ms-files.php in multisite.
  *
- * @param mixed $rewrite
+ * @param string $rewrite rewrite rules.
  * @return string
  */
 function wc_ms_protect_download_rewite_rules( $rewrite ) {
-	if ( ! is_multisite() || 'redirect' == get_option( 'woocommerce_file_download_method' ) ) {
+	if ( ! is_multisite() || 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
 		return $rewrite;
 	}
 
