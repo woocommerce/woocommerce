@@ -174,7 +174,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
-						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>" />
+						<button type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>"><?php esc_html_e( 'Save webhook', 'woocommerce' ); ?></button>
 						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
 							<?php //@codingStandardsIgnoreLine ?>
 							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? esc_html__( 'Delete permanently', 'woocommerce' ) : esc_html__( 'Move to trash', 'woocommerce' ); ?></a>
