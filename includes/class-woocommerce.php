@@ -506,6 +506,16 @@ final class WooCommerce {
 	/**
 	 * Add WC Image sizes to WP.
 	 *
+	 * As of 3.3, image sizes can be registered via themes using add_theme_support for woocommerce
+	 * and defining an array of args. If these are not defined, we will use defaults. This is
+	 * handled in wc_get_image_size function.
+	 *
+	 * Supported sizes:
+	 *
+	 * shop_thumbnail - This is used for gallery thumbnails and in widgets.
+	 * shop_catalog - This is the size used in archives/catalog/grid based listings of products.
+	 * shop_single - This is the size used on single product pages for the main product image.
+	 *
 	 * @since 2.3
 	 */
 	private function add_image_sizes() {
