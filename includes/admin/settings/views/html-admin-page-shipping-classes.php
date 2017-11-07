@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tfoot>
 		<tr>
 			<td colspan="<?php echo absint( count( $shipping_class_columns ) ); ?>">
-				<input type="submit" name="save" class="button button-primary wc-shipping-class-save" value="<?php esc_attr_e( 'Save shipping classes', 'woocommerce' ); ?>" disabled />
+				<button type="submit" name="save" class="button button-primary wc-shipping-class-save" value="<?php esc_attr_e( 'Save shipping classes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save shipping classes', 'woocommerce' ); ?></button>
 				<a class="button button-secondary wc-shipping-class-add" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
