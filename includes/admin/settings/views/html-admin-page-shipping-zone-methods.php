@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<tfoot>
 						<tr>
 							<td colspan="4">
-								<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" />
+								<button type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 							</td>
 						</tr>
 					</tfoot>
@@ -93,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tbody>
 </table>
 <p class="submit">
-	<input type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled />
+	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 </p>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
