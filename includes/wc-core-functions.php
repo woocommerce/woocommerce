@@ -657,39 +657,38 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
 }
 
 /**
- * Get an image size.
+ * Get an image size by name or defined dimensions.
  *
- * Variable is filtered by woocommerce_get_image_size_{image_size}.
+ * The returned variable is filtered by woocommerce_get_image_size_{image_size} filter to
+ * allow 3rd party customisation.
  *
- * @param array|string $image_size
- * @return array
+ * Sizes defined by the theme take priority over settings. Settings are hidden when a theme
+ * defines sizes.
+ *
+ * @param array|string $image_size Name of the image size to get, or an array of dimensions.
+ * @return array Array of dimensions including width, height, and cropping mode.  Cropping mode is 0 for no crop, and 1 for hard crop.
  */
 function wc_get_image_size( $image_size ) {
+	$theme_support = get_theme_support( 'woocommerce' );
+	$size          = $image_size_defaults = array(
+		'width'  => 500,
+		'height' => 500,
+		'crop'   => 1,
+	);
+
 	if ( is_array( $image_size ) ) {
-		$width  = isset( $image_size[0] ) ? $image_size[0] : '300';
-		$height = isset( $image_size[1] ) ? $image_size[1] : '300';
-		$crop   = isset( $image_size[2] ) ? $image_size[2] : 1;
-
 		$size = array(
-			'width'  => $width,
-			'height' => $height,
-			'crop'   => $crop,
+			'width'  => isset( $image_size[0] ) ? $image_size[0] : 500,
+			'height' => isset( $image_size[1] ) ? $image_size[1] : 500,
+			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
-
-		$image_size = $width . '_' . $height;
-
+		$image_size = $size['width'] . '_' . $size['height'];
+	} elseif ( isset( $theme_support[ $image_size ] ) ) {
+		$size = wp_parse_args( $theme_support[ $image_size ], $image_size_defaults ); // If the theme supports woocommerce, take image sizes from that definition.
 	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
-		$size           = get_option( $image_size . '_image_size', array() );
-		$size['width']  = isset( $size['width'] ) ? $size['width'] : '300';
-		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
-		$size['crop']   = isset( $size['crop'] ) ? $size['crop'] : 0;
-
+		$size = wp_parse_args( get_option( $image_size . '_image_size', array() ), $image_size_defaults );
 	} else {
-		$size = array(
-			'width'  => '300',
-			'height' => '300',
-			'crop'   => 1,
-		);
+		$size = $image_size_defaults;
 	}
 
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
