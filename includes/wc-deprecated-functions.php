@@ -809,7 +809,7 @@ function woocommerce_placeholder_img_src() {
 /**
  * @deprecated 3.0
  */
-function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
+function woocommerce_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	wc_deprecated_function( __FUNCTION__, '3.0', 'wc_placeholder_img' );
 	return wc_placeholder_img( $size );
 }
