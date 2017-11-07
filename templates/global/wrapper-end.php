@@ -23,6 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 $template = wc_get_theme_slug_for_templates();
 
 switch ( $template ) {
+	case 'twentyten' :
+		echo '</div></div>';
+		break;
 	case 'twentyeleven' :
 		echo '</div>';
 		get_sidebar( 'shop' );
@@ -44,10 +47,7 @@ switch ( $template ) {
 	case 'twentysixteen' :
 		echo '</main></div>';
 		break;
-	case 'underscores' :
-		echo '</div></main>';
-		break;
 	default :
-		echo '</div></div>';
+		echo '</div></main>';
 		break;
 }

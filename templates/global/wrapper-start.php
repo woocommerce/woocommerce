@@ -23,6 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 $template = wc_get_theme_slug_for_templates();
 
 switch ( $template ) {
+	case 'twentyten' :
+		echo '<div id="container"><div id="content" role="main">';
+		break;
 	case 'twentyeleven' :
 		echo '<div id="primary"><div id="content" role="main" class="twentyeleven">';
 		break;
@@ -41,10 +44,7 @@ switch ( $template ) {
 	case 'twentysixteen' :
 		echo '<div id="primary" class="content-area twentysixteen"><main id="main" class="site-main" role="main">';
 		break;
-	case 'underscores' :
-		echo '<div id="primary" class="content-area"><main id="main" class="site-main" role="main">';
-		break;
 	default :
-		echo '<div id="container"><div id="content" role="main">';
+		echo '<div id="primary" class="content-area"><main id="main" class="site-main" role="main">';
 		break;
 }

@@ -2736,33 +2736,5 @@ add_action( 'wp_head', 'wc_page_noindex' );
  * @return string
  */
 function wc_get_theme_slug_for_templates() {
-	/**
-	 * @hooked wc_check_for_underscores_theme
-	 * @since 3.3.0
-	 */
-	$template = apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
-
-	return $template;
+	return apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
 }
-
-/**
- * Treat all themes that don't formally support WooCommerce and are based on Underscores as one 'underscores' theme for templates.
- *
- * @since 3.3.0
- * @param string $template
- * @return string
- */
-function wc_check_for_underscores_theme( $template ) {
-	if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template,  wc_get_core_supported_themes() ) ) {
-		$stylesheet = get_stylesheet_directory() . '/style.css';
-		if( file_exists( $stylesheet ) ) {
-			$stylesheet_contents = file_get_contents( $stylesheet );
-			if ( stripos( $stylesheet_contents, 'underscores' ) ) {
-				return 'underscores';
-			}
-		}
-	}
-
-	return $template;
-}
-add_filter( 'woocommerce_theme_slug_for_templates', 'wc_check_for_underscores_theme' );
