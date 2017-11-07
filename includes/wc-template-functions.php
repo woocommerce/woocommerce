@@ -1758,7 +1758,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		extract( $args );
+		extract( $args ); // @codingStandardsIgnoreLine
 
 		// Main query only.
 		if ( ! is_main_query() && ! $force_display ) {
