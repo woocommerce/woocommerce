@@ -86,7 +86,7 @@ function wc_load_webhooks() {
  * @return WC_Webhook|null
  */
 function wc_get_webhook( $id ) {
-	$webhook = new WC_Webhook( $id );
+	$webhook = new WC_Webhook( (int) $id );
 
 	return 0 !== $webhook->get_id() ? $webhook : null;
 }

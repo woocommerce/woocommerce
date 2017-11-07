@@ -57,6 +57,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$webhook->apply_changes();
 
 		delete_transient( 'woocommerce_webhook_ids' );
+		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 		do_action( 'woocommerce_new_webhook', $webhook_id );
 	}
 
@@ -145,6 +146,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$webhook->apply_changes();
 
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );
+		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 		do_action( 'woocommerce_webhook_updated', $webhook->get_id() );
 	}
 
@@ -167,6 +169,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		); // WPCS: cache ok, DB call ok.
 
 		delete_transient( 'woocommerce_webhook_ids' );
+		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
 	}
 
@@ -215,32 +218,56 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'limit'  => 10,
 			'offset' => 0,
 		) );
-		$status = '';
-		$search = '';
 
-		// Query for status.
-		if ( ! empty( $args['status'] ) ) {
-			$status = "AND `status` = '" . sanitize_key( $args['status'] ) . "'";
+		$limit  = -1 < $args['limit'] ? sprintf( 'LIMIT %d', $args['limit'] ) : '';
+		$offset = 0 < $args['offset'] ? sprintf( 'OFFSET %d', $args['offset'] ) : '';
+		$status = ! empty( $args['status'] ) ? "AND `status` = '" . sanitize_key( $args['status'] ) . "'" : '';
+		$search = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'search_webhooks' . md5( implode( ',', $args ) );
+		$ids       = wp_cache_get( $cache_key, 'webhook_search_results' );
+
+		if ( false !== $ids ) {
+			return $ids;
 		}
 
-		// Search.
-		if ( ! empty( $args['search'] ) ) {
-			$status = "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'";
-		}
-
-		$query = "
+		$query = trim( "
 			SELECT webhook_id
 			FROM {$wpdb->prefix}wc_webhooks
 			WHERE 1=1
 			{$status}
 			{$search}
 			ORDER BY webhook_id
-			LIMIT %d
-			OFFSET %d
-		";
+			{$limit}
+			{$offset}
+		" );
 
-		$results = $wpdb->get_results( $wpdb->prepare( $query, $args['limit'], $args['offset'] ) ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		$results = $wpdb->get_results( $query ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-		return wp_list_pluck( $results, 'webhook_id' );
+		$ids = wp_list_pluck( $results, 'webhook_id' );
+		wp_cache_set( $cache_key, $ids, 'webhook_search_results' );
+
+		return $ids;
+	}
+
+	/**
+	 * Get total webhook counts by status.
+	 *
+	 * @return array
+	 */
+	public function get_count_webhooks_by_status() {
+		$statuses = array_keys( wc_get_webhook_statuses() );
+		$counts   = array();
+
+		foreach ( $statuses as $status ) {
+			$count = count( $this->search_webhooks( array(
+				'limit'  => -1,
+				'status' => $status,
+			) ) );
+
+			$counts[ $status ] = $count;
+		}
+
+		return $counts;
 	}
 }
