@@ -228,7 +228,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				<?php // @codingStandardsIgnoreStart ?>
 				<a href="#" class="select_none"><?php esc_html_e( 'None', 'woocommerce' ); ?></a>
 				<a href="#" class="select_all"><?php esc_html_e( 'All', 'woocommerce' ); ?></a>
-				<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
+				<button type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>"><?php esc_html_e( 'Show', 'woocommerce' ); ?></button>
 				<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( wp_unslash( $_GET['range'] ) ) : ''; ?>" />
 				<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( wp_unslash( $_GET['start_date'] ) ) : ''; ?>" />
 				<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( wp_unslash( $_GET['end_date'] ) ) : ''; ?>" />
