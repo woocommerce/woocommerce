@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo esc_html( date_i18n( get_option( 'date_format' ) ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
 					<?php endforeach; ?>
 				</select>
-				<input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
+				<button type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>"><?php esc_html_e( 'View', 'woocommerce' ); ?></button>
 			</form>
 		</div>
 		<div class="clear"></div>
