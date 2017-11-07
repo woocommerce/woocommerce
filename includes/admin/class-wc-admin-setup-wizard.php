@@ -431,7 +431,6 @@ class WC_Admin_Setup_Wizard {
 				id="product_type"
 				name="product_type"
 				required
-				data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>"
 				class="location-input wc-enhanced-select dropdown"
 			>
 				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
