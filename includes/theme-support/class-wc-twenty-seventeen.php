@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Twenty_Seventeen
  * @since   2.6.9
- * @version 2.6.9
  * @package WooCommerce/Classes
  */
 class WC_Twenty_Seventeen {
@@ -24,12 +23,33 @@ class WC_Twenty_Seventeen {
 		add_action( 'woocommerce_after_main_content', array( __CLASS__, 'output_content_wrapper_end' ), 10 );
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 		add_filter( 'twentyseventeen_custom_colors_css', array( __CLASS__, 'custom_colors_css' ), 10, 3 );
+
+		add_theme_support( 'wc-product-gallery-zoom' );
+		add_theme_support( 'wc-product-gallery-lightbox' );
+		add_theme_support( 'wc-product-gallery-slider' );
+		add_theme_support( 'woocommerce', array(
+			'shop_catalog_image_size' => array(
+				'width'  => 150,
+				'height' => 150,
+				'crop'   => 1,
+			),
+			'shop_thumbnail_image_size' => array(
+				'width'  => 80,
+				'height' => 80,
+				'crop'   => 1,
+			),
+			'shop_single_image_size' => array(
+				'width'  => 322,
+				'height' => 322,
+				'crop'   => 0,
+			),
+		) );
 	}
 
 	/**
 	 * Enqueue CSS for this theme.
 	 *
-	 * @param  array $styles
+	 * @param  array $styles Array of registered styles.
 	 * @return array
 	 */
 	public static function enqueue_styles( $styles ) {
@@ -69,9 +89,9 @@ class WC_Twenty_Seventeen {
 	/**
 	 * Custom colors.
 	 *
-	 * @param  string $css
-	 * @param  string $hue
-	 * @param  string $saturation
+	 * @param  string $css Styles.
+	 * @param  string $hue Color.
+	 * @param  string $saturation Saturation.
 	 * @return string
 	 */
 	public static function custom_colors_css( $css, $hue, $saturation ) {
