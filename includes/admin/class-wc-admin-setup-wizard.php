@@ -316,7 +316,7 @@ class WC_Admin_Setup_Wizard {
 		$country        = WC()->countries->get_base_country();
 		$postcode       = WC()->countries->get_base_postcode();
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
-		$product_type   = get_option( 'woocommerce_product_type' );
+		$product_type   = get_option( 'woocommerce_product_type', 'both' );
 
 		if ( empty( $country ) ) {
 			$user_location = WC_Geolocation::geolocate_ip();
@@ -431,13 +431,11 @@ class WC_Admin_Setup_Wizard {
 				id="product_type"
 				name="product_type"
 				required
-				data-placeholder="<?php esc_attr_e( 'Please choose one&hellip;', 'woocommerce' ); ?>"
 				class="location-input wc-enhanced-select dropdown"
 			>
-				<option value="" <?php selected( $product_type, '' ); ?>><?php esc_html_e( 'Please choose one&hellip;', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
-				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
 			</select>
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 				<div class="allow-tracking">
