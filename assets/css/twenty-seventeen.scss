@@ -129,6 +129,10 @@
 .price {
 	del {
 		opacity: .5;
+		display: inline-block;
+	}
+	ins {
+		display: inline-block;
 	}
 }
 

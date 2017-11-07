@@ -261,6 +261,10 @@ class WC_Email extends WC_Settings_API {
 		$find    = array_merge( (array) $this->find, $find );
 		$replace = array_merge( (array) $this->replace, $replace );
 
+		// Take care of blogname which is no longer defined as a valid placeholder.
+		$find[]    = '{blogname}';
+		$replace[] = $this->get_blogname();
+
 		// If using the older style filters for find and replace, ensure the array is associative and then pass through filters. @todo deprecate in 4.0.0.
 		if ( has_filter( 'woocommerce_email_format_string_replace' ) || has_filter( 'woocommerce_email_format_string_find' ) ) {
 			$legacy_find    = $this->find;
@@ -657,7 +661,7 @@ class WC_Email extends WC_Settings_API {
 	protected function save_template( $template_code, $template_path ) {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
-			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
+			$file   = get_stylesheet_directory() . '/' . WC()->template_path() . $template_path;
 			$code   = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {

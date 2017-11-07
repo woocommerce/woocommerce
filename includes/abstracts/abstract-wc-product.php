@@ -1420,6 +1420,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$visible = false;
 		}
 
+		if ( $this->get_parent_id() ) {
+			$parent_product = wc_get_product( $this->get_parent_id() );
+
+			if ( $parent_product && 'publish' !== $parent_product->get_status() ) {
+				$visible = false;
+			}
+		}
+
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
 			$visible = false;
 		}
