@@ -50,6 +50,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'BTN' => 'Bhutanese ngultrum',
 			'BWP' => 'Botswana pula',
 			'BYR' => 'Belarusian ruble (old)',
+			'BYN' => 'Belarusian ruble',
 			'BZD' => 'Belize dollar',
 			'CAD' => 'Canadian dollar',
 			'CDF' => 'Congolese franc',
