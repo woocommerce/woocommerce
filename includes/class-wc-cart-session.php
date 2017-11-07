@@ -104,7 +104,7 @@ final class WC_Cart_Session {
 
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
-		if ( $update_cart_session || is_null( $totals ) ) {
+		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
 			WC()->session->set( 'cart', $this->get_cart_for_session() );
 			$this->cart->calculate_totals();
 		}
