@@ -2,7 +2,7 @@
 /**
  * Webhook Data Store
  *
- * @version  3.2.0
+ * @version  3.3.0
  * @package  WooCommerce/Classes/Data_Store
  * @category Class
  * @author   Automattic
@@ -20,7 +20,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Create a new webhook in the database.
 	 *
-	 * @since 3.2.0
+	 * @since 3.3.0
 	 * @param WC_Webhook $webhook Webhook instance.
 	 */
 	public function create( &$webhook ) {
@@ -50,9 +50,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'pending_delivery' => $webhook->get_pending_delivery( 'edit' ),
 		);
 
-		// @codingStandardsIgnoreStart
-		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data );
-		// @codingStandardsIgnoreEnd
+		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data ); // WPCS: DB call ok.
 
 		$webhook_id = $wpdb->insert_id;
 		$webhook->set_id( $webhook_id );
@@ -65,7 +63,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Read a webhook from the database.
 	 *
-	 * @since  3.2.0
+	 * @since  3.3.0
 	 * @param  WC_Webhook $webhook Webhook instance.
 	 * @throws Exception When webhook is invalid.
 	 */
@@ -75,9 +73,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$data = wp_cache_get( $webhook->get_id(), 'webhooks' );
 
 		if ( false === $data ) {
-			// @codingStandardsIgnoreStart
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A );
-			// @codingStandardsIgnoreEnd
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A ); // WPCS: cache ok, DB call ok.
 
 			wp_cache_add( $webhook->get_id(), $data, 'webhooks' );
 		}
@@ -108,7 +104,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Update a webhook.
 	 *
-	 * @since 3.2.0
+	 * @since 3.3.0
 	 * @param WC_Webhook $webhook Webhook instance.
 	 */
 	public function update( &$webhook ) {
@@ -138,15 +134,13 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'pending_delivery'  => $webhook->get_pending_delivery( 'edit' ),
 		);
 
-		// @codingStandardsIgnoreStart
 		$wpdb->update(
 			$wpdb->prefix . 'wc_webhooks',
 			$data,
 			array(
 				'webhook_id' => $webhook->get_id( 'edit' ),
 			)
-		);
-		// @codingStandardsIgnoreEnd
+		); // WPCS: DB call ok.
 
 		$webhook->apply_changes();
 
@@ -157,22 +151,20 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Remove a webhook from the database.
 	 *
-	 * @since 3.2.0
+	 * @since 3.3.0
 	 * @param WC_Webhook $webhook      Webhook instance.
 	 * @param bool       $force_delete Skip trash bin forcing to delete.
 	 */
 	public function delete( &$webhook, $force_delete = false ) {
 		global $wpdb;
 
-		// @codingStandardsIgnoreStart
 		$wpdb->delete(
 			$wpdb->prefix . 'wc_webhooks',
 			array(
 				'webhook_id' => $webhook->get_id(),
 			),
 			array( '%d' )
-		);
-		// @codingStandardsIgnoreEnd
+		); // WPCS: cache ok, DB call ok.
 
 		delete_transient( 'woocommerce_webhook_ids' );
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
@@ -181,7 +173,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get API version number.
 	 *
-	 * @since  3.2.0
+	 * @since  3.3.0
 	 * @param  string $api_version REST API version.
 	 * @return int
 	 */
@@ -192,7 +184,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get all webhooks IDs.
 	 *
-	 * @since  3.2.0
+	 * @since  3.3.0
 	 * @return int[]
 	 */
 	public function get_webhooks_ids() {
@@ -201,14 +193,54 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$ids = get_transient( 'woocommerce_webhook_ids' );
 
 		if ( false === $ids ) {
-			// @codingStandardsIgnoreStart
-			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks" );
-			// @codingStandardsIgnoreEnd
-			$ids = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
+			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks" ); // WPCS: cache ok, DB call ok.
+			$ids     = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
 
-			set_transient( 'woocommerce_webhook_ids', $ids );
+			set_transient( 'woocommerce_webhook_ids' );
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * Search webhooks.
+	 *
+	 * @param  array $args Search arguments.
+	 * @return array
+	 */
+	public function search_webhooks( $args ) {
+		global $wpdb;
+
+		$args = wp_parse_args( $args, array(
+			'limit'  => 10,
+			'offset' => 0,
+		) );
+		$status = '';
+		$search = '';
+
+		// Query for status.
+		if ( ! empty( $args['status'] ) ) {
+			$status = "AND `status` = '" . sanitize_key( $args['status'] ) . "'";
+		}
+
+		// Search.
+		if ( ! empty( $args['search'] ) ) {
+			$status = "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'";
+		}
+
+		$query = "
+			SELECT webhook_id
+			FROM {$wpdb->prefix}wc_webhooks
+			WHERE 1=1
+			{$status}
+			{$search}
+			ORDER BY webhook_id
+			LIMIT %d
+			OFFSET %d
+		";
+
+		$results = $wpdb->get_results( $wpdb->prepare( $query, $args['limit'], $args['offset'] ) ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		return wp_list_pluck( $results, 'webhook_id' );
 	}
 }
