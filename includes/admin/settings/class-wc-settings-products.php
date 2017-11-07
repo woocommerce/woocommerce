@@ -9,10 +9,12 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Products', false ) ) :
+if ( class_exists( 'WC_Settings_Products', false ) ) {
+	return new WC_Settings_Products();
+}
 
 /**
  * WC_Settings_Products.
@@ -35,7 +37,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
-
 		$sections = array(
 			''          	=> __( 'General', 'woocommerce' ),
 			'display'       => __( 'Display', 'woocommerce' ),
@@ -70,22 +71,18 @@ class WC_Settings_Products extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section
-	 *
+	 * @param string $current_section Current section name.
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
-		if ( 'display' == $current_section ) {
-
-			$settings = apply_filters( 'woocommerce_product_settings', array(
-
+		if ( 'display' === $current_section ) {
+			$settings = array(
 				array(
 					'title' => __( 'Shop &amp; product pages', 'woocommerce' ),
 					'type' 	=> 'title',
 					'desc' 	=> '',
 					'id' 	=> 'catalog_options',
 				),
-
 				array(
 					'title'    => __( 'Shop page', 'woocommerce' ),
 					'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
@@ -96,7 +93,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
 				),
-
 				array(
 					'title'    => __( 'Shop page display', 'woocommerce' ),
 					'desc'     => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
@@ -112,7 +108,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 					'desc_tip' => true,
 				),
-
 				array(
 					'title'    => __( 'Default category display', 'woocommerce' ),
 					'desc'     => __( 'This controls what is shown on category archives.', 'woocommerce' ),
@@ -128,7 +123,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 					'desc_tip' => true,
 				),
-
 				array(
 					'title'    => __( 'Default product sorting', 'woocommerce' ),
 					'desc'     => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
@@ -147,7 +141,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					) ),
 					'desc_tip' => true,
 				),
-
 				array(
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
 					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
@@ -156,7 +149,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 				),
-
 				array(
 					'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_ajax_add_to_cart',
@@ -164,20 +156,31 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
 				),
-
 				array(
 					'type' 	=> 'sectionend',
 					'id' 	=> 'catalog_options',
 				),
+			);
 
-				array(
+			$theme_support           = get_theme_support( 'woocommerce' );
+			$theme_defines_all_sizes = false;
+			$image_settings          = array();
+
+			if ( isset( $theme_support['shop_thumbnail'], $theme_support['shop_single'], $theme_support['shop_catalog'] ) ) {
+				$theme_defines_all_sizes = true;
+			}
+
+			if ( ! $theme_defines_all_sizes ) {
+				$image_settings[] = array(
 					'title' => __( 'Product images', 'woocommerce' ),
 					'type' 	=> 'title',
 					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a target="_blank" href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/plugins/regenerate-thumbnails/' ),
 					'id' 	=> 'image_options',
-				),
+				);
+			}
 
-				array(
+			if ( ! isset( $theme_support['shop_catalog'] ) ) {
+				$image_settings[] = array(
 					'title'    => __( 'Catalog images', 'woocommerce' ),
 					'desc'     => __( 'This size is usually used in product listings. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_catalog_image_size',
@@ -189,9 +192,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'crop'   => 1,
 					),
 					'desc_tip' => true,
-				),
+				);
+			}
 
-				array(
+			if ( ! isset( $theme_support['shop_single'] ) ) {
+				$image_settings[] = array(
 					'title'    => __( 'Single product image', 'woocommerce' ),
 					'desc'     => __( 'This is the size used by the main image on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_single_image_size',
@@ -203,9 +208,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'crop'   => 1,
 					),
 					'desc_tip' => true,
-				),
+				);
+			}
 
-				array(
+			if ( ! isset( $theme_support['shop_thumbnail'] ) ) {
+				$image_settings[] = array(
 					'title'    => __( 'Product thumbnails', 'woocommerce' ),
 					'desc'     => __( 'This size is usually used for the gallery of images on the product page. (W x H)', 'woocommerce' ),
 					'id'       => 'shop_thumbnail_image_size',
@@ -217,15 +224,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'crop'   => 1,
 					),
 					'desc_tip' => true,
-				),
+				);
+			}
 
-				array(
+			if ( ! $theme_defines_all_sizes ) {
+				$image_settings[] = array(
 					'type' 	=> 'sectionend',
 					'id' 	=> 'image_options',
-				),
+				);
+			}
 
-			));
-		} elseif ( 'inventory' == $current_section ) {
+			$settings = apply_filters( 'woocommerce_product_settings', array_merge( $settings, $image_settings ) );
+
+		} elseif ( 'inventory' === $current_section ) {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
@@ -354,7 +365,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			));
 
-		} elseif ( 'downloadable' == $current_section ) {
+		} elseif ( 'downloadable' === $current_section ) {
 			$settings = apply_filters( 'woocommerce_downloadable_products_settings', array(
 				array(
 					'title' => __( 'Downloadable products', 'woocommerce' ),
@@ -529,7 +540,5 @@ class WC_Settings_Products extends WC_Settings_Page {
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 }
-
-endif;
 
 return new WC_Settings_Products();
