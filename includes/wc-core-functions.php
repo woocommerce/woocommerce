@@ -704,15 +704,13 @@ function wc_get_image_size( $image_size ) {
 
 		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
-		if ( '1:1' === $cropping ) {
-			$size['height'] = $size['width'];
-			$size['crop']   = 1;
-		} elseif ( 'uncropped' === $cropping ) {
+		if ( 'uncropped' === $cropping ) {
 			$size['height'] = 9999999999;
 			$size['crop']   = 0;
 		} else {
-			$width_ratio    = max( 1, get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_width', 4 ) );
-			$height_ratio   = max( 1, get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_height', 3 ) );
+			$cropping_split = explode( ':', $cropping );
+			$width_ratio    = max( 1, current( $cropping_split ) );
+			$height_ratio   = max( 1, end( $cropping_split ) );
 			$size['height'] = round( ( $size['width'] / $width_ratio ) * $height_ratio );
 			$size['crop']   = 1;
 		}

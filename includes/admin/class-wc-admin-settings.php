@@ -225,6 +225,9 @@ class WC_Admin_Settings {
 			if ( ! isset( $value['placeholder'] ) ) {
 				$value['placeholder'] = '';
 			}
+			if ( ! isset( $value['suffix'] ) ) {
+				$value['suffix'] = '';
+			}
 
 			// Custom attribute handling
 			$custom_attributes = array();
@@ -289,7 +292,7 @@ class WC_Admin_Settings {
 								class="<?php echo esc_attr( $value['class'] ); ?>"
 								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
-								/> <?php echo $description; ?>
+								/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -519,28 +522,17 @@ class WC_Admin_Settings {
 					</tr><?php
 					break;
 
-				// Width in pixels custom input. DEVELOPERS: This is private. Re-use at your own risk.
-				case 'width_in_pixels' :
-					$option_value = self::get_option( $value['id'], $value['default'] );
-
-					?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
-					<td class="forminp">
-						<input
-							name="<?php echo esc_attr( $value['id'] ); ?>"
-							id="<?php echo esc_attr( $value['id'] ); ?>"
-							type="text"
-							size="3"
-							value="<?php echo esc_attr( $option_value ); ?>" /> px
-						</td>
-					</tr><?php
-					break;
-
 				// Thumbnail cropping setting. DEVELOPERS: This is private. Re-use at your own risk.
 				case 'thumbnail_cropping' :
-					$option_value = self::get_option( $value['id'], $value['default'] );
-					$width        = get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_width', 4 );
-					$height       = get_option( 'woocommerce_thumbnail_cropping_aspect_ratio_height', 3 );
+					$option_value   = self::get_option( $value['id'], $value['default'] );
+					if ( strstr( $option_value, ':' ) ) {
+						$cropping_split = explode( ':', $option_value );
+						$width          = max( 1, current( $cropping_split ) );
+						$height         = max( 1, end( $cropping_split ) );
+					} else {
+						$width  = 4;
+						$height = 3;
+					}
 
 					?><tr valign="top">
 						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
@@ -569,7 +561,7 @@ class WC_Admin_Settings {
 									<label for="thumbnail_cropping_1_1">1:1<br/><span class="description"><?php esc_html_e( 'Images will be cropped into a square', 'woocommerce' ); ?></span></label>
 								</li>
 								<li>
-									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_custom" value="custom" <?php checked( $option_value, 'custom' ); ?> />
+									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_custom" value="custom" <?php checked( ! in_array( $option_value, array( '1:1', 'uncropped' ), true ), true ); ?> />
 									<label for="thumbnail_cropping_custom">
 										<?php esc_html_e( 'Custom', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will be cropped to a custom aspect ratio', 'woocommerce' ); ?></span>
 										<span class="woocommerce-thumbnail-cropping-aspect-ratio">
@@ -782,11 +774,9 @@ class WC_Admin_Settings {
 					$value = wc_clean( $raw_value );
 
 					if ( 'custom' === $value ) {
-						update_option( 'woocommerce_thumbnail_cropping_aspect_ratio_width', wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_width'] ) ) );
-						update_option( 'woocommerce_thumbnail_cropping_aspect_ratio_height', wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_height'] ) ) );
-					} else {
-						update_option( 'woocommerce_thumbnail_cropping_aspect_ratio_width', '4' );
-						update_option( 'woocommerce_thumbnail_cropping_aspect_ratio_height', '3' );
+						$width_ratio  = wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_width'] ) );
+						$height_ratio = wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_height'] ) );
+						$value        = $width_ratio . ':' . $height_ratio;
 					}
 					break;
 				case 'select':
