@@ -77,7 +77,6 @@ class WC_Cache_Helper {
 		if ( is_page( $page_ids ) ) {
 			self::do_not_cache_page();
 		}
-		return $values;
 	}
 
 	/**
