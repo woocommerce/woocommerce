@@ -916,16 +916,6 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
 
 /**
- * WooCommerce Core Supported Themes.
- *
- * @since 2.2
- * @return string[]
- */
-function wc_get_core_supported_themes() {
-	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-}
-
-/**
  * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron.
  * hook, see WC_Webhook::process().
  *

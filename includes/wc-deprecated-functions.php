@@ -972,3 +972,15 @@ function wc_get_customer_avatar_url( $email ) {
 
 	return get_avatar_url( $email );
 }
+
+/**
+ * WooCommerce Core Supported Themes.
+ *
+ * @deprecated 3.3.0
+ * @since 2.2
+ * @return string[]
+ */
+function wc_get_core_supported_themes() {
+	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
+	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+}
