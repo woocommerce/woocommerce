@@ -163,10 +163,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 			);
 
 			$theme_support           = get_theme_support( 'woocommerce' );
+			$theme_support           = is_array( $theme_support ) ? $theme_support[0]: false;
 			$theme_defines_all_sizes = false;
 			$image_settings          = array();
 
-			if ( isset( $theme_support['shop_thumbnail'], $theme_support['shop_single'], $theme_support['shop_catalog'] ) ) {
+			if ( isset( $theme_support['shop_thumbnail_image_size'], $theme_support['shop_single_image_size'], $theme_support['shop_catalog_image_size'] ) ) {
 				$theme_defines_all_sizes = true;
 			}
 
@@ -179,7 +180,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				);
 			}
 
-			if ( ! isset( $theme_support['shop_catalog'] ) ) {
+			if ( ! isset( $theme_support['shop_catalog_image_size'] ) ) {
 				$image_settings[] = array(
 					'title'    => __( 'Catalog images', 'woocommerce' ),
 					'desc'     => __( 'This size is usually used in product listings. (W x H)', 'woocommerce' ),
@@ -195,7 +196,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				);
 			}
 
-			if ( ! isset( $theme_support['shop_single'] ) ) {
+			if ( ! isset( $theme_support['shop_single_image_size'] ) ) {
 				$image_settings[] = array(
 					'title'    => __( 'Single product image', 'woocommerce' ),
 					'desc'     => __( 'This is the size used by the main image on the product page. (W x H)', 'woocommerce' ),
@@ -211,7 +212,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				);
 			}
 
-			if ( ! isset( $theme_support['shop_thumbnail'] ) ) {
+			if ( ! isset( $theme_support['shop_thumbnail_image_size'] ) ) {
 				$image_settings[] = array(
 					'title'    => __( 'Product thumbnails', 'woocommerce' ),
 					'desc'     => __( 'This size is usually used for the gallery of images on the product page. (W x H)', 'woocommerce' ),

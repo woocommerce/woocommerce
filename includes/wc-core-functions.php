@@ -670,6 +670,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  */
 function wc_get_image_size( $image_size ) {
 	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 	$size          = $image_size_defaults = array(
 		'width'  => 500,
 		'height' => 500,
@@ -683,8 +684,8 @@ function wc_get_image_size( $image_size ) {
 			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( isset( $theme_support[0], $theme_support[0][ $image_size . '_image_size' ] ) ) {
-		$size = wp_parse_args( $theme_support[0][ $image_size . '_image_size' ], $image_size_defaults ); // If the theme supports woocommerce, take image sizes from that definition.
+	} elseif ( isset( $theme_support[ $image_size . '_image_size' ] ) ) {
+		$size = wp_parse_args( $theme_support[ $image_size . '_image_size' ], $image_size_defaults ); // If the theme supports woocommerce, take image sizes from that definition.
 	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
 		$size = wp_parse_args( get_option( $image_size . '_image_size', array() ), $image_size_defaults );
 	} else {
