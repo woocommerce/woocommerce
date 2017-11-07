@@ -565,11 +565,11 @@ class WC_Admin_Settings {
 							</div>
 							<ul class="woocommerce-thumbnail-cropping">
 								<li>
-									<input type="radio" name="thumbnail_cropping" id="thumbnail_cropping_1_1" value="1:1" <?php checked( $option_value, '1:1' ); ?> />
+									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_1_1" value="1:1" <?php checked( $option_value, '1:1' ); ?> />
 									<label for="thumbnail_cropping_1_1">1:1<br/><span class="description"><?php esc_html_e( 'Images will be cropped into a square', 'woocommerce' ); ?></span></label>
 								</li>
 								<li>
-									<input type="radio" name="thumbnail_cropping" id="thumbnail_cropping_custom" value="custom" <?php checked( $option_value, 'custom' ); ?> />
+									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_custom" value="custom" <?php checked( $option_value, 'custom' ); ?> />
 									<label for="thumbnail_cropping_custom">
 										<?php esc_html_e( 'Custom', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will be cropped to a custom aspect ratio', 'woocommerce' ); ?></span>
 										<span class="woocommerce-thumbnail-cropping-aspect-ratio">
@@ -578,7 +578,7 @@ class WC_Admin_Settings {
 									</label>
 								</li>
 								<li>
-								<input type="radio" name="thumbnail_cropping" id="thumbnail_cropping_uncropped" value="uncropped" <?php checked( $option_value, 'uncropped' ); ?> />
+								<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_uncropped" value="uncropped" <?php checked( $option_value, 'uncropped' ); ?> />
 									<label for="thumbnail_cropping_uncropped"><?php esc_html_e( 'Uncropped', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will display using the aspect ratio in which they were uploaded', 'woocommerce' ); ?></span></label>
 								</li>
 							</ul>
