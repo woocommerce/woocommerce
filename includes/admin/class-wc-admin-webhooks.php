@@ -30,10 +30,7 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	private function is_webhook_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
-			&& 'wc-settings' === $_GET['page']
-			&& 'api' === $_GET['tab']
-			&& 'webhooks' === $_GET['section'];
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'api' === $_GET['tab'] && 'webhooks' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
 	/**
@@ -46,12 +43,12 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to update Webhooks', 'woocommerce' ) );
 		}
 
-		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;
+		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;  // WPCS: input var okay, CSRF ok.
 		$webhook    = new WC_Webhook( $webhook_id );
 
 		// Name.
-		if ( ! empty( $_POST['webhook_name'] ) ) {
-			$name = wc_clean( wp_unslash( $_POST['webhook_name'] ) );
+		if ( ! empty( $_POST['webhook_name'] ) ) { // WPCS: input var okay, CSRF ok.
+			$name = sanitize_text_field( wp_unslash( $_POST['webhook_name'] ) ); // WPCS: input var okay, CSRF ok.
 		} else {
 			$name = sprintf(
 				/* translators: %s: date */
@@ -65,38 +62,37 @@ class WC_Admin_Webhooks {
 		$webhook->set_name( $name );
 
 		// Status.
-		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? wc_clean( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' );
+		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' ); // WPCS: input var okay, CSRF ok.
 
 		// Delivery URL.
-		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '';
+		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : ''; // WPCS: input var okay, CSRF ok.
 
 		if ( wc_is_valid_url( $delivery_url ) ) {
 			$webhook->set_delivery_url( $delivery_url );
 		}
 
 		// Secret.
-		$secret = ! empty( $_POST['webhook_secret'] ) ? wc_clean( wp_unslash( $_POST['webhook_secret'] ) ) : wp_generate_password( 50, true, true );
+		$secret = ! empty( $_POST['webhook_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_secret'] ) ) : wp_generate_password( 50, true, true ); // WPCS: input var okay, CSRF ok.
 		$webhook->set_secret( $secret );
 
 		// Topic.
-		if ( ! empty( $_POST['webhook_topic'] ) ) {
-
+		if ( ! empty( $_POST['webhook_topic'] ) ) { // WPCS: input var okay, CSRF ok.
 			$resource = '';
 			$event    = '';
 
-			switch ( $_POST['webhook_topic'] ) {
-				case 'custom' :
-					if ( ! empty( $_POST['webhook_custom_topic'] ) ) {
-						list( $resource, $event ) = explode( '.', wc_clean( wp_unslash( $_POST['webhook_custom_topic'] ) ) );
+			switch ( $_POST['webhook_topic'] ) { // WPCS: input var okay, CSRF ok.
+				case 'custom':
+					if ( ! empty( $_POST['webhook_custom_topic'] ) ) { // WPCS: input var okay, CSRF ok.
+						list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_custom_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
 					}
 					break;
-				case 'action' :
+				case 'action':
 					$resource = 'action';
-					$event    = ! empty( $_POST['webhook_action_event'] ) ? wc_clean( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
+					$event    = ! empty( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : ''; // WPCS: input var okay, CSRF ok.
 					break;
 
-				default :
-					list( $resource, $event ) = explode( '.', wc_clean( wp_unslash( $_POST['webhook_topic'] ) ) );
+				default:
+					list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
 					break;
 			}
 
@@ -108,7 +104,7 @@ class WC_Admin_Webhooks {
 		}
 
 		// API version.
-		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? wc_clean( wp_unslash( $_POST['webhook_api_version'] ) ) : 'wp_api_v2' );
+		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : 'wp_api_v2' ); // WPCS: input var okay, CSRF ok.
 
 		$webhook->save();
 
@@ -116,12 +112,12 @@ class WC_Admin_Webhooks {
 		do_action( 'woocommerce_webhook_options_save', $webhook->get_id() );
 
 		// Ping the webhook at the first time that is activated.
-		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) {
+		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) { // WPCS: input var okay, CSRF ok.
 			$result = $webhook->deliver_ping();
 
 			if ( is_wp_error( $result ) ) {
 				// Redirect to webhook edit page to avoid settings save actions.
-				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . urlencode( $result->get_error_message() ) ) );
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $result->get_error_message() ) ) );
 				exit();
 			}
 		}
@@ -156,7 +152,7 @@ class WC_Admin_Webhooks {
 		$webhook->save();
 
 		// Redirect to edit page.
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&created=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&created=1' ) );
 		exit();
 	}
 
@@ -177,12 +173,12 @@ class WC_Admin_Webhooks {
 
 		$type   = ! EMPTY_TRASH_DAYS || $delete ? 'deleted' : 'trashed';
 		$qty    = count( $webhooks );
-		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // WPCS: input var okay, CSRF ok.
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
 		// Redirect to webhooks page.
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&' . $type . '=' . $qty ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&' . $type . '=' . $qty ) );
 		exit();
 	}
 
@@ -201,7 +197,7 @@ class WC_Admin_Webhooks {
 		delete_transient( 'woocommerce_webhook_ids' );
 
 		// Redirect to webhooks page.
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&untrashed=' . $qty ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&untrashed=' . $qty ) );
 		exit();
 	}
 
@@ -215,20 +211,20 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['action'] ) ) {
-			$webhooks = isset( $_GET['webhook'] ) ? array_map( 'absint', (array) $_GET['webhook'] ) : array();
+		if ( isset( $_GET['action'] ) ) { // WPCS: input var okay, CSRF ok.
+			$webhooks = isset( $_GET['webhook'] ) ? array_map( 'absint', (array) $_GET['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
 
-			switch ( wc_clean( wp_unslash( $_GET['action'] ) ) ) {
-				case 'trash' :
+			switch ( sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) { // WPCS: input var okay, CSRF ok.
+				case 'trash':
 					$this->bulk_trash( $webhooks );
 					break;
-				case 'untrash' :
+				case 'untrash':
 					$this->bulk_untrash( $webhooks );
 					break;
-				case 'delete' :
+				case 'delete':
 					$this->bulk_trash( $webhooks, true );
 					break;
-				default :
+				default:
 					break;
 			}
 		}
@@ -244,6 +240,7 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to delete Webhooks', 'woocommerce' ) );
 		}
 
+		// @codingStandardsIgnoreStart
 		$webhooks = get_posts( array(
 			'post_type'           => 'shop_webhook',
 			'ignore_sticky_posts' => true,
@@ -251,6 +248,7 @@ class WC_Admin_Webhooks {
 			'post_status'         => 'trash',
 			'fields'              => 'ids',
 		) );
+		// @codingStandardsIgnoreEnd
 
 		foreach ( $webhooks as $webhook_id ) {
 			wp_delete_post( $webhook_id, true );
@@ -259,7 +257,7 @@ class WC_Admin_Webhooks {
 		$qty = count( $webhooks );
 
 		// Redirect to webhooks page.
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&deleted=' . $qty ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&deleted=' . $qty ) );
 		exit();
 	}
 
@@ -269,22 +267,22 @@ class WC_Admin_Webhooks {
 	public function actions() {
 		if ( $this->is_webhook_settings_page() ) {
 			// Save.
-			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) { // WPCS: CSRF ok.
+			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->save();
 			}
 
 			// Create.
-			if ( isset( $_GET['create-webhook'] ) ) {
+			if ( isset( $_GET['create-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->create();
 			}
 
 			// Bulk actions.
-			if ( isset( $_GET['action'] ) && isset( $_GET['webhook'] ) ) {
+			if ( isset( $_GET['action'] ) && isset( $_GET['webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->bulk_actions();
 			}
 
 			// Empty trash.
-			if ( isset( $_GET['empty_trash'] ) ) {
+			if ( isset( $_GET['empty_trash'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->empty_trash();
 			}
 		}
@@ -297,11 +295,11 @@ class WC_Admin_Webhooks {
 		// Hide the save button.
 		$GLOBALS['hide_save_button'] = true;
 
-		if ( isset( $_GET['edit-webhook'] ) ) {
-			$webhook_id = absint( $_GET['edit-webhook'] );
+		if ( isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
+			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			if ( 'trash' != $webhook->get_status() ) {
+			if ( 'trash' !== $webhook->get_status() ) {
 				include( 'settings/views/html-webhooks-edit.php' );
 				return;
 			}
@@ -314,37 +312,37 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['trashed'] ) ) {
-			$trashed = absint( $_GET['trashed'] );
+		if ( isset( $_GET['trashed'] ) ) { // WPCS: input var okay, CSRF ok.
+			$trashed = absint( $_GET['trashed'] ); // WPCS: input var okay, CSRF ok.
 
 			/* translators: %d: count */
 			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook moved to the Trash.', '%d webhooks moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) );
 		}
 
-		if ( isset( $_GET['untrashed'] ) ) {
-			$untrashed = absint( $_GET['untrashed'] );
+		if ( isset( $_GET['untrashed'] ) ) { // WPCS: input var okay, CSRF ok.
+			$untrashed = absint( $_GET['untrashed'] ); // WPCS: input var okay, CSRF ok.
 
 			/* translators: %d: count */
 			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook restored from the Trash.', '%d webhooks restored from the Trash.', $untrashed, 'woocommerce' ), $untrashed ) );
 		}
 
-		if ( isset( $_GET['deleted'] ) ) {
-			$deleted = absint( $_GET['deleted'] );
+		if ( isset( $_GET['deleted'] ) ) { // WPCS: input var okay, CSRF ok.
+			$deleted = absint( $_GET['deleted'] ); // WPCS: input var okay, CSRF ok.
 
 			/* translators: %d: count */
 			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
 		}
 
-		if ( isset( $_GET['updated'] ) ) {
+		if ( isset( $_GET['updated'] ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::add_message( __( 'Webhook updated successfully.', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['created'] ) ) {
+		if ( isset( $_GET['created'] ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::add_message( __( 'Webhook created successfully.', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['error'] ) ) {
-			WC_Admin_Settings::add_error( wc_clean( wp_unslash( $_GET['error'] ) ) );
+		if ( isset( $_GET['error'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_error( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
 	}
 
@@ -366,7 +364,7 @@ class WC_Admin_Webhooks {
 			echo '<input type="hidden" name="section" value="webhooks" />';
 
 			$webhooks_table_list->views();
-			$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
+			$webhooks_table_list->search_box( esc_html__( 'Search webhooks', 'woocommerce' ), 'webhook' );
 			$webhooks_table_list->display();
 		} else {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
@@ -374,7 +372,8 @@ class WC_Admin_Webhooks {
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
 			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
 
-			<?php echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
+			<?php
+				echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}
 	}
 
@@ -384,7 +383,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook Webhook instance.
 	 */
 	public static function logs_output( $webhook ) {
-		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
+		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1; // WPCS: input var okay, CSRF ok.
 		$args    = array(
 			'post_id' => $webhook->get_id(),
 			'status'  => 'approve',
@@ -426,7 +425,7 @@ class WC_Admin_Webhooks {
 
 			if ( 'action' === $resource ) {
 				$topic = 'action';
-			} elseif ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
+			} elseif ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ), true ) ) {
 				$topic = 'custom';
 			}
 		}
@@ -448,16 +447,17 @@ class WC_Admin_Webhooks {
 	 */
 	public static function get_logs_navigation( $total, $webhook ) {
 		$pages   = ceil( $total / 10 );
-		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
+		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1; // WPCS: input var okay, CSRF ok.
 
 		$html = '<div class="webhook-logs-navigation">';
 
 		$html .= '<p class="info" style="float: left;"><strong>';
 
-		/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
 		$html .= sprintf(
-			__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
-			sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ),
+			/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
+			esc_html__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
+			/* translators: %d: items count */
+			esc_html( sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ) ),
 			$current,
 			$pages
 		);
@@ -465,13 +465,13 @@ class WC_Admin_Webhooks {
 
 		if ( 1 < $pages ) {
 			$html .= '<p class="tools" style="float: right;">';
-			if ( 1 == $current ) {
+			if ( 1 === $current ) {
 				$html .= '<button class="button-primary" disabled="disabled">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</button> ';
 			} else {
 				$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
 			}
 
-			if ( $pages == $current ) {
+			if ( $pages === $current ) {
 				$html .= '<button class="button-primary" disabled="disabled">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</button>';
 			} else {
 				$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
