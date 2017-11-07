@@ -1,11 +1,17 @@
 <?php
+/**
+ * Shipping zone admin
+ *
+ * @package WooCommerce/Admin/Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
 
 <h2>
-	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping' ); ?>"><?php _e( 'Shipping zones', 'woocommerce' ); ?></a> &gt;
+	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>"><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></a> &gt;
 	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
@@ -17,43 +23,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" class="">
 				<th scope="row" class="titledesc">
 					<label for="zone_name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 				</th>
 				<td class="forminp">
-					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name( 'edit' ) ); ?>" placeholder="<?php _e( 'Zone name', 'woocommerce' ); ?>">
+					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name( 'edit' ) ); ?>" placeholder="<?php esc_attr_e( 'Zone name', 'woocommerce' ); ?>">
 				</td>
 			</tr>
 			<tr valign="top" class="">
 				<th scope="row" class="titledesc">
 					<label for="zone_locations"><?php esc_html_e( 'Zone regions', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 				</th>
 				<td class="forminp">
-					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
+					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_html_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
 						<?php
-							foreach ( $continents as $continent_code => $continent ) {
-								echo '<option value="continent:' . esc_attr( $continent_code ) . '" ' . selected( in_array( "continent:$continent_code", $locations ), true, false ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
+						foreach ( $continents as $continent_code => $continent ) {
+							echo '<option value="continent:' . esc_attr( $continent_code ) . '" ' . selected( in_array( "continent:$continent_code", $locations ), true, false ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
 
-								$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
 
-								foreach ( $countries as $country_code ) {
-									echo '<option value="country:' . esc_attr( $country_code ) . '" ' . selected( in_array( "country:$country_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
+							foreach ( $countries as $country_code ) {
+								echo '<option value="country:' . esc_attr( $country_code ) . '" ' . selected( in_array( "country:$country_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
 
-									if ( $states = WC()->countries->get_states( $country_code ) ) {
-										foreach ( $states as $state_code => $state_name ) {
-											echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" ' . selected( in_array( "state:$country_code:$state_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
-										}
+								if ( $states = WC()->countries->get_states( $country_code ) ) {
+									foreach ( $states as $state_code => $state_name ) {
+										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" ' . selected( in_array( "state:$country_code:$state_code", $locations ), true, false ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
 									}
 								}
 							}
+						}
 						?>
 					</select>
 					<?php if ( empty( $postcodes ) ) : ?>
-						<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
+						<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php esc_html_e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
 					<?php endif; ?>
 					<div class="wc-shipping-zone-postcodes">
 						<textarea name="zone_postcodes" data-attribute="zone_postcodes" id="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"><?php echo esc_textarea( implode( "\n", $postcodes ) ); ?></textarea>
-						<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woocommerce' ) ?></span>
+						<span class="description"><?php esc_html_e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. <code>90210...99000</code>) are also supported.', 'woocommerce' ) ?></span>
 					</div>
 				</td>
 			<?php endif; ?>
@@ -61,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr valign="top" class="">
 			<th scope="row" class="titledesc">
 				<label><?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?></label>
-				<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); ?>
+				<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 			</th>
 			<td class="">
 				<table class="wc-shipping-zone-methods widefat">
@@ -93,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
 		<td class="wc-shipping-zone-method-blank-state" colspan="4">
-			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
+			<p><?php esc_html_e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>
 </script>
@@ -104,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="wc-shipping-zone-method-title">
 			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
 			<div class="row-actions">
-				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
@@ -128,7 +134,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						);
 					?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article class="wc-modal-shipping-method-settings">
@@ -139,7 +145,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Save changes', 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
@@ -153,9 +159,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<h1><?php _e( 'Add shipping method', 'woocommerce' ); ?></h1>
+					<h1><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article>
@@ -165,12 +171,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-										if ( ! $method->supports( 'shipping-zones' ) ) {
-											continue;
-										}
-										echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+									if ( ! $method->supports( 'shipping-zones' ) ) {
+										continue;
 									}
+									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+								}
 								?>
 							</select>
 						</div>
@@ -178,7 +184,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add shipping method', 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
