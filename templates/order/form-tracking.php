@@ -32,7 +32,7 @@ global $post;
 	<p class="form-row form-row-last"><label for="order_email"><?php esc_html_e( 'Billing email', 'woocommerce' ); ?></label> <input class="input-text" type="text" name="order_email" id="order_email" value="<?php echo isset( $_REQUEST['order_email'] ) ? esc_attr( wp_unslash( $_REQUEST['order_email'] ) ) : ''; ?>" placeholder="<?php esc_attr_e( 'Email you used during checkout.', 'woocommerce' ); ?>" /></p><?php // @codingStandardsIgnoreLine ?>
 	<div class="clear"></div>
 
-	<p class="form-row"><input type="submit" class="button" name="track" value="<?php esc_attr_e( 'Track', 'woocommerce' ); ?>" /></p>
+	<p class="form-row"><button type="submit" class="button" name="track" value="<?php esc_attr_e( 'Track', 'woocommerce' ); ?>"><?php esc_html_e( 'Track', 'woocommerce' ); ?></button></p>
 	<?php wp_nonce_field( 'woocommerce-order_tracking' ); ?>
 
 </form>
