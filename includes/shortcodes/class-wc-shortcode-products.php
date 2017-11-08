@@ -178,7 +178,7 @@ class WC_Shortcode_Products {
 
 		// @codingStandardsIgnoreStart
 		$query_args['posts_per_page'] = absint( $this->attributes['limit'] );
-		$query_args['offset']         = absint( $this->attributes['limit'] * ( absint( $this->attributes['page'] ) - 1 ) );
+		$query_args['paged']          = absint( $this->attributes['page'] );
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
@@ -510,6 +510,11 @@ class WC_Shortcode_Products {
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
+			if ( ! empty( $this->attributes['paginate'] ) ) {
+				woocommerce_result_count( $products );
+				woocommerce_catalog_ordering( $products );
+			}
+
 			woocommerce_product_loop_start();
 
 			while ( $products->have_posts() ) {
@@ -528,10 +533,7 @@ class WC_Shortcode_Products {
 			woocommerce_product_loop_end();
 
 			if ( ! empty( $this->attributes['paginate'] ) ) {
-				woocommerce_pagination( array(
-					'total'   => $products->max_num_pages,
-					'current' => $this->attributes['page'],
-				) );
+				woocommerce_pagination( $products );
 			}
 
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );

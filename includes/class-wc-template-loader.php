@@ -19,35 +19,40 @@ class WC_Template_Loader {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( current_theme_supports( 'woocommerce' ) ) {
-			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
-			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
-		} else {
-			add_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
-		}
+		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
+		add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+		add_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
 	}
 
 	/**
 	 * Filter the content and insert WooCommerce content. @todo
 	 *
 	 * @since 3.3.0
-	 * @param string $content
+	 * @param string $content Existing post content.
 	 * @return string
 	 */
 	public static function the_content_filter( $content ) {
-		if ( is_page( wc_get_page_id( 'shop' ) ) && is_main_query() ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && is_page( wc_get_page_id( 'shop' ) ) && is_main_query() ) {
 			$page      = max( 1, absint( get_query_var( 'paged' ) ) );
 			$columns   = 3;
-			$rows      = 4;
+			$rows      = 3;
 
-			$shortcode = new WC_Shortcode_Products( array(
-				'page'     => $page,
-				'columns'  => $columns,
-				'rows'     => $rows,
-				'paginate' => true,
-			), 'products' );
+			$shortcode = new WC_Shortcode_Products(
+				array_merge(
+					wc()->query->get_catalog_ordering_args(),
+					array(
+						'page'     => $page,
+						'columns'  => $columns,
+						'rows'     => $rows,
+						'paginate' => true,
+					)
+				),
+			'products' );
 
 			$content .= $shortcode->get_content();
+
+			// Remove self to avoid nested calls.
+			remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
 		}
 		return $content;
 	}
@@ -68,7 +73,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
-		if ( is_embed() ) {
+		if ( is_embed() || ! current_theme_supports( 'woocommerce' ) ) {
 			return $template;
 		}
 
@@ -151,7 +156,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
-		if ( get_post_type() !== 'product' ) {
+		if ( get_post_type() !== 'product' || ! current_theme_supports( 'woocommerce' ) ) {
 			return $template;
 		}
 

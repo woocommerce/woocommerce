@@ -813,10 +813,24 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	/**
 	 * Output the result count text (Showing x - x of x results).
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
 	 */
-	function woocommerce_result_count() {
-		wc_get_template( 'loop/result-count.php' );
+	function woocommerce_result_count( $query = null ) {
+		if ( is_null( $query ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
+
+		if ( ! woocommerce_products_will_display() ) {
+			return;
+		}
+
+		$args = array(
+			'total'    => $query->found_posts,
+			'per_page' => $query->get( 'posts_per_page' ),
+			'current'  => max( 1, $query->get( 'paged', 1 ) ),
+		);
+
+		wc_get_template( 'loop/result-count.php', $args );
 	}
 }
 
@@ -825,12 +839,14 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	/**
 	 * Output the product sorting options.
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global.
 	 */
-	function woocommerce_catalog_ordering() {
-		global $wp_query;
+	function woocommerce_catalog_ordering( $query = null ) {
+		if ( is_null( $query ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
 
-		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+		if ( 1 === (int) $query->found_posts || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
@@ -845,7 +861,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		if ( $wp_query->is_search() ) {
+		if ( $query->is_search() ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 			unset( $catalog_orderby_options['menu_order'] );
 			if ( 'menu_order' === $orderby ) {
@@ -872,13 +888,15 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	 *
 	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
 	 */
-	function woocommerce_pagination( $args = array() ) {
-		global $wp_query;
+	function woocommerce_pagination( $query = null ) {
+		if ( is_null( $query ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
 
-		$args = wp_parse_args( $args, array(
-			'total'   => $wp_query->max_num_pages,
-			'current' => get_query_var( 'paged' ),
-		) );
+		$args = array(
+			'total'   => $query->max_num_pages,
+			'current' => max( 1, $query->get( 'paged', 1 ) ),
+		);
 
 		wc_get_template( 'loop/pagination.php', $args );
 	}
