@@ -245,19 +245,19 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		WC()->api->register_resources( new WC_API_Server( '/' ) );
 
 		switch ( $resource ) {
-			case 'coupon' :
+			case 'coupon':
 				$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
 				break;
 
-			case 'customer' :
+			case 'customer':
 				$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
 				break;
 
-			case 'order' :
+			case 'order':
 				$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
 				break;
 
-			case 'product' :
+			case 'product':
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
 					$resource_id = $resource_id->get_id();
@@ -266,14 +266,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 
 			// Custom topics include the first hook argument.
-			case 'action' :
+			case 'action':
 				$payload = array(
 					'action' => current( $this->get_hooks() ),
 					'arg'    => $resource_id,
 				);
 				break;
 
-			default :
+			default:
 				$payload = array();
 				break;
 		}
@@ -294,13 +294,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
 
 		switch ( $resource ) {
-			case 'coupon' :
-			case 'customer' :
-			case 'order' :
-			case 'product' :
+			case 'coupon':
+			case 'customer':
+			case 'order':
+			case 'product':
 				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
 				$request    = new WP_REST_Request( 'GET' );
-				$controller = new $class;
+				$controller = new $class();
 
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
@@ -313,14 +313,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 
 			// Custom topics include the first hook argument.
-			case 'action' :
+			case 'action':
 				$payload = array(
 					'action' => current( $this->get_hooks() ),
 					'arg'    => $resource_id,
 				);
 				break;
 
-			default :
+			default:
 				$payload = array();
 				break;
 		}
@@ -391,7 +391,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$comment_data = apply_filters( 'woocommerce_new_webhook_delivery_data', array(
 			'comment_author'       => __( 'WooCommerce', 'woocommerce' ),
-			'comment_author_email' => sanitize_email( sprintf( '%s@%s', strtolower( __( 'WooCommerce', 'woocommerce' ) ), isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com' ) ),
+			'comment_author_email' => sanitize_email( sprintf( '%s@%s', strtolower( __( 'WooCommerce', 'woocommerce' ) ), isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', wp_unslash( $_SERVER['HTTP_HOST'] ) ) : 'noreply.com' ) ), // @codingStandardsIgnoreLine
 			'comment_post_ID'      => $this->get_id(),
 			'comment_agent'        => 'WooCommerce Hookshot',
 			'comment_type'         => 'webhook_delivery',
@@ -465,7 +465,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( $log->total_comments > apply_filters( 'woocommerce_max_webhook_delivery_logs', 25 ) ) {
 			global $wpdb;
 
-			$comment_id = $wpdb->get_var( $wpdb->prepare( "SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1", $this->get_id() ) );
+			$comment_id = $wpdb->get_var( $wpdb->prepare( "SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1", $this->get_id() ) ); // @codingStandardsIgnoreLine
 
 			if ( $comment_id ) {
 				wp_delete_comment( $comment_id, true );
@@ -514,7 +514,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		foreach ( $logs as $log ) {
 			$log = $this->get_delivery_log( $log->comment_ID );
-			$delivery_logs[] = ( ! empty( $log )  ? $log : array() );
+			$delivery_logs[] = ( ! empty( $log ) ? $log : array() );
 		}
 
 		return $delivery_logs;
