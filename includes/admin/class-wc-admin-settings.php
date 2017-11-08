@@ -547,7 +547,7 @@ class WC_Admin_Settings {
 									<label for="thumbnail_cropping_custom">
 										<?php esc_html_e( 'Custom', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will be cropped to a custom aspect ratio', 'woocommerce' ); ?></span>
 										<span class="woocommerce-thumbnail-cropping-aspect-ratio">
-											<input name="thumbnail_cropping_aspect_ratio_width" type="text" size="3" value="<?php echo $width; ?>" /> : <input name="thumbnail_cropping_aspect_ratio_height" type="text" size="3" value="<?php echo $height; ?>" />
+											<input name="thumbnail_cropping_aspect_ratio_width" type="text" pattern="\d*" size="3" value="<?php echo $width; ?>" /> : <input name="thumbnail_cropping_aspect_ratio_height" type="text" pattern="\d*" size="3" value="<?php echo $height; ?>" />
 										</span>
 									</label>
 								</li>

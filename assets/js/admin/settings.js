@@ -127,7 +127,7 @@
 
 	// Thumbnail cropping option updates and preview.
 	$( '.woocommerce-thumbnail-cropping' )
-		.on( 'change', 'input', function() {
+		.on( 'change input', 'input', function() {
 			var value = $( '.woocommerce-thumbnail-cropping input:checked' ).val(),
 				$preview_images = $( '.woocommerce-thumbnail-preview-block__image' );
 
