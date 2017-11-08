@@ -110,8 +110,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
 		// Register hooks for the objects.
-		$this->session->register_hooks();
-		$this->fees_api->register_hooks();
+		$this->session->init();
+		$this->fees_api->init();
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );

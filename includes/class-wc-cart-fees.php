@@ -68,7 +68,7 @@ final class WC_Cart_Fees {
 	/**
 	 * Register methods for this object on the appropriate WordPress hooks.
 	 */
-	public function register_hooks() {
+	public function init() {
 		add_action( 'woocommerce_cart_emptied', array( $this, 'remove_all_fees' ) );
 		add_action( 'woocommerce_cart_reset', array( $this, 'remove_all_fees' ) );
 	}

@@ -15,7 +15,7 @@ class WC_Tests_WC_Cart_Fees extends WC_Unit_Test_Case {
 	public function test_set_get_remove_fees() {
 
 		$cart_fees = new WC_Cart_Fees( wc()->cart );
-		$cart_fees->register_hooks();
+		$cart_fees->init();
 
 		// Test add_fee.
 		$args = array(
