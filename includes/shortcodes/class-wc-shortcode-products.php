@@ -126,6 +126,8 @@ class WC_Shortcode_Products {
 			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'          => '',        // HTML class.
+			'page'           => 1,         // Page for pagination.
+			'paginate'       => false,
 		), $attributes, $this->type );
 	}
 
@@ -164,13 +166,14 @@ class WC_Shortcode_Products {
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
-			'no_found_rows'       => true,
+			'no_found_rows'       => ! $this->attributes['paginate'],
 			'orderby'             => $this->attributes['orderby'],
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
 
 		// @codingStandardsIgnoreStart
 		$query_args['posts_per_page'] = (int) $this->attributes['limit'];
+		$query_args['offset']         = (int) $this->attributes['limit'] * ( (int) $this->attributes['page'] - 1 );
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
@@ -518,6 +521,13 @@ class WC_Shortcode_Products {
 			}
 
 			woocommerce_product_loop_end();
+
+			if ( ! empty( $this->attributes['paginate'] ) ) {
+				woocommerce_pagination( array(
+					'total'   => $products->max_num_pages,
+					'current' => $this->attributes['page'],
+				) );
+			}
 
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 		} else {
