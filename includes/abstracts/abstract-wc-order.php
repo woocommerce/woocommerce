@@ -842,17 +842,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id
+	 * @param int $item_id Item ID to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
-		$item = $this->get_item( $item_id );
+		$item = $this->get_item( $item_id, false );
 
 		if ( ! $item || ! ( $items_key = $this->get_items_key( $item ) ) ) {
 			return false;
 		}
 
-		// Unset and remove later
+		// Unset and remove later.
 		$this->items_to_delete[] = $item;
 		unset( $this->items[ $items_key ][ $item->get_id() ] );
 	}
