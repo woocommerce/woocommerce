@@ -515,11 +515,11 @@ jQuery( function( $ ) {
 			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' ),
 				isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
 
-			if ( ! scrollElement ) {
+			if ( ! scrollElement.length ) {
 				scrollElement = $( '.form.checkout' );
 			}
 
-			if ( scrollElement ) {
+			if ( scrollElement.length ) {
 				if ( isSmoothScrollSupported ) {
 					scrollElement[0].scrollIntoView({
 						behavior: 'smooth'
