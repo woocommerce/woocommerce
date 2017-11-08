@@ -115,6 +115,7 @@ class WC_Shortcode_Products {
 		return shortcode_atts( array(
 			'limit'          => '-1',      // Results limit.
 			'columns'        => '4',       // Number of columns.
+			'rows'           => '',       // Number of rows. If defined, limit will be ignored.
 			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
 			'order'          => 'ASC',     // ASC or DESC.
 			'ids'            => '',        // Comma separated IDs.
@@ -171,9 +172,13 @@ class WC_Shortcode_Products {
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
 
+		if ( ! empty( $this->attributes['rows'] ) ) {
+			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
+		}
+
 		// @codingStandardsIgnoreStart
-		$query_args['posts_per_page'] = (int) $this->attributes['limit'];
-		$query_args['offset']         = (int) $this->attributes['limit'] * ( (int) $this->attributes['page'] - 1 );
+		$query_args['posts_per_page'] = absint( $this->attributes['limit'] );
+		$query_args['offset']         = absint( $this->attributes['limit'] * ( absint( $this->attributes['page'] ) - 1 ) );
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
