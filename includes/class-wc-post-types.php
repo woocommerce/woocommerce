@@ -255,6 +255,9 @@ class WC_Post_types {
 			$supports[] = 'comments';
 		}
 
+		$shop_page_id = wc_get_page_id( 'shop' );
+		$has_archive  = current_theme_supports( 'woocommerce' ) ? $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop' : false;
+
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
 				array(
@@ -295,7 +298,7 @@ class WC_Post_types {
 					'rewrite'             => $permalinks['product_rewrite_slug'] ? array( 'slug' => $permalinks['product_rewrite_slug'], 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
 					'supports'            => $supports,
-					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop',
+					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 				)
