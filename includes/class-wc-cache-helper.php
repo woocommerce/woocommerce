@@ -78,8 +78,10 @@ class WC_Cache_Helper {
 			return;
 		}
 		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
+
 		if ( is_page( $page_ids ) ) {
-			self::do_not_cache_page();
+			self::set_nocache_constants();
+			nocache_headers();
 		}
 	}
 
@@ -167,13 +169,16 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Helper function that sets constants and headers to prefent caching
+	 * Set constants to prevent caching by some plugins.
+	 *
+	 * @param  mixed $return Value to return. Previously hooked into a filter.
+	 * @return mixed
 	 */
-	public static function do_not_cache_page() {
+	public static function set_nocache_constants( $return = true ) {
 		wc_maybe_define_constant( 'DONOTCACHEPAGE', true );
 		wc_maybe_define_constant( 'DONOTCACHEOBJECT', true );
 		wc_maybe_define_constant( 'DONOTCACHEDB', true );
-		nocache_headers();
+		return $return;
 	}
 
 	/**
