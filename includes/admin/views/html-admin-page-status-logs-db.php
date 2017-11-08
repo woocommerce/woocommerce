@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 $s = '';
 if ( isset( $_REQUEST['s'] ) ) {
-	$s = wc_clean( $_REQUEST['s'] );
+	$s = wc_clean( wp_unslash( $_REQUEST['s'] ) );
 }
 ?>
 <form method="get" id="mainform" action="">
