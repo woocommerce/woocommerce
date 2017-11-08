@@ -124,10 +124,11 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * When cloning, ensure object properties are handled.
+	 *
+	 * These properties store a reference to the cart, so we use new instead of clone.
 	 */
 	public function __clone() {
-		// These properties store a reference to the cart, so just use new instead of clone.
-		$this->session = new WC_Cart_Session( $this );
+		$this->session  = new WC_Cart_Session( $this );
 		$this->fees_api = new WC_Cart_Fees( $this );
 	}
 
