@@ -1758,7 +1758,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		extract( $args );
+		extract( $args ); // @codingStandardsIgnoreLine
 
 		// Main query only.
 		if ( ! is_main_query() && ! $force_display ) {
@@ -2050,7 +2050,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '</select>';
 
-					$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country', 'woocommerce' ) . '" /></noscript>';
+					$field .= '<noscript><button type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country', 'woocommerce' ) . '">' . esc_html__( 'Update country', 'woocommerce' ) . '</button></noscript>';
 
 				}
 
@@ -2728,3 +2728,13 @@ function wc_page_noindex() {
 	}
 }
 add_action( 'wp_head', 'wc_page_noindex' );
+
+/**
+ * Get a slug identifying the current theme.
+ *
+ * @since 3.3.0
+ * @return string
+ */
+function wc_get_theme_slug_for_templates() {
+	return apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
+}

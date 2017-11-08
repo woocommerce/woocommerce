@@ -1688,10 +1688,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function remove_coupon( $coupon_code ) {
-		if ( ! wc_coupons_enabled() ) {
-			return false;
-		}
-
 		$coupon_code  = wc_format_coupon_code( $coupon_code );
 		$position     = array_search( $coupon_code, $this->get_applied_coupons(), true );
 
