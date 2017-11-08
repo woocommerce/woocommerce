@@ -2738,3 +2738,17 @@ add_action( 'wp_head', 'wc_page_noindex' );
 function wc_get_theme_slug_for_templates() {
 	return apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
 }
+
+/**
+ * Load up unsupported theme enhancements if needed.
+ *
+ * @todo Move this into the main unsupported theme loader.
+ */
+function wc_enhance_unsupported_theme_product_singles( $template ) {
+	if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( wc_get_theme_slug_for_templates(), wc_get_core_supported_themes() ) && is_product() ) {
+		include_once( WC_ABSPATH . 'includes/theme-support/class-wc-unsupported-theme-product-single.php' );
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'wc_enhance_unsupported_theme_product_singles', 1 );
