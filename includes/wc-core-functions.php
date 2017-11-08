@@ -1395,14 +1395,24 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 /**
  * Wrapper for set_time_limit to see if it is enabled.
- * @since 2.6.0
  *
+ * @since 2.6.0
  * @param int $limit
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
 		@set_time_limit( $limit );
 	}
+}
+
+/**
+ * Wrapper for nocache_headers which also disables page caching.
+ *
+ * @since 3.2.4
+ */
+function wc_nocache_headers() {
+	WC_Cache_Helper::set_nocache_constants();
+	nocache_headers();
 }
 
 /**

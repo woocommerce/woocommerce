@@ -81,7 +81,7 @@ class WC_API extends WC_Legacy_API {
 			ob_start();
 
 			// No cache headers.
-			WC_Cache_Helper::do_not_cache_page();
+			wc_nocache_headers();
 
 			// Clean the API request.
 			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
