@@ -20,9 +20,9 @@ class WC_Cache_Helper {
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
-		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
+		add_action( 'wp', array( __CLASS__, 'prevent_page_caching' ) );
 	}
 
 	/**
@@ -62,6 +62,21 @@ class WC_Cache_Helper {
 		$location['postcode'] = $customer->get_billing_postcode();
 		$location['city']     = $customer->get_billing_city();
 		return substr( md5( implode( '', $location ) ), 0, 12 );
+	}
+
+	/**
+	 * Prevent caching on certain pages
+	 *
+	 * @return void
+	 */
+	public static function prevent_page_caching() {
+		if ( ! is_blog_installed() ) {
+			return;
+		}
+		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
+		if ( is_page( $page_ids ) ) {
+			self::do_not_cache_page();
+		}
 	}
 
 	/**
@@ -149,33 +164,16 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Prevent caching on dynamic pages.
-	 */
-	public static function prevent_caching() {
-		if ( ! is_blog_installed() ) {
-			return;
-		}
-		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
-
-		if ( isset( $_GET['download_file'] ) || isset( $_GET['add-to-cart'] ) || is_page( $page_ids ) ) {
-			add_filter( 'nocache_headers', array( __CLASS__, 'set_nocache_constants' ) );
-			nocache_headers();
-		}
-	}
-
-	/**
-	 * Set constants to prevent caching by some plugins.
+	 * Helper function that sets constants and headers to prefent caching
 	 *
-	 * Hooked into nocache_headers filter but does not change headers.
-	 *
-	 * @param  array $value
-	 * @return array
+	 * @return void
 	 */
-	public static function set_nocache_constants( $value ) {
+	public static function do_not_cache_page() {
 		wc_maybe_define_constant( 'DONOTCACHEPAGE', true );
 		wc_maybe_define_constant( 'DONOTCACHEOBJECT', true );
 		wc_maybe_define_constant( 'DONOTCACHEDB', true );
-		return $value;
+
+		nocache_headers();
 	}
 
 	/**
