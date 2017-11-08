@@ -1,17 +1,19 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Template Loader
  *
  * @class 		WC_Template
- * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		Automattic
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Template_Loader.
  */
 class WC_Template_Loader {
 
@@ -152,7 +154,7 @@ class WC_Template_Loader {
 	/**
 	 * Load comments template.
 	 *
-	 * @param mixed $template
+	 * @param string $template template to load.
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
