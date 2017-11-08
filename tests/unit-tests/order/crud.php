@@ -1701,4 +1701,48 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$coupon->delete( true );
 		$order->delete( true );
 	}
+
+	/**
+	 * Test removing and adding items + recalculation.
+	 *
+	 * @since 3.2.0
+	 */
+	function test_add_remove_items() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$item_1  = new WC_Order_Item_Product();
+		$item_1->set_props( array(
+			'product'  => $product,
+			'quantity' => 4,
+			'total'    => 100,
+		) );
+		$item_1_id = $item_1->save();
+		$item_2  = new WC_Order_Item_Product();
+		$item_2->set_props( array(
+			'product'  => $product,
+			'quantity' => 2,
+			'total'    => 100,
+		) );
+		$item_2_id = $item_2->save();
+		$object->add_item( $item_1 );
+		$object->add_item( $item_2 );
+		$object->save();
+		$object->calculate_totals();
+
+		$this->assertEquals( 200, $object->get_total() );
+
+		// remove an item and add an item, then compare totals.
+		$object->remove_item( $item_1 );
+		$item_3  = new WC_Order_Item_Product();
+		$item_3->set_props( array(
+			'product'  => $product,
+			'quantity' => 1,
+			'total'    => 100,
+		) );
+		$object->add_item( $item_3 );
+		$object->save();
+		$object->calculate_totals();
+
+		$this->assertEquals( 200, $object->get_total() );
+	}
 }
