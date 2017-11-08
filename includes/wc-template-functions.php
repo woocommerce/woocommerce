@@ -870,10 +870,17 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	/**
 	 * Output the pagination.
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
 	 */
-	function woocommerce_pagination() {
-		wc_get_template( 'loop/pagination.php' );
+	function woocommerce_pagination( $args = array() ) {
+		global $wp_query;
+
+		$args = wp_parse_args( $args, array(
+			'total'   => $wp_query->max_num_pages,
+			'current' => get_query_var( 'paged' ),
+		) );
+
+		wc_get_template( 'loop/pagination.php', $args );
 	}
 }
 
