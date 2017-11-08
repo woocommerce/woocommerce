@@ -101,7 +101,7 @@ class WC_Admin_Menus {
 		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
 
 		// Save settings if data has been posted.
-		if ( ! empty( $_POST ) ) { // WPCS: input var okay, CSRF ok.
+		if ( apply_filters( '' !== $current_section ? "woocommerce_save_settings_{$current_tab}_{$current_section}" : "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
 
