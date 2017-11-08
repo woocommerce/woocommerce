@@ -606,14 +606,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update a line item.
 	 *
-	 * @param array $posted Line item data.
+	 * @param array  $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
-	 *
+	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_line_items( $posted, $action = 'create' ) {
-		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
+		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 		$product = wc_get_product( $this->get_product_id( $posted ) );
 
 		if ( $product !== $item->get_product() ) {
@@ -636,14 +636,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order shipping method.
 	 *
-	 * @param $posted $shipping Item data.
+	 * @param array  $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
-	 *
+	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_shipping_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_shipping_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['method_id'] ) ) {
@@ -660,14 +660,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order fee.
 	 *
-	 * @param array $posted Item data.
+	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
-	 *
+	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_fee_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_fee_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['name'] ) ) {
@@ -684,14 +684,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order coupon.
 	 *
-	 * @param array $posted Item data.
+	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
-	 *
+	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_coupon_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_coupon_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['code'] ) ) {
@@ -710,10 +710,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * When updating, the item ID provided is checked to ensure it is associated
 	 * with the order.
 	 *
-	 * @param WC_Order $order order
-	 * @param string $item_type
-	 * @param array $posted item provided in the request body
-	 * @throws WC_REST_Exception If item ID is not associated with order
+	 * @param WC_Order $order order object.
+	 * @param string   $item_type The item type.
+	 * @param array    $posted item provided in the request body.
+	 * @throws WC_REST_Exception If item ID is not associated with order.
 	 */
 	protected function set_item( $order, $item_type, $posted ) {
 		global $wpdb;
@@ -725,29 +725,23 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		}
 
 		$method = 'prepare_' . $item_type;
+		$item   = null;
 
 		// Verify provided line item ID is associated with order.
 		if ( 'update' === $action ) {
-			$result = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
-				absint( $posted['id'] ),
-				absint( $order->get_id() )
-			) );
-			if ( is_null( $result ) ) {
+			$item = $order->get_item( absint( $posted['id'] ), false );
+
+			if ( ! $item ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
 			}
 		}
 
-		// Prepare item data
-		$item = $this->$method( $posted, $action );
+		// Prepare item data.
+		$item = $this->$method( $posted, $action, $item );
 
-		/**
-		 * Action hook to adjust item before save.
-		 * @since 3.0.0
-		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
-		// Save or add to order
+		// If creating the order, add the item to it.
 		if ( 'create' === $action ) {
 			$order->add_item( $item );
 		} else {
