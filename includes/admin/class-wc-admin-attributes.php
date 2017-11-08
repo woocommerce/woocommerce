@@ -410,7 +410,7 @@ class WC_Admin_Attributes {
 										<option value="name_num"><?php esc_html_e( 'Name (numeric)', 'woocommerce' ); ?></option>
 										<option value="id"><?php esc_html_e( 'Term ID', 'woocommerce' ); ?></option>
 									</select>
-									<p class="description"><?php _esc_html_e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
+									<p class="description"><?php esc_html_e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
 
 								<?php do_action( 'woocommerce_after_add_attribute_fields' ) ?>
