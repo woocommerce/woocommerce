@@ -1732,7 +1732,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $object->get_total() );
 
 		// remove an item and add an item, then compare totals.
-		$object->remove_item( $item_1 );
+		$object->remove_item( $item_1_id );
 		$item_3  = new WC_Order_Item_Product();
 		$item_3->set_props( array(
 			'product'  => $product,
