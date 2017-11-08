@@ -881,6 +881,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	public function test_cloned_cart_session() {
+		// PHP 5.2 does not include support for ReflectionProperty::setAccessible().
+		if ( version_compare( '5.3', PHP_VERSION, '>' ) ) {
+			$this->markTestSkipped( 'Test requires PHP 5.3 and above to use ReflectionProperty::setAccessible()' );
+		}
+
 		$cart     = wc()->cart;
 		$new_cart = clone $cart;
 
