@@ -3271,8 +3271,10 @@ img.help_tip {
 		}
 
 		.woocommerce-thumbnail-cropping {
-			margin: 0;
+			margin: 0 40px 1em 0;
 			padding: 0;
+			display:inline-block;
+			vertical-align: top;
 
 			input[type=radio] {
 				vertical-align: top;
@@ -3297,8 +3299,9 @@ img.help_tip {
 			}
 		}
 		.woocommerce-thumbnail-preview {
-			float:right;
+			display:inline-block;
 			width: 320px;
+			vertical-align: top;
 			h4 {
 				margin-top: 0;
 			}

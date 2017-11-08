@@ -537,24 +537,6 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
 						<td class="forminp">
-							<div class="woocommerce-thumbnail-preview hide-if-no-js">
-								<h4><?php esc_html_e( 'Preview', 'woocommerce' ); ?></h4>
-								<div class="woocommerce-thumbnail-preview-block">
-									<div class="woocommerce-thumbnail-preview-block__image"></div>
-									<div class="woocommerce-thumbnail-preview-block__text"></div>
-									<div class="woocommerce-thumbnail-preview-block__button"></div>
-								</div>
-								<div class="woocommerce-thumbnail-preview-block">
-									<div class="woocommerce-thumbnail-preview-block__image"></div>
-									<div class="woocommerce-thumbnail-preview-block__text"></div>
-									<div class="woocommerce-thumbnail-preview-block__button"></div>
-								</div>
-								<div class="woocommerce-thumbnail-preview-block">
-									<div class="woocommerce-thumbnail-preview-block__image"></div>
-									<div class="woocommerce-thumbnail-preview-block__text"></div>
-									<div class="woocommerce-thumbnail-preview-block__button"></div>
-								</div>
-							</div>
 							<ul class="woocommerce-thumbnail-cropping">
 								<li>
 									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_1_1" value="1:1" <?php checked( $option_value, '1:1' ); ?> />
@@ -574,6 +556,24 @@ class WC_Admin_Settings {
 									<label for="thumbnail_cropping_uncropped"><?php esc_html_e( 'Uncropped', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will display using the aspect ratio in which they were uploaded', 'woocommerce' ); ?></span></label>
 								</li>
 							</ul>
+							<div class="woocommerce-thumbnail-preview hide-if-no-js">
+								<h4><?php esc_html_e( 'Preview', 'woocommerce' ); ?></h4>
+								<div class="woocommerce-thumbnail-preview-block">
+									<div class="woocommerce-thumbnail-preview-block__image"></div>
+									<div class="woocommerce-thumbnail-preview-block__text"></div>
+									<div class="woocommerce-thumbnail-preview-block__button"></div>
+								</div>
+								<div class="woocommerce-thumbnail-preview-block">
+									<div class="woocommerce-thumbnail-preview-block__image"></div>
+									<div class="woocommerce-thumbnail-preview-block__text"></div>
+									<div class="woocommerce-thumbnail-preview-block__button"></div>
+								</div>
+								<div class="woocommerce-thumbnail-preview-block">
+									<div class="woocommerce-thumbnail-preview-block__image"></div>
+									<div class="woocommerce-thumbnail-preview-block__text"></div>
+									<div class="woocommerce-thumbnail-preview-block__button"></div>
+								</div>
+							</div>
 						</td>
 					</tr><?php
 					break;
