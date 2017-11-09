@@ -89,13 +89,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $wp_the_query;
-
 		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}
 
-		if ( ! $wp_the_query->post_count ) {
+		if ( ! wc()->query->get_main_query()->post_count ) {
 			return;
 		}
 

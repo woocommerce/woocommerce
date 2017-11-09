@@ -24,6 +24,13 @@ class WC_Query {
 	public $query_vars = array();
 
 	/**
+	 * Reference to the main product query on the page.
+	 *
+	 * @var array
+	 */
+	private static $product_query;
+
+	/**
 	 * Stores chosen attributes.
 	 *
 	 * @var array
@@ -196,6 +203,7 @@ class WC_Query {
 	 */
 	public function get_current_endpoint() {
 		global $wp;
+
 		foreach ( $this->get_query_vars() as $key => $value ) {
 			if ( isset( $wp->query_vars[ $key ] ) ) {
 				return $key;
@@ -370,6 +378,9 @@ class WC_Query {
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
+
+		// Store reference to this query.
+		self::$product_query = $q;
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -623,14 +634,21 @@ class WC_Query {
 	}
 
 	/**
+	 * Get the main query which product queries ran against.
+	 *
+	 * @return array
+	 */
+	public static function get_main_query() {
+		return self::$product_query;
+	}
+
+	/**
 	 * Get the tax query which was used by the main query.
 	 *
 	 * @return array
 	 */
 	public static function get_main_tax_query() {
-		global $wp_the_query;
-
-		$tax_query = isset( $wp_the_query->tax_query, $wp_the_query->tax_query->queries ) ? $wp_the_query->tax_query->queries : array();
+		$tax_query = isset( self::$product_query->tax_query, self::$product_query->tax_query->queries ) ? self::$product_query->tax_query->queries : array();
 
 		return $tax_query;
 	}
@@ -641,9 +659,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
-		global $wp_the_query;
-
-		$args       = $wp_the_query->query_vars;
+		$args       = self::$product_query->query_vars;
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
 		return $meta_query;
@@ -653,9 +669,9 @@ class WC_Query {
 	 * Based on WP_Query::parse_search
 	 */
 	public static function get_main_search_query_sql() {
-		global $wp_the_query, $wpdb;
+		global $wpdb;
 
-		$args         = $wp_the_query->query_vars;
+		$args         = self::$product_query->query_vars;
 		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
 		$sql          = array();
 

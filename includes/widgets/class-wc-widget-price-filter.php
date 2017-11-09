@@ -60,13 +60,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $wp, $wp_the_query;
+		global $wp;
 
 		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}
 
-		if ( ! $wp_the_query->post_count ) {
+		if ( ! wc()->query->get_main_query()->post_count ) {
 			return;
 		}
 
@@ -134,9 +134,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 * @return int
 	 */
 	protected function get_filtered_price() {
-		global $wpdb, $wp_the_query;
+		global $wpdb;
 
-		$args       = $wp_the_query->query_vars;
+		$args       = wc()->query->get_main_query()->query_vars;
 		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
