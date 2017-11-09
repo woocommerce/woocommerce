@@ -1710,6 +1710,12 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 		}
 
 		if ( 'subcategories' === $display_type ) {
+			if ( is_product_category() ) {
+				$term = get_queried_object();
+				if ( $term && ! count( get_term_children( $term->term_id, $term->taxonomy ) ) ) {
+					return true;
+				}
+			}
 			return false;
 		}
 
