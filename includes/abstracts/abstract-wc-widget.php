@@ -278,10 +278,9 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Get current page URL with various filtering props supported by WC.
 	 *
-	 * @param string $taxonomy Taxonomy.
 	 * @return string
 	 */
-	protected function get_page_base_url( $taxonomy ) {
+	protected function get_page_base_url() {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
 		} elseif ( is_shop() ) {
@@ -330,9 +329,6 @@ abstract class WC_Widget extends WP_Widget {
 		// All current filters.
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
 			foreach ( $_chosen_attributes as $name => $data ) {
-				if ( $name === $taxonomy ) {
-					continue;
-				}
 				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
 				if ( ! empty( $data['terms'] ) ) {
 					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
