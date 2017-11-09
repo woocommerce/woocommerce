@@ -1,4 +1,12 @@
 <?php
+/**
+ * Unsupported theme single product page enhancements.
+ *
+ * @package  WooCommerce/Classes
+ * @since   3.3.0
+ * @version 3.3.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,13 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Single product pages support for themes that don't declare WooCommerce support.
  *
  * @class   WC_Unsupported_Theme_Product_Single
- * @since   3.3.0
- * @version 3.3.0
  * @package WooCommerce/Classes
+ * @since   3.3.0
  */
 class WC_Unsupported_Theme_Product_Single {
 
-	public static $in_content_filter = false;
+	/**
+	 * Used for marking whether we're in the content filter.
+	 *
+	 * @var bool
+	 */
+	protected static $in_content_filter = false;
 
 	/**
 	 * Theme enhancements init.
@@ -45,7 +57,7 @@ class WC_Unsupported_Theme_Product_Single {
 	/**
 	 * Replace the content with the product shortcode.
 	 *
-	 * @param string $content
+	 * @param string $content Post content.
 	 * @return string
 	 */
 	public static function inject_product( $content ) {
@@ -60,7 +72,7 @@ class WC_Unsupported_Theme_Product_Single {
 	/**
 	 * Prevent the featured image unless we're in the content processing the product shortcode.
 	 *
-	 * @param string $html
+	 * @param string $html Image html.
 	 * @return string
 	 */
 	public static function remove_featured_image( $html ) {
@@ -74,7 +86,7 @@ class WC_Unsupported_Theme_Product_Single {
 	/**
 	 * Remove the Review tab and just use the regular comment form.
 	 *
-	 * @param array $tabs
+	 * @param array $tabs Tab info.
 	 * @return array
 	 */
 	public static function remove_review_tab( $tabs ) {
