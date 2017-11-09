@@ -1409,3 +1409,39 @@ function wc_update_320_mexican_states() {
 function wc_update_320_db_version() {
 	WC_Install::update_db_version( '3.2.0' );
 }
+
+/**
+ * Move comment based webhook logs to WC_Logger.
+ *
+ * @return void
+ */
+function wc_update_330_webhook_logs() {
+	global $wpdb;
+
+	$existing_webhook_logs = $wpdb->get_results( "SELECT comment_ID, comment_post_ID FROM {$wpdb->comments} WHERE comment_type = 'webhook_delivery' ORDER BY comment_post_ID, comment_ID DESC" );
+
+	if ( $existing_webhook_logs ) {
+		$logger = wc_get_logger();
+		foreach ( $existing_webhook_logs as $webhook_log ) {
+			$message = print_r( array(
+				'Webhook Delivery' => array(
+					'Date' => array(),
+					'URL' => array(),
+					'Request' => array(
+						'Method' => get_comment_meta( $webhook_log->comment_ID, '_request_method', true ),
+						'Headers' => get_comment_meta( $webhook_log->comment_ID, '_request_headers', true ),
+						'Body' => get_comment_meta( $webhook_log->comment_ID, '_request_body', true ),
+					),
+					'Response' => array(
+						'Code' => get_comment_meta( $webhook_log->comment_ID, '_response_code', true ),
+						'Message' => get_comment_meta( $webhook_log->comment_ID, '_response_message', true ),
+						'Headers' => get_comment_meta( $webhook_log->comment_ID, '_response_headers', true ),
+						'Body' => get_comment_meta( $webhook_log->comment_ID, '_response_body', true ),
+					),
+					'Duration' => get_comment_meta( $webhook_log->comment_ID, '_duration', true ),
+				),
+			), true );
+			$logger->log( 'info', $message, array( 'source' => 'webhook_delivery_' . $webhook_log->comment_post_ID ) );
+		}
+	}
+}

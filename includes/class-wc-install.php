@@ -94,6 +94,9 @@ class WC_Install {
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
 		),
+		'3.3.0' => array(
+			'wc_update_330_webhook_logs',
+		)
 	);
 
 	/**
