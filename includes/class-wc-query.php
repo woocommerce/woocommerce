@@ -248,12 +248,12 @@ class WC_Query {
 	 * @param object $q query object
 	 */
 	public function pre_get_posts( $q ) {
-		// We only want to affect the main query
+		// We only want to affect the main query.
 		if ( ! $q->is_main_query() ) {
 			return;
 		}
 
-		// Fix for endpoints on the homepage
+		// Fix for endpoints on the homepage.
 		if ( $this->is_showing_page_on_front( $q ) && ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
@@ -281,7 +281,7 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
-		// Special check for shops with the product archive on front
+		// Special check for shops with the product archive on front.
 		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
@@ -291,11 +291,10 @@ class WC_Query {
 				$q->set( 'paged', $q->query['paged'] );
 			}
 
-			// Define a variable so we know this is the front page shop later on
+			// Define a variable so we know this is the front page shop later on.
 			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
-			// Get the actual WP page to avoid errors and let us use is_front_page()
-			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
+			// Get the actual WP page to avoid errors and let us use is_front_page().  This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
 			global $wp_post_types;
 
 			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
@@ -306,22 +305,22 @@ class WC_Query {
 			$wp_post_types['product']->post_type    = $shop_page->post_type;
 			$wp_post_types['product']->ancestors    = get_ancestors( $shop_page->ID, $shop_page->post_type );
 
-			// Fix conditional Functions like is_front_page
+			// Fix conditional Functions like is_front_page.
 			$q->is_singular          = false;
 			$q->is_post_type_archive = true;
 			$q->is_archive           = true;
 			$q->is_page              = true;
 
-			// Remove post type archive name from front page title tag
+			// Remove post type archive name from front page title tag.
 			add_filter( 'post_type_archive_title', '__return_empty_string', 5 );
 
-			// Fix WP SEO
+			// Fix WP SEO.
 			if ( class_exists( 'WPSEO_Meta' ) ) {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
 
-		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
+		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
 		}
@@ -334,6 +333,7 @@ class WC_Query {
 
 	/**
 	 * Search post excerpt.
+	 *
 	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
 	 */
 	public function search_post_excerpt( $where = '' ) {
@@ -381,7 +381,7 @@ class WC_Query {
 			}
 		}
 
-		// Query vars that affect posts shown
+		// Query vars that affect posts shown.
 		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
