@@ -688,8 +688,8 @@ function wc_get_image_size( $image_size ) {
 		$image_size = $size['width'] . '_' . $size['height'];
 	} elseif ( in_array( $image_size, array( 'single', 'shop_single' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
-			$size['width'] = $theme_support[ 'single_image_width' ];
+		if ( isset( $theme_support['single_image_width'] ) ) {
+			$size['width'] = $theme_support['single_image_width'];
 		} else {
 			$size['width'] = get_option( 'woocommerce_single_image_width', 600 );
 		}
@@ -698,8 +698,8 @@ function wc_get_image_size( $image_size ) {
 		$image_size     = 'single';
 	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
-			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
+		if ( isset( $theme_support['thumbnail_image_width'] ) ) {
+			$size['width'] = $theme_support['thumbnail_image_width'];
 		} else {
 			$size['width'] = get_option( 'woocommerce_thumbnail_image_width', 300 );
 		}
