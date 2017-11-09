@@ -73,11 +73,13 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		// Get actions.
 		$actions = array(
 			/* translators: %s: webhook ID. */
-			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $webhook->get_id() ),
+			'id'     => sprintf( __( 'ID: %d', 'woocommerce' ), $webhook->get_id() ),
+			'edit'   => '<a href="' . esc_url( $edit_link ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',
+			/* translators: %s: webhook name */
+			'delete' => '<a class="submitdelete" aria-label="' . esc_attr( sprintf( __( 'Delete "%s" permanently', 'woocommerce' ), $webhook->get_name() ) ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array(
+				'delete' => $webhook->get_id(),
+			), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' ) ), 'delete-webhook' ) ) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',
 		);
-
-		$actions['edit']  = '<a href="' . esc_url( $edit_link ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>';
-		$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Move this item to the Trash', 'woocommerce' ) . '" href="' . get_delete_post_link( $webhook->get_id() ) . '">' . esc_html__( 'Trash', 'woocommerce' ) . '</a>';
 
 		$actions     = apply_filters( 'webhook_row_actions', $actions, $webhook );
 		$row_actions = array();
@@ -189,33 +191,16 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
-		if ( isset( $_GET['status'] ) && 'trash' === sanitize_key( wp_unslash( $_GET['status'] ) ) ) { // WPCS: input var okay, CSRF ok.
-			return array(
-				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete permanently', 'woocommerce' ),
-			);
-		}
-
 		return array(
-			'trash' => __( 'Move to trash', 'woocommerce' ),
+			'delete' => __( 'Delete permanently', 'woocommerce' ),
 		);
 	}
 
 	/**
-	 * Extra controls to be displayed between bulk actions and pagination.
+	 * Generate the table navigation above or below the table.
+	 * Included to remove extra nonce input.
 	 *
 	 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
-	 */
-	protected function extra_tablenav( $which ) {
-		if ( 'top' === $which && isset( $_GET['status'] ) && 'trash' === sanitize_key( wp_unslash( $_GET['status'] ) ) && current_user_can( 'delete_shop_webhooks' ) ) { // WPCS: input var okay, CSRF ok.
-			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&empty_trash=1' ), 'empty_trash' ) ) . '">' . esc_html__( 'Empty trash', 'woocommerce' ) . '</a></div>';
-		}
-	}
-
-	/**
-	 * Generate the table navigation above or below the table.
-	 *
-	 * @param string $which  The location of the extra table nav markup: 'top' or 'bottom'.
 	 */
 	protected function display_tablenav( $which ) {
 		echo '<div class="tablenav ' . esc_attr( $which ) . '">';

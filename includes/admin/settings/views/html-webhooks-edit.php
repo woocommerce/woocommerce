@@ -20,9 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<th scope="row" class="titledesc">
 					<label for="webhook_name"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 					<?php
-					// @codingStandardsIgnoreStart
-					echo wc_help_tip( sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) );
-					// @codingStandardsIgnoreEnd
+					/* translators: %s: date */
+					echo wc_help_tip( sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) ); // @codingStandardsIgnoreLine
 					?>
 				</th>
 				<td class="forminp">
@@ -40,7 +39,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$statuses       = wc_get_webhook_statuses();
 						$current_status = $webhook->get_status();
 
-						foreach ( $statuses as $status_slug => $status_name ) : ?>
+						foreach ( $statuses as $status_slug => $status_name ) :
+							?>
 							<option value="<?php echo esc_attr( $status_slug ); ?>" <?php selected( $current_status, $status_slug, true ); ?>><?php echo esc_html( $status_name ); ?></option>
 						<?php endforeach; ?>
 					</select>
@@ -77,7 +77,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'custom'            => __( 'Custom', 'woocommerce' ),
 							) );
 
-							foreach ( $topics as $topic_slug => $topic_name ) : ?>
+							foreach ( $topics as $topic_slug => $topic_name ) :
+								?>
 							<option value="<?php echo esc_attr( $topic_slug ); ?>" <?php selected( $topic_data['topic'], $topic_slug, true ); ?>><?php echo esc_html( $topic_name ); ?></option>
 						<?php endforeach; ?>
 					</select>
@@ -142,14 +143,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h2><?php esc_html_e( 'Webhook actions', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
-			<?php if ( '0000-00-00 00:00:00' != $webhook->get_date_modified()->date( 'Y-m-d H:i:s' ) ) : ?>
-				<?php if ( '0000-00-00 00:00:00' == $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) : ?>
+			<?php if ( '0000-00-00 00:00:00' !== $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) : ?>
+				<?php if ( 0 > $webhook->get_date_modified()->date( 'U' ) ) : ?>
 					<tr valign="top">
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
 						</th>
 						<td class="forminp">
-							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_modified()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
+							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
 				<?php else : ?>
@@ -171,11 +172,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</tr>
 				<?php endif; ?>
 			<?php endif; ?>
+			<?php
+			$delete_url = wp_nonce_url( add_query_arg( array(
+				'delete' => $webhook->get_id(),
+			), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' ) ), 'delete-webhook' );
+			?>
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
 						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>" />
-						<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->get_id() ) ); ?>"><?php echo ! EMPTY_TRASH_DAYS ? esc_html__( 'Delete permanently', 'woocommerce' ) : esc_html__( 'Move to trash', 'woocommerce' ); ?></a>
+						<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
 					</p>
 				</td>
 			</tr>

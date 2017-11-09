@@ -5,7 +5,7 @@
  * @author   Automattic
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @version  3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -158,9 +158,7 @@ class WC_Admin_Webhooks {
 		$webhook->set_name( sprintf(
 			/* translators: %s: date */
 			__( 'Webhook created on %s', 'woocommerce' ),
-			// @codingStandardsIgnoreStart
-			strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) )
-			// @codingStandardsIgnoreEnd
+			strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) // @codingStandardsIgnoreLine
 		);
 		$webhook->set_pending_delivery( true );
 		$webhook->set_api_version( 'wp_api_v2' );
@@ -173,48 +171,37 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Bulk trash/delete.
+	 * Bulk delete.
 	 *
 	 * @param array $webhooks List of webhooks IDs.
-	 * @param bool  $delete   If should delete or trash.
 	 */
-	private function bulk_trash( $webhooks, $delete = false ) {
+	private function bulk_delete( $webhooks ) {
 		foreach ( $webhooks as $webhook_id ) {
-			if ( $delete ) {
-				wp_delete_post( $webhook_id, true );
-			} else {
-				wp_trash_post( $webhook_id );
-			}
+			$webhook = new WC_Webhook( (int) $webhook_id );
+			$webhook->delete( true );
 		}
 
-		$type   = ! EMPTY_TRASH_DAYS || $delete ? 'deleted' : 'trashed';
 		$qty    = count( $webhooks );
 		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // WPCS: input var okay, CSRF ok.
 
-		delete_transient( 'woocommerce_webhook_ids' );
-
 		// Redirect to webhooks page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&' . $type . '=' . $qty ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&deleted=' . $qty ) );
 		exit();
 	}
 
 	/**
-	 * Bulk untrash.
-	 *
-	 * @param array $webhooks List of webhooks IDs.
+	 * Delete webhook.
 	 */
-	private function bulk_untrash( $webhooks ) {
-		foreach ( $webhooks as $webhook_id ) {
-			wp_untrash_post( $webhook_id );
+	private function delete() {
+		check_admin_referer( 'delete-webhook' );
+
+		if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
+			$webhook_id = absint( $_GET['delete'] ); // WPCS: input var okay, CSRF ok.
+
+			if ( $webhook_id ) {
+				$this->bulk_delete( array( $webhook_id ) );
+			}
 		}
-
-		$qty = count( $webhooks );
-
-		delete_transient( 'woocommerce_webhook_ids' );
-
-		// Redirect to webhooks page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&untrashed=' . $qty ) );
-		exit();
 	}
 
 	/**
@@ -227,54 +214,15 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['action'] ) ) { // WPCS: input var okay, CSRF ok.
-			$webhooks = isset( $_GET['webhook'] ) ? array_map( 'absint', (array) $_GET['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
+		if ( isset( $_REQUEST['action'] ) ) { // WPCS: input var okay, CSRF ok.
+			$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
 
-			switch ( sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) { // WPCS: input var okay, CSRF ok.
-				case 'trash':
-					$this->bulk_trash( $webhooks );
-					break;
-				case 'untrash':
-					$this->bulk_untrash( $webhooks );
-					break;
-				case 'delete':
-					$this->bulk_trash( $webhooks, true );
-					break;
-				default:
-					break;
+			$action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // WPCS: input var okay, CSRF ok.
+
+			if ( 'delete' === $action ) {
+				$this->bulk_delete( $webhooks );
 			}
 		}
-	}
-
-	/**
-	 * Empty Trash.
-	 */
-	private function empty_trash() {
-		check_admin_referer( 'empty_trash' );
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to delete Webhooks', 'woocommerce' ) );
-		}
-
-		// @codingStandardsIgnoreStart
-		$webhooks = get_posts( array(
-			'post_type'           => 'shop_webhook',
-			'ignore_sticky_posts' => true,
-			'nopaging'            => true,
-			'post_status'         => 'trash',
-			'fields'              => 'ids',
-		) );
-		// @codingStandardsIgnoreEnd
-
-		foreach ( $webhooks as $webhook_id ) {
-			wp_delete_post( $webhook_id, true );
-		}
-
-		$qty = count( $webhooks );
-
-		// Redirect to webhooks page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&deleted=' . $qty ) );
-		exit();
 	}
 
 	/**
@@ -293,13 +241,13 @@ class WC_Admin_Webhooks {
 			}
 
 			// Bulk actions.
-			if ( isset( $_GET['action'] ) && isset( $_GET['webhook'] ) ) { // WPCS: input var okay, CSRF ok.
+			if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->bulk_actions();
 			}
 
-			// Empty trash.
-			if ( isset( $_GET['empty_trash'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->empty_trash();
+			// Delete webhook.
+			if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
+				$this->delete();
 			}
 		}
 	}
@@ -315,10 +263,8 @@ class WC_Admin_Webhooks {
 			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			if ( 'trash' !== $webhook->get_status() ) {
-				include( 'settings/views/html-webhooks-edit.php' );
-				return;
-			}
+			include( 'settings/views/html-webhooks-edit.php' );
+			return;
 		}
 
 		self::table_list_output();
@@ -328,20 +274,6 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['trashed'] ) ) { // WPCS: input var okay, CSRF ok.
-			$trashed = absint( $_GET['trashed'] ); // WPCS: input var okay, CSRF ok.
-
-			/* translators: %d: count */
-			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook moved to the Trash.', '%d webhooks moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) );
-		}
-
-		if ( isset( $_GET['untrashed'] ) ) { // WPCS: input var okay, CSRF ok.
-			$untrashed = absint( $_GET['untrashed'] ); // WPCS: input var okay, CSRF ok.
-
-			/* translators: %d: count */
-			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook restored from the Trash.', '%d webhooks restored from the Trash.', $untrashed, 'woocommerce' ), $untrashed ) );
-		}
-
 		if ( isset( $_GET['deleted'] ) ) { // WPCS: input var okay, CSRF ok.
 			$deleted = absint( $_GET['deleted'] ); // WPCS: input var okay, CSRF ok.
 
