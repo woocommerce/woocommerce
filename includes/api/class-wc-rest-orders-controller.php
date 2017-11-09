@@ -282,7 +282,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
-		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : $this->request['dp'];
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
 		$data                = $this->get_formatted_item_data( $object );
 		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data                = $this->add_additional_fields_to_object( $data, $request );

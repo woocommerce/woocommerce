@@ -126,7 +126,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$order = wc_get_order( $post );
-		$dp    = is_null( $request['dp'] ) ? wc_get_price_decimals() : $request['dp'];
+		$dp    = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
 		$data = array(
 			'id'                   => $order->get_id(),

@@ -133,7 +133,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
-		$dp = is_null( $request['dp'] ) ? wc_get_price_decimals() : $request['dp'];
+		$dp = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
 		$data = array(
 			'id'           => $refund->get_id(),

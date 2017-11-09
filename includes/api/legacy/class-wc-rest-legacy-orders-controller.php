@@ -99,7 +99,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$this->request       = $request;
-		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : $this->request['dp'];
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
 		$statuses            = wc_get_order_statuses();
 		$order               = wc_get_order( $post );
 		$data                = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
