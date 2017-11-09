@@ -22,11 +22,9 @@
       "WooCommerce\\GitHooks\\Hooks::preHooks"
     ],
     "post-install-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths \"vendor/wp-coding-standards/wpcs,vendor/wimg/php-compatibility\"",
       "WooCommerce\\GitHooks\\Hooks::postHooks"
     ],
     "post-update-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths \"vendor/wp-coding-standards/wpcs,vendor/wimg/php-compatibility\"",
       "WooCommerce\\GitHooks\\Hooks::postHooks"
     ]
   }
