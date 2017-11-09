@@ -324,7 +324,7 @@ class WC_Download_Handler {
 	private static function check_server_config() {
 		wc_set_time_limit( 0 );
 		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
-			set_magic_quotes_runtime( 0 );
+			set_magic_quotes_runtime( 0 ); // @codingStandardsIgnoreLine
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );
