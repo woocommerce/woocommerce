@@ -62,7 +62,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	public function widget( $args, $instance ) {
 		global $wp, $wp_the_query;
 
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
+		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}
 
