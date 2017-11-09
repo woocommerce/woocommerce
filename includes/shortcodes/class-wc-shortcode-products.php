@@ -128,7 +128,8 @@ class WC_Shortcode_Products {
 			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'          => '',        // HTML class.
 			'page'           => 1,         // Page for pagination.
-			'paginate'       => false,
+			'paginate'       => false, // Should results be paginated.
+			'cache'          => true, // Should shortcode output be cached.
 		), $attributes, $this->type );
 	}
 
@@ -465,7 +466,7 @@ class WC_Shortcode_Products {
 	 */
 	protected function get_products() {
 		$transient_name = $this->get_transient_name();
-		$products       = get_transient( $transient_name );
+		$products       = $this->attributes['cache'] ? get_transient( $transient_name ) : false;
 
 		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
 			if ( 'top_rated_products' === $this->type ) {
@@ -476,7 +477,9 @@ class WC_Shortcode_Products {
 				$products = new WP_Query( $this->query_args );
 			}
 
-			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+			if ( $this->attributes['cache'] ) {
+				set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+			}
 		}
 
 		// Remove ordering query arguments.

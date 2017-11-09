@@ -102,13 +102,18 @@ class WC_Template_Loader {
 						'columns'  => $args->columns,
 						'rows'     => $args->rows,
 						'paginate' => true,
+						'cache'    => false,
 					)
 				),
 			'products' );
 
+			// Allow queries to run e.g. layered nav.
+			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+
 			$content = $content . $shortcode->get_content();
 
-			// Remove self to avoid nested calls.
+			// Remove actions and self to avoid nested calls.
+			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
 			remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
 		}
 		return $content;
