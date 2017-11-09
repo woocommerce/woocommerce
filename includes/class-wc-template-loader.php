@@ -49,8 +49,8 @@ class WC_Template_Loader {
 	private static function get_current_shop_view_args() {
 		return (object) array(
 			'page'    => absint( max( 1, absint( get_query_var( 'paged' ) ) ) ),
-			'columns' => 3,
-			'rows'    => 3,
+			'columns' => get_option( 'woocommerce_catalog_columns', 3 ),
+			'rows'    => get_option( 'woocommerce_catalog_rows', 4 ),
 		);
 	}
 

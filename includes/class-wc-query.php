@@ -375,9 +375,13 @@ class WC_Query {
 		// Query vars that affect posts shown.
 		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
-		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
+
+		// Work out how many products to query.
+		$products_per_row = absint( apply_filters( 'loop_shop_columns', get_option( 'woocommerce_catalog_columns', 3 ) ) );
+		$rows             = absint( get_option( 'woocommerce_catalog_rows', 4 ) );
+		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', $products_per_row * $rows ) );
 
 		// Store reference to this query.
 		self::$product_query = $q;

@@ -149,6 +149,34 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'title'             => __( 'Products per row', 'woocommerce' ),
+					'desc'              => __( 'How many products should be shown per row?', 'woocommerce' ),
+					'id'                => 'woocommerce_catalog_columns',
+					'default'           => '3',
+					'type'              => 'number',
+					'css'               => 'width: 50px;',
+					'custom_attributes' => array(
+						'min'           => 0,
+						'step'          => 1,
+					),
+					'desc_tip'          => true,
+				),
+
+				array(
+					'title'             => __( 'Rows per page', 'woocommerce' ),
+					'desc'              => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
+					'id'                => 'woocommerce_catalog_rows',
+					'default'           => '4',
+					'type'              => 'number',
+					'css'               => 'width: 50px;',
+					'custom_attributes' => array(
+						'min'           => 0,
+						'step'          => 1,
+					),
+					'desc_tip'          => true,
+				),
+
+				array(
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
 					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
 					'id'            => 'woocommerce_cart_redirect_after_add',
