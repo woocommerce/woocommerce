@@ -1699,6 +1699,8 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			return true;
 		}
 
+		$display_type = '';
+
 		if ( is_shop() ) {
 			$display_type = get_option( 'woocommerce_shop_page_display', '' );
 		} elseif ( is_product_category() ) {
