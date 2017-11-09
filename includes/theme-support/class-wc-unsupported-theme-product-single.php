@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Unsupported_Theme_Product_Single {
 
+	public static $in_content_filter = false;
+
 	/**
 	 * Theme enhancements init.
 	 */
@@ -22,114 +24,62 @@ class WC_Unsupported_Theme_Product_Single {
 		remove_filter( 'template_include', array( 'WC_Template_Loader', 'template_loader' ) );
 		remove_filter( 'comments_template', array( 'WC_Template_Loader', 'comments_template_loader' ) );
 
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'style' ) );
-		add_filter( 'the_content', array( __CLASS__, 'product_info_top' ) );
-		add_filter( 'the_content', array( __CLASS__, 'product_info_bottom' ), 99 );
+		add_theme_support( 'wc-product-gallery-zoom' );
+		add_theme_support( 'wc-product-gallery-lightbox' );
+		add_theme_support( 'wc-product-gallery-slider' );
+
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+
+		add_filter( 'the_content', array( __CLASS__, 'inject_product' ) );
+		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'remove_review_tab' ) );
+		add_filter( 'post_thumbnail_html', array( __CLASS__, 'remove_featured_image' ) );
 	}
 
 	/**
-	 * Style adjustments to normalize things across themes and make elements look better
-	 * when inserted into the post content.
+	 * Enqueue the unsupported theme stylesheet to normalize styles.
 	 */
-	public static function style() {
-		ob_start();
-		?>
-		.wc-content-top {
-			margin-bottom: 2em;
-		}
-
-		.wc-content-top input[name="quantity"] {
-			margin-right: 1em;
-		}
-
-		.wc-content-top .price {
-			font-size: 1.5em;
-			color: #77a464;
-		}
-
-		.wc-content-top .reset_variations {
-			margin-left: 1em;
-		}
-
-		.wc-content-top .woocommerce-variation-price {
-			margin-bottom: 1em;
-		}
-
-		/* Normalize the button and input to the same height and font. */
-		.wc-content-top input[name="quantity"],
-		.wc-content-top .single_add_to_cart_button {
-			float: left;
-			font-size: 1em;
-			height: 2em;
-			line-height: 2em;
-			padding-top: 0;
-			padding-bottom: 0;
-		}
-
-		.wc-content-bottom .sku_wrapper {
-			display: block;
-			margin-bottom: 1em;
-		}
-
-		.wc-content-bottom li.product .button {
-			font-size: .75em;
-		}
-		<?php
-		$additional_styling = ob_get_clean();
-        wp_add_inline_style( 'woocommerce-general', $additional_styling );
+	public static function enqueue_styles() {
+		wp_enqueue_style( 'woocommerce-unsupported-theme' );
 	}
 
 	/**
-	 * Add WC notices, the price and the cart at the top of the post content.
+	 * Replace the content with the product shortcode.
 	 *
-	 * @since 3.3.0
 	 * @param string $content
 	 * @return string
 	 */
-	public static function product_info_top( $content ) {
-		ob_start();
-		?>
-		<div class="wc-content-top">
-			<?php
-			do_action( 'woocommerce_before_single_product' );
-			woocommerce_template_single_price();
-			woocommerce_template_single_add_to_cart();
-			?>
-		</div>
-		<?php
-		$top = ob_get_clean();
-		return $top . $content;
+	public static function inject_product( $content ) {
+		self::$in_content_filter = true;
+		remove_filter( 'the_content', array( __CLASS__, 'inject_product' ) );
+		$content = do_shortcode( '[product_page id="' . get_the_ID() . '"]' );
+		self::$in_content_filter = false;
+
+		return $content;
 	}
 
 	/**
-	 * Add attributes/dimensions and related products at the bottom of the content.
+	 * Prevent the featured image unless we're in the content processing the product shortcode.
 	 *
-	 * @since 3.3.0
-	 * @param string $content
+	 * @param string $html
 	 * @return string
 	 */
-	public static function product_info_bottom( $content ) {
-		$product = wc_get_product( get_the_ID() );
-		if ( ! $product ) {
-			return $content;
+	public static function remove_featured_image( $html ) {
+		if ( self::$in_content_filter ) {
+			return $html;
 		}
 
-		$show_attributes = array_filter( $product->get_attributes(), 'wc_attributes_array_filter_visible' ) || apply_filters( 'wc_product_enable_dimensions_display', $product->has_weight() || $product->has_dimensions() );
+		return '';
+	}
 
-		ob_start();
-		?>
-		<div class="wc-content-bottom">
-			<?php
-			if ( $show_attributes ):
-				woocommerce_product_additional_information_tab();
-			endif;
-			woocommerce_template_single_meta();
-			woocommerce_upsell_display();
-			woocommerce_output_related_products();
-			?>
-		</div>
-		<?php
-		return $content . ob_get_clean();
+	/**
+	 * Remove the Review tab and just use the regular comment form.
+	 *
+	 * @param array $tabs
+	 * @return array
+	 */
+	public static function remove_review_tab( $tabs ) {
+		unset( $tabs['reviews'] );
+		return $tabs;
 	}
 }
 
