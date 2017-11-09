@@ -281,6 +281,34 @@ function wc_product_cat_class( $class = '', $category = null ) {
 }
 
 /**
+ * Get the default columns setting - this is how many products will be shown per row in loops.
+ *
+ * @since 3.3.0
+ * @return int
+ */
+function wc_get_default_products_per_row() {
+	$columns = get_option( 'woocommerce_catalog_columns', 3 );
+
+	// Legacy filter.
+	if ( has_filter( 'loop_shop_columns' ) ) {
+		$columns = apply_filters( 'loop_shop_columns', $columns );
+		wc_deprecated_function( 'The loop_shop_columns filter', '3.3', 'the woocomerce add_theme_support declaration, or remove the filter and set in product settings' );
+	}
+
+	return absint( $columns );
+}
+
+/**
+ * Get the default rows setting - this is how many product rows will be shown in loops.
+ *
+ * @since 3.3.0
+ * @return int
+ */
+function wc_get_default_product_rows_per_page() {
+	return absint( get_option( 'woocommerce_catalog_rows', 4 ) );
+}
+
+/**
  * Get classname for loops based on $woocommerce_loop global.
  *
  * @since 2.6.0
@@ -290,7 +318,7 @@ function wc_get_loop_class() {
 	global $woocommerce_loop;
 
 	$woocommerce_loop['loop']    = ! empty( $woocommerce_loop['loop'] ) ? $woocommerce_loop['loop'] + 1   : 1;
-	$woocommerce_loop['columns'] = max( 1, ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : absint( apply_filters( 'loop_shop_columns', get_option( 'woocommerce_catalog_columns', 3 ) ) ) );
+	$woocommerce_loop['columns'] = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : wc_get_default_products_per_row();
 
 	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
 		return 'first';
