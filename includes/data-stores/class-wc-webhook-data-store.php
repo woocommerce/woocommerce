@@ -199,7 +199,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks" ); // WPCS: cache ok, DB call ok.
 			$ids     = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
 
-			set_transient( 'woocommerce_webhook_ids' );
+			set_transient( 'woocommerce_webhook_ids', $ids );
 		}
 
 		return $ids;
