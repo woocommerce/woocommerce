@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Twenty_Seventeen
  * @since   2.6.9
- * @version 2.6.9
  * @package WooCommerce/Classes
  */
 class WC_Twenty_Seventeen {
@@ -24,12 +23,20 @@ class WC_Twenty_Seventeen {
 		add_action( 'woocommerce_after_main_content', array( __CLASS__, 'output_content_wrapper_end' ), 10 );
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 		add_filter( 'twentyseventeen_custom_colors_css', array( __CLASS__, 'custom_colors_css' ), 10, 3 );
+
+		add_theme_support( 'wc-product-gallery-zoom' );
+		add_theme_support( 'wc-product-gallery-lightbox' );
+		add_theme_support( 'wc-product-gallery-slider' );
+		add_theme_support( 'woocommerce', array(
+			'thumbnail_image_width' => 150,
+			'single_image_width'    => 322,
+		) );
 	}
 
 	/**
 	 * Enqueue CSS for this theme.
 	 *
-	 * @param  array $styles
+	 * @param  array $styles Array of registered styles.
 	 * @return array
 	 */
 	public static function enqueue_styles( $styles ) {
@@ -48,30 +55,28 @@ class WC_Twenty_Seventeen {
 	/**
 	 * Open the Twenty Seventeen wrapper.
 	 */
-	public static function output_content_wrapper() { ?>
-		<div class="wrap">
-			<div id="primary" class="content-area twentyseventeen">
-				<main id="main" class="site-main" role="main">
-		<?php
+	public static function output_content_wrapper() {
+		echo '<div class="wrap">';
+		echo '<div id="primary" class="content-area twentyseventeen">';
+		echo '<main id="main" class="site-main" role="main">';
 	}
 
 	/**
 	 * Close the Twenty Seventeen wrapper.
 	 */
-	public static function output_content_wrapper_end() { ?>
-				</main>
-			</div>
-			<?php get_sidebar(); ?>
-		</div>
-		<?php
+	public static function output_content_wrapper_end() {
+		echo '</main>';
+		echo '</div>';
+		get_sidebar();
+		echo '</div>';
 	}
 
 	/**
 	 * Custom colors.
 	 *
-	 * @param  string $css
-	 * @param  string $hue
-	 * @param  string $saturation
+	 * @param  string $css Styles.
+	 * @param  string $hue Color.
+	 * @param  string $saturation Saturation.
 	 * @return string
 	 */
 	public static function custom_colors_css( $css, $hue, $saturation ) {
