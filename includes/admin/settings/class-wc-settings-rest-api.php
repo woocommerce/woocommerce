@@ -98,14 +98,6 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	public function form_method( $method ) {
 		global $current_section;
 
-		if ( 'webhooks' === $current_section ) {
-			if ( isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
-				return 'post';
-			}
-
-			return 'get';
-		}
-
 		if ( 'keys' === $current_section ) {
 			if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) { // WPCS: input var okay, CSRF ok.
 				return 'post';

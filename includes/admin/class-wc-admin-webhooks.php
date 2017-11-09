@@ -21,7 +21,23 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
+		add_action( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
+	}
+
+	/**
+	 * Check if should allow save settings.
+	 * This prevents "Your settings have been saved." notices on the table list.
+	 *
+	 * @param  bool $allow If allow save settings.
+	 * @return bool
+	 */
+	public function allow_save_settings( $allow ) {
+		if ( ! isset( $_GET['edit-webhook'] ) ) {// WPCS: input var okay, CSRF ok.
+			return false;
+		}
+
+		return $allow;
 	}
 
 	/**
@@ -353,9 +369,10 @@ class WC_Admin_Webhooks {
 		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
-		$count = array_sum( (array) wp_count_posts( 'shop_webhook', 'readable' ) );
+		$data_store = WC_Data_Store::load( 'webhook' );
+		$count      = count( $data_store->get_webhooks_ids() );
 
-		if ( absint( $count ) && $count > 0 ) {
+		if ( 0 < $count ) {
 			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 			$webhooks_table_list->prepare_items();
 
@@ -364,7 +381,7 @@ class WC_Admin_Webhooks {
 			echo '<input type="hidden" name="section" value="webhooks" />';
 
 			$webhooks_table_list->views();
-			$webhooks_table_list->search_box( esc_html__( 'Search webhooks', 'woocommerce' ), 'webhook' );
+			$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
 			$webhooks_table_list->display();
 		} else {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
