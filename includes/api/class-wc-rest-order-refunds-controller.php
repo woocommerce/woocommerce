@@ -181,8 +181,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request = $request;
-		$order         = wc_get_order( (int) $request['order_id'] );
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : $this->request['dp'];
+		$order               = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );

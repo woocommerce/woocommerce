@@ -98,13 +98,14 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$this->request     = $request;
-		$statuses          = wc_get_order_statuses();
-		$order             = wc_get_order( $post );
-		$data              = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
-		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : $this->request['dp'];
+		$statuses            = wc_get_order_statuses();
+		$order               = wc_get_order( $post );
+		$data                = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
+		$format_decimal      = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date         = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		$format_line_items   = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
