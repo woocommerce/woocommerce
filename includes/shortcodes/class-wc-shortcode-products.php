@@ -127,7 +127,7 @@ class WC_Shortcode_Products {
 			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'          => '',        // HTML class.
-			'page'           => get_query_var( 'paged', 1 ), // Page for pagination.
+			'page'           => 1,         // Page for pagination.
 			'paginate'       => false,     // Should results be paginated.
 			'cache'          => true,      // Should shortcode output be cached.
 		), $attributes, $this->type );
@@ -172,6 +172,10 @@ class WC_Shortcode_Products {
 			'orderby'             => $this->attributes['orderby'],
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
+
+		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+			$this->attributes['page'] = get_query_var( 'paged', 1 );
+		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
 			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
