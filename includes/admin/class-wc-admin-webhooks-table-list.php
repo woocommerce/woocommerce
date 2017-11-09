@@ -54,23 +54,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $webhook ) {
-		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', $this->_args['singular'], $webhook->ID );
-	}
-
-	/**
-	 * Get Webhook object.
-	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
-	 * @return WC_Webhook
-	 */
-	private function get_webbook_object( $webhook ) {
-		global $the_webhook;
-
-		if ( empty( $the_webhook ) || $the_webhook->id !== $webhook->ID ) {
-			$the_webhook = new WC_Webhook( $webhook->ID );
-		}
-
-		return $the_webhook;
+		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', $this->_args['singular'], $webhook->get_id() );
 	}
 
 	/**
@@ -80,43 +64,22 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $webhook ) {
-		$the_webhook      = $this->get_webbook_object( $webhook );
-		$edit_link        = admin_url( 'admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;edit-webhook=' . $the_webhook->id );
-		$title            = _draft_or_post_title( $the_webhook->get_post_data() );
-		$post_type_object = get_post_type_object( $the_webhook->get_post_data()->post_type );
-		$post_status      = $the_webhook->get_post_data()->post_status;
+		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
+		$output    = '';
 
 		// Title.
-		$output = '<strong>';
-		if ( 'trash' === $post_status ) {
-			$output .= esc_html( $title );
-		} else {
-			$output .= '<a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $title ) . '</a>';
-		}
-		$output .= '</strong>';
+		$output .= '<strong><a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
 
 		// Get actions.
 		$actions = array(
 			/* translators: %s: webhook ID. */
-			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id ),
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $webhook->get_id() ),
 		);
 
-		if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
-			$actions['edit'] = '<a href="' . esc_url( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
-		}
+		$actions['edit']  = '<a href="' . esc_url( $edit_link ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>';
+		$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Move this item to the Trash', 'woocommerce' ) . '" href="' . get_delete_post_link( $webhook->get_id() ) . '">' . esc_html__( 'Trash', 'woocommerce' ) . '</a>';
 
-		if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
-			if ( 'trash' === $post_status ) {
-				$actions['untrash'] = '<a aria-label="' . esc_attr__( 'Restore this item from the Trash', 'woocommerce' ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . esc_html__( 'Restore', 'woocommerce' ) . '</a>';
-			} elseif ( EMPTY_TRASH_DAYS ) {
-				$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Move this item to the Trash', 'woocommerce' ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . esc_html__( 'Trash', 'woocommerce' ) . '</a>';
-			}
-			if ( 'trash' === $post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Delete this item permanently', 'woocommerce' ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>';
-			}
-		}
-
-		$actions     = apply_filters( 'post_row_actions', $actions, $the_webhook->get_post_data() );
+		$actions     = apply_filters( 'webhook_row_actions', $actions, $webhook );
 		$row_actions = array();
 
 		foreach ( $actions as $action => $link ) {
@@ -135,7 +98,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_status( $webhook ) {
-		return $this->get_webbook_object( $webhook )->get_i18n_status();
+		return $webhook->get_i18n_status();
 	}
 
 	/**
@@ -145,7 +108,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_topic( $webhook ) {
-		return $this->get_webbook_object( $webhook )->get_topic();
+		return $webhook->get_topic();
 	}
 
 	/**
@@ -155,56 +118,34 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_delivery_url( $webhook ) {
-		return $this->get_webbook_object( $webhook )->get_delivery_url();
+		return $webhook->get_delivery_url();
 	}
 
 	/**
 	 * Get the status label for webhooks.
 	 *
-	 * @param  string   $status_name Status name.
-	 * @param  stdClass $status      Status data.
-	 *
+	 * @param string $status_name Status name.
+	 * @param int    $amount      Amount of webhooks.
 	 * @return array
 	 */
-	private function get_status_label( $status_name, $status ) {
-		switch ( $status_name ) {
-			case 'publish':
-				$label = array(
-					/* translators: %s: count */
-					'singular' => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
-					/* translators: %s: count */
-					'plural'   => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
-					'context'  => '',
-					'domain'   => 'woocommerce',
-				);
-				break;
-			case 'draft':
-				$label = array(
-					/* translators: %s: count */
-					'singular' => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
-					/* translators: %s: count */
-					'plural'   => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
-					'context'  => '',
-					'domain'   => 'woocommerce',
-				);
-				break;
-			case 'pending':
-				$label = array(
-					/* translators: %s: count */
-					'singular' => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
-					/* translators: %s: count */
-					'plural'   => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
-					'context'  => '',
-					'domain'   => 'woocommerce',
-				);
-				break;
+	private function get_status_label( $status_name, $amount ) {
+		$statuses = wc_get_webhook_statuses();
 
-			default:
-				$label = $status->label_count;
-				break;
+		if ( isset( $statuses[ $status_name ] ) ) {
+			return array(
+				'singular' => sprintf( '%s <span class="count">(%s)</span>', esc_html( $statuses[ $status_name ] ), $amount ),
+				'plural'   => sprintf( '%s <span class="count">(%s)</span>', esc_html( $statuses[ $status_name ] ), $amount ),
+				'context'  => '',
+				'domain'   => 'woocommerce',
+			);
 		}
 
-		return $label;
+		return array(
+			'singular' => sprintf( '%s <span class="count">(%s)</span>', esc_html( $status_name ), $amount ),
+			'plural'   => sprintf( '%s <span class="count">(%s)</span>', esc_html( $status_name ), $amount ),
+			'context'  => '',
+			'domain'   => 'woocommerce',
+		);
 	}
 
 	/**
@@ -213,43 +154,20 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_views() {
-		$status_links       = array();
-		$num_posts          = wp_count_posts( 'shop_webhook', 'readable' );
-		$class              = '';
-		$total_posts        = array_sum( (array) $num_posts );
-		$non_admin_statuses = get_post_stati( array(
-			'show_in_admin_all_list' => false,
-		) );
-		$statuses           = get_post_stati( array(
-			'show_in_admin_status_list' => true,
-		), 'objects' );
+		$status_links   = array();
+		$data_store     = WC_Data_Store::load( 'webhook' );
+		$num_webhooks   = $data_store->get_count_webhooks_by_status();
+		$total_webhooks = array_sum( (array) $num_webhooks );
+		$statuses       = array_keys( wc_get_webhook_statuses() );
+		$class          = empty( $_REQUEST['status'] ) ? ' class="current"' : ''; // WPCS: input var okay. CSRF ok.
 
-		// Subtract post types that are not included in the admin all list.
-		foreach ( $statuses as $status ) {
-			$total_posts -= $num_posts->$status;
-		}
-
-		$class = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : ''; // WPCS: input var okay. CSRF ok.
 		/* translators: %s: count */
-		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts', 'woocommerce' ), number_format_i18n( $total_posts ) ) . '</a>';
+		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_webhooks, 'posts', 'woocommerce' ), number_format_i18n( $total_webhooks ) ) . '</a>';
 
-		foreach ( $statuses as $status ) {
+		foreach ( $statuses as $status_name ) {
 			$class = '';
-			$status_name = $status->name;
 
-			if ( ! in_array( $status_name, array(
-				'publish',
-				'draft',
-				'pending',
-				'trash',
-				'future',
-				'private',
-				'auto-draft',
-			), true ) ) {
-				continue;
-			}
-
-			if ( empty( $num_posts->$status_name ) ) {
+			if ( empty( $num_webhooks[ $status_name ] ) ) {
 				continue;
 			}
 
@@ -257,9 +175,9 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				$class = ' class="current"';
 			}
 
-			$label = $this->get_status_label( $status_name, $status );
+			$label = $this->get_status_label( $status_name, $num_webhooks[ $status_name ] );
 
-			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_posts->$status_name ), number_format_i18n( $num_posts->$status_name ) ) . '</a>';
+			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_webhooks[ $status_name ] ), number_format_i18n( $num_webhooks[ $status_name ] ) ) . '</a>';
 		}
 
 		return $status_links;
@@ -295,10 +213,54 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Generate the table navigation above or below the table.
+	 *
+	 * @param string $which  The location of the extra table nav markup: 'top' or 'bottom'.
+	 */
+	protected function display_tablenav( $which ) {
+		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
+
+		if ( $this->has_items() ) {
+			echo '<div class="alignleft actions bulkactions">';
+			$this->bulk_actions( $which );
+			echo '</div>';
+		}
+
+		$this->extra_tablenav( $which );
+		$this->pagination( $which );
+		echo '<br class="clear" />';
+		echo '</div>';
+	}
+
+	/**
+	 * Search box.
+	 *
+	 * @param  string $text     Button text.
+	 * @param  string $input_id Input ID.
+	 */
+	public function search_box( $text, $input_id ) {
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.
+			return;
+		}
+
+		$input_id     = $input_id . '-search-input';
+		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+
+		echo '<p class="search-box">';
+		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
+		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
+		submit_button( $text, '', '', false, array(
+			'id' => 'search-submit',
+		) );
+		echo '</p>';
+	}
+
+	/**
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = apply_filters( 'woocommerce_webhooks_settings_posts_per_page', 10 );
+		$per_page = absint( apply_filters( 'woocommerce_webhooks_settings_posts_per_page', 10 ) );
+		$per_page = 0 === $per_page ? 10 : $per_page;
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
@@ -310,30 +272,30 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		// Query args.
 		$args = array(
-			'post_type'           => 'shop_webhook',
-			'posts_per_page'      => $per_page,
-			'ignore_sticky_posts' => true,
-			'paged'               => $current_page,
+			'limit'  => $per_page,
+			'offset' => $per_page * ( $current_page - 1 ),
 		);
 
 		// Handle the status query.
 		if ( ! empty( $_REQUEST['status'] ) ) { // WPCS: input var okay, CSRF ok.
-			$args['post_status'] = sanitize_key( wp_unslash( $_REQUEST['status'] ) ); // WPCS: input var okay, CSRF ok.
+			$args['status'] = sanitize_key( wp_unslash( $_REQUEST['status'] ) ); // WPCS: input var okay, CSRF ok.
 		}
 
-		if ( ! empty( $_REQUEST['s'] ) ) {  // WPCS: input var okay, CSRF ok.
-			$args['s'] = sanitize_text_field( wp_unslash( $_REQUEST['s'] ) );  // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_REQUEST['s'] ) ) { // WPCS: input var okay, CSRF ok.
+			$args['search'] = sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ); // WPCS: input var okay, CSRF ok.
 		}
 
 		// Get the webhooks.
-		$webhooks    = new WP_Query( $args );
-		$this->items = $webhooks->posts;
+		$data_store  = WC_Data_Store::load( 'webhook' );
+		$webhooks    = $data_store->search_webhooks( $args );
+		$this->items = array_map( 'wc_get_webhook', $webhooks );
+		$total_items = count( $data_store->get_webhooks_ids() );
 
 		// Set the pagination.
 		$this->set_pagination_args( array(
-			'total_items' => $webhooks->found_posts,
+			'total_items' => $total_items,
 			'per_page'    => $per_page,
-			'total_pages' => $webhooks->max_num_pages,
+			'total_pages' => ceil( $total_items / $per_page ),
 		) );
 	}
 }
