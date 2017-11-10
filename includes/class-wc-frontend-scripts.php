@@ -43,20 +43,6 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'setup_theme', array( __CLASS__, 'add_default_theme_support' ) );
-	}
-
-	/**
-	 * Add theme support for default WP themes.
-	 *
-	 * @since 3.0.0
-	 */
-	public static function add_default_theme_support() {
-		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
-			add_theme_support( 'wc-product-gallery-zoom' );
-			add_theme_support( 'wc-product-gallery-lightbox' );
-			add_theme_support( 'wc-product-gallery-slider' );
-		}
 	}
 
 	/**

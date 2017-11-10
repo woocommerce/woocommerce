@@ -281,6 +281,59 @@ function wc_product_cat_class( $class = '', $category = null ) {
 }
 
 /**
+ * Get the default columns setting - this is how many products will be shown per row in loops.
+ *
+ * @since 3.3.0
+ * @return int
+ */
+function wc_get_default_products_per_row() {
+	$columns = get_option( 'woocommerce_catalog_columns', 3 );
+
+	// Theme support.
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+
+	if ( isset( $theme_support['product_grid']['min_columns'] ) && $columns < $theme_support['product_grid']['min_columns'] ) {
+		$columns = $theme_support['product_grid']['min_columns'];
+		update_option( 'woocommerce_catalog_columns', $columns );
+	} elseif ( ! empty( $theme_support['product_grid']['max_columns'] ) && $columns > $theme_support['product_grid']['max_columns'] ) {
+		$columns = $theme_support['product_grid']['max_columns'];
+		update_option( 'woocommerce_catalog_columns', $columns );
+	}
+
+	// Legacy filter.
+	if ( has_filter( 'loop_shop_columns' ) ) {
+		$columns = apply_filters( 'loop_shop_columns', $columns );
+	}
+
+	return absint( $columns );
+}
+
+/**
+ * Get the default rows setting - this is how many product rows will be shown in loops.
+ *
+ * @since 3.3.0
+ * @return int
+ */
+function wc_get_default_product_rows_per_page() {
+	$rows = absint( get_option( 'woocommerce_catalog_rows', 4 ) );
+
+	// Theme support.
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+
+	if ( isset( $theme_support['product_grid']['min_rows'] ) && $rows < $theme_support['product_grid']['min_rows'] ) {
+		$rows = $theme_support['product_grid']['min_rows'];
+		update_option( 'woocommerce_catalog_rows', $rows );
+	} elseif ( ! empty( $theme_support['product_grid']['max_rows'] ) && $rows > $theme_support['product_grid']['max_rows'] ) {
+		$rows = $theme_support['product_grid']['max_rows'];
+		update_option( 'woocommerce_catalog_rows', $rows );
+	}
+
+	return $rows;
+}
+
+/**
  * Get classname for loops based on $woocommerce_loop global.
  *
  * @since 2.6.0
@@ -290,7 +343,7 @@ function wc_get_loop_class() {
 	global $woocommerce_loop;
 
 	$woocommerce_loop['loop']    = ! empty( $woocommerce_loop['loop'] ) ? $woocommerce_loop['loop'] + 1   : 1;
-	$woocommerce_loop['columns'] = max( 1, ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 ) );
+	$woocommerce_loop['columns'] = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : wc_get_default_products_per_row();
 
 	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
 		return 'first';
@@ -474,7 +527,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php do_action( 'woocommerce_after_shop_loop' ); ?>
 
-			<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
+			<?php else : ?>
 
 				<?php do_action( 'woocommerce_no_products_found' ); ?>
 
@@ -588,8 +641,11 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	 */
 	function woocommerce_product_loop_start( $echo = true ) {
 		ob_start();
+
 		$GLOBALS['woocommerce_loop']['loop'] = 0;
+
 		wc_get_template( 'loop/loop-start.php' );
+
 		if ( $echo ) {
 			echo ob_get_clean(); // WPCS: XSS ok.
 		} else {
@@ -794,12 +850,12 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @subpackage	Loop
-	 * @param string $size (default: 'shop_catalog').
+	 * @param string $size (default: 'woocommerce_thumbnail').
 	 * @param int    $deprecated1 Deprecated since WooCommerce 2.0 (default: 0).
 	 * @param int    $deprecated2 Deprecated since WooCommerce 2.0 (default: 0).
 	 * @return string
 	 */
-	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
+	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $deprecated1 = 0, $deprecated2 = 0 ) {
 		global $product;
 
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
@@ -813,10 +869,24 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	/**
 	 * Output the result count text (Showing x - x of x results).
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
 	 */
-	function woocommerce_result_count() {
-		wc_get_template( 'loop/result-count.php' );
+	function woocommerce_result_count( $query = null ) {
+		if ( ! is_a( $query, 'WP_Query' ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
+
+		if ( ! woocommerce_products_will_display() ) {
+			return;
+		}
+
+		$args = array(
+			'total'    => $query->found_posts,
+			'per_page' => $query->get( 'posts_per_page' ),
+			'current'  => max( 1, $query->get( 'paged', 1 ) ),
+		);
+
+		wc_get_template( 'loop/result-count.php', $args );
 	}
 }
 
@@ -825,12 +895,14 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	/**
 	 * Output the product sorting options.
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global.
 	 */
-	function woocommerce_catalog_ordering() {
-		global $wp_query;
+	function woocommerce_catalog_ordering( $query = null ) {
+		if ( ! is_a( $query, 'WP_Query' ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
 
-		if ( 1 === (int) $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+		if ( ! woocommerce_products_will_display() ) {
 			return;
 		}
 
@@ -845,7 +917,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		if ( $wp_query->is_search() ) {
+		if ( $query->is_search() ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 			unset( $catalog_orderby_options['menu_order'] );
 			if ( 'menu_order' === $orderby ) {
@@ -870,10 +942,19 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	/**
 	 * Output the pagination.
 	 *
-	 * @subpackage	Loop
+	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
 	 */
-	function woocommerce_pagination() {
-		wc_get_template( 'loop/pagination.php' );
+	function woocommerce_pagination( $query = null ) {
+		if ( ! is_a( $query, 'WP_Query' ) ) {
+			$query = $GLOBALS['wp_query'];
+		}
+
+		$args = array(
+			'total'   => $query->max_num_pages,
+			'current' => max( 1, $query->get( 'paged', 1 ) ),
+		);
+
+		wc_get_template( 'loop/pagination.php', $args );
 	}
 }
 
@@ -1664,77 +1745,34 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	/**
 	 * Check if we will be showing products or not (and not sub-categories only).
 	 *
-	 * @subpackage	Loop
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		global $wpdb;
-
-		if ( is_shop() ) {
-			return 'subcategories' !== get_option( 'woocommerce_shop_page_display' ) || is_search();
-		}
-
-		if ( ! is_product_taxonomy() ) {
-			return false;
-		}
-
 		if ( is_search() || is_filtered() || is_paged() ) {
 			return true;
 		}
 
-		$term = get_queried_object();
+		$display_type = '';
 
-		if ( is_product_category() ) {
-			switch ( get_woocommerce_term_meta( $term->term_id, 'display_type', true ) ) {
-				case 'subcategories' :
-					// Nothing - we want to continue to see if there are products/subcats.
-				break;
-				case 'products' :
-				case 'both' :
+		if ( is_shop() ) {
+			$display_type = get_option( 'woocommerce_shop_page_display', '' );
+		} elseif ( is_product_category() ) {
+			$parent_id    = get_queried_object_id();
+			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
+			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
+		}
+
+		if ( 'subcategories' === $display_type ) {
+			if ( is_product_category() ) {
+				$term = get_queried_object();
+				if ( $term && ! count( get_term_children( $term->term_id, $term->taxonomy ) ) ) {
 					return true;
-				break;
-				default :
-					// Default - no setting.
-					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' ) {
-						return true;
-					}
-				break;
-			}
-		}
-
-		// Begin subcategory logic.
-		if ( empty( $term->term_id ) || empty( $term->taxonomy ) ) {
-			return true;
-		}
-
-		$transient_name = 'wc_products_will_display_' . $term->term_id . '_' . WC_Cache_Helper::get_transient_version( 'product_query' );
-
-		if ( false === ( $products_will_display = get_transient( $transient_name ) ) ) {
-			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $term->term_id, $term->taxonomy ) ); // WPCS: cache ok.
-
-			if ( $has_children ) {
-				// Check terms have products inside - parents first. If products are found inside, subcats will be shown instead of products so we can return false.
-				if ( count( get_objects_in_term( $has_children, $term->taxonomy ) ) > 0 ) {
-					$products_will_display = false;
-				} else {
-					// If we get here, the parents were empty so we're forced to check children.
-					foreach ( $has_children as $term_id ) {
-						$children = get_term_children( $term_id, $term->taxonomy );
-
-						if ( count( get_objects_in_term( $children, $term->taxonomy ) ) > 0 ) {
-							$products_will_display = false;
-							break;
-						}
-					}
 				}
-			} else {
-				$products_will_display = true;
 			}
+			return false;
 		}
 
-		set_transient( $transient_name, $products_will_display, DAY_IN_SECONDS * 30 );
-
-		return $products_will_display;
+		return true;
 	}
 }
 
@@ -1743,55 +1781,36 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	/**
 	 * Display product sub categories as thumbnails.
 	 *
-	 * @subpackage	Loop
 	 * @param array $args Arguments.
-	 * @return null|boolean
+	 * @return boolean
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
-		global $wp_query;
+		$args = wp_parse_args( $args, array(
+			'before'       => '',
+			'after'        => '',
+			'parent_id'    => 0,
+			'display_type' => '',
+		) );
 
-		$defaults = array(
-			'before'        => '',
-			'after'         => '',
-			'force_display' => false,
-		);
-
-		$args = wp_parse_args( $args, $defaults );
-
-		extract( $args ); // @codingStandardsIgnoreLine
-
-		// Main query only.
-		if ( ! is_main_query() && ! $force_display ) {
+		// Don't show when filtering, searching or when on page > 1.
+		if ( is_search() || is_filtered() || is_paged() ) {
 			return;
 		}
 
-		// Don't show when filtering, searching or when on page > 1 and ensure we're on a product archive.
-		if ( is_search() || is_filtered() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) {
-			return;
+		$parent_id    = $args['parent_id'];
+		$display_type = $args['display_type'];
+
+		// Check categories are enabled and see what level to query.
+		if ( is_shop() ) {
+			$display_type = get_option( 'woocommerce_shop_page_display', '' );
+		} elseif ( is_product_category() ) {
+			$parent_id    = get_queried_object_id();
+			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
+			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
 		}
 
-		// Check categories are enabled.
-		if ( is_shop() && '' === get_option( 'woocommerce_shop_page_display' ) ) {
-			return;
-		}
-
-		// Find the category + category parent, if applicable.
-		$term 			= get_queried_object();
-		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
-
-		if ( is_product_category() ) {
-			$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-
-			switch ( $display_type ) {
-				case 'products' :
-					return;
-				break;
-				case '' :
-					if ( '' === get_option( 'woocommerce_category_archive_display' ) ) {
-						return;
-					}
-				break;
-			}
+		if ( '' === $display_type ) {
+			return false;
 		}
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
@@ -1809,7 +1828,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		}
 
 		if ( $product_categories ) {
-			echo wp_kses_post( $before );
+			echo wp_kses_post( $args['before'] );
 
 			foreach ( $product_categories as $category ) {
 				wc_get_template( 'content-product_cat.php', array(
@@ -1817,33 +1836,20 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 				) );
 			}
 
+			echo wp_kses_post( $args['after'] );
+
 			// If we are hiding products disable the loop and pagination.
-			if ( is_product_category() ) {
-				$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
+			if ( 'subcategories' === $display_type ) {
+				global $wp_query;
 
-				switch ( $display_type ) {
-					case 'subcategories' :
-						$wp_query->post_count    = 0;
-						$wp_query->max_num_pages = 0;
-					break;
-					case '' :
-						if ( 'subcategories' === get_option( 'woocommerce_category_archive_display' ) ) {
-							$wp_query->post_count    = 0;
-							$wp_query->max_num_pages = 0;
-						}
-					break;
-				}
-			}
-
-			if ( is_shop() && 'subcategories' === get_option( 'woocommerce_shop_page_display' ) ) {
 				$wp_query->post_count    = 0;
 				$wp_query->max_num_pages = 0;
 			}
 
-			echo wp_kses_post( $after );
-
 			return true;
 		}
+
+		return false;
 	}
 }
 
@@ -1856,7 +1862,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * @subpackage	Loop
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
-		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'shop_catalog' );
+		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
 		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 
