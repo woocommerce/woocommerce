@@ -24,19 +24,36 @@ class WC_Template_Loader {
 	 */
 	private static $shop_page_id = 0;
 
+
+	private static $in_content_filter = false;
+
 	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
-		add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 
 		self::$shop_page_id = wc_get_page_id( 'shop' );
 
-		if ( ! current_theme_supports( 'woocommerce' ) && self::$shop_page_id ) {
-			add_filter( 'the_content', array( __CLASS__, 'the_content_filter' ), 10 );
-			add_filter( 'the_title', array( __CLASS__, 'the_title_filter' ), 10, 2 );
+		// Supported themes.
+		if ( current_theme_supports( 'woocommerce' ) || in_array( get_template(), array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
+			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+
+		// Unsupported themes.
+		} elseif ( self::$shop_page_id || is_product() ) {
+			add_filter( 'the_content', array( __CLASS__, 'unsupported_theme_content_filter' ), 10 );
+			add_filter( 'the_title', array( __CLASS__, 'unsupported_theme_title_filter' ), 10, 2 );
+			add_filter( 'post_thumbnail_html', array( __CLASS__, 'unsupported_theme_single_featured_image_filter' ) );
+			add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'unsupported_theme_remove_review_tab' ) );
 			add_filter( 'comments_number', '__return_empty_string' );
+
+			if ( is_product() ) {
+				remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
+				remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
+				add_theme_support( 'wc-product-gallery-zoom' );
+				add_theme_support( 'wc-product-gallery-lightbox' );
+				add_theme_support( 'wc-product-gallery-slider' );
+			}
 		}
 	}
 
@@ -64,7 +81,7 @@ class WC_Template_Loader {
 	 * @param int    $id ID of the post being filtered.
 	 * @return string
 	 */
-	public static function the_title_filter( $title, $id ) {
+	public static function unsupported_theme_title_filter( $title, $id ) {
 		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
 			$args         = self::get_current_shop_view_args();
 			$title_suffix = array();
@@ -89,10 +106,20 @@ class WC_Template_Loader {
 	 * @param string $content Existing post content.
 	 * @return string
 	 */
-	public static function the_content_filter( $content ) {
+	public static function unsupported_theme_content_filter( $content ) {
 		global $wp_query;
 
-		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && is_main_query() ) {
+		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+			return $content;
+		}
+
+		self::$in_content_filter = true;
+
+		// Remove the filter we're in to avoid nested calls.
+		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+
+		// Unsupported theme shop page.
+		if ( is_page( self::$shop_page_id ) ) {
 			$args      = self::get_current_shop_view_args();
 			$shortcode = new WC_Shortcode_Products(
 				array_merge(
@@ -116,9 +143,34 @@ class WC_Template_Loader {
 
 			// Remove actions and self to avoid nested calls.
 			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
-			remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+
+		// Unsupported theme product page.
+		} elseif ( is_product() ) {
+			$content = do_shortcode( '[product_page id="' . get_the_ID() . '"]' );
 		}
+
+		self::$in_content_filter = false;
+
 		return $content;
+	}
+
+	public static function unsupported_theme_single_featured_image_filter( $html ) {
+		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
+			return $html;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Remove the Review tab and just use the regular comment form.
+	 *
+	 * @param array $tabs Tab info.
+	 * @return array
+	 */
+	public static function unsupported_theme_remove_review_tab( $tabs ) {
+		unset( $tabs['reviews'] );
+		return $tabs;
 	}
 
 	/**

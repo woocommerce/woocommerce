@@ -403,8 +403,6 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		$theme_support = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-
 		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten' :
