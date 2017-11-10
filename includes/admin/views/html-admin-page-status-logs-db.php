@@ -1,23 +1,17 @@
 <?php
 /**
  * Admin View: Page - Status Database Logs
+ *
+ * @package WooCommerce/Admin/Logs
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-$s = '';
-if ( isset( $_REQUEST['s'] ) ) {
-	$s = wc_clean( wp_unslash( $_REQUEST['s'] ) );
-}
-?>
-<form method="get" id="mainform" action="">
-    <p class="search-box">
-        <label class="screen-reader-text" for="post-search-input"><?php _e( 'Search logs', 'woocommerce' ); ?></label>
-        <input type="search" id="post-search-input" name="s" value="<?php echo esc_attr( $s ); ?>">
-        <input type="submit" id="search-submit" class="button" value="<?php _e( 'Search logs', 'woocommerce' ); ?>">
-    </p>
 
+?>
+<form method="post" id="mainform" action="">
+	<?php $log_table_list->search_box( __( 'Search logs', 'woocommerce' ), 'log' ); ?>
 	<?php $log_table_list->display(); ?>
 
 	<input type="hidden" name="page" value="wc-status" />
