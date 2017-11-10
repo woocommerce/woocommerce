@@ -5,7 +5,7 @@
  * @author   Automattic
  * @category Core
  * @package  WooCommerce/Functions
- * @version  3.2.0
+ * @version  3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,7 +62,7 @@ function wc_get_webhook_statuses() {
 /**
  * Load webhooks.
  *
- * @since  3.2.0
+ * @since  3.3.0
  * @return bool
  */
 function wc_load_webhooks() {
@@ -77,4 +77,16 @@ function wc_load_webhooks() {
 	}
 
 	return $loaded;
+}
+
+/**
+ * Get webhook.
+ *
+ * @param  int $id Webhook ID.
+ * @return WC_Webhook|null
+ */
+function wc_get_webhook( $id ) {
+	$webhook = new WC_Webhook( (int) $id );
+
+	return 0 !== $webhook->get_id() ? $webhook : null;
 }

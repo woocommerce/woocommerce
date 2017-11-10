@@ -2,7 +2,7 @@
 /**
  * Setup menus in WP admin.
  *
- * @author   WooThemes
+ * @author   Automattic
  * @category Admin
  * @package  WooCommerce/Admin
  * @version  2.5.0
@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Menus', false ) ) :
+if ( class_exists( 'WC_Admin_Menus', false ) ) {
+	return new WC_Admin_Menus();
+}
 
 /**
  * WC_Admin_Menus Class.
@@ -23,7 +25,7 @@ class WC_Admin_Menus {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		// Add menus
+		// Add menus.
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
@@ -41,7 +43,7 @@ class WC_Admin_Menus {
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
-		// Admin bar menus
+		// Admin bar menus.
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
 		}
@@ -54,7 +56,7 @@ class WC_Admin_Menus {
 		global $menu;
 
 		if ( current_user_can( 'manage_woocommerce' ) ) {
-			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // WPCS: override ok.
 		}
 
 		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
@@ -91,25 +93,25 @@ class WC_Admin_Menus {
 		WC()->payment_gateways();
 		WC()->shipping();
 
-		// Include settings pages
+		// Include settings pages.
 		WC_Admin_Settings::get_settings_pages();
 
-		// Get current tab/section
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
+		// Get current tab/section.
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
 
-		// Save settings if data has been posted
-		if ( ! empty( $_POST ) ) {
+		// Save settings if data has been posted.
+		if ( apply_filters( '' !== $current_section ? "woocommerce_save_settings_{$current_tab}_{$current_section}" : "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
 
-		// Add any posted messages
-		if ( ! empty( $_GET['wc_error'] ) ) {
-			WC_Admin_Settings::add_error( stripslashes( $_GET['wc_error'] ) );
+		// Add any posted messages.
+		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
 
-		if ( ! empty( $_GET['wc_message'] ) ) {
-			WC_Admin_Settings::add_message( stripslashes( $_GET['wc_message'] ) );
+		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
 	}
 
@@ -125,6 +127,7 @@ class WC_Admin_Menus {
 	 */
 	public function addons_menu() {
 		$count_html = WC_Helper_Updater::get_updates_count_html();
+		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
 		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
@@ -136,17 +139,17 @@ class WC_Admin_Menus {
 		global $parent_file, $submenu_file, $post_type;
 
 		switch ( $post_type ) {
-			case 'shop_order' :
-			case 'shop_coupon' :
-				$parent_file = 'woocommerce';
-			break;
-			case 'product' :
+			case 'shop_order':
+			case 'shop_coupon':
+				$parent_file = 'woocommerce'; // WPCS: override ok.
+				break;
+			case 'product':
 				$screen = get_current_screen();
 				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
-					$submenu_file = 'product_attributes';
-					$parent_file  = 'edit.php?post_type=product';
+					$submenu_file = 'product_attributes'; // WPCS: override ok.
+					$parent_file  = 'edit.php?post_type=product'; // WPCS: override ok.
 				}
-			break;
+				break;
 		}
 	}
 
@@ -157,14 +160,16 @@ class WC_Admin_Menus {
 		global $submenu;
 
 		if ( isset( $submenu['woocommerce'] ) ) {
-			// Remove 'WooCommerce' sub menu item
+			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
 
-			// Add count if user has access
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && ( $order_count = wc_processing_order_count() ) ) {
+			$order_count = wc_processing_order_count();
+
+			// Add count if user has access.
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && $order_count ) {
 				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
 						break;
 					}
 				}
@@ -175,34 +180,34 @@ class WC_Admin_Menus {
 	/**
 	 * Reorder the WC menu items in admin.
 	 *
-	 * @param mixed $menu_order
+	 * @param int $menu_order Menu order.
 	 * @return array
 	 */
 	public function menu_order( $menu_order ) {
-		// Initialize our custom order array
+		// Initialize our custom order array.
 		$woocommerce_menu_order = array();
 
-		// Get the index of our custom separator
-		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order );
+		// Get the index of our custom separator.
+		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
 
-		// Get index of product menu
-		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order );
+		// Get index of product menu.
+		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order, true );
 
-		// Loop through menu order and do some rearranging
+		// Loop through menu order and do some rearranging.
 		foreach ( $menu_order as $index => $item ) {
 
-			if ( ( ( 'woocommerce' ) == $item ) ) {
+			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
 
-		// Return order
+		// Return order.
 		return $woocommerce_menu_order;
 	}
 
@@ -301,7 +306,7 @@ class WC_Admin_Menus {
 			</div>
 			<p class="button-controls">
 				<span class="list-controls">
-					<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select all', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ) ); ?>" class="select-all"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a>
 				</span>
 				<span class="add-to-menu">
 					<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
@@ -316,7 +321,7 @@ class WC_Admin_Menus {
 	 * Add the "Visit Store" link in admin bar main menu.
 	 *
 	 * @since 2.4.0
-	 * @param WP_Admin_Bar $wp_admin_bar
+	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
 	public function admin_bar_menus( $wp_admin_bar ) {
 		if ( ! is_admin() || ! is_user_logged_in() ) {
@@ -329,7 +334,7 @@ class WC_Admin_Menus {
 		}
 
 		// Don't display when shop page is the same of the page on front.
-		if ( get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) {
+		if ( intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) {
 			return;
 		}
 
@@ -342,7 +347,5 @@ class WC_Admin_Menus {
 		) );
 	}
 }
-
-endif;
 
 return new WC_Admin_Menus();
