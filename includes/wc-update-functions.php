@@ -1444,7 +1444,7 @@ function wc_update_330_webhook_logs() {
 				),
 			), true );
 			$logger->log( 'info', $message, array(
-				'source' => 'webhook_delivery',
+				'source' => 'webhooks-delivery',
 			) );
 		}
 	}

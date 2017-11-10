@@ -455,16 +455,16 @@ class WC_Admin_Webhooks {
 	/**
 	 * Logs output.
 	 *
-	 * @param WC_Webhook $webhook
+	 * @param WC_Webhook $webhook Deprecated.
 	 */
 	public static function logs_output( $webhook = 'deprecated' ) {
-		echo '<p>' . sprintf( __( '<a href="%s">View Webhook Delivery Logs</a>', 'woocommerce' ), esc_url( '' ) ) . '</p>';
+		echo '<p>' . sprintf( __( '<a href="%s">View Webhook Delivery Logs</a>', 'woocommerce' ), esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) ) ) . '</p>'; // @codingStandardsIgnoreLine
 	}
 
 	/**
 	 * Get the webhook topic data.
 	 *
-	 * @param WC_Webhook $webhook
+	 * @param WC_Webhook $webhook Webhook Object.
 	 *
 	 * @return array
 	 */
@@ -493,10 +493,8 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the logs navigation.
 	 *
-	 * @param  int $total
-	 * @param  WC_Webhook $webhook
-	 *
-	 * @return string
+	 * @param  int        $total Deprecated.
+	 * @param  WC_Webhook $webhook Deprecated.
 	 */
 	public static function get_logs_navigation( $total, $webhook ) {
 		wc_deprecated_function( 'WC_Admin_Webhooks::get_logs_navigation', '3.3' );
