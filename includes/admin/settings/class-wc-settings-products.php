@@ -193,7 +193,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 			);
 
 			if ( has_filter( 'loop_shop_columns' ) ) {
-				wc_deprecated_function( 'The loop_shop_columns filter', '3.3', 'the woocomerce add_theme_support declaration, or remove the filter and set in product settings' );
 				unset( $settings['columns'], $settings['rows'] );
 			}
 

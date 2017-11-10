@@ -304,7 +304,6 @@ function wc_get_default_products_per_row() {
 	// Legacy filter.
 	if ( has_filter( 'loop_shop_columns' ) ) {
 		$columns = apply_filters( 'loop_shop_columns', $columns );
-		wc_deprecated_function( 'The loop_shop_columns filter', '3.3', 'the woocomerce add_theme_support declaration, or remove the filter and set in product settings' );
 	}
 
 	return absint( $columns );
