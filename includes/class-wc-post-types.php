@@ -256,7 +256,12 @@ class WC_Post_types {
 		}
 
 		$shop_page_id = wc_get_page_id( 'shop' );
-		$has_archive  = current_theme_supports( 'woocommerce' ) ? $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop' : false;
+
+		if ( current_theme_supports( 'woocommerce' ) ) {
+			$has_archive  = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+		} else {
+			$has_archive = false;
+		}
 
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
