@@ -698,44 +698,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test validation of image_width.
-	 *
-	 * @since 3.0.0
-	 */
-	public function test_validation_image_width() {
-		wp_set_current_user( $this->user );
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) ) );
-		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 180, 'height' => 180, 'crop' => true ), $setting['value'] );
-
-		// test bogus
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
-		$request->set_body_params( array(
-			'value' => array(
-				'width'  => 400,
-				'height' => 200,
-				'crop'   => 'asdasdasd',
-			),
-		) );
-		$response = $this->server->dispatch( $request );
-		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 400, 'height' => 200, 'crop' => true ), $setting['value'] );
-
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
-		$request->set_body_params( array(
-			'value' => array(
-				'width'  => 200,
-				'height' => 100,
-				'crop'   => false,
-			),
-		) );
-		$response = $this->server->dispatch( $request );
-		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 200, 'height' => 100, 'crop' => false ), $setting['value'] );
-	}
-
-	/**
 	 * Test to make sure the 'base location' setting is present in the response.
 	 * That it is returned as 'select' and not 'single_select_country',
 	 * and that both state and country options are returned.

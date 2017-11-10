@@ -1,19 +1,28 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Template Loader
  *
  * @class 		WC_Template
- * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		Automattic
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Template_Loader.
  */
 class WC_Template_Loader {
+
+	/**
+	 * Store the shop page ID.
+	 *
+	 * @var integer
+	 */
+	private static $shop_page_id = 0;
 
 	/**
 	 * Hook in methods.
@@ -21,6 +30,95 @@ class WC_Template_Loader {
 	public static function init() {
 		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 		add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+
+		self::$shop_page_id = wc_get_page_id( 'shop' );
+
+		if ( ! current_theme_supports( 'woocommerce' ) && self::$shop_page_id ) {
+			add_filter( 'the_content', array( __CLASS__, 'the_content_filter' ), 10 );
+			add_filter( 'the_title', array( __CLASS__, 'the_title_filter' ), 10, 2 );
+			add_filter( 'comments_number', '__return_empty_string' );
+		}
+	}
+
+	/**
+	 * Get information about the current shop page view.
+	 *
+	 * @since 3.3.0
+	 * @return array
+	 */
+	private static function get_current_shop_view_args() {
+		return (object) array(
+			'page'    => absint( max( 1, absint( get_query_var( 'paged' ) ) ) ),
+			'columns' => wc_get_default_products_per_row(),
+			'rows'    => wc_get_default_product_rows_per_page(),
+		);
+	}
+
+	/**
+	 * Filter the title and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $title Existing title.
+	 * @param int    $id ID of the post being filtered.
+	 * @return string
+	 */
+	public static function the_title_filter( $title, $id ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+			$args         = self::get_current_shop_view_args();
+			$title_suffix = array();
+
+			if ( $args->page > 1 ) {
+				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
+			}
+
+			if ( $title_suffix ) {
+				$title = $title . ' &ndash; ' . implode( ', ', $title_suffix );
+			}
+		}
+		return $title;
+	}
+
+	/**
+	 * Filter the content and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $content Existing post content.
+	 * @return string
+	 */
+	public static function the_content_filter( $content ) {
+		global $wp_query;
+
+		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && is_main_query() ) {
+			$args      = self::get_current_shop_view_args();
+			$shortcode = new WC_Shortcode_Products(
+				array_merge(
+					wc()->query->get_catalog_ordering_args(),
+					array(
+						'page'     => $args->page,
+						'columns'  => $args->columns,
+						'rows'     => $args->rows,
+						'orderby'  => '',
+						'order'    => '',
+						'paginate' => true,
+						'cache'    => false,
+					)
+				),
+			'products' );
+
+			// Allow queries to run e.g. layered nav.
+			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+
+			$content = $content . $shortcode->get_content();
+
+			// Remove actions and self to avoid nested calls.
+			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+			remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		}
+		return $content;
 	}
 
 	/**
@@ -35,7 +133,7 @@ class WC_Template_Loader {
 	 * this to the theme (containing a woocommerce() inside) this will be used for all.
 	 * woocommerce templates.
 	 *
-	 * @param mixed $template
+	 * @param string $template Template to load.
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
@@ -79,7 +177,7 @@ class WC_Template_Loader {
 				$default_file = 'archive-product.php';
 			}
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
-			$default_file = 'archive-product.php';
+			$default_file = current_theme_supports( 'woocommerce' ) ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
 		}
@@ -118,7 +216,7 @@ class WC_Template_Loader {
 	/**
 	 * Load comments template.
 	 *
-	 * @param mixed $template
+	 * @param string $template template to load.
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
@@ -146,4 +244,4 @@ class WC_Template_Loader {
 	}
 }
 
-WC_Template_Loader::init();
+add_action( 'after_setup_theme', array( 'WC_Template_Loader', 'init' ) );
