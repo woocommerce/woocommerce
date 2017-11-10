@@ -116,8 +116,8 @@ class WC_Shortcode_Products {
 			'limit'          => '-1',      // Results limit.
 			'columns'        => '3',       // Number of columns.
 			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-			'orderby'        => '',        // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'          => '',        // ASC or DESC.
+			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
+			'order'          => 'ASC',     // ASC or DESC.
 			'ids'            => '',        // Comma separated IDs.
 			'skus'           => '',        // Comma separated SKUs.
 			'category'       => '',        // Comma separated category slugs.
@@ -185,8 +185,13 @@ class WC_Shortcode_Products {
 		$ordering_args                = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
 		$query_args['orderby']        = $ordering_args['orderby'];
 		$query_args['order']          = $ordering_args['order'];
-		$query_args['posts_per_page'] = $this->attributes['limit'];
-		$query_args['paged']          = absint( $this->attributes['page'] );
+		if ( $ordering_args['meta_key'] ) {
+			$query_args['meta_key']       = $ordering_args['meta_key'];
+		}
+		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
+		if ( 1 < $this->attributes['page'] ) {
+			$query_args['paged']          = absint( $this->attributes['page'] );
+		}
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
@@ -274,10 +279,6 @@ class WC_Shortcode_Products {
 	 */
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
- 			// @codingStandardsIgnoreStart
-			$query_args['meta_key'] = $ordering_args['meta_key'];
-			// @codingStandardsIgnoreEnd
-
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),

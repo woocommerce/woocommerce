@@ -101,6 +101,8 @@ class WC_Template_Loader {
 						'page'     => $args->page,
 						'columns'  => $args->columns,
 						'rows'     => $args->rows,
+						'orderby'  => '',
+						'order'    => '',
 						'paginate' => true,
 						'cache'    => false,
 					)

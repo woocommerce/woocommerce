@@ -415,7 +415,15 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) ); // WPCS: sanitization ok, input var ok.
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : ''; // WPCS: sanitization ok, input var ok.
+
+			if ( ! $orderby_value ) {
+				if ( is_search() ) {
+					$orderby_value = 'relevance';
+				} else {
+					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+				}
+			}
 
 			// Get order + orderby args from string.
 			$orderby_value = explode( '-', $orderby_value );
@@ -426,23 +434,21 @@ class WC_Query {
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
 		$args    = array(
-			'orderby'  => 'relevance',
-			'order'    => 'DESC',
+			'orderby'  => $orderby,
+			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',
 			'meta_key' => '', // @codingStandardsIgnoreLine
 		);
 
-		// Set to default. Menu order for non-searches, relevance for searches.
-		if ( ! is_search() ) {
-			$args['orderby']  = 'menu_order title';
-			$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-			$args['meta_key'] = ''; // @codingStandardsIgnoreLine
-		}
-
 		switch ( $orderby ) {
+			case 'menu_order' :
+				$args['orderby']  = 'menu_order title';
+				break;
+			case 'relevance' :
+				$args['orderby']= 'relevance';
+				$args['order']  = 'DESC';
+				break;
 			case 'rand' :
-				// @codingStandardsIgnoreStart
-				$args['orderby']  = 'rand';
-				// @codingStandardsIgnoreEnd
+				$args['orderby']  = 'rand'; // @codingStandardsIgnoreLine
 				break;
 			case 'date' :
 				$args['orderby']  = 'date ID';
