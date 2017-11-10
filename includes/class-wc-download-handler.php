@@ -305,7 +305,7 @@ class WC_Download_Handler {
 	private static function download_headers( $file_path, $filename ) {
 		self::check_server_config();
 		self::clean_buffers();
-		WC_Cache_Helper::do_not_cache_page();
+		wc_nocache_headers();
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . self::get_download_content_type( $file_path ) );
