@@ -214,7 +214,7 @@ class WC_Admin_Webhooks {
 			/* translators: %s: date */
 			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
 			// @codingStandardsIgnoreEnd
-			'comment_status' => 'open',
+			'comment_status' => 'closed',
 		) );
 
 		if ( is_wp_error( $webhook_id ) ) {
@@ -457,30 +457,8 @@ class WC_Admin_Webhooks {
 	 *
 	 * @param WC_Webhook $webhook
 	 */
-	public static function logs_output( $webhook ) {
-		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
-		$args    = array(
-			'post_id' => $webhook->id,
-			'status'  => 'approve',
-			'type'    => 'webhook_delivery',
-			'number'  => 10,
-		);
-
-		if ( 1 < $current ) {
-			$args['offset'] = ( $current - 1 ) * 10;
-		}
-
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		$logs = get_comments( $args );
-
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		if ( $logs ) {
-			include_once( dirname( __FILE__ ) . '/settings/views/html-webhook-logs.php' );
-		} else {
-			echo '<p>' . __( 'This Webhook has no log yet.', 'woocommerce' ) . '</p>';
-		}
+	public static function logs_output( $webhook = 'deprecated' ) {
+		echo '<p>' . sprintf( __( '<a href="%s">View Webhook Delivery Logs</a>', 'woocommerce' ), esc_url( '' ) ) . '</p>';
 	}
 
 	/**
@@ -521,40 +499,7 @@ class WC_Admin_Webhooks {
 	 * @return string
 	 */
 	public static function get_logs_navigation( $total, $webhook ) {
-		$pages   = ceil( $total / 10 );
-		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
-
-		$html = '<div class="webhook-logs-navigation">';
-
-			$html .= '<p class="info" style="float: left;"><strong>';
-			/* translators: 1: items count (i.e. 8 items) 2: current page 3: total pages */
-			$html .= sprintf(
-				__( '%1$s &ndash; Page %2$d of %3$d', 'woocommerce' ),
-				sprintf( _n( '%d item', '%d items', $total, 'woocommerce' ), $total ),
-				$current,
-				$pages
-			);
-			$html .= '</strong></p>';
-
-			if ( 1 < $pages ) {
-				$html .= '<p class="tools" style="float: right;">';
-					if ( 1 == $current ) {
-						$html .= '<button class="button-primary" disabled="disabled">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</button> ';
-					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
-					}
-
-					if ( $pages == $current ) {
-						$html .= '<button class="button-primary" disabled="disabled">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</button>';
-					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
-					}
-				$html .= '</p>';
-			}
-
-		$html .= '<div class="clear"></div></div>';
-
-		return $html;
+		wc_deprecated_function( 'WC_Admin_Webhooks::get_logs_navigation', '3.3' );
 	}
 }
 
