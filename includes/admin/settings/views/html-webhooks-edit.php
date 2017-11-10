@@ -144,7 +144,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<table class="form-table">
 		<tbody>
 			<?php if ( $webhook->get_date_created() && '0000-00-00 00:00:00' !== $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) : ?>
-				<?php if ( $webhook->get_date_created() ) : ?>
+				<?php if ( is_null( $webhook->get_date_modified() ) ) : ?>
 					<tr valign="top">
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
