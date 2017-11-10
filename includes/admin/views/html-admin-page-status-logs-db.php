@@ -6,8 +6,17 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+$s = '';
+if ( isset( $_REQUEST['s'] ) ) {
+	$s = wc_clean( wp_unslash( $_REQUEST['s'] ) );
+}
 ?>
 <form method="get" id="mainform" action="">
+    <p class="search-box">
+        <label class="screen-reader-text" for="post-search-input"><?php _e( 'Search logs', 'woocommerce' ); ?></label>
+        <input type="search" id="post-search-input" name="s" value="<?php echo esc_attr( $s ); ?>">
+        <input type="submit" id="search-submit" class="button" value="<?php _e( 'Search logs', 'woocommerce' ); ?>">
+    </p>
 
 	<?php $log_table_list->display(); ?>
 
