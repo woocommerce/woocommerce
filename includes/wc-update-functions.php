@@ -1418,15 +1418,17 @@ function wc_update_320_db_version() {
 function wc_update_330_webhook_logs() {
 	global $wpdb;
 
-	$existing_webhook_logs = $wpdb->get_results( "SELECT comment_ID, comment_post_ID FROM {$wpdb->comments} WHERE comment_type = 'webhook_delivery' ORDER BY comment_post_ID, comment_ID DESC" );
+	$existing_webhook_logs = $wpdb->get_results( "SELECT comment_ID, comment_post_ID, comment_date_gmt FROM {$wpdb->comments} WHERE comment_type = 'webhook_delivery'" ); // @codingStandardsIgnoreLine
 
 	if ( $existing_webhook_logs ) {
 		$logger = wc_get_logger();
 		foreach ( $existing_webhook_logs as $webhook_log ) {
-			$message = print_r( array(
+			$webhook = new WC_WebHook( $webhook_log->comment_post_ID );
+			$message = print_r( array( // @codingStandardsIgnoreLine
 				'Webhook Delivery' => array(
-					'Date' => array(),
-					'URL' => array(),
+					'Delivery ID' => $webhook_log->comment_ID,
+					'Date' => date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook_log->comment_date_gmt ), true ),
+					'URL' => $webhook->get_delivery_url(),
 					'Request' => array(
 						'Method' => get_comment_meta( $webhook_log->comment_ID, '_request_method', true ),
 						'Headers' => get_comment_meta( $webhook_log->comment_ID, '_request_headers', true ),
@@ -1441,7 +1443,9 @@ function wc_update_330_webhook_logs() {
 					'Duration' => get_comment_meta( $webhook_log->comment_ID, '_duration', true ),
 				),
 			), true );
-			$logger->log( 'info', $message, array( 'source' => 'webhook_delivery_' . $webhook_log->comment_post_ID ) );
+			$logger->log( 'info', $message, array(
+				'source' => 'webhook_delivery',
+			) );
 		}
 	}
 }
