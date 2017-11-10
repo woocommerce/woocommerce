@@ -144,33 +144,6 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Create Webhook.
-	 */
-	private function create() {
-		check_admin_referer( 'create-webhook' );
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to create Webhooks', 'woocommerce' ) );
-		}
-
-		$webhook = new WC_Webhook();
-		$webhook->set_status( 'disabled' );
-		$webhook->set_name( sprintf(
-			/* translators: %s: date */
-			__( 'Webhook created on %s', 'woocommerce' ),
-			strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) // @codingStandardsIgnoreLine
-		);
-		$webhook->set_pending_delivery( true );
-		$webhook->set_api_version( 'wp_api_v2' );
-		$webhook->set_secret( wp_generate_password( 50, true, true ) );
-		$webhook->save();
-
-		// Redirect to edit page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&created=1' ) );
-		exit();
-	}
-
-	/**
 	 * Bulk delete.
 	 *
 	 * @param array $webhooks List of webhooks IDs.
@@ -235,11 +208,6 @@ class WC_Admin_Webhooks {
 				$this->save();
 			}
 
-			// Create.
-			if ( isset( $_GET['create-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->create();
-			}
-
 			// Bulk actions.
 			if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->bulk_actions();
@@ -298,7 +266,7 @@ class WC_Admin_Webhooks {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
+		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
 		$data_store = WC_Data_Store::load( 'webhook' );
@@ -319,7 +287,7 @@ class WC_Admin_Webhooks {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
 
 			<?php
 				echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
