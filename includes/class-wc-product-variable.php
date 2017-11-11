@@ -309,7 +309,7 @@ class WC_Product_Variable extends WC_Product {
 			'variation_id'          => $variation->get_id(),
 			'variation_is_active'   => $variation->variation_is_active(),
 			'variation_is_visible'  => $variation->variation_is_visible(),
-			'weight'                => wc_format_weight( $variation->get_weight() ),
+			'weight'                => $variation->get_weight(),
 			'weight_html'           => wc_format_weight( $variation->get_weight() ),
 		), $this, $variation );
 	}
