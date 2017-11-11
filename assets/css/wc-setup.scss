@@ -473,6 +473,7 @@ body {
 	margin: 0 0 1em;
 	list-style: none outside;
 	border-radius: 4px;
+	overflow: hidden; // Make sure dark background doesn't cover curved border
 
 	p {
 		margin: 0 0 1em 0;
@@ -486,7 +487,7 @@ body {
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
-	padding: 2em 0;
+	padding: 0;
 	border-bottom: 1px solid #eee;
 	color: #666;
 
@@ -503,16 +504,24 @@ body {
 		min-width: 175px;
 		text-align: center;
 		font-weight: bold;
+		padding: 2em 0;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		img {
 			max-width: 75px;
-			margin-top: 0.5em;
 		}
+	}
+
+	&.inverted-logo .wc-wizard-service-name {
+		background: #3c3c3c;
 	}
 
 	.wc-wizard-service-description {
 		flex-grow: 1;
-		padding: 0 1em;
+		padding: 2em 1em;
 
 		p {
 			margin-bottom: 0;
@@ -534,6 +543,7 @@ body {
 		min-width: 75px;
 		text-align: center;
 		cursor: pointer;
+		padding: 2em 0;
 	}
 
 	.wc-wizard-service-toggle {
