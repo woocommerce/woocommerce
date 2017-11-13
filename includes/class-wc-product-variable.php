@@ -290,7 +290,7 @@ class WC_Product_Variable extends WC_Product {
 			'attributes'            => $variation->get_variation_attributes(),
 			'availability_html'     => wc_get_stock_html( $variation ),
 			'backorders_allowed'    => $variation->backorders_allowed(),
-			'dimensions'            => wc_format_dimensions( $variation->get_dimensions( false ) ),
+			'dimensions'            => $variation->get_dimensions( false ),
 			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 			'display_price'         => wc_get_price_to_display( $variation ),
 			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
@@ -309,7 +309,7 @@ class WC_Product_Variable extends WC_Product {
 			'variation_id'          => $variation->get_id(),
 			'variation_is_active'   => $variation->variation_is_active(),
 			'variation_is_visible'  => $variation->variation_is_visible(),
-			'weight'                => wc_format_weight( $variation->get_weight() ),
+			'weight'                => $variation->get_weight(),
 			'weight_html'           => wc_format_weight( $variation->get_weight() ),
 		), $this, $variation );
 	}
