@@ -1,4 +1,9 @@
 <?php
+/**
+ * Layered nav widget
+ *
+ * @package WooCommerce/Widgets
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -31,8 +36,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * @see WP_Widget->update
 	 *
-	 * @param array $new_instance
-	 * @param array $old_instance
+	 * @param array $new_instance New Instance.
+	 * @param array $old_instance Old Instance.
 	 *
 	 * @return array
 	 */
@@ -46,7 +51,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * @see WP_Widget->form
 	 *
-	 * @param array $instance
+	 * @param array $instance Instance.
 	 */
 	public function form( $instance ) {
 		$this->init_settings();
@@ -106,8 +111,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * @see WP_Widget
 	 *
-	 * @param array $args
-	 * @param array $instance
+	 * @param array $args Arguments.
+	 * @param array $instance Instance.
 	 */
 	public function widget( $args, $instance ) {
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
@@ -144,7 +149,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		$terms = get_terms( $taxonomy, $get_terms_args );
 
-		if ( 0 === sizeof( $terms ) ) {
+		if ( 0 === count( $terms ) ) {
 			return;
 		}
 
@@ -171,7 +176,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		$this->widget_end( $args );
 
-		// Force found when option is selected - do not force found on taxonomy attributes
+		// Force found when option is selected - do not force found on taxonomy attributes.
 		if ( ! is_tax() && is_array( $_chosen_attributes ) && array_key_exists( $taxonomy, $_chosen_attributes ) ) {
 			$found = true;
 		}
@@ -179,12 +184,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		if ( ! $found ) {
 			ob_end_clean();
 		} else {
-			echo ob_get_clean();
+			echo ob_get_clean(); // @codingStandardsIgnoreLine
 		}
 	}
 
 	/**
 	 * Return the currently viewed taxonomy name.
+	 *
 	 * @return string
 	 */
 	protected function get_current_taxonomy() {
@@ -193,6 +199,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Return the currently viewed term ID.
+	 *
 	 * @return int
 	 */
 	protected function get_current_term_id() {
@@ -201,6 +208,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Return the currently viewed term slug.
+	 *
 	 * @return int
 	 */
 	protected function get_current_term_slug() {
@@ -209,9 +217,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Show dropdown layered nav.
-	 * @param  array $terms
-	 * @param  string $taxonomy
-	 * @param  string $query_type
+	 *
+	 * @param  array  $terms Terms.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  string $query_type Query Type.
 	 * @return bool Will nav display?
 	 */
 	protected function layered_nav_dropdown( $terms, $taxonomy, $query_type ) {
@@ -239,16 +248,16 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			foreach ( $terms as $term ) {
 
-				// If on a term page, skip that term in widget list
+				// If on a term page, skip that term in widget list.
 				if ( $term->term_id === $this->get_current_term_id() ) {
 					continue;
 				}
 
-				// Get count based on current view
+				// Get count based on current view.
 				$option_is_set  = in_array( $term->slug, $current_values );
 				$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
-				// Only show options with count > 0
+				// Only show options with count > 0.
 				if ( 0 < $count ) {
 					$found = true;
 				} elseif ( 0 === $count && ! $option_is_set ) {
@@ -261,7 +270,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo '</select>';
 
 			if ( $multiple ) {
-				echo '<input class="woocommerce-widget-layered-nav-dropdown__submit" type="submit" value="' . esc_attr__( 'Apply', 'woocommerce' ) . '" />';
+				echo '<button class="woocommerce-widget-layered-nav-dropdown__submit" type="submit" value="' . esc_attr__( 'Apply', 'woocommerce' ) . '">' . esc_html__( 'Apply', 'woocommerce' ) . '</button>';
 			}
 
 			if ( 'or' === $query_type ) {
@@ -269,7 +278,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			echo '<input type="hidden" name="filter_' . esc_attr( $taxonomy_filter_name ) . '" value="' . esc_attr( implode( ',', $current_values ) ) . '" />';
-			echo wc_query_string_form_fields( null, array( 'filter_' . $taxonomy_filter_name, 'query_type_' . $taxonomy_filter_name ), '', true );
+			echo wc_query_string_form_fields( null, array( 'filter_' . $taxonomy_filter_name, 'query_type_' . $taxonomy_filter_name ), '', true ); // @codingStandardsIgnoreLine
 			echo '</form>';
 
 			wc_enqueue_js( "
@@ -290,7 +299,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
 							placeholder: '" . esc_html( $any_label ) . "',
 							minimumResultsForSearch: 5,
-							width: '100%'
+							width: '100%',
+							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+							language: {
+								noResults: function() {
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+								}
+							}
 						} );
 					};
 					wc_layered_nav_select();
@@ -304,7 +319,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Get current page URL for layered nav items.
 	 *
-	 * @param string $taxonomy
+	 * @param string $taxonomy Taxonomy.
 	 *
 	 * @return string
 	 */
@@ -322,18 +337,18 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
-		// Min/Max
+		// Min/Max.
 		if ( isset( $_GET['min_price'] ) ) {
-			$link = add_query_arg( 'min_price', wc_clean( $_GET['min_price'] ), $link );
+			$link = add_query_arg( 'min_price', wc_clean( wp_unslash( $_GET['min_price'] ) ), $link );
 		}
 
 		if ( isset( $_GET['max_price'] ) ) {
-			$link = add_query_arg( 'max_price', wc_clean( $_GET['max_price'] ), $link );
+			$link = add_query_arg( 'max_price', wc_clean( wp_unslash( $_GET['max_price'] ) ), $link );
 		}
 
-		// Order by
+		// Order by.
 		if ( isset( $_GET['orderby'] ) ) {
-			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
+			$link = add_query_arg( 'orderby', wc_clean( wp_unslash( $_GET['orderby'] ) ), $link );
 		}
 
 		/**
@@ -344,17 +359,17 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
 		}
 
-		// Post Type Arg
+		// Post Type Arg.
 		if ( isset( $_GET['post_type'] ) ) {
-			$link = add_query_arg( 'post_type', wc_clean( $_GET['post_type'] ), $link );
+			$link = add_query_arg( 'post_type', wc_clean( wp_unslash( $_GET['post_type'] ) ), $link );
 		}
 
-		// Min Rating Arg
+		// Min Rating Arg.
 		if ( isset( $_GET['rating_filter'] ) ) {
-			$link = add_query_arg( 'rating_filter', wc_clean( $_GET['rating_filter'] ), $link );
+			$link = add_query_arg( 'rating_filter', wc_clean( wp_unslash( $_GET['rating_filter'] ) ), $link );
 		}
 
-		// All current filters
+		// All current filters.
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
 			foreach ( $_chosen_attributes as $name => $data ) {
 				if ( $name === $taxonomy ) {
@@ -378,9 +393,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * This query allows counts to be generated based on the viewed products, not all products.
 	 *
-	 * @param  array  $term_ids
-	 * @param  string $taxonomy
-	 * @param  string $query_type
+	 * @param  array  $term_ids Term IDs.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  string $query_type Query Type.
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -402,7 +417,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$meta_query_sql  = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql   = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		// Generate query
+		// Generate query.
 		$query           = array();
 		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
 		$query['from']   = "FROM {$wpdb->posts}";
@@ -414,16 +429,15 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
-			AND {$wpdb->posts}.post_status = 'publish'
-			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
-			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
-		";
+			AND {$wpdb->posts}.post_status = 'publish'"
+			. $tax_query_sql['where'] . $meta_query_sql['where'] .
+			'AND terms.term_id IN (' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
 
 		if ( $search = WC_Query::get_main_search_query_sql() ) {
 			$query['where'] .= ' AND ' . $search;
 		}
 
-		$query['group_by'] = "GROUP BY terms.term_id";
+		$query['group_by'] = 'GROUP BY terms.term_id';
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
 
@@ -432,7 +446,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$cached_counts = (array) get_transient( 'wc_layered_nav_counts' );
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
-			$results                      = $wpdb->get_results( $query, ARRAY_A );
+			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			set_transient( 'wc_layered_nav_counts', $cached_counts, DAY_IN_SECONDS );
@@ -444,13 +458,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Show list based layered nav.
 	 *
-	 * @param  array  $terms
-	 * @param  string $taxonomy
-	 * @param  string $query_type
+	 * @param  array  $terms Terms.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  string $query_type Query Type.
 	 * @return bool   Will nav display?
 	 */
 	protected function layered_nav_list( $terms, $taxonomy, $query_type ) {
-		// List display
+		// List display.
 		echo '<ul class="woocommerce-widget-layered-nav-list">';
 
 		$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
@@ -462,12 +476,12 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$option_is_set  = in_array( $term->slug, $current_values );
 			$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
-			// Skip the term for the current archive
+			// Skip the term for the current archive.
 			if ( $this->get_current_term_id() === $term->term_id ) {
 				continue;
 			}
 
-			// Only show options with count > 0
+			// Only show options with count > 0.
 			if ( 0 < $count ) {
 				$found = true;
 			} elseif ( 0 === $count && ! $option_is_set ) {
@@ -475,7 +489,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			$filter_name    = 'filter_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) );
-			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( $_GET[ $filter_name ] ) ) : array();
+			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array();
 			$current_filter = array_map( 'sanitize_title', $current_filter );
 
 			if ( ! in_array( $term->slug, $current_filter ) ) {
@@ -486,7 +500,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {
-				// Exclude query arg for current term archive term
+				// Exclude query arg for current term archive term.
 				if ( $value === $this->get_current_term_slug() ) {
 					unset( $current_filter[ $key ] );
 				}
@@ -498,17 +512,19 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( ! empty( $current_filter ) ) {
+				asort( $current_filter );
 				$link = add_query_arg( $filter_name, implode( ',', $current_filter ), $link );
 
-				// Add Query type Arg to URL
-				if ( 'or' === $query_type && ! ( 1 === sizeof( $current_filter ) && $option_is_set ) ) {
+				// Add Query type Arg to URL.
+				if ( 'or' === $query_type && ! ( 1 === count( $current_filter ) && $option_is_set ) ) {
 					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
 				}
+				$link = str_replace( '%2C', ',', $link );
 			}
 
 			if ( $count > 0 || $option_is_set ) {
 				$link      = esc_url( apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy ) );
-				$term_html = '<a href="' . $link . '">' . esc_html( $term->name ) . '</a>';
+				$term_html = '<a rel="nofollow" href="' . $link . '">' . esc_html( $term->name ) . '</a>';
 			} else {
 				$link      = false;
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';

@@ -500,29 +500,38 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		$id         = 0;
-		$upload_dir = wp_upload_dir();
+		$upload_dir = wp_upload_dir( null, false );
 		$base_url   = $upload_dir['baseurl'] . '/';
 
-		// Check first if attachment is on WordPress uploads directory.
-		if ( false === strpos( $url, $base_url ) ) {
-			// Search for yyyy/mm/slug.extension.
+		// Check first if attachment is inside the WordPress uploads directory, or we're given a filename only.
+		if ( false !== strpos( $url, $base_url ) || false === strpos( $url, '://' ) ) {
+			// Search for yyyy/mm/slug.extension or slug.extension - remove the base URL.
 			$file = str_replace( $base_url, '', $url );
 			$args = array(
 				'post_type'   => 'attachment',
 				'post_status' => 'any',
 				'fields'      => 'ids',
 				'meta_query'  => array(
+					'relation' => 'OR',
 					array(
-						'value'   => $file,
-						'compare' => 'LIKE',
 						'key'     => '_wp_attached_file',
+						'value'   => '^' . $file,
+						'compare' => 'REGEXP',
+					),
+					array(
+						'key'     => '_wp_attached_file',
+						'value'   => '/' . $file,
+						'compare' => 'LIKE',
+					),
+					array(
+						'key'     => '_wc_attachment_source',
+						'value'   => '/' . $file,
+						'compare' => 'LIKE',
 					),
 				),
 			);
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
 		} else {
+			// This is an external URL, so compare to source.
 			$args = array(
 				'post_type'   => 'attachment',
 				'post_status' => 'any',
@@ -534,9 +543,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					),
 				),
 			);
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
+		}
+
+		if ( $ids = get_posts( $args ) ) {
+			$id = current( $ids );
 		}
 
 		// Upload if attachment does not exists.

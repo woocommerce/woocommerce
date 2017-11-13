@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 5.0.0
+ * SelectWoo 1.0.1
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
@@ -1668,6 +1668,13 @@ S2.define('select2/selection/multiple',[
         });
       }
     );
+
+    this.$selection.on('keydown', function (evt) {
+      // If user starts typing an alphanumeric key on the keyboard, open if not opened.
+      if (!container.isOpen() && evt.which >= 48 && evt.which <= 90) {
+        container.open();
+      }
+    });
   };
 
   MultipleSelection.prototype.clear = function () {
@@ -1694,6 +1701,7 @@ S2.define('select2/selection/multiple',[
   };
 
   MultipleSelection.prototype.update = function (data) {
+    var self = this;
     this.clear();
 
     if (data.length === 0) {
@@ -1719,6 +1727,14 @@ S2.define('select2/selection/multiple',[
     var $rendered = this.$selection.find('.select2-selection__rendered');
 
     Utils.appendMany($rendered, $selections);
+
+    // Return cursor to search field after updating.
+    // Needs 1 ms delay because of other 1 ms setTimeouts when rendering.
+    if ('undefined' !== typeof this.$search) {
+      setTimeout(function(){
+        self.$search.focus();
+      }, 1);
+    }
   };
 
   return MultipleSelection;
@@ -3524,6 +3540,7 @@ S2.define('select2/data/ajax',[
         }
 
         callback(results);
+        self.container.focusOnActiveElement();
       }, function () {
         // Attempt to detect if a request was aborted
         // Only works if the transport exposes a status property
@@ -5416,7 +5433,7 @@ S2.define('select2/core',[
       // Needs 1 ms delay because of other 1 ms setTimeouts when rendering.
       setTimeout(function(){
         self.focusOnActiveElement();
-      },1);
+      }, 1);
     });
 
     $(document).on('keydown', function (evt) {
@@ -5445,16 +5462,17 @@ S2.define('select2/core',[
           evt.preventDefault();
         }
 
+        var $searchField = self.$dropdown.find('.select2-search__field');
+        if (! $searchField.length) {
+          $searchField = self.$container.find('.select2-search__field');
+        }
+
         // Move the focus to the selected element on keyboard navigation.
         // Required for screen readers to work properly.
         if (key === KEYS.DOWN || key === KEYS.UP) {
             self.focusOnActiveElement();
         } else {
           // Focus on the search if user starts typing.
-          var $searchField = self.$dropdown.find('.select2-search__field');
-          if (! $searchField.length) {
-            $searchField = self.$container.find('.select2-search__field');
-          }
           $searchField.focus();
           // Focus back to active selection when finished typing.
           // Small delay so typed character can be read by screen reader.
@@ -5462,6 +5480,14 @@ S2.define('select2/core',[
               self.focusOnActiveElement();
           }, 1000);
         }
+
+        // If focus is in the search field, select the current active element on Enter key.
+        $searchField.on('keydown', function (evt) {
+          if (evt.which === KEYS.ENTER) {
+            self.trigger('results:select', {});
+            evt.preventDefault();
+          }
+        });
 
       } else if (self.hasFocus()) {
         if (key === KEYS.ENTER || key === KEYS.SPACE ||

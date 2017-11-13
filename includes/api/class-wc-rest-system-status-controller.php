@@ -836,7 +836,11 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		$outdated_templates = false;
 		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
 		foreach ( $scan_files as $file ) {
-			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+			$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
+
+			if ( file_exists( $located ) ) {
+				$theme_file = $located;
+			} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
 			} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
@@ -870,7 +874,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
-			'has_woocommerce_support' => ( current_theme_supports( 'woocommerce' ) || in_array( $active_theme->template, wc_get_core_supported_themes() ) ),
+			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 			'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 			'has_outdated_templates'  => $outdated_templates,
 			'overrides'               => $override_files,

@@ -59,6 +59,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function load_wc() {
+		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		require_once( $this->plugin_dir . '/woocommerce.php' );
 	}
 

@@ -141,7 +141,7 @@ class WC_Tracker {
 	public static function get_theme_info() {
 		$theme_data        = wp_get_theme();
 		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support  = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+		$theme_wc_support  = ! current_theme_supports( 'woocommerce' ) ? 'No' : 'Yes';
 
 		return array( 'name' => $theme_data->Name, 'version' => $theme_data->Version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
 	}
@@ -371,12 +371,12 @@ class WC_Tracker {
 			foreach ( $files as $file ) {
 				if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 					$theme_file = get_stylesheet_directory() . '/' . $file;
-				} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_template_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
 				} else {
 					$theme_file = false;
 				}

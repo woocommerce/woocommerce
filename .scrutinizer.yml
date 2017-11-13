@@ -1,29 +1,10 @@
-build:
-  environment:
-    php: "7.1"
-    mysql: true
-    postgresql: false
-    redis: false
-    apache2:
-      modules:
-        - rewrite
-    variables:
-      WP_VERSION: latest
-  dependencies:
-    before:
-      - "bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION"
-  tests:
-    override:
-      -
-        command: "vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.clover"
-        coverage:
-          file: coverage.clover
-          format: php-clover
 tools:
   php_code_sniffer:
     config:
       standard: WordPress
   sensiolabs_security_checker: true
+  external_code_coverage:
+    timeout: 2500
 checks:
   php:
     avoid_closing_tag: false
@@ -46,8 +27,6 @@ filter:
     - dummy-data/
     - i18n/
     - includes/api/legacy/
-    - includes/class-wc-legacy-api.php
-    - includes/gateways/simplify-commerce-deprecated/
     - includes/gateways/simplify-commerce/includes/
     - includes/legacy/
     - includes/libraries/

@@ -111,7 +111,7 @@ jQuery(function( $ ) {
 		dateFormat: 'yy-mm-dd',
 		numberOfMonths: 1,
 		minDate: '-20Y',
-		maxDate: '+0D',
+		maxDate: '+1D',
 		showButtonPanel: true,
 		showOn: 'focus',
 		buttonImageOnly: true,

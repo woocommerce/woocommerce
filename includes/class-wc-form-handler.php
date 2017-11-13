@@ -67,7 +67,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$user_id = get_current_user_id();
 
@@ -181,7 +181,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$errors       = new WP_Error();
 		$user         = new stdClass();
@@ -278,7 +278,7 @@ class WC_Form_Handler {
 	 */
 	public static function checkout_action() {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
 				wp_redirect( wc_get_page_permalink( 'cart' ) );
@@ -298,7 +298,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 			ob_start();
 
 			// Pay for existing order
@@ -377,7 +377,7 @@ class WC_Form_Handler {
 	 */
 	public static function add_payment_method_action() {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 			ob_start();
 
 			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
@@ -422,7 +422,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			$token_id = absint( $wp->query_vars['delete-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -447,7 +447,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -473,7 +473,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
@@ -587,7 +587,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
 			WC()->cart->empty_cart();
@@ -672,8 +672,13 @@ class WC_Form_Handler {
 	 * Cancel a pending order.
 	 */
 	public static function cancel_order() {
-		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
-			nocache_headers();
+		if (
+			isset( $_GET['cancel_order'] ) &&
+			isset( $_GET['order'] ) &&
+			isset( $_GET['order_id'] ) &&
+			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) )
+		) {
+			wc_nocache_headers();
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
@@ -720,7 +725,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
@@ -923,11 +928,11 @@ class WC_Form_Handler {
 
 			try {
 				$creds = array(
+					'user_login'    => trim( $_POST['username'] ),
 					'user_password' => $_POST['password'],
 					'remember'      => isset( $_POST['rememberme'] ),
 				);
 
-				$username         = trim( $_POST['username'] );
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -935,29 +940,13 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $validation_error->get_error_message() );
 				}
 
-				if ( empty( $username ) ) {
+				if ( empty( $creds['user_login'] ) ) {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Username is required.', 'woocommerce' ) );
-				}
-
-				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-					$user = get_user_by( 'email', $username );
-
-					if ( ! $user ) {
-						$user = get_user_by( 'login', $username );
-					}
-
-					if ( isset( $user->user_login ) ) {
-						$creds['user_login'] = $user->user_login;
-					} else {
-						throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
-					}
-				} else {
-					$creds['user_login'] = $username;
 				}
 
 				// On multisite, ensure user exists on current site, if not add them before allowing login.
 				if ( is_multisite() ) {
-					$user_data = get_user_by( 'login', $username );
+					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
 
 					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
 						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
@@ -969,7 +958,7 @@ class WC_Form_Handler {
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $username ) . '</strong>', $message );
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', $message );
 					throw new Exception( $message );
 				} else {
 
@@ -1071,11 +1060,6 @@ class WC_Form_Handler {
 					throw new Exception( $validation_error->get_error_message() );
 				}
 
-				// Anti-spam trap
-				if ( ! empty( $_POST['email_2'] ) ) {
-					throw new Exception( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
-				}
-
 				$new_customer = wc_create_new_customer( sanitize_email( $email ), wc_clean( $username ), $password );
 
 				if ( is_wp_error( $new_customer ) ) {
@@ -1086,7 +1070,15 @@ class WC_Form_Handler {
 					wc_set_customer_auth_cookie( $new_customer );
 				}
 
-				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : wc_get_page_permalink( 'myaccount' ) ) );
+				if ( ! empty( $_POST['redirect'] ) ) {
+					$redirect = wp_sanitize_redirect( $_POST['redirect'] );
+				} elseif ( wc_get_raw_referer() ) {
+					$redirect = wc_get_raw_referer();
+				} else {
+					$redirect = wc_get_page_permalink( 'myaccount' );
+				}
+
+				wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 
 			} catch ( Exception $e ) {

@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Product Export
+ *
+ * @package WooCommerce/Admin/Export
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -33,9 +36,9 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 							<td>
 								<select id="woocommerce-exporter-columns" class="woocommerce-exporter-columns wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all columns', 'woocommerce' ); ?>">
 									<?php
-										foreach ( $exporter->get_default_column_names() as $column_id => $column_name ) {
-											echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
-										}
+									foreach ( $exporter->get_default_column_names() as $column_id => $column_name ) {
+										echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
+									}
 									?>
 									<option value="downloads"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></option>
 									<option value="attributes"><?php esc_html_e( 'Attributes', 'woocommerce' ); ?></option>
@@ -49,9 +52,9 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 							<td>
 								<select id="woocommerce-exporter-types" class="woocommerce-exporter-types wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all products', 'woocommerce' ); ?>">
 									<?php
-										foreach ( wc_get_product_types() as $value => $label ) {
-											echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
-										}
+									foreach ( wc_get_product_types() as $value => $label ) {
+										echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
+									}
 									?>
 									<option value="variation"><?php esc_html_e( 'Product variations', 'woocommerce' ); ?></option>
 								</select>
@@ -71,7 +74,7 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>
 			</section>
 			<div class="wc-actions">
-				<input type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>" />
+				<button type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>"><?php esc_html_e( 'Generate CSV', 'woocommerce' ); ?></button>
 			</div>
 		</form>
 	</div>

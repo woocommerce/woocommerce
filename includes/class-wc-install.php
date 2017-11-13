@@ -96,6 +96,10 @@ class WC_Install {
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
 		),
+		'3.3.0' => array(
+			'wc_update_330_image_options',
+			'wc_update_330_db_version',
+		),
 	);
 
 	/**
@@ -165,6 +169,13 @@ class WC_Install {
 			return;
 		}
 
+		// Check if we are not already running this routine.
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+			return;
+		}
+
+		// If we made it till here nothing is running yet, lets set the transient now.
+		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
 		self::remove_admin_notices();
@@ -178,6 +189,8 @@ class WC_Install {
 		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+
+		delete_transient( 'wc_installing' );
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );

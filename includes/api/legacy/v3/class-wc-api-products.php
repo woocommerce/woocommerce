@@ -1566,10 +1566,11 @@ class WC_API_Products extends WC_API_Resource {
 
 			$product->set_date_on_sale_to( $date_to );
 			$product->set_date_on_sale_from( $date_from );
+
 			if ( $product->is_on_sale() ) {
-				$product->set_price( $product->get_sale_price() );
+				$product->set_price( $product->get_sale_price( 'edit' ) );
 			} else {
-				$product->set_price( $product->get_regular_price() );
+				$product->set_price( $product->get_regular_price( 'edit' ) );
 			}
 		}
 

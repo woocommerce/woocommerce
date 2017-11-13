@@ -3139,6 +3139,10 @@ img.help_tip {
 			box-sizing: border-box;
 		}
 
+		input[size] {
+			width: auto !important;
+		}
+
 		// Ignore nested inputs.
 		table {
 			select,
@@ -3231,6 +3235,10 @@ img.help_tip {
 			}
 		}
 
+		.iris-error {
+			background-color: #ffafaf;
+		}
+
 		.colorpickpreview {
 			padding: 6px;
 			padding-left: 20px;
@@ -3260,6 +3268,105 @@ img.help_tip {
 
 		.wc_emails_wrapper {
 			padding: 0 15px 10px 0;
+		}
+
+		.woocommerce-thumbnail-cropping {
+			margin: 0 40px 1em 0;
+			padding: 0;
+			display:inline-block;
+			vertical-align: top;
+
+			input[type=radio] {
+				vertical-align: top;
+				margin-top: 2px;
+			}
+			label {
+				display: inline-block;
+
+				span.description {
+					margin-top: .5em;
+					display:block;
+					color: #999;
+				}
+				span.woocommerce-thumbnail-cropping-aspect-ratio {
+					margin-top: .5em;
+					display:block;
+				}
+			}
+			li {
+				margin: 5px 0 1.5em;
+				padding: 0;
+			}
+		}
+		.woocommerce-thumbnail-preview {
+			display:inline-block;
+			width: 320px;
+			vertical-align: top;
+			h4 {
+				margin-top: 0;
+			}
+			.woocommerce-thumbnail-preview-block {
+				text-align: center;
+				width: 100px;
+				margin: 0 10px 0 0;
+				float: left;
+				.woocommerce-thumbnail-preview-block__image {
+					width: 90px;
+					height: 90px;
+					border: 5px solid #fff;
+					background: #eee;
+					box-shadow: 0 1px 1px #ccc;
+					margin: 0 0 10px;
+					position: relative;
+					overflow: hidden;
+					&:before,
+					&:after {
+						content: "";
+						display: block;
+						width: 30px;
+						height: 30px;
+						background: rgba(0,0,0,.1);
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						margin-left: -20px;
+						margin-top: -20px;
+					}
+					&:before {
+						margin-top: -10px;
+						margin-left: -10px;
+						background: rgba(0,0,0,.1);
+					}
+				}
+				.woocommerce-thumbnail-preview-block__text {
+					width: 50%;
+					background: #ddd;
+					margin: 0 auto 10px;
+					height: 6px;
+				}
+				.woocommerce-thumbnail-preview-block__button {
+					width: 30px;
+					height: 5px;
+					border: 8px solid #fff;
+					background: #ededed;
+					box-shadow: 0 0 0 1px #ddd;
+					margin: 0 auto;
+					border-radius: 2px;
+				}
+				&:nth-child(3) {
+					.woocommerce-thumbnail-preview-block__text {
+						width: 75%;
+					}
+				}
+				&:nth-child(4) {
+					.woocommerce-thumbnail-preview-block__text {
+						width: 35%;
+					}
+				}
+			}
+			.woocommerce-thumbnail-preview-block:last-child {
+				margin: 0;
+			}
 		}
 	}
 }
@@ -5674,6 +5781,34 @@ table.bar_chart {
 		}
 	}
 
+	.button {
+		font-size: 1.25em;
+		padding: 0.5em 1em !important;
+		line-height: 1.5em !important;
+		margin-right: 0.5em;
+		margin-bottom: 2px;
+		height: auto !important;
+		border-radius: 4px;
+		background-color: #bb77ae;
+		border-color: #a36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
+		margin: 0;
+		opacity: 1;
+
+		&:hover, &:focus, &:active {
+			background: #a36597;
+			border-color: #a36597;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		}
+	}
+
+	.error .button {
+		font-size: 1em;
+	}
+
 	.wc-actions {
 		overflow: hidden;
 		border-top: 1px solid #eee;
@@ -5683,27 +5818,6 @@ table.bar_chart {
 
 		.button {
 			float: right;
-			font-size: 1.25em;
-			padding: 0.5em 1em !important;
-			line-height: 1.5em !important;
-			margin-right: 0.5em;
-			margin-bottom: 2px;
-			height: auto !important;
-			border-radius: 4px;
-			background-color: #bb77ae;
-			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
-			margin: 0;
-			opacity: 1;
-
-			&:hover, &:focus, &:active {
-				background: #a36597;
-				border-color: #a36597;
-				-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			}
 		}
 
 		.woocommerce-importer-toggle-advanced-options {

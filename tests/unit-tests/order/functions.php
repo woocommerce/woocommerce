@@ -844,6 +844,80 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_order date queries combined with meta queries.
+	 *
+	 * @since 3.2
+	 */
+	public function test_wc_get_order_mixed_date_shipping_country() {
+		// Set up dates.
+		$start = time() - 1; // Start from one second ago.
+		$yesterday = strtotime( '-1 day', $start );
+		$end = strtotime( '+1 day', $start );
+		$date_range = $start . '...' . $end;
+
+		// Populate orders.
+		$us_now = WC_Helper_Order::create_order();
+		$us_now->set_props( array(
+			'shipping_country' => 'US',
+		) );
+		$us_now->save();
+
+		$us_old = WC_Helper_Order::create_order();
+		$us_old->set_props( array(
+			'date_created' => $yesterday,
+			'shipping_country' => 'US',
+		) );
+		$us_old->save();
+
+		$mx_now = WC_Helper_Order::create_order();
+		$mx_now->set_props( array(
+			'shipping_country' => 'MX',
+		) );
+		$mx_now->save();
+
+		$mx_old = WC_Helper_Order::create_order();
+		$mx_old->set_props( array(
+			'date_created'     => $yesterday,
+			'shipping_country' => 'MX',
+		) );
+		$mx_old->save();
+
+		// Test just date range.
+		$args = array(
+			'return'       => 'ids',
+			'date_created' => $date_range,
+			'orderby'      => 'ID',
+			'order'        => 'ASC',
+		);
+		$orders = wc_get_orders( $args );
+		$expected = array( $us_now->get_id(), $mx_now->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		// Test just US orders.
+		$args = array(
+			'return'           => 'ids',
+			'shipping_country' => 'US',
+			'orderby'          => 'ID',
+			'order'            => 'ASC',
+		);
+		$orders = wc_get_orders( $args );
+		$expected = array( $us_now->get_id(), $us_old->get_id() );
+		$this->assertEquals( $expected, $orders );
+
+		// Test US orders with date range.
+		$args = array(
+			'return'           => 'ids',
+			'date_created'     => $date_range,
+			'shipping_country' => 'US',
+			'orderby'          => 'ID',
+			'order'            => 'ASC',
+		);
+		$orders = wc_get_orders( $args );
+		$expected = array( $us_now->get_id() );
+		$this->assertEquals( $expected, $orders );
+	}
+
+	/**
 	 * Test wc_get_order_note().
 	 *
 	 * @since 3.2.0
