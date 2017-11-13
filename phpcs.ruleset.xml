@@ -5,9 +5,6 @@
 
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
-	<!-- Include WPCS and PHPCompatibility paths -->
-	<config name="installed_paths" value="vendor/wp-coding-standards/wpcs,vendor/wimg/php-compatibility" />
-
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
 	<exclude-pattern>apigen/</exclude-pattern>
