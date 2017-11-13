@@ -31,7 +31,6 @@ class WC_Template_Loader {
 	 * Hook in methods.
 	 */
 	public static function init() {
-
 		self::$shop_page_id = wc_get_page_id( 'shop' );
 
 		// Supported themes.
@@ -40,11 +39,23 @@ class WC_Template_Loader {
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 
 		// Unsupported themes.
-		} elseif ( self::$shop_page_id || is_product() ) {
+		} else {
+			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
+		}
+	}
+
+	/**
+	 * Hook in methods to enhance the unsupported theme experience on Shop and Product pages.
+	 *
+	 * @since 3.3.0
+	 */
+	public static function unsupported_theme_init() {
+		if ( self::$shop_page_id || is_product() ) {
 			add_filter( 'the_content', array( __CLASS__, 'unsupported_theme_content_filter' ), 10 );
 			add_filter( 'the_title', array( __CLASS__, 'unsupported_theme_title_filter' ), 10, 2 );
 			add_filter( 'post_thumbnail_html', array( __CLASS__, 'unsupported_theme_single_featured_image_filter' ) );
 			add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'unsupported_theme_remove_review_tab' ) );
+			add_filter( 'body_class', array( __CLASS__, 'unsupported_theme_body_class' ) );
 			add_filter( 'comments_number', '__return_empty_string' );
 
 			if ( is_product() ) {
@@ -69,108 +80,6 @@ class WC_Template_Loader {
 			'columns' => wc_get_default_products_per_row(),
 			'rows'    => wc_get_default_product_rows_per_page(),
 		);
-	}
-
-	/**
-	 * Filter the title and insert WooCommerce content on the shop page.
-	 *
-	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
-	 *
-	 * @since 3.3.0
-	 * @param string $title Existing title.
-	 * @param int    $id ID of the post being filtered.
-	 * @return string
-	 */
-	public static function unsupported_theme_title_filter( $title, $id ) {
-		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
-			$args         = self::get_current_shop_view_args();
-			$title_suffix = array();
-
-			if ( $args->page > 1 ) {
-				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
-			}
-
-			if ( $title_suffix ) {
-				$title = $title . ' &ndash; ' . implode( ', ', $title_suffix );
-			}
-		}
-		return $title;
-	}
-
-	/**
-	 * Filter the content and insert WooCommerce content on the shop page.
-	 *
-	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
-	 *
-	 * @since 3.3.0
-	 * @param string $content Existing post content.
-	 * @return string
-	 */
-	public static function unsupported_theme_content_filter( $content ) {
-		global $wp_query;
-
-		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
-			return $content;
-		}
-
-		self::$in_content_filter = true;
-
-		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
-
-		// Unsupported theme shop page.
-		if ( is_page( self::$shop_page_id ) ) {
-			$args      = self::get_current_shop_view_args();
-			$shortcode = new WC_Shortcode_Products(
-				array_merge(
-					wc()->query->get_catalog_ordering_args(),
-					array(
-						'page'     => $args->page,
-						'columns'  => $args->columns,
-						'rows'     => $args->rows,
-						'orderby'  => '',
-						'order'    => '',
-						'paginate' => true,
-						'cache'    => false,
-					)
-				),
-			'products' );
-
-			// Allow queries to run e.g. layered nav.
-			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
-
-			$content = $content . $shortcode->get_content();
-
-			// Remove actions and self to avoid nested calls.
-			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
-
-		// Unsupported theme product page.
-		} elseif ( is_product() ) {
-			$content = do_shortcode( '[product_page id="' . get_the_ID() . '"]' );
-		}
-
-		self::$in_content_filter = false;
-
-		return $content;
-	}
-
-	public static function unsupported_theme_single_featured_image_filter( $html ) {
-		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
-			return $html;
-		}
-
-		return '';
-	}
-
-	/**
-	 * Remove the Review tab and just use the regular comment form.
-	 *
-	 * @param array $tabs Tab info.
-	 * @return array
-	 */
-	public static function unsupported_theme_remove_review_tab( $tabs ) {
-		unset( $tabs['reviews'] );
-		return $tabs;
 	}
 
 	/**
@@ -293,6 +202,127 @@ class WC_Template_Loader {
 				return trailingslashit( $dir ) . 'single-product-reviews.php';
 			}
 		}
+	}
+
+	/**
+	 * Add a class to the body so we can better style things to look good when rendered in the content.
+	 *
+	 * @since 3.3.0
+	 * @return array
+	 */
+	public static function unsupported_theme_body_class( $classes ) {
+		$classes[] = 'woocommerce-normalized-theme';
+		return $classes;
+	}
+
+	/**
+	 * Filter the title and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $title Existing title.
+	 * @param int    $id ID of the post being filtered.
+	 * @return string
+	 */
+	public static function unsupported_theme_title_filter( $title, $id ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+			$args         = self::get_current_shop_view_args();
+			$title_suffix = array();
+
+			if ( $args->page > 1 ) {
+				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
+			}
+
+			if ( $title_suffix ) {
+				$title = $title . ' &ndash; ' . implode( ', ', $title_suffix );
+			}
+		}
+		return $title;
+	}
+
+	/**
+	 * Filter the content and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $content Existing post content.
+	 * @return string
+	 */
+	public static function unsupported_theme_content_filter( $content ) {
+		global $wp_query;
+
+		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+			return $content;
+		}
+
+		self::$in_content_filter = true;
+
+		// Remove the filter we're in to avoid nested calls.
+		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+
+		// Unsupported theme shop page.
+		if ( is_page( self::$shop_page_id ) ) {
+			$args      = self::get_current_shop_view_args();
+			$shortcode = new WC_Shortcode_Products(
+				array_merge(
+					wc()->query->get_catalog_ordering_args(),
+					array(
+						'page'     => $args->page,
+						'columns'  => $args->columns,
+						'rows'     => $args->rows,
+						'orderby'  => '',
+						'order'    => '',
+						'paginate' => true,
+						'cache'    => false,
+					)
+				),
+			'products' );
+
+			// Allow queries to run e.g. layered nav.
+			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+
+			$content = $content . $shortcode->get_content();
+
+			// Remove actions and self to avoid nested calls.
+			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+
+		// Unsupported theme product page.
+		} elseif ( is_product() ) {
+			$content = do_shortcode( '[product_page id="' . get_the_ID() . '"]' );
+		}
+
+		self::$in_content_filter = false;
+
+		return $content;
+	}
+
+	/**
+	 * Prevent the main featured image on product pages because there will be another featured image
+	 * in the gallery.
+	 *
+	 * @since 3.3.0
+	 * @param string $html Img element HTML.
+	 * @return string
+	 */
+	public static function unsupported_theme_single_featured_image_filter( $html ) {
+		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
+			return $html;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Remove the Review tab and just use the regular comment form.
+	 *
+	 * @param array $tabs Tab info.
+	 * @return array
+	 */
+	public static function unsupported_theme_remove_review_tab( $tabs ) {
+		unset( $tabs['reviews'] );
+		return $tabs;
 	}
 }
 

@@ -2197,3 +2197,31 @@ body:not( .search-results ) .twentysixteen .entry-summary {
 	background: inherit;
 	color: inherit;
 }
+
+/**
+ * Normalized theme styles.
+ * Styles applied to themes that don't formally support WooCommerce to normalize elements
+ * and make things look better since everything is rendered in the post content.
+ */
+.woocommerce-normalized-theme {
+ 	&.single-product {
+		// Normalize the button and input to the same height and font size.
+		input[name="quantity"],
+		.single_add_to_cart_button {
+			font-size: 1em;
+			height: 2em;
+			line-height: 2em;
+			padding-top: 0!important;
+			padding-bottom: 0!important;
+		}
+
+		li.product .button {
+			font-size: .75em;
+		}
+
+		a.reset_variations {
+			opacity: .5;
+			float: right;
+		}
+	}
+}
