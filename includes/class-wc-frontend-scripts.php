@@ -332,12 +332,6 @@ class WC_Frontend_Scripts {
 				'version' => WC_VERSION,
 				'has_rtl' => true,
 			),
-			'woocommerce-unsupported-theme' => array(
-				'src'     => self::get_asset_url( 'assets/css/unsupported-theme.css' ),
-				'deps'    => '',
-				'version' => WC_VERSION,
-				'has_rtl' => true,
-			),
 		);
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
