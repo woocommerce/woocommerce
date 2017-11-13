@@ -691,10 +691,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return an array of items/products within this order.
 	 *
+	 * Optionally pass a working context, e.g. 'shipping', 'inventory', etc,
+	 * which can be used to modify the itemset as needed.
+	 *
 	 * @param string|array $types Types of line items to get (array or string).
+	 * @param string $context Working context, e.g. 'shipping' or 'inventory'.
 	 * @return Array of WC_Order_item
 	 */
-	public function get_items( $types = 'line_item' ) {
+	public function get_items( $types = 'line_item', $context = '' ) {
 		$items = array();
 		$types = array_filter( (array) $types );
 
@@ -708,7 +712,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+		return apply_filters( 'woocommerce_order_get_items', $items, $this, $context );
 	}
 
 	/**
