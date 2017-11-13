@@ -24,7 +24,11 @@ class WC_Template_Loader {
 	 */
 	private static $shop_page_id = 0;
 
-
+	/**
+	 * Store whether we're processing a product inside the_content filter.
+	 *
+	 * @var boolean
+	 */
 	private static $in_content_filter = false;
 
 	/**
@@ -34,12 +38,11 @@ class WC_Template_Loader {
 		self::$shop_page_id = wc_get_page_id( 'shop' );
 
 		// Supported themes.
-		if ( current_theme_supports( 'woocommerce' ) || in_array( get_template(), array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( current_theme_supports( 'woocommerce' ) || in_array( get_template(), array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ), true ) ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
-
-		// Unsupported themes.
 		} else {
+			// Unsupported themes.
 			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
 		}
 	}
@@ -208,6 +211,7 @@ class WC_Template_Loader {
 	 * Add a class to the body so we can better style things to look good when rendered in the content.
 	 *
 	 * @since 3.3.0
+	 * @param array $classes Classes to add to body.
 	 * @return array
 	 */
 	public static function unsupported_theme_body_class( $classes ) {
@@ -288,7 +292,7 @@ class WC_Template_Loader {
 			// Remove actions and self to avoid nested calls.
 			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
 
-		// Unsupported theme product page.
+			// Unsupported theme product page.
 		} elseif ( is_product() ) {
 			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
 		}
