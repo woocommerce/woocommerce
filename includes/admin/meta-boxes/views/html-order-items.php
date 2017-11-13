@@ -111,9 +111,12 @@ if ( wc_tax_enabled() ) {
 					echo '<li><strong>' . __( 'Coupon(s)', 'woocommerce' ) . '</strong></li>';
 					foreach ( $coupons as $item_id => $item ) {
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
-						$link    = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item->get_code(), 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
+						if ( $post_id ) {
+							echo '<li class="code"><a href="' . esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
+						} else {
+							echo '<li class="code"><span class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></span> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
+						}
 					}
 				?></ul>
 			</div>
@@ -121,7 +124,32 @@ if ( wc_tax_enabled() ) {
 		}
 	?>
 	<table class="wc-order-totals">
+		<?php if ( 0 < $order->get_total_discount() ) : ?>
+			<tr>
+				<td class="label"><?php _e( 'Discount:', 'woocommerce' ); ?></td>
+				<td width="1%"></td>
+				<td class="total">
+					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
+				</td>
+			</tr>
+		<?php endif; ?>
+
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
+
+		<?php if ( $order->get_shipping_methods() ) : ?>
+			<tr>
+				<td class="label"><?php _e( 'Shipping:', 'woocommerce' ); ?></td>
+				<td width="1%"></td>
+				<td class="total"><?php
+					if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
+						echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
+					} else {
+						echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
+					}
+				?></td>
+			</tr>
+		<?php endif; ?>
+
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->get_id() ); ?>
 
 		<?php if ( wc_tax_enabled() ) : ?>
@@ -143,7 +171,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_id() ); ?>
 
 		<tr>
-			<td class="label"><?php _e( 'Order total', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php _e( 'Total', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
 				<?php echo $order->get_formatted_order_total(); ?>
@@ -241,6 +269,7 @@ if ( wc_tax_enabled() ) {
 		<button type="button" class="button <?php echo $gateway_supports_refunds ? 'button-primary do-api-refund' : 'tips disabled'; ?>" <?php echo $gateway_supports_refunds ? '' : 'data-tip="' . esc_attr__( 'The payment gateway used to place this order does not support automatic refunds.', 'woocommerce' ) . '"'; ?>><?php printf( __( 'Refund %1$s via %2$s', 'woocommerce' ), $refund_amount, $gateway_name ); ?></button>
 		<button type="button" class="button button-primary do-manual-refund tips" data-tip="<?php esc_attr_e( 'You will need to manually issue a refund through your payment gateway after using this.', 'woocommerce' ); ?>"><?php printf( __( 'Refund %s manually', 'woocommerce' ), $refund_amount ); ?></button>
 		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
+		<input type="hidden" id="refunded_amount" name="refunded_amount" value="<?php echo esc_attr( $order->get_total_refunded() ); ?>" />
 		<div class="clear"></div>
 	</div>
 </div>

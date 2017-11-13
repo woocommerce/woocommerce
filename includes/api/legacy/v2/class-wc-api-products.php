@@ -1034,7 +1034,7 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_attributes( $attributes );
 		}
 
-		// Sales and prices
+		// Sales and prices.
 		if ( in_array( $product->get_type(), array( 'variable', 'grouped' ) ) ) {
 
 			// Variable and grouped products have no prices.
@@ -1046,22 +1046,17 @@ class WC_API_Products extends WC_API_Resource {
 
 		} else {
 
-			// Regular Price
+			// Regular Price.
 			if ( isset( $data['regular_price'] ) ) {
 				$regular_price = ( '' === $data['regular_price'] ) ? '' : $data['regular_price'];
-			} else {
-				$regular_price = $product->get_regular_price();
+				$product->set_regular_price( $regular_price );
 			}
 
-			// Sale Price
+			// Sale Price.
 			if ( isset( $data['sale_price'] ) ) {
 				$sale_price = ( '' === $data['sale_price'] ) ? '' : $data['sale_price'];
-			} else {
-				$sale_price = $product->get_sale_price();
+				$product->set_sale_price( $sale_price );
 			}
-
-			$product->set_regular_price( $regular_price );
-			$product->set_sale_price( $sale_price );
 
 			if ( isset( $data['sale_price_dates_from'] ) ) {
 				$date_from = $data['sale_price_dates_from'];
@@ -1081,10 +1076,11 @@ class WC_API_Products extends WC_API_Resource {
 
 			$product->set_date_on_sale_to( $date_to );
 			$product->set_date_on_sale_from( $date_from );
+
 			if ( $product->is_on_sale() ) {
-				$product->set_price( $product->get_sale_price() );
+				$product->set_price( $product->get_sale_price( 'edit' ) );
 			} else {
-				$product->set_price( $product->get_regular_price() );
+				$product->set_price( $product->get_regular_price( 'edit' ) );
 			}
 		}
 

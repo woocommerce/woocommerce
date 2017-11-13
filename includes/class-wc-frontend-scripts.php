@@ -43,20 +43,6 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'setup_theme', array( __CLASS__, 'add_default_theme_support' ) );
-	}
-
-	/**
-	 * Add theme support for default WP themes.
-	 *
-	 * @since 3.0.0
-	 */
-	public static function add_default_theme_support() {
-		if ( in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
-			add_theme_support( 'wc-product-gallery-zoom' );
-			add_theme_support( 'wc-product-gallery-lightbox' );
-			add_theme_support( 'wc-product-gallery-slider' );
-		}
 	}
 
 	/**
@@ -184,7 +170,7 @@ class WC_Frontend_Scripts {
 			'flexslider' => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.6.3',
+				'version' => '2.6.1',
 			),
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -234,7 +220,7 @@ class WC_Frontend_Scripts {
 			'selectWoo' => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.0.0',
+				'version' => '1.0.1',
 			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),

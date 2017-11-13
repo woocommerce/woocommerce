@@ -46,13 +46,8 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 		$new_version_parts     = explode( '.', $this->new_version );
 
 		// If user has already moved to the minor version, we don't need to flag up anything.
-		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . $new_version_parts[1], '=' ) ) {
+		if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.' . $new_version_parts[1], '=' ) ) {
 			return;
-		}
-
-		// If user has already moved to the major version, we should only shown minor notices and assume everything is "ok" for major.
-		if ( version_compare( $current_version_parts[0] . $current_version_parts[1], $new_version_parts[0] . '0', '>=' ) ) {
-			$this->major_untested_plugins = array();
 		}
 
 		if ( ! empty( $this->major_untested_plugins ) ) {
@@ -106,16 +101,16 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 			$version_parts[0] . '.' . $version_parts[1], // Minor
 			$version_parts[0] . '.' . $version_parts[1] . '.' . $version_parts[2], // Patch
 		);
+		$notice_regexp     = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
+		$upgrade_notice    = '';
 
 		foreach ( $check_for_notices as $check_version ) {
 			if ( version_compare( WC_VERSION, $check_version, '>' ) ) {
 				continue;
 			}
-			$matches        = null;
-			$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
-			$upgrade_notice = '';
 
-			if ( preg_match( $regexp, $content, $matches ) ) {
+			$matches = null;
+			if ( preg_match( $notice_regexp, $content, $matches ) ) {
 				$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 				if ( version_compare( trim( $matches[1] ), $check_version, '=' ) ) {

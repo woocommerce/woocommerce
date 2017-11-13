@@ -164,7 +164,7 @@ jQuery( function( $ ) {
 						ajax: {
 							url:         wc_enhanced_select_params.ajax_url,
 							dataType:    'json',
-							delay:       250,
+							delay:       1000,
 							data:        function( params ) {
 								return {
 									term:     params.term,

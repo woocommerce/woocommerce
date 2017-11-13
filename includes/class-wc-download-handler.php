@@ -304,7 +304,7 @@ class WC_Download_Handler {
 	private static function download_headers( $file_path, $filename ) {
 		self::check_server_config();
 		self::clean_buffers();
-		nocache_headers();
+		wc_nocache_headers();
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . self::get_download_content_type( $file_path ) );
@@ -323,7 +323,7 @@ class WC_Download_Handler {
 	private static function check_server_config() {
 		wc_set_time_limit( 0 );
 		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
-			set_magic_quotes_runtime( 0 );
+			set_magic_quotes_runtime( 0 ); // @codingStandardsIgnoreLine
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );

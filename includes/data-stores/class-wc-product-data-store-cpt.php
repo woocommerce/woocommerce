@@ -318,6 +318,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
 			'image_id'           => get_post_thumbnail_id( $id ),
 		) );
+
+		// Handle sale dates on the fly in case of missed cron schedule.
+		if ( $product->is_type( 'simple' ) && $product->is_on_sale( 'edit' ) && $product->get_sale_price( 'edit' ) !== $product->get_price( 'edit' ) ) {
+			update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
+			$product->set_price( $product->get_sale_price( 'edit' ) );
+		}
 	}
 
 	/**
@@ -553,7 +559,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$product->set_sale_price( '' );
 			}
 		}
-		if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
+		if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) || in_array( 'product_type', $this->updated_props, true ) ) {
 			if ( $product->is_on_sale( 'edit' ) ) {
 				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 				$product->set_price( $product->get_sale_price( 'edit' ) );
@@ -690,6 +696,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
+			delete_transient( 'wc_layered_nav_counts' );
 		}
 	}
 
@@ -735,6 +742,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
+			$this->updated_props[] = 'product_type';
 			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
 		}
 	}
@@ -747,6 +755,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
+		WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_id() );
 	}
 
 	/*
@@ -1537,7 +1546,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
 			// Prime caches before grabbing objects.
-			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
+			update_post_caches( $query->posts, array( 'product', 'product_variation' ) );
 		}
 
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );

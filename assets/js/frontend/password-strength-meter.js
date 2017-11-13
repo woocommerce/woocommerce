@@ -1,6 +1,6 @@
 /* global wp, pwsL10n, wc_password_strength_meter_params */
-jQuery( function( $ ) {
-
+( function( $ ) {
+    'use strict';
 	/**
 	 * Password Strength Meter class.
 	 */
@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 		 */
 		strengthMeter: function() {
 			var wrapper    = $( 'form.register, form.checkout, form.edit-account, form.lost_reset_password' ),
-				submit     = $( 'input[type="submit"]', wrapper ),
+				submit     = $( 'button[type="submit"]', wrapper ),
 				field      = $( '#reg_password, #account_password, #password_1', wrapper ),
 				strength   = 1,
 				fieldValue = field.val();
@@ -106,4 +106,4 @@ jQuery( function( $ ) {
 	};
 
 	wc_password_strength_meter.init();
-});
+})( jQuery );

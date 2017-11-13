@@ -9,15 +9,23 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "0.10.0",
-    "phpunit/phpunit": "6.2.3"
+    "wp-coding-standards/wpcs": "0.13.1",
+    "phpunit/phpunit": "6.2.3",
+    "woocommerce/woocommerce-git-hooks": "1.0.3",
+    "wimg/php-compatibility": "^8.0"
   },
   "scripts": {
+    "pre-update-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
+    "pre-install-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
     "post-install-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
     ],
     "post-update-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
     ]
   }
 }

@@ -388,28 +388,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$message = __( 'Product transients cleared', 'woocommerce' );
 			break;
 			case 'clear_expired_transients' :
-				/*
-				 * Deletes all expired transients. The multi-table delete syntax is used.
-				 * to delete the transient record from table a, and the corresponding.
-				 * transient_timeout record from table b.
-				 *
-				 * Based on code inside core's upgrade_network() function.
-				 */
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-					AND b.option_value < %d";
-				$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
-
-				$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
-					AND b.option_value < %d";
-				$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
-
-				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), $rows + $rows2 );
+				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
 			break;
 			case 'delete_orphaned_variations' :
 				/**
@@ -427,15 +406,15 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				 * that don't have address indexes yet.
 				 */
 				$sql = "INSERT INTO {$wpdb->postmeta}( post_id, meta_key, meta_value )
-					SELECT post_id, '%1\$s', GROUP_CONCAT( meta_value SEPARATOR ' ' )
+					SELECT post_id, '%s', GROUP_CONCAT( meta_value SEPARATOR ' ' )
 					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ( '%2\$s', '%3\$s' )
+					WHERE meta_key IN ( '%s', '%s' )
 					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%1\$s' )
-						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%3\$s' ) )
+						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' )
+						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' ) )
 					GROUP BY post_id";
-				$rows = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name' ) );
-				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name' ) );
+				$rows = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) );
+				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name') );
 
 				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 			break;

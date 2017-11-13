@@ -164,50 +164,59 @@ class WC_Meta_Box_Order_Data {
 		<div class="panel-wrap woocommerce">
 			<input name="post_title" type="hidden" value="<?php echo empty( $post->post_title ) ? __( 'Order', 'woocommerce' ) : esc_attr( $post->post_title ); ?>" />
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
-			<div id="order_data" class="panel">
+			<div id="order_data" class="panel woocommerce-order-data">
+				<h2 class="woocommerce-order-data__heading"><?php
 
-				<h2><?php
-					/* translators: 1: order type 2: order number */
-					printf(
-						esc_html__( '%1$s #%2$s details', 'woocommerce' ),
-						$order_type_object->labels->singular_name,
-						$order->get_order_number()
-					);
+				/* translators: 1: order type 2: order number */
+				printf(
+					esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+					esc_html( $order_type_object->labels->singular_name ),
+					esc_html( $order->get_order_number() )
+				);
+
 				?></h2>
-				<p class="order_number"><?php
+				<p class="woocommerce-order-data__meta order_number"><?php
 
-					if ( $payment_method ) {
-						/* translators: %s: payment method */
-						printf(
-							__( 'Payment via %s', 'woocommerce' ),
-							( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) )
-						);
+				$meta_list = array();
 
-						if ( $transaction_id = $order->get_transaction_id() ) {
-								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
-								echo ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
-							} else {
-								echo ' (' . esc_html( $transaction_id ) . ')';
-							}
+				if ( $payment_method ) {
+					/* translators: %s: payment method */
+					$payment_method_string = sprintf(
+						__( 'Payment via %s', 'woocommerce' ),
+						esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
+					);
+
+					if ( $transaction_id = $order->get_transaction_id() ) {
+						if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
+							$payment_method_string = ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+						} else {
+							$payment_method_string = ' (' . esc_html( $transaction_id ) . ')';
 						}
-
-						if ( $order->get_date_paid() ) {
-							/* translators: 1: date 2: time */
-							printf( ' ' . __( 'on %1$s @ %2$s', 'woocommerce' ), wc_format_datetime( $order->get_date_paid() ), wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) ) );
-						}
-
-						echo '. ';
 					}
 
-					if ( $ip_address = $order->get_customer_ip_address() ) {
-						/* translators: %s: IP address */
-						printf(
-							__( 'Customer IP: %s', 'woocommerce' ),
-							'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
-						);
-					}
+					$meta_list[] = $payment_method_string;
+				}
+
+				if ( $order->get_date_paid() ) {
+					/* translators: 1: date 2: time */
+					$meta_list[] = sprintf(
+						__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
+						wc_format_datetime( $order->get_date_paid() ),
+						wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
+					);
+				}
+
+				if ( $ip_address = $order->get_customer_ip_address() ) {
+					/* translators: %s: IP address */
+					$meta_list[] = sprintf(
+						__( 'Customer IP: %s', 'woocommerce' ),
+						'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
+					);
+				}
+
+				echo wp_kses_post( implode( '. ', $meta_list ) );
+
 				?></p>
-
 				<div class="order_data_column_container">
 					<div class="order_data_column">
 						<h3><?php _e( 'General Details', 'woocommerce' ); ?></h3>

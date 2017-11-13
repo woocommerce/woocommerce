@@ -124,6 +124,9 @@ class WC_Order extends WC_Abstract_Order {
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
 		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error( sprintf( 'Payment complete of order #%d failed!', $this->get_id() ), array( 'order' => $this, 'error' => $e ) );
+
 			return false;
 		}
 		return true;
@@ -259,7 +262,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function maybe_set_date_paid() {
 		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
-			$this->set_date_paid( current_time( 'timestamp' ) );
+			$this->set_date_paid( current_time( 'timestamp', true ) );
 		}
 	}
 
@@ -294,6 +297,9 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_status( $new_status, $note, $manual );
 			$this->save();
 		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error( sprintf( 'Update status of order #%d failed!', $this->get_id() ), array( 'order' => $this, 'error' => $e ) );
+
 			return false;
 		}
 		return true;
@@ -808,23 +814,41 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get a formatted billing address for the order.
 	 *
+	 * @param string $empty_content Content to show if no address is present. @since 3.3.0.
 	 * @return string
 	 */
-	public function get_formatted_billing_address() {
-		return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this ) );
+	public function get_formatted_billing_address( $empty_content = '' ) {
+		$address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
+		$address = WC()->countries->get_formatted_address( $address );
+
+		return $address ? $address : $empty_content;
 	}
 
 	/**
 	 * Get a formatted shipping address for the order.
 	 *
+	 * @param string $empty_content Content to show if no address is present. @since 3.3.0.
 	 * @return string
 	 */
-	public function get_formatted_shipping_address() {
+	public function get_formatted_shipping_address( $empty_content = '' ) {
+		$address = '';
+
 		if ( $this->has_shipping_address() ) {
-			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this ) );
-		} else {
-			return '';
+			$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this );
+			$address = WC()->countries->get_formatted_address( $address );
 		}
+
+		return $address ? $address : $empty_content;
+	}
+
+	/**
+	 * Returns true if the order has a billing address.
+	 *
+	 * @since  3.0.4
+	 * @return boolean
+	 */
+	public function has_billing_address() {
+		return $this->get_billing_address_1() || $this->get_billing_address_2();
 	}
 
 	/**
@@ -1300,7 +1324,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function has_downloadable_item() {
 		foreach ( $this->get_items() as $item ) {
-			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->has_file() ) {
 				return true;
 			}
 		}
@@ -1751,7 +1775,7 @@ class WC_Order extends WC_Abstract_Order {
 				$refunded_item_id = (int) $refunded_item->get_meta( '_refunded_item_id' );
 				if ( $refunded_item_id === $item_id ) {
 					$taxes = $refunded_item->get_taxes();
-					$total += isset( $taxes['total'][ $tax_id ] ) ? $taxes['total'][ $tax_id ] : 0;
+					$total += isset( $taxes['total'][ $tax_id ] ) ? (float) $taxes['total'][ $tax_id ] : 0;
 					break;
 				}
 			}
@@ -1838,6 +1862,7 @@ class WC_Order extends WC_Abstract_Order {
 		$total_rows  = array();
 
 		$this->add_order_item_totals_subtotal_row( $total_rows, $tax_display );
+		$this->add_order_item_totals_discount_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_shipping_row( $total_rows, $tax_display );
 		$this->add_order_item_totals_fee_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );

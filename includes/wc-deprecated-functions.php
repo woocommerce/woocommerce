@@ -33,12 +33,13 @@ function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement )
 /**
  * Wrapper for deprecated functions so we can apply some extra logic.
  *
- * @since  3.0.0
- * @param  string $function
- * @param  string $version
- * @param  string $replacement
+ * @since 3.0.0
+ * @param string $function Function used.
+ * @param string $version Version the message was added in.
+ * @param string $replacement Replacement for the called function.
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
+	// @codingStandardsIgnoreStart
 	if ( is_ajax() ) {
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
@@ -47,18 +48,37 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
 	} else {
 		_deprecated_function( $function, $version, $replacement );
 	}
+	// @codingStandardsIgnoreEnd
 }
 
+/**
+ * When catching an exception, this allows us to log it if unexpected.
+ *
+ * @since 3.3.0
+ * @param Exception $exception_object The exception object.
+ * @param string    $function The function which threw exception.
+ * @param array     $args The args passed to the function.
+ */
+function wc_caught_exception( $exception_object, $function = '', $args = array() ) {
+	// @codingStandardsIgnoreStart
+	$message  = $exception_object->getMessage();
+	$message .= '. Args: ' . print_r( $args, true ) . '.';
+
+	do_action( 'woocommerce_caught_exception', $exception_object, $function, $args );
+	error_log( "Exception caught in {$function}. {$message}." );
+	// @codingStandardsIgnoreEnd
+}
 
 /**
  * Wrapper for wc_doing_it_wrong.
  *
  * @since  3.0.0
- * @param  string $function
- * @param  string $version
- * @param  string $replacement
+ * @param string $function Function used.
+ * @param string $message Message to log.
+ * @param string $version Version the message was added in.
  */
 function wc_doing_it_wrong( $function, $message, $version ) {
+	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
 
 	if ( is_ajax() ) {
@@ -67,6 +87,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
 	} else {
 		_doing_it_wrong( $function, $message, $version );
 	}
+	// @codingStandardsIgnoreEnd
 }
 
 /**
@@ -788,7 +809,7 @@ function woocommerce_placeholder_img_src() {
 /**
  * @deprecated 3.0
  */
-function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
+function woocommerce_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	wc_deprecated_function( __FUNCTION__, '3.0', 'wc_placeholder_img' );
 	return wc_placeholder_img( $size );
 }
@@ -950,4 +971,16 @@ function wc_get_customer_avatar_url( $email ) {
 	wc_deprecated_function( 'wc_get_customer_avatar_url()', '3.1', 'get_avatar_url()' );
 
 	return get_avatar_url( $email );
+}
+
+/**
+ * WooCommerce Core Supported Themes.
+ *
+ * @deprecated 3.3.0
+ * @since 2.2
+ * @return string[]
+ */
+function wc_get_core_supported_themes() {
+	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
+	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }

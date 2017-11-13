@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *
- * @author 		WooThemes
- * @category 	Shortcodes
- * @package 	WooCommerce/Shortcodes/My_Account
+ * @author        WooThemes
+ * @category    Shortcodes
+ * @package    WooCommerce/Shortcodes/My_Account
  * @version     2.0.0
  */
 class WC_Shortcode_My_Account {
@@ -20,6 +20,7 @@ class WC_Shortcode_My_Account {
 	 * Get the shortcode content.
 	 *
 	 * @param array $atts
+	 *
 	 * @return string
 	 */
 	public static function get( $atts ) {
@@ -78,20 +79,22 @@ class WC_Shortcode_My_Account {
 			 * so we need to render the endpoint content again.
 			 */
 			if ( ! did_action( 'woocommerce_account_content' ) ) {
-				foreach ( $wp->query_vars as $key => $value ) {
-					if ( 'pagename' === $key ) {
-						continue;
+				if ( ! empty( $wp->query_vars ) ) {
+					foreach ( $wp->query_vars as $key => $value ) {
+						if ( 'pagename' === $key ) {
+							continue;
+						}
+						if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+							ob_clean(); // Clear previous buffer
+							wc_set_notices( $notices );
+							wc_print_notices();
+							do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+							break;
+						}
 					}
-					if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-						ob_clean(); // Clear previous buffer
-						wc_set_notices( $notices );
-						wc_print_notices();
-						do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-						break;
-					}
-	 			}
 
-				wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
+					wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
+				}
 			}
 
 			// Send output buffer
@@ -121,10 +124,11 @@ class WC_Shortcode_My_Account {
 	 * @param int $order_id
 	 */
 	public static function view_order( $order_id ) {
-		$order   = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My account', 'woocommerce' ) . '</a>' . '</div>';
+
 			return;
 		}
 
@@ -133,9 +137,9 @@ class WC_Shortcode_My_Account {
 		$status->name = wc_get_order_status_name( $order->get_status() );
 
 		wc_get_template( 'myaccount/view-order.php', array(
-			'status'    => $status, // @deprecated 2.2
-			'order'     => wc_get_order( $order_id ),
-			'order_id'  => $order_id,
+			'status'   => $status, // @deprecated 2.2
+			'order'    => wc_get_order( $order_id ),
+			'order_id' => $order_id,
 		) );
 	}
 
@@ -171,15 +175,15 @@ class WC_Shortcode_My_Account {
 					case 'billing_email' :
 					case 'shipping_email' :
 						$value = $current_user->user_email;
-					break;
+						break;
 					case 'billing_country' :
 					case 'shipping_country' :
 						$value = WC()->countries->get_base_country();
-					break;
+						break;
 					case 'billing_state' :
 					case 'shipping_state' :
 						$value = WC()->countries->get_base_state();
-					break;
+						break;
 				}
 			}
 
@@ -187,8 +191,8 @@ class WC_Shortcode_My_Account {
 		}
 
 		wc_get_template( 'myaccount/form-edit-address.php', array(
-			'load_address' 	=> $load_address,
-			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
+			'load_address' => $load_address,
+			'address'      => apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
 		) );
 	}
 
@@ -202,9 +206,9 @@ class WC_Shortcode_My_Account {
 		if ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
 
-		/**
-		 * Process reset key / login from email confirmation link
-		 */
+			/**
+			 * Process reset key / login from email confirmation link
+			 */
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) {
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {
 				list( $rp_login, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) );
@@ -216,15 +220,13 @@ class WC_Shortcode_My_Account {
 						'key'   => $rp_key,
 						'login' => $rp_login,
 					) );
-				} else {
-					self::set_reset_password_cookie();
 				}
 			}
 		}
 
 		// Show lost password form by default
 		wc_get_template( 'myaccount/form-lost-password.php', array(
-			'form'  => 'lost_password',
+			'form' => 'lost_password',
 		) );
 	}
 
@@ -242,6 +244,7 @@ class WC_Shortcode_My_Account {
 		if ( empty( $login ) ) {
 
 			wc_add_notice( __( 'Enter a username or email address.', 'woocommerce' ), 'error' );
+
 			return false;
 
 		} else {
@@ -260,16 +263,19 @@ class WC_Shortcode_My_Account {
 
 		if ( $errors->get_error_code() ) {
 			wc_add_notice( $errors->get_error_message(), 'error' );
+
 			return false;
 		}
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+
 			return false;
 		}
 
 		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
 			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+
 			return false;
 		}
 
@@ -283,11 +289,13 @@ class WC_Shortcode_My_Account {
 		if ( ! $allow ) {
 
 			wc_add_notice( __( 'Password reset is not allowed for this user', 'woocommerce' ), 'error' );
+
 			return false;
 
 		} elseif ( is_wp_error( $allow ) ) {
 
 			wc_add_notice( $allow->get_error_message(), 'error' );
+
 			return false;
 		}
 
@@ -308,6 +316,7 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @param string $key Hash to validate sending user's password
 	 * @param string $login The user login
+	 *
 	 * @return WP_User|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
@@ -316,7 +325,7 @@ class WC_Shortcode_My_Account {
 		$user = check_password_reset_key( $key, $login );
 
 		if ( is_wp_error( $user ) ) {
-			wc_add_notice( $user->get_error_message(), 'error' );
+			wc_add_notice( __( 'This key is invalid or has already been used. Please reset your password again if needed.', 'woocommerce' ), 'error' );
 			return false;
 		}
 
