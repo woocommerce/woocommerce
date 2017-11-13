@@ -6,6 +6,9 @@ project.properties
 .project
 .settings*
 .idea
+.vscode
+*.sublime-project
+*.sublime-workspace
 
 # Grunt
 /node_modules/
