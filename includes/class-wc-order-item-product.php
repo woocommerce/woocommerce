@@ -312,9 +312,16 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the associated product.
 	 *
+	 * Optionally pass a working context, e.g. 'shipping', 'inventory', etc,
+	 * which can be used to modify the props of the product as needed, e.g.:
+	 *
+	 * - modify shipping properties; or
+	 * - generate dynamic kit/bundle SKUs.
+	 *
+	 * @param  string $context Working context, e.g. 'shipping' or 'inventory'.
 	 * @return WC_Product|bool
 	 */
-	public function get_product() {
+	public function get_product( $context = '' ) {
 		if ( $this->get_variation_id() ) {
 			$product = wc_get_product( $this->get_variation_id() );
 		} else {
@@ -326,7 +333,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
 
-		return apply_filters( 'woocommerce_order_item_product', $product, $this );
+		return apply_filters( 'woocommerce_order_item_product', $product, $this, $context );
 	}
 
 	/**
