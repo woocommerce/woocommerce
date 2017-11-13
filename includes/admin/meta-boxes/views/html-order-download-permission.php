@@ -22,16 +22,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tbody>
 			<tr>
 				<td>
-					<label><?php _e( 'Downloads remaining', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Downloads remaining', 'woocommerce' ); ?></label>
 					<input type="hidden" name="permission_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_id() ); ?>" />
 					<input type="number" step="1" min="0" class="short" name="downloads_remaining[<?php echo $loop; ?>]" value="<?php echo esc_attr( $download->get_downloads_remaining() ); ?>" placeholder="<?php esc_attr_e( 'Unlimited', 'woocommerce' ); ?>" />
 				</td>
 				<td>
-					<label><?php _e( 'Access expires', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Access expires', 'woocommerce' ); ?></label>
 					<input type="text" class="short date-picker" name="access_expires[<?php echo $loop; ?>]" value="<?php echo ! is_null( $download->get_access_expires() ) ? date_i18n( 'Y-m-d', $download->get_access_expires()->getTimestamp() ) : ''; ?>" maxlength="10" placeholder="<?php esc_attr_e( 'Never', 'woocommerce' ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />
 				</td>
 				<td>
-					<label><?php _e( 'Customer download link', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Customer download link', 'woocommerce' ); ?></label>
 					<?php
 						$download_link = add_query_arg( array(
 							'download_file' => $download->get_product_id(),
@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</td>
 				<td>
-					<label><?php _e( 'Downloads completed', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Downloads completed', 'woocommerce' ); ?></label>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
