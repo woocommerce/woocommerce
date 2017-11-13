@@ -111,6 +111,9 @@ class WC_Post_Data {
 		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
 			delete_transient( 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $id ) ) );
 		}
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ) ) ) {
+			self::delete_product_query_transients();
+		}
 	}
 
 	/**
