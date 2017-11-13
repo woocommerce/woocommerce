@@ -26,7 +26,7 @@
 	</rule>
 	<rule ref="WordPress.XSS.EscapeOutput">
 		<properties>
-			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip,wc_format_decimal" />
+			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
 		</properties>
 </rule>
 </ruleset>
