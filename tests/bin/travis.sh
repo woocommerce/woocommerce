@@ -25,7 +25,7 @@ fi
 
 if [ $1 == 'after' ]; then
 
-	if [[ ${TRAVIS_PHP_VERSION} == '7.1' ]]; then
+	if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
 		bash <(curl -s https://codecov.io/bash)
 		wget https://scrutinizer-ci.com/ocular.phar
 		chmod +x ocular.phar
