@@ -128,11 +128,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_customer_bought_product.
+	 * Test WC_Product_Purchases_Helper::is_product_purchased.
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_customer_bought_product() {
+	function test_is_product_purchased() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 		$product_1 = new WC_Product_Simple;
@@ -155,11 +155,15 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_3->set_status( 'pending' );
 		$order_3->save();
 
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, $customer_id_1 ) );
+		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, 'test@example.com' ) );
+		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, $customer_id_2 ) );
+		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, 'test2@example.com' ) );
+
+		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, $customer_id_2 ) );
+		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, 'test2@example.com' ) );
+		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, $customer_id_1 ) );
+		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, 'test@example.com' ) );
 	}
 
 	/**

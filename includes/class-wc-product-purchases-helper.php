@@ -80,6 +80,34 @@ class WC_Product_Purchases_Helper {
 			);
 		}
 	}
+
+	/**
+	 * Check if a product is purchased, given either email or user id.
+	 *
+	 * @param int        $product_id
+	 * @param string|int $email_or_user_id
+	 */
+	public static function is_product_purchased( $product_id, $email_or_user_id ) {
+		global $wpdb;
+
+		if ( is_int( $email_or_user_id ) ) {
+			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_product_purchases
+				WHERE ( user_id = %d ) AND product_id = %d
+				LIMIT 1
+			", absint( $email_or_user_id ), absint( $product_id ) ) );
+		} else {
+			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_product_purchases
+				WHERE ( user_email = %s ) AND product_id = %d
+				LIMIT 1
+			", esc_sql( $email_or_user_id ), absint( $product_id ) ) );
+		}
+
+		return ! empty( $product_purchases );
+	}
 }
 
 WC_Product_Purchases_Helper::init();

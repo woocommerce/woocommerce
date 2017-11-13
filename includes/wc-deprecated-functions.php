@@ -349,8 +349,8 @@ function woocommerce_paying_customer( $order_id ) {
  * @deprecated 3.0
  */
 function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
-	wc_deprecated_function( __FUNCTION__, '3.0', 'wc_customer_bought_product' );
-	return wc_customer_bought_product( $customer_email, $user_id, $product_id );
+	wc_deprecated_function( __FUNCTION__, '3.0', 'WC_Product_Purchases_Helper::is_product_purchased' );
+	return WC_Product_Purchases_Helper::is_product_purchased( $product_id, is_int( $user_id ) ? $user_id : $customer_email );
 }
 
 /**

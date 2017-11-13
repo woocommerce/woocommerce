@@ -60,7 +60,7 @@ if ( ! comments_open() ) {
 		<?php endif; ?>
 	</div>
 
-	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) : ?>
+	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || WC_Product_Purchases_Helper::is_product_purchased( $product->get_id(), get_current_user_id() ) ) : ?>
 
 		<div id="review_form_wrapper">
 			<div id="review_form">

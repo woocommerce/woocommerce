@@ -196,22 +196,13 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
-	global $wpdb;
+	wc_deprecated_function( 'WC_Product_Purchases_Helper::is_product_purchased', '3.3' );
 
-	$result = apply_filters( 'woocommerce_pre_customer_bought_product', null, $customer_email, $user_id, $product_id );
-
-	if ( null !== $result ) {
-		return $result;
+	if ( is_int( $user_id ) ) {
+		return WC_Product_Purchases_Helper::is_product_purchased( $product_id, $user_id );
 	}
 
-	$product_purchases = $wpdb->get_row( $wpdb->prepare( "
-		SELECT *
-		FROM {$wpdb->prefix}woocommerce_product_purchases
-		WHERE ( user_id = %s OR user_email = %s ) AND product_id = %d
-		LIMIT 1
-	", absint( $user_id ), esc_sql( $customer_email ), absint( $product_id ) ) );
-
-	return ! empty( $product_purchases );
+	return WC_Product_Purchases_Helper::is_product_purchased( $product_id, $customer_email );
 }
 
 /**
