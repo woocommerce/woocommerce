@@ -72,7 +72,7 @@ class WC_Report_Downloads extends WP_List_Table {
 			if ( ! empty( $permission ) && ! empty( $product ) ) {
 				// File information.
 				$file = $product->get_file( $permission->get_download_id() );
-				
+
 				// Output the titles at the top of the report.
 				$this->output_report_title( $file, $product, $permission );
 			}
@@ -142,7 +142,7 @@ class WC_Report_Downloads extends WP_List_Table {
 				if ( ! empty( $permission ) ) {
 					edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
 				}
-			
+
 				break;
 
 			case 'user' :
@@ -176,11 +176,11 @@ class WC_Report_Downloads extends WP_List_Table {
 	public function get_columns() {
 
 		$columns = array(
-			'timestamp'			=> __( 'Download time', 'woocommerce' ),
+			'timestamp'			=> __( 'Timestamp', 'woocommerce' ),
 			'product'			=> __( 'Product', 'woocommerce' ),
 			'order'				=> __( 'Order', 'woocommerce' ),
 			'user'				=> __( 'User', 'woocommerce' ),
-			'user_ip_address'	=> __( 'User IP Address', 'woocommerce' ),
+			'user_ip_address'	=> __( 'IP Address', 'woocommerce' ),
 		);
 
 		return $columns;
@@ -212,7 +212,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	 * No items found text.
 	 */
 	public function no_items() {
-		_e( 'No downloads found.', 'woocommerce' );
+		esc_html_e( 'No customer downloads has been tracked yet.', 'woocommerce' );
 	}
 
 	/**
