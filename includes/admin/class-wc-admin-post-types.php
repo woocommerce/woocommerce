@@ -1457,15 +1457,23 @@ class WC_Admin_Post_Types {
 		global $wp_query;
 
 		// Category Filtering.
-		$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
-		$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
-		?>
-		<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
-			<?php if ( $current_category_slug && $current_category ) : ?>
-				<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
-			<?php endif; ?>
-		</select>
-		<?php
+		$categories_count = (int) wp_count_terms( 'product_cat' );
+		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
+			wc_product_dropdown_categories( array(
+				'option_select_text' => __( 'Filter by category', 'woocommerce' ),
+			) );
+		} else {
+
+			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
+			$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
+			?>
+			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
+				<?php if ( $current_category_slug && $current_category ) : ?>
+					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
+				<?php endif; ?>
+			</select>
+			<?php
+		}
 
 		// Type filtering.
 		$terms   = get_terms( 'product_type' );
