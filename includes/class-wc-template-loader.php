@@ -207,18 +207,6 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * Add a class to the body so we can better style things to look good when rendered in the content.
-	 *
-	 * @since 3.3.0
-	 * @param array $classes Classes to add to body.
-	 * @return array
-	 */
-	public static function unsupported_theme_body_class( $classes ) {
-		$classes[] = 'woocommerce-normalized-theme';
-		return $classes;
-	}
-
-	/**
 	 * Filter the title and insert WooCommerce content on the shop page.
 	 *
 	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
