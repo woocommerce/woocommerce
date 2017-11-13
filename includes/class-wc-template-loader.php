@@ -290,7 +290,7 @@ class WC_Template_Loader {
 
 		// Unsupported theme product page.
 		} elseif ( is_product() ) {
-			$content = do_shortcode( '[product_page id="' . get_the_ID() . '"]' );
+			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
 		}
 
 		self::$in_content_filter = false;
