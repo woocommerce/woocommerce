@@ -59,7 +59,7 @@ class WC_AJAX {
 		@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 		@header( 'X-Robots-Tag: noindex' );
 		send_nosniff_header();
-		nocache_headers();
+		wc_nocache_headers();
 		status_header( 200 );
 	}
 
@@ -580,14 +580,13 @@ class WC_AJAX {
 	 * Add variation via ajax function.
 	 */
 	public static function add_variation() {
-
 		check_ajax_referer( 'add-variation', 'security' );
 
 		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( -1 );
 		}
 
-		global $post; // Set $post global so its available, like within the admin screens
+		global $post; // Set $post global so its available, like within the admin screens.
 
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id );
@@ -595,6 +594,7 @@ class WC_AJAX {
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
+		$variation_object->set_attributes( array_fill_keys( array_keys( $product_object->get_variation_attributes() ), '' ) );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
 		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.

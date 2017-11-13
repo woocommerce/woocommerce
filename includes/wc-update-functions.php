@@ -1441,6 +1441,28 @@ function wc_update_330_product_purchases() {
 	" );
 }
 
+/*
+ * Update image settings to use new aspect ratios and widths.
+ */
+function wc_update_330_image_options() {
+	$old_thumbnail_size = get_option( 'shop_catalog_image_size', array() );
+	$old_single_size    = get_option( 'shop_single_image_size', array() );
+
+	if ( ! empty( $old_thumbnail_size['width'] ) ) {
+		update_option( 'woocommerce_thumbnail_image_width', absint( $old_thumbnail_size['width'] ) );
+	}
+
+	if ( ! empty( $old_thumbnail_size['crop'] ) ) {
+		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+	} elseif ( isset( $old_thumbnail_size['crop'] ) ) {
+		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+	}
+
+	if ( ! empty( $old_single_size['width'] ) ) {
+		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
+	}
+}
+
 /**
  * Update DB Version.
  */

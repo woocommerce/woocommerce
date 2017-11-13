@@ -294,7 +294,7 @@ function wc_placeholder_img_src() {
  *
  * @return string
  */
-function wc_placeholder_img( $size = 'shop_thumbnail' ) {
+function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
 	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
@@ -693,18 +693,18 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['full_src_h'] = $src[2];
 
 		// Thumbnail version.
-		$src                 = wp_get_attachment_image_src( $attachment_id, 'shop_thumbnail' );
+		$src                 = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
 		$props['thumb_src']   = $src[0];
 		$props['thumb_src_w'] = $src[1];
 		$props['thumb_src_h'] = $src[2];
 
 		// Image source.
-		$src             = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+		$src             = wp_get_attachment_image_src( $attachment_id, 'woocommerce_single' );
 		$props['src']    = $src[0];
 		$props['src_w']  = $src[1];
 		$props['src_h']  = $src[2];
-		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'woocommerce_single' ) : false;
+		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'woocommerce_single' ) : false;
 
 		// Alt text fallbacks.
 		$props['alt'] = empty( $props['alt'] ) ? $props['caption']                                               : $props['alt'];
@@ -915,7 +915,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 				$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
 				$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
-				$return_price = round( $line_price - array_sum( $base_taxes ) + array_sum( $modded_taxes ), wc_get_price_decimals() );
+				$return_price = round( $line_price - array_sum( $base_taxes ) + wc_round_tax_total( array_sum( $modded_taxes ), wc_get_price_decimals() ), wc_get_price_decimals() );
 			}
 		}
 	}
