@@ -9,6 +9,7 @@ project.properties
 .vscode
 *.sublime-project
 *.sublime-workspace
+.sublimelinterrc
 
 # Grunt
 /node_modules/
