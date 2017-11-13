@@ -345,7 +345,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		return in_array( $offset, array_keys( $this->data ) );
+		return in_array( $key, array_keys( $this->data ) );
 	}
 
 	/**
