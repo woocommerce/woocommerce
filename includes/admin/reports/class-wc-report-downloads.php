@@ -128,7 +128,6 @@ class WC_Report_Downloads extends WP_List_Table {
 			case 'timestamp' :
 				echo esc_html( $item->timestamp );
 				break;
-
 			case 'product' :
 				if ( empty( $product ) ) {
 					break;
@@ -137,14 +136,11 @@ class WC_Report_Downloads extends WP_List_Table {
 				edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
 
 				break;
-
 			case 'order' :
 				if ( ! empty( $permission ) ) {
 					edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
 				}
-
 				break;
-
 			case 'user' :
 				if ( $item->user_id > 0 ) {
 					$user = get_user_by( 'id', $item->user_id );
@@ -157,13 +153,12 @@ class WC_Report_Downloads extends WP_List_Table {
 
 						echo '<a href="' . esc_url( get_edit_user_link( $item->user_id ) ) . '">' . esc_html( $user_description ) . '</a>';
 					}
+				} else {
+					esc_html_e( 'Guest', 'woocommerce' );
 				}
-
 				break;
-
 			case 'user_ip_address' :
 				echo esc_html( $item->user_ip_address );
-
 				break;
 		}
 	}
