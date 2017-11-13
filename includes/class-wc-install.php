@@ -670,7 +670,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}" . WC_Customer_Download_Log_Data_Store::get_table_name() . " (
+CREATE TABLE {$wpdb->prefix}wc_download_log (
   download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
   permission_id BIGINT UNSIGNED NOT NULL,

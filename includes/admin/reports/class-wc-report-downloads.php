@@ -65,49 +65,62 @@ class WC_Report_Downloads extends WP_List_Table {
 			// Load the permission, order, etc. so we can render more information.
 			$permission	= null;
 			$product	= null;
+
 			try {
 				$permission	= new WC_Customer_Download( $permission_id );
 				$product	= wc_get_product( $permission->product_id );
 			} catch ( Exception $e ) {
 				wp_die( sprintf( esc_html__( 'Permission #%d not found.', 'woocommerce' ), esc_html( $permission_id ) ) );
 			}
-
-			if ( ! empty( $permission ) && ! empty( $product ) ) {
-				// File information.
-				$file = $product->get_file( $permission->get_download_id() );
-
-				// Output the titles at the top of the report.
-				$this->output_report_title( $file, $product, $permission );
-			}
 		}
+
+		echo '<h1>' . esc_html__( 'Customer downloads', 'woocommerce' );
+
+		$filters      = $this->get_filter_vars();
+		$filter_list  = array();
+		$filter_names = array(
+			'product_id'      => __( 'Product', 'woocommerce' ),
+			'download_id'     => __( 'File ID', 'woocommerce' ),
+			'permission_id'   => __( 'Permission ID', 'woocommerce' ),
+			'order_id'        => __( 'Order', 'woocommerce' ),
+			'user_id'         => __( 'User', 'woocommerce' ),
+			'user_ip_address' => __( 'IP address', 'woocommerce' ),
+		);
+
+		foreach ( $filters as $key => $value ) {
+			if ( is_null( $value ) ) {
+				continue;
+			}
+			switch ( $key ) {
+				case 'order_id' :
+					$order = wc_get_order( $value );
+					if ( $order  ) {
+						$display_value = _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number();
+					} else {
+						break 2;
+					}
+					break;
+				case 'product_id' :
+					$product = wc_get_product( $value );
+					if ( $product  ) {
+						$display_value = $product->get_formatted_name();
+					} else {
+						break 2;
+					}
+					break;
+				default :
+					$display_value = $value;
+					break;
+			}
+			$filter_list[] = $filter_names[ $key ] . ' ' . $display_value . ' <a href="' . esc_url( remove_query_arg( $key ) ) . '" class="woocommerce-reports-remove-filter">&times;</a>';
+		}
+
+		echo $filter_list ? ' - ' . wp_kses_post( implode( ', ', $filter_list ) ) : '';
+		echo '</h1>';
 
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 		$this->display();
 		echo '</div>';
-	}
-
-	/**
-	 * Output the title at the top of the report.
-	 *
-	 * @param object               $file File to output.
-	 * @param WC_Product           $product Product object.
-	 * @param WC_Customer_Download $permission Download permission object.
-	 */
-	protected function output_report_title( $file, $product, $permission ) {
-		// Output file information (if provided).
-		if ( $file ) {
-			echo '<p><strong>' . esc_html__( 'File:', 'woocommerce' ) . '</strong><br/>' . esc_html( $file->get_name() ) . '</p>';
-		}
-
-		// Output product information.
-		echo '<p><strong>' . esc_html__( 'Product: ', 'woocommerce' ) . '</strong><br/>';
-		edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
-		echo '</p>';
-
-		// Output order information.
-		echo '<p><strong>' . esc_html__( 'Order: ', 'woocommerce' ) . '</strong><br/>';
-		edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
-		echo '</p>';
 	}
 
 	/**
@@ -117,9 +130,8 @@ class WC_Report_Downloads extends WP_List_Table {
 	 * @param string $column_name Column name.
 	 */
 	public function column_default( $item, $column_name ) {
-
 		$permission = null;
-		$product = null;
+		$product    = null;
 		try {
 			$permission	= new WC_Customer_Download( $item->permission_id );
 			$product	= wc_get_product( $permission->product_id );
@@ -134,12 +146,32 @@ class WC_Report_Downloads extends WP_List_Table {
 				break;
 			case 'product' :
 				if ( ! empty( $product ) ) {
-					edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
+					edit_post_link( esc_html( $product->get_formatted_name() ), '', '', $product->get_id(), 'view-link' );
+
+					echo '<div class="row-actions">';
+					echo '<a href="' . esc_url( add_query_arg( 'product_id', $product->get_id() ) ) . '">' . esc_html__( 'Filter by product', 'woocommerce' ) . '</a>';
+					echo '</div>';
+				}
+				break;
+			case 'file' :
+				if ( ! empty( $permission ) && ! empty( $product ) ) {
+					// File information.
+					$file = $product->get_file( $permission->get_download_id() );
+
+					echo esc_html( $file->get_name() .  ' - ' . basename( $file->get_file() ) );
+
+					echo '<div class="row-actions">';
+					echo '<a href="' . esc_url( add_query_arg( 'download_id', $permission->get_download_id() ) ) . '">' . esc_html__( 'Filter by file', 'woocommerce' ) . '</a>';
+					echo '</div>';
 				}
 				break;
 			case 'order' :
-				if ( ! empty( $permission ) ) {
-					edit_post_link( '#' . $permission->order_id, '', '', $permission->order_id );
+				if ( ! empty( $permission ) && ( $order = wc_get_order( $permission->order_id ) ) ) {
+					edit_post_link( esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ), '', '', $permission->order_id, 'view-link' );
+
+					echo '<div class="row-actions">';
+					echo '<a href="' . esc_url( add_query_arg( 'order_id', $order->get_id() ) ) . '">' . esc_html__( 'Filter by order', 'woocommerce' ) . '</a>';
+					echo '</div>';
 				}
 				break;
 			case 'user' :
@@ -147,12 +179,10 @@ class WC_Report_Downloads extends WP_List_Table {
 					$user = get_user_by( 'id', $item->user_id );
 
 					if ( ! empty( $user ) ) {
-						$user_description = $user->data->user_nicename;
-						if ( empty( $user_description ) ) {
-							$user_description = $user->data->user_email;
-						}
-
-						echo '<a href="' . esc_url( get_edit_user_link( $item->user_id ) ) . '">' . esc_html( $user_description ) . '</a>';
+						echo '<a href="' . esc_url( get_edit_user_link( $item->user_id ) ) . '">' . esc_html( $user->display_name ) . '</a>';
+						echo '<div class="row-actions">';
+						echo '<a href="' . esc_url( add_query_arg( 'user_id', $item->user_id ) ) . '">' . esc_html__( 'Filter by user', 'woocommerce' ) . '</a>';
+						echo '</div>';
 					}
 				} else {
 					esc_html_e( 'Guest', 'woocommerce' );
@@ -160,6 +190,10 @@ class WC_Report_Downloads extends WP_List_Table {
 				break;
 			case 'user_ip_address' :
 				echo esc_html( $item->user_ip_address );
+
+				echo '<div class="row-actions">';
+				echo '<a href="' . esc_url( add_query_arg( 'user_ip_address', $item->user_ip_address ) ) . '">' . esc_html__( 'Filter by IP address', 'woocommerce' ) . '</a>';
+				echo '</div>';
 				break;
 		}
 	}
@@ -170,13 +204,13 @@ class WC_Report_Downloads extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
-
 		$columns = array(
-			'timestamp'			=> __( 'Timestamp', 'woocommerce' ),
-			'product'			=> __( 'Product', 'woocommerce' ),
-			'order'				=> __( 'Order', 'woocommerce' ),
-			'user'				=> __( 'User', 'woocommerce' ),
-			'user_ip_address'	=> __( 'IP Address', 'woocommerce' ),
+			'timestamp'       => __( 'Timestamp', 'woocommerce' ),
+			'product'         => __( 'Product', 'woocommerce' ),
+			'file'            => __( 'File', 'woocommerce' ),
+			'order'           => __( 'Order', 'woocommerce' ),
+			'user'            => __( 'User', 'woocommerce' ),
+			'user_ip_address' => __( 'IP address', 'woocommerce' ),
 		);
 
 		return $columns;
@@ -208,7 +242,30 @@ class WC_Report_Downloads extends WP_List_Table {
 	 * No items found text.
 	 */
 	public function no_items() {
-		esc_html_e( 'No customer downloads has been tracked yet.', 'woocommerce' );
+		esc_html_e( 'No customer downloads found.', 'woocommerce' );
+	}
+
+	/**
+	 * Get filters from querystring.
+	 *
+	 * @return object
+	 */
+	protected function get_filter_vars() {
+		$product_id      = ! empty( $_GET['product_id'] ) ? absint( wp_unslash( $_GET['product_id'] ) )            : null; // WPCS: input var ok.
+		$download_id     = ! empty( $_GET['download_id'] ) ? wc_clean( wp_unslash( $_GET['download_id'] ) )            : null; // WPCS: input var ok.
+		$permission_id   = ! empty( $_GET['permission_id'] ) ? absint( wp_unslash( $_GET['permission_id'] ) )      : null; // WPCS: input var ok.
+		$order_id        = ! empty( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) )                : null; // WPCS: input var ok.
+		$user_id         = ! empty( $_GET['user_id'] ) ? absint( wp_unslash( $_GET['user_id'] ) )                  : null; // WPCS: input var ok.
+		$user_ip_address = ! empty( $_GET['user_ip_address'] ) ? wc_clean( wp_unslash( $_GET['user_ip_address'] ) ): null; // WPCS: input var ok.
+
+		return (object) array(
+			'product_id'      => $product_id,
+			'download_id'     => $download_id,
+			'permission_id'   => $permission_id,
+			'order_id'        => $order_id,
+			'user_id'         => $user_id,
+			'user_ip_address' => $user_ip_address,
+		);
 	}
 
 	/**
@@ -222,27 +279,40 @@ class WC_Report_Downloads extends WP_List_Table {
 
 		$this->max_items = 0;
 		$this->items     = array();
+		$filters         = $this->get_filter_vars();
 
 		// Get downloads from database.
-		$table = $wpdb->prefix . WC_Customer_Download_Log_Data_Store::get_table_name();
+		$table      = $wpdb->prefix . WC_Customer_Download_Log_Data_Store::get_table_name();
+		$query_from = " FROM {$table} as downloads ";
 
-		$query_from = "FROM {$table} as downloads WHERE 1=1 ";
+		if ( ! is_null( $filters->product_id ) || ! is_null( $filters->download_id ) || ! is_null( $filters->order_id ) ) {
+			$query_from .= " LEFT JOIN {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions on downloads.permission_id = permissions.permission_id ";
+		}
 
-		// Apply filter by permission.
-		if ( ! empty( $_GET['permission_id'] ) ) { // WPCS: input var ok.
-			$permission_id = absint( $_GET['permission_id'] ); // WPCS: input var ok.
+		$query_from .= ' WHERE 1=1 ';
 
-			// Ensure the permission and product exist.
-			try {
-				$permission	= new WC_Customer_Download( $permission_id );
-				$product	= wc_get_product( $permission->product_id );
-			} catch ( Exception $e ) {
-				// Leave array empty since we can't find the permission.
-				return;
-			}
+		if ( ! is_null( $filters->product_id ) ) {
+			$query_from .= $wpdb->prepare( ' AND product_id = %d ', $filters->product_id );
+		}
 
-			// Add filter for permission id.
-			$query_from .= $wpdb->prepare( 'AND permission_id = %d', $permission_id );
+		if ( ! is_null( $filters->download_id ) ) {
+			$query_from .= $wpdb->prepare( ' AND download_id = %s ', $filters->download_id );
+		}
+
+		if ( ! is_null( $filters->order_id ) ) {
+			$query_from .= $wpdb->prepare( ' AND order_id = %d ', $filters->order_id );
+		}
+
+		if ( ! is_null( $filters->permission_id ) ) {
+			$query_from .= $wpdb->prepare( ' AND downloads.permission_id = %d ', $filters->permission_id );
+		}
+
+		if ( ! is_null( $filters->user_id ) ) {
+			$query_from .= $wpdb->prepare( ' AND downloads.user_id = %d ', $filters->user_id );
+		}
+
+		if ( ! is_null( $filters->user_ip_address ) ) {
+			$query_from .= $wpdb->prepare( ' AND user_ip_address = %s ', $filters->user_ip_address );
 		}
 
 		$query_from  = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );

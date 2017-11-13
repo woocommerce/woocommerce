@@ -73,7 +73,7 @@ class WC_Admin_Reports {
 					'downloads' => array(
 						'title'       => __( 'Customer downloads', 'woocommerce' ),
 						'description' => '',
-						'hide_title'  => false,
+						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
 				),
