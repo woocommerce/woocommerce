@@ -58,7 +58,6 @@ class WC_Template_Loader {
 			add_filter( 'the_title', array( __CLASS__, 'unsupported_theme_title_filter' ), 10, 2 );
 			add_filter( 'post_thumbnail_html', array( __CLASS__, 'unsupported_theme_single_featured_image_filter' ) );
 			add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'unsupported_theme_remove_review_tab' ) );
-			add_filter( 'body_class', array( __CLASS__, 'unsupported_theme_body_class' ) );
 			add_filter( 'comments_number', '__return_empty_string' );
 
 			if ( is_product() ) {
@@ -330,4 +329,4 @@ class WC_Template_Loader {
 	}
 }
 
-add_action( 'after_setup_theme', array( 'WC_Template_Loader', 'init' ) );
+add_action( 'init', array( 'WC_Template_Loader', 'init' ) );
