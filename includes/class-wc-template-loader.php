@@ -38,7 +38,7 @@ class WC_Template_Loader {
 		self::$shop_page_id = wc_get_page_id( 'shop' );
 
 		// Supported themes.
-		if ( current_theme_supports( 'woocommerce' ) || in_array( get_template(), array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ), true ) ) {
+		if ( current_theme_supports( 'woocommerce' ) ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 		} else {
