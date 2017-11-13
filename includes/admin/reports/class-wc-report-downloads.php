@@ -58,7 +58,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 		// Subtitle for permission if set.
 		if ( isset( $_GET['permission_id'] ) && is_numeric( $_GET['permission_id'] ) && $_GET['permission_id'] > 0 ) {
-			$permission_id = $_GET['permission_id'];
+			$permission_id = absint( $_GET['permission_id'] ); // WPCS: input var ok.
+
 			// Load the permission, order, etc. so we can render more information.
 			$permission	= null;
 			$product	= null;
@@ -66,7 +67,7 @@ class WC_Report_Downloads extends WP_List_Table {
 				$permission	= new WC_Customer_Download( $permission_id );
 				$product	= wc_get_product( $permission->product_id );
 			} catch ( Exception $e ) {
-				wp_die( sprintf( __( 'Permission #%d not found.', 'woocommerce' ), $permission_id ) );
+				wp_die( sprintf( esc_html__( 'Permission #%d not found.', 'woocommerce' ), $permission_id ) );
 			}
 
 			if ( ! empty( $permission ) && ! empty( $product ) ) {
@@ -129,12 +130,9 @@ class WC_Report_Downloads extends WP_List_Table {
 				echo esc_html( $item->timestamp );
 				break;
 			case 'product' :
-				if ( empty( $product ) ) {
-					break;
+				if ( ! empty( $product ) ) {
+					edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
 				}
-
-				edit_post_link( $product->get_formatted_name(), '', '', $product->get_id() );
-
 				break;
 			case 'order' :
 				if ( ! empty( $permission ) ) {
@@ -229,10 +227,11 @@ class WC_Report_Downloads extends WP_List_Table {
 
 		// Apply filter by permission.
 		if ( isset( $_GET['permission_id'] ) && is_numeric( $_GET['permission_id'] ) && $_GET['permission_id'] > 0 ) {
+			$permission_id = absint( $_GET['permission_id'] ); // WPCS: input var ok.
 
 			// Ensure the permission and product exist.
 			try {
-				$permission	= new WC_Customer_Download( $_GET['permission_id'] );
+				$permission	= new WC_Customer_Download( $permission_id );
 				$product	= wc_get_product( $permission->product_id );
 			} catch ( Exception $e ) {
 				// Leave array empty since we can't find the permission.
@@ -240,7 +239,7 @@ class WC_Report_Downloads extends WP_List_Table {
 			}
 
 			// Add filter for permission id.
-			$query_from .= $wpdb->prepare( "AND permission_id = %d", $_GET['permission_id'] );
+			$query_from .= $wpdb->prepare( "AND permission_id = %d", $permission_id );
 		}
 
 		$query_from = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );

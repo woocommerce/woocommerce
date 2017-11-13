@@ -145,29 +145,4 @@ class WC_Customer_Download_Log extends WC_Data {
 	public function set_user_ip_address( $value ) {
 		$this->set_prop( 'user_ip_address', $value );
 	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD methods
-	|--------------------------------------------------------------------------
-	*/
-
-	/**
-	 * Save data to the database.
-	 *
-	 * @return int Log ID
-	 */
-	public function save() {
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Use a pointer to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
-
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
-		}
-		return $this->get_id();
-	}
 }
