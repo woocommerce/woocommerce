@@ -5,6 +5,18 @@
 
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
+	<!-- Include WPCS and PHPCompatibility paths -->
+	<config name="installed_paths" value="vendor/wp-coding-standards/wpcs,vendor/wimg/php-compatibility" />
+
+	<!-- Exclude paths -->
+	<exclude-pattern>tests/cli/</exclude-pattern>
+	<exclude-pattern>apigen/</exclude-pattern>
+	<exclude-pattern>includes/gateways/simplify-commerce/includes/</exclude-pattern>
+	<exclude-pattern>includes/libraries/</exclude-pattern>
+	<exclude-pattern>includes/api/legacy/</exclude-pattern>
+
+	<rule ref="PHPCompatibility"/>
+
 	<rule ref="WordPress">
 		<exclude name="WordPress.VIP.RestrictedFunctions" />
 		<exclude name="WordPress.VIP.OrderByRand" />

@@ -118,7 +118,7 @@ function wc_nav_menu_items( $items ) {
 	if ( ! is_user_logged_in() ) {
 		$customer_logout = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
 
-		if ( ! empty( $customer_logout ) ) {
+		if ( ! empty( $customer_logout ) && ! empty( $items ) && is_array( $items ) ) {
 			foreach ( $items as $key => $item ) {
 				if ( empty( $item->url ) ) {
 					continue;
@@ -153,35 +153,36 @@ function wc_nav_menu_item_classes( $menu_items ) {
 	$shop_page 		= (int) wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
-	foreach ( (array) $menu_items as $key => $menu_item ) {
+	if ( ! empty( $menu_items ) && is_array( $menu_items ) ) {
+		foreach ( $menu_items as $key => $menu_item ) {
 
-		$classes = (array) $menu_item->classes;
+			$classes = (array) $menu_item->classes;
 
-		// Unset active class for blog page
-		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[ $key ]->current = false;
+			// Unset active class for blog page
+			if ( $page_for_posts == $menu_item->object_id ) {
+				$menu_items[ $key ]->current = false;
 
-			if ( in_array( 'current_page_parent', $classes ) ) {
-				unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
+				if ( in_array( 'current_page_parent', $classes ) ) {
+					unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
+				}
+
+				if ( in_array( 'current-menu-item', $classes ) ) {
+					unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
+				}
+
+			// Set active state if this is the shop page link
+			} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
+				$menu_items[ $key ]->current = true;
+				$classes[] = 'current-menu-item';
+				$classes[] = 'current_page_item';
+
+			// Set parent state if this is a product page
+			} elseif ( is_singular( 'product' ) && $shop_page == $menu_item->object_id ) {
+				$classes[] = 'current_page_parent';
 			}
 
-			if ( in_array( 'current-menu-item', $classes ) ) {
-				unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
-			}
-
-		// Set active state if this is the shop page link
-		} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
-			$menu_items[ $key ]->current = true;
-			$classes[] = 'current-menu-item';
-			$classes[] = 'current_page_item';
-
-		// Set parent state if this is a product page
-		} elseif ( is_singular( 'product' ) && $shop_page == $menu_item->object_id ) {
-			$classes[] = 'current_page_parent';
+			$menu_items[ $key ]->classes = array_unique( $classes );
 		}
-
-		$menu_items[ $key ]->classes = array_unique( $classes );
-
 	}
 
 	return $menu_items;

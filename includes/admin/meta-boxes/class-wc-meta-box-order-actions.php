@@ -11,7 +11,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -22,7 +22,7 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public static function output( $post ) {
 		global $theorder;
@@ -44,17 +44,17 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
-					<option value=""><?php _e( 'Choose an action...', 'woocommerce' ); ?></option>
+					<option value=""><?php esc_html_e( 'Choose an action...', 'woocommerce' ); ?></option>
 					<?php foreach ( $order_actions as $action => $title ) { ?>
-						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
+						<option value="<?php echo esc_attr( $action ); ?>"><?php echo esc_html( $title ); ?></option>
 					<?php } ?>
 				</select>
-				<button class="button wc-reload"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
+				<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
 			<li class="wide">
-				<div id="delete-action"><?php
-
+				<div id="delete-action">
+					<?php
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
@@ -62,11 +62,12 @@ class WC_Meta_Box_Order_Actions {
 						} else {
 							$delete_text = __( 'Move to trash', 'woocommerce' );
 						}
-						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
+						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo esc_html( $delete_text ); ?></a><?php
 					}
-				?></div>
+					?>
+				</div>
 
-				<input type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $post->post_status ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>" />
+				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $post->post_status ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo 'auto-draft' === $post->post_status ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -78,17 +79,17 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
-	 * @param WP_Post $post
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post Post Object.
 	 */
 	public static function save( $post_id, $post ) {
 		// Order data saved, now get it so we can manipulate status.
 		$order = wc_get_order( $post_id );
 
-		// Handle button actions
-		if ( ! empty( $_POST['wc_order_action'] ) ) {
+		// Handle button actions.
+		if ( ! empty( $_POST['wc_order_action'] ) ) { // @codingStandardsIgnoreLine
 
-			$action = wc_clean( $_POST['wc_order_action'] );
+			$action = wc_clean( wp_unslash( $_POST['wc_order_action'] ) ); // @codingStandardsIgnoreLine
 
 			if ( 'send_order_details' === $action ) {
 				do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
@@ -137,12 +138,9 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Set the correct message ID.
 	 *
-	 * @param string $location
-	 *
+	 * @param string $location Location.
 	 * @since  2.3.0
-	 *
 	 * @static
-	 *
 	 * @return string
 	 */
 	public static function set_email_sent_message( $location ) {

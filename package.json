@@ -24,7 +24,7 @@
     "babel-preset-stage-2": "^6.13.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
-    "chromedriver": "2.33.0",
+    "chromedriver": "^2.33.0",
     "config": "^1.24.0",
     "cross-env": "^3.0.0",
     "grunt": "~1.0.1",

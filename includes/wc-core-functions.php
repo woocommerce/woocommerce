@@ -315,7 +315,8 @@ function get_woocommerce_currencies() {
 					'BTC' => __( 'Bitcoin', 'woocommerce' ),
 					'BTN' => __( 'Bhutanese ngultrum', 'woocommerce' ),
 					'BWP' => __( 'Botswana pula', 'woocommerce' ),
-					'BYR' => __( 'Belarusian ruble', 'woocommerce' ),
+					'BYR' => __( 'Belarusian ruble (old)', 'woocommerce' ),
+					'BYN' => __( 'Belarusian ruble', 'woocommerce' ),
 					'BZD' => __( 'Belize dollar', 'woocommerce' ),
 					'CAD' => __( 'Canadian dollar', 'woocommerce' ),
 					'CDF' => __( 'Congolese franc', 'woocommerce' ),
@@ -498,6 +499,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'BTN' => 'Nu.',
 		'BWP' => 'P',
 		'BYR' => 'Br',
+		'BYN' => 'Br',
 		'BZD' => '&#36;',
 		'CAD' => '&#36;',
 		'CDF' => 'Fr',
@@ -657,39 +659,64 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
 }
 
 /**
- * Get an image size.
+ * Get an image size by name or defined dimensions.
  *
- * Variable is filtered by woocommerce_get_image_size_{image_size}.
+ * The returned variable is filtered by woocommerce_get_image_size_{image_size} filter to
+ * allow 3rd party customisation.
  *
- * @param array|string $image_size
- * @return array
+ * Sizes defined by the theme take priority over settings. Settings are hidden when a theme
+ * defines sizes.
+ *
+ * @param array|string $image_size Name of the image size to get, or an array of dimensions.
+ * @return array Array of dimensions including width, height, and cropping mode. Cropping mode is 0 for no crop, and 1 for hard crop.
  */
 function wc_get_image_size( $image_size ) {
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+	$size          = array(
+		'width'  => 600,
+		'height' => 600,
+		'crop'   => 1,
+	);
+
 	if ( is_array( $image_size ) ) {
-		$width  = isset( $image_size[0] ) ? $image_size[0] : '300';
-		$height = isset( $image_size[1] ) ? $image_size[1] : '300';
-		$crop   = isset( $image_size[2] ) ? $image_size[2] : 1;
-
 		$size = array(
-			'width'  => $width,
-			'height' => $height,
-			'crop'   => $crop,
+			'width'  => isset( $image_size[0] ) ? $image_size[0] : 600,
+			'height' => isset( $image_size[1] ) ? $image_size[1] : 600,
+			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
+		$image_size = $size['width'] . '_' . $size['height'];
+	} elseif ( in_array( $image_size, array( 'single', 'shop_single' ), true ) ) {
+		// If the theme supports woocommerce, take image sizes from that definition.
+		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
+			$size['width'] = $theme_support[ 'single_image_width' ];
+		} else {
+			$size['width'] = get_option( 'woocommerce_single_image_width', 600 );
+		}
+		$size['height'] = 9999999999;
+		$size['crop']   = 0;
+		$image_size     = 'single';
+	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog' ), true ) ) {
+		// If the theme supports woocommerce, take image sizes from that definition.
+		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
+			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
+		} else {
+			$size['width'] = get_option( 'woocommerce_thumbnail_image_width', 300 );
+		}
 
-		$image_size = $width . '_' . $height;
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
-	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
-		$size           = get_option( $image_size . '_image_size', array() );
-		$size['width']  = isset( $size['width'] ) ? $size['width'] : '300';
-		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
-		$size['crop']   = isset( $size['crop'] ) ? $size['crop'] : 0;
-
-	} else {
-		$size = array(
-			'width'  => '300',
-			'height' => '300',
-			'crop'   => 1,
-		);
+		if ( 'uncropped' === $cropping ) {
+			$size['height'] = 9999999999;
+			$size['crop']   = 0;
+		} else {
+			$cropping_split = explode( ':', $cropping );
+			$width_ratio    = max( 1, current( $cropping_split ) );
+			$height_ratio   = max( 1, end( $cropping_split ) );
+			$size['height'] = round( ( $size['width'] / $width_ratio ) * $height_ratio );
+			$size['crop']   = 1;
+		}
+		$image_size = 'thumbnail';
 	}
 
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
@@ -897,11 +924,11 @@ add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
 /**
  * Protect downloads from ms-files.php in multisite.
  *
- * @param mixed $rewrite
+ * @param string $rewrite rewrite rules.
  * @return string
  */
 function wc_ms_protect_download_rewite_rules( $rewrite ) {
-	if ( ! is_multisite() || 'redirect' == get_option( 'woocommerce_file_download_method' ) ) {
+	if ( ! is_multisite() || 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
 		return $rewrite;
 	}
 
@@ -915,16 +942,6 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 	return $rule . $rewrite;
 }
 add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
-
-/**
- * WooCommerce Core Supported Themes.
- *
- * @since 2.2
- * @return string[]
- */
-function wc_get_core_supported_themes() {
-	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-}
 
 /**
  * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron.
@@ -1390,14 +1407,24 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 /**
  * Wrapper for set_time_limit to see if it is enabled.
- * @since 2.6.0
  *
+ * @since 2.6.0
  * @param int $limit
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
 		@set_time_limit( $limit );
 	}
+}
+
+/**
+ * Wrapper for nocache_headers which also disables page caching.
+ *
+ * @since 3.2.4
+ */
+function wc_nocache_headers() {
+	WC_Cache_Helper::set_nocache_constants();
+	nocache_headers();
 }
 
 /**
@@ -1432,6 +1459,21 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 	return ( $a->method_order < $b->method_order ) ? -1 : 1;
 }
 
+/**
+ * Get rounding mode for internal tax calculations.
+ *
+ * @since 3.2.4
+ * @return int
+ */
+function wc_get_tax_rounding_mode() {
+	$constant = WC_TAX_ROUNDING_MODE;
+
+	if ( 'auto' === $constant ) {
+		return 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1;
+	}
+
+	return intval( $constant );
+}
 
 /**
  * Get rounding precision for internal WC calculations.
@@ -1457,7 +1499,7 @@ function wc_get_rounding_precision() {
  */
 function wc_add_number_precision( $value ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return $value * $precision;
+	return intval( round( $value * $precision ) );
 }
 
 /**

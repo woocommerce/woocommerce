@@ -256,7 +256,7 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	private function is_active_theme( $theme ) {
-		return get_template() === $theme;
+		return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
 	}
 
 	/**
@@ -393,8 +393,47 @@ final class WooCommerce {
 			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
 		}
 
+		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
+	}
+
+	/**
+	 * Include classes sfor theme support.
+	 *
+	 * @since 3.3.0
+	 */
+	private function theme_support_includes() {
+		$theme_support = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+
+		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+			switch ( get_template() ) {
+				case 'twentyten' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php' );
+					break;
+				case 'twentyeleven' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-eleven.php' );
+					break;
+				case 'twentytwelve' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twelve.php' );
+					break;
+				case 'twentythirteen' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-thirteen.php' );
+					break;
+				case 'twentyfourteen' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fourteen.php' );
+					break;
+				case 'twentyfifteen' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fifteen.php' );
+					break;
+				case 'twentysixteen' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-sixteen.php' );
+					break;
+				case 'twentyseventeen' :
+					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php' );
+					break;
+			}
+		}
 	}
 
 	/**
@@ -414,10 +453,6 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );       // Shortcodes class.
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );            // Embeds.
 		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );  // Structured Data class.
-
-		if ( $this->is_active_theme( 'twentyseventeen' ) ) {
-			include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php' );
-		}
 	}
 
 	/**
@@ -507,16 +542,28 @@ final class WooCommerce {
 	/**
 	 * Add WC Image sizes to WP.
 	 *
+	 * As of 3.3, image sizes can be registered via themes using add_theme_support for woocommerce
+	 * and defining an array of args. If these are not defined, we will use defaults. This is
+	 * handled in wc_get_image_size function.
+	 *
+	 * 3.3 sizes:
+	 *
+	 * thumbnail - Used in product listings.
+	 * single - Used on single product pages for the main image.
+	 *
+	 * shop_thumbnail, shop_single, shop_catalog registered for bw compat. @todo remove in 4.0.
+	 *
 	 * @since 2.3
 	 */
 	private function add_image_sizes() {
-		$shop_thumbnail = wc_get_image_size( 'shop_thumbnail' );
-		$shop_catalog	= wc_get_image_size( 'shop_catalog' );
-		$shop_single	= wc_get_image_size( 'shop_single' );
+		$thumbnail = wc_get_image_size( 'thumbnail' );
+		$single	   = wc_get_image_size( 'single' );
 
-		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
-		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
-		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
+		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
+		add_image_size( 'shop_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
 	}
 
 	/**

@@ -365,7 +365,7 @@ class WC_Emails {
 	 * @param string $email
 	 */
 	public function order_downloads( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
-		$show_downloads = $order->has_downloadable_item() && $order->is_download_permitted();
+		$show_downloads = $order->has_downloadable_item() && $order->is_download_permitted() && ! $sent_to_admin;
 
 		if ( ! $show_downloads ) {
 			return;
@@ -482,9 +482,9 @@ class WC_Emails {
 			return;
 		}
 		if ( $plain_text ) {
-			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
+			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin ) );
 		} else {
-			wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
+			wc_get_template( 'emails/email-addresses.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin ) );
 		}
 	}
 
