@@ -1919,6 +1919,17 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Stock Status as On Backorder.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_onbackorder( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'onbackorder' );
+	}
+
+	/**
 	 * Bulk action - Set Stock.
 	 * @access private
 	 * @used-by bulk_edit_variations
