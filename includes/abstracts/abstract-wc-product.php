@@ -1497,7 +1497,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		return apply_filters( 'woocommerce_product_is_in_stock', 'instock' === $this->get_stock_status(), $this );
+		return apply_filters( 'woocommerce_product_is_in_stock', 'instock' === $this->get_stock_status() || 'onbackorder' === $this->get_stock_status(), $this );
 	}
 
 	/**

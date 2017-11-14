@@ -84,7 +84,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	  *
 	  * @since 3.3.0
 	  */
-	 public function test_product_stock_status() {
+	 public function test_product_backorder_stock_status() {
 	 	$product = new WC_Product();
 
 	 	$product->set_stock_status( 'onbackorder' );
