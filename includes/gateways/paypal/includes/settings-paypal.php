@@ -55,7 +55,7 @@ return array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable IPN email notification', 'woocommerce' ),
 		'default'     => 'yes',
-		'description' => __( 'Sends an admin email each time an IPN is received from PayPal and is related to cancelled order, refunded order, payment reversal, cancelled reversal.', 'woocommerce' )
+		'description' => __( 'Send an email to the user handling orders when an IPN is received from PayPal.', 'woocommerce' )
 	),
 	'advanced' => array(
 		'title'       => __( 'Advanced options', 'woocommerce' ),
