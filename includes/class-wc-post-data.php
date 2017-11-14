@@ -50,9 +50,6 @@ class WC_Post_Data {
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
 
-		// Download permissions
-		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
-
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
