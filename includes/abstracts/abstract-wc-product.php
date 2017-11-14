@@ -946,7 +946,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $status New status.
 	 */
 	public function set_stock_status( $status = '' ) {
-		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
+		$valid_statuses = array_keys( wc_get_product_stock_status_options() );
+
+		if ( in_array( $status, $valid_statuses, true ) ) {
+			$this->set_prop( 'stock_status', $status );
+		} else {
+			$this->set_prop( 'stock_status', 'instock' );
+		}
 	}
 
 	/**

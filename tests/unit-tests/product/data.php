@@ -79,6 +79,22 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
 	 }
 
+	 /**
+	  * Test the onbackorder stock status.
+	  *
+	  * @since 3.3.0
+	  */
+	 public function test_product_stock_status() {
+	 	$product = new WC_Product();
+
+	 	$product->set_stock_status( 'onbackorder' );
+	 	$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+
+	 	$product->save();
+	 	$product = new WC_Product( $product->get_id() );
+	 	$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+	 }
+
 	/**
 	 * Test product term setters and getters
 	 * @since 3.0.0
