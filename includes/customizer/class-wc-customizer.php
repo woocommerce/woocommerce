@@ -31,13 +31,25 @@ class WC_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public function add_sections( $wp_customize ) {
+		$theme_support = get_theme_support( 'woocommerce' );
+		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+
 		$wp_customize->add_section(
 			'woocommerce_display_settings',
 			array(
-				'title'       => __( 'WooCommerce', 'woocommerce' ),
-				'description' => __( 'These settings control how some parts of WooCommerce appear in your store.', 'woocommerce' ),
-				'priority'    => 140,
-				'active_callback' => 'is_woocommerce',
+				'title'           => __( 'WooCommerce', 'woocommerce' ),
+				'description'     => __( 'These settings control how some parts of WooCommerce appear in your store.', 'woocommerce' ),
+				'priority'        => 210,
+			)
+		);
+
+		$wp_customize->add_section(
+			'woocommerce_product_display_settings',
+			array(
+				'title'           => __( 'WooCommerce Products', 'woocommerce' ),
+				'description'     => __( 'These settings control how products display in your store.', 'woocommerce' ),
+				'priority'        => 220,
+				'active_callback' => array( $this, 'is_active' ),
 			)
 		);
 
@@ -69,7 +81,7 @@ class WC_Customizer {
 			'woocommerce_demo_store_notice',
 			array(
 				'label'       => __( 'Store notice', 'woocommerce' ),
-				'description' => __( "If enabled, this will be shown site-wide. It can be used to inform visitors about store events and promotions.", 'woocommerce' ),
+				'description' => __( 'If enabled, this text will be shown site-wide. You can use it to show events or promotions to visitors!', 'woocommerce' ),
 				'section'     => 'woocommerce_display_settings',
 				'settings'    => 'woocommerce_demo_store_notice',
 				'type'        => 'textarea',
@@ -87,7 +99,64 @@ class WC_Customizer {
 		);
 
 		/**
-		 * Grid and image settings.
+		 * Grid settings.
+		 */
+		$wp_customize->add_setting(
+			'woocommerce_catalog_columns',
+			array(
+				'default'              => 3,
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => 'absint',
+				'sanitize_js_callback' => 'absint',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_catalog_columns',
+			array(
+				'label'       => __( 'Products per row', 'woocommerce' ),
+				'description' => __( 'How many products should be shown per row?', 'woocommerce' ),
+				'section'     => 'woocommerce_product_display_settings',
+				'settings'    => 'woocommerce_catalog_columns',
+				'type'        => 'number',
+				'input_attrs' => array(
+					'min'  => isset( $theme_support['product_grid']['min_columns'] ) ? absint( $theme_support['product_grid']['min_columns'] ) : 1,
+					'max'  => isset( $theme_support['product_grid']['max_columns'] ) ? absint( $theme_support['product_grid']['max_columns'] ) : '',
+					'step' => 1,
+				),
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_catalog_rows',
+			array(
+				'default'              => 4,
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => 'absint',
+				'sanitize_js_callback' => 'absint',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_catalog_rows',
+			array(
+				'label'       => __( 'Rows per page', 'woocommerce' ),
+				'description' => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
+				'section'     => 'woocommerce_product_display_settings',
+				'settings'    => 'woocommerce_catalog_rows',
+				'type'        => 'number',
+				'input_attrs' => array(
+					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
+					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
+					'step' => 1,
+				),
+			)
+		);
+
+		/**
+		 * Image settings.
 		 */
 		$wp_customize->add_setting(
 			'single_image_width',
@@ -105,10 +174,13 @@ class WC_Customizer {
 			array(
 				'label'       => __( 'Main image width', 'woocommerce' ),
 				'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
-				'section'     => 'woocommerce_display_settings',
+				'section'     => 'woocommerce_product_display_settings',
 				'settings'    => 'single_image_width',
 				'type'        => 'number',
-				'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
+				'input_attrs' => array(
+					'min'  => 0,
+					'step' => 1,
+				),
 			)
 		);
 
@@ -128,7 +200,7 @@ class WC_Customizer {
 			array(
 				'label'       => __( 'Thumbnail width', 'woocommerce' ),
 				'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
-				'section'     => 'woocommerce_display_settings',
+				'section'     => 'woocommerce_product_display_settings',
 				'settings'    => 'thumbnail_image_width',
 				'type'        => 'number',
 				'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
@@ -174,7 +246,7 @@ class WC_Customizer {
 				$wp_customize,
 				'woocommerce_thumbnail_cropping',
 				array(
-					'section'  => 'woocommerce_display_settings',
+					'section'  => 'woocommerce_product_display_settings',
 					'settings' => array(
 						'cropping'      => 'woocommerce_thumbnail_cropping',
 						'custom_width'  => 'woocommerce_thumbnail_cropping_custom_width',
@@ -256,6 +328,15 @@ class WC_Customizer {
 			} );
 		</script>
 		<?php
+	}
+
+	/**
+	 * Should our settings show?
+	 *
+	 * @return boolean
+	 */
+	public function is_active() {
+		return is_woocommerce() || wc_post_content_has_shortcode( 'products' );
 	}
 }
 
