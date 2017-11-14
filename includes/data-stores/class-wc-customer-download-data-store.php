@@ -274,12 +274,16 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Update download ids if the hash changes.
 	 *
+	 * @deprecated 3.3.0 Download id is now a static UUID and should not be changed based on file hash.
+	 *
 	 * @param  int $product_id
 	 * @param  string $old_id
 	 * @param  string $new_id
 	 */
 	public function update_download_id( $product_id, $old_id, $new_id ) {
 		global $wpdb;
+
+		wc_deprecated_function( __METHOD__, '3.3' );
 
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',

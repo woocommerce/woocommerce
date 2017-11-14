@@ -50,9 +50,6 @@ class WC_Post_Data {
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
 
-		// Download permissions
-		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
-
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
@@ -481,26 +478,13 @@ class WC_Post_Data {
 	/**
 	 * Update changed downloads.
 	 *
+	 * @deprecated 3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
 	 * @param array $downloads newly set files
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
-		if ( $variation_id ) {
-			$product_id = $variation_id;
-		}
-		$data_store = WC_Data_Store::load( 'customer-download' );
-
-		if ( $downloads ) {
-			foreach ( $downloads as $download ) {
-				$new_hash = md5( $download->get_file() );
-
-				if ( $download->get_previous_hash() && $download->get_previous_hash() !== $new_hash ) {
-					// Update permissions.
-					$data_store->update_download_id( $product_id, $download->get_previous_hash(), $new_hash );
-				}
-			}
-		}
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 	}
 
 	/**

@@ -4658,6 +4658,10 @@ img.ui-datepicker-trigger {
 /**
  * Reports
  */
+ .woocommerce-reports-remove-filter {
+	color: red;
+	text-decoration: none;
+}
 .woocommerce-reports-wrap,
 .woocommerce-reports-wide {
 	&.woocommerce-reports-wrap {
@@ -4669,6 +4673,10 @@ img.ui-datepicker-trigger {
 		margin: 0;
 		overflow: hidden;
 		zoom: 1;
+	}
+
+	.widefat th {
+		padding: 7px;
 	}
 
 	.widefat td {

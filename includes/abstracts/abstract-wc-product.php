@@ -1172,13 +1172,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$download_object = $download;
 			} else {
 				$download_object           = new WC_Product_Download();
-				$download['previous_hash'] = isset( $download['previous_hash'] ) ? $download['previous_hash'] : '';
-				$file_hash                 = apply_filters( 'woocommerce_downloadable_file_hash', md5( $download['file'] ), $this->get_id(), $download['name'], $download['file'], $download['previous_hash'] );
 
-				$download_object->set_id( $file_hash );
+				// If we don't have a previous hash, generate UUID for download.
+				if ( empty( $download['download_id'] ) ) {
+					$download['download_id'] = wp_generate_uuid4();
+				}
+
+				$download_object->set_id( $download['download_id'] );
 				$download_object->set_name( $download['name'] );
 				$download_object->set_file( $download['file'] );
-				$download_object->set_previous_hash( $download['previous_hash'] );
 			}
 
 			// Validate the file extension.
