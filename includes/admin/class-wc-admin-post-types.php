@@ -453,6 +453,8 @@ class WC_Admin_Post_Types {
 			case 'is_in_stock':
 				if ( $the_product->is_in_stock() ) {
 					$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
+				} elseif ( $the_product->is_on_backorder() ) {
+					$stock_html = '<mark class="onbackorder">' . __( 'On backorder', 'woocommerce' ) . '</mark>';
 				} else {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
