@@ -101,111 +101,117 @@ class WC_Customizer {
 		/**
 		 * Grid settings.
 		 */
-		$wp_customize->add_setting(
-			'woocommerce_catalog_columns',
-			array(
-				'default'              => 3,
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'absint',
-				'sanitize_js_callback' => 'absint',
-			)
-		);
+		if ( ! has_filter( 'loop_shop_columns' ) ) {
+			$wp_customize->add_setting(
+				'woocommerce_catalog_columns',
+				array(
+					'default'              => 3,
+					'type'                 => 'option',
+					'capability'           => 'manage_woocommerce',
+					'sanitize_callback'    => 'absint',
+					'sanitize_js_callback' => 'absint',
+				)
+			);
 
-		$wp_customize->add_control(
-			'woocommerce_catalog_columns',
-			array(
-				'label'       => __( 'Products per row', 'woocommerce' ),
-				'description' => __( 'How many products should be shown per row?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_display_settings',
-				'settings'    => 'woocommerce_catalog_columns',
-				'type'        => 'number',
-				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_columns'] ) ? absint( $theme_support['product_grid']['min_columns'] ) : 1,
-					'max'  => isset( $theme_support['product_grid']['max_columns'] ) ? absint( $theme_support['product_grid']['max_columns'] ) : '',
-					'step' => 1,
-				),
-			)
-		);
+			$wp_customize->add_control(
+				'woocommerce_catalog_columns',
+				array(
+					'label'       => __( 'Products per row', 'woocommerce' ),
+					'description' => __( 'How many products should be shown per row?', 'woocommerce' ),
+					'section'     => 'woocommerce_product_display_settings',
+					'settings'    => 'woocommerce_catalog_columns',
+					'type'        => 'number',
+					'input_attrs' => array(
+						'min'  => isset( $theme_support['product_grid']['min_columns'] ) ? absint( $theme_support['product_grid']['min_columns'] ) : 1,
+						'max'  => isset( $theme_support['product_grid']['max_columns'] ) ? absint( $theme_support['product_grid']['max_columns'] ) : '',
+						'step' => 1,
+					),
+				)
+			);
 
-		$wp_customize->add_setting(
-			'woocommerce_catalog_rows',
-			array(
-				'default'              => 4,
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'absint',
-				'sanitize_js_callback' => 'absint',
-			)
-		);
+			$wp_customize->add_setting(
+				'woocommerce_catalog_rows',
+				array(
+					'default'              => 4,
+					'type'                 => 'option',
+					'capability'           => 'manage_woocommerce',
+					'sanitize_callback'    => 'absint',
+					'sanitize_js_callback' => 'absint',
+				)
+			);
 
-		$wp_customize->add_control(
-			'woocommerce_catalog_rows',
-			array(
-				'label'       => __( 'Rows per page', 'woocommerce' ),
-				'description' => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_display_settings',
-				'settings'    => 'woocommerce_catalog_rows',
-				'type'        => 'number',
-				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
-					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
-					'step' => 1,
-				),
-			)
-		);
+			$wp_customize->add_control(
+				'woocommerce_catalog_rows',
+				array(
+					'label'       => __( 'Rows per page', 'woocommerce' ),
+					'description' => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
+					'section'     => 'woocommerce_product_display_settings',
+					'settings'    => 'woocommerce_catalog_rows',
+					'type'        => 'number',
+					'input_attrs' => array(
+						'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
+						'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
+						'step' => 1,
+					),
+				)
+			);
+		}
 
 		/**
 		 * Image settings.
 		 */
-		$wp_customize->add_setting(
-			'single_image_width',
-			array(
-				'default'              => 600,
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'absint',
-				'sanitize_js_callback' => 'absint',
-			)
-		);
+		if ( ! isset( $theme_support['single_image_width'] ) ) {
+			$wp_customize->add_setting(
+				'single_image_width',
+				array(
+					'default'              => 600,
+					'type'                 => 'option',
+					'capability'           => 'manage_woocommerce',
+					'sanitize_callback'    => 'absint',
+					'sanitize_js_callback' => 'absint',
+				)
+			);
 
-		$wp_customize->add_control(
-			'single_image_width',
-			array(
-				'label'       => __( 'Main image width', 'woocommerce' ),
-				'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_display_settings',
-				'settings'    => 'single_image_width',
-				'type'        => 'number',
-				'input_attrs' => array(
-					'min'  => 0,
-					'step' => 1,
-				),
-			)
-		);
+			$wp_customize->add_control(
+				'single_image_width',
+				array(
+					'label'       => __( 'Main image width', 'woocommerce' ),
+					'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
+					'section'     => 'woocommerce_product_display_settings',
+					'settings'    => 'single_image_width',
+					'type'        => 'number',
+					'input_attrs' => array(
+						'min'  => 0,
+						'step' => 1,
+					),
+				)
+			);
+		}
 
-		$wp_customize->add_setting(
-			'thumbnail_image_width',
-			array(
-				'default'              => 300,
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'absint',
-				'sanitize_js_callback' => 'absint',
-			)
-		);
+		if ( ! isset( $theme_support['thumbnail_image_width'] ) ) {
+			$wp_customize->add_setting(
+				'thumbnail_image_width',
+				array(
+					'default'              => 300,
+					'type'                 => 'option',
+					'capability'           => 'manage_woocommerce',
+					'sanitize_callback'    => 'absint',
+					'sanitize_js_callback' => 'absint',
+				)
+			);
 
-		$wp_customize->add_control(
-			'thumbnail_image_width',
-			array(
-				'label'       => __( 'Thumbnail width', 'woocommerce' ),
-				'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_display_settings',
-				'settings'    => 'thumbnail_image_width',
-				'type'        => 'number',
-				'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
-			)
-		);
+			$wp_customize->add_control(
+				'thumbnail_image_width',
+				array(
+					'label'       => __( 'Thumbnail width', 'woocommerce' ),
+					'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
+					'section'     => 'woocommerce_product_display_settings',
+					'settings'    => 'thumbnail_image_width',
+					'type'        => 'number',
+					'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
+				)
+			);
+		}
 
 		include_once( WC_ABSPATH . 'includes/customizer/class-wc-customizer-control-cropping.php' );
 
