@@ -339,6 +339,11 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$mailer             = WC()->mailer();
 		$message            = $mailer->wrap_message( $subject, $message );
 
+		$woocommerce_paypal_settings = get_option('woocommerce_paypal_settings');
+		if ( ! empty( $woocommerce_paypal_settings['ipn_notification'] ) && 'no' === $woocommerce_paypal_settings['ipn_notification'] ) {
+			return;
+		}
+
 		$mailer->send( ! empty( $new_order_settings['recipient'] ) ? $new_order_settings['recipient'] : get_option( 'admin_email' ), strip_tags( $subject ), $message );
 	}
 }
