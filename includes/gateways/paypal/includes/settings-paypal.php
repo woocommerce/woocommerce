@@ -50,6 +50,13 @@ return array(
 		'default'     => 'no',
 		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s', 'woocommerce' ), '<code>' . WC_Log_Handler_File::get_log_file_path( 'paypal' ) . '</code>' ),
 	),
+	'ipn_notification' => array(
+		'title'       => __( 'Instant Payment Notification', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Send IPN email notification', 'woocommerce' ),
+		'default'     => 'yes',
+		'description' => __( 'Toggle notifications for cancelled orders payment, refunded order payments, reversal order payments, reversal cancelled payments.', 'woocommerce' )
+	),
 	'advanced' => array(
 		'title'       => __( 'Advanced options', 'woocommerce' ),
 		'type'        => 'title',
