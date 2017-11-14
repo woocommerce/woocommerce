@@ -13,7 +13,11 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.0
+ * @version     3.3.0
  */
+
+global $woocommerce_loop;
+
+$columns = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : wc_get_default_products_per_row();
 ?>
-<ul class="products">
+<ul class="products columns-<?php echo esc_attr( $columns ); ?>">

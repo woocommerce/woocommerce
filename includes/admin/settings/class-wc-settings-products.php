@@ -76,7 +76,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 */
 	public function get_settings( $current_section = '' ) {
 		if ( 'display' === $current_section ) {
-			$settings = array(
+			$theme_support = get_theme_support( 'woocommerce' );
+			$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+			$settings      = array(
 				array(
 					'title' => __( 'Shop &amp; product pages', 'woocommerce' ),
 					'type' 	=> 'title',
@@ -141,6 +143,34 @@ class WC_Settings_Products extends WC_Settings_Page {
 					) ),
 					'desc_tip' => true,
 				),
+				'columns' => array(
+					'title'             => __( 'Products per row', 'woocommerce' ),
+					'desc'              => __( 'How many products should be shown per row?', 'woocommerce' ),
+					'id'                => 'woocommerce_catalog_columns',
+					'default'           => '3',
+					'type'              => 'number',
+					'css'               => 'width: 50px;',
+					'custom_attributes' => array(
+						'min'  => isset( $theme_support['product_grid']['min_columns'] ) ? absint( $theme_support['product_grid']['min_columns'] ) : 1,
+						'max'  => isset( $theme_support['product_grid']['max_columns'] ) ? absint( $theme_support['product_grid']['max_columns'] ) : '',
+						'step' => 1,
+					),
+					'desc_tip'          => true,
+				),
+				'rows' => array(
+					'title'             => __( 'Rows per page', 'woocommerce' ),
+					'desc'              => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
+					'id'                => 'woocommerce_catalog_rows',
+					'default'           => '4',
+					'type'              => 'number',
+					'css'               => 'width: 50px;',
+					'custom_attributes' => array(
+						'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
+						'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
+						'step' => 1,
+					),
+					'desc_tip'          => true,
+				),
 				array(
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
 					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
@@ -162,8 +192,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 			);
 
-			$theme_support           = get_theme_support( 'woocommerce' );
-			$theme_support           = is_array( $theme_support ) ? $theme_support[0]: false;
+			if ( has_filter( 'loop_shop_columns' ) ) {
+				unset( $settings['columns'], $settings['rows'] );
+			}
+
 			$image_settings          = array(
 				array(
 					'title' => __( 'Product images', 'woocommerce' ),
