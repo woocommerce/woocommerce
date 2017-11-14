@@ -360,7 +360,8 @@ class WC_Download_Handler {
 	 * @return 	bool Success or fail
 	 */
 	public static function readfile_chunked( $file ) {
-		$chunksize = 1024 * 1024;
+		$chunk_num = apply_filters( 'woocommerce_download_readfile_chunk_number', 1024, $file );
+		$chunksize = (int) ( $chunk_num * 1024 );
 		$handle    = @fopen( $file, 'r' );
 
 		if ( false === $handle ) {
