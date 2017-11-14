@@ -341,11 +341,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		$ipn_notification = 'yes';
 		$woocommerce_paypal_settings = get_option('woocommerce_paypal_settings');
-		if ( isset($woocommerce_paypal_settings['ipn_notification']) && $woocommerce_paypal_settings['ipn_notification'] != '' ) {
-		    $ipn_notification = $woocommerce_paypal_settings['ipn_notification'];
-		}
-
-		if ( $ipn_notification == 'no' ) {
+		if ( ! empty( $woocommerce_paypal_settings['ipn_notification'] ) && 'no' === $woocommerce_paypal_settings['ipn_notification'] ) {
 			return;
 		}
 
