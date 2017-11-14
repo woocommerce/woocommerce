@@ -710,8 +710,8 @@ function wc_get_image_size( $image_size ) {
 			$size['height'] = 9999999999;
 			$size['crop']   = 0;
 		} elseif ( 'custom' === $cropping ) {
-			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_width', '4' ) );
-			$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_height', '4' ) );
+			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '3' ) );
 			$size['height'] = round( ( $size['width'] / $width ) * $height );
 			$size['crop']   = 1;
 		} else {
