@@ -165,32 +165,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/invalid' ) );
 		$this->assertEquals( 404, $response->get_status() );
 
-		// test getting a valid group
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general' ) );
-		$data = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains( array(
-    		'id' => 'woocommerce_demo_store',
-			'label' => 'Store notice',
-			'description' => 'Enable site-wide store notice text',
-			'type' => 'checkbox',
-			'default' => 'no',
-			'value' => 'no',
-			'_links' => array(
-				'self' => array(
-					array(
-						'href' => rest_url( '/wc/v2/settings/general/woocommerce_demo_store' ),
-					),
-				),
-				'collection' => array(
-					array(
-						'href' => rest_url( '/wc/v2/settings/general' ),
-					),
-				),
-			),
-		), $data );
-
 		// test getting a valid group with settings attached to it
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/test' ) );
 		$data = $response->get_data();

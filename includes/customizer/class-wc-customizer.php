@@ -37,9 +37,8 @@ class WC_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_display_settings',
 			array(
-				'title'           => __( 'WooCommerce', 'woocommerce' ),
-				'description'     => __( 'These settings control how some parts of WooCommerce appear in your store.', 'woocommerce' ),
-				'priority'        => 210,
+				'title'    => __( 'WooCommerce', 'woocommerce' ),
+				'priority' => 210,
 			)
 		);
 
@@ -47,7 +46,6 @@ class WC_Customizer {
 			'woocommerce_product_display_settings',
 			array(
 				'title'           => __( 'WooCommerce Products', 'woocommerce' ),
-				'description'     => __( 'These settings control how products display in your store.', 'woocommerce' ),
 				'priority'        => 220,
 				'active_callback' => array( $this, 'is_active' ),
 			)
