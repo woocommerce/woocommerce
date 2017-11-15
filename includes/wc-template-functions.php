@@ -684,9 +684,10 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_product_taxonomy() && 0 === absint( get_query_var( 'paged' ) ) ) {
-			$description = wc_format_content( term_description() );
-			if ( $description ) {
-				echo '<div class="term-description">' . $description . '</div>'; // WPCS: XSS ok.
+			$term = get_queried_object();
+
+			if ( $term && ! empty( $term->description ) ) {
+				echo '<div class="term-description">' . wc_format_content( $term->description ) . '</div>'; // WPCS: XSS ok.
 			}
 		}
 	}
@@ -794,12 +795,12 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @subpackage	Loop
-	 * @param string $size (default: 'shop_catalog').
+	 * @param string $size (default: 'woocommerce_thumbnail').
 	 * @param int    $deprecated1 Deprecated since WooCommerce 2.0 (default: 0).
 	 * @param int    $deprecated2 Deprecated since WooCommerce 2.0 (default: 0).
 	 * @return string
 	 */
-	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
+	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $deprecated1 = 0, $deprecated2 = 0 ) {
 		global $product;
 
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
@@ -1758,7 +1759,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		extract( $args );
+		extract( $args ); // @codingStandardsIgnoreLine
 
 		// Main query only.
 		if ( ! is_main_query() && ! $force_display ) {
@@ -1856,7 +1857,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * @subpackage	Loop
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
-		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'shop_catalog' );
+		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
 		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 
@@ -2050,7 +2051,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '</select>';
 
-					$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country', 'woocommerce' ) . '" /></noscript>';
+					$field .= '<noscript><button type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country', 'woocommerce' ) . '">' . esc_html__( 'Update country', 'woocommerce' ) . '</button></noscript>';
 
 				}
 
@@ -2728,3 +2729,13 @@ function wc_page_noindex() {
 	}
 }
 add_action( 'wp_head', 'wc_page_noindex' );
+
+/**
+ * Get a slug identifying the current theme.
+ *
+ * @since 3.3.0
+ * @return string
+ */
+function wc_get_theme_slug_for_templates() {
+	return apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
+}

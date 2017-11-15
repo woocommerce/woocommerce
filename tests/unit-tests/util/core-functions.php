@@ -49,7 +49,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'BTC' => 'Bitcoin',
 			'BTN' => 'Bhutanese ngultrum',
 			'BWP' => 'Botswana pula',
-			'BYR' => 'Belarusian ruble',
+			'BYR' => 'Belarusian ruble (old)',
+			'BYN' => 'Belarusian ruble',
 			'BZD' => 'Belize dollar',
 			'CAD' => 'Canadian dollar',
 			'CDF' => 'Congolese franc',
@@ -265,18 +266,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function return_bad_logger() {
 		return __CLASS__;
-	}
-
-	/**
-	 * Test wc_get_core_supported_themes().
-	 *
-	 * @since 2.2
-	 */
-	public function test_wc_get_core_supported_themes() {
-
-		$expected_themes = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-
-		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}
 
 	/**
