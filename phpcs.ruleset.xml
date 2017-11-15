@@ -5,9 +5,6 @@
 
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
-	<!-- Include WPCS and PHPCompatibility paths -->
-	<config name="installed_paths" value="vendor/wp-coding-standards/wpcs,vendor/wimg/php-compatibility" />
-
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
 	<exclude-pattern>apigen/</exclude-pattern>
@@ -24,7 +21,12 @@
 
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
-			<property name="customSanitizingFunctions" type="array" value="wc_clean" />
+			<property name="customSanitizingFunctions" type="array" value="wc_clean,wc_sanitize_tooltip,wc_format_decimal,wc_stock_amount" />
 		</properties>
 	</rule>
+	<rule ref="WordPress.XSS.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
+		</properties>
+</rule>
 </ruleset>

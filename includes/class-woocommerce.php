@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	3.2.0
+ * @version	3.3.0
  */
 final class WooCommerce {
 
@@ -25,7 +25,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.2.0';
+	public $version = '3.3.0';
 
 	/**
 	 * The single instance of the class.
@@ -275,6 +275,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php' );
+		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-item-data-store-interface.php' );
@@ -360,6 +361,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-data-store.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-log-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
