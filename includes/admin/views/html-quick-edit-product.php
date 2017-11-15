@@ -120,7 +120,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<?php endif; ?>
 
-		<label class="alignleft">
+		<div class="inline-edit-group">
 			<span class="title"><?php _e( 'Shipping class', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="shipping_class" name="_shipping_class">
@@ -132,33 +132,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 				</select>
 			</span>
-		</label>
-		<br class="clear" />
+		</div>
 
-		<label class="alignleft">
-			<span class="title"><?php _e( 'Visibility', 'woocommerce' ); ?></span>
-			<span class="input-text-wrap">
-				<select class="visibility" name="_visibility">
-				<?php
-					$options = apply_filters( 'woocommerce_product_visibility_options', array(
-						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
-						'catalog' => __( 'Catalog', 'woocommerce' ),
-						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' ),
-					) );
-					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
-					}
-				?>
-				</select>
-			</span>
-		</label>
-		<label class="alignleft featured">
-			<input type="checkbox" name="_featured" value="1">
-			<span class="checkbox-title"><?php _e( 'Featured', 'woocommerce' ); ?></span>
-		</label>
-		<br class="clear" />
-		<label class="alignleft">
+		<div class="inline-edit-group">
+			<label class="alignleft">
+				<span class="title"><?php _e( 'Visibility', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<select class="visibility" name="_visibility">
+					<?php
+						$options = apply_filters( 'woocommerce_product_visibility_options', array(
+							'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
+							'catalog' => __( 'Catalog', 'woocommerce' ),
+							'search'  => __( 'Search', 'woocommerce' ),
+							'hidden'  => __( 'Hidden', 'woocommerce' ),
+						) );
+						foreach ( $options as $key => $value ) {
+							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+						}
+					?>
+					</select>
+				</span>
+			</label>
+			<label class="alignleft featured">
+				<input type="checkbox" name="_featured" value="1">
+				<span class="checkbox-title"><?php _e( 'Featured', 'woocommerce' ); ?></span>
+			</label>
+		</div>
+
+		<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
+			<div class="inline-edit-group">
+				<label class="manage_stock">
+					<input type="checkbox" name="_manage_stock" value="1">
+					<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
+				</label>
+			</div>
+		<?php endif; ?>
+
+		<label class="stock_status_field">
 			<span class="title"><?php _e( 'In stock?', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
@@ -172,13 +182,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</label>
 
 		<div class="stock_fields">
-
 			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
-				<label class="alignleft manage_stock">
-					<input type="checkbox" name="_manage_stock" value="1">
-					<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
-				</label>
-				<br class="clear" />
 				<label class="stock_qty_field">
 					<span class="title"><?php _e( 'Stock qty', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
@@ -186,10 +190,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 			<?php endif; ?>
-
 		</div>
 
-		<label class="alignleft">
+		<label class="alignleft backorder_field">
 			<span class="title"><?php _e( 'Backorders?', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="backorders" name="_backorders">

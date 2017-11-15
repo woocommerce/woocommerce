@@ -232,8 +232,10 @@ jQuery( function( $ ) {
 	$( 'input#_manage_stock' ).change( function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( 'div.stock_fields' ).show();
+			$( 'p.stock_status_field' ).hide();
 		} else {
 			$( 'div.stock_fields' ).hide();
+			$( 'p.stock_status_field' ).show();
 		}
 	}).change();
 

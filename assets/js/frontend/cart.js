@@ -181,10 +181,8 @@ jQuery( function( $ ) {
 
 		/**
 		 * Handles when a shipping method is selected.
-		 *
-		 * @param {Object} evt The JQuery event.
 		 */
-		shipping_method_selected: function( evt ) {
+		shipping_method_selected: function() {
 			var shipping_methods = {};
 
 			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
