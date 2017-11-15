@@ -25,14 +25,14 @@ class WC_Regenerate_Images {
 	 *
 	 * @var WC_Regenerate_Images_Request
 	 */
-	protected $background_process;
+	protected static $background_process;
 
 	/**
 	 * Init function
 	 */
 	public static function init() {
 		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php' );
-		$this->background_process = new WC_Regenerate_Images_Request();
+		self::$background_process = new WC_Regenerate_Images_Request();
 
 		// Action to handle on-the-fly image resizing.
 		add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
@@ -170,7 +170,7 @@ class WC_Regenerate_Images {
 
 		// If we made it till here, it means that image settings have changed.
 		// First lets cancel existing running queue to avoid running it more than once.
-		$this->background_process->cancel_process();
+		self::$background_process->cancel_process();
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
@@ -183,13 +183,13 @@ class WC_Regenerate_Images {
 		);
 
 		foreach ( $images as $image ) {
-			$this->background_process->push_to_queue( array(
+			self::$background_process->push_to_queue( array(
 				'attachment_id' => $image->ID,
 			) );
 		}
 
 		// Lets dispatch the queue to start processing.
-		$this->background_process->save()->dispatch();
+		self::$background_process->save()->dispatch();
 	}
 }
 WC_Regenerate_Images::init();

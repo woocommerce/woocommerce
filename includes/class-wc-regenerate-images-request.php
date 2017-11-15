@@ -56,6 +56,9 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
 			return false;
 		}
+		$log = wc_get_logger();
+		// translators: %s: ID of the attachment.
+		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), absint( $attachment->ID ) ) );
 
 		$fullsizepath = get_attached_file( $attachment->ID );
 
