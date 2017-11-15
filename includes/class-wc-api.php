@@ -175,6 +175,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-customers-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-orders-controller.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-network-orders-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-notes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-order-refunds-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php' );
@@ -239,6 +240,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Coupons_Controller',
 			'WC_REST_Customer_Downloads_Controller',
 			'WC_REST_Customers_Controller',
+			'WC_REST_Network_Orders_Controller',
 			'WC_REST_Order_Notes_Controller',
 			'WC_REST_Order_Refunds_Controller',
 			'WC_REST_Orders_Controller',
