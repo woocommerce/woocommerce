@@ -2,10 +2,10 @@
 /**
  * Post Types Admin
  *
- * @author   WooCommerce
+ * @author   Automattic
  * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.0.0
+ * @package  WooCommerce/admin
+ * @version  3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -178,7 +178,6 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
-
 		$bulk_messages['product'] = array(
 			/* translators: %s: product count */
 			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'], 'woocommerce' ),
@@ -435,6 +434,7 @@ class WC_Admin_Post_Types {
 		$data_store        = $product->get_data_store();
 		$old_regular_price = $product->get_regular_price();
 		$old_sale_price    = $product->get_sale_price();
+		$data              = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
 
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) { // WPCS: input var ok, sanitization ok.
 			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) ); // WPCS: input var ok, sanitization ok.
@@ -500,7 +500,6 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( $can_product_type_change_price ) {
-
 			$price_changed = false;
 
 			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
@@ -508,10 +507,10 @@ class WC_Admin_Post_Types {
 				$regular_price        = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_regular_price ) {
-					case 1 :
+					case 1:
 						$new_price = $regular_price;
 						break;
-					case 2 :
+					case 2:
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
 							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
@@ -519,7 +518,7 @@ class WC_Admin_Post_Types {
 							$new_price = $old_regular_price + $regular_price;
 						}
 						break;
-					case 3 :
+					case 3:
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
 							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
@@ -528,7 +527,7 @@ class WC_Admin_Post_Types {
 						}
 						break;
 
-					default :
+					default:
 						break;
 				}
 
@@ -544,10 +543,10 @@ class WC_Admin_Post_Types {
 				$sale_price        = esc_attr( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_sale_price ) {
-					case 1 :
+					case 1:
 						$new_price = $sale_price;
 						break;
-					case 2 :
+					case 2:
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = $old_sale_price + ( $old_sale_price * $percent );
@@ -555,7 +554,7 @@ class WC_Admin_Post_Types {
 							$new_price = $old_sale_price + $sale_price;
 						}
 						break;
-					case 3 :
+					case 3:
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
@@ -563,7 +562,7 @@ class WC_Admin_Post_Types {
 							$new_price = max( 0, $old_sale_price - $sale_price );
 						}
 						break;
-					case 4 :
+					case 4:
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
 							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
@@ -572,7 +571,7 @@ class WC_Admin_Post_Types {
 						}
 						break;
 
-					default :
+					default:
 						break;
 				}
 
@@ -667,12 +666,12 @@ class WC_Admin_Post_Types {
 	 */
 	public function enter_title_here( $text, $post ) {
 		switch ( $post->post_type ) {
-			case 'product' :
-				$text = __( 'Product name', 'woocommerce' );
-			break;
-			case 'shop_coupon' :
-				$text = __( 'Coupon code', 'woocommerce' );
-			break;
+			case 'product':
+				$text = esc_html__( 'Product name', 'woocommerce' );
+				break;
+			case 'shop_coupon':
+				$text = esc_html__( 'Coupon code', 'woocommerce' );
+				break;
 		}
 		return $text;
 	}
@@ -716,7 +715,7 @@ class WC_Admin_Post_Types {
 		}
 
 		$thepostid          = $post->ID;
-		$product_object     = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
+		$product_object     = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
 		$current_visibility = $product_object->get_catalog_visibility();
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
@@ -770,11 +769,11 @@ class WC_Admin_Post_Types {
 				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
-				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
+				$new_subdir = '/woocommerce_uploads' . $uploads['subdir'];
 
-				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
-				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
-				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
+				$uploads['path']   = str_replace( $uploads['subdir'], $new_subdir, $uploads['path'] );
+				$uploads['url']    = str_replace( $uploads['subdir'], $new_subdir, $uploads['url'] );
+				$uploads['subdir'] = str_replace( $uploads['subdir'], $new_subdir, $uploads['subdir'] );
 			}
 		}
 		return $pathdata;
@@ -808,7 +807,7 @@ class WC_Admin_Post_Types {
 	 * @param WP_Post $post The current post object.
 	 * @return array
 	 */
-	public function hide_cpt_archive_templates( $page_templates, $class, $post ) {
+	public function hide_cpt_archive_templates( $page_templates, $theme, $post ) {
 		$shop_page_id = wc_get_page_id( 'shop' );
 
 		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {

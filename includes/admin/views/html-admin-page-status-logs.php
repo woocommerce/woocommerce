@@ -1,6 +1,8 @@
 <?php
 /**
  * Admin View: Page - Status Logs
+ *
+ * @package WooCommerce/Admin/Logs
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,13 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</h2>
 		</div>
 		<div class="alignright">
-			<form action="<?php echo admin_url( 'admin.php?page=wc-status&tab=logs' ); ?>" method="post">
+			<form action="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=logs' ) ); ?>" method="post">
 				<select name="log_file">
 					<?php foreach ( $logs as $log_key => $log_file ) : ?>
-						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
+						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo esc_html( date_i18n( get_option( 'date_format' ) ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
 					<?php endforeach; ?>
 				</select>
-				<input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
+				<button type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>"><?php esc_html_e( 'View', 'woocommerce' ); ?></button>
 			</form>
 		</div>
 		<div class="clear"></div>
@@ -34,5 +36,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<pre><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
 	</div>
 <?php else : ?>
-	<div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
+	<div class="updated woocommerce-message inline"><p><?php esc_html_e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
 <?php endif; ?>

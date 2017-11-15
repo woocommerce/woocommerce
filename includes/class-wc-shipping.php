@@ -132,8 +132,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
-	 *
 	 * Loads all shipping methods which are hooked in.
 	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
 	 *
@@ -263,7 +261,7 @@ class WC_Shipping {
 		}
 
 		/**
-		 * Allow packages to be reorganized after calculate the shipping.
+		 * Allow packages to be reorganized after calculating the shipping.
 		 *
 		 * This filter can be used to apply some extra manipulation after the shipping costs are calculated for the packages
 		 * but before Woocommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
@@ -284,6 +282,12 @@ class WC_Shipping {
 	 * @return boolean
 	 */
 	protected function is_package_shippable( $package ) {
+
+		// Packages are shippable until proven otherwise.
+		if ( empty( $package['destination']['country'] ) ) {
+			return true;
+		}
+
 		$allowed = array_keys( WC()->countries->get_shipping_countries() );
 		return in_array( $package['destination']['country'], $allowed );
 	}

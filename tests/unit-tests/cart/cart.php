@@ -219,6 +219,184 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test cart calculations when out of base location and using inclusive taxes and discounts.
+	 *
+	 * @see GitHub issues #17517 and #17536.
+	 * @since 3.3
+	 */
+	public function test_out_of_base_discounts_inclusive_tax() {
+		global $wpdb;
+
+		// Set up tax options.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+
+		// 20% tax for GB.
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// 20% tax everywhere else.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create product.
+		$product = new WC_Product_Simple;
+		$product->set_regular_price( '9.99' );
+		$product->save();
+
+		// Create coupons.
+		$ten_coupon = new WC_Coupon;
+		$ten_coupon->set_code( '10off' );
+		$ten_coupon->set_discount_type( 'percent' );
+		$ten_coupon->set_amount( 10 );
+		$ten_coupon->save();
+
+		$half_coupon = new WC_Coupon;
+		$half_coupon->set_code( '50off' );
+		$half_coupon->set_discount_type( 'percent' );
+		$half_coupon->set_amount( 50 );
+		$half_coupon->save();
+
+		$full_coupon = new WC_Coupon;
+		$full_coupon->set_code( '100off' );
+		$full_coupon->set_discount_type( 'percent' );
+		$full_coupon->set_amount( 100 );
+		$full_coupon->save();
+
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Test in store location with no coupon.
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '1.66', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '9.99', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		// Test in store location with 10% coupon.
+		WC()->cart->add_discount( $ten_coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '0.83', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '1.50', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '8.99', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		WC()->cart->remove_coupons();
+
+		// Test in store location with 50% coupon.
+		WC()->cart->add_discount( $half_coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '4.16', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '0.83', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '5.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		WC()->cart->remove_coupons();
+
+		// Test in store location with 100% coupon.
+		WC()->cart->add_discount( $full_coupon->get_code() );
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'Discount total in base' );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		WC()->cart->remove_coupons();
+
+		WC()->cart->empty_cart();
+		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Test out of store location with no coupon.
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '1.66', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '9.99', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		// Test out of store location with 10% coupon.
+		WC()->cart->add_discount( $ten_coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '0.83', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '1.50', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '8.99', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		WC()->cart->remove_coupons();
+
+		// Test out of store location with 50% coupon.
+		WC()->cart->add_discount( $half_coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '4.16', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '0.83', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '5.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		WC()->cart->remove_coupons();
+
+		// Test out of store location with 100% coupon.
+		WC()->cart->add_discount( $full_coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'Discount total out of base' );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Coupon::delete_coupon( $ten_coupon->get_id() );
+		WC_Helper_Coupon::delete_coupon( $half_coupon->get_id() );
+		WC_Helper_Coupon::delete_coupon( $full_coupon->get_id() );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Helper that can be hooked to a filter to force the customer's shipping country to be GB.
+	 *
+	 * @since 3.3
+	 * @param string $country
+	 * @return string
+	 */
+	public function force_customer_gb_shipping( $country ) {
+		return 'GB';
+	}
+
+	/**
+	 * Helper that can be hooked to a filter to force the customer's shipping country to be US.
+	 *
+	 * @since 3.3
+	 * @param string $country
+	 * @return string
+	 */
+	public function force_customer_us_shipping( $country ) {
+		return 'US';
+	}
+
+	/**
 	 * Test get_remove_url.
 	 *
 	 * @since 2.3
@@ -504,37 +682,50 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_total_ex_tax() {
+		global $wpdb;
 
-		// Set calc taxes option
+		// Set calc taxes option.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// We need this to have the calculate_totals() method calculate totals
+		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
 
-		// Add product to cart
+		// Add 10 fee.
+		WC_Helper_Fee::add_cart_fee( 'taxed' );
+
+		// Add product to cart (10).
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Calc total
-		$total = WC()->cart->total - WC()->cart->tax_total - WC()->cart->shipping_tax_total;
-		if ( $total < 0 ) {
-			$total = 0;
-		}
+		// Check.
+		$this->assertEquals( wc_price( 22 ), WC()->cart->get_total() );
+		$this->assertEquals( wc_price( 20 ), WC()->cart->get_total_ex_tax() );
 
-		// Check
-		$this->assertEquals( apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) ), WC()->cart->get_total_ex_tax() );
-
-		// Clean up the cart
+		// Clean up the cart.
 		WC()->cart->empty_cart();
 
-		// Clean up product
+		// Clean up product.
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		// Restore option
+		// Restore option.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
@@ -869,5 +1060,49 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 		WC_Helper_Coupon::delete_coupon( $iu_coupon1->get_code() );
 		WC_Helper_Coupon::delete_coupon( $iu_coupon2->get_code() );
+	}
+
+	public function test_clone_cart() {
+		$cart              = wc()->cart;
+		$new_cart          = clone $cart;
+		$is_identical_cart = $cart === $new_cart;
+
+		// Cloned carts should not be identical.
+		$this->assertFalse( $is_identical_cart, 'Cloned cart not identical to original cart' );
+	}
+
+	public function test_cloned_cart_session() {
+		// PHP 5.2 does not include support for ReflectionProperty::setAccessible().
+		if ( version_compare( '5.3', PHP_VERSION, '>' ) ) {
+			$this->markTestSkipped( 'Test requires PHP 5.3 and above to use ReflectionProperty::setAccessible()' );
+		}
+
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Allow accessing protected properties.
+		$reflected_cart = new ReflectionClass( $cart );
+		$cart_session   = $reflected_cart->getProperty( 'session' );
+		$cart_session->setAccessible( true );
+		$reflected_new_cart = new ReflectionClass( $new_cart );
+		$new_cart_session   = $reflected_new_cart->getProperty( 'session' );
+		$new_cart_session->setAccessible( true );
+
+		// Ensure that cloned properties are not identical.
+		$identical_sessions = $cart_session->getValue( $cart ) === $new_cart_session->getValue( $new_cart );
+		$this->assertFalse( $identical_sessions, 'Cloned cart sessions should not be identical to original cart' );
+	}
+
+	public function test_cloned_cart_fees() {
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Get the properties from each object.
+		$cart_fees = $cart->fees_api();
+		$new_cart_fees = $new_cart->fees_api();
+
+		// Ensure that cloned properties are not identical.
+		$identical_fees = $cart_fees === $new_cart_fees;
+		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
 	}
 }

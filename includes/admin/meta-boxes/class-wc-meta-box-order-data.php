@@ -214,7 +214,7 @@ class WC_Meta_Box_Order_Data {
 					);
 				}
 
-				echo wp_kses_post( implode( '. ', $meta_list ) ) . '.';
+				echo wp_kses_post( implode( '. ', $meta_list ) );
 
 				?></p>
 				<div class="order_data_column_container">

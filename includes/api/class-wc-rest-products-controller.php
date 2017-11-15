@@ -2029,7 +2029,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['sku'] = array(
-			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',

@@ -185,12 +185,10 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event.
 		 */
 		shipping_method_selected: function( evt ) {
-			var target = evt.currentTarget;
-
 			var shipping_methods = {};
 
 			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
-				shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
+				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
 			block( $( 'div.cart_totals' ) );

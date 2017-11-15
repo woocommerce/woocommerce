@@ -79,7 +79,7 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) ) {
 			self::add_notice( 'theme_support' );
 		}
 
@@ -216,7 +216,7 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice.
 	 */
 	public static function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) ) {
 			include( 'views/html-notice-theme-support.php' );
 		} else {
 			self::remove_notice( 'theme_support' );
