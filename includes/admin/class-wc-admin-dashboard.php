@@ -320,9 +320,9 @@ class WC_Admin_Dashboard {
 			<table id="woocommerce-network-order-table" class="woocommerce-network-order-table wp-list-table">
 				<thead>
 					<tr>
-						<td>Order</td>
-						<td>Status</td>
-						<td>Total</td>
+						<td><?php esc_html_e( 'Order', 'woocommerce' ); ?></td>
+						<td><?php esc_html_e( 'Status', 'woocommerce' ); ?></td>
+						<td><?php esc_html_e( 'Total', 'woocommerce' ); ?></td>
 					</tr>
 				</thead>
 				<tbody id="network-orders-tbody">
