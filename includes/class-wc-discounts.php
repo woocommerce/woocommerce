@@ -40,11 +40,11 @@ class WC_Discounts {
 	protected $discounts = array();
 
 	/**
-	 * Total taxes
+	 * Displayed subtotal of the cart/order
 	 *
-	 * @var array
+	 * @var integer
 	 */
-	protected $tax_total = 0;
+	protected $subtotal = 0;
 
 	/**
 	 * Constructor.
@@ -79,13 +79,19 @@ class WC_Discounts {
 	 */
 	public function set_items_from_cart( $cart ) {
 		$this->items = $this->discounts = array();
-		$this->tax_total = 0;
+		$this->subtotal = 0;
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
 		}
 
 		$this->object = $cart;
+
+		if ( 'excl' === $cart->tax_display_cart ) {
+			$this->subtotal = wc_add_number_precision_deep( $cart->get_subtotal() );
+		} else {
+			$this->subtotal = wc_add_number_precision_deep( $cart->get_subtotal() + $cart->get_subtotal_tax() );
+		}
 
 		foreach ( $cart->get_cart() as $key => $cart_item ) {
 			$item                = new stdClass();
@@ -95,9 +101,6 @@ class WC_Discounts {
 			$item->quantity      = $cart_item['quantity'];
 			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
 			$this->items[ $key ] = $item;
-			if ( ! wc_prices_include_tax() ) {
-				$this->tax_total += wc_add_number_precision_deep( $cart_item['line_tax'] );
-			}
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
@@ -111,12 +114,14 @@ class WC_Discounts {
 	 */
 	public function set_items_from_order( $order ) {
 		$this->items = $this->discounts = array();
+		$this->subtotal = 0;
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
 		$this->object = $order;
+		$this->subtotal = wc_add_number_precision_deep( $order->get_subtotal() );
 
 		foreach ( $order->get_items() as $order_item ) {
 			$item                = new stdClass();
@@ -622,7 +627,8 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) + $this->tax_total );
+		$subtotal = wc_remove_number_precision_deep( $this->subtotal );
+
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -640,7 +646,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) + $this->tax_total );
+		$subtotal = wc_remove_number_precision_deep( $this->subtotal );
 
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
