@@ -1992,6 +1992,7 @@ ul.wc_coupon_list_block {
 					border-radius: 4px;
 					border-bottom: 1px solid rgba(0,0,0,0.05);
 					margin: -.5em 0;
+					cursor: inherit !important;
 
 					&.status-completed {
 						background: #C8D7E1;
