@@ -83,7 +83,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 			);
 		}
 
-		$r = new WP_Query( $query_args );
+		$r = new WP_Query( apply_filters( 'woocommerce_recently_viewed_products_widget_query_args', $query_args ) );
 
 		if ( $r->have_posts() ) {
 

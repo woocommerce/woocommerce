@@ -31,7 +31,7 @@
 * Tweak - On checkout, improved the field locale logic to work without clearing default values.
 * Tweak - Change title of customer invoice email for clarity.
 * Tweak - Use custom event instead of blur to trigger validation.
-* Tweak - Various selectWoo usibility improvements and better support for keyboard controls on AJAX multiselect elements.
+* Tweak - Various selectWoo usability improvements and better support for keyboard controls on AJAX multiselect elements.
 * Tweak - Various setup Wizard improvements.
 * Dev - Fixed orders date query when querying by meta data.
 * Dev - In the CSV exporter, added a filter to process meta values before export.

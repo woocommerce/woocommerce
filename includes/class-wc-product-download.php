@@ -22,7 +22,6 @@ class WC_Product_Download implements ArrayAccess {
 		'id'            => '',
 		'name'          => '',
 		'file'          => '',
-		'previous_hash' => '',
 	);
 
 	/**
@@ -127,9 +126,11 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set previous_hash.
+	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
 	 * @param string $value
 	 */
 	public function set_previous_hash( $value ) {
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 		$this->data['previous_hash'] = wc_clean( $value );
 	}
 
@@ -172,9 +173,11 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get previous_hash.
+	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
 	 * @return string
 	 */
 	public function get_previous_hash() {
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 		return $this->data['previous_hash'];
 	}
 

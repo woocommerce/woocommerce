@@ -38,7 +38,12 @@ final class WC_Cart_Session {
 		}
 
 		$this->cart = $cart;
+	}
 
+	/**
+	 * Register methods for this object on the appropriate WordPress hooks.
+	 */
+	public function init() {
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );

@@ -109,6 +109,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->fees_api         = new WC_Cart_Fees( $this );
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
 
+		// Register hooks for the objects.
+		$this->session->init();
+		$this->fees_api->init();
+
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
@@ -116,6 +120,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
+	}
+
+	/**
+	 * When cloning, ensure object properties are handled.
+	 *
+	 * These properties store a reference to the cart, so we use new instead of clone.
+	 */
+	public function __clone() {
+		$this->session  = new WC_Cart_Session( $this );
+		$this->fees_api = new WC_Cart_Fees( $this );
 	}
 
 	/*
@@ -1764,7 +1778,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_total_ex_tax() {
-		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( max( 0, $this->get_total( 'edit' ) - $this->get_cart_contents_tax() - $this->get_shipping_tax() ) ) );
+		return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( max( 0, $this->get_total( 'edit' ) - $this->get_total_tax() ) ) );
 	}
 
 	/**

@@ -50,6 +50,13 @@ return array(
 		'default'     => 'no',
 		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s', 'woocommerce' ), '<code>' . WC_Log_Handler_File::get_log_file_path( 'paypal' ) . '</code>' ),
 	),
+	'ipn_notification' => array(
+		'title'       => __( 'IPN Email Notifications', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable IPN email notification', 'woocommerce' ),
+		'default'     => 'yes',
+		'description' => __( 'Send an email to the user handling orders when an IPN is received from PayPal.', 'woocommerce' )
+	),
 	'advanced' => array(
 		'title'       => __( 'Advanced options', 'woocommerce' ),
 		'type'        => 'title',
