@@ -95,7 +95,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 }
 
 	 /**
-	  * Test the automatic stock status changing when products are managing stock.
+	  * Test the automatic stock status transitions done on product save.
 	  *
 	  * @since 3.3.0
 	  */

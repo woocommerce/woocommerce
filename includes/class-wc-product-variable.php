@@ -367,19 +367,19 @@ class WC_Product_Variable extends WC_Product {
 			$this->set_backorders( 'no' );
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 
-		// If backorders are enabled, always in stock.
-		} elseif ( 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'instock' );
+			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'onbackorder' );
 
-		// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
-		// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
 			$this->set_stock_status( 'instock' );
 
-		// Otherwise revert to status the children have.
+			// Otherwise revert to status the children have.
 		} else {
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
