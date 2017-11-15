@@ -368,7 +368,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 						</article>
 						<footer>
 							<div class="inner">
-								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?post={{ data.data.id }}&action=edit' ) ); ?>"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
+								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
 					</section>
