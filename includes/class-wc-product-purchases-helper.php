@@ -20,6 +20,8 @@ class WC_Product_Purchases_Helper {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
+		add_action( 'woocommerce_delete_product', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
+		add_action( 'woocommerce_delete_product_variation', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
 		add_action( 'woocommerce_order_object_updated_props', array( __CLASS__, 'handle_product_purchase' ), 10, 2 );
 	}
 
@@ -32,6 +34,17 @@ class WC_Product_Purchases_Helper {
 		global $wpdb;
 
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_product_purchases', array( 'order_id' => $order_id ), array( '%d' ) );
+	}
+
+	/**
+	 * Handler for deleting a product, keep the purchased products table in sync.
+	 *
+	 * @param int $product_id
+	 */
+	public static function handle_delete_product( $product_id ) {
+		global $wpdb;
+
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_product_purchases', array( 'product_id' => $product_id ), array( '%d' ) );
 	}
 
 	/**
