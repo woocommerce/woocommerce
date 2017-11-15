@@ -411,7 +411,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
 		 */
-		$args = apply_filters( "woocommerce_rest_orders_prepare_object_query", $args, $request );
+		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
 
 		return $args;
 	}
@@ -1709,11 +1709,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		$items = $this->get_items( $request );
 		remove_filter( 'woocommerce_rest_orders_prepare_object_query', array( $this, 'network_orders_filter_args' ) );
 
-		foreach( $items->data as &$current_order ) {
+		foreach ( $items->data as &$current_order ) {
 			$order = wc_get_order( $current_order['id'] );
 
 			$current_order['blog'] = get_blog_details( get_current_blog_id() );
 			$current_order['edit_url'] = get_admin_url( $blog_id, 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' );
+			/* translators: 1: first name 2: last name */
 			$current_order['buyer'] = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $order->get_billing_first_name(), $order->get_billing_last_name() ) );
 			$current_order['status_name'] = wc_get_order_status_name( $order->get_status() );
 			$current_order['formatted_total'] = $order->get_formatted_order_total();
