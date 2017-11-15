@@ -79,13 +79,13 @@ class WC_Discounts {
 	 */
 	public function set_items_from_cart( $cart ) {
 		$this->items = $this->discounts = array();
+		$this->tax_total = 0;
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
 		}
 
 		$this->object = $cart;
-		$this->tax_total = $cart->get_taxes_total( true, false );
 
 		foreach ( $cart->get_cart() as $key => $cart_item ) {
 			$item                = new stdClass();
@@ -95,6 +95,9 @@ class WC_Discounts {
 			$item->quantity      = $cart_item['quantity'];
 			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
 			$this->items[ $key ] = $item;
+			if ( ! wc_prices_include_tax() ) {
+				$this->tax_total += wc_add_number_precision_deep( $cart_item['line_tax'] );
+			}
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );
@@ -620,7 +623,6 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) + $this->tax_total );
-
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
