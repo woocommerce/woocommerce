@@ -32,7 +32,11 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	 */
 	public function dispatch() {
 		$log = wc_get_logger();
-		$log->info( __( 'Starting product image regeneration job.', 'woocommerce' ) );
+		$log->info( __( 'Starting product image regeneration job.', 'woocommerce' ),
+			array(
+				'source' => 'wc-image-regeneration',
+			)
+		);
 		parent::dispatch();
 	}
 
@@ -59,7 +63,11 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		}
 		$log = wc_get_logger();
 		// translators: %s: ID of the attachment.
-		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), absint( $attachment->ID ) ) );
+		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), absint( $attachment->ID ) ),
+			array(
+				'source' => 'wc-image-regeneration',
+			)
+		);
 
 		$fullsizepath = get_attached_file( $attachment->ID );
 
@@ -91,7 +99,11 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	protected function complete() {
 		parent::complete();
 		$log = wc_get_logger();
-		$log->info( __( 'Completed product image regeneration job.', 'woocommerce' ) );
+		$log->info( __( 'Completed product image regeneration job.', 'woocommerce' ),
+			array(
+				'source' => 'wc-image-regeneration',
+			)
+		);
 	}
 
 
