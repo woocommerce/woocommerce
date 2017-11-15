@@ -331,12 +331,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 									<# if ( data.data.billing.email ) { #>
 										<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
-										{{ data.data.billing.email }}
+										<a href="mailto:{{ data.data.billing.email }}">{{ data.data.billing.email }}</a>
 									<# } #>
 
 									<# if ( data.data.billing.phone ) { #>
 										<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
-										{{ data.data.billing.phone }}
+										<a href="tel:{{ data.data.billing.phone }}">{{ data.data.billing.phone }}</a>
 									<# } #>
 
 									<# if ( data.payment_via ) { #>
@@ -350,7 +350,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 										<# if ( data.ship_to_billing ) { #>
 											{{{ data.formatted_billing_address }}}
 										<# } else { #>
-											{{{ data.formatted_shipping_address }}}
+											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
 										<# if ( data.data.customer_note ) { #>

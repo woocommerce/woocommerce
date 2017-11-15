@@ -33,8 +33,7 @@ jQuery( function( $ ) {
 	 */
 	WCOrdersTable.prototype.onPreview = function() {
 		var $previewButton    = $( this ),
-			$order_id         = $previewButton.data( 'order-id' ),
-			$order_table      = $previewButton.closest( 'table' );
+			$order_id         = $previewButton.data( 'order-id' );
 
 		if ( $previewButton.data( 'order-data' ) ) {
 			$( this ).WCBackboneModal({

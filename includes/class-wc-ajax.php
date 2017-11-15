@@ -556,6 +556,7 @@ class WC_AJAX {
 				'needs_shipping'             => $order->needs_shipping_address(),
 				'formatted_billing_address'  => ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ),
 				'formatted_shipping_address' => ( $address = $order->get_formatted_shipping_address() ) ? $address: __( 'N/A', 'woocommerce' ),
+				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
 				'shipping_via'               => $order->get_shipping_method(),
 			) );
