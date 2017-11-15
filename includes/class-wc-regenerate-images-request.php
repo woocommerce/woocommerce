@@ -53,7 +53,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		$attachment_id = absint( $message['attachment_id'] );
 
 		$attachment = get_post( $attachment_id );
-		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' != substr( $attachment->post_mime_type, 0, 6 ) ) {
+		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
 			return false;
 		}
 

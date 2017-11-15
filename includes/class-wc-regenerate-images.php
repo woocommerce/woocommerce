@@ -36,6 +36,8 @@ class WC_Regenerate_Images {
 
 		// Action to handle on-the-fly image resizing.
 		add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+		// Action to handle image generation when settings change.
+		add_action( 'update_option', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
 	}
 
 	/**
@@ -81,7 +83,7 @@ class WC_Regenerate_Images {
 	 */
 	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
 		$attachment = get_post( $attachment_id );
-		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' != substr( $attachment->post_mime_type, 0, 6 ) ) {
+		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
 			return $image;
 		}
 
@@ -146,10 +148,47 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Regenerate the product images using a job queue in the background.
+	 * Check if we should regenerate the product images using a job queue in the background.
+	 *
+	 * @param string $option Option name.
+	 * @param mixed  $old_value Old option value.
+	 * @param mixed  $new_value New option value.
 	 */
-	private static function regenerate_images_background() {
-		$this->background_process->push_to_queue( $item );
+	public static function maybe_regenerate_images_background( $option, $old_value, $new_value ) {
+		global $wpdb;
+
+		if ( ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
+			return;
+		}
+		if ( ! in_array( $option, array( 'woocommerce_thumbnail_cropping', 'woocommerce_thumbnail_image_width', 'woocommerce_single_image_width' ), true ) ) {
+			return;
+		}
+
+		if ( $new_value === $old_value ) {
+			return;
+		}
+
+		// If we made it till here, it means that image settings have changed.
+		// First lets cancel existing running queue to avoid running it more than once.
+		$this->background_process->cancel_process();
+
+		// Now lets find all product image attachments IDs and pop them onto the queue.
+		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
+			"SELECT ID
+			FROM $wpdb->posts
+			WHERE post_type = 'attachment'
+			AND post_parent IN ( SELECT ID FROM $wpdb->posts WHERE post_type IN ( 'product','product_variation' ) )
+			AND post_mime_type LIKE 'image/%'
+			ORDER BY ID DESC"
+		);
+
+		foreach ( $images as $image ) {
+			$this->background_process->push_to_queue( array(
+				'attachment_id' => $image->ID,
+			) );
+		}
+
+		// Lets dispatch the queue to start processing.
 		$this->background_process->save()->dispatch();
 	}
 }
