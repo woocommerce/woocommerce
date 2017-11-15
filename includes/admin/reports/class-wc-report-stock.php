@@ -108,10 +108,10 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_status' :
-				if ( $product->is_in_stock() ) {
-					$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
-				} elseif ( $product->is_on_backorder() ) {
+				if ( $product->is_on_backorder() ) {
 					$stock_html = '<mark class="onbackorder">' . __( 'On backorder', 'woocommerce' ) . '</mark>';
+				} elseif ( $product->is_in_stock() ) {
+					$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
