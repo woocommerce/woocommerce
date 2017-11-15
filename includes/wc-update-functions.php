@@ -1420,7 +1420,7 @@ function wc_update_330_product_purchases() {
 
 	// TODO: Test if this can cause a lot of performance issues during upgrade process.
 	$wpdb->query( "
-		INSERT INTO {$wpdb->prefix}woocommerce_product_purchases
+		INSERT INTO {$wpdb->prefix}woocommerce_order_product_lookup
 		SELECT
 		'' AS purchase_id,
 		pm.meta_value AS user_email,

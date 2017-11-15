@@ -33,7 +33,7 @@ class WC_Product_Purchases_Helper {
 	public static function handle_delete_order( $order_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_product_purchases', array( 'order_id' => $order_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_product_lookup', array( 'order_id' => $order_id ), array( '%d' ) );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class WC_Product_Purchases_Helper {
 	public static function handle_delete_product( $product_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_product_purchases', array( 'product_id' => $product_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_product_lookup', array( 'product_id' => $product_id ), array( '%d' ) );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class WC_Product_Purchases_Helper {
 			);
 
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_product_purchases',
+				$wpdb->prefix . 'woocommerce_order_product_lookup',
 				$data,
 				array(
 					'%s',
@@ -106,14 +106,14 @@ class WC_Product_Purchases_Helper {
 		if ( is_int( $email_or_user_id ) ) {
 			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
 				SELECT *
-				FROM {$wpdb->prefix}woocommerce_product_purchases
+				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_id = %d ) AND product_id = %d
 				LIMIT 1
 			", absint( $email_or_user_id ), absint( $product_id ) ) );
 		} else {
 			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
 				SELECT *
-				FROM {$wpdb->prefix}woocommerce_product_purchases
+				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_email = %s ) AND product_id = %d
 				LIMIT 1
 			", esc_sql( $email_or_user_id ), absint( $product_id ) ) );

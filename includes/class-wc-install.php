@@ -671,14 +671,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_product_purchases (
-  purchase_id BIGINT UNSIGNED NOT NULL auto_increment,
+CREATE TABLE {$wpdb->prefix}woocommerce_order_product_lookup (
+  lookup_id BIGINT UNSIGNED NOT NULL auto_increment,
   user_email varchar(200) NOT NULL,
   order_id bigint(20) NOT NULL DEFAULT 0,
   user_id bigint(20) NOT NULL DEFAULT 0,
   product_id bigint(20) NOT NULL DEFAULT 0,
   parent_order_item_id bigint(20) DEFAULT NULL,
-  PRIMARY KEY (purchase_id),
+  PRIMARY KEY (lookup_id),
   KEY order_id (order_id)
 ) $collate;
 		";
