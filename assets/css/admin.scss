@@ -1917,10 +1917,8 @@ ul.wc_coupon_list_block {
 				margin: 1px 0;
 			}
 		}
-		.column-order_number {
-			width: 35ch;
+		td.column-order_number {
 			line-height: 26px;
-
 			.order-preview {
 				float:right;
 				width: 16px;
@@ -1949,6 +1947,9 @@ ul.wc_coupon_list_block {
 					background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
 				}
 			}
+		}
+		.column-order_number {
+			width: 35ch;
 		}
 		.column-order_status {
 			width: 20ch;
