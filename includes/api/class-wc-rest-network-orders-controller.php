@@ -132,5 +132,4 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 
 		return $args;
 	}
-
 }

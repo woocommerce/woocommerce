@@ -1661,5 +1661,4 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		return $params;
 	}
-
 }
