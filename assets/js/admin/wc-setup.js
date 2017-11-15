@@ -36,17 +36,23 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable', function( e ) {
-		e.stopPropagation();
+		var eventTarget = $( e.target );
 
-		var $checkbox = $( this ).find( '.wc-wizard-service-toggle input' );
+		if ( eventTarget.is( 'input' ) ) {
+			e.stopPropagation();
+			return;
+		}
+
+		var $checkbox = $( this ).find( 'input[type="checkbox"]' );
+
 		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
-			$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
-			$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
-				.slideToggle()
-				.css( 'display', 'flex' );
+		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
+		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
+			.slideToggle()
+			.css( 'display', 'flex' );
 	} );
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-select .method', function( e ) {
