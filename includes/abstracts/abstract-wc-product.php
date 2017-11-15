@@ -1307,6 +1307,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
+			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
+		} elseif ( $this->get_stock_quantity() <= 0 && 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'onbackorder' );
+
 			// If the stock level is changing and we do now have enough, force in stock status.
 		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
 			$this->set_stock_status( 'instock' );
@@ -1564,7 +1568,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
+		return 'onbackorder' === $this->get_stock_status();
 	}
 
 	/**
