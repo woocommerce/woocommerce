@@ -132,10 +132,10 @@ class WC_Template_Loader {
 		if ( is_singular( 'product' ) ) {
 			$default_file = 'single-product.php';
 		} elseif ( is_product_taxonomy() ) {
-			$term = get_queried_object();
+			$object = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$default_file = 'taxonomy-' . $term->taxonomy . '.php';
+				$default_file = 'taxonomy-' . $object->taxonomy . '.php';
 			} else {
 				$default_file = 'archive-product.php';
 			}
@@ -155,25 +155,34 @@ class WC_Template_Loader {
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
-		$search_files   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
-		$search_files[] = 'woocommerce.php';
+		$templates   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
+		$templates[] = 'woocommerce.php';
 
 		if ( is_page_template() ) {
-			$search_files[] = get_page_template_slug();
+			$templates[] = get_page_template_slug();
+		}
+
+		if ( is_singular( 'product' ) ) {
+			$object       = get_queried_object();
+			$name_decoded = urldecode( $object->post_name );
+			if ( $name_decoded !== $object->post_name ) {
+				$templates[] = "single-product-{$name_decoded}.php";
+			}
+			$templates[] = "single-product-{$object->post_name}.php";
 		}
 
 		if ( is_product_taxonomy() ) {
-			$term   = get_queried_object();
-			$search_files[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$search_files[] = 'taxonomy-' . $term->taxonomy . '.php';
-			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '.php';
+			$object      = get_queried_object();
+			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
 		}
 
-		$search_files[] = $default_file;
-		$search_files[] = WC()->template_path() . $default_file;
+		$templates[] = $default_file;
+		$templates[] = WC()->template_path() . $default_file;
 
-		return array_unique( $search_files );
+		return array_unique( $templates );
 	}
 
 	/**
