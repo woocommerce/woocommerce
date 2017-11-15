@@ -58,7 +58,9 @@ class WC_Product_Purchases_Helper {
 
 		// Every order is marked as paid at most once.
 		// Only when this happens we're updating the purchased products table.
-		if ( ! in_array( 'date_paid', $updated_props ) || empty( $order->get_date_paid() ) ) {
+		$date_paid = $order->get_date_paid();
+
+		if ( ! in_array( 'date_paid', $updated_props ) || empty( $date_paid ) ) {
 			return;
 		}
 
