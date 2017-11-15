@@ -164,7 +164,6 @@ class WC_Template_Loader {
 
 		if ( is_singular( 'product' ) ) {
 			$object       = get_queried_object();
-			$slug         = get_page_template_slug( $object );
 			$name_decoded = urldecode( $object->post_name );
 			if ( $name_decoded !== $object->post_name ) {
 				$templates[] = "single-product-{$name_decoded}.php";
@@ -173,7 +172,7 @@ class WC_Template_Loader {
 		}
 
 		if ( is_product_taxonomy() ) {
-			$object         = get_queried_object();
+			$object      = get_queried_object();
 			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
