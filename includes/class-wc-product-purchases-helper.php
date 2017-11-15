@@ -1,7 +1,15 @@
 <?php
+/**
+ * WooCommerce product purchases class.
+ *
+ * @author   Automattic
+ * @package  WooCommerce
+ * @since    3.3.0
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	// Exit if accessed directly.
+	exit;
 }
 
 /**
@@ -28,30 +36,46 @@ class WC_Product_Purchases_Helper {
 	/**
 	 * Handler for deleting an order, keep the purchased products table in sync.
 	 *
-	 * @param int $order_id
+	 * @param int $order_id Order ID.
 	 */
 	public static function handle_delete_order( $order_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_product_lookup', array( 'order_id' => $order_id ), array( '%d' ) );
+		$wpdb->delete(
+			$wpdb->prefix . 'woocommerce_order_product_lookup',
+			array(
+				'order_id' => $order_id,
+			),
+			array(
+				'%d',
+			)
+		); // WPCS: cache ok.
 	}
 
 	/**
 	 * Handler for deleting a product, keep the purchased products table in sync.
 	 *
-	 * @param int $product_id
+	 * @param int $product_id Product ID.
 	 */
 	public static function handle_delete_product( $product_id ) {
 		global $wpdb;
 
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_product_lookup', array( 'product_id' => $product_id ), array( '%d' ) );
+		$wpdb->delete(
+			$wpdb->prefix . 'woocommerce_order_product_lookup',
+			array(
+				'product_id' => $product_id,
+			),
+			array(
+				'%d',
+			)
+		); // WPCS: cache ok.
 	}
 
 	/**
 	 * Handler for saving an order, keep the purchased products table in sync.
 	 *
-	 * @param WC_Order $order
-	 * @param array    $updated_props
+	 * @param WC_Order $order         Order object.
+	 * @param array    $updated_props List of updated properties.
 	 */
 	public static function handle_product_purchase( $order, $updated_props ) {
 		global $wpdb;
@@ -104,8 +128,8 @@ class WC_Product_Purchases_Helper {
 	/**
 	 * Check if a product is purchased, given either email or user id.
 	 *
-	 * @param int        $product_id
-	 * @param string|int $email_or_user_id
+	 * @param int        $product_id       Product ID.
+	 * @param string|int $email_or_user_id Either email or user id.
 	 */
 	public static function is_product_purchased( $product_id, $email_or_user_id ) {
 		global $wpdb;
@@ -116,14 +140,14 @@ class WC_Product_Purchases_Helper {
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_id = %d ) AND product_id = %d
 				LIMIT 1
-			", absint( $email_or_user_id ), absint( $product_id ) ) );
+			", absint( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		} else {
 			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
 				SELECT *
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_email = %s ) AND product_id = %d
 				LIMIT 1
-			", esc_sql( $email_or_user_id ), absint( $product_id ) ) );
+			", esc_sql( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		}
 
 		return ! empty( $product_purchases );
