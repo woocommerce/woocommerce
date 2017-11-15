@@ -46,6 +46,11 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		if ( ! is_array( $item ) && ! isset( $item['attachment_id'] ) ) {
 			return false;
 		}
+
+		if ( ! function_exists( 'wp_crop_image' ) ) {
+			include( ABSPATH . 'wp-admin/includes/image.php' );
+		}
+
 		$attachment_id = absint( $item['attachment_id'] );
 
 		$attachment = get_post( $attachment_id );

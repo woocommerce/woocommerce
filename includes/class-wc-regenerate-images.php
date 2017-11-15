@@ -101,8 +101,6 @@ class WC_Regenerate_Images {
 
 		$original_image_file_path   = get_attached_file( $attachment->ID );
 
-		$rel_path = str_replace( $wp_uploads_dir, '', $original_image_file_path );
-
 		if ( ! file_exists( $original_image_file_path ) || ! getimagesize( $original_image_file_path ) ) {
 			return $image;
 		}
