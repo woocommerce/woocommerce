@@ -54,6 +54,10 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		if ( is_admin() ) {
+			return $image;
+		}
+
 		$imagemeta = wp_get_attachment_metadata( $attachment_id );
 
 		if ( false === $imagemeta || empty( $imagemeta ) ) {
@@ -177,11 +181,9 @@ class WC_Regenerate_Images {
 			"SELECT ID
 			FROM $wpdb->posts
 			WHERE post_type = 'attachment'
-			AND post_parent IN ( SELECT ID FROM $wpdb->posts WHERE post_type IN ( 'product','product_variation' ) )
 			AND post_mime_type LIKE 'image/%'
 			ORDER BY ID DESC"
 		);
-
 		foreach ( $images as $image ) {
 			self::$background_process->push_to_queue( array(
 				'attachment_id' => $image->ID,

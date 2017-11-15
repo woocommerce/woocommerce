@@ -43,14 +43,10 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		$message = $this->get_message( $item );
-		$this->really_long_running_task();
-
-		if ( ! is_array( $message ) && ! isset( $message['attachment_id'] ) ) {
+		if ( ! is_array( $item ) && ! isset( $item['attachment_id'] ) ) {
 			return false;
 		}
-
-		$attachment_id = absint( $message['attachment_id'] );
+		$attachment_id = absint( $item['attachment_id'] );
 
 		$attachment = get_post( $attachment_id );
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
