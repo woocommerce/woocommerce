@@ -38,9 +38,9 @@ class WC_Admin_Dashboard {
 		}
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
-		// Network Order Widget
+		// Network Order Widget.
 		if ( is_multisite() ) {
-			wp_add_dashboard_widget( 'woocommerce_network_orders', __( "WooCommerce Network Orders", 'woocommerce' ), array( $this, 'network_orders' ) );
+			wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce network orders', 'woocommerce' ), array( $this, 'network_orders' ) );
 		}
 	}
 
@@ -293,7 +293,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Network orders widget
+	 * Network orders widget.
 	 */
 	public function network_orders() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -331,7 +331,7 @@ class WC_Admin_Dashboard {
 			</table>
 			<div id="woocommerce-network-orders-no-orders" class="woocommerce-network-orders-no-orders">
 				<p>
-					<?php esc_html_e( "No orders found", 'woocommerce' ); ?>
+					<?php esc_html_e( 'No orders found', 'woocommerce' ); ?>
 				</p>
 			</div>
 			<script type="text/template" id="network-orders-row-template">

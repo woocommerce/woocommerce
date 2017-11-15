@@ -6,15 +6,15 @@
 	}
 
 	var orders = [],
-		promises = [], // Track completion (pass or fail) of ajax requests
-		deferred = [], // Tracks the ajax deferreds
+		promises = [], // Track completion (pass or fail) of ajax requests.
+		deferred = [], // Tracks the ajax deferreds.
 		$tbody = $( document.getElementById( 'network-orders-tbody' ) ),
 		template = _.template( $( document.getElementById( 'network-orders-row-template') ).text() ),
 		$loadingIndicator = $( document.getElementById( 'woocommerce-network-order-table-loading' ) ),
 		$orderTable = $( document.getElementById( 'woocommerce-network-order-table' ) ),
 		$noneFound = $( document.getElementById( 'woocommerce-network-orders-no-orders' ) );
 
-	// No sites, so bail
+	// No sites, so bail.
 	if ( ! woocommerce_network_orders.sites.length ) {
 		$loadingIndicator.removeClass( 'is-active' );
 		$orderTable.removeClass( 'is-active' );
