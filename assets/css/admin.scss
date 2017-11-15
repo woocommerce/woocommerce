@@ -2018,9 +2018,14 @@ ul.wc_coupon_list_block {
 						background: #C6E1C6;
 						color: #5B841B;
 					}
+
+					&.status-trash {
+						background: #eba3a3;
+						color: #761919;
+					}
 				}
 			}
-			tr:hover {
+			tr:hover:not(.status-trash) {
 				td, th {
 					cursor: pointer;
 				}

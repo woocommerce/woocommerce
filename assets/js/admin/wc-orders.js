@@ -25,7 +25,9 @@ jQuery( function( $ ) {
 		var $row = $( this ).closest( 'tr' ),
 			href = $row.find( 'a.order-view' ).attr( 'href' );
 
-		window.location = href;
+		if ( href.length ) {
+			window.location = href;
+		}
 	};
 
 	/**
