@@ -1893,73 +1893,227 @@ ul.wc_coupon_list_block {
 		font-size: inherit;
 		margin: 3px 0;
 	}
+}
 
-	.column-order_total,
-	.column-order_date {
-		width: 9%;
+.post-type-shop_order {
+	.tablenav .one-page .displaying-num {
+		display: none;
 	}
-
-	.column-order_status {
-		width: 45px;
-		text-align: center;
-
-		mark {
-			@include ir();
-			background: none;
-			font-size: 1.4em;
-			margin: 0 auto;
+	.wp-list-table {
+		margin-top: 1em;
+		th {
+			padding: .75em 1em;
 		}
-
-		mark.pending,
-		mark.completed,
-		mark.on-hold,
-		mark.failed,
-		mark.cancelled,
-		mark.processing,
-		mark.refunded {
-			&::after {
-				@include icon;
+		th.sortable a, th.sorted a {
+			padding: 0;
+		}
+		.check-column {
+			width: 1px;
+			white-space: nowrap;
+			padding: 1em 1em 1em 1em !important;
+			vertical-align: middle;
+			input {
+				vertical-align: text-top;
+				margin: 1px 0;
 			}
 		}
+		td.column-order_number {
+			line-height: 26px;
+			.order-preview {
+				float:right;
+				width: 16px;
+				padding: 20px 4px 4px 4px;
+				height: 0;
+				overflow: hidden;
+				position: relative;
+				border: 2px solid transparent;
+				border-radius: 4px;
 
-		mark.pending::after {
-			content: '\e012';
-			color: $orange;
+				&::before {
+					@include icon( '\e010' );
+					line-height: 16px;
+					font-size: 14px;
+					vertical-align:middle;
+					top: 4px;
+
+				}
+				&:hover {
+					border: 2px solid #00a0d2;
+				}
+			}
+			.order-preview.disabled {
+				&::before {
+					content: '';
+					background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
+				}
+			}
 		}
-
-		mark.completed::after {
-			content: '\e015';
-			color: $blue;
+		.column-order_date {
+			width: 10ch;
 		}
-
-		mark.on-hold::after {
-			content: '\e033';
-			color: #999;
+		.column-order_number {
+			width: 35ch;
 		}
-
-		mark.failed::after {
-			content: '\e016';
-			color: #d0c21f;
+		.column-order_status {
+			width: 20ch;
 		}
-
-		mark.cancelled::after {
-			content: '\e013';
-			color: $red;
+		.column-order_total {
+			text-align: right;
+			width: 10ch;
+			a span {
+				float:right;
+			}
 		}
-
-		mark.processing::after {
-			content: '\e011';
-			color: #73a724;
+		.column-shipping_address,
+		.column-billing_address {
+			width: 20ch;
 		}
+		th:first-child,
+		td:first-child {
+			padding-left: 2em;
+		}
+		th:last-child,
+		td:last-child {
+			padding-right: 2em;
+		}
+		tbody {
+			th, td {
+				border-top: 1px solid #f5f5f5;
+			}
+			td {
+				vertical-align: middle;
+				padding: 1em;
 
-		mark.refunded::after {
-			content: '\e014';
-			color: #999;
+				.post-row-actions {
+					display: none;
+				}
+
+				.order-status {
+					display: inline-flex;
+					padding: 0px 1em;
+					line-height: 2.5em;
+					color: #777;
+					background: #E5E5E5;
+					border-radius: 4px;
+					border-bottom: 1px solid rgba(0,0,0,0.05);
+					margin: -.5em 0;
+					cursor: inherit !important;
+
+					&.status-completed {
+						background: #C8D7E1;
+						color: #2e4453;
+					}
+
+					&.status-on-hold {
+						background: #f8dda7;
+						color: #94660c;
+					}
+
+					&.status-failed {
+						background: #eba3a3;
+						color: #761919;
+					}
+
+					&.status-processing {
+						background: #C6E1C6;
+						color: #5B841B;
+					}
+
+					&.status-trash {
+						background: #eba3a3;
+						color: #761919;
+					}
+				}
+			}
+			tr:hover:not(.status-trash) {
+				td, th {
+					cursor: pointer;
+				}
+			}
 		}
 	}
+}
 
-	td.column-order_status {
-		padding-top: 9px;
+// Hide some columns on smaller screens.
+@media only screen and (max-width: 1400px) {
+	.post-type-shop_order .wp-list-table {
+		.column-billing_address {
+			display:none;
+			visibility:hidden;
+		}
+	}
+}
+@media only screen and (max-width: 1200px) {
+	.post-type-shop_order .wp-list-table {
+		.column-shipping_address,
+		.column-order_total {
+			display:none;
+			visibility:hidden;
+		}
+	}
+}
+
+.wc-order-preview {
+	article {
+		padding: 0 !important;
+	}
+	.wc-order-preview__table {
+		width: 100%;
+		margin: 0;
+		border-bottom: 1px solid #ccc;
+		th, td {
+			padding: 1em 1.5em;
+			text-align: left;
+			border: 0;
+			border-bottom: 1px solid #eee;
+			margin: 0;
+			background: transparent;
+			box-shadow: none;
+			text-align: right;
+			vertical-align: top;
+		}
+		td:first-child,
+		th:first-child {
+			text-align: left;
+		}
+		th {
+			border-color: #ccc;
+		}
+		tr:last-child td {
+			border: 0;
+		}
+		.wc-order-item-sku {
+			margin-top: .5em;
+		}
+		.wc-order-item-meta {
+			margin-top: .5em;
+			th, td {
+				padding: 0;
+				border: 0;
+				text-align: left;
+				vertical-align: top;
+			}
+			td:last-child {
+				padding-left: .5em;
+			}
+		}
+	}
+	.wc-order-preview-addresses {
+		overflow:hidden;
+		.wc-order-preview-address {
+			width: 50%;
+			float: left;
+			padding: 1.5em;
+			box-sizing: border-box;
+
+			h2 {
+				margin-top: 0;
+			}
+			strong {
+				display: block;
+				margin-top: 1em;
+			}
+		}
 	}
 }
 
@@ -4658,6 +4812,10 @@ img.ui-datepicker-trigger {
 /**
  * Reports
  */
+ .woocommerce-reports-remove-filter {
+	color: red;
+	text-decoration: none;
+}
 .woocommerce-reports-wrap,
 .woocommerce-reports-wide {
 	&.woocommerce-reports-wrap {
@@ -4669,6 +4827,10 @@ img.ui-datepicker-trigger {
 		margin: 0;
 		overflow: hidden;
 		zoom: 1;
+	}
+
+	.widefat th {
+		padding: 7px;
 	}
 
 	.widefat td {
@@ -5410,20 +5572,6 @@ table.bar_chart {
 
 	.post-type-shop_order {
 		.wp-list-table {
-			.column-order_status {
-				display: none;
-				text-align: left;
-				padding-bottom: 0;
-
-				mark {
-					margin: 0;
-				}
-
-				&::before {
-					display: none !important;
-				}
-			}
-
 			.column-customer_message,
 			.column-order_notes {
 				text-align: inherit;
@@ -5510,6 +5658,14 @@ table.bar_chart {
 
 	.select2-container {
 		width: 100% !important;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.wc-backbone-modal .wc-backbone-modal-content {
+		width: 100%;
+		height: 100%;
+		min-width: 100%;
 	}
 }
 
@@ -5708,7 +5864,7 @@ table.bar_chart {
 	}
 	select,
 	input {
-		line-height: 32px;
+		line-height: 1;
 		height: 32px;
 	}
 	.select2-container {

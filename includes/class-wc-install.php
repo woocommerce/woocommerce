@@ -560,7 +560,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id BIGINT UNSIGNED NOT NULL auto_increment,
-  download_id varchar(32) NOT NULL,
+  download_id varchar(36) NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   order_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
   order_key varchar(200) NOT NULL,
@@ -669,6 +669,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   context longtext NULL,
   PRIMARY KEY (log_id),
   KEY level (level)
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_download_log (
+  download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  permission_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NULL,
+  user_ip_address VARCHAR(100) NULL DEFAULT '',
+  PRIMARY KEY (download_log_id),
+  KEY permission_id (permission_id),
+  KEY timestamp (timestamp)
 ) $collate;
 		";
 
