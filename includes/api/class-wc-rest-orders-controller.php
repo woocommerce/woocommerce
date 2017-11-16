@@ -1159,7 +1159,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'tax_class' => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'subtotal' => array(
@@ -1244,7 +1244,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'price' => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
