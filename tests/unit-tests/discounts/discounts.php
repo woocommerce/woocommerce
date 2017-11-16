@@ -137,6 +137,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts = new WC_Discounts();
 		$discounts->set_items_from_cart( false );
 		$this->assertEquals( array(), $discounts->get_items() );
+		$product->delete( true );
 	}
 
 	/**
@@ -173,6 +174,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -185,6 +187,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	public function test_calculations( $test_data ) {
 		$this->last_test_data = $test_data;
 		$discounts = new WC_Discounts();
+		$products = array();
 
 		if ( isset( $test_data['tax_rate'] ) ) {
 			WC_Tax::_insert_tax_rate( $test_data['tax_rate'] );
@@ -196,13 +199,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			}
 		}
 
-		foreach ( $test_data['cart'] as $item ) {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( $item['price'] );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
-			$this->store_product( $product );
-			WC()->cart->add_to_cart( $product->get_id(), $item['qty'] );
+		foreach ( $test_data['cart'] as $key => $item ) {
+			$products[ $key ] = WC_Helper_Product::create_simple_product();
+			$products[ $key ]->set_regular_price( $item['price'] );
+			$products[ $key ]->set_tax_status( 'taxable' );
+			$products[ $key ]->save();
+			$this->store_product( $products[ $key ] );
+			WC()->cart->add_to_cart( $products[ $key ]->get_id(), $item['qty'] );
 		}
 
 		$discounts->set_items_from_cart( WC()->cart );
@@ -222,6 +225,10 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $test_data['expected_total_discount'], $discount_total, 'Failed (' . print_r( $test_data, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
+
+		foreach ( $products as $product ) {
+			$products->delete( true );
+		}
 	}
 
 	/**
