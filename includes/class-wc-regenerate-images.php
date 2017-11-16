@@ -34,10 +34,17 @@ class WC_Regenerate_Images {
 		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php' );
 		self::$background_process = new WC_Regenerate_Images_Request();
 
-		// Action to handle on-the-fly image resizing.
-		add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
-		// Action to handle image generation when settings change.
-		add_action( 'update_option', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
+		if ( apply_filters( 'woocommerce_resize_images', true ) && ! is_admin() ) {
+			// Action to handle on-the-fly image resizing.
+			add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+		}
+
+		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
+			// Actions to handle image generation when settings change.
+			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
+			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
+			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -50,14 +57,6 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
-		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
-			return $image;
-		}
-
-		if ( is_admin() ) {
-			return $image;
-		}
-
 		$imagemeta = wp_get_attachment_metadata( $attachment_id );
 
 		if ( false === $imagemeta || empty( $imagemeta ) ) {
@@ -152,11 +151,11 @@ class WC_Regenerate_Images {
 	/**
 	 * Check if we should regenerate the product images using a job queue in the background.
 	 *
-	 * @param string $option Option name.
 	 * @param mixed  $old_value Old option value.
 	 * @param mixed  $new_value New option value.
+	 * @param string $option Option name.
 	 */
-	public static function maybe_regenerate_images_background( $option, $old_value, $new_value ) {
+	public static function maybe_regenerate_images_background( $old_value, $new_value, $option ) {
 		global $wpdb;
 
 		if ( ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
