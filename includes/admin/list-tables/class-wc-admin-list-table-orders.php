@@ -369,6 +369,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 									</div>
 								<# } #>
 							</div>
+							<?php do_action( 'woocommerce_admin_order_preview' ); ?>
 						</article>
 						<footer>
 							<div class="inner">
