@@ -835,28 +835,6 @@ function wc_update_240_api_keys() {
 }
 
 /**
- * Update webhooks for 2.4
- *
- * @return void
- */
-function wc_update_240_webhooks() {
-	/**
-	 * Webhooks.
-	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
-	 */
-	$order_update_webhooks = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'meta_key'       => '_topic',
-		'meta_value'     => 'order.updated',
-	) );
-	foreach ( $order_update_webhooks as $order_update_webhook ) {
-		$webhook = new WC_Webhook( $order_update_webhook->ID );
-		$webhook->set_topic( 'order.updated' );
-	}
-}
-
-/**
  * Update refunds for 2.4
  *
  * @return void
@@ -1149,28 +1127,6 @@ function wc_update_260_db_version() {
 }
 
 /**
- * Update webhooks for 3.0
- *
- * @return void
- */
-function wc_update_300_webhooks() {
-	/**
-	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
-	 * and woocommerce_product_bulk_edit_save hooks.
-	 */
-	$product_update_webhooks = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'meta_key'       => '_topic',
-		'meta_value'     => 'product.updated',
-	) );
-	foreach ( $product_update_webhooks as $product_update_webhook ) {
-		$webhook = new WC_Webhook( $product_update_webhook->ID );
-		$webhook->set_topic( 'product.updated' );
-	}
-}
-
-/**
  * Add an index to the field comment_type to improve the response time of the query
  * used by WC_Comments::wp_count_comments() to get the number of comments by type.
  */
@@ -1430,6 +1386,42 @@ function wc_update_330_image_options() {
 	if ( ! empty( $old_single_size['width'] ) ) {
 		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
 	}
+}
+
+/**
+ * Migrate webhooks from post type to CRUD.
+ */
+function wc_update_330_webhooks() {
+	register_post_type( 'shop_webhook' );
+
+	// Map statuses from post_type to Webhooks CRUD.
+	$statuses = array(
+		'publish' => 'active',
+		'draft'   => 'paused',
+		'pending' => 'disabled',
+	);
+
+	$posts = get_posts( array(
+		'posts_per_page' => -1,
+		'post_type'      => 'shop_webhook',
+		'post_status'    => 'any',
+	) );
+
+	foreach ( $posts as $post ) {
+		$webhook = new WC_Webhook();
+		$webhook->set_name( $post->post_title );
+		$webhook->set_status( isset( $statuses[ $post->post_status ] ) ? $statuses[ $post->post_status ] : 'disabled' );
+		$webhook->set_delivery_url( get_post_meta( $post->ID, '_delivery_url', true ) );
+		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
+		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );
+		$webhook->set_api_version( get_post_meta( $post->ID, '_api_version', true ) );
+		$webhook->set_pending_delivery( false );
+		$webhook->save();
+
+		wp_delete_post( $post->ID, true );
+	}
+
+	unregister_post_type( 'shop_webhook' );
 }
 
 /**
