@@ -5,7 +5,7 @@
  * @author   Automattic
  * @category Shortcodes
  * @package  WooCommerce/Shortcodes
- * @version  3.2.0
+ * @version  3.2.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -195,7 +195,12 @@ class WC_Shortcode_Products {
 		// Categories.
 		$this->set_categories_query_args( $query_args );
 
-		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
+		$query_args = apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
+
+		// Always query only IDs.
+		$query_args['fields'] = 'ids';
+
+		return $query_args;
 	}
 
 	/**
@@ -450,16 +455,16 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get products.
+	 * Get products IDs.
 	 *
-	 * @since  3.2.0
-	 * @return WP_Query
+	 * @since  3.2.4
+	 * @return array
 	 */
-	protected function get_products() {
+	protected function get_products_ids() {
 		$transient_name = $this->get_transient_name();
-		$products       = get_transient( $transient_name );
+		$ids            = get_transient( $transient_name );
 
-		if ( false === $products || ! is_a( $products, 'WP_Query' ) ) {
+		if ( false === $ids ) {
 			if ( 'top_rated_products' === $this->type ) {
 				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 				$products = new WP_Query( $this->query_args );
@@ -468,7 +473,9 @@ class WC_Shortcode_Products {
 				$products = new WP_Query( $this->query_args );
 			}
 
-			set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+			$ids = wp_parse_id_list( $products->posts );
+
+			set_transient( $transient_name, $ids, DAY_IN_SECONDS * 30 );
 		}
 
 		// Remove ordering query arguments.
@@ -476,7 +483,7 @@ class WC_Shortcode_Products {
 			WC()->query->remove_ordering_args();
 		}
 
-		return $products;
+		return $ids;
 	}
 
 	/**
@@ -492,20 +499,23 @@ class WC_Shortcode_Products {
 		$classes                     = $this->get_wrapper_classes( $columns );
 		$woocommerce_loop['columns'] = $columns;
 		$woocommerce_loop['name']    = $this->type;
-		$products                    = $this->get_products();
+		$products_ids                = $this->get_products_ids();
 
 		ob_start();
 
-		if ( $products->have_posts() ) {
-			// Prime caches before grabbing objects.
-			update_post_caches( $products->posts, array( 'product', 'product_variation' ) );
+		if ( $products_ids ) {
+			// Prime meta cache to reduce future queries.
+			update_meta_cache( 'post', $products_ids );
+			update_object_term_cache( $products_ids, 'product' );
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
 			woocommerce_product_loop_start();
 
-			while ( $products->have_posts() ) {
-				$products->the_post();
+			foreach ( $products_ids as $product_id ) {
+				$post_object = get_post( $product_id );
+				$GLOBALS['post'] =& $post_object; // WPCS: override ok.
+				setup_postdata( $post_object );
 
 				// Set custom product visibility when quering hidden products.
 				add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
