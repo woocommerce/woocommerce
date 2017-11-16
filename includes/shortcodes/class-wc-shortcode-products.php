@@ -441,7 +441,7 @@ class WC_Shortcode_Products {
 	 * @return array
 	 */
 	protected function get_products_ids() {
-		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );;
+		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 ) . WC_Cache_Helper::get_transient_version( 'product_query' );
 		$ids            = get_transient( $transient_name );
 
 		if ( false === $ids ) {
