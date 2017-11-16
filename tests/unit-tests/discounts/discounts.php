@@ -227,7 +227,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->assertEquals( $test_data['expected_total_discount'], $discount_total, 'Failed (' . print_r( $test_data, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
 
 		foreach ( $products as $product ) {
-			$products->delete( true );
+			$product->delete( true );
 		}
 	}
 
