@@ -41,9 +41,10 @@ class WC_Regenerate_Images {
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			// Actions to handle image generation when settings change.
-			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
-			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
-			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_background' ), 10, 3 );
+			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
+			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
+			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
+			add_action( 'after_theme_switch', array( __CLASS__, 'queue_image_regeneration' ) );
 		}
 	}
 
@@ -149,27 +150,27 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Check if we should regenerate the product images using a job queue in the background.
+	 * Check if we should regenerate the product images when options change.
 	 *
 	 * @param mixed  $old_value Old option value.
 	 * @param mixed  $new_value New option value.
 	 * @param string $option Option name.
 	 */
-	public static function maybe_regenerate_images_background( $old_value, $new_value, $option ) {
-		global $wpdb;
-
-		if ( ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
-			return;
-		}
-		if ( ! in_array( $option, array( 'woocommerce_thumbnail_cropping', 'woocommerce_thumbnail_image_width', 'woocommerce_single_image_width' ), true ) ) {
-			return;
-		}
-
+	public static function maybe_regenerate_images_option_update( $old_value, $new_value, $option ) {
 		if ( $new_value === $old_value ) {
 			return;
 		}
 
-		// If we made it till here, it means that image settings have changed.
+		$this->queue_image_regeneration();
+	}
+
+	/**
+	 * Get list of images and queue them for regeneration
+	 *
+	 * @return void
+	 */
+	private static function queue_image_regeneration() {
+		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->cancel_process();
 
