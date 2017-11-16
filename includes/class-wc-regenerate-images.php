@@ -44,7 +44,7 @@ class WC_Regenerate_Images {
 			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
 			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
 			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
-			add_action( 'after_theme_switch', array( __CLASS__, 'queue_image_regeneration' ) );
+			add_action( 'after_switch_theme', array( __CLASS__, 'queue_image_regeneration' ) );
 		}
 	}
 
@@ -161,7 +161,7 @@ class WC_Regenerate_Images {
 			return;
 		}
 
-		$this->queue_image_regeneration();
+		self::queue_image_regeneration();
 	}
 
 	/**
@@ -169,7 +169,7 @@ class WC_Regenerate_Images {
 	 *
 	 * @return void
 	 */
-	private static function queue_image_regeneration() {
+	public static function queue_image_regeneration() {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->cancel_process();
