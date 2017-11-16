@@ -851,7 +851,7 @@ class WC_Discounts {
 	protected function get_object_subtotal() {
 		if ( is_a( $this->object, 'WC_Cart' ) ) {
 			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
-		} elseif ( is_a( $object, 'WC_Order' ) ) {
+		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
 			return wc_add_number_precision( $this->object->get_subtotal() );
 		} else {
 			return array_sum( wp_list_pluck( $this->items, 'price' ) );
