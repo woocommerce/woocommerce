@@ -558,15 +558,18 @@ class WC_Emails {
 			'order_id' => '',
 		) );
 
-		extract( $args );
-
-		if ( ! $product || ! $quantity || ! ( $order = wc_get_order( $order_id ) ) ) {
+		$order = wc_get_order( $args['order_id'] );
+		if (
+			! $args['product'] ||
+			! $args['quantity'] ||
+			! $order
+		) {
 			return;
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
-		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
-
+		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( strip_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+		
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args ),
 			apply_filters( 'woocommerce_email_subject_backorder', $subject, $args ),
