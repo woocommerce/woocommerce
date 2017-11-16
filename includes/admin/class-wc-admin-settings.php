@@ -223,6 +223,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['placeholder'] ) ) {
 					$value['placeholder'] = '';
 				}
+				if ( ! isset( $value['suffix'] ) ) {
+					$value['suffix'] = '';
+				}
 
 				// Custom attribute handling.
 				$custom_attributes = array();
@@ -288,7 +291,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-									/> <?php echo $description; // WPCS: XSS ok. ?>
+									/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
 						</tr>
 						<?php
@@ -498,7 +501,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						break;
 
-					// Image width settings.
+					// Image width settings. @todo deprecate and remove in 4.0. No longer needed by core.
 					case 'image_width':
 						$image_size       = str_replace( '_image_size', '', $value['id'] );
 						$size             = wc_get_image_size( $image_size );
@@ -523,6 +526,64 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" value="1" <?php checked( 1, $crop ); ?> /> <?php esc_html_e( 'Hard crop?', 'woocommerce' ); ?></label>
 
 								</td>
+						</tr>
+						<?php
+						break;
+
+					// Thumbnail cropping setting. DEVELOPERS: This is private. Re-use at your own risk.
+					case 'thumbnail_cropping':
+						$option_value   = self::get_option( $value['id'], $value['default'] );
+						if ( strstr( $option_value, ':' ) ) {
+							$cropping_split = explode( ':', $option_value );
+							$width          = max( 1, current( $cropping_split ) );
+							$height         = max( 1, end( $cropping_split ) );
+						} else {
+							$width  = 4;
+							$height = 3;
+						}
+
+						?>
+						<tr valign="top">
+							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></th>
+							<td class="forminp">
+								<ul class="woocommerce-thumbnail-cropping">
+									<li>
+										<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_1_1" value="1:1" <?php checked( ! in_array( $option_value, array( '1:1', 'uncropped' ), true ), true ); ?> />
+										<label for="thumbnail_cropping_1_1">1:1<br/><span class="description"><?php esc_html_e( 'Images will be cropped into a square', 'woocommerce' ); ?></span></label>
+									</li>
+									<li>
+										<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_custom" value="custom" <?php checked( $option_value, 'custom' ); ?> />
+										<label for="thumbnail_cropping_custom">
+											<?php esc_html_e( 'Custom', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will be cropped to a custom aspect ratio', 'woocommerce' ); ?></span>
+											<span class="woocommerce-thumbnail-cropping-aspect-ratio">
+												<input name="thumbnail_cropping_aspect_ratio_width" type="text" pattern="\d*" size="3" value="<?php echo esc_attr( $width ); ?>" /> : <input name="thumbnail_cropping_aspect_ratio_height" type="text" pattern="\d*" size="3" value="<?php echo esc_attr( $height ); ?>" />
+											</span>
+										</label>
+									</li>
+									<li>
+									<input type="radio" name="woocommerce_thumbnail_cropping" id="thumbnail_cropping_uncropped" value="uncropped" <?php checked( $option_value, 'uncropped' ); ?> />
+										<label for="thumbnail_cropping_uncropped"><?php esc_html_e( 'Uncropped', 'woocommerce' ); ?><br/><span class="description"><?php esc_html_e( 'Images will display using the aspect ratio in which they were uploaded', 'woocommerce' ); ?></span></label>
+									</li>
+								</ul>
+								<div class="woocommerce-thumbnail-preview hide-if-no-js">
+									<h4><?php esc_html_e( 'Preview', 'woocommerce' ); ?></h4>
+									<div class="woocommerce-thumbnail-preview-block">
+										<div class="woocommerce-thumbnail-preview-block__image"></div>
+										<div class="woocommerce-thumbnail-preview-block__text"></div>
+										<div class="woocommerce-thumbnail-preview-block__button"></div>
+									</div>
+									<div class="woocommerce-thumbnail-preview-block">
+										<div class="woocommerce-thumbnail-preview-block__image"></div>
+										<div class="woocommerce-thumbnail-preview-block__text"></div>
+										<div class="woocommerce-thumbnail-preview-block__button"></div>
+									</div>
+									<div class="woocommerce-thumbnail-preview-block">
+										<div class="woocommerce-thumbnail-preview-block__image"></div>
+										<div class="woocommerce-thumbnail-preview-block__text"></div>
+										<div class="woocommerce-thumbnail-preview-block__button"></div>
+									</div>
+								</div>
+							</td>
 						</tr>
 						<?php
 						break;
@@ -721,6 +782,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$value['width']  = $option['default']['width'];
 							$value['height'] = $option['default']['height'];
 							$value['crop']   = $option['default']['crop'];
+						}
+						break;
+					case 'thumbnail_cropping':
+						$value = wc_clean( $raw_value );
+
+						if ( 'custom' === $value ) {
+							$width_ratio  = isset( $_POST['thumbnail_cropping_aspect_ratio_width'] ) ? wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_width'] ) ) : '1'; // WPCS: input var ok, CSRF ok.
+							$height_ratio = isset( $_POST['thumbnail_cropping_aspect_ratio_height'] ) ? wc_clean( wp_unslash( $_POST['thumbnail_cropping_aspect_ratio_height'] ) ) : '1'; // WPCS: input var ok, CSRF ok.
+							$value        = $width_ratio . ':' . $height_ratio;
 						}
 						break;
 					case 'select':

@@ -353,7 +353,8 @@ class WC_Discounts {
 			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
 
 			// See how many and what price to apply to.
-			$apply_quantity    = max( 0, ( $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity ) );
+			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+			$apply_quantity    = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 			$price_to_discount = ( $price_to_discount / $item->quantity ) * $apply_quantity;
 
 			// Run coupon calculations.
@@ -416,10 +417,11 @@ class WC_Discounts {
 
 			// Run coupon calculations.
 			if ( $limit_usage_qty ) {
-				$apply_quantity = max( 0, ( $limit_usage_qty - $applied_count < $item->quantity ? $limit_usage_qty - $applied_count: $item->quantity ) );
+				$apply_quantity = $limit_usage_qty - $applied_count < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 				$discount       = min( $amount, $item->price / $item->quantity ) * $apply_quantity;
 			} else {
-				$apply_quantity = $item->quantity;
+				$apply_quantity = apply_filters( 'woocommerce_coupon_get_apply_quantity', $item->quantity, $item, $coupon, $this );
 				$discount       = $amount * $apply_quantity;
 			}
 
@@ -611,8 +613,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) );
-
+		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -630,8 +631,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision( array_sum( wp_list_pluck( $this->items, 'price' ) ) );
-
+		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
@@ -843,6 +843,21 @@ class WC_Discounts {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get the object subtotal
+	 *
+	 * @return int
+	 */
+	protected function get_object_subtotal() {
+		if ( is_a( $this->object, 'WC_Cart' ) ) {
+			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
+		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
+			return wc_add_number_precision( $this->object->get_subtotal() );
+		} else {
+			return array_sum( wp_list_pluck( $this->items, 'price' ) );
+		}
 	}
 
 	/**

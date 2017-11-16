@@ -67,7 +67,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$user_id = get_current_user_id();
 
@@ -181,7 +181,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$errors       = new WP_Error();
 		$user         = new stdClass();
@@ -278,7 +278,7 @@ class WC_Form_Handler {
 	 */
 	public static function checkout_action() {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
 				wp_redirect( wc_get_page_permalink( 'cart' ) );
@@ -298,7 +298,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 			ob_start();
 
 			// Pay for existing order
@@ -377,7 +377,7 @@ class WC_Form_Handler {
 	 */
 	public static function add_payment_method_action() {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 			ob_start();
 
 			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
@@ -422,7 +422,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			$token_id = absint( $wp->query_vars['delete-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -447,7 +447,7 @@ class WC_Form_Handler {
 		global $wp;
 
 		if ( isset( $wp->query_vars['set-default-payment-method'] ) ) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			$token_id = absint( $wp->query_vars['set-default-payment-method'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
@@ -473,7 +473,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
@@ -587,7 +587,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
 			WC()->cart->empty_cart();
@@ -678,7 +678,7 @@ class WC_Form_Handler {
 			isset( $_GET['order_id'] ) &&
 			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) )
 		) {
-			nocache_headers();
+			wc_nocache_headers();
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
@@ -725,7 +725,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		nocache_headers();
+		wc_nocache_headers();
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
@@ -834,8 +834,8 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
 		try {
-			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) );
+			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // WPCS: sanitization ok.
 			$missing_attributes = array();
 			$variations         = array();
 			$adding_to_cart     = wc_get_product( $product_id );
@@ -873,18 +873,22 @@ class WC_Form_Handler {
 					continue;
 				}
 
-				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+				// Get valid value from variation data.
+				$taxonomy    = 'attribute_' . sanitize_title( $attribute['name'] );
+				$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
+				/**
+				 * If the attribute value was posted, check if it's valid.
+				 *
+				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
+				 */
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 					if ( $attribute['is_taxonomy'] ) {
 						// Don't use wc_clean as it destroys sanitized characters.
 						$value = sanitize_title( wp_unslash( $_REQUEST[ $taxonomy ] ) );
 					} else {
-						$value = wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) );
+						$value = wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) ); // WPCS: sanitization ok.
 					}
-
-					// Get valid value from variation data.
-					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {
@@ -895,7 +899,7 @@ class WC_Form_Handler {
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
 					}
-				} else {
+				} elseif ( '' === $valid_value ) {
 					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 				}
 			}

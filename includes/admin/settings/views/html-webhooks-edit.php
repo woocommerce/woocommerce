@@ -2,7 +2,7 @@
 /**
  * Admin View: Edit Webhooks
  *
- * @package WooCommerce/Admin/Webhooks/Views
+ * @package WooCommerce\Admin\Webhooks\Views
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -87,7 +87,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-action-event-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_action_event"><?php esc_html_e( 'Action event', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( esc_html__( 'Enter the action that will trigger this webhook.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'Enter the action that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_action_event" id="webhook_action_event" type="text" class="input-text regular-input" value="<?php echo esc_attr( $topic_data['event'] ); ?>" />
@@ -96,7 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-custom-topic-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_custom_topic"><?php esc_html_e( 'Custom topic', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( esc_html__( 'Enter the custom topic that will trigger this webhook.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'Enter the custom topic that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_custom_topic" id="webhook_custom_topic" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_topic() ); ?>" />
@@ -105,7 +105,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_delivery_url"><?php esc_html_e( 'Delivery URL', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( esc_html__( 'URL where the webhook payload is delivered.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'URL where the webhook payload is delivered.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_delivery_url() ); ?>" />
@@ -114,7 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_secret"><?php esc_html_e( 'Secret', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( esc_html__( 'The secret key is used to generate a hash of the delivered webhook and provided in the request headers.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'The secret key is used to generate a hash of the delivered webhook and provided in the request headers.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />
@@ -123,7 +123,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_api_version"><?php esc_html_e( 'API Version', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( esc_html__( 'REST API version used in the webhook deliveries.', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'REST API version used in the webhook deliveries.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<select name="webhook_api_version" id="webhook_api_version">
@@ -175,7 +175,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
-						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save webhook', 'woocommerce' ); ?>" />
+						<button type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p"><?php esc_html_e( 'Save webhook', 'woocommerce' ); ?></button>
 						<?php
 						if ( $webhook->get_id() ) :
 							$delete_url = wp_nonce_url( add_query_arg( array(

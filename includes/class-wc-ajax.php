@@ -59,7 +59,7 @@ class WC_AJAX {
 		@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 		@header( 'X-Robots-Tag: noindex' );
 		send_nosniff_header();
-		nocache_headers();
+		wc_nocache_headers();
 		status_header( 200 );
 	}
 
@@ -99,6 +99,7 @@ class WC_AJAX {
 			'get_customer_location'                            => true,
 			'feature_product'                                  => false,
 			'mark_order_status'                                => false,
+			'get_order_details'                                => false,
 			'add_attribute'                                    => false,
 			'add_new_attribute'                                => false,
 			'remove_variation'                                 => false,
@@ -473,6 +474,97 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Get order details.
+	 */
+	public static function get_order_details() {
+		check_admin_referer( 'woocommerce-preview-order', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		if ( $order = wc_get_order( absint( $_GET['order_id'] ) ) ) {
+
+			ob_start();
+
+			$hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', array(
+				'_qty',
+				'_tax_class',
+				'_product_id',
+				'_variation_id',
+				'_line_subtotal',
+				'_line_subtotal_tax',
+				'_line_total',
+				'_line_tax',
+				'method_id',
+				'cost',
+			) );
+			?>
+			<div class="wc-order-preview__table-wrapper">
+				<table cellspacing="0" class="wc-order-preview__table">
+					<tr>
+						<th><?php _e( 'Product', 'woocommerce' ); ?></th>
+						<th><?php _e( 'Quantity', 'woocommerce' ); ?></th>
+						<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
+						<th><?php _e( 'Total', 'woocommerce' ); ?></th>
+					</tr>
+				<?php
+				foreach ( $order->get_items() as $item_id => $item ) {
+					if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
+						?>
+						<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
+							<td><?php
+								echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+
+								if ( is_callable( array( $item, 'get_product' ) ) && ( $product = $item->get_product() ) && is_object( $product ) && $product->get_sku() ) {
+									echo '<div class="wc-order-item-sku">' . esc_html( $product->get_sku() ) . '</div>';
+								}
+
+								if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
+									<table cellspacing="0" class="wc-order-item-meta">
+										<?php foreach ( $meta_data as $meta_id => $meta ) :
+											if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+												continue;
+											}
+											?>
+											<tr>
+												<th><?php echo wp_kses_post( $meta->display_key ); ?>:</th>
+												<td><?php echo wp_kses_post( force_balance_tags( $meta->display_value ) ); ?></td>
+											</tr>
+										<?php endforeach; ?>
+									</table>
+								<?php endif;
+							?></td>
+							<td><?php echo esc_html( $item->get_quantity() ); ?></td>
+							<td><?php echo wc_price( $item->get_total_tax(), array( 'currency' => $order->get_currency() ) );; ?></td>
+							<td><?php echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );; ?></td>
+						</tr>
+						<?php
+					}
+				}
+				?>
+				</table>
+			</div>
+			<?php
+			$item_html = ob_get_clean();
+
+			wp_send_json_success( array(
+				'data'                       => $order->get_data(),
+				'order_number'               => $order->get_order_number(),
+				'item_html'                  => $item_html,
+				'ship_to_billing'            => wc_ship_to_billing_address_only(),
+				'needs_shipping'             => $order->needs_shipping_address(),
+				'formatted_billing_address'  => ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ),
+				'formatted_shipping_address' => ( $address = $order->get_formatted_shipping_address() ) ? $address: __( 'N/A', 'woocommerce' ),
+				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
+				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
+				'shipping_via'               => $order->get_shipping_method(),
+			) );
+		}
+		exit;
+	}
+
+	/**
 	 * Add an attribute row.
 	 */
 	public static function add_attribute() {
@@ -580,14 +672,13 @@ class WC_AJAX {
 	 * Add variation via ajax function.
 	 */
 	public static function add_variation() {
-
 		check_ajax_referer( 'add-variation', 'security' );
 
 		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( -1 );
 		}
 
-		global $post; // Set $post global so its available, like within the admin screens
+		global $post; // Set $post global so its available, like within the admin screens.
 
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id );
@@ -595,6 +686,7 @@ class WC_AJAX {
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
+		$variation_object->set_attributes( array_fill_keys( array_keys( $product_object->get_variation_attributes() ), '' ) );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
 		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.

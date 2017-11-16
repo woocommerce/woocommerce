@@ -168,7 +168,7 @@ abstract class WC_CSV_Exporter {
 		@ini_set( 'output_handler', '' );
 		ignore_user_abort( true );
 		wc_set_time_limit( 0 );
-		nocache_headers();
+		wc_nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=' . $this->get_filename() );
 		header( 'Pragma: no-cache' );

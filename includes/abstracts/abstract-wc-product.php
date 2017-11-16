@@ -1172,13 +1172,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$download_object = $download;
 			} else {
 				$download_object           = new WC_Product_Download();
-				$download['previous_hash'] = isset( $download['previous_hash'] ) ? $download['previous_hash'] : '';
-				$file_hash                 = apply_filters( 'woocommerce_downloadable_file_hash', md5( $download['file'] ), $this->get_id(), $download['name'], $download['file'], $download['previous_hash'] );
 
-				$download_object->set_id( $file_hash );
+				// If we don't have a previous hash, generate UUID for download.
+				if ( empty( $download['download_id'] ) ) {
+					$download['download_id'] = wp_generate_uuid4();
+				}
+
+				$download_object->set_id( $download['download_id'] );
 				$download_object->set_name( $download['name'] );
 				$download_object->set_file( $download['file'] );
-				$download_object->set_previous_hash( $download['previous_hash'] );
 			}
 
 			// Validate the file extension.
@@ -1763,12 +1765,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the main product image.
 	 *
-	 * @param string $size (default: 'shop_thumbnail').
+	 * @param string $size (default: 'woocommerce_thumbnail').
 	 * @param array  $attr Image attributes.
 	 * @param bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
+	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		if ( has_post_thumbnail( $this->get_id() ) ) {
 			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {

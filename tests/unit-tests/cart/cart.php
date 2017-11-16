@@ -682,37 +682,50 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_total_ex_tax() {
+		global $wpdb;
 
-		// Set calc taxes option
+		// Set calc taxes option.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// We need this to have the calculate_totals() method calculate totals
+		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
 
-		// Add product to cart
+		// Add 10 fee.
+		WC_Helper_Fee::add_cart_fee( 'taxed' );
+
+		// Add product to cart (10).
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Calc total
-		$total = WC()->cart->total - WC()->cart->tax_total - WC()->cart->shipping_tax_total;
-		if ( $total < 0 ) {
-			$total = 0;
-		}
+		// Check.
+		$this->assertEquals( wc_price( 22 ), WC()->cart->get_total() );
+		$this->assertEquals( wc_price( 20 ), WC()->cart->get_total_ex_tax() );
 
-		// Check
-		$this->assertEquals( apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) ), WC()->cart->get_total_ex_tax() );
-
-		// Clean up the cart
+		// Clean up the cart.
 		WC()->cart->empty_cart();
 
-		// Clean up product
+		// Clean up product.
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		// Restore option
+		// Restore option.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
@@ -1047,5 +1060,49 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 		WC_Helper_Coupon::delete_coupon( $iu_coupon1->get_code() );
 		WC_Helper_Coupon::delete_coupon( $iu_coupon2->get_code() );
+	}
+
+	public function test_clone_cart() {
+		$cart              = wc()->cart;
+		$new_cart          = clone $cart;
+		$is_identical_cart = $cart === $new_cart;
+
+		// Cloned carts should not be identical.
+		$this->assertFalse( $is_identical_cart, 'Cloned cart not identical to original cart' );
+	}
+
+	public function test_cloned_cart_session() {
+		// PHP 5.2 does not include support for ReflectionProperty::setAccessible().
+		if ( version_compare( '5.3', PHP_VERSION, '>' ) ) {
+			$this->markTestSkipped( 'Test requires PHP 5.3 and above to use ReflectionProperty::setAccessible()' );
+		}
+
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Allow accessing protected properties.
+		$reflected_cart = new ReflectionClass( $cart );
+		$cart_session   = $reflected_cart->getProperty( 'session' );
+		$cart_session->setAccessible( true );
+		$reflected_new_cart = new ReflectionClass( $new_cart );
+		$new_cart_session   = $reflected_new_cart->getProperty( 'session' );
+		$new_cart_session->setAccessible( true );
+
+		// Ensure that cloned properties are not identical.
+		$identical_sessions = $cart_session->getValue( $cart ) === $new_cart_session->getValue( $new_cart );
+		$this->assertFalse( $identical_sessions, 'Cloned cart sessions should not be identical to original cart' );
+	}
+
+	public function test_cloned_cart_fees() {
+		$cart     = wc()->cart;
+		$new_cart = clone $cart;
+
+		// Get the properties from each object.
+		$cart_fees = $cart->fees_api();
+		$new_cart_fees = $new_cart->fees_api();
+
+		// Ensure that cloned properties are not identical.
+		$identical_fees = $cart_fees === $new_cart_fees;
+		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
 	}
 }

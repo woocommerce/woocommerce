@@ -842,17 +842,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id
+	 * @param int $item_id Item ID to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
-		$item = $this->get_item( $item_id );
+		$item = $this->get_item( $item_id, false );
 
 		if ( ! $item || ! ( $items_key = $this->get_items_key( $item ) ) ) {
 			return false;
 		}
 
-		// Unset and remove later
+		// Unset and remove later.
 		$this->items_to_delete[] = $item;
 		unset( $this->items[ $items_key ][ $item->get_id() ] );
 	}
@@ -1672,7 +1672,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 			}
 
-			/* translators: %s: shipping method */
+			/* translators: %s: method */
 			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
 
 		} elseif ( $this->get_shipping_method() ) {

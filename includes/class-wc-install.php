@@ -94,6 +94,10 @@ class WC_Install {
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
 		),
+		'3.3.0' => array(
+			'wc_update_330_image_options',
+			'wc_update_330_db_version',
+		),
 	);
 
 	/**
@@ -554,7 +558,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id BIGINT UNSIGNED NOT NULL auto_increment,
-  download_id varchar(32) NOT NULL,
+  download_id varchar(36) NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   order_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
   order_key varchar(200) NOT NULL,
@@ -681,6 +685,15 @@ CREATE TABLE {$wpdb->prefix}wc_webhooks (
   pending_delivery tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (webhook_id),
   KEY user_id (user_id)
+CREATE TABLE {$wpdb->prefix}wc_download_log (
+  download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  timestamp datetime NOT NULL,
+  permission_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NULL,
+  user_ip_address VARCHAR(100) NULL DEFAULT '',
+  PRIMARY KEY (download_log_id),
+  KEY permission_id (permission_id),
+  KEY timestamp (timestamp)
 ) $collate;
 		";
 
