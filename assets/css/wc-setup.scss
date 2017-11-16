@@ -992,9 +992,11 @@ p.jetpack-terms {
 
 .allow-tracking {
 	color: #9f9f9f;
-	margin-top: 2em;
+	margin-top: 1em;
 	text-align: center;
 	font-size: 0.9em;
+	padding-top: 2em;
+	border-top: 1px solid #ccc;
 }
 
 .wc-wizard-service-setting-stripe_create_account {
