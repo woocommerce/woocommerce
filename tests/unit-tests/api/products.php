@@ -69,6 +69,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$this->assertEquals( 401, $response->get_status() );
 
+		// Remove product.
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
 		$product = wc_get_product( $products[0]['id'] );
 		$product->delete( true );
