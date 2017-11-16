@@ -40,13 +40,6 @@ class WC_Discounts {
 	protected $discounts = array();
 
 	/**
-	 * Displayed subtotal of the cart/order
-	 *
-	 * @var integer
-	 */
-	protected $subtotal = 0;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param array $object Cart or order object.
@@ -79,19 +72,12 @@ class WC_Discounts {
 	 */
 	public function set_items_from_cart( $cart ) {
 		$this->items = $this->discounts = array();
-		$this->subtotal = 0;
 
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			return;
 		}
 
 		$this->object = $cart;
-
-		if ( 'excl' === $cart->tax_display_cart ) {
-			$this->subtotal = wc_add_number_precision_deep( $cart->get_subtotal() );
-		} else {
-			$this->subtotal = wc_add_number_precision_deep( $cart->get_subtotal() + $cart->get_subtotal_tax() );
-		}
 
 		foreach ( $cart->get_cart() as $key => $cart_item ) {
 			$item                = new stdClass();
@@ -114,14 +100,12 @@ class WC_Discounts {
 	 */
 	public function set_items_from_order( $order ) {
 		$this->items = $this->discounts = array();
-		$this->subtotal = 0;
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return;
 		}
 
 		$this->object = $order;
-		$this->subtotal = wc_add_number_precision_deep( $order->get_subtotal() );
 
 		foreach ( $order->get_items() as $order_item ) {
 			$item                = new stdClass();
@@ -627,8 +611,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision_deep( $this->subtotal );
-
+		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -646,8 +629,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
-		$subtotal = wc_remove_number_precision_deep( $this->subtotal );
-
+		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
@@ -859,6 +841,21 @@ class WC_Discounts {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get the object subtotal
+	 *
+	 * @return int
+	 */
+	protected function get_object_subtotal() {
+		if ( is_a( $this->object, 'WC_Cart' ) ) {
+			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
+		} elseif ( is_a( $object, 'WC_Order' ) ) {
+			return wc_add_number_precision( $this->object->get_subtotal() );
+		} else {
+			return array_sum( wp_list_pluck( $this->items, 'price' ) );
+		}
 	}
 
 	/**
