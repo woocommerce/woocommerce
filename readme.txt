@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 3.2.3
+Stable tag: 3.2.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,7 +160,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.4 - X =
+= 3.2.4 - 2017-11-16 =
+* Fix - Cache IDs in shortcodes rather than query objects.
 * Fix - Fix float rounding issues in cart with currencies like Bitcoin.
 * Fix - Prevent slashes appearing in shipping fields and inside meta keys when using quotes.
 * Fix - Check valid data when filtering `wp_nav_menu_objects` to prevent conflicts.
