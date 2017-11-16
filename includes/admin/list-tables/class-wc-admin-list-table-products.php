@@ -132,7 +132,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render columm: thumb.
 	 */
 	protected function render_thumb_column() {
-		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . wp_kses_post( $this->object->get_image( 'thumbnail' ) ) . '</a>';
+		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>';
 	}
 
 	/**
