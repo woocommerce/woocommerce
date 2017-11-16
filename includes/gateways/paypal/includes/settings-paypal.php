@@ -36,6 +36,11 @@ return array(
 		'desc_tip'    => true,
 		'placeholder' => 'you@youremail.com',
 	),
+	'advanced' => array(
+		'title'       => __( 'Advanced options', 'woocommerce' ),
+		'type'        => 'title',
+		'description' => '',
+	),
 	'testmode' => array(
 		'title'       => __( 'PayPal sandbox', 'woocommerce' ),
 		'type'        => 'checkbox',
@@ -50,10 +55,12 @@ return array(
 		'default'     => 'no',
 		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s', 'woocommerce' ), '<code>' . WC_Log_Handler_File::get_log_file_path( 'paypal' ) . '</code>' ),
 	),
-	'advanced' => array(
-		'title'       => __( 'Advanced options', 'woocommerce' ),
-		'type'        => 'title',
-		'description' => '',
+	'ipn_notification' => array(
+		'title'       => __( 'IPN Email Notifications', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
+		'default'     => 'yes',
+		'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
 	),
 	'receiver_email' => array(
 		'title'       => __( 'Receiver email', 'woocommerce' ),
