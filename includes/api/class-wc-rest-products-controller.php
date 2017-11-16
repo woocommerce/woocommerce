@@ -1917,6 +1917,9 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 								'description' => __( 'List of available term names of the attribute.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
+								'items'       => array(
+									'type' => 'string',
+								),
 							),
 						),
 					),
