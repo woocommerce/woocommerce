@@ -117,7 +117,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'          => 'minimum_amount',
 					'label'       => __( 'Minimum spend', 'woocommerce' ),
 					'placeholder' => __( 'No minimum', 'woocommerce' ),
-					'description' => __( 'This field allows you to set the minimum spend (displayed subtotal) allowed to use the coupon.', 'woocommerce' ),
+					'description' => __( 'This field allows you to set the minimum spend (subtotal) allowed to use the coupon.', 'woocommerce' ),
 					'data_type'   => 'price',
 					'desc_tip'    => true,
 				) );
@@ -127,7 +127,7 @@ class WC_Meta_Box_Coupon_Data {
 					'id'          => 'maximum_amount',
 					'label'       => __( 'Maximum spend', 'woocommerce' ),
 					'placeholder' => __( 'No maximum', 'woocommerce' ),
-					'description' => __( 'This field allows you to set the maximum spend (displayed subtotal) allowed when using the coupon.', 'woocommerce' ),
+					'description' => __( 'This field allows you to set the maximum spend (subtotal) allowed when using the coupon.', 'woocommerce' ),
 					'data_type'   => 'price',
 					'desc_tip'    => true,
 				) );
