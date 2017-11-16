@@ -44,7 +44,7 @@ class WC_Regenerate_Images {
 			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
 			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
 			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
-			add_action( 'after_switch_theme', array( __CLASS__, 'queue_image_regeneration' ) );
+			add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_image_theme_switch' ) );
 		}
 	}
 
@@ -165,11 +165,26 @@ class WC_Regenerate_Images {
 	}
 
 	/**
+	 * Check if we should generate images when new themes declares custom sizes
+	 *
+	 * @return void
+	 */
+	public static function maybe_regenerate_image_theme_switch() {
+		$theme_support = get_theme_support( 'woocommerce' );
+		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+		// Only queue image generation if the theme declares custom sizes via theme_support.
+		if ( is_array( $theme_support ) && ( isset( $theme_support['single_image_width'] ) || isset( $theme_support['thumbnail_image_width'] ) ) ) {
+			self::queue_image_regeneration();
+		}
+	}
+
+	/**
 	 * Get list of images and queue them for regeneration
 	 *
 	 * @return void
 	 */
-	public static function queue_image_regeneration() {
+	private static function queue_image_regeneration() {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->cancel_process();
