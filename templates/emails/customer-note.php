@@ -10,10 +10,10 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails
- * @version     2.5.0
+ * @see     https://docs.woocommerce.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails
+ * @version 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,11 +25,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<p><?php _e( "Hello, a note has just been added to your order:", 'woocommerce' ); ?></p>
+<p><?php esc_html( "Hello, a note has just been added to your order:", 'woocommerce' ); ?></p>
 
 <blockquote><?php echo wpautop( wptexturize( $customer_note ) ) ?></blockquote>
 
-<p><?php _e( "For your reference, your order details are shown below.", 'woocommerce' ); ?></p>
+<p><?php esc_html( "For your reference, your order details are shown below.", 'woocommerce' ); ?></p>
 
 <?php
 
