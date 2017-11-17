@@ -332,7 +332,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-countries.php' ); // Defines countries and states.
 		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations.
 		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper.
-		include_once( WC_ABSPATH . 'includes/class-wc-product-purchases-helper.php' ); // Product Purchases Helper.
+		include_once( WC_ABSPATH . 'includes/class-wc-order-product-lookup-helper.php' ); // Order Product Lookup Helper.
 		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper.
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );

@@ -35,7 +35,7 @@ class WC_Order_Product_Lookup_Helper {
 	}
 
 	/**
-	 * Handler for deleting an order, keep the purchased products table in sync.
+	 * Handler for deleting an order, keep the lookup table in sync.
 	 *
 	 * @param int $order_id Order ID.
 	 */
@@ -54,7 +54,7 @@ class WC_Order_Product_Lookup_Helper {
 	}
 
 	/**
-	 * Handler for deleting a product, keep the purchased products table in sync.
+	 * Handler for deleting a product, keep the lookup table in sync.
 	 *
 	 * @param int $product_id Product ID.
 	 */
@@ -73,7 +73,7 @@ class WC_Order_Product_Lookup_Helper {
 	}
 
 	/**
-	 * Handler for saving an order, keep the purchased products table in sync.
+	 * Handler for saving an order, keep the lookup table in sync.
 	 *
 	 * @param int   $order_id      Order ID.
 	 */
@@ -115,7 +115,7 @@ class WC_Order_Product_Lookup_Helper {
 	}
 
 	/**
-	 * Handler for updating an order, keep the purchased products table in sync.
+	 * Handler for updating an order, keep the lookup table in sync.
 	 *
 	 * @param int   $order_id      Order ID.
 	 */
@@ -136,22 +136,35 @@ class WC_Order_Product_Lookup_Helper {
 		global $wpdb;
 
 		if ( is_int( $email_or_user_id ) ) {
-			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
-				SELECT *
+			$product_purchases = $wpdb->get_results( $wpdb->prepare( "
+				SELECT order_id
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_id = %d ) AND product_id = %d
 				LIMIT 1
 			", absint( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		} else {
-			$product_purchases = $wpdb->get_row( $wpdb->prepare( "
-				SELECT *
+			$product_purchases = $wpdb->get_results( $wpdb->prepare( "
+				SELECT order_id
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_email = %s ) AND product_id = %d
 				LIMIT 1
 			", esc_sql( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		}
 
-		return ! empty( $product_purchases );
+		foreach ( $product_purchases as $product_purchase ) {
+			$order = wc_get_order( $product_purchase->order_id );
+
+			if ( is_callable( array( $order, 'get_date_paid' ) ) ) {
+				$date_paid = $order->get_date_paid();
+
+				// Every order is marked as paid at most once.
+				if ( ! empty( $date_paid ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }
 
