@@ -28,7 +28,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 			<h2><?php esc_html_e( 'Billing address', 'woocommerce' ); ?></h2>
 
 			<address class="address">
-				<?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
+				<?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : esc_html__( 'N/A', 'woocommerce' ); ?>
 				<?php if ( $order->get_billing_phone() ) : ?>
 					<br/><?php echo esc_html( $order->get_billing_phone() ); ?>
 				<?php endif; ?>

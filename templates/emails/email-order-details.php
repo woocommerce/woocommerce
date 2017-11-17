@@ -27,7 +27,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 <?php if ( ! $sent_to_admin ) : ?>
 	<h2><?php printf( esc_html__( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
 <?php else : ?>
-	<h2><a class="link" href="<?php echo esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ); ?>"><?php printf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?></a> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
+	<h2><a class="link" href="<?php echo esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ); ?>"><?php printf( esc_html__( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?></a> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
 <?php endif; ?>
 
 <div style="margin-bottom: 40px;">
@@ -62,7 +62,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				}
 				if ( $order->get_customer_note() ) {
 					?><tr>
-						<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php _e( 'Note:', 'woocommerce' ); ?></th>
+						<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
 						<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo wptexturize( $order->get_customer_note() ); ?></td>
 					</tr><?php
 				}
