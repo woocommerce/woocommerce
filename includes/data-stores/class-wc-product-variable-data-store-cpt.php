@@ -317,6 +317,20 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	}
 
 	/**
+	 * Is a child on backorder?
+	 *
+	 * @since 3.3.0
+	 * @param WC_Product $product Product object.
+	 * @return boolean
+	 */
+	public function child_is_on_backorder( $product ) {
+		global $wpdb;
+		$children             = $product->get_children();
+		$onbackorder_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'onbackorder' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
+		return (bool) $onbackorder_children;
+	}
+
+	/**
 	 * Syncs all variation names if the parent name is changed.
 	 *
 	 * @param WC_Product $product Product object.
@@ -404,7 +418,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	public function sync_stock_status( &$product ) {
-		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		$in_stock = $product->child_is_in_stock();
+		if ( $in_stock ) {
+			$on_backorder = $product->child_is_on_backorder();
+			$product->set_stock_status( $on_backorder ? 'onbackorder' : 'instock' );
+		} else {
+			$product->set_stock_status( 'outofstock' );
+		}
 	}
 
 	/**

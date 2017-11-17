@@ -365,7 +365,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
-			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+			$this->data_store->sync_stock_status( $this );
 
 			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
@@ -438,6 +438,16 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function child_is_in_stock() {
 		return $this->data_store->child_is_in_stock( $this );
+	}
+
+	/**
+	 * Is a child on backorder?
+	 *
+	 * @since 3.3.0
+	 * @return boolean
+	 */
+	public function child_is_on_backorder() {
+		return $this->data_store->child_is_on_backorder( $this );
 	}
 
 	/**
