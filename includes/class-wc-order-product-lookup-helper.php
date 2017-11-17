@@ -30,8 +30,8 @@ class WC_Order_Product_Lookup_Helper {
 		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
 		add_action( 'woocommerce_delete_product', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
 		add_action( 'woocommerce_delete_product_variation', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
-		add_action( 'woocommerce_new_order', array( __CLASS__, 'handle_new_order' ), 10, 2 );
-		add_action( 'woocommerce_update_order', array( __CLASS__, 'handle_update_order' ), 10, 2 );
+		add_action( 'woocommerce_new_order', array( __CLASS__, 'handle_new_order' ), 10, 1 );
+		add_action( 'woocommerce_update_order', array( __CLASS__, 'handle_update_order' ), 10, 1 );
 	}
 
 	/**
