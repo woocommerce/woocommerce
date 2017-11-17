@@ -44,6 +44,7 @@
     "grunt-wp-i18n": "~1.0.0",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
+    "stylelint": "^7.8.0",
     "wc-e2e-page-objects": "0.4.0"
   },
   "engines": {
