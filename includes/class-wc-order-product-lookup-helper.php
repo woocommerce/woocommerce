@@ -80,7 +80,11 @@ class WC_Order_Product_Lookup_Helper {
 	public static function handle_new_order( $order_id ) {
 		global $wpdb;
 
-		$paid = true;
+		$order = wc_get_order( $order_id );
+
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
 
 		$order_items = $order->get_items();
 
