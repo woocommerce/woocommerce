@@ -171,7 +171,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				array(
 					'method_id'    => 'flat_rate',
 					'method_title' => 'Flat rate',
-					'total'        => 10,
+					'total'        => '10',
 				),
 			),
 		) );

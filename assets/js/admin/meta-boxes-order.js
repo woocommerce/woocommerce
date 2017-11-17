@@ -472,13 +472,13 @@ jQuery( function ( $ ) {
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action  : 'woocommerce_add_order_fee',
 					dataType: 'json',
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					security: woocommerce_admin_meta_boxes.order_item_nonce,
 					amount  : value
-				};
+				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					if ( response.success ) {
@@ -543,12 +543,13 @@ jQuery( function ( $ ) {
 
 				wc_meta_boxes_order_items.block();
 
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					order_id      : woocommerce_admin_meta_boxes.post_id,
 					order_item_ids: order_item_id,
 					action        : 'woocommerce_remove_order_item',
 					security      : woocommerce_admin_meta_boxes.order_item_nonce
-				};
+				} );
+
 				// Check if items have changed, if so pass them through so we can save them before deleting.
 				if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {
 					data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
@@ -607,39 +608,44 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
+		get_taxable_address: function() {
+			var country          = '';
+			var state            = '';
+			var postcode         = '';
+			var city             = '';
+
+			if ( 'shipping' === woocommerce_admin_meta_boxes.tax_based_on ) {
+				country  = $( '#_shipping_country' ).val();
+				state    = $( '#_shipping_state' ).val();
+				postcode = $( '#_shipping_postcode' ).val();
+				city     = $( '#_shipping_city' ).val();
+			}
+
+			if ( 'billing' === woocommerce_admin_meta_boxes.tax_based_on || ! country ) {
+				country  = $( '#_billing_country' ).val();
+				state    = $( '#_billing_state' ).val();
+				postcode = $( '#_billing_postcode' ).val();
+				city     = $( '#_billing_city' ).val();
+			}
+
+			return {
+				country:  country,
+				state:    state,
+				postcode: postcode,
+				city:     city
+			};
+		},
+
 		recalculate: function() {
 			if ( window.confirm( woocommerce_admin_meta_boxes.calc_totals ) ) {
 				wc_meta_boxes_order_items.block();
 
-				var country          = '';
-				var state            = '';
-				var postcode         = '';
-				var city             = '';
-
-				if ( 'shipping' === woocommerce_admin_meta_boxes.tax_based_on ) {
-					country  = $( '#_shipping_country' ).val();
-					state    = $( '#_shipping_state' ).val();
-					postcode = $( '#_shipping_postcode' ).val();
-					city     = $( '#_shipping_city' ).val();
-				}
-
-				if ( 'billing' === woocommerce_admin_meta_boxes.tax_based_on || ! country ) {
-					country  = $( '#_billing_country' ).val();
-					state    = $( '#_billing_state' ).val();
-					postcode = $( '#_billing_postcode' ).val();
-					city     = $( '#_billing_city' ).val();
-				}
-
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action:   'woocommerce_calc_line_taxes',
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					items:    $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize(),
-					country:  country,
-					state:    state,
-					postcode: postcode,
-					city:     city,
 					security: woocommerce_admin_meta_boxes.calc_totals_nonce
-				};
+				} );
 
 				$.ajax({
 					url:  woocommerce_admin_meta_boxes.ajax_url,

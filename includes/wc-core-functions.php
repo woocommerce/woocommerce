@@ -686,7 +686,7 @@ function wc_get_image_size( $image_size ) {
 			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( in_array( $image_size, array( 'single', 'shop_single' ), true ) ) {
+	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
 		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
 			$size['width'] = $theme_support[ 'single_image_width' ];
@@ -696,7 +696,7 @@ function wc_get_image_size( $image_size ) {
 		$size['height'] = 9999999999;
 		$size['crop']   = 0;
 		$image_size     = 'single';
-	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog' ), true ) ) {
+	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
 		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
 			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
