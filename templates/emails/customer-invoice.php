@@ -33,15 +33,15 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	printf(
 		wp_kses(
 			/* translators: %1s item is the name of the site, %2s is a html link */
-			 __( 'An order has been created for you on %1$s. To pay for this order please use the following link: %2$s', 'woocommerce' ),
-			esc_html( get_bloginfo( 'name', 'display' ) ),
-			'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Submit payment online.', 'woocommerce' ) . '</a>'
+			__( 'An order has been created for you on %1$s. To pay for this order please use the following link: %2$s', 'woocommerce' ),
+			array(
+				'a' => array(
+					'href' => array(),
+				),
+			)
 		),
-		array(
-			'a' => array(
-				'href' => array(),
-			),
-		)
+		esc_html( get_bloginfo( 'name', 'display' ) ),
+		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Submit payment online.', 'woocommerce' ) . '</a>'
 	);
 	?>
 				</p>
