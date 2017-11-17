@@ -1412,6 +1412,8 @@ function wc_update_320_db_version() {
 
 /**
  * Synchronize order product lookup database table from order meta.
+ *
+ * @since 3.3.0
  */
 function wc_update_330_order_product_lookup() {
 	global $wpdb;

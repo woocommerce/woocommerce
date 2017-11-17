@@ -130,7 +130,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test WC_Order_Product_Lookup_Helper::is_product_purchased.
 	 *
-	 * @since 3.1
+	 * @since 3.3.0
 	 */
 	function test_is_product_purchased() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );

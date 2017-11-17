@@ -25,6 +25,8 @@ class WC_Order_Product_Lookup_Helper {
 
 	/**
 	 * Hook in methods.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function init() {
 		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
@@ -38,6 +40,8 @@ class WC_Order_Product_Lookup_Helper {
 	 * Handler for deleting an order, keep the lookup table in sync.
 	 *
 	 * @param int $order_id Order ID.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function handle_delete_order( $order_id ) {
 		global $wpdb;
@@ -57,6 +61,8 @@ class WC_Order_Product_Lookup_Helper {
 	 * Handler for deleting a product, keep the lookup table in sync.
 	 *
 	 * @param int $product_id Product ID.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function handle_delete_product( $product_id ) {
 		global $wpdb;
@@ -76,6 +82,8 @@ class WC_Order_Product_Lookup_Helper {
 	 * Handler for saving an order, keep the lookup table in sync.
 	 *
 	 * @param WC_Order $order Order object.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function handle_new_order( $order ) {
 		global $wpdb;
@@ -116,6 +124,8 @@ class WC_Order_Product_Lookup_Helper {
 	 * Handler for updating an order, keep the lookup table in sync.
 	 *
 	 * @param int $order_id Order ID.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function handle_update_order( $order_id ) {
 		// Make sure we delete the old order, as it may have its line items updated.
@@ -134,6 +144,8 @@ class WC_Order_Product_Lookup_Helper {
 	 * @param  int        $product_id       Product ID.
 	 * @param  string|int $email_or_user_id Either email or user id.
 	 * @return bool       Whether product is purchased or not.
+	 *
+	 * @since 3.3.0
 	 */
 	public static function is_product_purchased( $product_id, $email_or_user_id ) {
 		global $wpdb;
