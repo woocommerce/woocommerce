@@ -488,6 +488,8 @@ class WC_Shortcode_Products {
 			update_meta_cache( 'post', $products_ids );
 			update_object_term_cache( $products_ids, 'product' );
 
+			$original_post = $GLOBALS['post'];
+
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
 			woocommerce_product_loop_start();
@@ -507,15 +509,17 @@ class WC_Shortcode_Products {
 				remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
 			}
 
+			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
+
+			wp_reset_postdata();
 		} else {
 			do_action( "woocommerce_shortcode_{$this->type}_loop_no_results", $this->attributes );
 		}
 
 		woocommerce_reset_loop();
-		wp_reset_postdata();
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
 	}
