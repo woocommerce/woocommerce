@@ -348,10 +348,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	}
 
 	/**
-	 * Get a log file name
+	 * Get a log file name.
 	 *
 	 * @since 3.3
-	 *
 	 * @param string $handle Log name.
 	 * @return bool|string The log file name or false if cannot be determined.
 	 */
