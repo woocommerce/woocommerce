@@ -498,14 +498,12 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * + request headers/body
 	 * + response code/message/headers/body
 	 *
-	 * @todo Update to use wc_logger.
 	 * @since 2.2
 	 * @param int $delivery_id Delivery ID.
-	 * @return bool|array false if invalid delivery ID, array of log data otherwise
+	 * @return void
 	 */
 	public function get_delivery_log( $delivery_id ) {
-		// @todo Depricate filter woocommerce_webhook_delivery_log
-		return apply_filters( 'woocommerce_webhook_delivery_log', $delivery_log, $delivery_id, $this->get_id() );
+		wc_deprecated_function( 'WC_Webhook::get_delivery_log', '3.3' );
 	}
 
 	/**
