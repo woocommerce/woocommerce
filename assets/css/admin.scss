@@ -1902,7 +1902,7 @@ ul.wc_coupon_list_block {
 	.wp-list-table {
 		margin-top: 1em;
 		th {
-			padding: .75em 1em;
+			padding: 0.75em 1em;
 		}
 		th.sortable a, th.sorted a {
 			padding: 0;
@@ -1910,7 +1910,7 @@ ul.wc_coupon_list_block {
 		.check-column {
 			width: 1px;
 			white-space: nowrap;
-			padding: 1em 1em 1em 1em !important;
+			padding: 1em !important;
 			vertical-align: middle;
 			input {
 				vertical-align: text-top;
@@ -1922,7 +1922,7 @@ ul.wc_coupon_list_block {
 			.order-preview {
 				float:right;
 				width: 16px;
-				padding: 20px 4px 4px 4px;
+				padding: 20px 4px 4px;
 				height: 0;
 				overflow: hidden;
 				position: relative;
@@ -1930,10 +1930,10 @@ ul.wc_coupon_list_block {
 				border-radius: 4px;
 
 				&::before {
-					@include icon( '\e010' );
+					@include icon_dashicons( '\f177' );
 					line-height: 16px;
 					font-size: 14px;
-					vertical-align:middle;
+					vertical-align: middle;
 					top: 4px;
 
 				}
@@ -1993,14 +1993,14 @@ ul.wc_coupon_list_block {
 					padding: 0px 1em;
 					line-height: 2.5em;
 					color: #777;
-					background: #E5E5E5;
+					background: #e5e5e5;
 					border-radius: 4px;
 					border-bottom: 1px solid rgba(0,0,0,0.05);
-					margin: -.5em 0;
+					margin: -0.5em 0;
 					cursor: inherit !important;
 
 					&.status-completed {
-						background: #C8D7E1;
+						background: #c8d7e1;
 						color: #2e4453;
 					}
 
@@ -2015,8 +2015,8 @@ ul.wc_coupon_list_block {
 					}
 
 					&.status-processing {
-						background: #C6E1C6;
-						color: #5B841B;
+						background: #c6e1c6;
+						color: #5b841b;
 					}
 
 					&.status-trash {
@@ -2038,8 +2038,8 @@ ul.wc_coupon_list_block {
 @media only screen and (max-width: 1400px) {
 	.post-type-shop_order .wp-list-table {
 		.column-billing_address {
-			display:none;
-			visibility:hidden;
+			display: none;
+			visibility: hidden;
 		}
 	}
 }
@@ -2047,8 +2047,8 @@ ul.wc_coupon_list_block {
 	.post-type-shop_order .wp-list-table {
 		.column-shipping_address,
 		.column-order_total {
-			display:none;
-			visibility:hidden;
+			display: none;
+			visibility: hidden;
 		}
 	}
 }
