@@ -913,9 +913,15 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id = absint( $_POST['order_id'] );
-			$amount   = wc_clean( $_POST['amount'] );
-			$order    = wc_get_order( $order_id );
+			$order_id           = absint( $_POST['order_id'] );
+			$amount             = wc_clean( $_POST['amount'] );
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
 
 			if ( ! $order ) {
 				throw new exception( __( 'Invalid order', 'woocommerce' ) );
@@ -936,7 +942,8 @@ class WC_AJAX {
 			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
 
 			$order->add_item( $fee );
-			$order->calculate_totals( true );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 			$order->save();
 
 			ob_start();
@@ -1084,9 +1091,15 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id       = absint( $_POST['order_id'] );
-			$order_item_ids = $_POST['order_item_ids'];
-			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
+			$order_id           = absint( $_POST['order_id'] );
+			$order_item_ids     = $_POST['order_item_ids'];
+			$items              = ( ! empty( $_POST['items'] ) ) ? $_POST['items']: '';
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
@@ -1107,7 +1120,8 @@ class WC_AJAX {
 			}
 
 			$order = wc_get_order( $order_id );
-			$order->calculate_totals( true );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
