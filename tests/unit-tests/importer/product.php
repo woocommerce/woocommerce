@@ -11,7 +11,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $csv_file = string;
+	protected $csv_file = '';
 
 	/**
 	 * Load up the importer classes since they aren't loaded by default.

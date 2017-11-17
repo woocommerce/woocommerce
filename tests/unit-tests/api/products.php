@@ -51,6 +51,11 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'DUMMY SKU', $products[0]['sku'] );
 		$this->assertEquals( 'Dummy External Product', $products[1]['name'] );
 		$this->assertEquals( 'DUMMY EXTERNAL SKU', $products[1]['sku'] );
+
+		foreach ( $products as $key => $value ) {
+			$product = wc_get_product( $value['id'] );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -63,6 +68,13 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$this->assertEquals( 401, $response->get_status() );
+
+		// Remove product.
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
+		$products = $response->get_data();
+		$product = wc_get_product( $products[0]['id'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -85,6 +97,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			'sku'           => 'DUMMY EXTERNAL SKU',
 			'regular_price' => 10,
 		), $product );
+		$simple->delete( true );
 	}
 
 	/**
@@ -97,6 +110,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -116,6 +130,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 0, count( $variations ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -130,6 +145,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -179,6 +195,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'FIXED-SKU', $data['sku'] );
 		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
 		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
+		$product->delete( true );
 
 		// test variable product (variations are tested in product-variations.php)
 		$product  = WC_Helper_Product::create_variation_product();
@@ -463,6 +480,11 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 8, count( $products ) );
+
+		foreach ( $products as $key => $value ) {
+			$product = wc_get_product( $value['id'] );
+			$product->delete( true );
+		}
 	}
 
 	/**
