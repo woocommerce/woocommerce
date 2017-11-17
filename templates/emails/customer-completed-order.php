@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<p><?php printf( esc_html_e( "Hi there. Your recent order on %s has been completed. Your order details are shown below for your reference:", 'woocommerce' ), get_option( 'blogname' ) ); ?></p>
+<p><?php printf( __( "Hi there. Your recent order on %s has been completed. Your order details are shown below for your reference:", 'woocommerce' ), get_option( 'blogname' ) ); ?></p>
 
 <?php
 

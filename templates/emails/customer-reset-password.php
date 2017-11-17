@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <p><?php esc_html_e( 'Someone requested that the password be reset for the following account:', 'woocommerce' ); ?></p>
-<p><?php printf( esc_html_e( 'Username: %s', 'woocommerce' ), $user_login ); ?></p>
+<p><?php printf( __( 'Username: %s', 'woocommerce' ), $user_login ); ?></p>
 <p><?php esc_html_e( 'If this was a mistake, just ignore this email and nothing will happen.', 'woocommerce' ); ?></p>
 <p><?php esc_html_e( 'To reset your password, visit the following address:', 'woocommerce' ); ?></p>
 <p>

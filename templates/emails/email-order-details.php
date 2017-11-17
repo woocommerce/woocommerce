@@ -25,7 +25,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
 
 <?php if ( ! $sent_to_admin ) : ?>
-	<h2><?php printf( esc_html_e( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
+	<h2><?php printf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
 <?php else : ?>
 	<h2><a class="link" href="<?php echo esc_url( admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ); ?>"><?php printf( esc_html_e( 'Order #%s', 'woocommerce' ), $order->get_order_number() ); ?></a> (<?php printf( '<time datetime="%s">%s</time>', $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ); ?>)</h2>
 <?php endif; ?>
@@ -55,15 +55,15 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 					foreach ( $totals as $total ) {
 						$i++;
 						?><tr>
-							<th class="td" scope="row" colspan="2" style="text-align:<?php echo $text_align; ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['label']; ?></th>
-							<td class="td" style="text-align:<?php echo $text_align; ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo $total['value']; ?></td>
+							<th class="td" scope="row" colspan="2" style="text-align:<?php echo $text_align; ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo esc_html( $total['label'] ); ?></th>
+							<td class="td" style="text-align:<?php echo esc_html( $text_align ); ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo esc_html( $total['value'] ); ?></td>
 						</tr><?php
 					}
 				}
 				if ( $order->get_customer_note() ) {
 					?><tr>
-						<th class="td" scope="row" colspan="2" style="text-align:<?php echo $text_align; ?>;"><?php _e( 'Note:', 'woocommerce' ); ?></th>
-						<td class="td" style="text-align:<?php echo $text_align; ?>;"><?php echo wptexturize( $order->get_customer_note() ); ?></td>
+						<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_html( $text_align ); ?>;"><?php _e( 'Note:', 'woocommerce' ); ?></th>
+						<td class="td" style="text-align:<?php echo esc_html( $text_align ); ?>;"><?php echo wptexturize( $order->get_customer_note() ); ?></td>
 					</tr><?php
 				}
 			?>
