@@ -112,7 +112,7 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 	 */
 	public function network_orders( $request ) {
 		$blog_id = $request->get_param( 'blog_id' );
-		$blog_id = $blog_id ?: get_current_blog_id();
+		$blog_id = ! empty( $blog_id ) ? $blog_id : get_current_blog_id();
 
 		switch_to_blog( $blog_id );
 
