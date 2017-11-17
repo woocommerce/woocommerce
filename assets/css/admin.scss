@@ -6236,18 +6236,42 @@ table.bar_chart {
 }
 
 #woocommerce_network_orders {
+	.inside {
+		margin: 0;
+		padding: 0;
+	}
+
 	.woocommerce-network-orders-no-orders,
 	.woocommerce-network-order-table-loading,
 	.woocommerce-network-order-table {
+		width: 100%;
 		display: none;
 
 		&.is-active {
 			display: block;
 		}
+	}
 
+	.woocommerce-network-orders-no-orders,
+	.woocommerce-network-order-table-loading {
 		p {
-			margin: 0;
 			text-align: center;
+		}
+	}
+
+	.woocommerce-network-order-table {
+		&.is-active {
+			display: table;
+		}
+
+		margin-top: 0;
+
+		td {
+			padding: 1em;
+		}
+
+		thead td {
+			padding: 0.5em 1em;
 		}
 	}
 
