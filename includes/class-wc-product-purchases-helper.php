@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce product purchases class.
+ * WooCommerce order product lookup class.
  *
  * @author   Automattic
  * @package  WooCommerce
@@ -13,15 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Product_Purchases_Helper class.
+ * WC_Order_Product_Lookup_Helper class.
  *
- * @class     WC_Product_Purchases_Helper
+ * @class     WC_Order_Product_Lookup_Helper
  * @version   3.3.0
  * @package   WooCommerce/Classes
  * @category  Class
  * @author    WooThemes
  */
-class WC_Product_Purchases_Helper {
+class WC_Order_Product_Lookup_Helper {
 
 	/**
 	 * Hook in methods.
@@ -30,7 +30,8 @@ class WC_Product_Purchases_Helper {
 		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
 		add_action( 'woocommerce_delete_product', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
 		add_action( 'woocommerce_delete_product_variation', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
-		add_action( 'woocommerce_order_object_updated_props', array( __CLASS__, 'handle_product_purchase' ), 10, 2 );
+		add_action( 'woocommerce_new_order', array( __CLASS__, 'handle_new_order' ), 10, 2 );
+		add_action( 'woocommerce_update_order', array( __CLASS__, 'handle_update_order' ), 10, 2 );
 	}
 
 	/**
@@ -74,24 +75,12 @@ class WC_Product_Purchases_Helper {
 	/**
 	 * Handler for saving an order, keep the purchased products table in sync.
 	 *
-	 * @param WC_Order $order         Order object.
-	 * @param array    $updated_props List of updated properties.
+	 * @param int   $order_id      Order ID.
 	 */
-	public static function handle_product_purchase( $order, $updated_props ) {
+	public static function handle_new_order( $order_id ) {
 		global $wpdb;
 
-		// Every order is marked as paid at most once.
-		// Only when this happens we're updating the purchased products table.
-		if ( is_callable( array( $order, 'get_date_paid' ) ) ) {
-			$date_paid = $order->get_date_paid();
-			if ( empty( $date_paid ) ) {
-				return;
-			}
-		}
-
-		if ( ! in_array( 'date_paid', $updated_props ) ) {
-			return;
-		}
+		$paid = true;
 
 		$order_items = $order->get_items();
 
@@ -126,6 +115,18 @@ class WC_Product_Purchases_Helper {
 	}
 
 	/**
+	 * Handler for updating an order, keep the purchased products table in sync.
+	 *
+	 * @param int   $order_id      Order ID.
+	 */
+	public static function handle_update_order( $order_id ) {
+		// Make sure we delete the old order, as it may have its line items updated.
+		self::handle_delete_order( $order_id );
+
+		self::handle_new_order( $order_id );
+	}
+
+	/**
 	 * Check if a product is purchased, given either email or user id.
 	 *
 	 * @param int        $product_id       Product ID.
@@ -154,4 +155,4 @@ class WC_Product_Purchases_Helper {
 	}
 }
 
-WC_Product_Purchases_Helper::init();
+WC_Order_Product_Lookup_Helper::init();

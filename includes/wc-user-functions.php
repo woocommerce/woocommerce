@@ -196,13 +196,13 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
-	wc_deprecated_function( 'WC_Product_Purchases_Helper::is_product_purchased', '3.3' );
+	wc_deprecated_function( 'WC_Order_Product_Lookup_Helper::is_product_purchased', '3.3' );
 
 	if ( is_int( $user_id ) ) {
-		return WC_Product_Purchases_Helper::is_product_purchased( $product_id, $user_id );
+		return WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id, $user_id );
 	}
 
-	return WC_Product_Purchases_Helper::is_product_purchased( $product_id, $customer_email );
+	return WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id, $customer_email );
 }
 
 /**

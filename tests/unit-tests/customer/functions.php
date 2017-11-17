@@ -128,7 +128,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test WC_Product_Purchases_Helper::is_product_purchased.
+	 * Test WC_Order_Product_Lookup_Helper::is_product_purchased.
 	 *
 	 * @since 3.1
 	 */
@@ -159,15 +159,15 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_3->set_status( 'pending' );
 		$order_3->save();
 
-		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, $customer_id_1 ) );
-		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, 'test@example.com' ) );
-		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, $customer_id_2 ) );
-		$this->assertTrue( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, 'test2@example.com' ) );
+		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, $customer_id_1 ) );
+		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, 'test@example.com' ) );
+		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, $customer_id_2 ) );
+		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, 'test2@example.com' ) );
 
-		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, $customer_id_2 ) );
-		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_1, 'test2@example.com' ) );
-		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, $customer_id_1 ) );
-		$this->assertFalse( WC_Product_Purchases_Helper::is_product_purchased( $product_id_2, 'test@example.com' ) );
+		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, $customer_id_2 ) );
+		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, 'test2@example.com' ) );
+		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, $customer_id_1 ) );
+		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, 'test@example.com' ) );
 	}
 
 	/**
