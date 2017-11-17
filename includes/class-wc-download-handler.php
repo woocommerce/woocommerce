@@ -359,7 +359,9 @@ class WC_Download_Handler {
 	 * @return 	bool Success or fail
 	 */
 	public static function readfile_chunked( $file ) {
-		$chunksize = 1024 * 1024;
+		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
+			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
+		}
 		$handle    = @fopen( $file, 'r' );
 
 		if ( false === $handle ) {
@@ -367,7 +369,7 @@ class WC_Download_Handler {
 		}
 
 		while ( ! @feof( $handle ) ) {
-			echo @fread( $handle, $chunksize );
+			echo @fread( $handle, (int) WC_CHUNK_SIZE );
 
 			if ( ob_get_length() ) {
 				ob_flush();
