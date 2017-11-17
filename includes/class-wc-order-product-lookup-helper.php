@@ -128,7 +128,7 @@ class WC_Order_Product_Lookup_Helper {
 	 * @since 3.3.0
 	 */
 	public static function handle_update_order( $order_id ) {
-		// Make sure we delete the old order, as it may have its line items updated.
+		// Make sure we delete the old order from the lookup database, as it may have its line items updated.
 		self::handle_delete_order( $order_id );
 
 		$order = wc_get_order( $order_id );
