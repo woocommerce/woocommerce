@@ -298,13 +298,13 @@ class WC_Admin_Dashboard {
 	public function network_orders() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		wp_enqueue_script( 'network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
+		wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
 
 		$user = wp_get_current_user();
 		$blogs = get_blogs_of_user( $user->ID );
 		$blog_ids = wp_list_pluck( $blogs, 'userblog_id' );
 
-		wp_localize_script( 'network-orders', 'woocommerce_network_orders', array(
+		wp_localize_script( 'wc-network-orders', 'woocommerce_network_orders', array(
 			'nonce' => wp_create_nonce( 'wp_rest' ),
 			'sites' => array_values( $blog_ids ),
 			'order_endpoint' => get_rest_url( null, 'wc/v2/orders/network' ),
