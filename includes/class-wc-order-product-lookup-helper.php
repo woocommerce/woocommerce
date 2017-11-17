@@ -30,7 +30,7 @@ class WC_Order_Product_Lookup_Helper {
 		add_action( 'woocommerce_delete_order', array( __CLASS__, 'handle_delete_order' ), 10, 1 );
 		add_action( 'woocommerce_delete_product', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
 		add_action( 'woocommerce_delete_product_variation', array( __CLASS__, 'handle_delete_product' ), 10, 1 );
-		add_action( 'woocommerce_new_order', array( __CLASS__, 'handle_new_order' ), 10, 1 );
+		add_action( 'woocommerce_after_order_object_save', array( __CLASS__, 'handle_new_order' ), 10, 1 );
 		add_action( 'woocommerce_update_order', array( __CLASS__, 'handle_update_order' ), 10, 1 );
 	}
 
@@ -75,16 +75,10 @@ class WC_Order_Product_Lookup_Helper {
 	/**
 	 * Handler for saving an order, keep the lookup table in sync.
 	 *
-	 * @param int   $order_id      Order ID.
+	 * @param WC_Order $order Order object.
 	 */
-	public static function handle_new_order( $order_id ) {
+	public static function handle_new_order( $order ) {
 		global $wpdb;
-
-		$order = wc_get_order( $order_id );
-
-		if ( ! is_a( $order, 'WC_Order' ) ) {
-			return;
-		}
 
 		$order_items = $order->get_items();
 
@@ -127,7 +121,11 @@ class WC_Order_Product_Lookup_Helper {
 		// Make sure we delete the old order, as it may have its line items updated.
 		self::handle_delete_order( $order_id );
 
-		self::handle_new_order( $order_id );
+		$order = wc_get_order( $order_id );
+
+		if ( is_a( $order, 'WC_Order' ) ) {
+			self::handle_new_order( $order );
+		}
 	}
 
 	/**
