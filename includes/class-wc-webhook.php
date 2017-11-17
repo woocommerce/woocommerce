@@ -389,23 +389,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function get_new_delivery_id() {
 		// Since we no longer use comments to store delivery logs, we generate a unique hash instead based on current time and webhook ID.
 		return wp_hash( $this->get_id() . strtotime( 'now' ) );
-
-		// @todo Deprecate woocommerce_new_webhook_delivery_data filter.
-		$comment_data = apply_filters( 'woocommerce_new_webhook_delivery_data', array(
-			'comment_author'       => __( 'WooCommerce', 'woocommerce' ),
-			'comment_author_email' => sanitize_email( sprintf( '%s@%s', strtolower( __( 'WooCommerce', 'woocommerce' ) ), isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', wp_unslash( $_SERVER['HTTP_HOST'] ) ) : 'noreply.com' ) ), // @codingStandardsIgnoreLine
-			'comment_post_ID'      => $this->get_id(),
-			'comment_agent'        => 'WooCommerce Hookshot',
-			'comment_type'         => 'webhook_delivery',
-			'comment_parent'       => 0,
-			'comment_approved'     => 1,
-		), $this->get_id() );
 	}
 
 	/**
 	 * Log the delivery request/response.
 	 *
-	 * @todo Update to use log system.
 	 * @since 2.2.0
 	 * @param string         $delivery_id Previously created hash.
 	 * @param array          $request     Request data.
@@ -494,12 +482,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery logs for this webhook.
 	 *
-	 * @todo Update to use log system.
 	 * @since  2.2.0
 	 * @return array
 	 */
 	public function get_delivery_logs() {
-		// @todo Return something here, perhaps the url to the log file?
+		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 	}
 
 	/**
@@ -511,7 +498,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * + request headers/body
 	 * + response code/message/headers/body
 	 *
-	 * @todo Update to use log system.
+	 * @todo Update to use wc_logger.
 	 * @since 2.2
 	 * @param int $delivery_id Delivery ID.
 	 * @return bool|array false if invalid delivery ID, array of log data otherwise
