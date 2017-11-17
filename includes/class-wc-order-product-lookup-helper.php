@@ -131,8 +131,9 @@ class WC_Order_Product_Lookup_Helper {
 	/**
 	 * Check if a product is purchased, given either email or user id.
 	 *
-	 * @param int        $product_id       Product ID.
-	 * @param string|int $email_or_user_id Either email or user id.
+	 * @param  int        $product_id       Product ID.
+	 * @param  string|int $email_or_user_id Either email or user id.
+	 * @return bool       Whether product is purchased or not.
 	 */
 	public static function is_product_purchased( $product_id, $email_or_user_id ) {
 		global $wpdb;
