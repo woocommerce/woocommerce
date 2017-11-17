@@ -16,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	3.3.0
  */
 final class WooCommerce {
 
@@ -237,13 +236,13 @@ final class WooCommerce {
 	 */
 	private function is_request( $type ) {
 		switch ( $type ) {
-			case 'admin' :
+			case 'admin':
 				return is_admin();
-			case 'ajax' :
+			case 'ajax':
 				return defined( 'DOING_AJAX' );
-			case 'cron' :
+			case 'cron':
 				return defined( 'DOING_CRON' );
-			case 'frontend' :
+			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
 		}
 	}
@@ -320,11 +319,11 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-emails.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-query.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-meta-data.php' ); // Meta data internal object
+		include_once( WC_ABSPATH . 'includes/class-wc-meta-data.php' ); // Meta data internal object.
 		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory.
 		include_once( WC_ABSPATH . 'includes/class-wc-order-query.php' ); // Order query.
 		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory.
-		include_once( WC_ABSPATH . 'includes/class-wc-product-query.php' ); // Product query
+		include_once( WC_ABSPATH . 'includes/class-wc-product-query.php' ); // Product query.
 		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller.
 		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );
 		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway.
@@ -338,6 +337,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
+		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images.php' ); // Image regeneration class.
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -409,28 +409,28 @@ final class WooCommerce {
 
 		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
-				case 'twentyten' :
+				case 'twentyten':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php' );
 					break;
-				case 'twentyeleven' :
+				case 'twentyeleven':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-eleven.php' );
 					break;
-				case 'twentytwelve' :
+				case 'twentytwelve':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twelve.php' );
 					break;
-				case 'twentythirteen' :
+				case 'twentythirteen':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-thirteen.php' );
 					break;
-				case 'twentyfourteen' :
+				case 'twentyfourteen':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fourteen.php' );
 					break;
-				case 'twentyfifteen' :
+				case 'twentyfifteen':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fifteen.php' );
 					break;
-				case 'twentysixteen' :
+				case 'twentysixteen':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-sixteen.php' );
 					break;
-				case 'twentyseventeen' :
+				case 'twentyseventeen':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php' );
 					break;
 			}
@@ -558,7 +558,7 @@ final class WooCommerce {
 	 */
 	private function add_image_sizes() {
 		$thumbnail = wc_get_image_size( 'thumbnail' );
-		$single	   = wc_get_image_size( 'single' );
+		$single    = wc_get_image_size( 'single' );
 
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
@@ -641,12 +641,12 @@ final class WooCommerce {
 			return;
 		}
 
-		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) {
+		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) { // @codingStandardsIgnoreLine
 			$webhooks = get_posts( array(
 				'fields'         => 'ids',
 				'post_type'      => 'shop_webhook',
 				'post_status'    => 'publish',
-				'posts_per_page' => -1,
+				'posts_per_page' => -1, // @codingStandardsIgnoreLine
 			) );
 			set_transient( 'woocommerce_webhook_ids', $webhooks );
 		}

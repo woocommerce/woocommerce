@@ -44,6 +44,17 @@ class WC_Product_Grouped extends WC_Product {
 	}
 
 	/**
+	 * Get the add to cart button text description - used in aria tags.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function add_to_cart_description() {
+		/* translators: %s: Product title */
+		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( __( 'View products in the &ldquo;%s&rdquo; group', 'woocommerce' ), $this->get_name() ), $this );
+	}
+
+	/**
 	 * Returns whether or not the product is on sale.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.

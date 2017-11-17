@@ -63,9 +63,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				'post_type'   => 'product_variation',
 				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
 				'fields'      => 'ids',
-				'post_status' => 'publish',
+				'post_status' => array( 'publish', 'private' ),
 				'numberposts' => -1,
 			);
+
+			$visible_only_args['post_status'] = 'publish';
+
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 				$visible_only_args['tax_query'][] = array(
 					'taxonomy' => 'product_visibility',
