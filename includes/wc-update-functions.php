@@ -1411,9 +1411,9 @@ function wc_update_320_db_version() {
 }
 
 /**
- * Synchronize purchased products database table from order meta.
+ * Synchronize order product lookup database table from order meta.
  */
-function wc_update_330_product_purchases() {
+function wc_update_330_order_product_lookup() {
 	global $wpdb;
 
 	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
@@ -1421,7 +1421,7 @@ function wc_update_330_product_purchases() {
 	$wpdb->query( "
 		INSERT INTO {$wpdb->prefix}woocommerce_order_product_lookup
 		SELECT
-		'' AS purchase_id,
+		'' AS lookup_id,
 		pm.meta_value AS user_email,
 		p.id AS order_id,
 		pm2.meta_value AS user_id,

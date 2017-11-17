@@ -97,7 +97,7 @@ class WC_Install {
 			'wc_update_320_db_version',
 		),
 		'3.3.0' => array(
-			'wc_update_330_product_purchases',
+			'wc_update_330_order_product_lookup',
 			'wc_update_330_image_options',
 			'wc_update_330_db_version',
 		),
