@@ -298,6 +298,8 @@ class WC_Admin_Dashboard {
 	public function network_orders() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
+		wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), WC_VERSION );
+
 		wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
 
 		$user = wp_get_current_user();
