@@ -115,7 +115,7 @@ class WC_Order_Product_Lookup_Helper {
 	/**
 	 * Handler for updating an order, keep the lookup table in sync.
 	 *
-	 * @param int   $order_id      Order ID.
+	 * @param int $order_id Order ID.
 	 */
 	public static function handle_update_order( $order_id ) {
 		// Make sure we delete the old order, as it may have its line items updated.
