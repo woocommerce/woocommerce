@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 3.2.0
@@ -22,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $text_align = is_rtl() ? 'right' : 'left';
 
-?><h2 class="woocommerce-order-downloads__title"><?php _e( 'Downloads', 'woocommerce' ); ?></h2>
+?><h2 class="woocommerce-order-downloads__title"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></h2>
 
 <table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; margin-bottom: 40px;" border="1">
 	<thead>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<th class="td" scope="col" style="text-align:<?php echo $text_align; ?>;"><?php echo esc_html( $column_name ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo esc_html( $column_name ); ?></th>
 			<?php endforeach; ?>
 		</tr>
 	</thead>
@@ -36,7 +36,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 	<?php foreach ( $downloads as $download ) : ?>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-					<td class="td" style="text-align:<?php echo $text_align; ?>;"><?php
+					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download );
 					} else {
@@ -53,7 +53,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 								<?php if ( ! empty( $download['access_expires'] ) ) : ?>
 									<time datetime="<?php echo date( 'Y-m-d', strtotime( $download['access_expires'] ) ); ?>" title="<?php echo esc_attr( strtotime( $download['access_expires'] ) ); ?>"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $download['access_expires'] ) ); ?></time>
 								<?php else : ?>
-									<?php _e( 'Never', 'woocommerce' ); ?>
+									<?php esc_html_e( 'Never', 'woocommerce' ); ?>
 								<?php endif;
 							break;
 						}

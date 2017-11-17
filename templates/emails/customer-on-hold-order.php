@@ -10,10 +10,10 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails
- * @version     2.5.0
+ * @see     https://docs.woocommerce.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails
+ * @version 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<p><?php _e( "Your order is on-hold until we confirm payment has been received. Your order details are shown below for your reference:", 'woocommerce' ); ?></p>
+<p><?php esc_html_e( "Your order is on-hold until we confirm payment has been received. Your order details are shown below for your reference:", 'woocommerce' ); ?></p>
 
 <?php
 
