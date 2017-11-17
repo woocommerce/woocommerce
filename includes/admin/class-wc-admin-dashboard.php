@@ -337,7 +337,7 @@ class WC_Admin_Dashboard {
 			<script type="text/template" id="network-orders-row-template">
 				<tr>
 					<td>
-						<a href="<%- edit_url %>" class="order-view"><strong>#<%- id %> <%- buyer %></strong></a>
+						<a href="<%- edit_url %>" class="order-view"><strong>#<%- id %> <%- customer %></strong></a>
 						<br>
 						<em>
 							<%- blog.blogname %>
