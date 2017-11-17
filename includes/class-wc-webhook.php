@@ -418,7 +418,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'Webhook Delivery' => array(
 				'Delivery ID' => $delivery_id,
 				'Date'        => date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( 'now' ), true ),
-				'URL'         => $webhook->get_delivery_url(),
+				'URL'         => $this->get_delivery_url(),
 				'Duration'    => $duration,
 				'Request'     => array(
 					'Method'  => $request['method'],
@@ -440,11 +440,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'Code'    => wp_remote_retrieve_response_code( $response ),
 				'Message' => wp_remote_retrieve_response_message( $response ),
 				'Headers' => wp_remote_retrieve_headers( $response ),
-				'Body'    => p_remote_retrieve_body( $response ),
+				'Body'    => wp_remote_retrieve_body( $response ),
 			);
 		}
 
-		$logger->log( 'info', $message, array(
+		$logger->info( print_r( $message, true ), array(
 			'source' => 'webhooks-delivery',
 		) );
 
@@ -462,8 +462,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$response_body    = wp_remote_retrieve_body( $response );
 		}
 
-		$logger->log( print_r( $message, true ), array(
-			'source' => 'webhook-delivery',
+		$logger->info( print_r( $message, true ), array(
+			'source' => 'webhooks-delivery',
 		) );
 
 		// Track failures.
