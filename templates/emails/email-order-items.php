@@ -59,7 +59,7 @@ foreach ( $items as $item_id => $item ) :
 
 	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = $product->get_purchase_note() ) ) : ?>
 		<tr>
-			<td colspan="3" style="text-align:<?php echo esc_html( $text_align ); ?>; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo esc_html( wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ) ); ?></td>
+			<td colspan="3" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo esc_html( wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ) ); ?></td>
 		</tr>
 	<?php endif; ?>
 
