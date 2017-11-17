@@ -300,7 +300,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook Deprecated.
 	 */
 	public static function logs_output( $webhook = 'deprecated' ) {
-		echo '<p>' . sprintf( __( '<a href="%s">View Webhook Delivery Logs</a>', 'woocommerce' ), esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) ) ) . '</p>'; // @codingStandardsIgnoreLine
+		wc_deprecated_function( 'WC_Admin_Webhooks::logs_output', '3.3' );
 	}
 
 	/**
