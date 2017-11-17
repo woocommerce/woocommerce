@@ -419,42 +419,6 @@ class WC_Post_types {
 			);
 		}
 
-		register_post_type( 'shop_webhook',
-			apply_filters( 'woocommerce_register_post_type_shop_webhook',
-				array(
-					'labels'              => array(
-						'name'               => __( 'Webhooks', 'woocommerce' ),
-						'singular_name'      => __( 'Webhook', 'woocommerce' ),
-						'menu_name'          => _x( 'Webhooks', 'Admin menu name', 'woocommerce' ),
-						'add_new'            => __( 'Add webhook', 'woocommerce' ),
-						'add_new_item'       => __( 'Add new webhook', 'woocommerce' ),
-						'edit'               => __( 'Edit', 'woocommerce' ),
-						'edit_item'          => __( 'Edit webhook', 'woocommerce' ),
-						'new_item'           => __( 'New webhook', 'woocommerce' ),
-						'view'               => __( 'View webhooks', 'woocommerce' ),
-						'view_item'          => __( 'View webhook', 'woocommerce' ),
-						'search_items'       => __( 'Search webhooks', 'woocommerce' ),
-						'not_found'          => __( 'No webhooks found', 'woocommerce' ),
-						'not_found_in_trash' => __( 'No webhooks found in trash', 'woocommerce' ),
-						'parent'             => __( 'Parent webhook', 'woocommerce' ),
-					),
-					'public'              => false,
-					'show_ui'             => true,
-					'capability_type'     => 'shop_webhook',
-					'map_meta_cap'        => true,
-					'publicly_queryable'  => false,
-					'exclude_from_search' => true,
-					'show_in_menu'        => false,
-					'hierarchical'        => false,
-					'rewrite'             => false,
-					'query_var'           => false,
-					'supports'            => false,
-					'show_in_nav_menus'   => false,
-					'show_in_admin_bar'   => false,
-				)
-			)
-		);
-
 		do_action( 'woocommerce_after_register_post_type' );
 	}
 

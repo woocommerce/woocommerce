@@ -1411,6 +1411,46 @@ function wc_update_320_db_version() {
 }
 
 /**
+ * Move comment based webhook logs to WC_Logger.
+ *
+ * @return void
+ */
+function wc_update_330_webhook_logs() {
+	global $wpdb;
+
+	$existing_webhook_logs = $wpdb->get_results( "SELECT comment_ID, comment_post_ID, comment_date_gmt FROM {$wpdb->comments} WHERE comment_type = 'webhook_delivery'" ); // @codingStandardsIgnoreLine
+
+	if ( $existing_webhook_logs ) {
+		$logger = wc_get_logger();
+		foreach ( $existing_webhook_logs as $webhook_log ) {
+			$webhook = new WC_WebHook( $webhook_log->comment_post_ID );
+			$message = print_r( array( // @codingStandardsIgnoreLine
+				'Webhook Delivery' => array(
+					'Delivery ID' => $webhook_log->comment_ID,
+					'Date' => date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook_log->comment_date_gmt ), true ),
+					'URL' => $webhook->get_delivery_url(),
+					'Request' => array(
+						'Method' => get_comment_meta( $webhook_log->comment_ID, '_request_method', true ),
+						'Headers' => get_comment_meta( $webhook_log->comment_ID, '_request_headers', true ),
+						'Body' => get_comment_meta( $webhook_log->comment_ID, '_request_body', true ),
+					),
+					'Response' => array(
+						'Code' => get_comment_meta( $webhook_log->comment_ID, '_response_code', true ),
+						'Message' => get_comment_meta( $webhook_log->comment_ID, '_response_message', true ),
+						'Headers' => get_comment_meta( $webhook_log->comment_ID, '_response_headers', true ),
+						'Body' => get_comment_meta( $webhook_log->comment_ID, '_response_body', true ),
+					),
+					'Duration' => get_comment_meta( $webhook_log->comment_ID, '_duration', true ),
+				),
+			), true );
+			$logger->log( 'info', $message, array(
+				'source' => 'webhooks-delivery',
+			) );
+		}
+	}
+}
+
+/**
  * Update image settings to use new aspect ratios and widths.
  */
 function wc_update_330_image_options() {

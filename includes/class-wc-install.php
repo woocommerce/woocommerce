@@ -56,7 +56,6 @@ class WC_Install {
 			'wc_update_240_options',
 			'wc_update_240_shipping_methods',
 			'wc_update_240_api_keys',
-			'wc_update_240_webhooks',
 			'wc_update_240_refunds',
 			'wc_update_240_db_version',
 		),
@@ -77,7 +76,6 @@ class WC_Install {
 			'wc_update_260_db_version',
 		),
 		'3.0.0' => array(
-			'wc_update_300_webhooks',
 			'wc_update_300_grouped_products',
 			'wc_update_300_settings',
 			'wc_update_300_product_visibility',
@@ -97,6 +95,7 @@ class WC_Install {
 			'wc_update_320_db_version',
 		),
 		'3.3.0' => array(
+			'wc_update_330_webhook_logs',
 			'wc_update_330_image_options',
 			'wc_update_330_db_version',
 		),
@@ -670,6 +669,24 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   PRIMARY KEY (log_id),
   KEY level (level)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_webhooks (
+  webhook_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  status varchar(200) NOT NULL,
+  name text NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  delivery_url text NOT NULL,
+  secret text NOT NULL,
+  topic varchar(200) NOT NULL,
+  date_created datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  date_created_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  date_modified datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  date_modified_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  api_version smallint(4) NOT NULL,
+  failure_count smallint(10) NOT NULL DEFAULT '0',
+  pending_delivery tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (webhook_id),
+  KEY user_id (user_id)
+) $collate;
 CREATE TABLE {$wpdb->prefix}wc_download_log (
   download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,
@@ -787,7 +804,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			'view_woocommerce_reports',
 		);
 
-		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
+		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
 
 		foreach ( $capability_types as $capability_type ) {
 
