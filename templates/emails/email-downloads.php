@@ -28,7 +28,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 	<thead>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<th class="td" scope="col" style="text-align:<?php echo esc_html( $text_align ); ?>;"><?php echo esc_html( $column_name ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo esc_html( $column_name ); ?></th>
 			<?php endforeach; ?>
 		</tr>
 	</thead>
@@ -36,7 +36,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 	<?php foreach ( $downloads as $download ) : ?>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-					<td class="td" style="text-align:<?php echo esc_html( $text_align ); ?>;"><?php
+					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download );
 					} else {
