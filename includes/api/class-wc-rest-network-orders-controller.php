@@ -22,6 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 
+	/**
+	 * Register the routes for network orders.
+	 */
 	public function register_routes() {
 		if ( is_multisite() ) {
 			register_rest_route( $this->namespace, '/' . $this->rest_base . '/network', array(
@@ -36,6 +39,13 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 		}
 	}
 
+	/**
+	 * Retrieves the item's schema for display / public consumption purposes.
+	 *
+	 * @access public
+	 *
+	 * @return array Public item schema data.
+	 */
 	public function get_public_item_schema() {
 		$schema = parent::get_public_item_schema();
 
@@ -76,7 +86,7 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 	/**
 	 * Does a permissions check for the proper requested blog
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool $permission
 	 */
@@ -94,9 +104,11 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * Get a collection of orders from the requested blog id
 	 *
-	 * @return mixed|WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response
 	 */
 	public function network_orders( $request ) {
 		$blog_id = $request->get_param( 'blog_id' );
@@ -124,6 +136,13 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 		return $items;
 	}
 
+	/**
+	 * Filters the post statuses to on hold and processing for the network order query.
+	 *
+	 * @param array $args Query args.
+	 *
+	 * @return array
+	 */
 	public function network_orders_filter_args( $args ) {
 		$args['post_status'] = array(
 			'wc-on-hold',
