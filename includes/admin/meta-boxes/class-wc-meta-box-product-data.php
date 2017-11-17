@@ -262,7 +262,7 @@ class WC_Meta_Box_Product_Data {
 				$attribute->set_position( $attribute_position[ $i ] );
 				$attribute->set_visible( isset( $attribute_visibility[ $i ] ) );
 				$attribute->set_variation( isset( $attribute_variation[ $i ] ) );
-				$attributes[] = $attribute;
+				$attributes[] = apply_filters( 'woocommerce_admin_meta_boxes_prepare_attribute', $attribute, $data, $i );
 			}
 		}
 		return $attributes;
