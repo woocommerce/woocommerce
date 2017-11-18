@@ -25,7 +25,12 @@ class WC_Admin_Dashboard {
 	public function __construct() {
 		// Only hook in admin parts if the user has admin access
 		if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' ) ) {
-			add_action( 'wp_dashboard_setup', array( $this, 'init' ) );
+			// If on network admin, only load the widget that works in that context and skip the rest.
+			if ( is_multisite() && is_network_admin() ) {
+				add_action( 'wp_network_dashboard_setup', array( $this, 'register_network_order_widget' ) );
+			} else {
+				add_action( 'wp_dashboard_setup', array( $this, 'init' ) );
+			}
 		}
 	}
 
@@ -40,8 +45,15 @@ class WC_Admin_Dashboard {
 
 		// Network Order Widget.
 		if ( is_multisite() ) {
-			wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce network orders', 'woocommerce' ), array( $this, 'network_orders' ) );
+			$this->register_network_order_widget();
 		}
+	}
+
+	/**
+	 * Register the network order dashboard widget.
+	 */
+	public function register_network_order_widget() {
+		wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce network orders', 'woocommerce' ), array( $this, 'network_orders' ) );
 	}
 
 	/**
