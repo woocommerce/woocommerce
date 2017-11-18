@@ -331,7 +331,7 @@ class WC_Admin_Dashboard {
 				</p>
 
 			</div>
-			<table id="woocommerce-network-order-table" class="woocommerce-network-order-table wp-list-table">
+			<table id="woocommerce-network-order-table" class="woocommerce-network-order-table">
 				<thead>
 					<tr>
 						<td><?php esc_html_e( 'Order', 'woocommerce' ); ?></td>
