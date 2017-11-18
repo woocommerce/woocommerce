@@ -769,11 +769,11 @@ class WC_Admin_Post_Types {
 				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
-				$new_subdir = '/woocommerce_uploads' . $uploads['subdir'];
+				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
 
-				$uploads['path']   = str_replace( $uploads['subdir'], $new_subdir, $uploads['path'] );
-				$uploads['url']    = str_replace( $uploads['subdir'], $new_subdir, $uploads['url'] );
-				$uploads['subdir'] = str_replace( $uploads['subdir'], $new_subdir, $uploads['subdir'] );
+				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
 			}
 		}
 		return $pathdata;
