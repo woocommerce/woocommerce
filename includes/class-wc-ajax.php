@@ -548,7 +548,7 @@ class WC_AJAX {
 			<?php
 			$item_html = ob_get_clean();
 
-			wp_send_json_success( array(
+			wp_send_json_success( apply_filters( 'woocommerce_ajax_get_order_details', array(
 				'data'                       => $order->get_data(),
 				'order_number'               => $order->get_order_number(),
 				'item_html'                  => $item_html,
@@ -559,7 +559,7 @@ class WC_AJAX {
 				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
 				'shipping_via'               => $order->get_shipping_method(),
-			) );
+			), $order ) );
 		}
 		exit;
 	}
