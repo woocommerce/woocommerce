@@ -151,14 +151,14 @@ class WC_Order_Product_Lookup_Helper {
 		global $wpdb;
 
 		if ( is_int( $email_or_user_id ) ) {
-			$product_purchases = $wpdb->get_results( $wpdb->prepare( "
+			$orders = $wpdb->get_results( $wpdb->prepare( "
 				SELECT order_id
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_id = %d ) AND product_id = %d
 				LIMIT 1
 			", absint( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		} else {
-			$product_purchases = $wpdb->get_results( $wpdb->prepare( "
+			$orders = $wpdb->get_results( $wpdb->prepare( "
 				SELECT order_id
 				FROM {$wpdb->prefix}woocommerce_order_product_lookup
 				WHERE ( user_email = %s ) AND product_id = %d
@@ -166,8 +166,8 @@ class WC_Order_Product_Lookup_Helper {
 			", esc_sql( $email_or_user_id ), absint( $product_id ) ) ); // WPCS: cache ok.
 		}
 
-		foreach ( $product_purchases as $product_purchase ) {
-			$order = wc_get_order( $product_purchase->order_id );
+		foreach ( $orders as $order ) {
+			$order = wc_get_order( $order->order_id );
 
 			if ( is_callable( array( $order, 'get_date_paid' ) ) ) {
 				$date_paid = $order->get_date_paid();
@@ -180,6 +180,28 @@ class WC_Order_Product_Lookup_Helper {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get last order for a given user id.
+	 *
+	 * @param  int      $user_id User ID.
+	 * @return WC_Order Order object.
+	 *
+	 * @since 3.3.0
+	 */
+	public static function get_last_order( $user_id ) {
+		global $wpdb;
+
+		$id = $wpdb->get_var( $wpdb->prepare( "
+			SELECT order_id
+			FROM {$wpdb->prefix}woocommerce_order_product_lookup
+			WHERE ( user_id = %d )
+			ORDER BY order_id DESC
+			LIMIT 1
+		", absint( $user_id ) ) ); // WPCS: cache ok.
+
+		return wc_get_order( $id );
 	}
 }
 

@@ -517,7 +517,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	public function prepare_item_for_response( $user_data, $request ) {
 		$customer    = new WC_Customer( $user_data->ID );
 		$_data       = $customer->get_data();
-		$last_order  = wc_get_customer_last_order( $customer->get_id() );
+		$last_order  = WC_Order_Product_Lookup_Helper::get_last_order( $customer->get_id() );
 		$format_date = array( 'date_created', 'date_modified' );
 
 		// Format date values.

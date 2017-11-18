@@ -375,21 +375,19 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_customer_last_order.
+	 * Test WC_Order_Product_Lookup_Helper::get_last_order.
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_last_order() {
+	function test_get_last_order() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
-		$order_1 = new WC_Order;
-		$order_1->set_customer_id( $customer_id );
+		$order_1 = WC_Helper_Order::create_order( $customer_id );
 		$order_1->save();
-		$order_2 = new WC_Order;
-		$order_2->set_customer_id( $customer_id );
+		$order_2 = WC_Helper_Order::create_order( $customer_id );
 		$order_2->save();
 
-		$last_order = wc_get_customer_last_order( $customer_id );
+		$last_order = WC_Order_Product_Lookup_Helper::get_last_order( $customer_id );
 		$this->assertEquals( $order_2->get_id(), $last_order->get_id() );
 	}
 }

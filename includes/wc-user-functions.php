@@ -552,21 +552,9 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  * @return WC_Order Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
-	global $wpdb;
+	wc_deprecated_function( 'WC_Order_Product_Lookup_Helper::get_last_order', '3.3' );
 
-	$customer_id = absint( $customer_id );
-
-	$id = $wpdb->get_var( "SELECT id
-		FROM $wpdb->posts AS posts
-		LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-		WHERE meta.meta_key = '_customer_user'
-		AND   meta.meta_value = {$customer_id}
-		AND   posts.post_type = 'shop_order'
-		AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-		ORDER BY posts.ID DESC
-	" );
-
-	return wc_get_order( $id );
+	return WC_Order_Product_Lookup_Helper::get_last_order( $customer_id );
 }
 
 /**
