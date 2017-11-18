@@ -20,6 +20,73 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected $prices_array = array();
 
 	/**
+	 * Read attributes from post meta.
+	 *
+	 * @param WC_Product $product Product object.
+	 */
+	protected function read_attributes( &$product ) {
+		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+
+		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
+			$attributes   = array();
+			$force_update = false;
+			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
+				$meta_value = array_merge( array(
+					'name'         => '',
+					'value'        => '',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				), (array) $meta_attribute_value );
+
+				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
+				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
+					global $wpdb;
+
+					$old_slug      = 'attribute_' . $meta_attribute_key;
+					$new_slug      = 'attribute_' . sanitize_title( $meta_value['name'] );
+					$old_meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s;", $old_slug ) ); // WPCS: db call ok, cache ok.
+
+					if ( $old_meta_rows ) {
+						foreach ( $old_meta_rows as $old_meta_row ) {
+							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+						}
+					}
+
+					$force_update = true;
+				}
+
+				// Check if is a taxonomy attribute.
+				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
+					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
+						continue;
+					}
+					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
+					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+				} else {
+					$id      = 0;
+					$options = wc_get_text_attributes( $meta_value['value'] );
+				}
+
+				$attribute = new WC_Product_Attribute();
+				$attribute->set_id( $id );
+				$attribute->set_name( $meta_value['name'] );
+				$attribute->set_options( $options );
+				$attribute->set_position( $meta_value['position'] );
+				$attribute->set_visible( $meta_value['is_visible'] );
+				$attribute->set_variation( $meta_value['is_variation'] );
+				$attributes[] = $attribute;
+			}
+			$product->set_attributes( $attributes );
+
+			if ( $force_update ) {
+				$this->update_attributes( $product, true );
+			}
+		}
+	}
+
+	/**
 	 * Read product data.
 	 *
 	 * @since 3.0.0
