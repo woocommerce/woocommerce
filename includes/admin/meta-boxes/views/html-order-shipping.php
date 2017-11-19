@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div class="view">
 							<?php
 								echo ( '' !== $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) ) : '&ndash;';
-							$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
+								$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
 								if ( $refunded ) {
 									echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 								}
