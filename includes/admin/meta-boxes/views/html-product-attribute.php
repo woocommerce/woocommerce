@@ -29,8 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
 
 						<?php
-						$attribute_taxonomy = $attribute->get_taxonomy_object();
-						if ( $attribute->is_taxonomy() && $attribute_taxonomy ) :
+						if ( $attribute->is_taxonomy() && $attribute_taxonomy = $attribute->get_taxonomy_object() ) :
 						?>
 							<?php if ( 'select' === $attribute_taxonomy->attribute_type ) : ?>
 
