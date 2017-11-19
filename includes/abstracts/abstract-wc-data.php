@@ -398,9 +398,9 @@ abstract class WC_Data {
 	 *
 	 * @param  string $key
 	 * @param  string $value
-	 * @param  string $meta_id
+	 * @param  int $meta_id
 	 */
-	public function update_meta_data( $key, $value, $meta_id = '' ) {
+	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'set_' . $key;
 
