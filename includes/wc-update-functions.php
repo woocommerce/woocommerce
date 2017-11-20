@@ -1450,7 +1450,7 @@ function wc_update_330_product_stock_status() {
 		INNER JOIN $wpdb->postmeta t2
 			ON t1.post_id = t2.post_id
 			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
-			AND t2.meta_key = '_stock' AND t2.meta_value <= %s
+			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
 		INNER JOIN $wpdb->postmeta t3
 			ON t2.post_id = t3.post_id
 			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
