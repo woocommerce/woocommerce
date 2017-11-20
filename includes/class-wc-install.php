@@ -95,7 +95,6 @@ class WC_Install {
 			'wc_update_320_db_version',
 		),
 		'3.3.0' => array(
-			'wc_update_330_webhook_logs',
 			'wc_update_330_image_options',
 			'wc_update_330_db_version',
 		),
