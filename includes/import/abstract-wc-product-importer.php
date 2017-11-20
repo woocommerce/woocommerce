@@ -126,6 +126,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Get importer parameters.
+	 *
+	 * @return array
+	 */
+	public function get_params() {
+		return $this->params;
+	}
+	
+	/**
 	 * Get file pointer position from the last read.
 	 *
 	 * @return int
