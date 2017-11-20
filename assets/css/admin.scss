@@ -2457,18 +2457,26 @@ table.wp-list-table {
 		}
 	}
 
-	mark.instock {
-		font-weight: 700;
-		color: $green;
-		background: transparent none;
-		line-height: 1;
-	}
+	mark {
+		&.instock,
+		&.outofstock,
+		&.onbackorder {
+			font-weight: 700;
+			background: transparent none;
+			line-height: 1;
+		}
 
-	mark.outofstock {
-		font-weight: 700;
-		color: #aa4444;
-		background: transparent none;
-		line-height: 1;
+		&.instock {
+			color: $green;
+		}
+
+		&.outofstock {
+			color: #aa4444;
+		}
+
+		&.onbackorder {
+			color: #eaa600;
+		}
 	}
 
 	.order-notes_head,
