@@ -292,6 +292,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	protected function render_billing_address_column() {
 		if ( $address = $this->object->get_formatted_billing_address() ) {
 			echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
+
+			if ( $this->object->get_payment_method() ) {
+				/* translators: %s: payment method */
+				echo '<span class="description">' . sprintf( __( 'via %s', 'woocommerce' ), esc_html( $this->object->get_payment_method_title() ) ) . '</span>';
+			}
 		} else {
 			echo '&ndash;';
 		}
@@ -303,6 +308,10 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	protected function render_shipping_address_column() {
 		if ( $address = $this->object->get_formatted_shipping_address() ) {
 			echo '<a target="_blank" href="' . esc_url( $this->object->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
+			if ( $this->object->get_shipping_method() ) {
+				/* translators: %s: shipping method */
+				echo '<span class="description">' . sprintf( __( 'via %s', 'woocommerce' ), esc_html( $this->object->get_shipping_method() ) ) . '</span>';
+			}
 		} else {
 			echo '&ndash;';
 		}
