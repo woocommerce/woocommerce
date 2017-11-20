@@ -114,10 +114,10 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns                     = array();
 		$show_columns['cb']               = $columns['cb'];
 		$show_columns['order_number']     = __( 'Order', 'woocommerce' );
-		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_date']       = __( 'Date', 'woocommerce' );
 		$show_columns['order_status']     = __( 'Status', 'woocommerce' );
+		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
+		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
 
 		if ( has_action( 'woocommerce_admin_order_actions_start' ) || has_action( 'woocommerce_admin_order_actions_end' ) || has_filter( 'woocommerce_admin_order_actions' ) ) {
@@ -227,7 +227,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) ) {
 			$show_date = sprintf( _x( '%s ago', '%s = human-readable time difference', 'woocommerce' ), human_time_diff( $this->object->get_date_created()->getTimestamp(), current_time( 'timestamp', true ) ) );
 		} else {
-			$show_date = $this->object->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) );
+			$show_date = $this->object->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'M j, Y', 'woocommerce' ) ) );
 		}
 		printf(
 			'<time datetime="%1$s" title="%2$s">%3$s</time>',

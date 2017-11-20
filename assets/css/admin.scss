@@ -1901,11 +1901,59 @@ ul.wc_coupon_list_block {
 	}
 	.wp-list-table {
 		margin-top: 1em;
-		th {
-			padding: .75em 1em;
+
+		thead td,
+		thead th,
+		tfoot td,
+		tfoot th {
+			border: 0;
 		}
-		th.sortable a, th.sorted a {
-			padding: 0;
+		thead tr {
+			border-bottom: 1px solid #e1e1e1;
+		}
+		tfoot tr {
+			border-top: 1px solid #e1e1e1;
+		}
+		thead,
+		tfoot {
+			th {
+				padding: .75em 1em;
+			}
+			th.sortable a, th.sorted a {
+				padding: 0;
+			}
+			th:first-child {
+				padding-left: 2em;
+			}
+			th:last-child {
+				padding-right: 2em;
+			}
+		}
+		tbody {
+			td,
+			th {
+				padding: 1em;
+				line-height: 26px;
+			}
+			td:first-child {
+				padding-left: 2em;
+			}
+			td:last-child {
+				padding-right: 2em;
+			}
+		}
+		tbody tr {
+			border-top: 1px solid #f5f5f5;
+		}
+		tbody tr:hover:not(.status-trash) td {
+			cursor: pointer;
+		}
+
+		// Columns.
+		td,
+		th {
+			width: 12ch;
+			vertical-align: middle;
 		}
 		.check-column {
 			width: 1px;
@@ -1917,138 +1965,88 @@ ul.wc_coupon_list_block {
 				margin: 1px 0;
 			}
 		}
-		td.column-order_number {
-			line-height: 26px;
-			.order-preview {
-				float:right;
-				width: 16px;
-				padding: 20px 4px 4px 4px;
-				height: 0;
-				overflow: hidden;
-				position: relative;
-				border: 2px solid transparent;
-				border-radius: 4px;
-
-				&::before {
-					@include icon( '\e010' );
-					line-height: 16px;
-					font-size: 14px;
-					vertical-align:middle;
-					top: 4px;
-
-				}
-				&:hover {
-					border: 2px solid #00a0d2;
-				}
-			}
-			.order-preview.disabled {
-				&::before {
-					content: '';
-					background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
-				}
-			}
-		}
-		.column-order_date {
-			width: 10ch;
-		}
 		.column-order_number {
 			width: 35ch;
 		}
-		.column-order_status {
-			width: 20ch;
-		}
 		.column-order_total {
+			width: 8ch;
 			text-align: right;
-			width: 10ch;
 			a span {
 				float:right;
 			}
 		}
+		.column-order_date,
+		.column-order_status {
+			width: 12ch;
+		}
 		.column-shipping_address,
 		.column-billing_address {
 			width: 20ch;
+			line-height: 1.5em;
 		}
-		th:first-child,
-		td:first-child {
-			padding-left: 2em;
-		}
-		th:last-child,
-		td:last-child {
-			padding-right: 2em;
-		}
-		tbody {
-			th, td {
-				border-top: 1px solid #f5f5f5;
+		.order-preview {
+			float:right;
+			width: 16px;
+			padding: 20px 4px 4px 4px;
+			height: 0;
+			overflow: hidden;
+			position: relative;
+			border: 2px solid transparent;
+			border-radius: 4px;
+
+			&::before {
+				@include icon( '\e010' );
+				line-height: 16px;
+				font-size: 14px;
+				vertical-align:middle;
+				top: 4px;
+
 			}
-			td {
-				vertical-align: middle;
-				padding: 1em;
-
-				.post-row-actions {
-					display: none;
-				}
-
-				.order-status {
-					display: inline-flex;
-					padding: 0px 1em;
-					line-height: 2.5em;
-					color: #777;
-					background: #E5E5E5;
-					border-radius: 4px;
-					border-bottom: 1px solid rgba(0,0,0,0.05);
-					margin: -.5em 0;
-					cursor: inherit !important;
-
-					&.status-completed {
-						background: #C8D7E1;
-						color: #2e4453;
-					}
-
-					&.status-on-hold {
-						background: #f8dda7;
-						color: #94660c;
-					}
-
-					&.status-failed {
-						background: #eba3a3;
-						color: #761919;
-					}
-
-					&.status-processing {
-						background: #C6E1C6;
-						color: #5B841B;
-					}
-
-					&.status-trash {
-						background: #eba3a3;
-						color: #761919;
-					}
-				}
-			}
-			tr:hover:not(.status-trash) {
-				td, th {
-					cursor: pointer;
-				}
+			&:hover {
+				border: 2px solid #00a0d2;
 			}
 		}
-	}
-}
-
-// Hide some columns on smaller screens.
-@media only screen and (max-width: 1400px) {
-	.post-type-shop_order .wp-list-table {
-		.column-billing_address {
-			display:none;
-			visibility:hidden;
+		.order-preview.disabled {
+			&::before {
+				content: '';
+				background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
+			}
 		}
-	}
-}
-@media only screen and (max-width: 1200px) {
-	.post-type-shop_order .wp-list-table {
-		.column-shipping_address,
-		.column-order_total {
-			display:none;
-			visibility:hidden;
+		.order-status {
+			display: inline-flex;
+			padding: 0px 1em;
+			line-height: 2.5em;
+			color: #777;
+			background: #E5E5E5;
+			border-radius: 4px;
+			border-bottom: 1px solid rgba(0,0,0,0.05);
+			margin: -.5em 0;
+			cursor: inherit !important;
+
+			&.status-completed {
+				background: #C8D7E1;
+				color: #2e4453;
+			}
+
+			&.status-on-hold {
+				background: #f8dda7;
+				color: #94660c;
+			}
+
+			&.status-failed {
+				background: #eba3a3;
+				color: #761919;
+			}
+
+			&.status-processing {
+				background: #C6E1C6;
+				color: #5B841B;
+			}
+
+			&.status-trash {
+				background: #eba3a3;
+				color: #761919;
+			}
 		}
 	}
 }
