@@ -503,6 +503,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * + response code/message/headers/body
 	 *
 	 * @since 2.2
+	 * @deprecated 3.3.0
 	 * @param int $delivery_id Delivery ID.
 	 * @return void
 	 */
