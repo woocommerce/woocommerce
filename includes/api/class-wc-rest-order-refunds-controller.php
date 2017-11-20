@@ -385,6 +385,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -411,6 +415,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
