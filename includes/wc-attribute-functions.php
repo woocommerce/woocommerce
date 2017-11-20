@@ -332,8 +332,6 @@ function wc_attributes_array_filter_variation( $attribute ) {
  * @return bool
  */
 function wc_is_attribute_in_product_name( $attribute, $name ) {
-	$attribute  = html_entity_decode( $attribute, ENT_QUOTES, get_bloginfo( 'charset' ) );
-	$name       = html_entity_decode( $name, ENT_QUOTES, get_bloginfo( 'charset' ) );
 	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
 	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
 }
