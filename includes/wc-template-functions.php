@@ -412,7 +412,12 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		if ( is_array( $value ) ) {
 			$html .= wc_query_string_form_fields( $value, $exclude, $key, true );
 		} else {
-			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+			// Strip slashes from search parameters
+			if( $key == "s" ){
+				$html .= '<input type="hidden" name="' . stripslashes( $key ) . '" value="' . stripslashes( $value ) . '" />';
+			} else {
+				$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+			}
 		}
 	}
 
