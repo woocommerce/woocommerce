@@ -686,6 +686,7 @@ CREATE TABLE {$wpdb->prefix}wc_webhooks (
   pending_delivery tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (webhook_id),
   KEY user_id (user_id)
+) $collate;
 CREATE TABLE {$wpdb->prefix}wc_download_log (
   download_log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   timestamp datetime NOT NULL,

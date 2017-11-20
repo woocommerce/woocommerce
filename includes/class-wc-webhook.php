@@ -245,19 +245,19 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		WC()->api->register_resources( new WC_API_Server( '/' ) );
 
 		switch ( $resource ) {
-			case 'coupon' :
+			case 'coupon':
 				$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
 				break;
 
-			case 'customer' :
+			case 'customer':
 				$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
 				break;
 
-			case 'order' :
+			case 'order':
 				$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
 				break;
 
-			case 'product' :
+			case 'product':
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
 					$resource_id = $resource_id->get_id();
@@ -266,14 +266,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 
 			// Custom topics include the first hook argument.
-			case 'action' :
+			case 'action':
 				$payload = array(
 					'action' => current( $this->get_hooks() ),
 					'arg'    => $resource_id,
 				);
 				break;
 
-			default :
+			default:
 				$payload = array();
 				break;
 		}
@@ -294,13 +294,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
 
 		switch ( $resource ) {
-			case 'coupon' :
-			case 'customer' :
-			case 'order' :
-			case 'product' :
+			case 'coupon':
+			case 'customer':
+			case 'order':
+			case 'product':
 				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
 				$request    = new WP_REST_Request( 'GET' );
-				$controller = new $class;
+				$controller = new $class();
 
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
@@ -313,14 +313,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 
 			// Custom topics include the first hook argument.
-			case 'action' :
+			case 'action':
 				$payload = array(
 					'action' => current( $this->get_hooks() ),
 					'arg'    => $resource_id,
 				);
 				break;
 
-			default :
+			default:
 				$payload = array();
 				break;
 		}
@@ -380,47 +380,65 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Create a new comment for log the delivery request/response and.
-	 * return the ID for inclusion in the webhook request.
+	 * Generate a new unique hash as a delivery id based on current time and wehbook id.
+	 * Return the hash for inclusion in the webhook request.
 	 *
-	 * @todo Update to use log system.
 	 * @since  2.2.0
-	 * @return int
+	 * @return string
 	 */
 	public function get_new_delivery_id() {
-
-		$comment_data = apply_filters( 'woocommerce_new_webhook_delivery_data', array(
-			'comment_author'       => __( 'WooCommerce', 'woocommerce' ),
-			'comment_author_email' => sanitize_email( sprintf( '%s@%s', strtolower( __( 'WooCommerce', 'woocommerce' ) ), isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com' ) ),
-			'comment_post_ID'      => $this->get_id(),
-			'comment_agent'        => 'WooCommerce Hookshot',
-			'comment_type'         => 'webhook_delivery',
-			'comment_parent'       => 0,
-			'comment_approved'     => 1,
-		), $this->get_id() );
-
-		$comment_id = wp_insert_comment( $comment_data );
-
-		return $comment_id;
+		// Since we no longer use comments to store delivery logs, we generate a unique hash instead based on current time and webhook ID.
+		return wp_hash( $this->get_id() . strtotime( 'now' ) );
 	}
 
 	/**
 	 * Log the delivery request/response.
 	 *
-	 * @todo Update to use log system.
 	 * @since 2.2.0
-	 * @param int            $delivery_id Previously created comment ID.
+	 * @param string         $delivery_id Previously created hash.
 	 * @param array          $request     Request data.
 	 * @param array|WP_Error $response    Response data.
 	 * @param float          $duration    Request duration.
 	 */
 	public function log_delivery( $delivery_id, $request, $response, $duration ) {
-		// Save request data.
-		add_comment_meta( $delivery_id, '_request_method', $request['method'] );
-		add_comment_meta( $delivery_id, '_request_headers', array_merge( array(
-			'User-Agent' => $request['user-agent'],
-		), $request['headers'] ) );
-		add_comment_meta( $delivery_id, '_request_body', wp_slash( $request['body'] ) );
+		$logger = wc_get_logger();
+		$message = array(
+			'Webhook Delivery' => array(
+				'Delivery ID' => $delivery_id,
+				'Date'        => date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( 'now' ), true ),
+				'URL'         => $this->get_delivery_url(),
+				'Duration'    => $duration,
+				'Request'     => array(
+					'Method'  => $request['method'],
+					'Headers' => array_merge(
+						array(
+							'User-Agent' => $request['user-agent'],
+						),
+						$request['headers']
+					),
+				),
+				'Body'    => wp_slash( $request['body'] ),
+			),
+		);
+		if ( is_wp_error( $response ) ) {
+			$message['Webhook Delivery']['Response'] = array(
+				'Code'    => $response->get_error_code(),
+				'Message' => $response->get_error_message(),
+				'Headers' => array(),
+				'Body'    => '',
+			);
+		} else {
+			$message['Webhook Delivery']['Response'] = array(
+				'Code'    => wp_remote_retrieve_response_code( $response ),
+				'Message' => wp_remote_retrieve_response_message( $response ),
+				'Headers' => wp_remote_retrieve_headers( $response ),
+				'Body'    => wp_remote_retrieve_body( $response ),
+			);
+		}
+
+		$logger->info( wc_print_r( $message, true ), array(
+			'source' => 'webhooks-delivery',
+		) );
 
 		// Parse response.
 		if ( is_wp_error( $response ) ) {
@@ -436,40 +454,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$response_body    = wp_remote_retrieve_body( $response );
 		}
 
-		// Save response data.
-		add_comment_meta( $delivery_id, '_response_code', $response_code );
-		add_comment_meta( $delivery_id, '_response_message', $response_message );
-		add_comment_meta( $delivery_id, '_response_headers', $response_headers );
-		add_comment_meta( $delivery_id, '_response_body', $response_body );
-
-		// Save duration.
-		add_comment_meta( $delivery_id, '_duration', $duration );
-
-		// Set a summary for quick display.
-		$args = array(
-			'comment_ID' => $delivery_id,
-			'comment_content' => sprintf( 'HTTP %s %s: %s', $response_code, $response_message, $response_body ),
-		);
-
-		wp_update_comment( $args );
+		$logger->info( wc_print_r( $message, true ), array(
+			'source' => 'webhooks-delivery',
+		) );
 
 		// Track failures.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
 			delete_post_meta( $this->get_id(), '_failure_count' );
 		} else {
 			$this->failed_delivery();
-		}
-
-		// Keep the 25 most recent delivery logs.
-		$log = wp_count_comments( $this->get_id() );
-		if ( $log->total_comments > apply_filters( 'woocommerce_max_webhook_delivery_logs', 25 ) ) {
-			global $wpdb;
-
-			$comment_id = $wpdb->get_var( $wpdb->prepare( "SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1", $this->get_id() ) );
-
-			if ( $comment_id ) {
-				wp_delete_comment( $comment_id, true );
-			}
 		}
 	}
 
@@ -493,31 +486,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery logs for this webhook.
 	 *
-	 * @todo Update to use log system.
 	 * @since  2.2.0
 	 * @return array
 	 */
 	public function get_delivery_logs() {
-		$args = array(
-			'post_id' => $this->get_id(),
-			'status'  => 'approve',
-			'type'    => 'webhook_delivery',
-		);
-
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		$logs = get_comments( $args );
-
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		$delivery_logs = array();
-
-		foreach ( $logs as $log ) {
-			$log = $this->get_delivery_log( $log->comment_ID );
-			$delivery_logs[] = ( ! empty( $log )  ? $log : array() );
-		}
-
-		return $delivery_logs;
+		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 	}
 
 	/**
@@ -529,35 +502,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * + request headers/body
 	 * + response code/message/headers/body
 	 *
-	 * @todo Update to use log system.
 	 * @since 2.2
+	 * @deprecated 3.3.0
 	 * @param int $delivery_id Delivery ID.
-	 * @return bool|array false if invalid delivery ID, array of log data otherwise
+	 * @return void
 	 */
 	public function get_delivery_log( $delivery_id ) {
-		$log = get_comment( $delivery_id );
-
-		// Valid comment and ensure delivery log belongs to this webhook.
-		if ( is_null( $log ) || $log->comment_post_ID !== $this->get_id() ) {
-			return false;
-		}
-
-		$delivery_log = array(
-			'id'               => intval( $delivery_id ),
-			'duration'         => get_comment_meta( $delivery_id, '_duration', true ),
-			'summary'          => $log->comment_content,
-			'request_method'   => get_comment_meta( $delivery_id, '_request_method', true ),
-			'request_url'      => $this->get_delivery_url(),
-			'request_headers'  => get_comment_meta( $delivery_id, '_request_headers', true ),
-			'request_body'     => get_comment_meta( $delivery_id, '_request_body', true ),
-			'response_code'    => get_comment_meta( $delivery_id, '_response_code', true ),
-			'response_message' => get_comment_meta( $delivery_id, '_response_message', true ),
-			'response_headers' => get_comment_meta( $delivery_id, '_response_headers', true ),
-			'response_body'    => get_comment_meta( $delivery_id, '_response_body', true ),
-			'comment'          => $log,
-		);
-
-		return apply_filters( 'woocommerce_webhook_delivery_log', $delivery_log, $delivery_id, $this->get_id() );
+		wc_deprecated_function( 'WC_Webhook::get_delivery_log', '3.3' );
 	}
 
 	/**
