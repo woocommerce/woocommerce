@@ -2105,6 +2105,46 @@ ul.wc_coupon_list_block {
 			}
 		}
 	}
+	.wc-action-button,
+	.wc-action-button-group {
+		float: left;
+		margin-right: 4px;
+	}
+}
+
+.wc-action-button-group {
+	vertical-align: middle;
+	line-height: 26px;
+    white-space: nowrap;
+	label {
+		margin-right: 6px;
+		cursor: default;
+		font-weight: bold;
+	}
+	.wc-action-button {
+		margin: -1px !important;
+		border: 1px solid #ccc;
+		padding-top: 0;
+		border-radius: 0 !important;
+		float: none;
+		line-height: 28px;
+		height: auto;
+		z-index: 1;
+		position:relative;
+	}
+	.wc-action-button:hover,
+	.wc-action-button:focus {
+		border: 1px solid #999;
+		z-index: 2;
+	}
+	.wc-action-button:nth-child(2) {
+		border-top-left-radius: 3px !important;
+		border-bottom-left-radius: 3px !important;
+	}
+	.wc-action-button:last-child {
+		border-top-right-radius: 3px !important;
+		border-bottom-right-radius: 3px !important;
+	}
 }
 
 .column-customer_message .note-on {
@@ -5760,7 +5800,7 @@ table.bar_chart {
 		box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, 0.1);
 
 		.inner {
-			float: right;
+			text-align: right;
 			line-height: 23px;
 
 			.button {

@@ -483,7 +483,9 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		if ( $order = wc_get_order( absint( $_GET['order_id'] ) ) ) {
+		$order = wc_get_order( absint( $_GET['order_id'] ) ); // WPCS: sanitization ok.
+
+		if ( $order ) {
 
 			ob_start();
 
@@ -503,10 +505,10 @@ class WC_AJAX {
 			<div class="wc-order-preview__table-wrapper">
 				<table cellspacing="0" class="wc-order-preview__table">
 					<tr>
-						<th><?php _e( 'Product', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Quantity', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Total', 'woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Tax', 'woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Total', 'woocommerce' ); ?></th>
 					</tr>
 				<?php
 				foreach ( $order->get_items() as $item_id => $item ) {
@@ -546,12 +548,50 @@ class WC_AJAX {
 				</table>
 			</div>
 			<?php
-			$item_html = ob_get_clean();
+			$item_html      = ob_get_clean();
+			$actions_html   = '';
+			$actions        = array();
+			$status_actions = array();
+
+			if ( $order->has_status( array( 'pending' ) ) ) {
+				$status_actions['on-hold'] = array(
+					'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+					'name'      => __( 'On-hold', 'woocommerce' ),
+					'action'    => 'on-hold',
+				);
+			}
+
+			if ( $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+				$status_actions['processing'] = array(
+					'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+					'name'      => __( 'Processing', 'woocommerce' ),
+					'action'    => 'processing',
+				);
+			}
+
+			if ( $order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+				$status_actions['complete'] = array(
+					'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+					'name'      => __( 'Completed', 'woocommerce' ),
+					'action'    => 'complete',
+				);
+			}
+
+			if ( $status_actions ) {
+				$actions['status'] = array(
+					'group'   => __( 'Change status: ', 'woocommerce' ),
+					'actions' => $status_actions,
+				);
+			}
+
+			$actions      = apply_filters( 'woocommerce_admin_preview_order_actions', $actions, $order );
+			$actions_html = wc_render_action_buttons( $actions );
 
 			wp_send_json_success( apply_filters( 'woocommerce_ajax_get_order_details', array(
 				'data'                       => $order->get_data(),
 				'order_number'               => $order->get_order_number(),
 				'item_html'                  => $item_html,
+				'actions_html'               => $actions_html,
 				'ship_to_billing'            => wc_ship_to_billing_address_only(),
 				'needs_shipping'             => $order->needs_shipping_address(),
 				'formatted_billing_address'  => ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ),

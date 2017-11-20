@@ -138,9 +138,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			unset( $actions['edit'] );
 		}
 
-		$actions['mark_processing'] = __( 'Set order status to &ldquo;processing&rdquo;', 'woocommerce' );
-		$actions['mark_on-hold']    = __( 'Set order status to &ldquo;on-hold&rdquo;', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Set order status to &ldquo;complete&rdquo;', 'woocommerce' );
+		$actions['mark_processing'] = __( 'Change status to processing', 'woocommerce' );
+		$actions['mark_on-hold']    = __( 'Change status to on-hold', 'woocommerce' );
+		$actions['mark_completed']  = __( 'Change status to completed', 'woocommerce' );
 
 		return $actions;
 	}
@@ -275,9 +275,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $this->object );
 
-		foreach ( $actions as $action ) {
-			printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
-		}
+		echo wc_render_action_buttons( $actions ); // WPCS: XSS ok.
 
 		do_action( 'woocommerce_admin_order_actions_end', $this->object );
 
@@ -383,6 +381,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 						</article>
 						<footer>
 							<div class="inner">
+								{{{ data.actions_html }}}
+
 								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
