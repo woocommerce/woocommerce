@@ -1238,7 +1238,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'tax_class' => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

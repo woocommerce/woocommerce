@@ -880,7 +880,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_do_oembeds() {
 		// In this case should only return the URL back, since oEmbed will run other actions on frontend.
-		$this->assertEquals( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/', wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) );
+		$this->assertEquals( "<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) );
 	}
 
 	/**

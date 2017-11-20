@@ -72,7 +72,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		 * To support quote characters, first they are decoded from &quot; entities, then URL encoded.
 		 */
 		if ( get_search_query() ) {
-			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
+			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query( false ) ) ), $link );
 		}
 
 		// Post Type Arg
