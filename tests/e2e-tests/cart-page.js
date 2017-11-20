@@ -93,7 +93,7 @@ test.describe( 'Cart page', function() {
 		);
 	} );
 
-	test.it( 'should go to the checkout page when "Proceed to Chcekout" is clicked', () => {
+	test.it( 'should go to the checkout page when "Proceed to Checkout" is clicked', () => {
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
 		const checkoutPage = cartPage.checkout();
 
