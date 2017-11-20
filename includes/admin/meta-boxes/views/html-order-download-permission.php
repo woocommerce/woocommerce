@@ -12,22 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 			printf(
 				'#%s &mdash; %s &mdash; %s: %s &mdash; ',
 				esc_html( $product->get_id() ),
-				esc_html(
-					apply_filters(
-						'woocommerce_admin_download_permissions_title',
-						$product->get_name(),
-						$download->get_product_id(),
-						$download->get_order_id(),
-						$download->get_order_key(),
-						$download->get_download_id()
-					)
+				apply_filters(
+					'woocommerce_admin_download_permissions_title',
+					$product->get_name(),
+					$download->get_product_id(),
+					$download->get_order_id(),
+					$download->get_order_key(),
+					$download->get_download_id()
 				),
 				esc_html( $file_count ),
-				esc_html(
-					wc_get_filename_from_url(
-						$product->get_file_download_path(
-							$download->get_download_id()
-						)
+				wc_get_filename_from_url(
+					$product->get_file_download_path(
+						$download->get_download_id()
 					)
 				)
 			);
