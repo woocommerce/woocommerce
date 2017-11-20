@@ -84,6 +84,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		return array(
 			'shipping_address',
 			'billing_address',
+			'order_actions',
 		);
 	}
 
@@ -119,10 +120,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
-
-		if ( has_action( 'woocommerce_admin_order_actions_start' ) || has_action( 'woocommerce_admin_order_actions_end' ) || has_filter( 'woocommerce_admin_order_actions' ) ) {
-			$show_columns['order_actions'] = __( 'Actions', 'woocommerce' );
-		}
+		$show_columns['order_actions']    = __( 'Actions', 'woocommerce' );
 
 		wp_enqueue_script( 'wc-orders' );
 
@@ -140,9 +138,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			unset( $actions['edit'] );
 		}
 
-		$actions['mark_processing'] = __( 'Mark processing', 'woocommerce' );
-		$actions['mark_on-hold']    = __( 'Mark on-hold', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Mark complete', 'woocommerce' );
+		$actions['mark_processing'] = __( 'Set order status to &ldquo;processing&rdquo;', 'woocommerce' );
+		$actions['mark_on-hold']    = __( 'Set order status to &ldquo;on-hold&rdquo;', 'woocommerce' );
+		$actions['mark_completed']  = __( 'Set order status to &ldquo;complete&rdquo;', 'woocommerce' );
 
 		return $actions;
 	}
