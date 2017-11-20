@@ -349,8 +349,8 @@ final class WC_Cart_Totals {
 			$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class' );
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
-			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes );
-			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ) );
+			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
+			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ), false );
 
 			if ( ! $this->round_at_subtotal() ) {
 				$shipping_line->total_tax = wc_round_tax_total( $shipping_line->total_tax, wc_get_rounding_precision() );
