@@ -66,7 +66,7 @@ class WC_Regenerate_Images {
 
 		$size_settings = wc_get_image_size( $size );
 
-		if ( isset( $imagemeta['sizes'][ $size ] ) ) {
+		if ( isset( $imagemeta['sizes'] ) && isset( $imagemeta['sizes'][ $size ] ) ) {
 			if ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
 				$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 			}
