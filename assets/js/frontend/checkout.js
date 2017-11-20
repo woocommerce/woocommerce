@@ -99,9 +99,9 @@ jQuery( function( $ ) {
 			}
 
 			if ( $( this ).data( 'order_button_text' ) ) {
-				$( '#place_order' ).val( $( this ).data( 'order_button_text' ) );
+				$( '#place_order' ).text( $( this ).data( 'order_button_text' ) );
 			} else {
-				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
+				$( '#place_order' ).text( $( '#place_order' ).data( 'value' ) );
 			}
 
 			var selectedPaymentMethod = $( '.woocommerce-checkout input[name="payment_method"]:checked' ).attr( 'id' );

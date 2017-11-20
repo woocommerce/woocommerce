@@ -548,7 +548,7 @@ class WC_AJAX {
 			<?php
 			$item_html = ob_get_clean();
 
-			wp_send_json_success( array(
+			wp_send_json_success( apply_filters( 'woocommerce_ajax_get_order_details', array(
 				'data'                       => $order->get_data(),
 				'order_number'               => $order->get_order_number(),
 				'item_html'                  => $item_html,
@@ -559,7 +559,7 @@ class WC_AJAX {
 				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
 				'shipping_via'               => $order->get_shipping_method(),
-			) );
+			), $order ) );
 		}
 		exit;
 	}
@@ -686,7 +686,7 @@ class WC_AJAX {
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
-		$variation_object->set_attributes( array_fill_keys( array_keys( $product_object->get_variation_attributes() ), '' ) );
+		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
 		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
@@ -913,9 +913,15 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id = absint( $_POST['order_id'] );
-			$amount   = wc_clean( $_POST['amount'] );
-			$order    = wc_get_order( $order_id );
+			$order_id           = absint( $_POST['order_id'] );
+			$amount             = wc_clean( $_POST['amount'] );
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
 
 			if ( ! $order ) {
 				throw new exception( __( 'Invalid order', 'woocommerce' ) );
@@ -936,7 +942,8 @@ class WC_AJAX {
 			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
 
 			$order->add_item( $fee );
-			$order->calculate_totals( true );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 			$order->save();
 
 			ob_start();
@@ -1084,9 +1091,15 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id       = absint( $_POST['order_id'] );
-			$order_item_ids = $_POST['order_item_ids'];
-			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
+			$order_id           = absint( $_POST['order_id'] );
+			$order_item_ids     = $_POST['order_item_ids'];
+			$items              = ( ! empty( $_POST['items'] ) ) ? $_POST['items']: '';
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
@@ -1107,7 +1120,8 @@ class WC_AJAX {
 			}
 
 			$order = wc_get_order( $order_id );
-			$order->calculate_totals( true );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include( 'admin/meta-boxes/views/html-order-items.php' );
@@ -1325,15 +1339,30 @@ class WC_AJAX {
 		if ( $post_id > 0 ) {
 			$order      = wc_get_order( $post_id );
 			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
+			$note       = wc_get_order_note( $comment_id );
 
-			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
-			if ( $is_customer_note ) {
-				echo 'customer-note';
-			}
-			echo '"><div class="note_content">';
-			echo wpautop( wptexturize( $note ) );
-			echo '</div><p class="meta"><a href="#" class="delete_note">' . __( 'Delete note', 'woocommerce' ) . '</a></p>';
-			echo '</li>';
+			$note_classes   = array( 'note' );
+			$note_classes[] = $is_customer_note ? 'customer-note' : '';
+			$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
+			?>
+			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
+				<div class="note_content">
+					<?php echo wpautop( wptexturize( wp_kses_post( $note->content ) ) ); ?>
+				</div>
+				<p class="meta">
+					<abbr class="exact-date" title="<?php echo $note->date_created->date( 'y-m-d h:i:s' ); ?>">
+						<?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), $note->date_created->date_i18n( wc_date_format() ), $note->date_created->date_i18n( wc_time_format() ) ); ?>
+					</abbr>
+					<?php
+					if ( 'system' !== $note->added_by ) :
+						/* translators: %s: note author */
+						printf( ' ' . __( 'by %s', 'woocommerce' ), $note->added_by );
+					endif;
+					?>
+					<a href="#" class="delete_note" role="button"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
+				</p>
+			</li>
+			<?php
 		}
 		wp_die();
 	}

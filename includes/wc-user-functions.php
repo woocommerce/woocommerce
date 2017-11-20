@@ -148,7 +148,19 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	if ( ! empty( $customer_orders ) ) {
 		foreach ( $customer_orders as $order_id ) {
-			update_post_meta( $order_id, '_customer_user', $customer->ID );
+			$order = wc_get_order( $order_id );
+			if ( ! $order ) {
+				continue;
+			}
+
+			$order->set_customer_id( $customer->ID );
+			$order->save();
+
+			if ( $order->has_downloadable_item() ) {
+				$data_store = WC_Data_Store::load( 'customer-download' );
+				$data_store->delete_by_order_id( $order->get_id() );
+				wc_downloadable_product_permissions( $order->get_id(), true );
+			}
 
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 

@@ -87,16 +87,18 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 					if ( 'non-taxable' === $tax_class ) {
 						continue;
 					}
-					$proportion               = $tax_class_cost / $total_costs;
-					$cart_discount_proportion = $this->get_total() * $proportion;
-					$discount_taxes           = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, WC_Tax::get_rates( $tax_class ) ) );
+					$proportion                     = $tax_class_cost / $total_costs;
+					$cart_discount_proportion       = $this->get_total() * $proportion;
+					$calculate_tax_for['tax_class'] = $tax_class;
+					$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
+					$discount_taxes                 = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, $tax_rates ) );
 				}
 			}
 			$this->set_taxes( array( 'total' => $discount_taxes ) );
 		} else {
 			$this->set_taxes( false );
 		}
-		
+
 		do_action( 'woocommerce_order_item_fee_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;

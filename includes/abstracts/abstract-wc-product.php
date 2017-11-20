@@ -1777,6 +1777,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get the add to cart button text description - used in aria tags.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function add_to_cart_description() {
+		/* translators: %s: Product title */
+		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' ), $this->get_name() ), $this );
+	}
+
+	/**
 	 * Returns the main product image.
 	 *
 	 * @param string $size (default: 'woocommerce_thumbnail').

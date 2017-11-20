@@ -89,7 +89,7 @@ class WC_API extends WC_Legacy_API {
 			wc_nocache_headers();
 
 			// Clean the API request.
-			$api_request = $wp->query_vars['wc-api'];
+			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
 
 			// Trigger generic action before request hook.
 			do_action( 'woocommerce_api_request', $api_request );

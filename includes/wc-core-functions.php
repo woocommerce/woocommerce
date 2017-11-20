@@ -686,7 +686,7 @@ function wc_get_image_size( $image_size ) {
 			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( in_array( $image_size, array( 'single', 'shop_single' ), true ) ) {
+	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
 		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
 			$size['width'] = $theme_support[ 'single_image_width' ];
@@ -696,7 +696,7 @@ function wc_get_image_size( $image_size ) {
 		$size['height'] = 9999999999;
 		$size['crop']   = 0;
 		$image_size     = 'single';
-	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog' ), true ) ) {
+	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
 		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
 			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
@@ -1495,11 +1495,13 @@ function wc_get_rounding_precision() {
  *
  * @since  3.2.0
  * @param  float $value Number to add precision to.
- * @return int
+ * @param  bool $round Should we round after adding precision?
+ * @return int|float
  */
-function wc_add_number_precision( $value ) {
+function wc_add_number_precision( $value, $round = true ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return intval( round( $value * $precision ) );
+	$value     = $value * $precision;
+	return $round ? intval( round( $value ) ) : $value;
 }
 
 /**
@@ -1519,15 +1521,16 @@ function wc_remove_number_precision( $value ) {
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
+ * @param  bool $round Should we round after adding precision?
  * @return int
  */
-function wc_add_number_precision_deep( $value ) {
+function wc_add_number_precision_deep( $value, $round = true ) {
 	if ( is_array( $value ) ) {
 		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_add_number_precision_deep( $subvalue );
+			$value[ $key ] = wc_add_number_precision_deep( $subvalue, $round );
 		}
 	} else {
-		$value = wc_add_number_precision( $value );
+		$value = wc_add_number_precision( $value, $round );
 	}
 	return $value;
 }

@@ -61,6 +61,17 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Get the add to cart button text description - used in aria tags.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function add_to_cart_description() {
+		/* translators: %s: Product title */
+		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( __( 'Select options for &ldquo;%s&rdquo;', 'woocommerce' ), $this->get_name() ), $this );
+	}
+
+	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
 	 * @param  bool $include_taxes Should taxes be included in the prices.
