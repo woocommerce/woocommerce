@@ -89,9 +89,10 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		$permalink = get_permalink();
 	}
 
-	// Map endpoint to options
-	$endpoint = ! empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
-	$value    = ( get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ) === $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
+	// Map endpoint to options.
+	$query_vars = WC()->query->get_query_vars();
+	$endpoint   = ! empty( $query_vars[ $endpoint ] ) ? $query_vars[ $endpoint ]: $endpoint;
+	$value      = ( get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ) === $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
 		if ( strstr( $permalink, '?' ) ) {

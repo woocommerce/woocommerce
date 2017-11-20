@@ -159,7 +159,7 @@ class WC_Query {
 	public function add_endpoints() {
 		$mask = $this->get_endpoints_mask();
 
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			if ( ! empty( $var ) ) {
 				add_rewrite_endpoint( $var, $mask );
 			}
@@ -248,7 +248,7 @@ class WC_Query {
 	 * @param object $q query object
 	 */
 	public function pre_get_posts( $q ) {
-		// We only want to affect the main query
+		// We only want to affect the main query.
 		if ( ! $q->is_main_query() ) {
 			return;
 		}
@@ -256,7 +256,7 @@ class WC_Query {
 		// Fix for endpoints on the homepage
 		if ( $this->is_showing_page_on_front( $q ) && ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
+			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
 				$q->is_page     = true;
 				$q->is_home     = false;
 				$q->is_singular = true;
