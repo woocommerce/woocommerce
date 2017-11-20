@@ -410,11 +410,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'Duration'    => $duration,
 				'Request'     => array(
 					'Method'  => $request['method'],
-					'Headers' => array_merge( array(
-						'User-Agent' => $request['user-agent'],
-					), $request['headers'] ) ),
-					'Body'    => wp_slash( $request['body'] ),
+					'Headers' => array_merge(
+						array(
+							'User-Agent' => $request['user-agent'],
+						),
+						$request['headers']
+					),
 				),
+				'Body'    => wp_slash( $request['body'] ),
+			),
 		);
 		if ( is_wp_error( $response ) ) {
 			$message['Webhook Delivery']['Response'] = array(
@@ -432,7 +436,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		$logger->info( print_r( $message, true ), array(
+		$logger->info( wc_print_r( $message, true ), array(
 			'source' => 'webhooks-delivery',
 		) );
 
@@ -450,7 +454,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$response_body    = wp_remote_retrieve_body( $response );
 		}
 
-		$logger->info( print_r( $message, true ), array(
+		$logger->info( wc_print_r( $message, true ), array(
 			'source' => 'webhooks-delivery',
 		) );
 
