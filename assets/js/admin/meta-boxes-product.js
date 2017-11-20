@@ -234,8 +234,12 @@ jQuery( function( $ ) {
 			$( 'div.stock_fields' ).show();
 			$( 'p.stock_status_field' ).hide();
 		} else {
+			var product_type = $( 'select#product-type' ).val();
+
 			$( 'div.stock_fields' ).hide();
-			$( 'p.stock_status_field' ).show();
+			if ( ! $( 'p.stock_status_field' ).hasClass( 'hide_if_' + product_type ) ) {
+				$( 'p.stock_status_field' ).show();
+			}
 		}
 	}).change();
 
