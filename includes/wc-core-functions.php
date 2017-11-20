@@ -1495,11 +1495,13 @@ function wc_get_rounding_precision() {
  *
  * @since  3.2.0
  * @param  float $value Number to add precision to.
- * @return int
+ * @param  bool $round Should we round after adding precision?
+ * @return int|float
  */
-function wc_add_number_precision( $value ) {
+function wc_add_number_precision( $value, $round = false ) {
 	$precision = pow( 10, wc_get_price_decimals() );
-	return intval( round( $value * $precision ) );
+	$value     = $value * $precision;
+	return $round ? intval( round( $value ) ) : $value;
 }
 
 /**
@@ -1519,15 +1521,16 @@ function wc_remove_number_precision( $value ) {
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
+ * @param  bool $round Should we round after adding precision?
  * @return int
  */
-function wc_add_number_precision_deep( $value ) {
+function wc_add_number_precision_deep( $value, $round = false ) {
 	if ( is_array( $value ) ) {
 		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_add_number_precision_deep( $subvalue );
+			$value[ $key ] = wc_add_number_precision_deep( $subvalue, $round );
 		}
 	} else {
-		$value = wc_add_number_precision( $value );
+		$value = wc_add_number_precision( $value, $round );
 	}
 	return $value;
 }
