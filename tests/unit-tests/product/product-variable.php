@@ -99,15 +99,24 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		WC_Product_Variable::sync( $product );
 		$this->assertEquals( 'instock', $product->get_stock_status() );
 
+		$child2->set_stock_status( 'onbackorder' );
+		$child2->save();
+		WC_Product_Variable::sync( $product );
+		$this->assertEquals( 'instock', $product->get_stock_status() );
+
 		// Product should be out of stock if all children are out of stock.
 		$child1->set_stock_status( 'outofstock' );
 		$child1->save();
+		$child2->set_stock_status( 'outofstock' );
+		$child2->save();
 		WC_Product_Variable::sync( $product );
 		$this->assertEquals( 'outofstock', $product->get_stock_status() );
 
-		// Product should be on backorder if a child is on backorder.
+		// Product should be on backorder if all children are on backorder.
 		$child1->set_stock_status( 'onbackorder' );
 		$child1->save();
+		$child2->set_stock_status( 'onbackorder' );
+		$child2->save();
 		WC_Product_Variable::sync( $product );
 		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
 	}

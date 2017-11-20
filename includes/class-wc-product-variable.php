@@ -446,8 +446,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @since 3.3.0
 	 * @return boolean
 	 */
-	public function child_is_on_backorder() {
-		return $this->data_store->child_is_on_backorder( $this );
+	public function children_are_on_backorder() {
+		return $this->data_store->children_are_on_backorder( $this );
 	}
 
 	/**

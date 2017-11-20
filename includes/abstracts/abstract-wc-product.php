@@ -1570,7 +1570,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return 'onbackorder' === $this->get_stock_status();
+		if ( 'onbackorder' === $this->get_stock_status() ) {
+			return true;
+		}
+
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
 	}
 
 	/**
