@@ -982,6 +982,23 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get all tax classes for shipping based on the items in the cart.
+	 *
+	 * @return array
+	 */
+	public function get_cart_item_tax_classes_for_shipping() {
+		$found_tax_classes = array();
+
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( $item['data'] && ( $item['data']->is_shipping_taxable() ) ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
+		}
+
+		return array_unique( $found_tax_classes );
+	}
+
+	/**
 	 * Determines the value that the customer spent and the subtotal
 	 * displayed, used for things like coupon validation.
 	 *
