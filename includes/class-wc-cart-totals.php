@@ -208,7 +208,7 @@ final class WC_Cart_Totals {
 	 * into the same format for use by this class.
 	 *
 	 * Each item is made up of the following props, in addition to those returned by get_default_item_props() for totals.
-	 * 	- key: An identifier for the item (cart item key or line item ID).
+	 *  - key: An identifier for the item (cart item key or line item ID).
 	 *  - cart_item: For carts, the cart item from the cart which may include custom data.
 	 *  - quantity: The qty for this line.
 	 *  - price: The line price in cents.
@@ -217,17 +217,36 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function get_items_from_cart() {
-		$this->items = array();
+		$this->items        = array();
+		$prices_include_tax = wc_prices_include_tax();
 
 		foreach ( $this->cart->get_cart() as $cart_item_key => $cart_item ) {
+
+			$line_price = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+
+			/**
+			 * Filters whether the cart line item calculated price should be rounded.
+			 *
+			 * Setting this to true will round the result of [quantity x item price] to the number of decimals
+			 * defined in store settings. By default, this is only true when prices include tax, to avoid 1 penny/cent
+			 * off issues with cart subtotal and total.
+			 *
+			 * @since 3.3-dev
+			 *
+			 * @param bool $round whether to round the line price or not
+			 */
+			if ( apply_filters( 'woocommerce_cart_item_round_calculated_line_price', $prices_include_tax ) ) {
+				$line_price = round( $line_price );
+			}
+
 			$item                          = $this->get_default_item_props();
 			$item->key                     = $cart_item_key;
 			$item->object                  = $cart_item;
 			$item->tax_class               = $cart_item['data']->get_tax_class();
 			$item->taxable                 = 'taxable' === $cart_item['data']->get_tax_status();
-			$item->price_includes_tax      = wc_prices_include_tax();
+			$item->price_includes_tax      = $prices_include_tax;
 			$item->quantity                = $cart_item['quantity'];
-			$item->price                   = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->price                   = $line_price;
 			$item->product                 = $cart_item['data'];
 			$item->tax_rates               = $this->get_item_tax_rates( $item );
 			$this->items[ $cart_item_key ] = $item;
@@ -308,7 +327,6 @@ final class WC_Cart_Totals {
 							$fee->taxes               = wc_array_merge_recursive_numeric( $fee->taxes, WC_Tax::calc_tax( $fee->total * $proportion, WC_Tax::get_rates( $tax_class ) ) );
 						}
 					}
-
 				} elseif ( $fee->object->taxable ) {
 					$fee->taxes = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->tax_class, $this->cart->get_customer() ), false );
 				}
@@ -371,13 +389,13 @@ final class WC_Cart_Totals {
 
 		foreach ( $this->coupons as $coupon ) {
 			switch ( $coupon->get_discount_type() ) {
-				case 'fixed_product' :
+				case 'fixed_product':
 					$coupon->sort = 1;
 					break;
-				case 'percent' :
+				case 'percent':
 					$coupon->sort = 2;
 					break;
-				case 'fixed_cart' :
+				case 'fixed_cart':
 					$coupon->sort = 3;
 					break;
 				default:
@@ -393,7 +411,7 @@ final class WC_Cart_Totals {
 	 * Sort coupons so discounts apply consistently across installs.
 	 *
 	 * In order of priority;
-	 * 	- sort param
+	 *  - sort param
 	 *  - usage restriction
 	 *  - coupon value
 	 *  - ID
@@ -553,6 +571,7 @@ final class WC_Cart_Totals {
 	 * Get taxes merged by type.
 	 *
 	 * @since 3.2.0
+	 * @param  bool         $in_cents Should the totals be returned in cents, or without precision. Defaults to false.
 	 * @param  array|string $types Types to merge and return. Defaults to all.
 	 * @return array
 	 */
@@ -586,7 +605,7 @@ final class WC_Cart_Totals {
 	 * Combine item taxes into a single array, preserving keys.
 	 *
 	 * @since 3.2.0
-	 * @param array $taxes Taxes to combine.
+	 * @param array $item_taxes Taxes to combine.
 	 * @return array
 	 */
 	protected function combine_item_taxes( $item_taxes ) {
