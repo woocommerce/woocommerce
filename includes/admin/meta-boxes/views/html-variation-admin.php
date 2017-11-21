@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
-		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></a>
+		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set admin variation order', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?> </strong>
@@ -44,14 +44,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 			}
 		?>
-		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
-		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_object->get_menu_order( 'edit' ) ); ?>" />
+		<input type="hidden" name="variable_post_id[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
+		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_object->get_menu_order( 'edit' ) ); ?>" />
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
 				<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
-					<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
+					<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo esc_attr( $loop ); ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 				</a>
 			</p>
 			<?php
@@ -70,22 +70,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<p class="form-row form-row-full options">
 				<label>
-					<?php _e( 'Enabled', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ) ), true ); ?> />
+					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
+					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
 				</label>
-				<label class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
-					<?php _e( 'Downloadable', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php checked( $variation_object->get_downloadable( 'edit' ), true ); ?> />
+				<label class="tips" data-tip="<?php esc_html_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
+					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>:
+					<input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_downloadable( 'edit' ), true ); ?> />
 				</label>
-				<label class="tips" data-tip="<?php _e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
-					<?php _e( 'Virtual', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php checked( $variation_object->get_virtual( 'edit' ), true ); ?> />
+				<label class="tips" data-tip="<?php esc_html_e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
+					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>:
+					<input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_virtual( 'edit' ), true ); ?> />
 				</label>
 
 				<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-					<label class="tips" data-tip="<?php _e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>">
-						<?php _e( 'Manage stock?', 'woocommerce' ); ?>
-						<input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo $loop; ?>]" <?php checked( $variation_object->get_manage_stock( 'edit' ), true ); ?> />
+					<label class="tips" data-tip="<?php esc_html_e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>">
+						<?php esc_html_e( 'Manage stock?', 'woocommerce' ); ?>
+						<input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_manage_stock( 'edit' ), true ); ?> />
 					</label>
 				<?php endif; ?>
 
@@ -94,8 +94,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="variable_pricing">
 				<?php
-					/* translators: %s: currency symbol */
 					$label = sprintf(
+						/* translators: %s: currency symbol */
 						__( 'Regular price (%s)', 'woocommerce' ),
 						get_woocommerce_currency_symbol()
 					);
@@ -109,9 +109,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'wrapper_class' => 'form-row form-row-first',
 						'placeholder'   => __( 'Variation price (required)', 'woocommerce' ),
 					) );
-
-					/* translators: %s: currency symbol */
+				
 					$label = sprintf(
+						/* translators: %s: currency symbol */
 						__( 'Sale price (%s)', 'woocommerce' ),
 						get_woocommerce_currency_symbol()
 					);
@@ -121,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'name'          => "variable_sale_price[{$loop}]",
 						'value'         => wc_format_localized_price( $variation_object->get_sale_price( 'edit' ) ),
 						'data_type'     => 'price',
-						'label'         => $label . ' <a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a><a href="#" class="cancel_sale_schedule hidden">' . __( 'Cancel schedule', 'woocommerce' ) . '</a>',
+						'label'         => $label . ' <a href="#" class="sale_schedule">' . esc_html__( 'Schedule', 'woocommerce' ) . '</a><a href="#" class="cancel_sale_schedule hidden">' . esc_html__( 'Cancel schedule', 'woocommerce' ) . '</a>',
 						'wrapper_class' => 'form-row form-row-last',
 					) );
 
@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</p>
 						<p class="form-row form-row-last">
 							<label>' . __( 'Sale end date', 'woocommerce' ) . '</label>
-							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . $loop . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
+							<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . esc_attr( $loop ) . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_html_x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 						</p>
 					</div>';
 
@@ -170,7 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'wrapper_class'     => 'form-row form-row-first',
 						) );
 
-						echo '<input type="hidden" name="variable_original_stock[' . $loop . ']" value="' . esc_attr( wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ) ) . '" />';
+						echo '<input type="hidden" name="variable_original_stock[' . esc_attr( $loop ) . ']" value="' . esc_attr( wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 						woocommerce_wp_select( array(
 							'id'            => "variable_backorders{$loop}",
@@ -211,8 +211,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					) );
 
 					if ( wc_product_weight_enabled() ) {
-						/* translators: %s: weight unit */
 						$label = sprintf(
+							/* translators: %s: weight unit */
 							__( 'Weight (%s)', 'woocommerce' ),
 							esc_html( get_option( 'woocommerce_weight_unit' ) )
 						);
@@ -238,17 +238,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						?><p class="form-field form-row dimensions_field hide_if_variation_virtual form-row-last">
 							<label for="product_length"><?php
-								/* translators: %s: dimension unit */
 								printf(
-									__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
+									/* translators: %s: dimension unit */
+									esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
 									get_option( 'woocommerce_dimension_unit' )
 								);
 							?></label>
 							<?php echo wc_help_tip( __( 'Length x width x height in decimal form', 'woocommerce' ) ); ?>
 							<span class="wrap">
-								<input id="product_length" placeholder="<?php echo $parent_length ? esc_attr( $parent_length ) : esc_attr__( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_length( 'edit' ) ) ); ?>" />
-								<input placeholder="<?php echo $parent_width ? esc_attr( $parent_width ) : esc_attr__( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_width( 'edit' ) ) ); ?>" />
-								<input placeholder="<?php echo $parent_height ? esc_attr( $parent_height ) : esc_attr__( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_height( 'edit' ) ) ); ?>" />
+								<input id="product_length" placeholder="<?php echo $parent_length ? esc_attr( $parent_length ) : esc_attr__( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_length( 'edit' ) ) ); ?>" />
+								<input placeholder="<?php echo $parent_width ? esc_attr( $parent_width ) : esc_attr__( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_width( 'edit' ) ) ); ?>" />
+								<input placeholder="<?php echo $parent_height ? esc_attr( $parent_height ) : esc_attr__( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="variable_height[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( wc_format_localized_decimal( $variation_object->get_height( 'edit' ) ) ); ?>" />
 							</span>
 						</p><?php
 					}
@@ -267,7 +267,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 
 			<div>
-				<p class="form-row hide_if_variation_virtual form-row-full"><label><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php
+				<p class="form-row hide_if_variation_virtual form-row-full"><label><?php esc_html_e( 'Shipping class', 'woocommerce' ); ?></label> <?php
 					wp_dropdown_categories( array(
 						'taxonomy'         => 'product_shipping_class',
 						'hide_empty'       => 0,
@@ -319,12 +319,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<div class="show_if_variation_downloadable" style="display: none;">
 				<div class="form-row form-row-full downloadable_files">
-					<label><?php _e( 'Downloadable files', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Downloadable files', 'woocommerce' ); ?></label>
 					<table class="widefat">
 						<thead>
 							<div>
-								<th><?php _e( 'Name', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the name of the download shown to the customer.', 'woocommerce' ) ); ?></th>
-								<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ) ); ?></th>
+								<th><?php esc_html_e( 'Name', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the name of the download shown to the customer.', 'woocommerce' ) ); ?></th>
+								<th colspan="2"><?php esc_html_e( 'File URL', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ) ); ?></th>
 								<th>&nbsp;</th>
 							</div>
 						</thead>
@@ -349,7 +349,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 										ob_start();
 										include( 'html-product-variation-download.php' );
 										echo esc_attr( ob_get_clean() );
-									?>"><?php _e( 'Add file', 'woocommerce' ); ?></a>
+									?>"><?php esc_html_e( 'Add file', 'woocommerce' ); ?></a>
 								</th>
 							</div>
 						</tfoot>
