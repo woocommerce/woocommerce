@@ -163,7 +163,7 @@ if ( wc_tax_enabled() ) {
 					<td class="total">
 						<?php
 						$refunded = $order->get_total_tax_refunded_by_rate_id( $tax->rate_id );
-						if ( ( $refunded ) > 0 ) {
+						if ( $refunded > 0 ) {
 							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_currency() ) ) . '</ins>';
 						} else {
 							echo $tax->formatted_amount;
