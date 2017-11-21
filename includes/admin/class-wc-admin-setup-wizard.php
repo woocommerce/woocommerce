@@ -624,7 +624,7 @@ class WC_Admin_Setup_Wizard {
 				'settings'    => array(
 					'cost' => array(
 						'type'          => 'text',
-						'default_value' => __( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
+						'default_value' => _x( 'Cost', 'Short label for entering the cost of an item', 'woocommerce' ),
 						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
 						'required'      => true,
 					),
@@ -1599,7 +1599,7 @@ class WC_Admin_Setup_Wizard {
 		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text    = sprintf(
 			/* translators: %1$s: link to videos, %2$s: link to docs */
-			__( 'Watch our <a href="%1$s" target="_blank">guided tour videos</a> to learn more about WooCommerce, and visit WooCommerce.com to learn more about <a href="%2$s" target="_blank">getting started</a>.' ),
+			__( 'Watch our <a href="%1$s" target="_blank">guided tour videos</a> to learn more about WooCommerce, and visit WooCommerce.com to learn more about <a href="%2$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$videos_url,
 			$docs_url
 		);
