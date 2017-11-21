@@ -366,7 +366,7 @@ function wc_rest_validate_value_from_schema_backwards_compatibility( $value, $ar
 		}
 		if ( ! wp_is_numeric_array( $value ) ) {
 			/* translators: 1: parameter, 2: type name */
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'array' ) );
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'array' ) );
 		}
 		foreach ( $value as $index => $v ) {
 			$is_valid = wc_rest_validate_value_from_schema_backwards_compatibility( $v, $args['items'], $param . '[' . $index . ']' );
@@ -382,7 +382,7 @@ function wc_rest_validate_value_from_schema_backwards_compatibility( $value, $ar
 		}
 		if ( ! is_array( $value ) ) {
 			/* translators: 1: parameter, 2: type name */
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'object' ) );
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'object' ) );
 		}
 
 		foreach ( $value as $property => $v ) {
@@ -392,7 +392,7 @@ function wc_rest_validate_value_from_schema_backwards_compatibility( $value, $ar
 					return $is_valid;
 				}
 			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not a valid property of Object.' ), $property ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not a valid property of Object.', 'woocommerce' ), $property ) );
 			}
 		}
 	}
@@ -404,7 +404,7 @@ function wc_rest_validate_value_from_schema_backwards_compatibility( $value, $ar
 		}
 
 		/* translators: 1: parameter, 2: type name */
-		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'string' ) );
+		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'string' ) );
 	}
 
 	if ( ! $is_valid ) {
