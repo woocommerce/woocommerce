@@ -380,36 +380,24 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
-		global $wpdb;
-		$children            = $product->get_children();
-		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'outofstock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		return count( $children ) > $oufofstock_children;
+		return $this->child_has_stock_status( $product, 'instock' );
 	}
 
 	/**
-	 * Are the children on backorder?
+	 * Does a child have a stock status?
 	 *
 	 * @since 3.3.0
 	 * @param WC_Product $product Product object.
+	 * @param string $status 'instock', 'outofstock', or 'onbackorder'.
 	 * @return boolean
 	 */
-	public function children_are_on_backorder( $product ) {
+	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
+
 		$children             = $product->get_children();
+		$children_with_status = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = '" . esc_sql( $status ) . "' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
 
-		// If any children are in stock, the product is not on backorder.
-		$instock_children     = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'instock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		if ( $instock_children ) {
-			return false;
-		}
-
-		// If no children are in stock and at least one child is on backorder, the product is on backorder.
-		$backordered_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'onbackorder' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		if ( $backordered_children ) {
-			return true;
-		}
-
-		return false;
+		return (bool) $children_with_status;
 	}
 
 	/**
@@ -500,10 +488,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	public function sync_stock_status( &$product ) {
-		$in_stock = $product->child_is_in_stock();
-		if ( $in_stock ) {
-			$on_backorder = $product->children_are_on_backorder();
-			$product->set_stock_status( $on_backorder ? 'onbackorder' : 'instock' );
+		if ( $product->child_is_in_stock() ) {
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->child_is_on_backorder() ) {
+			$product->set_stock_status( 'onbackorder' );
 		} else {
 			$product->set_stock_status( 'outofstock' );
 		}
