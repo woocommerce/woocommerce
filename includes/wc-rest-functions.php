@@ -320,3 +320,175 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
 }
+
+/**
+ * Validate a request argument based on details registered to the route.
+ * Function to keep backwards compatibility in our REST API v1 and v2 in WP 4.9+.
+ * This function is for internal use only, and should be removed in a future version.
+ *
+ * @since 3.2.5
+ *
+ * @param  mixed            $value   value.
+ * @param  WP_REST_Request  $request Request instance.
+ * @param  string           $param   Parameter.
+ * @return WP_Error|bool
+ */
+function wc_rest_validate_request_arg_backwards_compatibility( $value, $request, $param ) {
+	$attributes = $request->get_attributes();
+
+	if ( ! isset( $attributes['args'][ $param ] ) || ! is_array( $attributes['args'][ $param ] ) ) {
+		return true;
+	}
+
+	$args = $attributes['args'][ $param ];
+
+	return wc_rest_validate_value_from_schema_backwards_compatibility( $value, $args, $param );
+}
+
+/**
+ * Validate a value based on a schema.
+ * Function to keep backwards compatibility in our REST API v1 and v2 in WP 4.9+.
+ * This function is for internal use only, and should be removed in a future version.
+ *
+ * @since 3.2.5
+ *
+ * @param mixed  $value The value to validate.
+ * @param array  $args  Schema array to use for validation.
+ * @param string $param The parameter name, used in error messages.
+ * @return true|WP_Error
+ */
+function wc_rest_validate_value_from_schema_backwards_compatibility( $value, $args, $param = '' ) {
+	$is_valid = false;
+
+	if ( 'array' === $args['type'] ) {
+		if ( ! is_array( $value ) ) {
+			$value = preg_split( '/[\s,]+/', $value );
+		}
+		if ( ! wp_is_numeric_array( $value ) ) {
+			/* translators: 1: parameter, 2: type name */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'array' ) );
+		}
+		foreach ( $value as $index => $v ) {
+			$is_valid = wc_rest_validate_value_from_schema_backwards_compatibility( $v, $args['items'], $param . '[' . $index . ']' );
+			if ( is_wp_error( $is_valid ) ) {
+				return $is_valid;
+			}
+		}
+	}
+
+	if ( 'object' === $args['type'] ) {
+		if ( $value instanceof stdClass ) {
+			$value = (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			/* translators: 1: parameter, 2: type name */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'object' ) );
+		}
+
+		foreach ( $value as $property => $v ) {
+			if ( isset( $args['properties'][ $property ] ) ) {
+				$is_valid = wc_rest_validate_value_from_schema_backwards_compatibility( $v, $args['properties'][ $property ], $param . '[' . $property . ']' );
+				if ( is_wp_error( $is_valid ) ) {
+					return $is_valid;
+				}
+			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not a valid property of Object.', 'woocommerce' ), $property ) );
+			}
+		}
+	}
+
+	// Allow null to keep backwards compatibility.
+	if ( 'string' === $args['type'] ) {
+		if ( is_string( $value ) || is_null( $value ) ) {
+			return true;
+		}
+
+		/* translators: 1: parameter, 2: type name */
+		return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, 'string' ) );
+	}
+
+	if ( ! $is_valid ) {
+		return rest_validate_value_from_schema( $value, $args, $param );
+	}
+
+	return $is_valid;
+}
+
+/**
+ * Sanitize a request argument based on details registered to the route.
+ * Function to keep backwards compatibility in our REST API v1 and v2 in WP 4.9+.
+ * This function is for internal use only, and should be removed in a future version.
+ *
+ * @since 3.2.5
+ *
+ * @param  mixed            $value   value.
+ * @param  WP_REST_Request  $request Request instance.
+ * @param  string           $param   Parameter.
+ * @return mixed
+ */
+function wc_rest_sanitize_request_arg_backwards_compatibility( $value, $request, $param ) {
+	$attributes = $request->get_attributes();
+	if ( ! isset( $attributes['args'][ $param ] ) || ! is_array( $attributes['args'][ $param ] ) ) {
+		return $value;
+	}
+	$args = $attributes['args'][ $param ];
+
+	return wc_rest_sanitize_value_from_schema_backwards_compatibility( $value, $args );
+}
+
+/**
+ * Sanitize a value based on a schema.
+ * Function to keep backwards compatibility in our REST API v1 and v2 in WP 4.9+.
+ * This function is for internal use only, and should be removed in a future version.
+ *
+ * @since 3.2.5
+ *
+ * @param mixed $value The value to sanitize.
+ * @param array $args  Schema array to use for sanitization.
+ * @return mixed
+ */
+function wc_rest_sanitize_value_from_schema_backwards_compatibility( $value, $args ) {
+	if ( 'array' === $args['type'] ) {
+		if ( empty( $args['items'] ) ) {
+			return (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			$value = preg_split( '/[\s,]+/', $value );
+		}
+		foreach ( $value as $index => $v ) {
+			$value[ $index ] = wc_rest_sanitize_value_from_schema_backwards_compatibility( $v, $args['items'] );
+		}
+		// Normalize to numeric array so nothing unexpected is in the keys.
+		$value = array_values( $value );
+		return $value;
+	}
+
+	if ( 'object' === $args['type'] ) {
+		if ( $value instanceof stdClass ) {
+			$value = (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		foreach ( $value as $property => $v ) {
+			if ( isset( $args['properties'][ $property ] ) ) {
+				$value[ $property ] = wc_rest_sanitize_value_from_schema_backwards_compatibility( $v, $args['properties'][ $property ] );
+			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
+				unset( $value[ $property ] );
+			}
+		}
+
+		return $value;
+	}
+
+	if ( 'string' === $args['type'] ) {
+		if ( is_null( $value ) ) {
+			return null;
+		}
+
+		return strval( $value );
+	}
+
+	return rest_sanitize_value_from_schema( $value, $args );
+}

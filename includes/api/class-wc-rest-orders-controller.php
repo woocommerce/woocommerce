@@ -597,8 +597,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	protected function maybe_set_item_meta_data( $item, $posted ) {
 		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
 			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'], $meta['value'] ) ) {
-					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				if ( isset( $meta['key'] ) ) {
+					$value = isset( $meta['value'] ) ? $meta['value'] : null;
+					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
 				}
 			}
 		}
@@ -1102,6 +1103,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1128,6 +1133,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1334,6 +1343,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1420,6 +1433,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1518,6 +1535,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Coupons line data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wc_rest_sanitize_request_arg_backwards_compatibility',
+						'validate_callback' => 'wc_rest_validate_request_arg_backwards_compatibility',
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
