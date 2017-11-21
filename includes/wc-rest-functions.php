@@ -448,6 +448,40 @@ function wc_rest_sanitize_request_arg_backwards_compatibility( $value, $request,
  * @return mixed
  */
 function wc_rest_sanitize_value_from_schema_backwards_compatibility( $value, $args ) {
+	if ( 'array' === $args['type'] ) {
+		if ( empty( $args['items'] ) ) {
+			return (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			$value = preg_split( '/[\s,]+/', $value );
+		}
+		foreach ( $value as $index => $v ) {
+			$value[ $index ] = wc_rest_sanitize_value_from_schema_backwards_compatibility( $v, $args['items'] );
+		}
+		// Normalize to numeric array so nothing unexpected is in the keys.
+		$value = array_values( $value );
+		return $value;
+	}
+
+	if ( 'object' === $args['type'] ) {
+		if ( $value instanceof stdClass ) {
+			$value = (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		foreach ( $value as $property => $v ) {
+			if ( isset( $args['properties'][ $property ] ) ) {
+				$value[ $property ] = wc_rest_sanitize_value_from_schema_backwards_compatibility( $v, $args['properties'][ $property ] );
+			} elseif ( isset( $args['additionalProperties'] ) && false === $args['additionalProperties'] ) {
+				unset( $value[ $property ] );
+			}
+		}
+
+		return $value;
+	}
+
 	if ( 'string' === $args['type'] ) {
 		if ( is_null( $value ) ) {
 			return null;
