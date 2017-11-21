@@ -336,7 +336,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
-		'i81n'
+		'i18n'
 	]);
 
 	grunt.registerTask( 'js', [
