@@ -378,7 +378,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -390,7 +390,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 							),
 							'product_id' => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation_id' => array(
@@ -486,7 +486,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),

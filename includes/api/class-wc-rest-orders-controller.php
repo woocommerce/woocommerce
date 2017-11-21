@@ -1118,7 +1118,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
@@ -1139,12 +1139,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'product_id' => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation_id' => array(
@@ -1230,7 +1230,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1321,7 +1321,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1345,12 +1345,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'method_title' => array(
 								'description' => __( 'Shipping method name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'method_id' => array(
 								'description' => __( 'Shipping method ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total' => array(
@@ -1407,7 +1407,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1431,7 +1431,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Fee name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
@@ -1505,7 +1505,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1529,7 +1529,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'discount' => array(
@@ -1563,7 +1563,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
