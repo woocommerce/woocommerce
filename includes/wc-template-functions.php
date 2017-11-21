@@ -2443,7 +2443,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$strings = array();
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
-			'before'    => '<ul class = "wc-item-meta"><li>',
+			'before'    => '<ul class="wc-item-meta"><li>',
 			'after'     => '</li></ul>',
 			'separator' => '</li><li>',
 			'echo'      => true,
