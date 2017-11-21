@@ -11,7 +11,14 @@
 	<exclude-pattern>includes/gateways/simplify-commerce/includes/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
 
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="4.5" />
+	<config name="testVersion" value="5.2-"/>
+
+	<!-- Rueles -->
 	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress">
@@ -28,5 +35,11 @@
 		<properties>
 			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
 		</properties>
-</rule>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="woocommerce" />
+		</properties>
+	</rule>
 </ruleset>
