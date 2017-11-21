@@ -1456,6 +1456,12 @@ function wc_update_330_product_stock_status() {
 			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
 		", $min_stock_amount ) );
 
+	if ( empty( $post_ids ) ) {
+		return;
+	}
+
+	$post_ids = array_map( 'absint', $post_ids );
+
 	// Set the status to onbackorder for those products.
 	$wpdb->query( "
 		UPDATE $wpdb->postmeta

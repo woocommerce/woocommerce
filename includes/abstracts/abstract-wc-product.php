@@ -945,10 +945,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $status New status.
 	 */
-	public function set_stock_status( $status = '' ) {
+	public function set_stock_status( $status = 'instock' ) {
 		$valid_statuses = wc_get_product_stock_status_options();
 
-		if ( $status && isset( $valid_statuses[ $status ] ) ) {
+		if ( isset( $valid_statuses[ $status ] ) ) {
 			$this->set_prop( 'stock_status', $status );
 		} else {
 			$this->set_prop( 'stock_status', 'instock' );
@@ -1498,7 +1498,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns whether or not the product is in stock.
+	 * Returns whether or not the product can be purchased.
+	 * This returns true for 'instock' and 'onbackorder' stock statuses.
 	 *
 	 * @return bool
 	 */

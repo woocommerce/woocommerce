@@ -237,9 +237,7 @@ jQuery( function( $ ) {
 			var product_type = $( 'select#product-type' ).val();
 
 			$( 'div.stock_fields' ).hide();
-			if ( ! $( 'p.stock_status_field' ).hasClass( 'hide_if_' + product_type ) ) {
-				$( 'p.stock_status_field' ).show();
-			}
+			$( 'p.stock_status_field:not( .hide_if_' + product_type + ' )' ).show();
 		}
 	}).change();
 

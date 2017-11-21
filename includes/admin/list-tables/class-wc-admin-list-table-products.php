@@ -433,7 +433,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 			$query_vars['meta_query'][] = array(
 				'key' => '_stock_status',
-				'value' => esc_attr( $_GET['stock_status'] ),
+				'value' => wc_clean( wp_unslash( $_GET['stock_status'] ) ),
 			);
 		}
 
