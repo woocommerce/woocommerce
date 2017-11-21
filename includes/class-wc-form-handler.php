@@ -887,7 +887,7 @@ class WC_Form_Handler {
 						// Don't use wc_clean as it destroys sanitized characters.
 						$value = sanitize_title( wp_unslash( $_REQUEST[ $taxonomy ] ) );
 					} else {
-						$value = wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) ); // WPCS: sanitization ok.
+						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
 					}
 
 					// Allow if valid or show error.
