@@ -18,14 +18,13 @@
 	<config name="minimum_supported_wp_version" value="4.5" />
 	<config name="testVersion" value="5.2-"/>
 
-	<!-- Rueles -->
+	<!-- Rules -->
 	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress">
 		<exclude name="WordPress.VIP.RestrictedFunctions" />
 		<exclude name="WordPress.VIP.OrderByRand" />
 	</rule>
-
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
 			<property name="customSanitizingFunctions" type="array" value="wc_clean,wc_sanitize_tooltip,wc_format_decimal,wc_stock_amount" />
@@ -36,7 +35,6 @@
 			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
 		</properties>
 	</rule>
-
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array" value="woocommerce" />
