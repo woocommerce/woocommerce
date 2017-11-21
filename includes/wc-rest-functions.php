@@ -445,12 +445,12 @@ function wc_rest_sanitize_request_arg_backwards_compatibility( $value, $request,
  *
  * @param mixed $value The value to sanitize.
  * @param array $args  Schema array to use for sanitization.
- * @return true|WP_Error
+ * @return mixed
  */
 function wc_rest_sanitize_value_from_schema_backwards_compatibility( $value, $args ) {
 	if ( 'string' === $args['type'] ) {
 		if ( is_null( $value ) ) {
-			return true;
+			return null;
 		}
 
 		return strval( $value );
