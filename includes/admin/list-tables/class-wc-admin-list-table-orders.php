@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_List_Table_Orders', false ) ) {
-	new WC_Admin_List_Table_Orders();
 	return;
 }
 
@@ -395,6 +394,176 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
+	 * Get items to display in the preview as HTML.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return string
+	 */
+	public static function get_order_preview_item_html( $order ) {
+		$hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', array(
+			'_qty',
+			'_tax_class',
+			'_product_id',
+			'_variation_id',
+			'_line_subtotal',
+			'_line_subtotal_tax',
+			'_line_total',
+			'_line_tax',
+			'method_id',
+			'cost',
+		) );
+
+		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
+		$columns    = apply_filters( 'woocommerce_admin_order_preview_line_item_columns', array(
+			'product'  => __( 'Product', 'woocommerce' ),
+			'quantity' => __( 'Quantity', 'woocommerce' ),
+			'tax'      => __( 'Tax', 'woocommerce' ),
+			'total'    => __( 'Total', 'woocommerce' ),
+		), $order );
+
+		if ( ! wc_tax_enabled() ) {
+			unset( $columns['tax'] );
+		}
+
+		$html = '
+		<div class="wc-order-preview-table-wrapper">
+			<table cellspacing="0" class="wc-order-preview-table">
+				<thead>
+					<tr>';
+
+		foreach ( $columns as $column => $label ) {
+			$html .= '<th class="wc-order-preview-table__column--' . esc_attr( $column ) . '">' . esc_html( $label ) . '</th>';
+		}
+
+		$html .= '
+					</tr>
+				</thead>
+				<tbody>';
+
+		foreach ( $line_items as $item_id => $item ) {
+			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
+
+			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . '">';
+
+			foreach ( $columns as $column => $label ) {
+				$html .= '<td class="wc-order-preview-table__column--' . esc_attr( $column ) . '">';
+				switch ( $column ) {
+					case 'product':
+						$html .= wp_kses_post( $item->get_name() );
+
+						if ( $product_object ) {
+							$html .= '<div class="wc-order-item-sku">' . esc_html( $product_object->get_sku() ) . '</div>';
+						}
+
+						if ( $meta_data = $item->get_formatted_meta_data( '' ) ) {
+							$html .= '<table cellspacing="0" class="wc-order-item-meta">';
+
+							foreach ( $meta_data as $meta_id => $meta ) {
+								if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+									continue;
+								}
+								$html .= '<tr><th>' . wp_kses_post( $meta->display_key ) . ':</th><td>' . wp_kses_post( force_balance_tags( $meta->display_value ) ) . '</td></tr>';
+							}
+							$html .= '</table>';
+						}
+						break;
+					case 'quantity':
+						$html .= esc_html( $item->get_quantity() );
+						break;
+					case 'tax':
+						$html .= wc_price( $item->get_total_tax(), array( 'currency' => $order->get_currency() ) );
+						break;
+					case 'total':
+						$html .= wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
+						break;
+					default :
+						$html .= apply_filters( 'woocommerce_admin_order_preview_line_item_column_' . sanitize_key( $column ), '', $item, $item_id, $order );
+						break;
+				}
+				$html .= '</td>';
+			}
+
+			$html .= '</tr>';
+		}
+
+		$html .= '
+				</tbody>
+			</table>
+		</div>';
+
+		return $html;
+	}
+
+	/**
+	 * Get actions to display in the preview as HTML.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return string
+	 */
+	public static function get_order_preview_actions_html( $order ) {
+		$actions        = array();
+		$status_actions = array();
+
+		if ( $order->has_status( array( 'pending' ) ) ) {
+			$status_actions['on-hold'] = array(
+				'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'      => __( 'On-hold', 'woocommerce' ),
+				'action'    => 'on-hold',
+			);
+		}
+
+		if ( $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+			$status_actions['processing'] = array(
+				'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'      => __( 'Processing', 'woocommerce' ),
+				'action'    => 'processing',
+			);
+		}
+
+		if ( $order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+			$status_actions['complete'] = array(
+				'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'      => __( 'Completed', 'woocommerce' ),
+				'action'    => 'complete',
+			);
+		}
+
+		if ( $status_actions ) {
+			$actions['status'] = array(
+				'group'   => __( 'Change status: ', 'woocommerce' ),
+				'actions' => $status_actions,
+			);
+		}
+
+		return wc_render_action_buttons( apply_filters( 'woocommerce_admin_order_preview_actions', $actions, $order ) );
+	}
+
+	/**
+	 * Get order details to send to the ajax endpoint for previews.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return array
+	 */
+	public static function order_preview_get_order_details( $order ) {
+		if ( ! $order ) {
+			return array();
+		}
+		return apply_filters( 'woocommerce_admin_order_preview_get_order_details', array(
+			'data'                       => $order->get_data(),
+			'order_number'               => $order->get_order_number(),
+			'item_html'                  => WC_Admin_List_Table_Orders::get_order_preview_item_html( $order ),
+			'actions_html'               => WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order ),
+			'ship_to_billing'            => wc_ship_to_billing_address_only(),
+			'needs_shipping'             => $order->needs_shipping_address(),
+			'formatted_billing_address'  => ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ),
+			'formatted_shipping_address' => ( $address = $order->get_formatted_shipping_address() ) ? $address: __( 'N/A', 'woocommerce' ),
+			'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
+			'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
+			'shipping_via'               => $order->get_shipping_method(),
+		), $order );
+	}
+
+	/**
 	 * Handle bulk actions.
 	 *
 	 * @param  string $redirect_to URL to redirect to.
@@ -618,5 +787,3 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 	}
 }
-
-new WC_Admin_List_Table_Orders();
