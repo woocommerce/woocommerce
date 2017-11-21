@@ -37,3 +37,10 @@ script:
 
 after_script:
   - bash tests/bin/travis.sh after
+
+# Specifies that Travis should create builds for master and release branches and also tags.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^release\//
