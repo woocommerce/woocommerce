@@ -25,7 +25,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.2.4';
+	public $version = '3.2.5';
 
 	/**
 	 * The single instance of the class.
