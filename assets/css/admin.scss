@@ -2001,7 +2001,7 @@ ul.wc_coupon_list_block {
 		.order-preview.disabled {
 			&::before {
 				content: '';
-				background: url(../../../../../wp-includes/images/wpspin.gif) no-repeat center top;
+				background: url('../images/wpspin.gif') no-repeat center top;
 			}
 		}
 		.order-status {
