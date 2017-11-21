@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Save fee tax lines to new orders on checkout.
 * Fix - Restore the post global after rendering product shortcodes.
 * Fix - Fix product filtering when searching for a string including quote characters.
+* Fix - Fix layered nav dropdowns containing unicode characters.
 * Fix - Fix an edge case rounding bug with shipping taxes.
 
 = 3.2.4 - 2017-11-16 =
