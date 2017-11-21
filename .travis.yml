@@ -6,7 +6,6 @@ sudo: false
 php:
   - 5.6
   - 7.0
-  - 7.1
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -21,13 +20,14 @@ matrix:
   - php: 5.2
     dist: precise
   - php: 7.1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - php: 7.1
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
   - env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - if [[ $TRAVIS_PHP_VERSION == '7.1' ]]; then composer install; fi
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
