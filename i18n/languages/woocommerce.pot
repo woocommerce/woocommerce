@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.2.4\n"
+"Project-Id-Version: WooCommerce 3.2.5\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2017-11-16 17:34:08+00:00\n"
+"POT-Creation-Date: 2017-11-21 14:48:19+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n1.0.0\n"
+"X-Generator: grunt-wp-i18n1.0.1\n"
 
 #: i18n/continents.php:19
 msgid "Africa"
@@ -8446,14 +8446,6 @@ msgstr ""
 msgid "Set a fixed price to cover shipping costs."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:627
-#: includes/admin/meta-boxes/views/html-order-items.php:31
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:31
-#: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:58
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:91
-msgid "Cost"
-msgstr ""
-
 #: includes/admin/class-wc-admin-setup-wizard.php:628
 msgid "What would you like to charge for flat rate shipping?"
 msgstr ""
@@ -10610,6 +10602,13 @@ msgstr ""
 #: includes/class-wc-form-handler.php:492
 #: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php:338
 msgid "Item"
+msgstr ""
+
+#: includes/admin/meta-boxes/views/html-order-items.php:31
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:31
+#: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:58
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:91
+msgid "Cost"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-items.php:32
@@ -14915,7 +14914,7 @@ msgstr ""
 #: includes/api/class-wc-rest-orders-controller.php:1488
 #: includes/api/class-wc-rest-orders-controller.php:1546
 #: includes/api/class-wc-rest-product-variations-controller.php:929
-#: includes/api/class-wc-rest-products-controller.php:1972
+#: includes/api/class-wc-rest-products-controller.php:1975
 msgid "Meta data."
 msgstr ""
 
@@ -14930,7 +14929,7 @@ msgstr ""
 #: includes/api/class-wc-rest-orders-controller.php:1495
 #: includes/api/class-wc-rest-orders-controller.php:1553
 #: includes/api/class-wc-rest-product-variations-controller.php:936
-#: includes/api/class-wc-rest-products-controller.php:1979
+#: includes/api/class-wc-rest-products-controller.php:1982
 msgid "Meta ID."
 msgstr ""
 
@@ -14945,7 +14944,7 @@ msgstr ""
 #: includes/api/class-wc-rest-orders-controller.php:1501
 #: includes/api/class-wc-rest-orders-controller.php:1559
 #: includes/api/class-wc-rest-product-variations-controller.php:942
-#: includes/api/class-wc-rest-products-controller.php:1985
+#: includes/api/class-wc-rest-products-controller.php:1988
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:476
 #: includes/api/v1/class-wc-rest-orders-controller.php:1309
 msgid "Meta key."
@@ -14962,7 +14961,7 @@ msgstr ""
 #: includes/api/class-wc-rest-orders-controller.php:1506
 #: includes/api/class-wc-rest-orders-controller.php:1564
 #: includes/api/class-wc-rest-product-variations-controller.php:947
-#: includes/api/class-wc-rest-products-controller.php:1990
+#: includes/api/class-wc-rest-products-controller.php:1993
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:488
 #: includes/api/v1/class-wc-rest-orders-controller.php:1321
 msgid "Meta value."
@@ -16266,7 +16265,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:906
 #: includes/api/class-wc-rest-products-controller.php:1890
-#: includes/api/class-wc-rest-products-controller.php:1932
+#: includes/api/class-wc-rest-products-controller.php:1935
 #: includes/api/v1/class-wc-rest-products-controller.php:2199
 #: includes/api/v1/class-wc-rest-products-controller.php:2241
 #: includes/api/v1/class-wc-rest-products-controller.php:2531
@@ -16276,7 +16275,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:911
 #: includes/api/class-wc-rest-products-controller.php:1895
-#: includes/api/class-wc-rest-products-controller.php:1937
+#: includes/api/class-wc-rest-products-controller.php:1940
 #: includes/api/v1/class-wc-rest-product-attributes-controller.php:462
 #: includes/api/v1/class-wc-rest-products-controller.php:2204
 #: includes/api/v1/class-wc-rest-products-controller.php:2246
@@ -16285,14 +16284,14 @@ msgid "Attribute name."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:916
-#: includes/api/class-wc-rest-products-controller.php:1942
+#: includes/api/class-wc-rest-products-controller.php:1945
 #: includes/api/v1/class-wc-rest-products-controller.php:2251
 #: includes/api/v1/class-wc-rest-products-controller.php:2541
 msgid "Selected attribute term name."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:924
-#: includes/api/class-wc-rest-products-controller.php:1967
+#: includes/api/class-wc-rest-products-controller.php:1970
 #: includes/api/v1/class-wc-rest-products-controller.php:2561
 msgid "Menu order, used to custom sort products."
 msgstr ""
@@ -16590,88 +16589,88 @@ msgstr ""
 msgid "List of available term names of the attribute."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:1925
+#: includes/api/class-wc-rest-products-controller.php:1928
 #: includes/api/v1/class-wc-rest-products-controller.php:2234
 msgid "Defaults variation attributes."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:1950
+#: includes/api/class-wc-rest-products-controller.php:1953
 msgid "List of variations IDs."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:1959
+#: includes/api/class-wc-rest-products-controller.php:1962
 #: includes/api/v1/class-wc-rest-products-controller.php:2552
 msgid "List of grouped products ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2012
+#: includes/api/class-wc-rest-products-controller.php:2015
 #: includes/api/v1/class-wc-rest-products-controller.php:2580
 msgid "Limit result set to products with a specific slug."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2018
+#: includes/api/class-wc-rest-products-controller.php:2021
 #: includes/api/v1/class-wc-rest-products-controller.php:2586
 msgid "Limit result set to products assigned a specific status."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2025
+#: includes/api/class-wc-rest-products-controller.php:2028
 #: includes/api/v1/class-wc-rest-products-controller.php:2593
 msgid "Limit result set to products assigned a specific type."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2032
+#: includes/api/class-wc-rest-products-controller.php:2035
 #: includes/api/v1/class-wc-rest-products-controller.php:2630
 msgid "Limit result set to products with a specific SKU."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2038
+#: includes/api/class-wc-rest-products-controller.php:2041
 msgid "Limit result set to featured products."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2044
+#: includes/api/class-wc-rest-products-controller.php:2047
 #: includes/api/v1/class-wc-rest-products-controller.php:2600
 msgid "Limit result set to products assigned a specific category ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2050
+#: includes/api/class-wc-rest-products-controller.php:2053
 #: includes/api/v1/class-wc-rest-products-controller.php:2606
 msgid "Limit result set to products assigned a specific tag ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2056
+#: includes/api/class-wc-rest-products-controller.php:2059
 #: includes/api/v1/class-wc-rest-products-controller.php:2612
 msgid "Limit result set to products assigned a specific shipping class ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2062
+#: includes/api/class-wc-rest-products-controller.php:2065
 #: includes/api/v1/class-wc-rest-products-controller.php:2618
 msgid "Limit result set to products with a specific attribute."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2068
+#: includes/api/class-wc-rest-products-controller.php:2071
 #: includes/api/v1/class-wc-rest-products-controller.php:2624
 msgid ""
 "Limit result set to products with a specific attribute term ID (required an "
 "assigned attribute)."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2076
+#: includes/api/class-wc-rest-products-controller.php:2079
 msgid "Limit result set to products with a specific tax class."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2085
+#: includes/api/class-wc-rest-products-controller.php:2088
 msgid "Limit result set to products in stock or out of stock."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2091
+#: includes/api/class-wc-rest-products-controller.php:2094
 msgid "Limit result set to products on sale."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2097
+#: includes/api/class-wc-rest-products-controller.php:2100
 msgid "Limit result set to products based on a minimum price."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:2103
+#: includes/api/class-wc-rest-products-controller.php:2106
 msgid "Limit result set to products based on a maximum price."
 msgstr ""
 
@@ -20250,8 +20249,8 @@ msgstr ""
 msgid "Invalid coupon."
 msgstr ""
 
-#: includes/data-stores/class-wc-customer-data-store.php:136
-#: includes/data-stores/class-wc-customer-data-store.php:141
+#: includes/data-stores/class-wc-customer-data-store.php:137
+#: includes/data-stores/class-wc-customer-data-store.php:142
 msgid "Invalid customer."
 msgstr ""
 
@@ -22735,7 +22734,7 @@ msgstr ""
 msgid "JCB"
 msgstr ""
 
-#: includes/wc-core-functions.php:1569
+#: includes/wc-core-functions.php:1572
 #. translators: 1: class name 2: woocommerce_logging_class 3:
 #. WC_Logger_Interface
 msgid "The class %1$s provided by %2$s filter must implement %3$s."
@@ -24044,19 +24043,19 @@ msgid "Webhooks"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:76
-#: includes/wc-core-functions.php:1724 includes/wc-update-functions.php:51
+#: includes/wc-core-functions.php:1727 includes/wc-update-functions.php:51
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:85
-#: includes/wc-core-functions.php:1725 includes/wc-update-functions.php:52
+#: includes/wc-core-functions.php:1728 includes/wc-update-functions.php:52
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:194
-#: includes/wc-core-functions.php:1723 includes/wc-update-functions.php:60
+#: includes/wc-core-functions.php:1726 includes/wc-update-functions.php:60
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -24082,6 +24081,11 @@ msgstr ""
 #. translators: 1: first name 2: last name
 msgctxt "full name"
 msgid "%1$s %2$s"
+msgstr ""
+
+#: includes/admin/class-wc-admin-setup-wizard.php:627
+msgctxt "Short label for entering the cost of an item"
+msgid "Cost"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1082
