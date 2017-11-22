@@ -227,7 +227,7 @@ class WC_Comments {
 					GROUP BY comment_approved
 				", ARRAY_A );
 
-				$total = 0;
+				$total    = 0;
 				$approved = array(
 					'0'            => 'moderated',
 					'1'            => 'approved',
@@ -238,7 +238,7 @@ class WC_Comments {
 
 				foreach ( (array) $count as $row ) {
 					// Don't count post-trashed toward totals.
-					if ( 'post-trashed' !== $row['comment_approved'] && 'trash' !== $row['comment_approved'] ) {
+					if ( 'post-trashed' !== $row['comment_approved'] && 'trash' !== $row['comment_approved'] && 'spam' !== $row['comment_approved'] ) {
 						$total += $row['num_comments'];
 					}
 					if ( isset( $approved[ $row['comment_approved'] ] ) ) {
@@ -247,7 +247,8 @@ class WC_Comments {
 				}
 
 				$stats['total_comments'] = $total;
-				$stats['all'] = $total;
+				$stats['all']            = $total;
+
 				foreach ( $approved as $key ) {
 					if ( empty( $stats[ $key ] ) ) {
 						$stats[ $key ] = 0;
