@@ -1454,7 +1454,7 @@ function wc_update_330_product_stock_status() {
 		INNER JOIN $wpdb->postmeta t3
 			ON t2.post_id = t3.post_id
 			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
-		", $min_stock_amount ) );
+		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
 
 	if ( empty( $post_ids ) ) {
 		return;
@@ -1466,8 +1466,8 @@ function wc_update_330_product_stock_status() {
 	$wpdb->query( "
 		UPDATE $wpdb->postmeta
 		SET meta_value = 'onbackorder'
-		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . " )
-		" );
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
+		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
 }
 
 /**

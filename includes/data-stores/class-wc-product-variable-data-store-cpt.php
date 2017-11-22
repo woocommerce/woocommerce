@@ -125,15 +125,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children                = get_transient( $children_transient_name );
 
 		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
-			$all_args = $visible_only_args = array(
+			$all_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',
-				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
+				'orderby'     => array(
+					'menu_order' => 'ASC',
+					'ID'         => 'ASC',
+				),
 				'fields'      => 'ids',
 				'post_status' => array( 'publish', 'private' ),
 				'numberposts' => -1,
 			);
 
+			$visible_only_args                = $all_args;
 			$visible_only_args['post_status'] = 'publish';
 
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
