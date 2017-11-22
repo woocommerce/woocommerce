@@ -16,7 +16,8 @@ let manager;
 let driver;
 
 test.describe( 'Single Product Page', function() {
-	test.before( 'open browser', function() {
+	// open browser
+	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
@@ -52,7 +53,8 @@ test.describe( 'Single Product Page', function() {
 		assert.eventually.equal( cartPage.hasItem( 'Hoodie - Green' ), true );
 	} );
 
-	test.after( 'quit browser', () => {
+	// quit browser
+	test.after( () => {
 		manager.quitBrowser();
 	} );
 } );
