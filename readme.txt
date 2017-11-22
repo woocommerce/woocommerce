@@ -160,7 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.5 - 2017-11-21 =
+= 3.2.5 - 2017-11-22 =
 * Fix - WordPress 4.9 - REST API - Updated schema, sanitization, and validation callbacks to support correct data types.
 * Fix - WordPress 4.9 - Fix an issue saving variation attributes on new products and with attributes containing slashes.
 * Fix - Save fee tax lines to new orders on checkout.
