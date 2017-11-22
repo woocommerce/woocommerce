@@ -1093,7 +1093,7 @@ class WC_Admin_Setup_Wizard {
 			'https://woocommerce.com/products/klarna/'
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
-			__( 'Accept Visa, Mastercard, Discover, and American Express all for one low rate, with no surprise fees.', 'woocommerce. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
+			__( 'Accept Visa, Mastercard, Discover, and American Express all for one low rate, with no surprise fees. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/square/'
 		) . '</p>';
 
