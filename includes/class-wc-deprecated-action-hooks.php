@@ -38,6 +38,29 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 	);
 
 	/**
+	 * Array of versions on each hook has been deprecated.
+	 *
+	 * @var array
+	 */
+	protected $deprecated_version = array(
+		'woocommerce_order_add_shipping'       => '3.0.0',
+		'woocommerce_order_add_coupon'         => '3.0.0',
+		'woocommerce_order_add_tax'            => '3.0.0',
+		'woocommerce_order_add_fee'            => '3.0.0',
+		'woocommerce_add_shipping_order_item'  => '3.0.0',
+		'woocommerce_add_order_item_meta'      => '3.0.0',
+		'woocommerce_add_order_fee_meta'       => '3.0.0',
+		'woocommerce_order_edit_product'       => '3.0.0',
+		'woocommerce_order_update_coupon'      => '3.0.0',
+		'woocommerce_order_update_shipping'    => '3.0.0',
+		'woocommerce_order_update_fee'         => '3.0.0',
+		'woocommerce_order_update_tax'         => '3.0.0',
+		'woocommerce_payment_token_created'    => '3.0.0',
+		'woocommerce_create_product_variation' => '3.0.0',
+		'woocommerce_order_items_table'        => '3.0.0',
+	);
+
+	/**
 	 * Hook into the new hook so we can handle deprecated hooks once fired.
 	 * @param  string $hook_name
 	 */

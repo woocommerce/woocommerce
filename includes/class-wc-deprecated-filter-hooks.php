@@ -55,6 +55,49 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	);
 
 	/**
+	 * Array of versions on each hook has been deprecated.
+	 *
+	 * @var array
+	 */
+	protected $deprecated_version = array(
+		'woocommerce_email_order_schema_markup'      => '3.0.0',
+		'add_to_cart_fragments'                      => '3.0.0',
+		'add_to_cart_redirect'                       => '3.0.0',
+		'woocommerce_product_width'                  => '3.0.0',
+		'woocommerce_product_height'                 => '3.0.0',
+		'woocommerce_product_length'                 => '3.0.0',
+		'woocommerce_product_weight'                 => '3.0.0',
+		'woocommerce_get_sku'                        => '3.0.0',
+		'woocommerce_get_price'                      => '3.0.0',
+		'woocommerce_get_regular_price'              => '3.0.0',
+		'woocommerce_get_sale_price'                 => '3.0.0',
+		'woocommerce_product_tax_class'              => '3.0.0',
+		'woocommerce_get_stock_quantity'             => '3.0.0',
+		'woocommerce_get_product_attributes'         => '3.0.0',
+		'woocommerce_product_gallery_attachment_ids' => '3.0.0',
+		'woocommerce_product_review_count'           => '3.0.0',
+		'woocommerce_product_files'                  => '3.0.0',
+		'woocommerce_get_currency'                   => '3.0.0',
+		'woocommerce_order_amount_discount_total'    => '3.0.0',
+		'woocommerce_order_amount_discount_tax'      => '3.0.0',
+		'woocommerce_order_amount_shipping_total'    => '3.0.0',
+		'woocommerce_order_amount_shipping_tax'      => '3.0.0',
+		'woocommerce_order_amount_cart_tax'          => '3.0.0',
+		'woocommerce_order_amount_total'             => '3.0.0',
+		'woocommerce_order_amount_total_tax'         => '3.0.0',
+		'woocommerce_order_amount_total_discount'    => '3.0.0',
+		'woocommerce_order_amount_subtotal'          => '3.0.0',
+		'woocommerce_order_tax_totals'               => '3.0.0',
+		'woocommerce_refund_amount'                  => '3.0.0',
+		'woocommerce_refund_reason'                  => '3.0.0',
+		'default_checkout_country'                   => '3.0.0',
+		'default_checkout_state'                     => '3.0.0',
+		'default_checkout_postcode'                  => '3.0.0',
+		'woocommerce_debug_posting'                  => '3.0.0',
+		'wocommerce_credit_card_type_labels'         => '3.0.0',
+	);
+
+	/**
 	 * Hook into the new hook so we can handle deprecated hooks once fired.
 	 * @param  string $hook_name
 	 */
