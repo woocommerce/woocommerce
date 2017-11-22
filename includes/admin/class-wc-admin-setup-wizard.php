@@ -447,7 +447,7 @@ class WC_Admin_Setup_Wizard {
 				<?php checked( $sell_in_person, true ); ?>
 			/>
 			<label class="location-prompt" for="sell_in_person">
-				<?php esc_html_e( 'I will also be selling physical products in person.', 'woocommerce' ); ?>
+				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
 
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
@@ -1089,11 +1089,11 @@ class WC_Admin_Setup_Wizard {
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
 		$klarna_description = '<p>' . sprintf(
-			__( 'Pay directly at the checkout. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna.</a>.', 'woocommerce' ),
+			__( 'Pay directly at the checkout. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/klarna/'
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
-			__( 'Accept Visa, Mastercard, Discover, and American Express all for one low rate, with no surprise fees.', 'woocommerce. <a href="%s" target="_blank">Learn more about Square.</a>.', 'woocommerce' ),
+			__( 'Accept Visa, Mastercard, Discover, and American Express all for one low rate, with no surprise fees.', 'woocommerce. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/square/'
 		) . '</p>';
 
