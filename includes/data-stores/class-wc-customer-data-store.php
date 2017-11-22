@@ -114,7 +114,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		wp_update_user( apply_filters( 'woocommerce_update_customer_args', array(
 			'ID'           => $customer->get_id(),
 			'role'         => $customer->get_role(),
-			'display_name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+			'display_name' => sprintf( __( '%1$s %2$s', 'display name', 'woocommerce' ), $customer->get_first_name(), $customer->get_last_name() ),
 		), $customer ) );
 		$wp_user = new WP_User( $customer->get_id() );
 		$customer->set_date_created( $wp_user->user_registered );
@@ -218,6 +218,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'paying_customer' => 'is_paying_customer',
 			'first_name'      => 'first_name',
 			'last_name'       => 'last_name',
+			'display_name'    => 'display_name',
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
