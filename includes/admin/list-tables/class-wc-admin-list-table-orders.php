@@ -349,7 +349,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 									<# if ( data.payment_via ) { #>
 										<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
-										{{ data.payment_via }}
+										{{{ data.payment_via }}}
 									<# } #>
 								</div>
 								<# if ( data.needs_shipping ) { #>
