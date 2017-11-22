@@ -388,7 +388,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * AJAX add to cart.
+	 * AJAX remove from cart.
 	 */
 	public static function remove_from_cart() {
 		ob_start();
