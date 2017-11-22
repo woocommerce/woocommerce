@@ -322,7 +322,7 @@ function wc_render_action_buttons( $actions ) {
 
 	foreach ( $actions as $action ) {
 		if ( isset( $action['group'] ) ) {
-			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> ' . wc_render_action_buttons( $action['actions'] ) . '</div>';
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
 		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
 			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%s %s" href="%s" title="%s">%s</a>', esc_attr( $action['action'] ), esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
 		}
