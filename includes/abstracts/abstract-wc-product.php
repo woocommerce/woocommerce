@@ -1531,7 +1531,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_shipping_taxable() {
-		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping';
+		return $this->needs_shipping() && ( $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' );
 	}
 
 	/**
