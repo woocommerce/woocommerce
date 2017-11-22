@@ -1867,23 +1867,53 @@ ul.wc_coupon_list_block {
 		width: 11%;
 	}
 
-	.column-order_actions,
-	.column-user_actions,
 	.column-wc_actions {
 		width: 110px;
 
 		a.button {
-			float: left;
-			margin: 0 4px 2px 0;
-			cursor: pointer;
-			padding: 3px 4px;
-			height: auto;
+			@include ir();
+			display: inline-block;
+			margin: 2px 4px 2px 0;
+			padding: 0 !important;
+			height: 2em !important;
+			width: 2em;
+
+			&::after {
+				@include icon_dashicons;
+				line-height: 1.85;
+			}
 
 			img {
 				display: block;
 				width: 12px;
 				height: auto;
 			}
+		}
+
+		a.edit::after {
+			content: '\f464';
+		}
+
+		a.link::after {
+			content: '\e00d';
+		}
+
+		a.view::after {
+			content: '\f177';
+		}
+
+		a.refresh::after {
+			font-family: 'WooCommerce';
+			content: '\e031';
+		}
+
+		a.processing::after {
+			font-family: 'WooCommerce';
+			content: '\e00f';
+		}
+
+		a.complete::after {
+			content: '\f147';
 		}
 	}
 
@@ -1942,6 +1972,9 @@ ul.wc_coupon_list_block {
 		th {
 			width: 12ch;
 			vertical-align: middle;
+			p {
+				margin: 0;
+			}
 		}
 		.check-column {
 			width: 1px;
@@ -1959,13 +1992,17 @@ ul.wc_coupon_list_block {
 		.column-order_total {
 			width: 8ch;
 			text-align: right;
+
 			a span {
 				float:right;
 			}
 		}
 		.column-order_date,
 		.column-order_status {
-			width: 12ch;
+			width: 10ch;
+		}
+		.column-order_status {
+			width: 14ch;
 		}
 		.column-shipping_address,
 		.column-billing_address {
@@ -1974,6 +2011,14 @@ ul.wc_coupon_list_block {
 			.description {
 				display: block;
 				color: #999;
+			}
+		}
+		.column-wc_actions {
+			text-align: right;
+
+			a.button {
+				text-indent: 9999px;
+				margin: 2px 0 2px 4px;
 			}
 		}
 		.order-preview {
@@ -2014,6 +2059,7 @@ ul.wc_coupon_list_block {
 			border-bottom: 1px solid rgba(0,0,0,0.05);
 			margin: -.5em 0;
 			cursor: inherit !important;
+			white-space: nowrap;
 
 			&.status-completed {
 				background: #C8D7E1;
@@ -2166,66 +2212,6 @@ ul.wc_coupon_list_block {
 	&::after {
 		@include icon( '\e027' );
 		line-height: 16px;
-	}
-}
-
-.order_actions {
-	.processing,
-	.complete,
-	.view {
-		@include ir();
-		padding: 0 !important;
-		height: 2em !important;
-		width: 2em;
-	}
-
-	.processing::after {
-		@include icon( '\e00f' );
-		line-height: 1.85;
-	}
-
-	.complete::after {
-		@include icon_dashicons( '\f147' );
-		line-height: 1.85;
-	}
-
-	.view::after {
-		@include icon_dashicons( '\f177' );
-		line-height: 1.85;
-	}
-}
-
-.user_actions {
-	.edit,
-	.link,
-	.view,
-	.refresh {
-		@include ir();
-		padding: 0 !important;
-		height: 2em !important;
-		width: 2em;
-
-		&::after {
-			@include icon;
-			line-height: 1.85;
-		}
-	}
-
-	.edit::after {
-		font-family: 'Dashicons';
-		content: '\f464';
-	}
-
-	.link::after {
-		content: '\e00d';
-	}
-
-	.view::after {
-		content: '\e010';
-	}
-
-	.refresh::after {
-		content: '\e031';
 	}
 }
 
@@ -5250,29 +5236,6 @@ img.ui-datepicker-trigger {
 	.woocommerce-reports-right {
 		width: 49.5%;
 		float: right;
-	}
-
-	.column-wc_actions {
-		a.edit,
-		a.view {
-			@include ir();
-			padding: 0 !important;
-			height: 2em !important;
-			width: 2em;
-
-			&::after {
-				@include icon_dashicons;
-				line-height: 1.85;
-			}
-		}
-
-		a.edit::after {
-			content: '\f464';
-		}
-
-		a.view::after {
-			content: '\f177';
-		}
 	}
 }
 

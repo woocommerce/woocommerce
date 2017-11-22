@@ -119,7 +119,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
-		$show_columns['order_actions']    = __( 'Actions', 'woocommerce' );
+		$show_columns['wc_actions']       = __( 'Actions', 'woocommerce' );
 
 		wp_enqueue_script( 'wc-orders' );
 
@@ -247,9 +247,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_actions.
+	 * Render columm: wc_actions.
 	 */
-	protected function render_order_actions_column() {
+	protected function render_wc_actions_column() {
 		echo '<p>';
 
 		do_action( 'woocommerce_admin_order_actions_start', $this->object );
