@@ -1154,7 +1154,7 @@ class WC_Admin_Setup_Wizard {
 			'name'        => __( 'Klarna', 'woocommerce' ),
 			'description' => $klarna_description,
 			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
-			'class'       => 'inverted-logo',
+			'class'       => 'klarna-logo',
 			'enabled'     => true,
 			'repo-slug'   => 'woocommerce-gateway-klarna',
 		);
@@ -1162,7 +1162,7 @@ class WC_Admin_Setup_Wizard {
 			'name'        => __( 'Square', 'woocommerce' ),
 			'description' => $square_description,
 			'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
-			'class'       => 'inverted-logo',
+			'class'       => 'square-logo',
 			'enabled'     => true,
 			'repo-slug'   => 'woocommerce-square',
 		);
