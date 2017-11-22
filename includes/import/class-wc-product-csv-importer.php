@@ -646,8 +646,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['stock_status'] ) ) {
 			if ( 'backorder' === $data['stock_status'] ) {
 				$data['stock_status'] = 'onbackorder';
+			} else {
+				$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
 			}
-			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
 		}
 
 		// Prepare grouped products.
