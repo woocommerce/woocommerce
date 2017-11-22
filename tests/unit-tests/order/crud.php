@@ -1657,6 +1657,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that if an exception is thrown when creating a refund, the refund is deleted from database.
+	 */
+	function test_refund_exception() {
+		$order = WC_Helper_Order::create_order();
+		add_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
+		$refund = wc_create_refund( array(
+			'order_id'   => $order->get_id(),
+			'amount'     => $order->get_total(),
+			'line_items' => array(),
+		) );
+		remove_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
+		$this->assertEmpty( $order->get_refunds() );
+	}
+
+	/**
 	 * Test apply_coupon and remove_coupon with a fixed discount coupon.
 	 * @since 3.2.0
 	 */
