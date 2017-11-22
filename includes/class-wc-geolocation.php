@@ -67,33 +67,6 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Check if is a valid IP address.
-	 *
-	 * @since  3.0.6
-	 * @param  string $ip_address IP address.
-	 * @return string|bool The valid IP address, otherwise false.
-	 */
-	private static function is_ip_address( $ip_address ) {
-		// WP 4.7+ only.
-		if ( function_exists( 'rest_is_ip_address' ) ) {
-			return rest_is_ip_address( $ip_address );
-		}
-
-		// Support for WordPress 4.4 to 4.6.
-		if ( ! class_exists( 'Requests_IPv6', false ) ) {
-			include_once( dirname( __FILE__ ) . '/vendor/class-requests-ipv6.php' );
-		}
-
-		$ipv4_pattern = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
-
-		if ( ! preg_match( $ipv4_pattern, $ip_address ) && ! Requests_IPv6::check_ipv6( $ip_address ) ) {
-			return false;
-		}
-
-		return $ip_address;
-	}
-
-	/**
 	 * Get current user IP Address.
 	 * @return string
 	 */
@@ -103,7 +76,7 @@ class WC_Geolocation {
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			return (string) self::is_ip_address( trim( current( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) );
+			return (string) rest_is_ip_address( trim( current( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) );
 		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 			return $_SERVER['REMOTE_ADDR'];
 		}
