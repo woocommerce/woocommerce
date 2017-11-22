@@ -280,6 +280,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $value;
 		}
 
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_negative_number( $value );
+
 		return floatval( $value );
 	}
 
@@ -293,6 +296,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( '' === $value ) {
 			return $value;
 		}
+
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_negative_number( $value );
 
 		return wc_stock_amount( $value );
 	}
@@ -633,16 +639,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['stock_status'] = isset( $data['stock_status'] ) ? $data['stock_status'] : true;
 			} else {
 				$data['manage_stock'] = true;
-
-				// Only auto set status when stock_status is empty.
-				if ( ! isset( $data['stock_status'] ) || isset( $data['stock_status'] ) && '' === $data['stock_status'] ) {
-					$data['stock_status'] = 0 < $data['stock_quantity'];
-				}
 			}
 		}
 
-		// Stock is bool.
+		// Stock is bool or 'backorder'.
 		if ( isset( $data['stock_status'] ) ) {
+			if ( 'backorder' === $data['stock_status'] ) {
+				$data['stock_status'] = 'onbackorder';
+			}
 			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
 		}
 

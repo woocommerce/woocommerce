@@ -133,7 +133,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	public function get_params() {
 		return $this->params;
 	}
-	
+
 	/**
 	 * Get file pointer position from the last read.
 	 *
@@ -725,5 +725,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function explode_values_formatter( $value ) {
 		return trim( str_replace( '::separator::', ',', $value ) );
+	}
+
+	/**
+	 * The exporter prepends a ' to fields that start with a - which causes
+	 * issues with negative numbers. This removes the ' if the input is still a valid
+	 * number after removal.
+	 *
+	 * @since 3.3.0
+	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @return string
+	 */
+	protected function unescape_negative_number( $value ) {
+		$unescaped = str_replace( "'-", '-', $value );
+		if ( is_numeric( $unescaped ) ) {
+			return $unescaped;
+		}
+
+		return $value;
 	}
 }
