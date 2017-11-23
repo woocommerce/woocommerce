@@ -937,11 +937,15 @@ class WC_Helper {
 
 		return false;
 	}
-
+	
 	/**
 	 * Additional theme style.css and plugin file headers.
 	 *
 	 * Format: Woo: product_id:file_id
+	 *
+	 * @param array $headers
+	 *
+	 * @return array
 	 */
 	public static function extra_headers( $headers ) {
 		$headers[] = 'Woo';
