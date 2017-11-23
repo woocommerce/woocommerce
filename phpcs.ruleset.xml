@@ -22,8 +22,11 @@
 	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress">
-		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.SchemaChange" />
+		<exclude name="WordPress.VIP.FileSystemWritesDisallow.file_ops_fwrite" />
 		<exclude name="WordPress.VIP.OrderByRand" />
+		<exclude name="WordPress.VIP.RestrictedFunctions" />
 	</rule>
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
