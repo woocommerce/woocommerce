@@ -454,9 +454,19 @@ class WC_Install {
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
 			foreach ( $terms as $term ) {
-				if ( ! get_term_by( 'name', $term, $taxonomy ) ) {
+				if ( ! get_term_by( 'name', $term, $taxonomy ) ) { // @codingStandardsIgnoreLine.
 					wp_insert_term( $term, $taxonomy );
 				}
+			}
+		}
+
+		$default_product_cat_slug = sanitize_title( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) );
+
+		if ( ! get_option( 'woocommerce_default_category', 0 ) && ! get_term_by( 'slug', $default_product_cat_slug, 'product_cat' ) ) { // @codingStandardsIgnoreLine.
+			$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
+
+			if ( ! empty( $result['term_id'] ) ) {
+				update_option( 'woocommerce_default_category', $result['term_id'] );
 			}
 		}
 	}
