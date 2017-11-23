@@ -64,7 +64,8 @@ function wc_update_200_permalinks() {
 		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
 			$product_base = trailingslashit( $base_slug );
 		} else {
-			if ( ( $product_slug = get_option( 'woocommerce_product_slug' ) ) !== false && ! empty( $product_slug ) ) {
+			$product_slug = get_option( 'woocommerce_product_slug' );
+			if ( false !== $product_slug && ! empty( $product_slug ) ) {
 				$product_base = trailingslashit( $product_slug );
 			} else {
 				$product_base = trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
@@ -279,7 +280,7 @@ function wc_update_200_line_items() {
 					$wpdb->query(
 						$wpdb->prepare(
 							"INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( order_item_id, meta_key, meta_value )
-							VALUES " . implode( ',', $meta_rows ) . ';',
+							VALUES " . implode( ',', $meta_rows ) . ';', // @codingStandardsIgnoreLine
 							$order_item_row->post_id
 						)
 					);
@@ -747,9 +748,11 @@ function wc_update_240_shipping_methods() {
 				'cost'          => array(),
 				'no_class_cost' => array(),
 			);
-			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
 
-			if ( $fee = $shipping_method->get_option( 'fee' ) ) {
+			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
+			$fee = $shipping_method->get_option( 'fee' );
+
+			if ( $fee ) {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
@@ -758,7 +761,9 @@ function wc_update_240_shipping_methods() {
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
 
-			if ( $flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) ) ) {
+			$flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) );
+
+			if ( $flat_rates ) {
 				foreach ( $flat_rates as $shipping_class => $rate ) {
 					$rate_key = 'class_cost_' . $shipping_class;
 					if ( $rate['cost'] || $rate['fee'] ) {
@@ -1267,39 +1272,57 @@ function wc_update_300_product_visibility() {
 
 	WC_Install::create_terms();
 
-	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
+	$featured_term = get_term_by( 'name', 'featured', 'product_visibility' );
+
+	if ( $featured_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_taxonomy_id ) );
 	}
 
-	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
+	$exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' );
+
+	if ( $exclude_search_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_taxonomy_id ) );
 	}
 
-	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+	$exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' );
+
+	if ( $exclude_catalog_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
 	}
 
-	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
+	$outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' );
+
+	if ( $outofstock_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_taxonomy_id ) );
 	}
 }
