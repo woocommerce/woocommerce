@@ -130,7 +130,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_customer_bought_product.
 	 *
-	 * @since 3.3.0
+	 * @since 3.1
 	 */
 	function test_wc_customer_bought_product() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
