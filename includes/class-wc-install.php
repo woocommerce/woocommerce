@@ -460,13 +460,25 @@ class WC_Install {
 			}
 		}
 
-		$default_product_cat_slug = sanitize_title( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) );
+		$woocommerce_default_category = get_option( 'woocommerce_default_category', 0 );
 
-		if ( ! get_option( 'woocommerce_default_category', 0 ) && ! get_term_by( 'slug', $default_product_cat_slug, 'product_cat' ) ) { // @codingStandardsIgnoreLine.
-			$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
+		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
+			$default_product_cat_id   = 0;
+			$default_product_cat_slug = sanitize_title( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) );
+			$default_product_cat      = get_term_by( 'slug', $default_product_cat_slug, 'product_cat' ); // @codingStandardsIgnoreLine.
 
-			if ( ! empty( $result['term_id'] ) ) {
-				update_option( 'woocommerce_default_category', $result['term_id'] );
+			if ( $default_product_cat ) {
+				$default_product_cat_id = absint( $default_product_cat->term_id );
+			} else {
+				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
+
+				if ( ! empty( $result['term_id'] ) ) {
+					$default_product_cat_id = absint( $result['term_id'] );
+				}
+			}
+
+			if ( $default_product_cat_id ) {
+				update_option( 'woocommerce_default_category', $default_product_cat_id );
 			}
 		}
 	}
