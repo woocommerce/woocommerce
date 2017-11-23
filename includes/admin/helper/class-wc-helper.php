@@ -321,11 +321,9 @@ class WC_Helper {
 	/**
 	 * Get available subscriptions filters.
 	 *
-	 * @param array Optional subscriptions array to generate counts.
-	 *
 	 * @return array An array of filter keys and labels.
 	 */
-	public static function get_filters( $subscriptions = null ) {
+	public static function get_filters() {
 		$filters = array(
 			'all' => __( 'All', 'woocommerce' ),
 			'active' => __( 'Active', 'woocommerce' ),
