@@ -320,7 +320,7 @@ class WC_Install {
 	/**
 	 * Update DB version to current.
 	 *
-	 * @param string $version
+	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );
@@ -330,7 +330,7 @@ class WC_Install {
 	/**
 	 * Add more cron schedules.
 	 *
-	 * @param  array $schedules
+	 * @param  array $schedules List of WP scheduled cron jobs.
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
@@ -410,7 +410,7 @@ class WC_Install {
 	 * Sets up the default options used on the settings page.
 	 */
 	private static function create_options() {
-		// Include settings so that we can run through defaults
+		// Include settings so that we can run through defaults.
 		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
 
 		$settings = WC_Admin_Settings::get_settings_pages();
@@ -509,7 +509,7 @@ class WC_Install {
 	/**
 	 * Get Table schema.
 	 *
-	 * https://github.com/woocommerce/woocommerce/wiki/Database-Description/
+	 * See https://github.com/woocommerce/woocommerce/wiki/Database-Description/
 	 *
 	 * A note on indexes; Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
 	 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
@@ -717,10 +717,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles();
+			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
-		// Customer role
+		// Customer role.
 		add_role(
 			'customer',
 			__( 'Customer', 'woocommerce' ),
@@ -729,7 +729,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			)
 		);
 
-		// Shop manager role
+		// Shop manager role.
 		add_role(
 			'shop_manager',
 			__( 'Shop manager', 'woocommerce' ),
@@ -804,7 +804,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		foreach ( $capability_types as $capability_type ) {
 
 			$capabilities[ $capability_type ] = array(
-				// Post type
+				// Post type.
 				"edit_{$capability_type}",
 				"read_{$capability_type}",
 				"delete_{$capability_type}",
@@ -819,7 +819,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				"edit_private_{$capability_type}s",
 				"edit_published_{$capability_type}s",
 
-				// Terms
+				// Terms.
 				"manage_{$capability_type}_terms",
 				"edit_{$capability_type}_terms",
 				"delete_{$capability_type}_terms",
@@ -831,7 +831,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * woocommerce_remove_roles function.
+	 * Remove WooCommerce roles.
 	 */
 	public static function remove_roles() {
 		global $wp_roles;
@@ -841,7 +841,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles();
+			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
 		$capabilities = self::get_core_capabilities();
@@ -861,12 +861,12 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
-		// Bypass if filesystem is read-only and/or non-standard upload system is used
+		// Bypass if filesystem is read-only and/or non-standard upload system is used.
 		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
 			return;
 		}
 
-		// Install files and folders for uploading files and prevent hotlinking
+		// Install files and folders for uploading files and prevent hotlinking.
 		$upload_dir      = wp_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
@@ -898,7 +898,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				if ( $file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ) ) {
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' );
+				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] );
 					fclose( $file_handle );
 				}
@@ -909,7 +910,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show action links on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Action links
+	 * @param   mixed $links Plugin Action links.
 	 * @return  array
 	 */
 	public static function plugin_action_links( $links ) {
@@ -923,8 +924,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show row meta on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Row Meta
-	 * @param   mixed $file  Plugin Base file
+	 * @param   mixed $links Plugin Row Meta.
+	 * @param   mixed $file  Plugin Base file.
 	 * @return  array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
@@ -944,7 +945,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Uninstall tables when MU blog is deleted.
 	 *
-	 * @param  array $tables
+	 * @param  array $tables List of tables that will be deleted by WP.
 	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
@@ -970,7 +971,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Get slug from path
 	 *
-	 * @param  string $key
+	 * @param  string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 * @return string
 	 */
 	private static function format_plugin_slug( $key ) {
@@ -983,8 +984,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Install a plugin from .org in the background via a cron job (used by
 	 * installer - opt in).
 	 *
-	 * @param string $plugin_to_install_id
-	 * @param array  $plugin_to_install
+	 * @param string $plugin_to_install_id Plugin ID.
+	 * @param array  $plugin_to_install Plugin information.
+	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since 2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
@@ -1007,7 +1009,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$installed         = false;
 			$activate          = false;
 
-			// See if the plugin is installed already
+			// See if the plugin is installed already.
 			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
 				$installed = true;
 				$activate  = ! is_plugin_active( $plugin );
@@ -1015,7 +1017,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			// Install this thing!
 			if ( ! $installed ) {
-				// Suppress feedback
+				// Suppress feedback.
 				ob_start();
 
 				try {
@@ -1082,6 +1084,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
+							// translators: 1: plugin name, 2: error message, 3: URL to install plugin manually.
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
@@ -1090,13 +1093,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					);
 				}
 
-				// Discard feedback
+				// Discard feedback.
 				ob_end_clean();
 			}
 
 			wp_clean_plugins_cache();
 
-			// Activate this thing
+			// Activate this thing.
 			if ( $activate ) {
 				try {
 					$result = activate_plugin( $plugin );
@@ -1108,6 +1111,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
+							// translators: 1: plugin name, 2: URL to WP plugin page.
 							__( '%1$s was installed but could not be activated. <a href="%2$s">Please activate it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							admin_url( 'plugins.php' )
@@ -1121,7 +1125,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
 	 *
-	 * @param string $theme_slug
+	 * @param string $theme_slug Theme slug.
+	 * @throws Exception If unable to proceed with theme installation.
 	 * @since 3.1.0
 	 */
 	public static function theme_background_installer( $theme_slug ) {
@@ -1129,7 +1134,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
 
 		if ( ! empty( $theme_slug ) ) {
-			// Suppress feedback
+			// Suppress feedback.
 			ob_start();
 
 			try {
@@ -1166,6 +1171,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				WC_Admin_Notices::add_custom_notice(
 					$theme_slug . '_install_error',
 					sprintf(
+						// translators: 1: theme slug, 2: error message, 3: URL to install theme manually.
 						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 						$theme_slug,
 						$e->getMessage(),
@@ -1174,7 +1180,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				);
 			}
 
-			// Discard feedback
+			// Discard feedback.
 			ob_end_clean();
 		}
 	}
