@@ -211,7 +211,7 @@ function wc_update_200_taxrates() {
 }
 
 /**
- * Upadte order item line items for 2.0
+ * Update order item line items for 2.0
  *
  * @return void
  */
