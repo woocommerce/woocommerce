@@ -233,7 +233,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo implode( ', ', apply_filters( 'woocommerce_admin_product_term_list', $termlist, $this->object->get_id(), 'product_cat' ) ); // WPCS: XSS ok.
+			echo implode( ', ', apply_filters( 'woocommerce_admin_product_term_list', $termlist, 'product_cat', $this->object->get_id() ) ); // WPCS: XSS ok.
 		}
 	}
 
@@ -249,7 +249,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo implode( ', ', apply_filters( 'woocommerce_admin_product_term_list', $termlist, $this->object->get_id(), 'product_tag' ) ); // WPCS: XSS ok.
+			echo implode( ', ', apply_filters( 'woocommerce_admin_product_term_list', $termlist, 'product_tag', $this->object->get_id() ) ); // WPCS: XSS ok.
 		}
 	}
 
