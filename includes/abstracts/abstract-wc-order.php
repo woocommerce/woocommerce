@@ -1599,9 +1599,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 		$subtotal    = 0;
-		$items = apply_filters( 'woocommerce_subtotal_order_item_types', 'line_item' );
+		
 		if ( ! $compound ) {
-			foreach ( $items as $item ) {
+			foreach ( $this->get_items() as $item ) {
 				$subtotal += $item->get_subtotal();
 
 				if ( 'incl' === $tax_display ) {
@@ -1619,7 +1619,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				return '';
 			}
 
-			foreach ( $items as $item ) {
+			foreach ( $this->get_items() as $item ) {
 				$subtotal += $item->get_subtotal();
 			}
 
