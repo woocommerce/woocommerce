@@ -196,8 +196,6 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
-	wc_deprecated_function( 'WC_Order_Product_Lookup_Helper::is_product_purchased', '3.3' );
-
 	if ( is_int( $user_id ) ) {
 		return WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id, $user_id );
 	}
@@ -552,8 +550,6 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  * @return WC_Order Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
-	wc_deprecated_function( 'WC_Order_Product_Lookup_Helper::get_last_order', '3.3' );
-
 	return WC_Order_Product_Lookup_Helper::get_last_order( $customer_id );
 }
 

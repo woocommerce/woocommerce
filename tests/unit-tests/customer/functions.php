@@ -128,11 +128,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test WC_Order_Product_Lookup_Helper::is_product_purchased.
+	 * Test wc_customer_bought_product.
 	 *
 	 * @since 3.3.0
 	 */
-	function test_is_product_purchased() {
+	function test_wc_customer_bought_product() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 		$product_1 = new WC_Product_Simple;
@@ -159,15 +159,15 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_3->set_status( 'pending' );
 		$order_3->save();
 
-		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, $customer_id_1 ) );
-		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, 'test@example.com' ) );
-		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, $customer_id_2 ) );
-		$this->assertTrue( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, 'test2@example.com' ) );
+		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
+		$this->assertTrue( wc_customer_bought_product( 'test@example.com', '', $product_id_1 ) );
+		$this->assertTrue( wc_customer_bought_product( '', $customer_id_2, $product_id_2 ) );
+		$this->assertTrue( wc_customer_bought_product( 'test2@example.com', '', $product_id_2 ) );
 
-		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, $customer_id_2 ) );
-		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_1, 'test2@example.com' ) );
-		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, $customer_id_1 ) );
-		$this->assertFalse( WC_Order_Product_Lookup_Helper::is_product_purchased( $product_id_2, 'test@example.com' ) );
+		$this->assertFalse( wc_customer_bought_product( '', $customer_id_2, $product_id_1 ) );
+		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', '', $product_id_1 ) );
+		$this->assertFalse( wc_customer_bought_product( '', $customer_id_1, $product_id_2 ) );
+		$this->assertFalse( wc_customer_bought_product( 'test@example.com', '', $product_id_2 ) );
 	}
 
 	/**
@@ -375,11 +375,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test WC_Order_Product_Lookup_Helper::get_last_order.
+	 * Test wc_get_customer_last_order.
 	 *
 	 * @since 3.1
 	 */
-	function test_get_last_order() {
+	function test_wc_get_customer_last_order() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
 		$order_1 = WC_Helper_Order::create_order( $customer_id );
@@ -387,7 +387,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_2 = WC_Helper_Order::create_order( $customer_id );
 		$order_2->save();
 
-		$last_order = WC_Order_Product_Lookup_Helper::get_last_order( $customer_id );
+		$last_order = wc_get_customer_last_order( $customer_id );
 		$this->assertEquals( $order_2->get_id(), $last_order->get_id() );
 	}
 }
