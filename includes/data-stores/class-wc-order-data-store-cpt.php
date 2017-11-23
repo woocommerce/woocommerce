@@ -110,7 +110,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$order->set_props(
 			array(
 				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
+				'customer_id'          => $post_object->post_author,
 				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
 				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
 				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
@@ -258,10 +258,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
-		// If customer changed, update any downloadable permissions.
-		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
-			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
+		// If customer email changed, update any downloadable permissions.
+		if ( in_array( 'billing_email', $updated_props ) ) {
+			$this->update_downloadable_permissions( $order );
 		}
 
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );

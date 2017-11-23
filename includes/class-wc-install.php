@@ -99,6 +99,7 @@ class WC_Install {
 		'3.3.0' => array(
 			'wc_update_330_image_options',
 			'wc_update_330_set_default_product_cat',
+			'wc_update_330_order_customer_id',
 			'wc_update_330_db_version',
 		),
 	);

@@ -1508,6 +1508,21 @@ function wc_update_330_set_default_product_cat() {
 }
 
 /**
+ * Copy order customer_id from post meta to post_author.
+ */
+function wc_update_330_order_customer_id() {
+	global $wpdb;
+
+	$orders_to_update = $wpdb->get_results(
+		"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE meta_key = '_customer_user' AND p.post_type = 'shop_order'"
+	);
+
+	foreach ( $orders_to_update as $order ) {
+		$wpdb->update( $wpdb->posts, array( 'post_author' => $order->customer_id ), array( 'ID' => $order->post_id ) );
+	}
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_330_db_version() {
