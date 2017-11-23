@@ -420,6 +420,8 @@ class WC_Product_Variable extends WC_Product {
 			$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
 			$this->data_store->sync_managed_variation_stock_status( $this );
 
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			return $this->get_id();
 		}
 	}

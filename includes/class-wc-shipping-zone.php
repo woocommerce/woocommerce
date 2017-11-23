@@ -258,6 +258,9 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			} else {
 				$this->data_store->update( $this );
 			}
+
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 			return $this->get_id();
 		}
 	}

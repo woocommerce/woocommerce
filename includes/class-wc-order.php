@@ -215,6 +215,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 		$this->save_items();
 		$this->status_transition();
+
+		if ( $this->data_store ) {
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+		}
+
 		return $this->get_id();
 	}
 

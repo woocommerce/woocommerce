@@ -1330,6 +1330,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( $this->get_parent_id() ) {
 				wc_deferred_product_sync( $this->get_parent_id() );
 			}
+
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 		}
 		return $this->get_id();
 	}

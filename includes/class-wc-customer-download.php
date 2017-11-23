@@ -349,6 +349,8 @@ WHERE permission_id = %d",
 			} else {
 				$this->data_store->create( $this );
 			}
+
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 		}
 		return $this->get_id();
 	}
