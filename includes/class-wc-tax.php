@@ -579,7 +579,7 @@ class WC_Tax {
 			} elseif ( WC()->cart->get_cart() ) {
 
 				// This will be per order shipping - loop through the order and find the highest tax class rate
-				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
+				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes_for_shipping();
 
 				// No tax classes = no taxable items.
 				if ( empty( $cart_tax_classes ) ) {

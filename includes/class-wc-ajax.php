@@ -388,7 +388,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * AJAX add to cart.
+	 * AJAX remove from cart.
 	 */
 	public static function remove_from_cart() {
 		ob_start();
@@ -548,7 +548,7 @@ class WC_AJAX {
 			<?php
 			$item_html = ob_get_clean();
 
-			wp_send_json_success( array(
+			wp_send_json_success( apply_filters( 'woocommerce_ajax_get_order_details', array(
 				'data'                       => $order->get_data(),
 				'order_number'               => $order->get_order_number(),
 				'item_html'                  => $item_html,
@@ -559,7 +559,7 @@ class WC_AJAX {
 				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
 				'shipping_via'               => $order->get_shipping_method(),
-			) );
+			), $order ) );
 		}
 		exit;
 	}
@@ -686,7 +686,7 @@ class WC_AJAX {
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
-		$variation_object->set_attributes( array_fill_keys( array_keys( $product_object->get_variation_attributes() ), '' ) );
+		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
 		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.

@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			if ( wc_product_dimensions_enabled() ) {
 				?><p class="form-field dimensions_field">
+				<?php /* translators: WooCommerce dimension unit*/ ?>
 					<label for="product_length"><?php printf( __( 'Dimensions (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?></label>
 					<span class="wrap">
 						<input id="product_length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_length" value="<?php echo esc_attr( wc_format_localized_decimal( $product_object->get_length( 'edit' ) ) ); ?>" />
@@ -47,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'class'            => 'select short',
 			);
 			?><p class="form-field dimensions_field">
-				<label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label>
+				<label for="product_shipping_class"><?php esc_html_e( 'Shipping class', 'woocommerce' ); ?></label>
 				<?php wp_dropdown_categories( $args ); ?>
 				<?php echo wc_help_tip( __( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ) ); ?>
 			</p><?php

@@ -264,7 +264,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					continue;
 				}
 
-				echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $option_is_set, true, false ) . '>' . esc_html( $term->name ) . '</option>';
+				echo '<option value="' . esc_attr( urldecode( $term->slug ) ) . '" ' . selected( $option_is_set, true, false ) . '>' . esc_html( $term->name ) . '</option>';
 			}
 
 			echo '</select>';
@@ -356,7 +356,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		 * To support quote characters, first they are decoded from &quot; entities, then URL encoded.
 		 */
 		if ( get_search_query() ) {
-			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
+			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query( false ) ) ), $link );
 		}
 
 		// Post Type Arg.

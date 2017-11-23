@@ -9,7 +9,7 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "0.13.1",
+    "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
     "woocommerce/woocommerce-git-hooks": "1.0.3",
     "wimg/php-compatibility": "^8.0",

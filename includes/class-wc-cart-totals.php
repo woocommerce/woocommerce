@@ -227,7 +227,7 @@ final class WC_Cart_Totals {
 			$item->taxable                 = 'taxable' === $cart_item['data']->get_tax_status();
 			$item->price_includes_tax      = wc_prices_include_tax();
 			$item->quantity                = $cart_item['quantity'];
-			$item->price                   = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->price                   = wc_add_number_precision_deep( $cart_item['data']->get_price() * $cart_item['quantity'] );
 			$item->product                 = $cart_item['data'];
 			$item->tax_rates               = $this->get_item_tax_rates( $item );
 			$this->items[ $cart_item_key ] = $item;
@@ -349,8 +349,8 @@ final class WC_Cart_Totals {
 			$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class' );
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
-			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes );
-			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ) );
+			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
+			$shipping_line->total_tax = wc_add_number_precision_deep( array_sum( $shipping_object->taxes ), false );
 
 			if ( ! $this->round_at_subtotal() ) {
 				$shipping_line->total_tax = wc_round_tax_total( $shipping_line->total_tax, wc_get_rounding_precision() );
