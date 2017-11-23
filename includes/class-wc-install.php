@@ -98,6 +98,7 @@ class WC_Install {
 		),
 		'3.3.0' => array(
 			'wc_update_330_image_options',
+			'wc_update_330_set_default_product_cat',
 			'wc_update_330_db_version',
 		),
 	);
@@ -468,12 +469,12 @@ class WC_Install {
 			$default_product_cat      = get_term_by( 'slug', $default_product_cat_slug, 'product_cat' ); // @codingStandardsIgnoreLine.
 
 			if ( $default_product_cat ) {
-				$default_product_cat_id = absint( $default_product_cat->term_id );
+				$default_product_cat_id = absint( $default_product_cat->term_taxonomy_id );
 			} else {
 				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
 
-				if ( ! empty( $result['term_id'] ) ) {
-					$default_product_cat_id = absint( $result['term_id'] );
+				if ( ! empty( $result['term_taxonomy_id'] ) ) {
+					$default_product_cat_id = absint( $result['term_taxonomy_id'] );
 				}
 			}
 
