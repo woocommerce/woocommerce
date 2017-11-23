@@ -74,6 +74,16 @@ abstract class WC_Legacy_Cart {
 		$value = '';
 
 		switch ( $name ) {
+			case 'tax_display_cart' :
+				// Store the tax_display_cart value in a dynamically created property. This
+				// allows the __get() to be called only once, while still "lazy loading"
+				// the option value.
+				// This approach also prevents issues like the one reported in
+				// https://github.com/woocommerce/woocommerce/issues/17894, caused by
+				// option values being loaded too early
+				$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
+				$value = $this->tax_display_cart;
+			break;
 			case 'dp' :
 				$value = wc_get_price_decimals();
 				break;
