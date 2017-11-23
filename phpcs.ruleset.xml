@@ -15,7 +15,7 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="4.5" />
+	<config name="minimum_supported_wp_version" value="4.7" />
 	<config name="testVersion" value="5.2-"/>
 
 	<!-- Rules -->
