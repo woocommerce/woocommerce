@@ -27,6 +27,8 @@
 		<exclude name="WordPress.VIP.FileSystemWritesDisallow.file_ops_fwrite" />
 		<exclude name="WordPress.VIP.OrderByRand" />
 		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.RestrictedVariables.user_meta__wpdb__usermeta" />
+		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
 	</rule>
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
