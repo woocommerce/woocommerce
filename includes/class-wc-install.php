@@ -460,7 +460,7 @@ class WC_Install {
 			}
 		}
 
-		$woocommerce_default_category = get_option( 'woocommerce_default_category', 0 );
+		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
 
 		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
 			$default_product_cat_id   = 0;
@@ -478,7 +478,7 @@ class WC_Install {
 			}
 
 			if ( $default_product_cat_id ) {
-				update_option( 'woocommerce_default_category', $default_product_cat_id );
+				update_option( 'default_product_cat', $default_product_cat_id );
 			}
 		}
 	}
