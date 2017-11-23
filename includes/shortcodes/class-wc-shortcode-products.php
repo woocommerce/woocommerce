@@ -495,9 +495,8 @@ class WC_Shortcode_Products {
 			woocommerce_product_loop_start();
 
 			foreach ( $products_ids as $product_id ) {
-				$post_object = get_post( $product_id );
-				$GLOBALS['post'] =& $post_object; // WPCS: override ok.
-				setup_postdata( $post_object );
+				$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
+				setup_postdata( $GLOBALS['post'] );
 
 				// Set custom product visibility when quering hidden products.
 				add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
