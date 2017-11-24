@@ -12,12 +12,6 @@ if [ $1 == 'before' ]; then
 		phpenv config-rm xdebug.ini
 	fi
 
-	if [[ ${TRAVIS_PHP_VERSION:0:2} == "5." ]]; then
-		composer global require "phpunit/phpunit=4.8.*"
-	else
-		composer global require "phpunit/phpunit=6.2.*"
-	fi
-
 	if [[ ${RUN_PHPCS} == 1 ]]; then
 		composer install
 	fi
