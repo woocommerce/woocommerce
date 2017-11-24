@@ -38,9 +38,11 @@
 				<directory suffix=".php">./includes/updates</directory>
 				<directory suffix=".php">./includes/vendor</directory>
 				<directory suffix=".php">./includes/widgets</directory>
+				<directory>./vendor</directory>
 				<file>./includes/wc-deprecated-functions.php</file>
 				<file>./includes/wc-template-hooks.php</file>
 				<file>./includes/wc-widget-functions.php</file>
+				<file>./tests/bootstrap.php</file>
 			</exclude>
 		</whitelist>
 	</filter>
