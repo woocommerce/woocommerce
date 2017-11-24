@@ -982,4 +982,22 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertTrue( wc_delete_order_note( $note_id ) );
 	}
+
+	/**
+	 * Test wc_order_search()
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_wc_order_search() {
+		$order = WC_Helper_Order::create_order();
+
+		// Should find order searching by billing address name.
+		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'Jeroen' ) );
+
+		// Should find order searching by order item name.
+		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'Dummy Product' ) );
+
+		// Should return nothing when searching for nonexistent term.
+		$this->assertEmpty( wc_order_search( 'Nonexistent term' ) );
+	}
 }
