@@ -1433,6 +1433,34 @@ function wc_update_330_image_options() {
 }
 
 /**
+ * Assign default cat to all products with no cats.
+ */
+function wc_update_330_set_default_product_cat() {
+	global $wpdb;
+
+	$default_category = get_option( 'default_product_cat', 0 );
+
+	if ( $default_category ) {
+		$result = $wpdb->query( $wpdb->prepare( "
+			INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
+			SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
+			LEFT JOIN
+				(
+					SELECT object_id FROM {$wpdb->term_relationships} term_relationships
+					LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+					WHERE term_taxonomy.taxonomy = 'product_cat'
+				) AS tax_query
+			ON posts.ID = tax_query.object_id
+			WHERE posts.post_type = 'product'
+			AND tax_query.object_id IS NULL
+		", $default_category ) );
+		wp_cache_flush();
+		delete_transient( 'wc_term_counts' );
+		wp_update_term_count_now( array( $default_category ), 'product_cat' );
+	}
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_330_db_version() {
