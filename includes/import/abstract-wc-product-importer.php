@@ -737,9 +737,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return string
 	 */
 	protected function unescape_negative_number( $value ) {
-		$unescaped = str_replace( "'-", '-', $value );
-		if ( is_numeric( $unescaped ) ) {
-			return $unescaped;
+		if ( 0 === strpos( $value, "'-" ) ) {
+			$unescaped = substr_replace( $value, '', 0, 1 );
+			if ( is_numeric( $unescaped ) ) {
+				return $unescaped;
+			}
 		}
 
 		return $value;
