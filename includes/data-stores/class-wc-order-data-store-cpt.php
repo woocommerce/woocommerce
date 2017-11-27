@@ -446,11 +446,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$unpaid_orders = $wpdb->get_col(
 			$wpdb->prepare(
+				// @codingStandardsIgnoreStart
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
 				AND     posts.post_status = 'wc-pending'
 				AND     posts.post_modified < %s",
+				// @codingStandardsIgnoreEnd
 				date( 'Y-m-d H:i:s', absint( $date ) )
 			)
 		);
@@ -496,7 +498,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					$order_ids,
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')",
+							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
 							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
 						)
 					),
