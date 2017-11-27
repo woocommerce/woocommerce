@@ -45,4 +45,7 @@
 			<property name="text_domain" type="array" value="woocommerce" />
 		</properties>
 	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+	</rule>
 </ruleset>
