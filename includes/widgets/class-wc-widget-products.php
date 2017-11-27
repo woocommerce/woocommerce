@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  3.3.0
  * @extends  WC_Widget
  */
 class WC_Widget_Products extends WC_Widget {
@@ -20,9 +20,9 @@ class WC_Widget_Products extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_products';
-		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
+		$this->widget_description = __( "A list of your store's products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce products', 'woocommerce' );
+		$this->widget_name        = __( 'Products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
@@ -189,14 +189,19 @@ class WC_Widget_Products extends WC_Widget {
 		if ( ( $products = $this->get_products( $args, $instance ) ) && $products->have_posts() ) {
 			$this->widget_start( $args, $instance );
 
-			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
+
+			$template_args = array(
+				'widget_id'   => $args['widget_id'],
+				'show_rating' => true,
+			);
 
 			while ( $products->have_posts() ) {
 				$products->the_post();
-				wc_get_template( 'content-widget-product.php', array( 'show_rating' => false ) );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );
 		}

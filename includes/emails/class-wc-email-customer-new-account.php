@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 
 /**
  * Customer New Account.
@@ -51,20 +51,35 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id             = 'customer_new_account';
 		$this->customer_email = true;
 		$this->title          = __( 'New account', 'woocommerce' );
 		$this->description    = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-new-account.php';
 		$this->template_plain = 'emails/plain/customer-new-account.php';
 
-		$this->subject        = __( 'Your account on {site_title}', 'woocommerce' );
-		$this->heading        = __( 'Welcome to {site_title}', 'woocommerce' );
-
 		// Call parent constructor
 		parent::__construct();
+	}
+
+	/**
+	 * Get email subject.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_subject() {
+		return __( 'Your account on {site_title}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Welcome to {site_title}', 'woocommerce' );
 	}
 
 	/**
@@ -75,6 +90,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 * @param bool $password_generated
 	 */
 	public function trigger( $user_id, $user_pass = '', $password_generated = false ) {
+		$this->setup_locale();
 
 		if ( $user_id ) {
 			$this->object             = new WP_User( $user_id );
@@ -86,11 +102,11 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			$this->password_generated = $password_generated;
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		$this->restore_locale();
 	}
 
 	/**

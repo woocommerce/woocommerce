@@ -6,16 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (tax).
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
 class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
-	 * Order Data array. This is the core order data exposed in APIs since 2.7.0.
-	 * @since 2.7.0
+	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
@@ -77,7 +77,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_tax_total( $value ) {
-		$this->set_prop( 'tax_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_shipping_tax_total( $value ) {
-		$this->set_prop( 'shipping_tax_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
@@ -104,10 +104,12 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_rate( $tax_rate_id ) {
+		$tax_rate = WC_Tax::_get_tax_rate( $tax_rate_id, OBJECT );
+
 		$this->set_rate_id( $tax_rate_id );
-		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_label( WC_Tax::get_rate_code( $tax_rate_id ) );
-		$this->set_compound( WC_Tax::get_rate_code( $tax_rate_id ) );
+		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate ) );
+		$this->set_label( WC_Tax::get_rate_label( $tax_rate ) );
+		$this->set_compound( WC_Tax::is_compound( $tax_rate ) );
 	}
 
 	/*
@@ -206,5 +208,56 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 */
 	public function is_compound() {
 		return $this->get_compound();
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Array Access Methods
+	|--------------------------------------------------------------------------
+	|
+	| For backwards compatibility with legacy arrays.
+	|
+	*/
+
+	/**
+	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @return mixed
+	 */
+	public function offsetGet( $offset ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		return parent::offsetGet( $offset );
+	}
+
+	/**
+	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet( $offset, $value ) {
+		if ( 'tax_amount' === $offset ) {
+			$offset = 'tax_total';
+		} elseif ( 'shipping_tax_amount' === $offset ) {
+			$offset = 'shipping_tax_total';
+		}
+		parent::offsetSet( $offset, $value );
+	}
+
+	/**
+	 * offsetExists for ArrayAccess
+	 * @param string $offset
+	 * @return bool
+	 */
+	public function offsetExists( $offset ) {
+		if ( in_array( $offset, array( 'tax_amount', 'shipping_tax_amount' ) ) ) {
+			return true;
+		}
+		return parent::offsetExists( $offset );
 	}
 }

@@ -137,7 +137,7 @@ class WC_Countries {
 	/**
 	 * Get the states for a country.
 	 * @param  string $cc country code
-	 * @return array of states
+	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
 		if ( empty( $this->states ) ) {
@@ -149,6 +149,26 @@ class WC_Countries {
 		} else {
 			return $this->states;
 		}
+	}
+
+	/**
+	 * Get the base address (first line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address() {
+		$base_address = get_option( 'woocommerce_store_address', '' );
+		return apply_filters( 'woocommerce_countries_base_address', $base_address );
+	}
+
+	/**
+	 * Get the base address (second line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address_2() {
+		$base_address_2 = get_option( 'woocommerce_store_address_2', '' );
+		return apply_filters( 'woocommerce_countries_base_address_2', $base_address_2 );
 	}
 
 	/**
@@ -171,18 +191,22 @@ class WC_Countries {
 
 	/**
 	 * Get the base city for the store.
+	 * @version 3.1.1
 	 * @return string
 	 */
 	public function get_base_city() {
-		return apply_filters( 'woocommerce_countries_base_city', '' );
+		$base_city = get_option( 'woocommerce_store_city', '' );
+		return apply_filters( 'woocommerce_countries_base_city', $base_city );
 	}
 
 	/**
 	 * Get the base postcode for the store.
+	 * @since 3.1.1
 	 * @return string
 	 */
 	public function get_base_postcode() {
-		return apply_filters( 'woocommerce_countries_base_postcode', '' );
+		$base_postcode = get_option( 'woocommerce_store_postcode', '' );
+		return apply_filters( 'woocommerce_countries_base_postcode', $base_postcode );
 	}
 
 	/**
@@ -191,7 +215,7 @@ class WC_Countries {
 	 */
 	public function get_allowed_countries() {
 		if ( 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
-			return $this->countries;
+			return apply_filters( 'woocommerce_countries_allowed_countries', $this->countries );
 		}
 
 		if ( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
@@ -304,7 +328,7 @@ class WC_Countries {
 	 *
 	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
 	 *
-	 * @param  $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
+	 * @param  string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
 	 * @return string[]
 	 */
 	public function get_european_union_countries( $type = '' ) {
@@ -320,6 +344,9 @@ class WC_Countries {
 
 	/**
 	 * Gets the correct string for shipping - either 'to the' or 'to'
+	 *
+	 * @param string $country_code
+	 *
 	 * @return string
 	 */
 	public function shipping_to_prefix( $country_code = '' ) {
@@ -332,6 +359,9 @@ class WC_Countries {
 
 	/**
 	 * Prefix certain countries with 'the'
+	 *
+	 * @param string $country_code
+	 *
 	 * @return string
 	 */
 	public function estimated_for_prefix( $country_code = '' ) {
@@ -347,7 +377,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -357,7 +387,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -367,7 +397,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
@@ -380,27 +410,29 @@ class WC_Countries {
 	 * @param bool   $escape (default: false)
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
-		if ( $this->countries ) foreach ( $this->countries as $key => $value ) :
-			if ( $states = $this->get_states( $key ) ) :
-				echo '<optgroup label="' . esc_attr( $value ) . '">';
-					foreach ( $states as $state_key => $state_value ) :
-					echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
+		if ( $this->countries ) :
+			foreach ( $this->countries as $key => $value ) :
+				if ( $states = $this->get_states( $key ) ) :
+					echo '<optgroup label="' . esc_attr( $value ) . '">';
+						foreach ( $states as $state_key => $state_value ) :
+						echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
-					if ( $selected_country == $key && $selected_state == $state_key ) {
-						echo ' selected="selected"';
+						if ( $selected_country === $key && $selected_state === $state_key ) {
+							echo ' selected="selected"';
 						}
 
-					echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
-					endforeach;
-				echo '</optgroup>';
-			else :
-				echo '<option';
-				if ( $selected_country == $key && '*' == $selected_state ) {
-					echo ' selected="selected"';
-				}
-				echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
-			endif;
-		endforeach;
+						echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
+						endforeach;
+					echo '</optgroup>';
+				else :
+					echo '<option';
+					if ( $selected_country === $key && '*' === $selected_state ) {
+						echo ' selected="selected"';
+					}
+					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
+				endif;
+			endforeach;
+		endif;
 	}
 
 	/**
@@ -559,7 +591,6 @@ class WC_Countries {
 				'label'        => __( 'Last name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-last' ),
-				'clear'        => true,
 				'autocomplete' => 'family-name',
 				'priority'     => 20,
 			),
@@ -578,8 +609,9 @@ class WC_Countries {
 				'priority'     => 40,
 			),
 			'address_1' => array(
-				'label'        => __( 'Address', 'woocommerce' ),
-				'placeholder'  => esc_attr__( 'Street address', 'woocommerce' ),
+				'label'        => __( 'Street address', 'woocommerce' ),
+				/* translators: use local order of street name and house number. */
+				'placeholder'  => esc_attr__( 'House number and street name', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line1',
@@ -612,7 +644,6 @@ class WC_Countries {
 				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field' ),
-				'clear'        => true,
 				'validate'     => array( 'postcode' ),
 				'autocomplete' => 'postal-code',
 				'priority'     => 90,
@@ -651,6 +682,9 @@ class WC_Countries {
 					'postcode' => array(
 						'required' => false,
 						'hidden'   => true,
+					),
+					'state' => array(
+						'required' => false,
 					),
 				),
 				'AF' => array(
@@ -799,6 +833,16 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'GP' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'GF' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'HK' => array(
 					'postcode' => array(
 						'required' => false,
@@ -868,6 +912,21 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'KW' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'LB' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'MQ' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'NL' => array(
 					'postcode' => array(
 						'priority' => 65,
@@ -911,6 +970,11 @@ class WC_Countries {
 					),
 				),
 				'PT' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'RE' => array(
 					'state' => array(
 						'required' => false,
 					),
@@ -1016,6 +1080,11 @@ class WC_Countries {
 						'hidden'   => true,
 					),
 				),
+				'YT' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'ZA' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
@@ -1068,7 +1137,9 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
-			$keys = array_keys( $fields );
+			if ( 'state' === $key ) {
+				$value['country_field'] = $type . 'country';
+			}
 			$address_fields[ $type . $key ] = $value;
 		}
 
@@ -1078,7 +1149,7 @@ class WC_Countries {
 				'label'        => __( 'Phone', 'woocommerce' ),
 				'required'     => true,
 				'type'         => 'tel',
-				'class'        => array( 'form-row-first' ),
+				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'phone' ),
 				'autocomplete' => 'tel',
 				'priority'     => 100,
@@ -1086,9 +1157,8 @@ class WC_Countries {
 			$address_fields['billing_email'] = array(
 				'label'        => __( 'Email address', 'woocommerce' ),
 				'required'     => true,
-				'clear'        => true,
 				'type'         => 'email',
-				'class'        => array( 'form-row-last' ),
+				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
 				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
 				'priority'     => 110,

@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.1.2
+ * @version 3.0.9
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,16 +36,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_before_checkout_billing_form', $checkout ); ?>
 
-	<?php foreach ( $checkout->get_checkout_fields( 'billing' ) as $key => $field ) : ?>
+	<div class="woocommerce-billing-fields__field-wrapper">
+		<?php
+			$fields = $checkout->get_checkout_fields( 'billing' );
 
-		<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-
-	<?php endforeach; ?>
+			foreach ( $fields as $key => $field ) {
+				if ( isset( $field['country_field'], $fields[ $field['country_field'] ] ) ) {
+					$field['country'] = $checkout->get_value( $field['country_field'] );
+				}
+				woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+			}
+		?>
+	</div>
 
 	<?php do_action( 'woocommerce_after_checkout_billing_form', $checkout ); ?>
+</div>
 
-	<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
-
+<?php if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
+	<div class="woocommerce-account-fields">
 		<?php if ( ! $checkout->is_registration_required() ) : ?>
 
 			<p class="form-row form-row-wide create-account">
@@ -61,27 +69,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
 
 			<div class="create-account">
-
-				<p><?php
-					_e( 'Create an account by entering the information below.', 'woocommerce' );
-					if ( 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ) ) {
-						echo ' ' . __( 'If you are a returning customer please login at the top of the page.', 'woocommerce' );
-					}
-				?></p>
-
-				<?php foreach ( $checkout->get_checkout_fields( 'account' )  as $key => $field ) : ?>
-
+				<?php foreach ( $checkout->get_checkout_fields( 'account' ) as $key => $field ) : ?>
 					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
-
 				<?php endforeach; ?>
-
 				<div class="clear"></div>
-
 			</div>
 
 		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
-
-	<?php endif; ?>
-</div>
+	</div>
+<?php endif; ?>

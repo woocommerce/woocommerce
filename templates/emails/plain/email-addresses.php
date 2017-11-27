@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.2.0
+ * @version     3.2.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,6 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo "\n" . strtoupper( __( 'Billing address', 'woocommerce' ) ) . "\n\n";
 echo preg_replace( '#<br\s*/?>#i', "\n", $order->get_formatted_billing_address() ) . "\n";
+
+if ( $order->get_billing_phone() ) {
+	echo $order->get_billing_phone() . "\n";
+}
+
+if ( $order->get_billing_email() ) {
+	echo $order->get_billing_email() . "\n";
+}
 
 if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && ( $shipping = $order->get_formatted_shipping_address() ) ) {
 	echo "\n" . strtoupper( __( 'Shipping address', 'woocommerce' ) ) . "\n\n";

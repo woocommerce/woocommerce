@@ -43,9 +43,12 @@ function wc_register_widgets() {
 	register_widget( 'WC_Widget_Product_Search' );
 	register_widget( 'WC_Widget_Product_Tag_Cloud' );
 	register_widget( 'WC_Widget_Products' );
-	register_widget( 'WC_Widget_Rating_Filter' );
-	register_widget( 'WC_Widget_Recent_Reviews' );
 	register_widget( 'WC_Widget_Recently_Viewed' );
-	register_widget( 'WC_Widget_Top_Rated_Products' );
+
+	if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
+		register_widget( 'WC_Widget_Top_Rated_Products' );
+		register_widget( 'WC_Widget_Recent_Reviews' );
+		register_widget( 'WC_Widget_Rating_Filter' );
+	}
 }
 add_action( 'widgets_init', 'wc_register_widgets' );

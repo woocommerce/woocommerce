@@ -137,8 +137,8 @@ class WC_Webhook {
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
 			$should_deliver = false;
-		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
-			// Only deliver deleted event for coupons, orders, and products.
+		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post', 'untrashed_post' ), true ) ) {
+			// Only deliver deleted/restored event for coupons, orders, and products.
 			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 				$should_deliver = false;
 			}
@@ -233,7 +233,7 @@ class WC_Webhook {
 	/**
 	 * Get Legacy API payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
@@ -284,19 +284,21 @@ class WC_Webhook {
 	/**
 	 * Get WP API integration payload.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @param  string $resource    Resource type.
 	 * @param  int    $resource_id Resource ID.
 	 * @param  string $event       Event type.
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
+		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
+
 		switch ( $resource ) {
 			case 'coupon' :
 			case 'customer' :
 			case 'order' :
 			case 'product' :
-				$class      = 'WC_REST_' . ucfirst( $resource ) . 's_Controller';
+				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
 				$request    = new WP_REST_Request( 'GET' );
 				$controller = new $class;
 
@@ -333,7 +335,7 @@ class WC_Webhook {
 	 * @param mixed $resource_id first hook argument, typically the resource ID
 	 * @return mixed payload data
 	 */
-	private function build_payload( $resource_id ) {
+	public function build_payload( $resource_id ) {
 		// build the payload with the same user context as the user who created
 		// the webhook -- this avoids permission errors as background processing
 		// runs with no user context
@@ -349,7 +351,7 @@ class WC_Webhook {
 				'id' => $resource_id,
 			);
 		} else {
-			if ( 'wp_api_v1' === $this->get_api_version() ) {
+			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2' ), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 			} else {
 				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
@@ -419,7 +421,7 @@ class WC_Webhook {
 		// save request data
 		add_comment_meta( $delivery_id, '_request_method', $request['method'] );
 		add_comment_meta( $delivery_id, '_request_headers', array_merge( array( 'User-Agent' => $request['user-agent'] ), $request['headers'] ) );
-		add_comment_meta( $delivery_id, '_request_body', $request['body'] );
+		add_comment_meta( $delivery_id, '_request_body', wp_slash( $request['body'] ) );
 
 		// parse response
 		if ( is_wp_error( $response ) ) {
@@ -608,54 +610,59 @@ class WC_Webhook {
 		$topic_hooks = array(
 			'coupon.created' => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_create_coupon',
+				'woocommerce_new_coupon',
 			),
 			'coupon.updated' => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_edit_coupon',
+				'woocommerce_update_coupon',
 			),
 			'coupon.deleted' => array(
 				'wp_trash_post',
 			),
+			'coupon.restored' => array(
+				'untrashed_post',
+			),
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
-				'woocommerce_api_create_customer',
+				'woocommerce_new_customer',
 			),
 			'customer.updated' => array(
 				'profile_update',
-				'woocommerce_api_edit_customer',
-				'woocommerce_customer_save_address',
+				'woocommerce_update_customer',
 			),
 			'customer.deleted' => array(
 				'delete_user',
 			),
 			'order.created'    => array(
-				'woocommerce_checkout_order_processed',
 				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_create_order',
+				'woocommerce_new_order',
 			),
 			'order.updated' => array(
 				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_edit_order',
-				'woocommerce_order_edit_status',
-				'woocommerce_order_status_changed',
+				'woocommerce_update_order',
 			),
 			'order.deleted' => array(
 				'wp_trash_post',
 			),
+			'order.restored' => array(
+				'untrashed_post',
+			),
 			'product.created' => array(
 				'woocommerce_process_product_meta',
-				'woocommerce_api_create_product',
+				'woocommerce_new_product',
+				'woocommerce_new_product_variation',
 			),
 			'product.updated' => array(
 				'woocommerce_process_product_meta',
-				'woocommerce_api_edit_product',
-				'woocommerce_product_quick_edit_save',
-				'woocommerce_product_bulk_edit_save',
+				'woocommerce_update_product',
+				'woocommerce_update_product_variation',
 			),
 			'product.deleted' => array(
 				'wp_trash_post',
+			),
+			'product.restored' => array(
+				'untrashed_post',
 			),
 		);
 
@@ -686,6 +693,8 @@ class WC_Webhook {
 		if ( 200 !== $response_code ) {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
+
+		delete_post_meta( $this->id, '_webhook_pending_delivery' );
 
 		return true;
 	}
@@ -895,17 +904,18 @@ class WC_Webhook {
 	/**
 	 * Set API version.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @param string $version REST API version.
 	 */
 	public function set_api_version( $version ) {
 		$versions = array(
+			'wp_api_v2',
 			'wp_api_v1',
 			'legacy_v3',
 		);
 
 		if ( ! in_array( $version, $versions, true ) ) {
-			$version = 'wp_api_v1';
+			$version = 'wp_api_v2';
 		}
 
 		update_post_meta( $this->id, '_api_version', $version );
@@ -914,7 +924,7 @@ class WC_Webhook {
 	/**
 	 * API version.
 	 *
-	 * @since  2.7.0
+	 * @since  3.0.0
 	 * @return string
 	 */
 	public function get_api_version() {

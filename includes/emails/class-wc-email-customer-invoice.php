@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 /**
  * Customer Invoice.
@@ -20,73 +20,53 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
 class WC_Email_Customer_Invoice extends WC_Email {
 
 	/**
-	 * Strings to find in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $find;
-
-	/**
-	 * Strings to replace in subjects/headings.
-	 *
-	 * @var array
-	 */
-	public $replace;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id             = 'customer_invoice';
-		$this->title          = __( 'Customer invoice', 'woocommerce' );
+		$this->customer_email = true;
+		$this->title          = __( 'Customer invoice / Order details', 'woocommerce' );
 		$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-invoice.php';
 		$this->template_plain = 'emails/plain/customer-invoice.php';
-
-		$this->subject        = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce' );
-		$this->heading        = __( 'Invoice for order {order_number}', 'woocommerce' );
-
-		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce' );
-		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce' );
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Call parent constructor
 		parent::__construct();
 
-		$this->customer_email = true;
 		$this->manual         = true;
-		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
-		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
 	}
 
 	/**
-	 * Trigger the sending of this email.
+	 * Get email subject.
 	 *
-	 * @param int $order_id The order ID.
-	 * @param WC_Order $order Order object.
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function trigger( $order_id, $order = false ) {
-		if ( $order_id && ! is_a( $order, 'WC_Order' ) ){
-			$order = wc_get_order( $order_id );
+	public function get_default_subject( $paid = false ) {
+		if ( $paid ) {
+			return __( 'Your {site_title} order from {order_date}', 'woocommerce' );
+		} else {
+			return __( 'Invoice for order {order_number}', 'woocommerce' );
 		}
+	}
 
-		if ( is_a( $order, 'WC_Order' ) ) {
-			$this->object                  = $order;
-			$this->recipient               = $this->object->get_billing_email();
-
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-
-			$this->replace['order-date']   = date_i18n( wc_date_format(), $this->object->get_date_created() );
-			$this->replace['order-number'] = $this->object->get_order_number();
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading( $paid = false ) {
+		if ( $paid ) {
+			return __( 'Your order details', 'woocommerce' );
+		} else {
+			return __( 'Invoice for order {order_number}', 'woocommerce' );
 		}
-
-		if ( ! $this->get_recipient() ) {
-			return;
-		}
-
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
 
 	/**
@@ -96,11 +76,14 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	public function get_subject() {
-		if ( $this->object->has_status( wc_get_is_paid_statuses() ) ) {
-			return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $this->subject_paid ), $this->object );
+		if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
+			$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
+			$action  = 'woocommerce_email_subject_customer_invoice_paid';
 		} else {
-			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $this->subject ), $this->object );
+			$subject = $this->get_option( 'subject', $this->get_default_subject() );
+			$action  = 'woocommerce_email_subject_customer_invoice';
 		}
+		return apply_filters( $action, $this->format_string( $subject ), $this->object );
 	}
 
 	/**
@@ -110,11 +93,41 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	public function get_heading() {
-		if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
-			return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $this->heading_paid ), $this->object );
+		if ( $this->object->has_status( wc_get_is_paid_statuses() ) ) {
+			$heading = $this->get_option( 'heading_paid', $this->get_default_heading( true ) );
+			$action  = 'woocommerce_email_heading_customer_invoice_paid';
 		} else {
-			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $this->heading ), $this->object );
+			$heading = $this->get_option( 'heading', $this->get_default_heading() );
+			$action  = 'woocommerce_email_heading_customer_invoice';
 		}
+		return apply_filters( $action, $this->format_string( $heading ), $this->object );
+	}
+
+	/**
+	 * Trigger the sending of this email.
+	 *
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
+	 */
+	public function trigger( $order_id, $order = false ) {
+		$this->setup_locale();
+
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
+		}
+
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$this->object                         = $order;
+			$this->recipient                      = $this->object->get_billing_email();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
+		}
+
+		if ( $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		}
+
+		$this->restore_locale();
 	}
 
 	/**
@@ -155,40 +168,40 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'subject' => array(
-				'title'         => __( 'Email subject', 'woocommerce' ),
+				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_subject(),
+				'default'       => '',
 			),
 			'heading' => array(
 				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_heading(),
+				'default'       => '',
 			),
 			'subject_paid' => array(
-				'title'         => __( 'Email subject (paid)', 'woocommerce' ),
+				'title'         => __( 'Subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default subject */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->subject_paid . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_subject( true ),
+				'default'       => '',
 			),
 			'heading_paid' => array(
 				'title'         => __( 'Email heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
-				/* translators: %s: default heading */
-				'description'   => sprintf( __( 'Defaults to %s', 'woocommerce' ), '<code>' . $this->heading_paid . '</code>' ),
-				'placeholder'   => '',
-				'default'       => '',
 				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_heading( true ),
+				'default'       => '',
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),

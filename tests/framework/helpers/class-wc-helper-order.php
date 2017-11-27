@@ -16,22 +16,22 @@ class WC_Helper_Order {
 
 		$order = wc_get_order( $order_id );
 
-		// Delete all products in the order
-		foreach ( $order->get_items() as $item ) :
+		// Delete all products in the order.
+		foreach ( $order->get_items() as $item ) {
 			WC_Helper_Product::delete_product( $item['product_id'] );
-		endforeach;
+		}
 
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
-		// Delete the order post
-		wp_delete_post( $order_id, true );
+		// Delete the order post.
+		$order->delete( true );
 	}
 
 	/**
 	 * Create a order.
 	 *
 	 * @since   2.4
-	 * @version 2.7 New parameter $product.
+	 * @version 3.0 New parameter $product.
 	 *
 	 * @param int        $customer_id
 	 * @param WC_Product $product
@@ -57,7 +57,15 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$order->add_product( $product, 4 );
+		$item = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => $product,
+			'quantity' => 4,
+			'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+			'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
+		) );
+		$item->save();
+		$order->add_item( $item );
 
 		// Set billing address
 		$order->set_billing_first_name( 'Jeroen' );
@@ -97,7 +105,7 @@ class WC_Helper_Order {
 		$order->set_discount_tax( 0 );
 		$order->set_cart_tax( 0 );
 		$order->set_shipping_tax( 0 );
-		$order->set_total( 40 ); // 4 x $10 simple helper product
+		$order->set_total( 50 ); // 4 x $10 simple helper product
 		$order->save();
 
 		return $order;

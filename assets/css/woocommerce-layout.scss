@@ -6,7 +6,6 @@
 /**
  * Imports
  */
-@import 'bourbon';
 @import 'mixins';
 @import 'variables';
 
@@ -103,6 +102,7 @@
 		div.summary {
 			float: right;
 			width: 48%;
+			clear: none;
 		}
 
 		.woocommerce-tabs {
@@ -341,6 +341,23 @@
 		#place_order {
 			float: right;
 		}
+	}
+
+	.woocommerce-billing-fields,
+	.woocommerce-shipping-fields {
+		@include clearfix();
+	}
+
+	.woocommerce-terms-and-conditions {
+		margin-bottom: 1.618em;
+		padding: 1.618em;
+	}
+
+	/**
+	 * oEmbeds
+	 */
+	.woocommerce-oembed {
+		position: relative;
 	}
 }
 

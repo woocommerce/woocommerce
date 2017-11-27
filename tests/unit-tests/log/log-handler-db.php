@@ -3,7 +3,7 @@
 /**
  * Class WC_Tests_Log_Handler_DB
  * @package WooCommerce\Tests\Log
- * @since 2.7.0
+ * @since 3.0.0
  */
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	public function setUp() {
@@ -19,7 +19,7 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	/**
 	 * Test handle writes to database correctly.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_handle() {
 		global $wpdb;
@@ -115,7 +115,7 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	/**
 	 * Test flush.
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_flush() {
 		global $wpdb;

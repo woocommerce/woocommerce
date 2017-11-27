@@ -1,4 +1,4 @@
-/*global ajaxurl, inlineEditPost, inlineEditL10n, woocommerce_admin */
+/*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -88,6 +88,9 @@ jQuery(function( $ ) {
 		} else {
 			$( '.stock_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
 		}
+
+		// Rename core strings
+		$( 'input[name="comment_status"]' ).parent().find( '.checkbox-title' ).text( woocommerce_quick_edit.strings.allow_reviews );
 	});
 
 	$( '#the-list' ).on( 'change', '.inline-edit-row input[name="_manage_stock"]', function() {
@@ -104,10 +107,6 @@ jQuery(function( $ ) {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
 		$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
 		$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
-
-		// Autosuggest product tags on bulk edit
-		var tax = 'product_tag';
-		$( 'tr.inline-editor textarea[name="tax_input[' + tax + ']"]' ).suggest( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: inlineEditL10n.comma } );
 	});
 
 	$( '#wpbody' ).on( 'change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function() {
@@ -118,5 +117,9 @@ jQuery(function( $ ) {
 			$( this ).closest( 'div' ).find( '.change-input' ).hide();
 		}
 
+	});
+
+	$( '#wpbody' ).on( 'click', '.trash-product', function() {
+		return window.confirm( woocommerce_admin.i18_delete_product_notice );
 	});
 });

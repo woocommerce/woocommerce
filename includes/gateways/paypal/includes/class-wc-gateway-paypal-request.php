@@ -43,7 +43,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
-		$paypal_args = http_build_query( array_filter( $this->get_paypal_args( $order ) ), '', '&' );
+		$paypal_args = http_build_query( $this->get_paypal_args( $order ), '', '&' );
 
 		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . wc_print_r( $paypal_args, true ) );
 
@@ -327,7 +327,7 @@ class WC_Gateway_Paypal_Request {
 	 * @param  string  $item_number
 	 * @return bool successfully added or not
 	 */
-	protected function add_line_item( $item_name, $quantity = 1, $amount = 0, $item_number = '' ) {
+	protected function add_line_item( $item_name, $quantity = 1, $amount = 0.0, $item_number = '' ) {
 		$index = ( sizeof( $this->line_items ) / 4 ) + 1;
 
 		if ( $amount < 0 || $index > 9 ) {
@@ -337,7 +337,7 @@ class WC_Gateway_Paypal_Request {
 		$item = apply_filters( 'woocommerce_paypal_line_item', array(
 			'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
 			'quantity'    => (int) $quantity,
-			'amount'      => (float) $amount,
+			'amount'      => wc_float_to_string( (float) $amount ),
 			'item_number' => $item_number,
 		), $item_name, $quantity, $amount, $item_number );
 

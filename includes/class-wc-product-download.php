@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Represents a file which can be downloaded.
  *
- * @version     2.7.0
- * @since       2.7.0
+ * @version     3.0.0
+ * @since       3.0.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -15,14 +15,13 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Data array.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $data = array(
 		'id'            => '',
 		'name'          => '',
 		'file'          => '',
-		'previous_hash' => '',
 	);
 
 	/**
@@ -80,7 +79,7 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return boolean
 	 */
 	public function is_allowed_filetype() {
-		if ( 'shortcode' === $this->get_type_of_file_path() ) {
+		if ( 'relative' !== $this->get_type_of_file_path() ) {
 			return true;
 		}
 		return ! $this->get_file_extension() || in_array( $this->get_file_type(), $this->get_allowed_mime_types() );
@@ -97,6 +96,8 @@ class WC_Product_Download implements ArrayAccess {
 		$file_url = $this->get_file();
 		if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
 			$file_url = realpath( ABSPATH . $file_url );
+		} elseif ( '/wp-content' === substr( $file_url, 0, 11 ) ) {
+			$file_url = realpath( WP_CONTENT_DIR . substr( $file_url, 11 ) );
 		}
 		return apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $this->get_file() );
 	}
@@ -125,9 +126,11 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set previous_hash.
+	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
 	 * @param string $value
 	 */
 	public function set_previous_hash( $value ) {
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 		$this->data['previous_hash'] = wc_clean( $value );
 	}
 
@@ -170,9 +173,11 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get previous_hash.
+	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
 	 * @return string
 	 */
 	public function get_previous_hash() {
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 		return $this->data['previous_hash'];
 	}
 

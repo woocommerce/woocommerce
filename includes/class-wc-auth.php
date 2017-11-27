@@ -9,12 +9,9 @@
  * @package  WooCommerce/API
  * @since    2.4.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-if ( ! class_exists( 'WC_Auth' ) ) :
 
 class WC_Auth {
 
@@ -145,7 +142,7 @@ class WC_Auth {
 	/**
 	 * Decode and format a URL.
 	 * @param  string $url
-	 * @return array
+	 * @return string
 	 */
 	protected function get_formatted_url( $url ) {
 		$url = urldecode( $url );
@@ -195,7 +192,7 @@ class WC_Auth {
 		$callback_url = $this->get_formatted_url( $_REQUEST['callback_url'] );
 
 		if ( 0 !== stripos( $callback_url, 'https://' ) ) {
-			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
+			throw new Exception( __( 'The callback_url needs to be over SSL', 'woocommerce' ) );
 		}
 	}
 
@@ -377,12 +374,12 @@ class WC_Auth {
 					exit;
 				}
 			} else {
-				throw new Exception( __( 'You do not have permissions to access this page!', 'woocommerce' ) );
+				throw new Exception( __( 'You do not have permission to access this page', 'woocommerce' ) );
 			}
 		} catch ( Exception $e ) {
 			$this->maybe_delete_key( $consumer_data );
 
-			/* translators: %s: error messase */
+			/* translators: %s: error message */
 			wp_die( sprintf( __( 'Error: %s.', 'woocommerce' ), $e->getMessage() ), __( 'Access denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}
@@ -402,7 +399,4 @@ class WC_Auth {
 		}
 	}
 }
-
-endif;
-
-return new WC_Auth();
+new WC_Auth();

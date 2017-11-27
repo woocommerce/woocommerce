@@ -8,16 +8,31 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 $who_refunded = new WP_User( $refund->get_refunded_by() );
 ?>
-<tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->get_id(); ?>">
+<tr class="refund <?php echo ( ! empty( $class ) ) ? esc_attr( $class ) : ''; ?>" data-order_refund_id="<?php echo esc_attr( $refund->get_id() ); ?>">
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
 		<?php
-			/* translators: 1: refund id 2: date */
-			printf( __( 'Refund #%1$s - %2$s', 'woocommerce' ), $refund->get_id(), date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), $refund->get_date_created() ) );
-
 			if ( $who_refunded->exists() ) {
-				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
+				printf(
+					/* translators: 1: refund id 2: refund date 3: username */
+					esc_html__( 'Refund #%1$s - %2$s by %3$s', 'woocommerce' ),
+					$refund->get_id(),
+					wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ),
+					sprintf(
+						'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
+						/* translators: 1: ID who refunded */
+						sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ),
+						esc_html( $who_refunded->display_name )
+					)
+				);
+			} else {
+				printf(
+					/* translators: 1: refund id 2: refund date */
+					esc_html__( 'Refund #%1$s - %2$s', 'woocommerce' ),
+					$refund->get_id(),
+					wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) )
+				);
 			}
 		?>
 		<?php if ( $refund->get_reason() ) : ?>

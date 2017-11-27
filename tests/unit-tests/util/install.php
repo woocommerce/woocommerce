@@ -27,17 +27,18 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - install.
 	 */
 	public function test_install() {
-		// clean existing install first
+		// clean existing install first.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 
 		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		delete_transient( 'wc_installing' );
 
 		WC_Install::install();
 
-		$this->assertTrue( get_option( 'woocommerce_version' ) === WC()->version );
+		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ), print_r( array( 'Stored version' => get_option( 'woocommerce_version' ), 'WC Version' => WC()->version ), true ) );
 	}
 
 	/**
@@ -102,15 +103,5 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		$this->assertNull( get_role( 'customer' ) );
 		$this->assertNull( get_role( 'shop_manager' ) );
-	}
-
-	/**
-	 * Test - in_plugin_update_message.
-	 */
-	public function test_in_plugin_update_message() {
-		ob_start();
-		WC_install::in_plugin_update_message( array( 'Version' => '2.0.0', 'new_version' => '2.0.0' ) );
-		$result = ob_get_clean();
-		$this->assertTrue( is_string( $result ) );
 	}
 }

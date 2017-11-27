@@ -127,7 +127,7 @@ class WC_Embed {
 				<?php
 					/* translators: %s: average rating */
 					printf(
-						esc_html_( 'Rated %s out of 5', 'woocommerce' ),
+						esc_html__( 'Rated %s out of 5', 'woocommerce' ),
 						esc_html( $_product->get_average_rating() )
 					);
 				?>

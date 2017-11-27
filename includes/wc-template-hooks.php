@@ -200,11 +200,6 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 add_action( 'woocommerce_product_additional_information', 'wc_display_product_attributes', 10 );
 
 /**
- * Photoswipe.
- */
-add_action( 'wp_footer', 'woocommerce_photoswipe' );
-
-/**
  * Checkout.
  *
  * @see woocommerce_checkout_login_form()
@@ -233,6 +228,7 @@ add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shop
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
 add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
+add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
 
 /**
  * Footer.
@@ -252,6 +248,13 @@ add_action( 'wp_footer', 'woocommerce_demo_store' );
 add_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
+
+/**
+ * Order downloads.
+ *
+ * @see woocommerce_order_downloads_table()
+ */
+add_action( 'woocommerce_available_downloads', 'woocommerce_order_downloads_table', 10 );
 
 /**
  * Auth.

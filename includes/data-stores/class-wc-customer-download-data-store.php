@@ -6,31 +6,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Download Data Store.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
 class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store_Interface {
 
 	/**
-	 * Create dowload permission for a user.
+	 * Create download permission for a user.
 	 *
 	 * @param WC_Customer_Download $download
 	 */
 	public function create( &$download ) {
 		global $wpdb;
 
+		// Always set a access granted date.
+		if ( is_null( $download->get_access_granted( 'edit' ) ) ) {
+			$download->set_access_granted( current_time( 'timestamp', true ) );
+		}
+
 		$data = array(
-			'download_id'         => $download->get_download_id(),
-			'product_id'          => $download->get_product_id(),
-			'user_id'             => $download->get_user_id(),
-			'user_email'          => $download->get_user_email(),
-			'order_id'            => $download->get_order_id(),
-			'order_key'           => $download->get_order_key(),
-			'downloads_remaining' => $download->get_downloads_remaining(),
-			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
-			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : 'NULL',
+			'download_id'         => $download->get_download_id( 'edit' ),
+			'product_id'          => $download->get_product_id( 'edit' ),
+			'user_id'             => $download->get_user_id( 'edit' ),
+			'user_email'          => $download->get_user_email( 'edit' ),
+			'order_id'            => $download->get_order_id( 'edit' ),
+			'order_key'           => $download->get_order_key( 'edit' ),
+			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
+			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+			'download_count'      => $download->get_download_count( 'edit' ),
+			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 		);
 
 		$format = array(
@@ -63,7 +68,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Method to read a download permission from the database.
 	 *
-	 * @param WC_Customer_Download
+	 * @param $download
+	 *
+	 * @throws Exception
 	 */
 	public function read( &$download ) {
 		global $wpdb;
@@ -74,7 +81,18 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			throw new Exception( __( 'Invalid download.', 'woocommerce' ) );
 		}
 
-		$download->set_props( $raw_download );
+		$download->set_props( array(
+			'download_id'         => $raw_download->download_id,
+			'product_id'          => $raw_download->product_id,
+			'user_id'             => $raw_download->user_id,
+			'user_email'          => $raw_download->user_email,
+			'order_id'            => $raw_download->order_id,
+			'order_key'           => $raw_download->order_key,
+			'downloads_remaining' => $raw_download->downloads_remaining,
+			'access_granted'      => strtotime( $raw_download->access_granted ),
+			'download_count'      => $raw_download->download_count,
+			'access_expires'      => is_null( $raw_download->access_expires ) ? null : strtotime( $raw_download->access_expires ),
+		) );
 		$download->set_object_read( true );
 	}
 
@@ -87,16 +105,16 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$data = array(
-			'download_id'         => $download->get_download_id(),
-			'product_id'          => $download->get_product_id(),
-			'user_id'             => $download->get_user_id(),
-			'user_email'          => $download->get_user_email(),
-			'order_id'            => $download->get_order_id(),
-			'order_key'           => $download->get_order_key(),
-			'downloads_remaining' => $download->get_downloads_remaining(),
-			'access_granted'      => date( 'Y-m-d', $download->get_access_granted() ),
-			'download_count'      => $download->get_download_count(),
-			'access_expires'      => $download->get_access_expires() ? date( 'Y-m-d', $download->get_access_expires() ) : 'NULL',
+			'download_id'         => $download->get_download_id( 'edit' ),
+			'product_id'          => $download->get_product_id( 'edit' ),
+			'user_id'             => $download->get_user_id( 'edit' ),
+			'user_email'          => $download->get_user_email( 'edit' ),
+			'order_id'            => $download->get_order_id( 'edit' ),
+			'order_key'           => $download->get_order_key( 'edit' ),
+			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
+			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+			'download_count'      => $download->get_download_count( 'edit' ),
+			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 		);
 
 		$format = array(
@@ -199,48 +217,53 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$args = wp_parse_args( $args, array(
-			'user_email' => '',
-			'order_id'   => '',
-			'order_key'  => '',
-			'product_id' => '',
-			'orderby'    => 'permission_id',
-			'order'      => 'DESC',
-			'limit'      => -1,
-			'return'     => 'objects',
+			'user_email'  => '',
+			'order_id'    => '',
+			'order_key'   => '',
+			'product_id'  => '',
+			'download_id' => '',
+			'orderby'     => 'permission_id',
+			'order'       => 'DESC',
+			'limit'       => -1,
+			'return'      => 'objects',
 		) );
-
-		extract( $args );
 
 		$query   = array();
 		$query[] = "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE 1=1";
 
-		if ( $user_email ) {
-			$query[] = $wpdb->prepare( "AND user_email = %s", $user_email );
+		if ( $args['user_email'] ) {
+			$query[] = $wpdb->prepare( "AND user_email = %s", sanitize_email( $args['user_email'] ) );
 		}
 
-		if ( $order_id ) {
-			$query[] = $wpdb->prepare( "AND order_id = %d", $order_id );
+		if ( $args['order_id'] ) {
+			$query[] = $wpdb->prepare( "AND order_id = %d", $args['order_id'] );
 		}
 
-		if ( $order_key ) {
-			$query[] = $wpdb->prepare( "AND order_key = %s", $order_key );
+		if ( $args['order_key'] ) {
+			$query[] = $wpdb->prepare( "AND order_key = %s", $args['order_key'] );
 		}
 
-		if ( $product_id ) {
-			$query[] = $wpdb->prepare( "AND product_id = %d", $product_id );
+		if ( $args['product_id'] ) {
+			$query[] = $wpdb->prepare( "AND product_id = %d", $args['product_id'] );
 		}
 
-		$orderby = esc_sql( $orderby );
-		$order   = esc_sql( $order );
-		$query[] = "ORDER BY {$orderby} {$order}";
+		if ( $args['download_id'] ) {
+			$query[] = $wpdb->prepare( "AND download_id = %s", $args['download_id'] );
+		}
 
-		if ( 0 < $limit ) {
-			$query[] = $wpdb->prepare( "LIMIT %d", $limit );
+		$allowed_orders = array( 'permission_id', 'download_id', 'product_id', 'order_id', 'order_key', 'user_email', 'user_id', 'downloads_remaining', 'access_granted', 'access_expires', 'download_count' );
+		$order          = in_array( $args['order'], $allowed_orders ) ? $args['order'] : 'permission_id';
+		$orderby        = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
+		$orderby_sql    = sanitize_sql_orderby( "{$order} {$orderby}" );
+		$query[]        = "ORDER BY {$orderby_sql}";
+
+		if ( 0 < $args['limit'] ) {
+			$query[] = $wpdb->prepare( "LIMIT %d", $args['limit'] );
 		}
 
 		$raw_downloads = $wpdb->get_results( implode( ' ', $query ) );
 
-		switch ( $return ) {
+		switch ( $args['return'] ) {
 			case 'ids' :
 				return wp_list_pluck( $raw_downloads, 'permission_id' );
 			default :
@@ -251,12 +274,16 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Update download ids if the hash changes.
 	 *
+	 * @deprecated 3.3.0 Download id is now a static UUID and should not be changed based on file hash.
+	 *
 	 * @param  int $product_id
 	 * @param  string $old_id
 	 * @param  string $new_id
 	 */
 	public function update_download_id( $product_id, $old_id, $new_id ) {
 		global $wpdb;
+
+		wc_deprecated_function( __METHOD__, '3.3' );
 
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',

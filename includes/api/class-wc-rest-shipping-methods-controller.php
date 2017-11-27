@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package  WooCommerce/API
- * @since    2.7.0
+ * @since    3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v2';
 
 	/**
 	 * Route base.
@@ -196,16 +196,19 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 					'description' => __( 'Method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'title' => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'description' => array(
 					'description' => __( 'Shipping method description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);

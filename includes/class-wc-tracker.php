@@ -3,7 +3,7 @@
  * WooCommerce Tracker
  *
  * The WooCommerce tracker class adds functionality to track WooCommerce usage based on if the customer opted in.
- * No personal infomation is tracked, only general WooCommerce settings, general product, order and user counts and admin email for discount code.
+ * No personal information is tracked, only general WooCommerce settings, general product, order and user counts and admin email for discount code.
  *
  * @class 		WC_Tracker
  * @version		2.3.0
@@ -37,7 +37,7 @@ class WC_Tracker {
 	 * @param boolean $override
 	 */
 	public static function send_tracking_data( $override = false ) {
-		// Dont trigger this on AJAX Requests
+		// Don't trigger this on AJAX Requests
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			return;
 		}
@@ -49,7 +49,7 @@ class WC_Tracker {
 				return;
 			}
 		} else {
-			// Make sure there is at least a 1 hour delay between override sends, we dont want duplicate calls due to double clicking links.
+			// Make sure there is at least a 1 hour delay between override sends, we don't want duplicate calls due to double clicking links.
 			$last_send = self::get_last_send_time();
 			if ( $last_send && $last_send > strtotime( '-1 hours' ) ) {
 				return;
@@ -141,7 +141,7 @@ class WC_Tracker {
 	public static function get_theme_info() {
 		$theme_data        = wp_get_theme();
 		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support  = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+		$theme_wc_support  = ! current_theme_supports( 'woocommerce' ) ? 'No' : 'Yes';
 
 		return array( 'name' => $theme_data->Name, 'version' => $theme_data->Version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
 	}
@@ -371,12 +371,12 @@ class WC_Tracker {
 			foreach ( $files as $file ) {
 				if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 					$theme_file = get_stylesheet_directory() . '/' . $file;
-				} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
 				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-					$theme_file = get_template_directory() . '/woocommerce/' . $file;
+				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
 				} else {
 					$theme_file = false;
 				}

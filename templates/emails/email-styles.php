@@ -10,13 +10,15 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Emails
  * @version 2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Load colors
 $bg              = get_option( 'woocommerce_email_background_color' );
@@ -84,7 +86,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content table td {
-	padding: 48px;
+	padding: 48px 48px 0;
 }
 
 #body_content table td td {
@@ -93,6 +95,22 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #body_content table td th {
 	padding: 12px;
+}
+
+#body_content td ul.wc-item-meta {
+	font-size: small;
+	margin: 1em 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+#body_content td ul.wc-item-meta li {
+	margin: 0.5em 0 0;
+	padding: 0;
+}
+
+#body_content td ul.wc-item-meta li p {
+	margin: 0;
 }
 
 #body_content p {
@@ -108,6 +126,12 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 .td {
+	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
+	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+}
+
+.address {
+	padding:12px 12px 0;
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 }
@@ -145,7 +169,7 @@ h2 {
 	font-size: 18px;
 	font-weight: bold;
 	line-height: 130%;
-	margin: 16px 0 8px;
+	margin: 0 0 18px;
 	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
@@ -161,7 +185,7 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $base ); ?>;
+	color: <?php echo esc_attr( $base_text ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }

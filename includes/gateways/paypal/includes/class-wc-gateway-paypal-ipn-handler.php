@@ -54,11 +54,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			// Lowercase returned variables.
 			$posted['payment_status'] = strtolower( $posted['payment_status'] );
 
-			// Sandbox fix.
-			if ( isset( $posted['test_ipn'] ) && 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
-				$posted['payment_status'] = 'completed';
-			}
-
 			WC_Gateway_Paypal::log( 'Found order #' . $order->get_id() );
 			WC_Gateway_Paypal::log( 'Payment status: ' . $posted['payment_status'] );
 
@@ -283,7 +278,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a reveral.
+	 * Handle a reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */
@@ -297,7 +292,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a cancelled reveral.
+	 * Handle a cancelled reversal.
 	 * @param WC_Order $order
 	 * @param array $posted
 	 */
@@ -343,6 +338,11 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$new_order_settings = get_option( 'woocommerce_new_order_settings', array() );
 		$mailer             = WC()->mailer();
 		$message            = $mailer->wrap_message( $subject, $message );
+
+		$woocommerce_paypal_settings = get_option('woocommerce_paypal_settings');
+		if ( ! empty( $woocommerce_paypal_settings['ipn_notification'] ) && 'no' === $woocommerce_paypal_settings['ipn_notification'] ) {
+			return;
+		}
 
 		$mailer->send( ! empty( $new_order_settings['recipient'] ) ? $new_order_settings['recipient'] : get_option( 'admin_email' ), strip_tags( $subject ), $message );
 	}

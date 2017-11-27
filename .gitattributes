@@ -1,0 +1,10 @@
+/.* export-ignore
+apigen* export-ignore
+CHANGELOG.txt export-ignore
+composer.* export-ignore
+Gruntfile.js export-ignore
+package.json export-ignore
+phpcs.ruleset.xml export-ignore
+phpunit.* export-ignore
+README.md export-ignore
+tests export-ignore

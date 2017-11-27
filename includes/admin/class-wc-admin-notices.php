@@ -79,7 +79,7 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) ) {
 			self::add_notice( 'theme_support' );
 		}
 
@@ -145,7 +145,11 @@ class WC_Admin_Notices {
 		$notices = self::get_notices();
 
 		if ( ! empty( $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
+
+			// Add RTL support
+			wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
+
 			foreach ( $notices as $notice ) {
 				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 					add_action( 'admin_notices', array( __CLASS__, self::$core_notices[ $notice ] ) );
@@ -212,7 +216,7 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice.
 	 */
 	public static function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) ) {
 			include( 'views/html-notice-theme-support.php' );
 		} else {
 			self::remove_notice( 'theme_support' );
@@ -231,12 +235,12 @@ class WC_Admin_Notices {
 			$theme_file = false;
 			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
-			} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-				$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+			} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
+				$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
 			} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
 				$theme_file = get_template_directory() . '/' . $file;
-			} elseif ( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-				$theme_file = get_template_directory() . '/woocommerce/' . $file;
+			} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
+				$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
 			}
 
 			if ( false !== $theme_file ) {
@@ -283,8 +287,6 @@ class WC_Admin_Notices {
 	 */
 	public static function no_shipping_methods_notice() {
 		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
-			global $wpdb;
-
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 

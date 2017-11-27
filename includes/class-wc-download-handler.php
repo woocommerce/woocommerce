@@ -21,7 +21,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+		if ( isset( $_GET['download_file'], $_GET['order'], $_GET['email'] ) ) {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -72,11 +72,12 @@ class WC_Download_Handler {
 			$download->get_download_id(),
 			$download->get_order_id()
 		);
-		$count     = $download->get_download_count();
-		$remaining = $download->get_downloads_remaining();
-		$download->set_download_count( $count ++ );
-		$download->set_downloads_remaining( $remaining -- );
 		$download->save();
+
+		// Track the download in logs and change remaining/counts.
+		$current_user_id = get_current_user_id();
+		$ip_address = WC_Geolocation::get_ip_address();
+		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
 	}
@@ -109,7 +110,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_download_expiry( $download ) {
-		if ( $download->get_access_expires() > 0 && $download->get_access_expires() < strtotime( 'midnight', current_time( 'timestamp' ) ) ) {
+		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', current_time( 'timestamp', true ) ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
@@ -136,6 +137,8 @@ class WC_Download_Handler {
 
 	/**
 	 * @deprecated
+	 *
+	 * @param $download_data
 	 */
 	public static function count_download( $download_data ) {}
 
@@ -185,13 +188,17 @@ class WC_Download_Handler {
 		$wp_uploads_dir = $wp_uploads['basedir'];
 		$wp_uploads_url = $wp_uploads['baseurl'];
 
-		// Replace uploads dir, site url etc with absolute counterparts if we can
+		/**
+		 * Replace uploads dir, site url etc with absolute counterparts if we can.
+		 * Note the str_replace on site_url is on purpose, so if https is forced
+		 * via filters we can still do the string replacement on a HTTP file.
+		 */
 		$replacements = array(
-			$wp_uploads_url                  => $wp_uploads_dir,
-			network_site_url( '/', 'https' ) => ABSPATH,
-			network_site_url( '/', 'http' )  => ABSPATH,
-			site_url( '/', 'https' )         => ABSPATH,
-			site_url( '/', 'http' )          => ABSPATH,
+			$wp_uploads_url                                                   => $wp_uploads_dir,
+			network_site_url( '/', 'https' )                                  => ABSPATH,
+			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
+			site_url( '/', 'https' )                                          => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
 		);
 
 		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
@@ -202,6 +209,10 @@ class WC_Download_Handler {
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
+
+		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+			$remote_file = false;
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
 		// Check if we have an absolute path
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
@@ -293,7 +304,7 @@ class WC_Download_Handler {
 	private static function download_headers( $file_path, $filename ) {
 		self::check_server_config();
 		self::clean_buffers();
-		nocache_headers();
+		wc_nocache_headers();
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . self::get_download_content_type( $file_path ) );
@@ -312,7 +323,7 @@ class WC_Download_Handler {
 	private static function check_server_config() {
 		wc_set_time_limit( 0 );
 		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
-			set_magic_quotes_runtime( 0 );
+			set_magic_quotes_runtime( 0 ); // @codingStandardsIgnoreLine
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );
@@ -348,7 +359,9 @@ class WC_Download_Handler {
 	 * @return 	bool Success or fail
 	 */
 	public static function readfile_chunked( $file ) {
-		$chunksize = 1024 * 1024;
+		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
+			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
+		}
 		$handle    = @fopen( $file, 'r' );
 
 		if ( false === $handle ) {
@@ -356,7 +369,7 @@ class WC_Download_Handler {
 		}
 
 		while ( ! @feof( $handle ) ) {
-			echo @fread( $handle, $chunksize );
+			echo @fread( $handle, (int) WC_CHUNK_SIZE );
 
 			if ( ob_get_length() ) {
 				ob_flush();
@@ -392,7 +405,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

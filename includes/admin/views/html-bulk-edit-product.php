@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php echo sprintf( __( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php printf( esc_attr__( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php echo sprintf( __( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php printf( esc_attr__( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -97,10 +97,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						$tax_classes = WC_Tax::get_tax_classes();
 
-						if ( ! empty( $tax_classes ) )
+						if ( ! empty( $tax_classes ) ) {
 							foreach ( $tax_classes as $class ) {
 								$options[ sanitize_title( $class ) ] = esc_html( $class );
 							}
+						}
 
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -130,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php echo sprintf( __( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
+					<input type="text" name="_weight" class="text weight" placeholder="<?php printf( esc_attr__( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
@@ -154,9 +155,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_length" class="text length" placeholder="<?php echo sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php echo sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php echo sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
@@ -218,7 +219,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
 				<?php
-					echo '<option value="">' . __( '— No Change —', 'woocommerce' ) . '</option>';
+					echo '<option value="">' . esc_html__( '— No Change —', 'woocommerce' ) . '</option>';
 
 					foreach ( wc_get_product_stock_status_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -274,7 +275,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="input-text-wrap">
 					<select class="backorders" name="_backorders">
 					<?php
-						echo '<option value="">' . __( '— No Change —', 'woocommerce' ) . '</option>';
+						echo '<option value="">' . esc_html__( '— No Change —', 'woocommerce' ) . '</option>';
 
 						foreach ( wc_get_product_backorder_options() as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -307,6 +308,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_bulk_edit" value="1" />
-		<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
+		<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_quick_edit_nonce' ); ?>" />
 	</div>
 </fieldset>

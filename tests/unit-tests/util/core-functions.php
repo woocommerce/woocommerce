@@ -49,7 +49,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'BTC' => 'Bitcoin',
 			'BTN' => 'Bhutanese ngultrum',
 			'BWP' => 'Botswana pula',
-			'BYR' => 'Belarusian ruble',
+			'BYR' => 'Belarusian ruble (old)',
+			'BYN' => 'Belarusian ruble',
 			'BZD' => 'Belize dollar',
 			'CAD' => 'Canadian dollar',
 			'CDF' => 'Congolese franc',
@@ -241,7 +242,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_logger().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_logger() {
 		// This filter should have no effect because the class does not implement WC_Logger_Interface
@@ -265,18 +266,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function return_bad_logger() {
 		return __CLASS__;
-	}
-
-	/**
-	 * Test wc_get_core_supported_themes().
-	 *
-	 * @since 2.2
-	 */
-	public function test_wc_get_core_supported_themes() {
-
-		$expected_themes = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-
-		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}
 
 	/**
@@ -319,7 +308,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_print_r()
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_print_r() {
 		$arr = array( 1, 2, 'a', 'b', 'c' => 'd' );

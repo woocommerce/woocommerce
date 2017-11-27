@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Settings_Tax' ) ) :
+if ( class_exists( 'WC_Settings_Tax', false ) ) {
+	return new WC_Settings_Tax();
+}
 
 /**
  * WC_Settings_Tax.
@@ -20,22 +22,26 @@ if ( ! class_exists( 'WC_Settings_Tax' ) ) :
 class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
-	 * Setting page id.
-	 *
-	 * @var string
-	 */
-	protected $id = 'tax';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->id    = 'tax';
 		$this->label = __( 'Tax', 'woocommerce' );
-		parent::__construct();
+
+		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
+
+		if ( wc_tax_enabled() ) {
+			add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
+			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
+			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+		}
 	}
 
 	/**
 	 * Add this page to settings.
+	 *
+	 * @param array $pages Existing pages.
+	 * @return array|mixed
 	 */
 	public function add_settings_page( $pages ) {
 		if ( wc_tax_enabled() ) {
@@ -56,7 +62,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'standard' => __( 'Standard rates', 'woocommerce' ),
 		);
 
-		// Get tax classes and display as links
+		// Get tax classes and display as links.
 		$tax_classes = WC_Tax::get_tax_classes();
 
 		foreach ( $tax_classes as $class ) {
@@ -69,10 +75,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section Current section being shown.
 	 * @return array
 	 */
-	public function get_settings() {
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
+	public function get_settings( $current_section = '' ) {
+		$settings = array();
+
+		if ( '' === $current_section ) {
+			$settings = include( 'views/settings-tax.php' );
+		}
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**
@@ -83,7 +95,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		$tax_classes = WC_Tax::get_tax_class_slugs();
 
-		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes ) ) {
+		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes, true ) ) {
 			$this->output_tax_rates();
 		} else {
 			$settings = $this->get_settings();
@@ -96,7 +108,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
-		global $current_section, $wpdb;
+		global $current_section;
 
 		if ( ! $current_section ) {
 			$settings = $this->get_settings();
@@ -113,7 +125,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
-		global $wpdb, $current_section;
+		global $current_section;
 
 		$current_class = $this->get_current_tax_class();
 
@@ -187,6 +199,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
 	 * Get tax class being edited.
+	 *
 	 * @return string
 	 */
 	private static function get_current_tax_class() {
@@ -196,7 +209,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$current_class = '';
 
 		foreach ( $tax_classes as $class ) {
-			if ( sanitize_title( $class ) == $current_section ) {
+			if ( sanitize_title( $class ) === $current_section ) {
 				$current_class = $class;
 			}
 		}
@@ -206,9 +219,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
 	 * Get a posted tax rate.
-	 * @param  string $key   Key of tax rate in the post data array
-	 * @param  int $order Position/order of rate
-	 * @param  string $class Tax class for rate
+	 *
+	 * @param string $key   Key of tax rate in the post data array.
+	 * @param int    $order Position/order of rate.
+	 * @param string $class Tax class for rate.
 	 * @return array
 	 */
 	private function get_posted_tax_rate( $key, $order, $class ) {
@@ -222,8 +236,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		);
 
 		foreach ( $tax_rate_keys as $tax_rate_key ) {
-			if ( isset( $_POST[ $tax_rate_key ] ) && isset( $_POST[ $tax_rate_key ][ $key ] ) ) {
-				$tax_rate[ $tax_rate_key ] = wc_clean( $_POST[ $tax_rate_key ][ $key ] );
+			if ( isset( $_POST[ $tax_rate_key ], $_POST[ $tax_rate_key ][ $key ] ) ) {
+				$tax_rate[ $tax_rate_key ] = wc_clean( wp_unslash( $_POST[ $tax_rate_key ][ $key ] ) );
 			}
 		}
 
@@ -241,24 +255,25 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function save_tax_rates() {
 		global $wpdb;
 
-		$current_class = sanitize_title( $this->get_current_tax_class() );
+		$current_class    = sanitize_title( $this->get_current_tax_class() );
+		$posted_countries = wc_clean( wp_unslash( $_POST['tax_rate_country'] ) );
 
-		// get the tax rate id of the first submited row
-		$first_tax_rate_id = key( $_POST['tax_rate_country'] );
+		// get the tax rate id of the first submited row.
+		$first_tax_rate_id = key( $posted_countries );
 
-		// get the order position of the first tax rate id
+		// get the order position of the first tax rate id.
 		$tax_rate_order = absint( $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_order FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $first_tax_rate_id ) ) );
 
 		$index = isset( $tax_rate_order ) ? $tax_rate_order : 0;
 
-		// Loop posted fields
-		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
+		// Loop posted fields.
+		foreach ( $posted_countries as $key => $value ) {
 			$mode        = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
 			$tax_rate    = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
 				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
-			} elseif ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
+			} elseif ( 1 === absint( $_POST['remove_tax_rate'][ $key ] ) ) {
 				$tax_rate_id = absint( $key );
 				WC_Tax::_delete_tax_rate( $tax_rate_id );
 				continue;
@@ -268,15 +283,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 
 			if ( isset( $_POST['tax_rate_postcode'][ $key ] ) ) {
-				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( $_POST['tax_rate_postcode'][ $key ] ) );
+				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( wp_unslash( $_POST['tax_rate_postcode'][ $key ] ) ) );
 			}
 			if ( isset( $_POST['tax_rate_city'][ $key ] ) ) {
-				WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( $_POST['tax_rate_city'][ $key ] ) );
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( wp_unslash( $_POST['tax_rate_city'][ $key ] ) ) );
 			}
 		}
 	}
 }
-
-endif;
 
 return new WC_Settings_Tax();

@@ -1,8 +1,12 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Enables WooCommerce, via the the command line.
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  * @author  WooCommerce
  */
@@ -34,3 +38,5 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Update_Command::register_commands' );
 	}
 }
+
+new WC_CLI;

@@ -11,10 +11,12 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Reports' ) ) :
+if ( class_exists( 'WC_Admin_Reports', false ) ) {
+	return;
+}
 
 /**
  * WC_Admin_Reports Class.
@@ -44,26 +46,32 @@ class WC_Admin_Reports {
 			'orders'     => array(
 				'title'  => __( 'Orders', 'woocommerce' ),
 				'reports' => array(
-					"sales_by_date" => array(
+					'sales_by_date' => array(
 						'title'       => __( 'Sales by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"sales_by_product" => array(
+					'sales_by_product' => array(
 						'title'       => __( 'Sales by product', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"sales_by_category" => array(
+					'sales_by_category' => array(
 						'title'       => __( 'Sales by category', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"coupon_usage" => array(
+					'coupon_usage' => array(
 						'title'       => __( 'Coupons by date', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => true,
+						'callback'    => array( __CLASS__, 'get_report' ),
+					),
+					'downloads' => array(
+						'title'       => __( 'Customer downloads', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
@@ -73,13 +81,13 @@ class WC_Admin_Reports {
 			'customers' => array(
 				'title'  => __( 'Customers', 'woocommerce' ),
 				'reports' => array(
-					"customers" => array(
+					'customers' => array(
 						'title'       => __( 'Customers vs. guests', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"customer_list" => array(
+					'customer_list' => array(
 						'title'       => __( 'Customer list', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
@@ -90,20 +98,20 @@ class WC_Admin_Reports {
 			'stock'     => array(
 				'title'  => __( 'Stock', 'woocommerce' ),
 				'reports' => array(
-					"low_in_stock" => array(
+					'low_in_stock' => array(
 						'title'       => __( 'Low in stock', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"out_of_stock" => array(
+					'out_of_stock' => array(
 						'title'       => __( 'Out of stock', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"most_stocked" => array(
-						'title'       => __( 'Most Stocked', 'woocommerce' ),
+					'most_stocked' => array(
+						'title'       => __( 'Most stocked', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
@@ -116,13 +124,13 @@ class WC_Admin_Reports {
 			$reports['taxes'] = array(
 				'title'  => __( 'Taxes', 'woocommerce' ),
 				'reports' => array(
-					"taxes_by_code" => array(
+					'taxes_by_code' => array(
 						'title'       => __( 'Taxes by code', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					"taxes_by_date" => array(
+					'taxes_by_date' => array(
 						'title'       => __( 'Taxes by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
@@ -133,7 +141,7 @@ class WC_Admin_Reports {
 		}
 
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
-		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compat
+		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compatibility.
 
 		foreach ( $reports as $key => $report_group ) {
 			if ( isset( $reports[ $key ]['charts'] ) ) {
@@ -152,6 +160,8 @@ class WC_Admin_Reports {
 
 	/**
 	 * Get a report from our reports subfolder.
+	 *
+	 * @param string $name
 	 */
 	public static function get_report( $name ) {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
@@ -159,12 +169,11 @@ class WC_Admin_Reports {
 
 		include_once( apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class ) );
 
-		if ( ! class_exists( $class ) )
+		if ( ! class_exists( $class ) ) {
 			return;
+		}
 
 		$report = new $class();
 		$report->output_report();
 	}
 }
-
-endif;

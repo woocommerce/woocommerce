@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Refund Data Store: Stored in CPT.
  *
- * @version  2.7.0
+ * @version  3.0.0
  * @category Class
  * @author   WooThemes
  */
@@ -14,7 +14,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $internal_meta_keys = array(
@@ -35,23 +35,27 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Delete a refund - no trash is supported.
-	 * @param WC_Order
+	 * @param WC_Order $order
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
 		$id = $order->get_id();
 
+		if ( ! $id ) {
+			return;
+		}
+
 		wp_delete_post( $id );
 		$order->set_id( 0 );
-		do_action( 'woocommerce_delete_order', $id );
+		do_action( 'woocommerce_delete_order_refund', $id );
 	}
 
 	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order
+	 * @param WC_Order $refund
 	 * @param object $post_object
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$refund, $post_object ) {
 		parent::read_order_data( $refund, $post_object );
@@ -67,8 +71,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order
-	 * @param bool $force Force all props to be written even if not changed. This is used during creation.
-	 * @since 2.7.0
+	 * @param WC_Order $refund
+	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$refund ) {
 		parent::update_post_meta( $refund );

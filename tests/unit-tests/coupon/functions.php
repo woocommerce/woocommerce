@@ -46,7 +46,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_coupon_code_by_id().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_coupon_code_by_id() {
 		// Create coupon.
@@ -64,7 +64,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_coupon_id_by_code().
 	 *
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_wc_get_coupon_id_by_code() {
 		// Create coupon.

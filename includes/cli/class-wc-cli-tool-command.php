@@ -1,11 +1,16 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Hooks up our system status tools to the CLI.
  *
  * Forked from wp-cli/restful (by Daniel Bachhuber, released under the MIT license https://opensource.org/licenses/MIT).
  * https://github.com/wp-cli/restful
  *
- * @version 2.7.0
+ * @version 3.0.0
  * @package WooCommerce
  */
 class WC_CLI_Tool_Command {
@@ -18,7 +23,7 @@ class WC_CLI_Tool_Command {
 	public static function register_commands() {
 		global $wp_rest_server;
 
-		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
+		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
 		$response      = $wp_rest_server->dispatch( $request );
 		$response_data = $response->get_data();
 		if ( empty( $response_data ) ) {
@@ -37,7 +42,7 @@ class WC_CLI_Tool_Command {
 					'optional'	  => false,
 				);
 				$method = 'update_item';
-				$route  = '/wc/v1/system_status/tools/(?P<id>[\w-]+)';
+				$route  = '/wc/v2/system_status/tools/(?P<id>[\w-]+)';
 			} elseif ( 'list' === $command ) {
 				$synopsis[] = array(
 					'name'		  => 'fields',
@@ -70,15 +75,13 @@ class WC_CLI_Tool_Command {
 					),
 				);
 				$method = 'list_items';
-				$route  = '/wc/v1/system_status/tools';
+				$route  = '/wc/v2/system_status/tools';
 			}
 
 			$before_invoke = null;
 			if ( empty( $command_args['when'] ) && WP_CLI::get_config( 'debug' ) ) {
 				$before_invoke = function() {
-					if ( ! defined( 'SAVEQUERIES' ) ) {
-						define( 'SAVEQUERIES', true );
-					}
+					wc_maybe_define_constant( 'SAVEQUERIES', true );
 				};
 			}
 

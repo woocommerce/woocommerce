@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.7.0
+ * @version     3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -49,8 +49,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<li class="woocommerce-order-overview__date date">
 					<?php _e( 'Date:', 'woocommerce' ); ?>
-					<strong><?php echo date_i18n( get_option( 'date_format' ), $order->get_date_created() ); ?></strong>
+					<strong><?php echo wc_format_datetime( $order->get_date_created() ); ?></strong>
 				</li>
+
+				<?php if ( is_user_logged_in() && $order->get_user_id() === get_current_user_id() && $order->get_billing_email() ) : ?>
+					<li class="woocommerce-order-overview__email email">
+						<?php _e( 'Email:', 'woocommerce' ); ?>
+						<strong><?php echo $order->get_billing_email(); ?></strong>
+					</li>
+				<?php endif; ?>
 
 				<li class="woocommerce-order-overview__total total">
 					<?php _e( 'Total:', 'woocommerce' ); ?>
@@ -58,12 +65,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</li>
 
 				<?php if ( $order->get_payment_method_title() ) : ?>
-
-				<li class="woocommerce-order-overview__payment-method method">
-					<?php _e( 'Payment method:', 'woocommerce' ); ?>
-					<strong><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></strong>
-				</li>
-
+					<li class="woocommerce-order-overview__payment-method method">
+						<?php _e( 'Payment method:', 'woocommerce' ); ?>
+						<strong><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></strong>
+					</li>
 				<?php endif; ?>
 
 			</ul>

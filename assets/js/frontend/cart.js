@@ -175,6 +175,7 @@ jQuery( function( $ ) {
 		 */
 		toggle_shipping: function() {
 			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
 			return false;
 		},
 
@@ -183,13 +184,11 @@ jQuery( function( $ ) {
 		 *
 		 * @param {Object} evt The JQuery event.
 		 */
-		shipping_method_selected: function( evt ) {
-			var target = evt.currentTarget;
-
+		shipping_method_selected: function() {
 			var shipping_methods = {};
 
 			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
-				shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
+				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
 			block( $( 'div.cart_totals' ) );
@@ -266,11 +265,12 @@ jQuery( function( $ ) {
 			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
 			this.quantity_update       = this.quantity_update.bind( this );
 			this.item_remove_clicked   = this.item_remove_clicked.bind( this );
+			this.item_restore_clicked  = this.item_restore_clicked.bind( this );
 			this.update_cart           = this.update_cart.bind( this );
 
 			$( document ).on(
 				'wc_update_cart',
-				this.update_cart );
+				function() { cart.update_cart.apply( cart, [].slice.call( arguments, 1 ) ); } );
 			$( document ).on(
 				'click',
 				'.woocommerce-cart-form input[type=submit]',
@@ -291,6 +291,10 @@ jQuery( function( $ ) {
 				'click',
 				'.woocommerce-cart-form .product-remove > a',
 				this.item_remove_clicked );
+			$( document ).on(
+				'click',
+				'.woocommerce-cart .restore-item',
+				this.item_restore_clicked );
 			$( document ).on(
 				'change input',
 				'.woocommerce-cart-form .cart_item :input',
@@ -437,7 +441,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'applied_coupon' );
+					$( document.body ).trigger( 'applied_coupon', [ coupon_code ] );
 				},
 				complete: function() {
 					unblock( $form );
@@ -474,7 +478,7 @@ jQuery( function( $ ) {
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					$( document.body ).trigger( 'removed_coupon' );
+					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
 					unblock( $wrapper );
 				},
 				complete: function() {
@@ -532,7 +536,37 @@ jQuery( function( $ ) {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
-				success: update_wc_div,
+				success:  function( response ) {
+					update_wc_div( response );
+				},
+				complete: function() {
+					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
+				}
+			} );
+		},
+
+		/**
+		 * Handle when a restore item link is clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		item_restore_clicked: function( evt ) {
+			evt.preventDefault();
+
+			var $a = $( evt.currentTarget );
+			var $form = $( 'form.woocommerce-cart-form' );
+
+			block( $form );
+			block( $( 'div.cart_totals' ) );
+
+			$.ajax( {
+				type:     'GET',
+				url:      $a.attr( 'href' ),
+				dataType: 'html',
+				success:  function( response ) {
+					update_wc_div( response );
+				},
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );

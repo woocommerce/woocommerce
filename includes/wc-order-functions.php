@@ -13,33 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Wrapper for get_posts specific to orders.
+ * Standard way of retrieving orders based on certain parameters.
  *
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args:
- *      status array|string List of order statuses to find
- *      type array|string Order type, e.g. shop_order or shop_order_refund
- *      parent int post/order parent
- *      customer int|string|array User ID or billing email to limit orders to a
- *          particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
- *          e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
- *      limit int Maximum of orders to retrieve.
- *      offset int Offset of orders to retrieve.
- *      page int Page of orders to retrieve. Ignored when using the 'offset' arg.
- *      date_before string Get orders before a certain date ( strtotime() compatibile string )
- *      date_after string Get orders after a certain date ( strtotime() compatibile string )
- *      exclude array Order IDs to exclude from the query.
- *      orderby string Order by date, title, id, modified, rand etc
- *      order string ASC or DESC
- *      return string Type of data to return. Allowed values:
- *          ids array of order ids
- *          objects array of order objects (default)
- *      paginate bool If true, the return value will be an array with values:
- *          'orders'        => array of data (return value above),
- *          'total'         => total number of orders matching the query
- *          'max_num_pages' => max number of pages found
+ * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
@@ -47,31 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
-	$args = wp_parse_args( $args, array(
-		'status'      => array_keys( wc_get_order_statuses() ),
-		'type'        => wc_get_order_types( 'view-orders' ),
-		'parent'      => null,
-		'customer'    => null,
-		'email'       => '',
-		'limit'       => get_option( 'posts_per_page' ),
-		'offset'      => null,
-		'page'        => 1,
-		'exclude'     => array(),
-		'orderby'     => 'date',
-		'order'       => 'DESC',
-		'return'      => 'objects',
-		'paginate'    => false,
-		'date_before' => '',
-		'date_after'  => '',
-	) );
-
-	// Handle some BW compatibility arg names where wp_query args differ in naming.
 	$map_legacy = array(
 		'numberposts'    => 'limit',
 		'post_type'      => 'type',
 		'post_status'    => 'status',
 		'post_parent'    => 'parent',
 		'author'         => 'customer',
+		'email'          => 'billing_email',
 		'posts_per_page' => 'limit',
 		'paged'          => 'page',
 	);
@@ -82,19 +43,43 @@ function wc_get_orders( $args ) {
 		}
 	}
 
-	return WC_Data_Store::load( 'order' )->get_orders( $args );
+	// Map legacy date args to modern date args.
+	$date_before = false;
+	$date_after  = false;
+
+	if ( ! empty( $args['date_before'] ) ) {
+		$datetime    = wc_string_to_datetime( $args['date_before'] );
+		$date_before = strpos( $args['date_before'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
+	}
+	if ( ! empty( $args['date_after'] ) ) {
+		$datetime   = wc_string_to_datetime( $args['date_after'] );
+		$date_after = strpos( $args['date_after'], ':' ) ? $datetime->getOffsetTimestamp() : $datetime->date( 'Y-m-d' );
+	}
+
+	if ( $date_before && $date_after ) {
+		$args['date_created'] = $date_after . '...' . $date_before;
+	} elseif ( $date_before ) {
+		$args['date_created'] = '<' . $date_before;
+	} elseif ( $date_after ) {
+		$args['date_created'] = '>' . $date_after;
+	}
+
+	$query = new WC_Order_Query( $args );
+	return $query->get_orders();
 }
 
 /**
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @since  2.2
+ *
  * @param  mixed $the_order Post object or post ID of the order.
- * @return WC_Order|WC_Refund
+ *
+ * @return bool|WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		wc_doing_it_wrong( __FUNCTION__, 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action)', '2.5' );
 		return false;
 	}
 	return WC()->order_factory->get_order( $the_order );
@@ -104,6 +89,7 @@ function wc_get_order( $the_order = false ) {
  * Get all order statuses.
  *
  * @since 2.2
+ * @used-by WC_Order::set_status
  * @return array
  */
 function wc_get_order_statuses() {
@@ -131,7 +117,7 @@ function wc_is_order_status( $maybe_status ) {
 
 /**
  * Get list of statuses which are consider 'paid'.
- * @since  2.7.0
+ * @since  3.0.0
  * @return array
  */
 function wc_get_is_paid_statuses() {
@@ -166,7 +152,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 /**
  * Get all registered order types.
  *
- * $for optionally define what you are getting order types for so only relevent types are returned.
+ * $for optionally define what you are getting order types for so only relevant types are returned.
  *
  * e.g. for 'order-meta-boxes', 'order-count'
  *
@@ -237,7 +223,7 @@ function wc_get_order_types( $for = '' ) {
 /**
  * Get an order type by post type name.
  * @param  string post type name
- * @return bool|array of datails about the order type
+ * @return bool|array of details about the order type
  */
 function wc_get_order_type( $type ) {
 	global $wc_order_types;
@@ -371,23 +357,24 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp' ) );
+	$download->set_access_granted( current_time( 'timestamp', true ) );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
 
 	if ( $expiry > 0 ) {
-		$order_completed_date = date_i18n( "Y-m-d", $order->get_date_completed() );
-		$download->set_access_expires( strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+		$from_date = $order->get_date_completed() ? $order->get_date_completed()->format( 'Y-m-d' ) : current_time( 'mysql', true );
+		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
 	return $download->save();
 }
 
 /**
- * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER.
+ * Order Status completed - give downloadable product access to customer.
  *
  * @param int $order_id
+ * @param bool $force
  */
 function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
@@ -556,9 +543,15 @@ function wc_create_refund( $args = array() ) {
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
 
+		// this should remain after update_taxes(), as this will save the order, and write the current date to the db
+		// so we must wait until the order is persisted to set the date
+		if ( isset( $args['date_created'] ) ) {
+			$refund->set_date_created( $args['date_created'] );
+		}
+
 		/**
 		 * Action hook to adjust refund before save.
-		 * @since 2.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
 
@@ -581,7 +574,12 @@ function wc_create_refund( $args = array() ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() ) );
+
+				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
+
+				if ( $parent_status ) {
+					$order->update_status( $parent_status );
+				}
 			}
 		}
 
@@ -589,6 +587,9 @@ function wc_create_refund( $args = array() ) {
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
 	} catch ( Exception $e ) {
+		if ( isset( $refund ) && is_a( $refund, 'WC_Order_Refund' ) ) {
+			wp_delete_post( $refund->get_id(), true );
+		}
 		return new WP_Error( 'error', $e->getMessage() );
 	}
 
@@ -598,7 +599,7 @@ function wc_create_refund( $args = array() ) {
 /**
  * Try to refund the payment for an order via the gateway.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param WC_Order $order
  * @param string $amount
  * @param string $reason
@@ -643,7 +644,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 /**
  * Restock items during refund.
  *
- * @since  2.7.0
+ * @since  3.0.0
  * @param  WC_Order $order
  * @param  array $refunded_line_items
  */
@@ -688,7 +689,7 @@ function wc_get_tax_class_by_tax_id( $tax_id ) {
  */
 function wc_get_payment_gateway_by_order( $order ) {
 	if ( WC()->payment_gateways() ) {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 	} else {
 		$payment_gateways = array();
 	}
@@ -698,7 +699,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
+	return is_a( $order, 'WC_Order' ) && isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**
@@ -742,7 +743,7 @@ function wc_order_search( $term ) {
 /**
  * Update total sales amount for each product within a paid order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_total_sales_counts( $order_id ) {
@@ -777,7 +778,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 /**
  * Update used coupon amount for each coupon within an order.
  *
- * @since 2.7.0
+ * @since 3.0.0
  * @param int $order_id
  */
 function wc_update_coupon_usage_counts( $order_id ) {
@@ -811,10 +812,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce' :
-					$coupon->dcr_usage_count( $used_by );
+					$coupon->decrease_usage_count( $used_by );
 				break;
 				case 'increase' :
-					$coupon->inc_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by );
 				break;
 			}
 		}
@@ -852,3 +853,160 @@ function wc_cancel_unpaid_orders() {
 	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
+
+/**
+ * Sanitize order id removing unwanted characters.
+ *
+ * E.g Users can sometimes try to track an order id using # with no success.
+ * This function will fix this.
+ *
+ * @since 3.1.0
+ * @param int $order_id
+ */
+function wc_sanitize_order_id( $order_id ) {
+	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
+}
+add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
+
+/**
+ * Get an order note.
+ *
+ * @since  3.2.0
+ * @param  int|WP_Comment $data Note ID (or WP_Comment instance for internal use only).
+ * @return stdClass|null        Object with order note details or null when does not exists.
+ */
+function wc_get_order_note( $data ) {
+	if ( is_numeric( $data ) ) {
+		$data = get_comment( $data );
+	}
+
+	if ( ! is_a( $data, 'WP_Comment' ) ) {
+		return null;
+	}
+
+	return (object) apply_filters( 'woocommerce_get_order_note', array(
+		'id'            => (int) $data->comment_ID,
+		'date_created'  => wc_string_to_datetime( $data->comment_date ),
+		'content'       => $data->comment_content,
+		'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
+		'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+	), $data );
+}
+
+/**
+ * Get order notes.
+ *
+ * @since  3.2.0
+ * @param  array $args Query arguments {
+ *     Array of query parameters.
+ *
+ *     @type string $limit         Maximum number of notes to retrieve.
+ *                                 Default empty (no limit).
+ *     @type int    $order_id      Limit results to those affiliated with a given order ID.
+ *                                 Default 0.
+ *     @type array  $order__in     Array of order IDs to include affiliated notes for.
+ *                                 Default empty.
+ *     @type array  $order__not_in Array of order IDs to exclude affiliated notes for.
+ *                                 Default empty.
+ *     @type string $orderby       Define how should sort notes.
+ *                                 Accepts 'date_created', 'date_created_gmt' or 'id'.
+ *                                 Default: 'id'.
+ *     @type string $order         How to order retrieved notes.
+ *                                 Accepts 'ASC' or 'DESC'.
+ *                                 Default: 'DESC'.
+ *     @type string $type          Define what type of note should retrieve.
+ *                                 Accepts 'customer', 'internal' or empty for both.
+ *                                 Default empty.
+ * }
+ * @return stdClass[]              Array of stdClass objects with order notes details.
+ */
+function wc_get_order_notes( $args ) {
+	$key_mapping = array(
+		'limit'         => 'number',
+		'order_id'      => 'post_id',
+		'order__in'     => 'post__in',
+		'order__not_in' => 'post__not_in',
+	);
+
+	foreach ( $key_mapping as $query_key => $db_key ) {
+		if ( isset( $args[ $query_key ] ) ) {
+			$args[ $db_key ] = $args[ $query_key ];
+			unset( $args[ $query_key ] );
+		}
+	}
+
+	// Define orderby.
+	$orderby_mapping = array(
+		'date_created'     => 'comment_date',
+		'date_created_gmt' => 'comment_date_gmt',
+		'id'               => 'comment_ID',
+	);
+
+	$args['orderby'] = ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'date_created', 'date_created_gmt', 'id' ), true ) ? $orderby_mapping[ $args['orderby'] ] : 'comment_ID';
+
+	// Set WooCommerce order type.
+	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
+		$args['meta_query'] = array(
+			array(
+				'key'     => 'is_customer_note',
+				'value'   => 1,
+				'compare' => '=',
+			),
+		);
+	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
+		$args['meta_query'] = array(
+			array(
+				'key'     => 'is_customer_note',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+	}
+
+	// Set correct comment type.
+	$args['type'] = 'order_note';
+
+	// Always approved.
+	$args['status'] = 'approve';
+
+	// Does not support 'count' or 'fields';
+	unset( $args['count'], $args['fields'] );
+
+	remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+	$notes = get_comments( $args );
+
+	add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+	return array_filter( array_map( 'wc_get_order_note', $notes ) );
+}
+
+/**
+ * Create an order note.
+ *
+ * @since  3.2.0
+ * @param  int    $order_id         Order ID.
+ * @param  string $note             Note to add.
+ * @param  bool   $is_customer_note Is this a note for the customer?
+ * @param  bool   $added_by_user    Was the note added by a user?
+ * @return int|WP_Error             Integer when created or WP_Error when found an error.
+ */
+function wc_create_order_note( $order_id, $note, $is_customer_note = false, $added_by_user = false ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order ) {
+		return new WP_Error( 'invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 400 ) );
+	}
+
+	return $order->add_order_note( $note, (int) $is_customer_note, $added_by_user );
+}
+
+/**
+ * Delete an order note.
+ *
+ * @since  3.2.0
+ * @param  int $note_id Order note.
+ * @return bool         True on success, false on failure.
+ */
+function wc_delete_order_note( $note_id ) {
+	return wp_delete_comment( $note_id, true );
+}

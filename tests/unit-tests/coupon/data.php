@@ -10,7 +10,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * name we want.
 	 * @param string $function
 	 * @return string
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	function get_function_name( $function ) {
 		if ( 'exclude_product_ids' === $function ) {
@@ -27,7 +27,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test that properties can still be accessed directly for backwards
 	 * compat sake. They throw a deprecated notice.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_coupon_backwards_compat_props_use_correct_getters() {
 		// Accessing properties directly will throw some wanted deprected notices
@@ -39,6 +39,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'type',
 			'discount_type',
 			'amount',
+			'coupon_amount',
 			'code',
 			'individual_use',
 			'product_ids',
@@ -68,6 +69,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
+		$this->assertEquals( $coupon->get_amount(), $coupon->coupon_amount );
 		$this->assertEquals( $coupon->get_code(), $coupon->code );
 		$this->assertEquals( $coupon->get_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
 		$this->assertEquals( $coupon->get_product_ids(), $coupon->product_ids );
@@ -87,7 +89,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	/**
 	 * Developers can create manual coupons (code only). This test will make sure this works correctly
 	 * and some of our backwards compat handling works correctly as well.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_read_manual_coupon() {
 		$code = 'manual_coupon_' . time();
@@ -152,7 +154,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test standard coupon getters & setters.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_coupon_getters_and_setters() {
 		$time = time();
@@ -161,7 +163,6 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'description' => 'hello world',
 			'discount_type' => 'percent',
 			'amount' => 10.50,
-			'date_expires' => time(),
 			'usage_count' => 5,
 			'individual_use' => true,
 			'product_ids' => array( 5, 10 ),
@@ -189,7 +190,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test getting custom fields.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_get_custom_fields() {
 		$coupon     = WC_Helper_Coupon::create_coupon();
@@ -206,7 +207,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting custom fields.
-	 * @since 2.7.0
+	 * @since 3.0.0
 	 */
 	public function test_set_custom_fields() {
 		$coupon     = WC_Helper_Coupon::create_coupon();

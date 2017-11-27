@@ -26,7 +26,7 @@ charset: [UTF-8]
 main: WC
 
 # title of generated documentation
-title: WooCommerce 2.6.x Code Reference
+title: WooCommerce 3.0.x Code Reference
 
 # base url used for sitemap (useful for public doc)
 baseUrl: https://docs.woocommerce.com/wc-apidocs/

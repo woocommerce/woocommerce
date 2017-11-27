@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
@@ -12,7 +17,7 @@
 		</label>
 
 		<?php foreach ( self::get_product_type_options() as $key => $option ) :
-			if ( $product_object ) {
+			if ( metadata_exists( 'post', $post->ID, '_' . $key ) ) {
 				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : 'yes' === get_post_meta( $post->ID, '_' . $key, true );
 			} else {
 				$selected_value = 'yes' === ( isset( $option['default'] ) ? $option['default'] : 'no' );
@@ -27,8 +32,8 @@
 
 	<ul class="product_data_tabs wc-tabs">
 		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
-			<li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
-				<a href="#<?php echo $tab['target']; ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
+			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ' , (array) $tab['class'] ) : '' ); ?>">
+				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 			</li>
 		<?php endforeach; ?>
 		<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>

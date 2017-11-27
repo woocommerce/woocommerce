@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div id="inventory_product_data" class="panel woocommerce_options_panel hidden">
 
 	<div class="options_group">
@@ -6,7 +11,7 @@
 				woocommerce_wp_text_input( array(
 					'id'          => '_sku',
 					'value'       => $product_object->get_sku( 'edit' ),
-					'label'       => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>',
+					'label'       => '<abbr title="' . esc_attr__( 'Stock Keeping Unit', 'woocommerce' ) . '">' . esc_html__( 'SKU', 'woocommerce' ) . '</abbr>',
 					'desc_tip'    => true,
 					'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ),
 				) );
@@ -30,7 +35,7 @@
 
 				woocommerce_wp_text_input( array(
 					'id'                => '_stock',
-					'value'             => $product_object->get_stock_quantity( 'edit' ),
+					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ),
 					'label'             => __( 'Stock quantity', 'woocommerce' ),
 					'desc_tip'          => true,
 					'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),
@@ -40,6 +45,8 @@
 					),
 					'data_type'         => 'stock',
 				) );
+
+				echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 				woocommerce_wp_select( array(
 					'id'          => '_backorders',

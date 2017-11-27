@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -66,28 +65,33 @@ class WC_Autoloader {
 	 */
 	public function autoload( $class ) {
 		$class = strtolower( $class );
+
+		if ( 0 !== strpos( $class, 'wc_' ) ) {
+			return;
+		}
+
 		$file  = $this->get_file_name_from_class( $class );
 		$path  = '';
 
-		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
+		if ( 0 === strpos( $class, 'wc_addons_gateway_' )  ) {
 			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
-		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
+		} elseif ( 0 ===  strpos( $class, 'wc_gateway_' ) ) {
 			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 11 ) . '/';
-		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
+		} elseif ( 0 ===  strpos( $class, 'wc_shipping_' ) ) {
 			$path = $this->include_path . 'shipping/' . substr( str_replace( '_', '-', $class ), 12 ) . '/';
-		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
+		} elseif ( 0 === strpos( $class, 'wc_shortcode_' ) ) {
 			$path = $this->include_path . 'shortcodes/';
-		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
+		} elseif ( 0 === strpos( $class, 'wc_meta_box' ) ) {
 			$path = $this->include_path . 'admin/meta-boxes/';
-		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
+		} elseif ( 0 === strpos( $class, 'wc_admin' ) ) {
 			$path = $this->include_path . 'admin/';
-		} elseif ( strpos( $class, 'wc_payment_token_' ) === 0 ) {
+		} elseif ( 0 === strpos( $class, 'wc_payment_token_' ) ) {
 			$path = $this->include_path . 'payment-tokens/';
-		} elseif ( strpos( $class, 'wc_log_handler_' ) === 0 ) {
+		} elseif ( 0 === strpos( $class, 'wc_log_handler_' ) ) {
 			$path = $this->include_path . 'log-handlers/';
 		}
 
-		if ( empty( $path ) || ( ! $this->load_file( $path . $file ) && strpos( $class, 'wc_' ) === 0 ) ) {
+		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
 			$this->load_file( $this->include_path . $file );
 		}
 	}
