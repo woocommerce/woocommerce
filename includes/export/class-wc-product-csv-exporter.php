@@ -383,6 +383,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	protected function get_column_value_stock_status( $product ) {
 		$status = $product->get_stock_status( 'edit' );
+
+		if ( 'onbackorder' === $status ) {
+			return 'backorder';
+		}
+
 		return 'instock' === $status ? 1 : 0;
 	}
 
