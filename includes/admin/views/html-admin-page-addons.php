@@ -37,7 +37,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden" name="page" value="wc-addons">
 			<input type="hidden" name="section" value="<?php echo esc_attr( $_GET['section'] ); ?>">
 		</form>
-		<br class="clear" />
 		<?php if ( 'featured' === $current_section ) : ?>
 			<div class="addons-featured">
 				<?php
