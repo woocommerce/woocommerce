@@ -40,6 +40,65 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Build transient name
+	 *
+	 * @return string transient name
+	 */
+	public static function build_transient_name( $category, $term, $country ) {
+		$transient_name = 'wc_addons_extensions';
+		if ( $category ) {
+			$transient_name = $transient_name . '_category_' . $category;
+		}
+		if ( $term ) {
+			$transient_name = $transient_name . '_term_' . $term;
+		}
+		if ( $country ) {
+			$transient_name = $transient_name . '_country_' . $country;
+		}
+		return $transient_name;
+	}
+
+	/**
+	 * Build transient name
+	 *
+	 * @return string transient name
+	 */
+	public static function build_parameter_string( $category, $term, $country ) {
+
+		$paramters = array(
+			'category' => str_replace( '_', '-', $category ),
+			'term' => $term,
+			'country' => $country,
+		);
+
+		return '?' . http_build_query( $paramters );
+	}
+
+	/**
+	 * Call API to get extensions
+	 *
+	 * @return array of extensions
+	 */
+	public static function get_extension_data( $category, $term, $country ) {
+		$transient_name = self::build_transient_name( $category, $term, $country );
+		$parameters = self::build_parameter_string( $category, $term, $country );
+		$addons = get_transient( $transient_name );
+		if ( false === $addons ) {
+			$raw_extensions = wp_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+				array( 'sslverify' => false )
+			);
+			if ( ! is_wp_error( $raw_extensions ) ) {
+				$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
+				if ( $addons ) {
+					set_transient( $transient_name, $addons, WEEK_IN_SECONDS );
+				}
+			}
+		}
+		return $addons;
+	}
+
+	/**
 	 * Get sections for the addons screen
 	 *
 	 * @return array of objects
@@ -477,10 +536,19 @@ class WC_Admin_Addons {
 		$theme           = wp_get_theme();
 		$section_keys    = array_keys( $sections );
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
+		$addons = array();
+
+		if ( 'featured' !== $current_section ) {
+			$category = isset( $_GET['section'] ) ? $_GET['section'] : null;
+			$term =  isset( $_GET['search'] ) ? $_GET['search'] : null;
+			$country = WC()->countries->get_base_country();
+			$addons = self::get_extension_data( $category, $term, $country );
+		}
 
 		/**
 		 * Addon page view.
 		 *
+		 * @uses $addons
 		 * @uses $sections
 		 * @uses $theme
 		 * @uses $section_keys

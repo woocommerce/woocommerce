@@ -29,6 +29,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php echo ( end( $section_keys ) !== $section_id ) ? ' |' : ''; ?></li>
 			<?php endforeach; ?>
 		</ul>
+		<form class="search-form" method="GET">
+			<button type="submit">
+				<span class="dashicons dashicons-search"></span>
+			</button>
+			<input type="text" name="search" value="" placeholder="Search for an extension...">
+			<input type="hidden" name="page" value="wc-addons">
+			<input type="hidden" name="section" value="<?php echo esc_attr( $_GET['section'] ); ?>">
+		</form>
 		<br class="clear" />
 		<?php if ( 'featured' === $current_section ) : ?>
 			<div class="addons-featured">
@@ -37,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 			</div>
 		<?php endif; ?>
-		<?php if ( 'featured' !== $current_section && $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+		<?php if ( 'featured' !== $current_section && $addons ) : ?>
 			<?php if ( 'shipping_methods' === $current_section ) : ?>
 				<div class="addons-shipping-methods">
 					<?php WC_Admin_Addons::output_wcs_banner_block(); ?>

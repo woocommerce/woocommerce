@@ -21,6 +21,29 @@
 
 .wc_addons_wrap {
 
+	form.search-form {
+		clear: both;
+		display: block;
+		position: relative;
+		width: 100%;
+
+		input {
+			box-shadow: none;
+			height: 53px;
+			padding-left: 50px;
+			width: 100%;
+		}
+
+		button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			height: 53px;
+			position: absolute;
+			width: 53px;
+		}
+	}
+
 	.update-plugins .update-count  {
 		background-color: #d54e21;
 		border-radius: 10px;
