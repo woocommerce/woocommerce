@@ -29,8 +29,10 @@
 		width: 100%;
 
 		input {
-			box-shadow: none;
+			border: none;
+			box-shadow: 0 0 1px rgba(0,0,0,.2);
 			height: 53px;
+			margin-left: -1px;
 			padding-left: 50px;
 			width: 100%;
 		}
