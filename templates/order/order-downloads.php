@@ -43,8 +43,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						} else {
 							switch ( $column_id ) {
 								case 'download-product' : ?>
-									<a href="<?php echo esc_url( get_permalink( $download['product_id'] ) ); ?>"><?php echo esc_html( $download['product_name'] ); ?></a>
-									<?php
+									<?php if ( $download['product_url'] ) : ?>
+										<a href="<?php echo esc_url( $download['product_url'] ); ?>"><?php echo esc_html( $download['product_name'] ); ?></a>
+									<?php else : ?>
+										<?php echo esc_html( $download['product_name'] ); ?>
+									<?php endif;
 								break;
 								case 'download-file' : ?>
 									<a href="<?php echo esc_url( $download['download_url'] ); ?>" class="woocommerce-MyAccount-downloads-file button alt"><?php echo esc_html( $download['download_name'] ); ?></a>

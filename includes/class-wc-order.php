@@ -1349,6 +1349,7 @@ class WC_Order extends WC_Abstract_Order {
 							'download_id'         => $file['id'],
 							'product_id'          => $product->get_id(),
 							'product_name'        => $product->get_name(),
+							'product_url'         => $product->is_visible() ? $product->get_permalink() : '', // Since 3.3.0.
 							'download_name'       => $file['name'],
 							'order_id'            => $this->get_id(),
 							'order_key'           => $this->get_order_key(),
