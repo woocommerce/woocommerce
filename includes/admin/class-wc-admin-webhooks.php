@@ -77,6 +77,10 @@ class WC_Admin_Webhooks {
 
 		$webhook->set_name( $name );
 
+		if ( ! $webhook->get_user_id() ) {
+			$webhook->set_user_id( get_current_user_id() );
+		}
+
 		// Status.
 		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' ); // WPCS: input var okay, CSRF ok.
 
