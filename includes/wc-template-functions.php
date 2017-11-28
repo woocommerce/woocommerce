@@ -1998,7 +1998,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		// Custom attribute handling.
 		$custom_attributes         = array();
-		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'] );
 
 		if ( $args['maxlength'] ) {
 			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
