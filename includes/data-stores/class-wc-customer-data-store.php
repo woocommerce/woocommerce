@@ -218,7 +218,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'paying_customer' => 'is_paying_customer',
 			'first_name'      => 'first_name',
 			'last_name'       => 'last_name',
-			'display_name'    => 'display_name',
 		);
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
