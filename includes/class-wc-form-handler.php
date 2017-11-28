@@ -193,32 +193,30 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
-		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_first_name    = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
+		$account_last_name     = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
 		$account_display_name  = ! empty( $_POST['account_display_name'] ) ? wc_clean( $_POST['account_display_name'] ) : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
-		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
-		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
-		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
-		$save_pass          = true;
+		$account_email         = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
+		$pass_cur              = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1                 = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2                 = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
+		$save_pass             = true;
 
-		$user->first_name   = $account_first_name;
-		$user->last_name    = $account_last_name;
+		$user->first_name      = $account_first_name;
+		$user->last_name       = $account_last_name;
+		$user->display_name    = $account_display_name;
 
-		// Prevent emails being displayed, or leave alone.
-		$user->display_name = is_email( $current_user->display_name ) ? sprintf( __( '%1$s %2$s', 'display name', 'woocommerce' ), $user->first_name, $user->last_name ) : $account_display_name;
-		// Prevent display name change to email
-		if ( is_email( $user->display_name ) ) {
+		// Prevent display name to be changed to email
+		if ( is_email( $account_display_name ) ) {
 			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
-			$user->display_name = $current_user->display_name;
 		}
 		
 		// Handle required fields
 		$required_fields = apply_filters( 'woocommerce_save_account_details_required_fields', array(
-			'account_first_name' => __( 'First name', 'woocommerce' ),
-			'account_last_name'  => __( 'Last name', 'woocommerce' ),
-			'account_display_name'  => __( 'Display name publicly as', 'woocommerce' ),
-			'account_email'      => __( 'Email address', 'woocommerce' ),
+			'account_first_name'    => __( 'First name', 'woocommerce' ),
+			'account_last_name'     => __( 'Last name', 'woocommerce' ),
+			'account_display_name'  => __( 'Display name', 'woocommerce' ),
+			'account_email'         => __( 'Email address', 'woocommerce' ),
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
@@ -226,7 +224,7 @@ class WC_Form_Handler {
 				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_name ) . '</strong>' ), 'error' );
 			}
 		}
-
+		
 		if ( $account_email ) {
 			$account_email = sanitize_email( $account_email );
 			if ( ! is_email( $account_email ) ) {
