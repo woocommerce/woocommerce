@@ -96,11 +96,8 @@ class WC_Install {
 		),
 		'3.3.0' => array(
 			'wc_update_330_image_options',
-<<<<<<< HEAD
 			'wc_update_330_webhooks',
-=======
 			'wc_update_330_set_default_product_cat',
->>>>>>> master
 			'wc_update_330_db_version',
 		),
 	);
