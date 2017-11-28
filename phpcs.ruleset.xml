@@ -11,14 +11,25 @@
 	<exclude-pattern>includes/gateways/simplify-commerce/includes/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
 
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="4.7" />
+	<config name="testVersion" value="5.2-"/>
+
+	<!-- Rules -->
 	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress">
-		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.SchemaChange" />
+		<exclude name="WordPress.VIP.FileSystemWritesDisallow.file_ops_fwrite" />
 		<exclude name="WordPress.VIP.OrderByRand" />
+		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.RestrictedVariables.user_meta__wpdb__usermeta" />
+		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
 	</rule>
-
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
 			<property name="customSanitizingFunctions" type="array" value="wc_clean,wc_sanitize_tooltip,wc_format_decimal,wc_stock_amount" />
@@ -28,5 +39,13 @@
 		<properties>
 			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
 		</properties>
-</rule>
+	</rule>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="woocommerce" />
+		</properties>
+	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+	</rule>
 </ruleset>
