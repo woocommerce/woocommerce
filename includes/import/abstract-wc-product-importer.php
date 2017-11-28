@@ -133,7 +133,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	public function get_params() {
 		return $this->params;
 	}
-	
+
 	/**
 	 * Get file pointer position from the last read.
 	 *
@@ -503,7 +503,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  int    $product_id Product ID.
 	 * @return int
 	 */
-	protected function get_attachment_id_from_url( $url, $product_id ) {
+	public function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
 		}
@@ -590,7 +590,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  string $name Attribute name.
 	 * @return int
 	 */
-	protected function get_attribute_taxonomy_id( $raw_name ) {
+	public function get_attribute_taxonomy_id( $raw_name ) {
 		global $wpdb, $wc_product_attributes;
 
 		// These are exported as labels, so convert the label to a name if possible first.
