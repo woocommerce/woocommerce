@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $states['JP'] = array(
-	'JP01' => __( 'Hokkaido', 'woocommerce' ),
+	'JP01' => __( 'Hokkaido-dō', 'woocommerce' ),
 	'JP02' => __( 'Aomori-ken', 'woocommerce' ),
 	'JP03' => __( 'Iwate-ken', 'woocommerce' ),
 	'JP04' => __( 'Miyagi-ken', 'woocommerce' ),
@@ -26,7 +26,7 @@ $states['JP'] = array(
 	'JP10' => __( 'Gunma-ken', 'woocommerce' ),
 	'JP11' => __( 'Saitama-ken', 'woocommerce' ),
 	'JP12' => __( 'Chiba-ken', 'woocommerce' ),
-	'JP13' => __( 'Tokyo-ken', 'woocommerce' ),
+	'JP13' => __( 'Tokyo-to', 'woocommerce' ),
 	'JP14' => __( 'Kanagawa-ken', 'woocommerce' ),
 	'JP15' => __( 'Niigata-ken', 'woocommerce' ),
 	'JP16' => __( 'Toyama-ken', 'woocommerce' ),
