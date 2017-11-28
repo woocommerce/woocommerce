@@ -257,7 +257,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			$data = apply_filters( 'woocommerce_api_edit_webhook_data', $data, $id, $this );
 
-			$webhook = new WC_Webhook( $id );
+			$webhook = wc_get_webhook( $id );
 
 			// update topic
 			if ( ! empty( $data['topic'] ) ) {
