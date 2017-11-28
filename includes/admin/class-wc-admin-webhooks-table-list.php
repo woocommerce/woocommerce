@@ -274,7 +274,11 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$data_store  = WC_Data_Store::load( 'webhook' );
 		$webhooks    = $data_store->search_webhooks( $args );
 		$this->items = array_map( 'wc_get_webhook', $webhooks );
-		$total_items = count( $data_store->get_webhooks_ids() );
+
+		// Get total items.
+		$args['limit']  = -1;
+		$args['offset'] = 0;
+		$total_items = count( $data_store->search_webhooks( $args ) );
 
 		// Set the pagination.
 		$this->set_pagination_args( array(
