@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<button type="submit">
 				<span class="dashicons dashicons-search"></span>
 			</button>
-			<input type="text" name="search" value="" placeholder="Search for an extension...">
+			<input type="text" name="search" value="" placeholder="Enter a search term and press enter">
 			<input type="hidden" name="page" value="wc-addons">
 			<input type="hidden" name="section" value="<?php echo esc_attr( $_GET['section'] ); ?>">
 		</form>
