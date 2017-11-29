@@ -185,7 +185,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'name' => array(
+						'title' => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
