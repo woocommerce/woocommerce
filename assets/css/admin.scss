@@ -186,7 +186,6 @@
 	}
 
 	.addons-column-block-item {
-		display: flex;
 		border-top: 2px solid #f9f9f9;
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -223,6 +222,18 @@
 
 	.addons-column-block-item-content p {
 		float: left;
+	}
+
+	.addons-banner-block-item,
+	.addons-column-block-item  {
+		display: none;
+	}
+
+	.addons-banner-block-item:nth-child(-n+3) {
+		display: block;
+	}
+	.addons-column-block-item:nth-of-type(-n+3)  {
+		display: flex;
 	}
 
 	.addons-small-dark-block {
