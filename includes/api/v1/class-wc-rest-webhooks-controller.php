@@ -523,7 +523,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param WC_Webhook        $id       Webhook ID or instance.
+	 * @param int               $id       Webhook ID.
 	 * @param WP_REST_Request   $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
