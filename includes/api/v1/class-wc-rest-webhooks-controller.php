@@ -334,28 +334,25 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$webhook->set_api_version( $this->get_default_api_version() );
 		$webhook->save();
 
-		$this->update_additional_fields_for_object( null, $request );
+		$this->update_additional_fields_for_object( $webhook, $request );
 
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WC_Webhook      $webhook   Webhook data.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param WC_Webhook      $webhook  Webhook data.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param bool            $creating True when creating item, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_webhook", null, $request, true );
+		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, true );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
+		$response = $this->prepare_item_for_response( $webhook->get_id(), $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $webhook->get_id() ) ) );
 
 		// Send ping.
 		$webhook->deliver_ping();
-
-		// Clear cache.
-		delete_transient( 'woocommerce_webhook_ids' );
 
 		return $response;
 	}
@@ -367,14 +364,12 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$id   = (int) $request['id'];
-		$post = get_post( $id );
+		$id      = (int) $request['id'];
+		$webhook = wc_get_webhook( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+		if ( empty( $id ) || is_null( $webhook->get_id() ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
-
-		$webhook = new WC_Webhook( $id );
 
 		// Update topic.
 		if ( ! empty( $request['topic'] ) ) {
@@ -401,7 +396,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// Update status.
 		if ( ! empty( $request['status'] ) ) {
-			$webhook->update_status( $request['status'] );
+			$webhook->set_status( $request['status'] );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -409,34 +404,22 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			return $post;
 		}
 
-		// Convert the post object to an array, otherwise wp_update_post will expect non-escaped input.
-		$post_id = wp_update_post( (array) $post, true );
-		if ( is_wp_error( $post_id ) ) {
-			if ( in_array( $post_id->get_error_code(), array( 'db_update_error' ) ) ) {
-				$post_id->add_data( array( 'status' => 500 ) );
-			} else {
-				$post_id->add_data( array( 'status' => 400 ) );
-			}
-			return $post_id;
-		}
+		$webhook->set_name( $post->post_title );
+		$webhook->save();
 
-		$post = get_post( $post_id );
-		$this->update_additional_fields_for_object( $post, $request );
+		$this->update_additional_fields_for_object( $webhook, $request );
 
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WP_Post         $post      Inserted object.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param WC_Webhook      $webhook  Webhook data.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param bool            $creating True when creating item, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
+		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, false );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
-
-		// Clear cache.
-		delete_transient( 'woocommerce_webhook_ids' );
+		$response = $this->prepare_item_for_response( $webhook->get_id(), $request );
 
 		return rest_ensure_response( $response );
 	}
@@ -456,16 +439,15 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$post = get_post( $id );
+		$webhook = wc_get_webhook( $id );
 
-		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $webhook ) || is_null( $webhook ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
-
-		$result = wp_delete_post( $id, true );
+		$response = $this->prepare_item_for_response( $webhook, $request );
+		$result   = $webhook->delete( true );
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
@@ -475,14 +457,11 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is deleted or trashed via the REST API.
 		 *
-		 * @param object           $post     The deleted or trashed item.
+		 * @param WC_Webhook       $webhook     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
-		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
-
-		// Clear cache.
-		delete_transient( 'woocommerce_webhook_ids' );
+		do_action( "woocommerce_rest_delete_webhook_object", $webhook, $response, $request );
 
 		return $response;
 	}
@@ -544,12 +523,12 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param int $id Webhook ID.
-	 * @param WP_REST_Request $request Request object.
+	 * @param WC_Webhook        $id       Webhook ID or instance.
+	 * @param WP_REST_Request   $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $id, $request ) {
-		$webhook = new WC_Webhook( $id );
+		$webhook = wc_get_webhook( (int) $id );
 		$data    = array(
 			'id'            => $webhook->get_id(),
 			'name'          => $webhook->get_name(),
