@@ -74,8 +74,9 @@ class WC_Template_Loader {
 		}
 	}
 
+	// need to make this think it's a single page better
 	private static function unsupported_theme_tax_archive_init() {
-		global $wp_query, $post;
+		global $wp_query, $post, $wp_filters;
 
 		$queried_object = get_queried_object();
 		$tax = $queried_object->taxonomy;
@@ -93,7 +94,7 @@ class WC_Template_Loader {
 			'post_modified_gmt'     => 0,
 			'post_content'          => do_shortcode( '[product_category category="' . $term_slug . '"]' ),
 			'post_title'            => $queried_object->name,
-			'post_excerpt'          => do_shortcode( '[product_category category="' . $term_slug . '"]' ),
+			'post_excerpt'          => '',
 			'post_content_filtered' => '',
 			'post_mime_type'        => '',
 			'post_password'         => '',
@@ -110,7 +111,6 @@ class WC_Template_Loader {
 
 		// Set the $post global.
 		$post = new WP_Post( (object) $dummy_post_properties );
-		$post->comment_status = 'closed';
 
 		// Copy the new post global into the main $wp_query.
 		$wp_query->post = $post;
@@ -119,13 +119,32 @@ class WC_Template_Loader {
         // Prevent comments form from appearing
 		$wp_query->post_count = 1;
 		$wp_query->is_404     = false;
-		$wp_query->is_page    = false;
-		$wp_query->is_single  = false;
+		$wp_query->is_page    = true;
+		$wp_query->is_single  = true;
 		$wp_query->is_archive = false;
 		$wp_query->is_tax     = false;
 
 		setup_postdata( $post );
 		remove_all_filters( 'the_content' );
+		remove_all_filters( 'the_excerpt' );
+
+		add_filter( 'template_include', function( $template ){
+			$possible_templates = array(
+				'page',
+				'single',
+				'singular',
+				'index',
+			);
+
+			foreach ( $possible_templates as $possible_template ) {
+				$path = get_query_template( $possible_template );
+				if ( $path ) {
+					return $path;
+				}
+			}
+
+			return $template;
+		});
 	}
 
 	/**
