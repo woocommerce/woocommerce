@@ -42,6 +42,10 @@ class WC_Admin_Addons {
 	/**
 	 * Build transient name
 	 *
+	 * @param  string $category
+	 * @param  string $term
+	 * @param  string $country
+	 *
 	 * @return string transient name
 	 */
 	public static function build_transient_name( $category, $term, $country ) {
@@ -59,9 +63,13 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Build transient name
+	 * Build url parameter string
 	 *
-	 * @return string transient name
+	 * @param  string $category
+	 * @param  string $term
+	 * @param  string $country
+	 *
+	 * @return string url parameter string
 	 */
 	public static function build_parameter_string( $category, $term, $country ) {
 
@@ -76,6 +84,10 @@ class WC_Admin_Addons {
 
 	/**
 	 * Call API to get extensions
+	 *
+	 * @param  string $category
+	 * @param  string $term
+	 * @param  string $country
 	 *
 	 * @return array of extensions
 	 */
