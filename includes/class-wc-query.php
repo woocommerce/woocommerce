@@ -42,6 +42,7 @@ class WC_Query {
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
+			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
 	}
@@ -813,5 +814,15 @@ class WC_Query {
 	 */
 	public function layered_nav_query( $filtered_posts ) {
 		wc_deprecated_function( 'layered_nav_query', '2.6' );
+	}
+
+	/**
+	 * Remove the add-to-cart param from pagination urls.
+	 *
+	 * @param string $url URL.
+	 * @return string
+	 */
+	public function remove_add_to_cart_pagination( $url ) {
+		return remove_query_arg( 'add-to-cart', $url );
 	}
 }
