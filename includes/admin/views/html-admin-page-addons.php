@@ -35,7 +35,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</button>
 			<input type="text" name="search" value="" placeholder="Enter a search term and press enter">
 			<input type="hidden" name="page" value="wc-addons">
-			<input type="hidden" name="section" value="<?php echo esc_attr( $_GET['section'] ); ?>">
+			<?php $page_section = isset( $_GET['section'] ) ? $_GET['section'] : ''; ?>
+			<?php $page_section = 'featured' === $page_section ? '' : $page_section; ?>
+			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
 		</form>
 		<?php if ( 'featured' === $current_section ) : ?>
 			<div class="addons-featured">
