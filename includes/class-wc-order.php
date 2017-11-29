@@ -108,7 +108,7 @@ class WC_Order extends WC_Abstract_Order {
 			}
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
-			if ( ! WC()->session ) {
+			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );
 			}
 
