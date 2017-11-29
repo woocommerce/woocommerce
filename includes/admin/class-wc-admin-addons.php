@@ -85,8 +85,7 @@ class WC_Admin_Addons {
 		$addons = get_transient( $transient_name );
 		if ( false === $addons ) {
 			$raw_extensions = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
-				array( 'sslverify' => false )
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters
 			);
 			if ( ! is_wp_error( $raw_extensions ) ) {
 				$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
