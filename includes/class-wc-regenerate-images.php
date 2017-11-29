@@ -66,13 +66,14 @@ class WC_Regenerate_Images {
 
 		$size_settings = wc_get_image_size( $size );
 
-		if ( isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) ) {
+		if ( in_array( $size, array( 'woocommerce_thumbnail' ), true ) && isset( $imagemeta['sizes'] ) ) {
 			if ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
 				$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 			}
 		} else {
 			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
+
 		return $image;
 	}
 
