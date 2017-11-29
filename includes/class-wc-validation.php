@@ -87,6 +87,9 @@ class WC_Validation {
 			case 'PL':
 				$valid = (bool) preg_match( '/^([0-9]{2})([-])([0-9]{3})$/', $postcode );
 				break;
+			case 'CZ':
+				$valid = (bool) preg_match( '/^([0-9]{3})( ?)([0-9]{2})$/', $postcode );
+				break;
 
 			default :
 				$valid = true;
