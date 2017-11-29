@@ -53,7 +53,11 @@ class WC_Template_Loader {
 	 * @since 3.3.0
 	 */
 	public static function unsupported_theme_init() {
-		if ( self::$shop_page_id || is_product() ) {
+
+		// todo limit this to only WC taxes
+		if ( is_tax() ) {
+			self::unsupported_theme_tax_archive_init();
+		} elseif ( self::$shop_page_id || is_product() ) {
 			add_filter( 'the_content', array( __CLASS__, 'unsupported_theme_content_filter' ), 10 );
 			add_filter( 'the_title', array( __CLASS__, 'unsupported_theme_title_filter' ), 10, 2 );
 			add_filter( 'post_thumbnail_html', array( __CLASS__, 'unsupported_theme_single_featured_image_filter' ) );
@@ -68,6 +72,60 @@ class WC_Template_Loader {
 				add_theme_support( 'wc-product-gallery-slider' );
 			}
 		}
+	}
+
+	private static function unsupported_theme_tax_archive_init() {
+		global $wp_query, $post;
+
+		$queried_object = get_queried_object();
+		$tax = $queried_object->taxonomy;
+		$term_slug = $queried_object->slug;
+
+		$dummy_post_properties = array(
+			'ID' => 0,
+			'post_status' => 'publish',
+			'post_author'           => 0,
+			'post_parent'           => 0,
+			'post_type'             => 'page',
+			'post_date'             => 0,
+			'post_date_gmt'         => 0,
+			'post_modified'         => 0,
+			'post_modified_gmt'     => 0,
+			'post_content'          => do_shortcode( '[product_category category="' . $term_slug . '"]' ),
+			'post_title'            => $queried_object->name,
+			'post_excerpt'          => do_shortcode( '[product_category category="' . $term_slug . '"]' ),
+			'post_content_filtered' => '',
+			'post_mime_type'        => '',
+			'post_password'         => '',
+			'post_name'             => '',
+			'guid'                  => '',
+			'menu_order'            => 0,
+			'pinged'                => '',
+			'to_ping'               => '',
+			'ping_status'           => '',
+			'comment_status'        => 'closed',
+			'comment_count'         => 0,
+			'filter'                => 'raw',
+		);
+
+		// Set the $post global.
+		$post = new WP_Post( (object) $dummy_post_properties );
+		$post->comment_status = 'closed';
+
+		// Copy the new post global into the main $wp_query.
+		$wp_query->post = $post;
+		$wp_query->posts = array( $post );
+
+        // Prevent comments form from appearing
+		$wp_query->post_count = 1;
+		$wp_query->is_404     = false;
+		$wp_query->is_page    = false;
+		$wp_query->is_single  = false;
+		$wp_query->is_archive = false;
+		$wp_query->is_tax     = false;
+
+		setup_postdata( $post );
+		remove_all_filters( 'the_content' );
 	}
 
 	/**
