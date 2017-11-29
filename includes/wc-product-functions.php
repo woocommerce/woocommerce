@@ -484,9 +484,13 @@ function wc_track_product_view() {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 	}
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) {
-		$viewed_products[] = $post->ID;
+	// Unset if already in viewed products list and append ID.
+	$keys = array_flip( $viewed_products );
+	if ( isset( $keys[ $post->ID ] ) ) {
+		unset( $viewed_products[ $keys[ $post->ID ] ] );
 	}
+
+	$viewed_products[] = $post->ID;
 
 	if ( count( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
