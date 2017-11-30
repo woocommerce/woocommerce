@@ -189,8 +189,7 @@ class WC_Template_Loader {
 	 */
 	public static function unsupported_theme_init() {
 		if ( self::$shop_page_id ) {
-			// todo make this only happen on wc taxonomies
-			if ( is_tax() ) {
+			if ( is_product_taxonomy() ) {
 				self::unsupported_theme_tax_archive_init();
 			} elseif ( is_product() ) {
 				self::unsupported_theme_product_page_init();
@@ -229,22 +228,37 @@ class WC_Template_Loader {
 
 	/**
 	 * Enhance the unsupported theme experience on Product Category and Attribute pages by rendering
-	 * those pages using the single template and shortcode-based content.
+	 * those pages using the single template and shortcode-based content. To do this we make a dummy
+	 * post and set a shortcode as the post content. This approach is adapted from bbPress.
 	 *
 	 * @since 3.3.0
 	 */
 	private static function unsupported_theme_tax_archive_init() {
 		global $wp_query, $post;
 
+		$queried_object = get_queried_object();
+		$shortcode_args = array(
+
+		);
+
+		if ( is_product_category() ) {
+			$shortcode_args['category'] = $queried_object->slug;
+		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
+			$shortcode_args['attribute'] = $queried_object->taxonomy;
+			$shortcode_args['terms'] = $queried_object->slug;
+		} elseif ( is_product_tag() ) {
+			// todo
+			die( "NOT IMPLEMENTED" );
+		} else {
+			return;
+		}
+
+		$shortcode = new WC_Shortcode_Products( $shortcode_args );
 		$shop_page = get_post( self::$shop_page_id );
 
-		$queried_object = get_queried_object();
-		$tax = $queried_object->taxonomy;
-		$term_slug = $queried_object->slug;
-
 		$dummy_post_properties = array(
-			'ID' => 0,
-			'post_status' => 'publish',
+			'ID'                    => 0,
+			'post_status'           => 'publish',
 			'post_author'           => $shop_page->post_author,
 			'post_parent'           => 0,
 			'post_type'             => 'page',
@@ -252,7 +266,7 @@ class WC_Template_Loader {
 			'post_date_gmt'         => $shop_page->post_date_gmt,
 			'post_modified'         => $shop_page->post_modified,
 			'post_modified_gmt'     => $shop_page->post_modified_gmt,
-			'post_content'          => do_shortcode( '[product_category category="' . $term_slug . '"]' ),
+			'post_content'          => $shortcode->get_content(),
 			'post_title'            => $queried_object->name,
 			'post_excerpt'          => '',
 			'post_content_filtered' => '',
@@ -276,7 +290,7 @@ class WC_Template_Loader {
 		$wp_query->post = $post;
 		$wp_query->posts = array( $post );
 
-        // Prevent comments form from appearing
+        // Prevent comments form from appearing.
 		$wp_query->post_count = 1;
 		$wp_query->is_404     = false;
 		$wp_query->is_page    = true;
@@ -284,27 +298,36 @@ class WC_Template_Loader {
 		$wp_query->is_archive = false;
 		$wp_query->is_tax     = false;
 
+		// Prepare everything for rendering.
 		setup_postdata( $post );
 		remove_all_filters( 'the_content' );
 		remove_all_filters( 'the_excerpt' );
+		add_filter( 'template_include', array( __CLASS__, 'force_single_template_filter' ) );
+	}
 
-		add_filter( 'template_include', function( $template ){
-			$possible_templates = array(
-				'page',
-				'single',
-				'singular',
-				'index',
-			);
+	/**
+	 * Force the loading of one of the single templates instead of whatever template was about to be loaded.
+	 *
+	 * @since 3.3.0
+	 * @param string $template Path to template.
+	 * @return string
+	 */
+	public static function force_single_template_filter( $template ) {
+		$possible_templates = array(
+			'page',
+			'single',
+			'singular',
+			'index',
+		);
 
-			foreach ( $possible_templates as $possible_template ) {
-				$path = get_query_template( $possible_template );
-				if ( $path ) {
-					return $path;
-				}
+		foreach ( $possible_templates as $possible_template ) {
+			$path = get_query_template( $possible_template );
+			if ( $path ) {
+				return $path;
 			}
+		}
 
-			return $template;
-		});
+		return $template;
 	}
 
 	/**
