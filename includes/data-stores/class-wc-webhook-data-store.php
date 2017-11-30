@@ -112,6 +112,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		global $wpdb;
 
 		$changes = $webhook->get_changes();
+		$trigger = isset( $changes['delivery_url'] );
+
 		if ( isset( $changes['date_modified'] ) ) {
 			$date_modified     = $webhook->get_date_modified()->date( 'Y-m-d H:i:s' );
 			$date_modified_gmt = gmdate( 'Y-m-d H:i:s', $webhook->get_date_modified()->getTimestamp() );
@@ -147,6 +149,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
+
+		if ( $trigger || $webhook->get_pending_delivery() ) {
+			$webhook->deliver_ping();
+		}
+
 		do_action( 'woocommerce_webhook_updated', $webhook->get_id() );
 	}
 

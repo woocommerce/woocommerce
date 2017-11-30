@@ -536,7 +536,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
 
-		delete_post_meta( $this->get_id(), '_webhook_pending_delivery' );
+		$this->set_pending_delivery( false );
+		$this->save();
 
 		return true;
 	}
@@ -771,7 +772,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Set the delivery URL.
 	 *
-	 * @todo trigger webhook when set new delivery URL.
 	 * @since 2.2.0
 	 * @param string $url Delivery URL.
 	 */
