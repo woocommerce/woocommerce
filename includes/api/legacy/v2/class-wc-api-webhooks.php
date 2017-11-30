@@ -416,6 +416,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get deliveries for a webhook
 	 *
 	 * @since 2.2
+	 * @deprecated 3.3.0 Webhooks deliveries logs now uses logging system.
 	 * @param string $webhook_id webhook ID
 	 * @param string|null $fields fields to include in response
 	 * @return array|WP_Error
@@ -429,29 +430,14 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return $webhook_id;
 		}
 
-		$webhook       = new WC_Webhook( $webhook_id );
-		$logs          = $webhook->get_delivery_logs();
-		$delivery_logs = array();
-
-		foreach ( $logs as $log ) {
-
-			// Add timestamp
-			$log['created_at'] = $this->server->format_datetime( $log['comment']->comment_date_gmt );
-
-			// Remove comment object
-			unset( $log['comment'] );
-
-			$delivery_logs[] = $log;
-		}
-
-		return array( 'webhook_deliveries' => $delivery_logs );
+		return array( 'webhook_deliveries' => array() );
 	}
 
 	/**
 	 * Get the delivery log for the given webhook ID and delivery ID
 	 *
 	 * @since 2.2
-	 *
+	 * @deprecated 3.3.0 Webhooks deliveries logs now uses logging system.
 	 * @param string $webhook_id webhook ID
 	 * @param string $id delivery log ID
 	 * @param string|null $fields fields to limit response to
@@ -475,21 +461,13 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			$webhook = new WC_Webhook( $webhook_id );
 
-			$log = $webhook->get_delivery_log( $id );
+			$log = 0;
 
 			if ( ! $log ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery.', 'woocommerce' ), 400 );
 			}
 
-			$delivery_log = $log;
-
-			// Add timestamp
-			$delivery_log['created_at'] = $this->server->format_datetime( $log['comment']->comment_date_gmt );
-
-			// Remove comment object
-			unset( $delivery_log['comment'] );
-
-			return array( 'webhook_delivery' => apply_filters( 'woocommerce_api_webhook_delivery_response', $delivery_log, $id, $fields, $log, $webhook_id, $this ) );
+			return array( 'webhook_delivery' => apply_filters( 'woocommerce_api_webhook_delivery_response', array(), $id, $fields, $log, $webhook_id, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
