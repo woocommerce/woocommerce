@@ -237,19 +237,17 @@ class WC_Template_Loader {
 		global $wp_query, $post;
 
 		$queried_object = get_queried_object();
-		$shortcode_args = array(
-
-		);
+		$shortcode_args = array();
 
 		if ( is_product_category() ) {
-			$shortcode_args['category'] = $queried_object->slug;
+			$shortcode_args['category'] = sanitize_title( $queried_object->slug );
 		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
-			$shortcode_args['attribute'] = $queried_object->taxonomy;
-			$shortcode_args['terms'] = $queried_object->slug;
+			$shortcode_args['attribute'] = sanitize_title( $queried_object->taxonomy );
+			$shortcode_args['terms'] = sanitize_title( $queried_object->slug );
 		} elseif ( is_product_tag() ) {
-			// todo
-			die( "NOT IMPLEMENTED" );
+			$shortcode_args['tag'] = sanitize_title( $queried_object->slug );
 		} else {
+			// Default theme archive for all other taxonomies.
 			return;
 		}
 
@@ -267,7 +265,7 @@ class WC_Template_Loader {
 			'post_modified'         => $shop_page->post_modified,
 			'post_modified_gmt'     => $shop_page->post_modified_gmt,
 			'post_content'          => $shortcode->get_content(),
-			'post_title'            => $queried_object->name,
+			'post_title'            => wc_clean( $queried_object->name ),
 			'post_excerpt'          => '',
 			'post_content_filtered' => '',
 			'post_mime_type'        => '',
