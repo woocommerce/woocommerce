@@ -319,13 +319,13 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			return $post;
 		}
 
-		$webhook = new WC_Webhook( $post_id );
+		$webhook = new WC_Webhook();
 		$webhook->set_name( $post->post_title );
 		$webhook->set_user_id( $post->post_author );
 		$webhook->set_status( 'publish' === $post->post_status ? 'active' : 'disabled' );
-		$webhook->set_topic( $data['topic'] );
-		$webhook->set_delivery_url( $data['delivery_url'] );
-		$webhook->set_secret( ! empty( $data['secret'] ) ? $data['secret'] : wp_generate_password( 50, true, true ) );
+		$webhook->set_topic( $request['topic'] );
+		$webhook->set_delivery_url( $request['delivery_url'] );
+		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : wp_generate_password( 50, true, true ) );
 		$webhook->set_api_version( $this->get_default_api_version() );
 		$webhook->save();
 
@@ -399,7 +399,10 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			return $post;
 		}
 
-		$webhook->set_name( $post->post_title );
+		if ( isset( $post->post_title ) ) {
+			$webhook->set_name( $post->post_title );
+		}
+
 		$webhook->save();
 
 		$this->update_additional_fields_for_object( $webhook, $request );
