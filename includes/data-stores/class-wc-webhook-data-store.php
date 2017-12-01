@@ -36,6 +36,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$webhook->set_date_created( $date_created );
 		}
 
+		// Pending delivery by default if not set while creating a new webhook.
+		if ( ! isset( $changes['pending_delivery'] ) ) {
+			$webhook->set_pending_delivery( true );
+		}
+
 		$data = array(
 			'status'           => $webhook->get_status( 'edit' ),
 			'name'             => $webhook->get_name( 'edit' ),
@@ -150,7 +155,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 
-		if ( $trigger || $webhook->get_pending_delivery() ) {
+		if ( 'active' === $webhook->get_status() && ( $trigger || $webhook->get_pending_delivery() ) ) {
 			$webhook->deliver_ping();
 		}
 
