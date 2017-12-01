@@ -30,7 +30,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'page'           => 1,
 			'paginate'       => false,
 			'cache'          => true,
-
+			'tag'            => '',
 		);
 		$this->assertEquals( $expected, $shortcode->get_attributes() );
 
@@ -56,6 +56,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'page'           => 1,
 			'paginate'       => false,
 			'cache'          => true,
+			'tag'            => '',
 		);
 		$this->assertEquals( $expected2, $shortcode2->get_attributes() );
 	}
