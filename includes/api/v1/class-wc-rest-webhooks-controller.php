@@ -69,11 +69,6 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 						'type'        => 'string',
 						'description' => __( 'Webhook delivery URL.', 'woocommerce' ),
 					),
-					'secret' => array(
-						'required'    => true,
-						'type'        => 'string',
-						'description' => __( 'Webhook secret.', 'woocommerce' ),
-					),
 				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
