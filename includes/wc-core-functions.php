@@ -956,22 +956,6 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
 
 /**
- * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron.
- * hook, see WC_Webhook::process().
- *
- * @since 2.2
- * @param int $webhook_id webhook ID to deliver.
- * @param mixed $arg hook argument.
- */
-function wc_deliver_webhook_async( $webhook_id, $arg ) {
-
-	$webhook = new WC_Webhook( $webhook_id );
-
-	$webhook->deliver( $arg );
-}
-add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
-
-/**
  * Formats a string in the format COUNTRY:STATE into an array.
  *
  * @since 2.3.0

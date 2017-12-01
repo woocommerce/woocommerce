@@ -106,19 +106,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return;
 		}
 
-		// Webhooks are processed in the background by default
-		// so as to avoid delays or failures in delivery from affecting the
-		// user who triggered it.
-		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $this, $arg ) ) {
-
-			// Deliver in background.
-			wp_schedule_single_event( time(), 'woocommerce_deliver_webhook_async', array( $this->get_id(), $arg ) );
-
-		} else {
-
-			// Deliver immediately.
-			$this->deliver( $arg );
-		}
+		/**
+		 * Process webhook delivery.
+		 *
+		 * @since 3.3.0
+		 * @hooked wc_webhook_process_delivery - 10
+		 */
+		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
 	}
 
 	/**
