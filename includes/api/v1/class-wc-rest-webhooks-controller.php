@@ -127,7 +127,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check whether a given request has permission to read taxes.
+	 * Check whether a given request has permission to read webhooks.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -141,7 +141,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access create taxes.
+	 * Check if a given request has access create webhooks.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
@@ -156,7 +156,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read a tax.
+	 * Check if a given request has access to read a webhook.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -170,7 +170,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access update a tax.
+	 * Check if a given request has access update a webhook.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
@@ -185,7 +185,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access delete a tax.
+	 * Check if a given request has access delete a webhook.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
@@ -225,7 +225,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get all taxes.
+	 * Get all webhooks.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
