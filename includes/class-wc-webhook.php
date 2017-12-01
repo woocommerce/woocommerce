@@ -464,7 +464,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		// Track failures.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
-			delete_post_meta( $this->get_id(), '_failure_count' );
+			$this->set_failure_count( 0 );
+			$this->save();
 		} else {
 			$this->failed_delivery();
 		}
@@ -481,10 +482,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
-			$this->update_status( 'disabled' );
+			$this->set_status( 'disabled' );
+
+			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
-			update_post_meta( $this->get_id(), '_failure_count', ++$failures );
+			$this->set_failure_count( ++$failures );
 		}
+
+		$this->save();
 	}
 
 	/**
