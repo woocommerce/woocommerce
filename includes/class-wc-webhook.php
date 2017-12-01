@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-include_once( 'legacy/class-wc-legacy-webhook.php' );
+require_once 'legacy/class-wc-legacy-webhook.php';
 
 /**
  * Webhook class.
@@ -209,7 +209,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->get_id() );
 
 		// Add custom headers.
-		$delivery_id = $this->get_new_delivery_id();
+		$delivery_id                                      = $this->get_new_delivery_id();
 		$http_args['headers']['X-WC-Webhook-Source']      = home_url( '/' ); // Since 2.6.0.
 		$http_args['headers']['X-WC-Webhook-Topic']       = $this->get_topic();
 		$http_args['headers']['X-WC-Webhook-Resource']    = $this->get_resource();
@@ -401,7 +401,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param float          $duration    Request duration.
 	 */
 	public function log_delivery( $delivery_id, $request, $response, $duration ) {
-		$logger = wc_get_logger();
+		$logger  = wc_get_logger();
 		$message = array(
 			'Webhook Delivery' => array(
 				'Delivery ID' => $delivery_id,
@@ -417,7 +417,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 						$request['headers']
 					),
 				),
-				'Body'    => wp_slash( $request['body'] ),
+				'Body'        => wp_slash( $request['body'] ),
 			),
 		);
 		if ( is_wp_error( $response ) ) {
@@ -436,9 +436,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		$logger->info( wc_print_r( $message, true ), array(
-			'source' => 'webhooks-delivery',
-		) );
+		$logger->info(
+			wc_print_r( $message, true ), array(
+				'source' => 'webhooks-delivery',
+			)
+		);
 
 		// Parse response.
 		if ( is_wp_error( $response ) ) {
@@ -454,9 +456,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$response_body    = wp_remote_retrieve_body( $response );
 		}
 
-		$logger->info( wc_print_r( $message, true ), array(
-			'source' => 'webhooks-delivery',
-		) );
+		$logger->info(
+			wc_print_r( $message, true ), array(
+				'source' => 'webhooks-delivery',
+			)
+		);
 
 		// Track failures.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
@@ -486,8 +490,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery logs for this webhook.
 	 *
-	 * @since  2.2.0
-	 * @return array
+	 * @since  3.3.0
+	 * @return string
 	 */
 	public function get_delivery_logs() {
 		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
@@ -543,10 +547,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/*
-	 |--------------------------------------------------------------------------
-	 | Getters
-	 |--------------------------------------------------------------------------
-	 */
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Get the friendly name for the webhook.
@@ -687,9 +691,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/*
-	 |--------------------------------------------------------------------------
-	 | Setters
-	 |--------------------------------------------------------------------------
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
 	 */
 
 	/**
@@ -824,10 +828,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/*
-	 |--------------------------------------------------------------------------
-	 | Non-CRUD Getters
-	 |--------------------------------------------------------------------------
-	 */
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Get the associated hook names for a topic.
@@ -838,18 +842,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	private function get_topic_hooks( $topic ) {
 		$topic_hooks = array(
-			'coupon.created' => array(
+			'coupon.created'   => array(
 				'woocommerce_process_shop_coupon_meta',
 				'woocommerce_new_coupon',
 			),
-			'coupon.updated' => array(
+			'coupon.updated'   => array(
 				'woocommerce_process_shop_coupon_meta',
 				'woocommerce_update_coupon',
 			),
-			'coupon.deleted' => array(
+			'coupon.deleted'   => array(
 				'wp_trash_post',
 			),
-			'coupon.restored' => array(
+			'coupon.restored'  => array(
 				'untrashed_post',
 			),
 			'customer.created' => array(
@@ -868,27 +872,27 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_new_order',
 			),
-			'order.updated' => array(
+			'order.updated'    => array(
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_update_order',
 			),
-			'order.deleted' => array(
+			'order.deleted'    => array(
 				'wp_trash_post',
 			),
-			'order.restored' => array(
+			'order.restored'   => array(
 				'untrashed_post',
 			),
-			'product.created' => array(
+			'product.created'  => array(
 				'woocommerce_process_product_meta',
 				'woocommerce_new_product',
 				'woocommerce_new_product_variation',
 			),
-			'product.updated' => array(
+			'product.updated'  => array(
 				'woocommerce_process_product_meta',
 				'woocommerce_update_product',
 				'woocommerce_update_product_variation',
 			),
-			'product.deleted' => array(
+			'product.deleted'  => array(
 				'wp_trash_post',
 			),
 			'product.restored' => array(

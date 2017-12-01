@@ -222,15 +222,72 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		global $wpdb;
 
 		$args = wp_parse_args( $args, array(
-			'limit'  => 10,
-			'offset' => 0,
+			'limit'   => 10,
+			'offset'  => 0,
+			'order'   => 'DESC',
+			'orderby' => 'id',
 		) );
 
-		$limit  = -1 < $args['limit'] ? sprintf( 'LIMIT %d', $args['limit'] ) : '';
-		$offset = 0 < $args['offset'] ? sprintf( 'OFFSET %d', $args['offset'] ) : '';
-		$status = ! empty( $args['status'] ) ? "AND `status` = '" . sanitize_key( $args['status'] ) . "'" : '';
-		$search = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
+		// Map post statuses.
+		$statuses = array(
+			'publish' => 'active',
+			'draft'   => 'paused',
+			'pending' => 'disabled',
+		);
 
+		// Map orderby to support a few post keys.
+		$orderby_mapping = array(
+			'ID'            => 'webhook_id',
+			'id'            => 'webhook_id',
+			'name'          => 'name',
+			'title'         => 'name',
+			'post_title'    => 'name',
+			'post_name'     => 'name',
+			'date_created'  => 'date_created_gmt',
+			'date'          => 'date_created_gmt',
+			'post_date'     => 'date_created_gmt',
+			'date_modified' => 'date_modified_gmt',
+			'modified'      => 'date_modified_gmt',
+			'post_modified' => 'date_modified_gmt',
+		);
+		$orderby         = isset( $orderby_mapping[ $args['orderby'] ] ) ? $orderby_mapping[ $args['orderby'] ] : 'webhook_id';
+
+		$limit         = -1 < $args['limit'] ? sprintf( 'LIMIT %d', $args['limit'] ) : '';
+		$offset        = 0 < $args['offset'] ? sprintf( 'OFFSET %d', $args['offset'] ) : '';
+		$status        = ! empty( $args['status'] ) ? "AND `status` = '" . sanitize_key( isset( $statuses[ $args['status'] ] ) ? $statuses[ $args['status'] ] : $args['status'] ) . "'" : '';
+		$search        = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
+		$include       = '';
+		$exclude       = '';
+		$date_created  = '';
+		$date_modified = '';
+
+		if ( ! empty( $args['include'] ) ) {
+			$args['include'] = implode( ',', wp_parse_id_list( $args['include'] ) );
+			$include         = 'AND webhook_id IN (' . $args['include'] . ')';
+		}
+
+		if ( ! empty( $args['exclude'] ) ) {
+			$args['exclude'] = implode( ',', wp_parse_id_list( $args['exclude'] ) );
+			$exclude         = 'AND webhook_id NOT IN (' . $args['exclude'] . ')';
+		}
+
+		if ( ! empty( $args['after'] ) || ! empty( $args['before'] ) ) {
+			$args['after']  = empty( $args['after'] ) ? '0000-00-00' : $args['after'];
+			$args['before'] = empty( $args['before'] ) ? current_time( 'mysql', 1 ) : $args['before'];
+
+			$date_created = "AND `date_created_gmt` BETWEEN STR_TO_DATE('" . $args['after'] . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . $args['before'] . "', '%Y-%m-%d %H:%i:%s')";
+		}
+
+		if ( ! empty( $args['modified_after'] ) || ! empty( $args['modified_before'] ) ) {
+			$args['modified_after']  = empty( $args['modified_after'] ) ? '0000-00-00' : $args['modified_after'];
+			$args['modified_before'] = empty( $args['modified_before'] ) ? current_time( 'mysql', 1 ) : $args['modified_before'];
+
+			$date_modified = "AND `date_modified_gmt` BETWEEN STR_TO_DATE('" . $args['modified_after'] . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . $args['modified_before'] . "', '%Y-%m-%d %H:%i:%s')";
+		}
+
+		$order = "ORDER BY {$orderby} " . strtoupper( sanitize_key( $args['order'] ) );
+
+		// Check for cache.
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'search_webhooks' . md5( implode( ',', $args ) );
 		$ids       = wp_cache_get( $cache_key, 'webhook_search_results' );
 
@@ -244,7 +301,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			WHERE 1=1
 			{$status}
 			{$search}
-			ORDER BY webhook_id
+			{$include}
+			{$exclude}
+			{$date_created}
+			{$date_modified}
+			{$order}
 			{$limit}
 			{$offset}
 		" );
