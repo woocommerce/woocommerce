@@ -189,7 +189,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
-		$payload = $this->build_payload( $arg );
+		$start_time = microtime( true );
+		$payload    = $this->build_payload( $arg );
 
 		// Setup request args.
 		$http_args = array(
@@ -217,8 +218,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$http_args['headers']['X-WC-Webhook-Signature']   = $this->generate_signature( $http_args['body'] );
 		$http_args['headers']['X-WC-Webhook-ID']          = $this->get_id();
 		$http_args['headers']['X-WC-Webhook-Delivery-ID'] = $delivery_id;
-
-		$start_time = microtime( true );
 
 		// Webhook away!
 		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
