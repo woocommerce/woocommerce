@@ -653,33 +653,45 @@ if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 		<?php
 	}
 }
-/**
- * Insert the opening anchor tag for products in the loop.
- */
-function woocommerce_template_loop_product_link_open() {
-	echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
-}
-/**
- * Insert the opening anchor tag for products in the loop.
- */
-function woocommerce_template_loop_product_link_close() {
-	echo '</a>';
+
+if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_open() {
+		echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+	}
 }
 
-/**
- * Insert the opening anchor tag for categories in the loop.
- *
- * @param int|object|string $category Category ID, Object or String.
- */
-function woocommerce_template_loop_category_link_open( $category ) {
-	echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+if ( ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_close() {
+		echo '</a>';
+	}
 }
-/**
- * Insert the closing anchor tag for categories in the loop.
- */
-function woocommerce_template_loop_category_link_close() {
-	echo '</a>';
+
+if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
+	/**
+	 * Insert the opening anchor tag for categories in the loop.
+	 *
+	 * @param int|object|string $category Category ID, Object or String.
+	 */
+	function woocommerce_template_loop_category_link_open( $category ) {
+		echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+	}
 }
+
+if ( ! function_exists( 'woocommerce_template_loop_category_link_close' ) ) {
+	/**
+	 * Insert the closing anchor tag for categories in the loop.
+	 */
+	function woocommerce_template_loop_category_link_close() {
+		echo '</a>';
+	}
+}
+
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
