@@ -270,7 +270,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render columm: is_in_stock.
 	 */
 	protected function render_is_in_stock_column() {
-		if ( $this->object->is_in_stock() ) {
+		if ( $this->object->is_on_backorder() ) {
+			$stock_html = '<mark class="onbackorder">' . __( 'On backorder', 'woocommerce' ) . '</mark>';
+		} elseif ( $this->object->is_in_stock() ) {
 			$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 		} else {
 			$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
@@ -298,7 +300,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
-		// Category Filtering.
 		$categories_count = (int) wp_count_terms( 'product_cat' );
 
 		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
@@ -317,7 +318,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			<?php
 		}
 
-		// Product type filtering.
 		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$terms                = get_terms( 'product_type' );
 		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
@@ -368,6 +368,16 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$output .= '</select>';
 
+		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ): false; // WPCS: input var ok, sanitization ok.
+		$stock_statuses       = wc_get_product_stock_status_options();
+		$output              .= '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
+
+		foreach ( $stock_statuses as $status => $label ) {
+			$output .= '<option ' . selected( $status, $current_stock_status, false ) . ' value="' . esc_attr( $status ) . '">' . esc_html( $label ) . '</option>';
+		}
+
+		$output .= '</select>';
+
 		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
 	}
 
@@ -378,6 +388,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
+
 		if ( isset( $query_vars['orderby'] ) ) {
 			if ( 'price' === $vars['orderby'] ) {
 				// @codingStandardsIgnoreStart
@@ -417,6 +428,17 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'field'    => 'id',
 				'terms'    => get_terms( 'product_shipping_class', array( 'fields' => 'ids' ) ),
 				'operator' => 'NOT IN',
+			);
+		}
+
+		if ( ! empty( $_GET['stock_status'] ) ) {
+			if ( ! isset( $query_vars['meta_query'] ) ) {
+				$query_vars['meta_query'] = array();
+			}
+
+			$query_vars['meta_query'][] = array(
+				'key' => '_stock_status',
+				'value' => wc_clean( wp_unslash( $_GET['stock_status'] ) ),
 			);
 		}
 

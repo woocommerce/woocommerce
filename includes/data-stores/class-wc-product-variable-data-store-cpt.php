@@ -125,15 +125,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children                = get_transient( $children_transient_name );
 
 		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
-			$all_args = $visible_only_args = array(
+			$all_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',
-				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
+				'orderby'     => array(
+					'menu_order' => 'ASC',
+					'ID'         => 'ASC',
+				),
 				'fields'      => 'ids',
 				'post_status' => array( 'publish', 'private' ),
 				'numberposts' => -1,
 			);
 
+			$visible_only_args                = $all_args;
 			$visible_only_args['post_status'] = 'publish';
 
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
@@ -380,10 +384,24 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
+		return $this->child_has_stock_status( $product, 'instock' );
+	}
+
+	/**
+	 * Does a child have a stock status?
+	 *
+	 * @since 3.3.0
+	 * @param WC_Product $product Product object.
+	 * @param string $status 'instock', 'outofstock', or 'onbackorder'.
+	 * @return boolean
+	 */
+	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
-		$children            = $product->get_children();
-		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'outofstock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		return count( $children ) > $oufofstock_children;
+
+		$children             = $product->get_children();
+		$children_with_status = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = '" . esc_sql( $status ) . "' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
+
+		return (bool) $children_with_status;
 	}
 
 	/**
@@ -474,7 +492,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	public function sync_stock_status( &$product ) {
-		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		if ( $product->child_is_in_stock() ) {
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->child_is_on_backorder() ) {
+			$product->set_stock_status( 'onbackorder' );
+		} else {
+			$product->set_stock_status( 'outofstock' );
+		}
 	}
 
 	/**
