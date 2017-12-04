@@ -982,6 +982,23 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get all tax classes for shipping based on the items in the cart.
+	 *
+	 * @return array
+	 */
+	public function get_cart_item_tax_classes_for_shipping() {
+		$found_tax_classes = array();
+
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( $item['data'] && ( $item['data']->is_shipping_taxable() ) ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
+		}
+
+		return array_unique( $found_tax_classes );
+	}
+
+	/**
 	 * Determines the value that the customer spent and the subtotal
 	 * displayed, used for things like coupon validation.
 	 *
@@ -1085,7 +1102,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Load cart item data - may be added by other plugins.
-			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
+			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
 			// Generate a ID based on product ID, variation ID, variation data, and other cart item data.
 			$cart_id        = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );

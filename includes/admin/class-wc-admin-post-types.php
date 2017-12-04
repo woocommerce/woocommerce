@@ -13,7 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_Post_Types', false ) ) {
-	return new WC_Admin_Post_Types();
+	new WC_Admin_Post_Types();
+	return;
 }
 
 /**
@@ -27,56 +28,25 @@ class WC_Admin_Post_Types {
 	 * Constructor.
 	 */
 	public function __construct() {
+		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
+
+		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
+			include_once( 'class-wc-admin-duplicate-product.php' );
+		}
+
+		// Load correct list table classes for current screen.
+		add_action( 'current_screen', array( $this, 'setup_screen' ) );
+		add_action( 'check_ajax_referer', array( $this, 'setup_screen' ) );
+
+		// Admin notices.
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
 
 		// Disable Auto Save.
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
-		// Extra post data.
+		// Extra post data and screen elements.
 		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
-
-		// WP List table columns. Defined here so they are always available for events such as inline editing.
-		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
-		add_filter( 'manage_shop_coupon_posts_columns', array( $this, 'shop_coupon_columns' ) );
-		add_filter( 'manage_shop_order_posts_columns', array( $this, 'shop_order_columns' ) );
-
-		add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_columns' ), 2 );
-		add_action( 'manage_shop_coupon_posts_custom_column', array( $this, 'render_shop_coupon_columns' ), 2 );
-		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_shop_order_columns' ), 2 );
-
-		add_filter( 'manage_edit-product_sortable_columns', array( $this, 'product_sortable_columns' ) );
-		add_filter( 'manage_edit-shop_coupon_sortable_columns', array( $this, 'shop_coupon_sortable_columns' ) );
-		add_filter( 'manage_edit-shop_order_sortable_columns', array( $this, 'shop_order_sortable_columns' ) );
-
-		add_filter( 'list_table_primary_column', array( $this, 'list_table_primary_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 100, 2 );
-
-		// Views.
-		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
-		add_filter( 'disable_months_dropdown', array( $this, 'disable_months_dropdown' ), 10, 2 );
-
-		// Bulk / quick edit.
-		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
-		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
-		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
-		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
-		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
-		add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_shop_order_bulk_actions' ), 10, 3 );
-		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
-
-		// Order Search.
-		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
-		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
-		add_action( 'parse_query', array( $this, 'shop_order_search_custom_fields' ) );
-
-		// Filters.
-		add_action( 'restrict_manage_posts', array( $this, 'restrict_manage_posts' ) );
-		add_filter( 'request', array( $this, 'request_query' ) );
-		add_filter( 'parse_query', array( $this, 'product_filters_query' ) );
-		add_filter( 'posts_search', array( $this, 'product_search' ) );
-
-		// Edit post screens.
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
@@ -86,55 +56,57 @@ class WC_Admin_Post_Types {
 		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
 		add_action( 'media_upload_downloadable_product', array( $this, 'media_upload_downloadable_product' ) );
 
-		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
-			include( 'class-wc-admin-duplicate-product.php' );
-		}
-
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
-
-		// Disable DFW feature pointer.
-		add_action( 'admin_footer', array( $this, 'disable_dfw_feature_pointer' ) );
-
-		// Disable post type view mode options.
-		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
-
-		// Update the screen options.
-		add_filter( 'default_hidden_columns', array( $this, 'adjust_shop_order_columns' ), 10, 2 );
-
-		// Show blank state.
-		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
-
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
 		add_action( 'edit_form_top', array( $this, 'show_cpt_archive_notice' ) );
 
 		// Add a post display state for special WC pages.
 		add_filter( 'display_post_states', array( $this, 'add_display_post_states' ), 10, 2 );
+
+		// Bulk / quick edit.
+		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
+		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
+		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 	}
 
 	/**
-	 * Adjust shop order columns for the user on certain conditions.
+	 * Looks at the current screen and loads the correct list table handler.
 	 *
-	 * @param array  $hidden Hidden columns.
-	 * @param object $screen Screen data.
-	 *
-	 * @return array
+	 * @since 3.3.0
 	 */
-	public function adjust_shop_order_columns( $hidden, $screen ) {
-		if ( isset( $screen->id ) && 'edit-shop_order' === $screen->id ) {
-			if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
-				$hidden[] = 'shipping_address';
-			} else {
-				$hidden[] = 'billing_address';
-			}
+	public function setup_screen() {
+		$screen_id = false;
+
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen    = get_current_screen();
+			$screen_id = isset( $screen, $screen->id ) ? $screen->id : '';
 		}
-		return $hidden;
+
+		if ( ! empty( $_REQUEST['screen'] ) ) { // WPCS: input var ok.
+			$screen_id = wc_clean( wp_unslash( $_REQUEST['screen'] ) ); // WPCS: input var ok, sanitization ok.
+		}
+
+		switch ( $screen_id ) {
+			case 'edit-shop_order' :
+				include_once( 'list-tables/class-wc-admin-list-table-orders.php' );
+				new WC_Admin_List_Table_Orders();
+				break;
+			case 'edit-shop_coupon' :
+				include_once( 'list-tables/class-wc-admin-list-table-coupons.php' );
+				new WC_Admin_List_Table_Coupons();
+				break;
+			case 'edit-product' :
+				include_once( 'list-tables/class-wc-admin-list-table-products.php' );
+				new WC_Admin_List_Table_Products();
+				break;
+		}
 	}
 
 	/**
 	 * Change messages when a post type is updated.
 	 *
-	 * @param  array $messages Messages.
+	 * @param  array $messages Array of messages.
 	 * @return array
 	 */
 	public function post_updated_messages( $messages ) {
@@ -142,13 +114,11 @@ class WC_Admin_Post_Types {
 
 		$messages['product'] = array(
 			0 => '', // Unused. Messages start at index 1.
-			/* translators: %s: product URL */
 			1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Product updated.', 'woocommerce' ),
-			/* translators: %s: revision title */
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( absint( $_GET['revision'] ), false ) ) : false, // WPCS: input var okay, CSRF ok.
+			5 => __( 'Revision restored.', 'woocommerce' ),
 			/* translators: %s: product url */
 			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
 			7 => __( 'Product saved.', 'woocommerce' ),
@@ -169,8 +139,7 @@ class WC_Admin_Post_Types {
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Order updated.', 'woocommerce' ),
-			/* translators: %s: revision title */
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( absint( $_GET['revision'] ), false ) ) : false, // WPCS: input var okay, CSRF ok.
+			5 => __( 'Revision restored.', 'woocommerce' ),
 			6 => __( 'Order updated.', 'woocommerce' ),
 			7 => __( 'Order saved.', 'woocommerce' ),
 			8 => __( 'Order submitted.', 'woocommerce' ),
@@ -189,8 +158,7 @@ class WC_Admin_Post_Types {
 			2 => __( 'Custom field updated.', 'woocommerce' ),
 			3 => __( 'Custom field deleted.', 'woocommerce' ),
 			4 => __( 'Coupon updated.', 'woocommerce' ),
-			/* translators: %s: revision title */
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( absint( $_GET['revision'] ), false ) ) : false, // WPCS: input var okay, CSRF ok.
+			5 => __( 'Revision restored.', 'woocommerce' ),
 			6 => __( 'Coupon updated.', 'woocommerce' ),
 			7 => __( 'Coupon saved.', 'woocommerce' ),
 			8 => __( 'Coupon submitted.', 'woocommerce' ),
@@ -208,8 +176,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Specify custom bulk actions messages for different post types.
 	 *
-	 * @param  array $bulk_messages Messages.
-	 * @param  array $bulk_counts   Counts.
+	 * @param  array $bulk_messages Array of messages.
+	 * @param  array $bulk_counts Array of how many objects were updated.
 	 * @return array
 	 */
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
@@ -256,585 +224,10 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for products.
-	 *
-	 * @param  array $existing_columns Existing columns.
-	 * @return array
-	 */
-	public function product_columns( $existing_columns ) {
-		if ( empty( $existing_columns ) && ! is_array( $existing_columns ) ) {
-			$existing_columns = array();
-		}
-
-		unset( $existing_columns['title'], $existing_columns['comments'], $existing_columns['date'] );
-
-		$columns          = array();
-		$columns['cb']    = '<input type="checkbox" />';
-		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
-		$columns['name']  = __( 'Name', 'woocommerce' );
-
-		if ( wc_product_sku_enabled() ) {
-			$columns['sku'] = __( 'SKU', 'woocommerce' );
-		}
-
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
-		}
-
-		$columns['price']        = __( 'Price', 'woocommerce' );
-		$columns['product_cat']  = __( 'Categories', 'woocommerce' );
-		$columns['product_tag']  = __( 'Tags', 'woocommerce' );
-		$columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$columns['product_type'] = '<span class="wc-type parent-tips" data-tip="' . esc_attr__( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
-		$columns['date']         = __( 'Date', 'woocommerce' );
-
-		return array_merge( $columns, $existing_columns );
-
-	}
-
-	/**
-	 * Define custom columns for coupons.
-	 *
-	 * @param  array $existing_columns Existing columns.
-	 * @return array
-	 */
-	public function shop_coupon_columns( $existing_columns ) {
-		$columns                = array();
-		$columns['cb']          = $existing_columns['cb'];
-		$columns['coupon_code'] = __( 'Code', 'woocommerce' );
-		$columns['type']        = __( 'Coupon type', 'woocommerce' );
-		$columns['amount']      = __( 'Coupon amount', 'woocommerce' );
-		$columns['description'] = __( 'Description', 'woocommerce' );
-		$columns['products']    = __( 'Product IDs', 'woocommerce' );
-		$columns['usage']       = __( 'Usage / Limit', 'woocommerce' );
-		$columns['expiry_date'] = __( 'Expiry date', 'woocommerce' );
-
-		return $columns;
-	}
-
-	/**
-	 * Define custom columns for orders.
-	 *
-	 * @param  array $existing_columns Existing columns.
-	 * @return array
-	 */
-	public function shop_order_columns( $existing_columns ) {
-		$columns                     = array();
-		$columns['cb']               = $existing_columns['cb'];
-		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
-		$columns['order_title']      = __( 'Order', 'woocommerce' );
-		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
-		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer message', 'woocommerce' ) . '">' . esc_attr__( 'Customer message', 'woocommerce' ) . '</span>';
-		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order notes', 'woocommerce' ) . '">' . esc_attr__( 'Order notes', 'woocommerce' ) . '</span>';
-		$columns['order_date']       = __( 'Date', 'woocommerce' );
-		$columns['order_total']      = __( 'Total', 'woocommerce' );
-		$columns['order_actions']    = __( 'Actions', 'woocommerce' );
-
-		return $columns;
-	}
-
-	/**
-	 * Output custom columns for products.
-	 *
-	 * @param string $column Current column.
-	 */
-	public function render_product_columns( $column ) {
-		global $post, $the_product;
-
-		if ( empty( $the_product ) || $the_product->get_id() !== $post->ID ) {
-			$the_product = wc_get_product( $post );
-		}
-
-		// Only continue if we have a product.
-		if ( empty( $the_product ) ) {
-			return;
-		}
-
-		switch ( $column ) {
-			case 'thumb':
-				echo '<a href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . $the_product->get_image( 'thumbnail' ) . '</a>'; // WPCS: XSS ok.
-				break;
-			case 'name':
-				echo '<strong><a class="row-title" href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html( _draft_or_post_title() ) . '</a>';
-
-				_post_states( $post );
-
-				echo '</strong>';
-
-				if ( $post->post_parent > 0 ) {
-					echo '&nbsp;&nbsp;&larr; <a href="' . esc_url( get_edit_post_link( $post->post_parent ) ) . '">' . esc_html( get_the_title( $post->post_parent ) ) . '</a>';
-				}
-
-				// Excerpt view.
-				if ( isset( $_GET['mode'] ) && 'excerpt' === sanitize_key( wp_unslash( $_GET['mode'] ) ) ) { // WPCS: input var okay, CSRF ok.
-					echo wp_kses_post( apply_filters( 'the_excerpt', $post->post_excerpt ) );
-				}
-
-				get_inline_data( $post );
-
-				/* Custom inline data for woocommerce. */
-				echo '
-					<div class="hidden" id="woocommerce_inline_' . absint( $post->ID ) . '">
-						<div class="menu_order">' . absint( $the_product->get_menu_order() ) . '</div>
-						<div class="sku">' . esc_html( $the_product->get_sku() ) . '</div>
-						<div class="regular_price">' . esc_html( $the_product->get_regular_price() ) . '</div>
-						<div class="sale_price">' . esc_html( $the_product->get_sale_price() ) . '</div>
-						<div class="weight">' . esc_html( $the_product->get_weight() ) . '</div>
-						<div class="length">' . esc_html( $the_product->get_length() ) . '</div>
-						<div class="width">' . esc_html( $the_product->get_width() ) . '</div>
-						<div class="height">' . esc_html( $the_product->get_height() ) . '</div>
-						<div class="shipping_class">' . esc_html( $the_product->get_shipping_class() ) . '</div>
-						<div class="visibility">' . esc_html( $the_product->get_catalog_visibility() ) . '</div>
-						<div class="stock_status">' . esc_html( $the_product->get_stock_status() ) . '</div>
-						<div class="stock">' . esc_html( $the_product->get_stock_quantity() ) . '</div>
-						<div class="manage_stock">' . esc_html( wc_bool_to_string( $the_product->get_manage_stock() ) ) . '</div>
-						<div class="featured">' . esc_html( wc_bool_to_string( $the_product->get_featured() ) ) . '</div>
-						<div class="product_type">' . esc_html( $the_product->get_type() ) . '</div>
-						<div class="product_is_virtual">' . esc_html( wc_bool_to_string( $the_product->get_virtual() ) ) . '</div>
-						<div class="tax_status">' . esc_html( $the_product->get_tax_status() ) . '</div>
-						<div class="tax_class">' . esc_html( $the_product->get_tax_class() ) . '</div>
-						<div class="backorders">' . esc_html( $the_product->get_backorders() ) . '</div>
-					</div>
-				';
-				break;
-			case 'sku':
-				echo $the_product->get_sku() ? esc_html( $the_product->get_sku() ) : '<span class="na">&ndash;</span>';
-				break;
-			case 'product_type':
-				if ( $the_product->is_type( 'grouped' ) ) {
-					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
-				} elseif ( $the_product->is_type( 'external' ) ) {
-					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-				} elseif ( $the_product->is_type( 'simple' ) ) {
-
-					if ( $the_product->is_virtual() ) {
-						echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
-					} elseif ( $the_product->is_downloadable() ) {
-						echo '<span class="product-type tips downloadable" data-tip="' . esc_attr__( 'Downloadable', 'woocommerce' ) . '"></span>';
-					} else {
-						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
-					}
-				} elseif ( $the_product->is_type( 'variable' ) ) {
-					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
-				} else {
-					// Assuming that we have other types in future.
-					echo '<span class="product-type tips ' . esc_attr( sanitize_html_class( $the_product->get_type() ) ) . '" data-tip="' . esc_attr( ucfirst( $the_product->get_type() ) ) . '"></span>';
-				}
-				break;
-			case 'price':
-				echo $the_product->get_price_html() ? $the_product->get_price_html() : '<span class="na">&ndash;</span>'; // WPCS: XSS ok.
-				break;
-			case 'product_cat':
-			case 'product_tag':
-				$terms = get_the_terms( $post->ID, $column );
-				if ( ! $terms ) {
-					echo '<span class="na">&ndash;</span>';
-				} else {
-					$termlist = array();
-					foreach ( $terms as $term ) {
-						$termlist[] = '<a href="' . esc_url( add_query_arg( array(
-							$column     => $term->slug,
-							'post_type' => 'product',
-						), admin_url( 'edit.php' ) ) ) . '">' . esc_html( $term->name ) . '</a>';
-					}
-					echo implode( ', ', $termlist ); // WPCS: XSS ok.
-				}
-				break;
-			case 'featured':
-				echo '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' ) ) . '" aria-label="' . esc_attr__( 'Toggle featured', 'woocommerce' ) . '">';
-				if ( $the_product->is_featured() ) {
-					echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
-				} else {
-					echo '<span class="wc-featured not-featured tips" data-tip="' . esc_attr__( 'No', 'woocommerce' ) . '">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
-				}
-				echo '</a>';
-				break;
-			case 'is_in_stock':
-				if ( $the_product->is_in_stock() ) {
-					$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
-				} else {
-					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
-				}
-
-				if ( $the_product->managing_stock() ) {
-					$stock_html .= ' (' . wc_stock_amount( $the_product->get_stock_quantity() ) . ')';
-				}
-
-				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product ); // WPCS: XSS ok.
-				break;
-			default:
-				break;
-		}
-	}
-
-	/**
-	 * Output custom columns for coupons.
-	 *
-	 * @param string $column Current column.
-	 */
-	public function render_shop_coupon_columns( $column ) {
-		global $post, $the_coupon;
-
-		if ( empty( $the_coupon ) || $the_coupon->get_id() !== $post->ID ) {
-			$the_coupon = new WC_Coupon( $post->ID );
-		}
-
-		switch ( $column ) {
-			case 'coupon_code':
-				echo '<strong><a class="row-title" href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html( $the_coupon->get_code() ) . '</a>';
-				_post_states( $post );
-				echo '</strong>';
-				break;
-			case 'type':
-				echo esc_html( wc_get_coupon_type( $the_coupon->get_discount_type() ) );
-				break;
-			case 'amount':
-				echo esc_html( wc_format_localized_price( $the_coupon->get_amount() ) );
-				break;
-			case 'products':
-				$product_ids = $the_coupon->get_product_ids();
-
-				if ( 0 < count( $product_ids ) ) {
-					echo esc_html( implode( ', ', $product_ids ) );
-				} else {
-					echo '&ndash;';
-				}
-				break;
-			case 'usage_limit':
-				$usage_limit = $the_coupon->get_usage_limit();
-
-				if ( $usage_limit ) {
-					echo esc_html( $usage_limit );
-				} else {
-					echo '&ndash;';
-				}
-				break;
-			case 'usage':
-				$usage_limit = $the_coupon->get_usage_limit();
-
-				echo esc_html( sprintf(
-					/* translators: 1: count 2: limit */
-					__( '%1$s / %2$s', 'woocommerce' ),
-					$the_coupon->get_usage_count(),
-					$usage_limit ? $usage_limit : '&infin;'
-				) );
-				break;
-			case 'expiry_date':
-				$expiry_date = $the_coupon->get_date_expires();
-
-				if ( $expiry_date ) {
-					echo esc_html( $expiry_date->date_i18n( 'F j, Y' ) );
-				} else {
-					echo '&ndash;';
-				}
-				break;
-			case 'description':
-				echo wp_kses_post( $the_coupon->get_description() ? $the_coupon->get_description() : '&ndash;' );
-				break;
-		}
-	}
-
-	/**
-	 * Output custom columns for coupons.
-	 *
-	 * @param string $column Current column.
-	 */
-	public function render_shop_order_columns( $column ) {
-		global $post, $the_order;
-
-		if ( empty( $the_order ) || $the_order->get_id() !== $post->ID ) {
-			$the_order = wc_get_order( $post->ID );
-		}
-
-		switch ( $column ) {
-			case 'order_status':
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', esc_attr( sanitize_html_class( $the_order->get_status() ) ), esc_attr( wc_get_order_status_name( $the_order->get_status() ) ), esc_html( wc_get_order_status_name( $the_order->get_status() ) ) );
-				break;
-			case 'order_date':
-				printf(
-					'<time datetime="%1$s" title="%2$s">%3$s</time>',
-					esc_attr( $the_order->get_date_created()->date( 'c' ) ),
-					esc_html( $the_order->get_date_created()->date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ),
-					esc_html( $the_order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) ) )
-				);
-				break;
-			case 'customer_message':
-				if ( $the_order->get_customer_note() ) {
-					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
-				} else {
-					echo '<span class="na">&ndash;</span>';
-				}
-
-				break;
-			case 'billing_address':
-				$address = $the_order->get_formatted_billing_address();
-				if ( $address ) {
-					echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
-				} else {
-					echo '&ndash;';
-				}
-
-				if ( $the_order->get_billing_phone() ) {
-					echo '<small class="meta">' . esc_html__( 'Phone:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
-				}
-
-				break;
-			case 'shipping_address':
-				$address = $the_order->get_formatted_shipping_address();
-				if ( $address ) {
-					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
-				} else {
-					echo '&ndash;';
-				}
-
-				if ( $the_order->get_shipping_method() ) {
-					echo '<small class="meta">' . esc_html__( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
-				}
-				break;
-			case 'order_notes':
-				if ( $post->comment_count ) {
-					$latest_notes = wc_get_order_notes( array(
-						'order_id' => $post->ID,
-						'limit'    => 1,
-						'orderby'  => 'date_created_gmt',
-					) );
-
-					$latest_note = current( $latest_notes );
-
-					if ( isset( $latest_note->content ) && 1 === intval( $post->comment_count ) ) {
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
-					} elseif ( isset( $latest_note->content ) ) {
-						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
-					} else {
-						/* translators: %d: notes count */
-						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
-					}
-				} else {
-					echo '<span class="na">&ndash;</span>';
-				}
-				break;
-			case 'order_total':
-				echo $the_order->get_formatted_order_total(); // WPCS: XSS ok.
-
-				if ( $the_order->get_payment_method_title() ) {
-					echo '<small class="meta">' . esc_html__( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_payment_method_title() ) . '</small>';
-				}
-				break;
-			case 'order_title':
-				if ( $the_order->get_customer_id() ) {
-					$user     = get_user_by( 'id', $the_order->get_customer_id() );
-					$username = '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . absint( $the_order->get_customer_id() ) ) ) . '">';
-					$username .= ucwords( $user->display_name );
-					$username .= '</a>';
-				} elseif ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
-					/* translators: 1: first name 2: last name */
-					$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
-				} elseif ( $the_order->get_billing_company() ) {
-					$username = trim( $the_order->get_billing_company() );
-				} else {
-					$username = __( 'Guest', 'woocommerce' );
-				}
-
-				echo sprintf(
-					/* translators: 1: order and number (i.e. Order #13) 2: user name */
-					esc_html__( '%1$s by %2$s', 'woocommerce' ),
-					'<a href="' . esc_url( add_query_arg( array(
-						'post'   => absint( $post->ID ),
-						'action' => 'edit',
-					), admin_url( 'post.php' ) ) ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>',
-					wp_kses_post( $username )
-				);
-
-				if ( $the_order->get_billing_email() ) {
-					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->get_billing_email() ) . '">' . esc_html( $the_order->get_billing_email() ) . '</a></small>';
-				}
-
-				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'woocommerce' ) . '</span></button>';
-				break;
-			case 'order_actions':
-				echo '<p>';
-				do_action( 'woocommerce_admin_order_actions_start', $the_order );
-
-				$actions = array();
-
-				if ( $the_order->has_status( array( 'pending', 'on-hold' ) ) ) {
-					$actions['processing'] = array(
-						'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-						'name'      => __( 'Processing', 'woocommerce' ),
-						'action'    => 'processing',
-					);
-				}
-
-				if ( $the_order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
-					$actions['complete'] = array(
-						'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
-						'name'      => __( 'Complete', 'woocommerce' ),
-						'action'    => 'complete',
-					);
-				}
-
-				$actions['view'] = array(
-					'url'       => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-					'name'      => __( 'View', 'woocommerce' ),
-					'action'    => 'view',
-				);
-
-				$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
-
-				foreach ( $actions as $action ) {
-					printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
-				}
-
-				do_action( 'woocommerce_admin_order_actions_end', $the_order );
-				echo '</p>';
-				break;
-		}
-	}
-
-	/**
-	 * Make columns sortable - https://gist.github.com/906872.
-	 *
-	 * @param  array $columns Columns.
-	 * @return array
-	 */
-	public function product_sortable_columns( $columns ) {
-		$custom = array(
-			'price'    => 'price',
-			'sku'      => 'sku',
-			'name'     => 'title',
-		);
-		return wp_parse_args( $custom, $columns );
-	}
-
-	/**
-	 * Make columns sortable - https://gist.github.com/906872.
-	 *
-	 * @param  array $columns Columns.
-	 * @return array
-	 */
-	public function shop_coupon_sortable_columns( $columns ) {
-		return $columns;
-	}
-
-	/**
-	 * Make columns sortable - https://gist.github.com/906872.
-	 *
-	 * @param  array $columns Columns.
-	 * @return array
-	 */
-	public function shop_order_sortable_columns( $columns ) {
-		$custom = array(
-			'order_title' => 'ID',
-			'order_total' => 'order_total',
-			'order_date'  => 'date',
-		);
-		unset( $columns['comments'] );
-
-		return wp_parse_args( $custom, $columns );
-	}
-
-	/**
-	 * Set list table primary column for products and orders.
-	 * Support for WordPress 4.3.
-	 *
-	 * @param  string $default   Default value.
-	 * @param  string $screen_id Screen ID.
-	 *
-	 * @return string
-	 */
-	public function list_table_primary_column( $default, $screen_id ) {
-		if ( 'edit-product' === $screen_id ) {
-			return 'name';
-		}
-
-		if ( 'edit-shop_order' === $screen_id ) {
-			return 'order_title';
-		}
-
-		if ( 'edit-shop_coupon' === $screen_id ) {
-			return 'coupon_code';
-		}
-
-		return $default;
-	}
-
-	/**
-	 * Set row actions for products and orders.
-	 *
-	 * @param  array   $actions Row actions list.
-	 * @param  WP_Post $post    Post instance.
-	 *
-	 * @return array
-	 */
-	public function row_actions( $actions, $post ) {
-		if ( 'product' === $post->post_type ) {
-			return array_merge( array(
-				'id' => 'ID: ' . $post->ID,
-			), $actions );
-		}
-
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ), true ) ) {
-			if ( isset( $actions['inline hide-if-no-js'] ) ) {
-				unset( $actions['inline hide-if-no-js'] );
-			}
-		}
-
-		return $actions;
-	}
-
-	/**
-	 * Change views on the edit product screen.
-	 *
-	 * @param  array $views Default views.
-	 * @return array
-	 */
-	public function product_views( $views ) {
-		global $wp_query;
-
-		// Products do not have authors.
-		unset( $views['mine'] );
-
-		// Add sorting link.
-		if ( current_user_can( 'edit_others_pages' ) ) {
-			$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
-			$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
-			$query_string     = add_query_arg( 'orderby', rawurlencode( 'menu_order title' ), $query_string );
-			$query_string     = add_query_arg( 'order', rawurlencode( 'ASC' ), $query_string );
-			$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sorting', 'woocommerce' ) . '</a>';
-		}
-
-		return $views;
-	}
-
-	/**
-	 * Product sorting link.
-	 *
-	 * @deprecated 3.1
-	 * @param  array $views Default views.
-	 * @return array
-	 */
-	public function product_sorting_link( $views ) {
-		return $this->product_views( $views );
-	}
-
-	/**
-	 * Disable months dropdown on product screen.
-	 *
-	 * @param bool   $bool      Disable or enable dropdown.
-	 * @param string $post_type Post type.
-	 * @return bool
-	 */
-	public function disable_months_dropdown( $bool, $post_type ) {
-		return 'product' === $post_type ? true : $bool;
-	}
-
-	/**
 	 * Custom bulk edit - form.
 	 *
-	 * @param string $column_name Column name.
-	 * @param string $post_type   Post type.
+	 * @param string $column_name Column being shown.
+	 * @param string $post_type Post type being shown.
 	 */
 	public function bulk_edit( $column_name, $post_type ) {
 		if ( 'price' !== $column_name || 'product' !== $post_type ) {
@@ -851,11 +244,10 @@ class WC_Admin_Post_Types {
 	/**
 	 * Custom quick edit - form.
 	 *
-	 * @param string $column_name Column name.
-	 * @param string $post_type   Post type.
+	 * @param string $column_name Column being shown.
+	 * @param string $post_type Post type being shown.
 	 */
 	public function quick_edit( $column_name, $post_type ) {
-
 		if ( 'price' !== $column_name || 'product' !== $post_type ) {
 			return;
 		}
@@ -872,8 +264,8 @@ class WC_Admin_Post_Types {
 	 * when quick/bulk saving product info.
 	 *
 	 * @since 3.0.0
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post instance.
+	 * @param int    $post_id Post ID being saved.
+	 * @param object $post Post object being saved.
 	 */
 	public function bulk_and_quick_edit_hook( $post_id, $post ) {
 		remove_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ) );
@@ -884,8 +276,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick and bulk edit saving.
 	 *
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post instance.
+	 * @param int    $post_id Post ID being saved.
+	 * @param object $post Post object being saved.
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
@@ -895,28 +287,12 @@ class WC_Admin_Post_Types {
 		}
 
 		// Don't save revisions and autosaves.
-		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || 'product' !== $post->post_type || ! current_user_can( 'edit_post', $post_id ) ) {
 			return $post_id;
 		}
 
-		// Check post type is product.
-		if ( 'product' !== $post->post_type ) {
-			return $post_id;
-		}
-
-		// Check user permission.
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
-		}
-
-		// Check nonces.
-		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) ) { // WPCS: input var ok, CSRF ok.
-			return $post_id;
-		}
-		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['woocommerce_quick_edit_nonce'] ) ), 'woocommerce_quick_edit_nonce' ) ) { // WPCS: input var ok.
-			return $post_id;
-		}
-		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['woocommerce_bulk_edit_nonce'] ) ), 'woocommerce_bulk_edit_nonce' ) ) { // WPCS: input var ok.
+		// Check nonce.
+		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) || ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) { // WPCS: input var ok, sanitization ok.
 			return $post_id;
 		}
 
@@ -935,19 +311,32 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick edit.
 	 *
-	 * @param int        $post_id Post ID.
-	 * @param WC_Product $product Product instance.
+	 * @param int        $post_id Post ID being saved.
+	 * @param WC_Product $product Product object.
 	 */
 	private function quick_edit_save( $post_id, $product ) {
 		$data_store        = $product->get_data_store();
 		$old_regular_price = $product->get_regular_price();
 		$old_sale_price    = $product->get_sale_price();
-		$data              = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
+		$input_to_props    = array(
+			'_weight'     => 'weight',
+			'_length'     => 'length',
+			'_width'      => 'width',
+			'_height'     => 'height',
+			'_visibility' => 'catalog_visibility',
+			'_tax_class'  => 'tax_class',
+			'_tax_status' => 'tax_status',
+		);
 
-		// Save fields.
-		if ( isset( $data['_sku'] ) ) {
+		foreach ( $input_to_props as $input_var => $prop ) {
+			if ( isset( $_REQUEST[ $input_var ] ) ) { // WPCS: input var ok, sanitization ok.
+				$product->{"set_{$prop}"}( wc_clean( wp_unslash( $_REQUEST[ $input_var ] ) ) ); // WPCS: input var ok, sanitization ok.
+			}
+		}
+
+		if ( isset( $_REQUEST['_sku'] ) ) { // WPCS: input var ok, sanitization ok.
 			$sku     = $product->get_sku();
-			$new_sku = (string) wc_clean( $data['_sku'] );
+			$new_sku = (string) wc_clean( $_REQUEST['_sku'] ); // WPCS: input var ok, sanitization ok.
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
@@ -961,58 +350,27 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		if ( isset( $data['_weight'] ) ) {
-			$product->set_weight( wc_clean( $data['_weight'] ) );
-		}
-
-		if ( isset( $data['_length'] ) ) {
-			$product->set_length( wc_clean( $data['_length'] ) );
-		}
-
-		if ( isset( $data['_width'] ) ) {
-			$product->set_width( wc_clean( $data['_width'] ) );
-		}
-
-		if ( isset( $data['_height'] ) ) {
-			$product->set_height( wc_clean( $data['_height'] ) );
-		}
-
-		if ( ! empty( $data['_shipping_class'] ) ) {
-			if ( '_no_shipping_class' === $data['_shipping_class'] ) {
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) { // WPCS: input var ok, sanitization ok.
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) { // WPCS: input var ok, sanitization ok.
 				$product->set_shipping_class_id( 0 );
 			} else {
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['_shipping_class'] ) );
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) ); // WPCS: input var ok, sanitization ok.
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 
-		if ( isset( $data['_visibility'] ) ) {
-			$product->set_catalog_visibility( wc_clean( $data['_visibility'] ) );
-		}
-
-		if ( isset( $data['_featured'] ) ) {
-			$product->set_featured( true );
-		} else {
-			$product->set_featured( false );
-		}
-
-		if ( isset( $data['_tax_status'] ) ) {
-			$product->set_tax_status( wc_clean( $data['_tax_status'] ) );
-		}
-
-		if ( isset( $data['_tax_class'] ) ) {
-			$product->set_tax_class( wc_clean( $data['_tax_class'] ) );
-		}
+		$product->set_featured( isset( $_REQUEST['_featured'] ) ); // WPCS: input var ok, sanitization ok.
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
-			if ( isset( $data['_regular_price'] ) ) {
-				$new_regular_price = ( '' === $data['_regular_price'] ) ? '' : wc_format_decimal( $data['_regular_price'] );
+
+			if ( isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
+				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] ); // WPCS: input var ok, sanitization ok.
 				$product->set_regular_price( $new_regular_price );
 			} else {
 				$new_regular_price = null;
 			}
-			if ( isset( $data['_sale_price'] ) ) {
-				$new_sale_price = ( '' === $data['_sale_price'] ) ? '' : wc_format_decimal( $data['_sale_price'] );
+			if ( isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
+				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] ); // WPCS: input var ok, sanitization ok.
 				$product->set_sale_price( $new_sale_price );
 			} else {
 				$new_sale_price = null;
@@ -1034,10 +392,10 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle Stock Data.
-		$manage_stock = ! empty( $data['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
-		$backorders   = ! empty( $data['_backorders'] ) ? wc_clean( $data['_backorders'] ) : 'no';
-		$stock_status = ! empty( $data['_stock_status'] ) ? wc_clean( $data['_stock_status'] ) : 'instock';
-		$stock_amount = 'yes' === $manage_stock && isset( $data['_stock'] ) ? wc_stock_amount( $data['_stock'] ) : '';
+		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no'; // WPCS: input var ok, sanitization ok.
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no'; // WPCS: input var ok, sanitization ok.
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock'; // WPCS: input var ok, sanitization ok.
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : ''; // WPCS: input var ok, sanitization ok.
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
@@ -1072,8 +430,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Bulk edit.
 	 *
-	 * @param int        $post_id Post ID.
-	 * @param WC_Product $product Product instance.
+	 * @param int        $post_id Post ID being saved.
+	 * @param WC_Product $product Product object.
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
 		$data_store        = $product->get_data_store();
@@ -1081,55 +439,53 @@ class WC_Admin_Post_Types {
 		$old_sale_price    = $product->get_sale_price();
 		$data              = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
 
-		// Save fields.
-		if ( ! empty( $data['change_weight'] ) && isset( $data['_weight'] ) ) {
-			$product->set_weight( wc_clean( $data['_weight'] ) );
+		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) { // WPCS: input var ok, sanitization ok.
+			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		if ( ! empty( $data['change_dimensions'] ) ) {
-			if ( isset( $data['_length'] ) ) {
-				$product->set_length( wc_clean( $data['_length'] ) );
+		if ( ! empty( $_REQUEST['change_dimensions'] ) ) { // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST['_length'] ) ) { // WPCS: input var ok, sanitization ok.
+				$product->set_length( wc_clean( wp_unslash( $_REQUEST['_length'] ) ) ); // WPCS: input var ok, sanitization ok.
 			}
-			if ( isset( $data['_width'] ) ) {
-				$product->set_width( wc_clean( $data['_width'] ) );
+			if ( isset( $_REQUEST['_width'] ) ) { // WPCS: input var ok, sanitization ok.
+				$product->set_width( wc_clean( wp_unslash( $_REQUEST['_width'] ) ) ); // WPCS: input var ok, sanitization ok.
 			}
-			if ( isset( $data['_height'] ) ) {
-				$product->set_height( wc_clean( $data['_height'] ) );
+			if ( isset( $_REQUEST['_height'] ) ) { // WPCS: input var ok, sanitization ok.
+				$product->set_height( wc_clean( wp_unslash( $_REQUEST['_height'] ) ) ); // WPCS: input var ok, sanitization ok.
 			}
 		}
 
-		if ( ! empty( $data['_tax_status'] ) ) {
-			$product->set_tax_status( wc_clean( $data['_tax_status'] ) );
+		if ( ! empty( $_REQUEST['_tax_status'] ) ) { // WPCS: input var ok, sanitization ok.
+			$product->set_tax_status( wc_clean( $_REQUEST['_tax_status'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		if ( ! empty( $data['_tax_class'] ) ) {
-			$tax_class = wc_clean( $data['_tax_class'] );
+		if ( ! empty( $_REQUEST['_tax_class'] ) ) { // WPCS: input var ok, sanitization ok.
+			$tax_class = wc_clean( wp_unslash( $_REQUEST['_tax_class'] ) ); // WPCS: input var ok, sanitization ok.
 			if ( 'standard' === $tax_class ) {
 				$tax_class = '';
 			}
 			$product->set_tax_class( $tax_class );
 		}
 
-		if ( ! empty( $data['_shipping_class'] ) ) {
-			if ( '_no_shipping_class' === $data['_shipping_class'] ) {
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) { // WPCS: input var ok, sanitization ok.
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) { // WPCS: input var ok, sanitization ok.
 				$product->set_shipping_class_id( 0 );
 			} else {
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['_shipping_class'] ) );
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) ); // WPCS: input var ok, sanitization ok.
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 
-		if ( ! empty( $data['_visibility'] ) ) {
-			$product->set_catalog_visibility( wc_clean( $data['_visibility'] ) );
+		if ( ! empty( $_REQUEST['_visibility'] ) ) { // WPCS: input var ok, sanitization ok.
+			$product->set_catalog_visibility( wc_clean( $_REQUEST['_visibility'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		if ( ! empty( $data['_featured'] ) ) {
-			$product->set_featured( wc_clean( $data['_featured'] ) );
+		if ( ! empty( $_REQUEST['_featured'] ) ) { // WPCS: input var ok, sanitization ok.
+			$product->set_featured( wp_unslash( $_REQUEST['_featured'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		// Sold Individually.
-		if ( ! empty( $data['_sold_individually'] ) ) {
-			if ( 'yes' === $data['_sold_individually'] ) {
+		if ( ! empty( $_REQUEST['_sold_individually'] ) ) { // WPCS: input var ok, sanitization ok.
+			if ( 'yes' === $_REQUEST['_sold_individually'] ) { // WPCS: input var ok, sanitization ok.
 				$product->set_sold_individually( 'yes' );
 			} else {
 				$product->set_sold_individually( '' );
@@ -1148,9 +504,10 @@ class WC_Admin_Post_Types {
 
 		if ( $can_product_type_change_price ) {
 			$price_changed = false;
-			if ( ! empty( $data['change_regular_price'] ) && isset( $data['_regular_price'] ) ) {
-				$change_regular_price = absint( $data['change_regular_price'] );
-				$regular_price = wc_clean( $data['_regular_price'] );
+
+			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
+				$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
+				$regular_price        = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_regular_price ) {
 					case 1:
@@ -1184,9 +541,9 @@ class WC_Admin_Post_Types {
 				}
 			}
 
-			if ( ! empty( $data['change_sale_price'] ) && isset( $data['_sale_price'] ) ) {
-				$change_sale_price = absint( $data['change_sale_price'] );
-				$sale_price        = wc_clean( $data['_sale_price'] );
+			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
+				$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
+				$sale_price        = esc_attr( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_sale_price ) {
 					case 1:
@@ -1242,16 +599,16 @@ class WC_Admin_Post_Types {
 		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
 		$stock_status       = $product->get_stock_status();
 		$backorders         = $product->get_backorders();
-		$backorders         = ! empty( $data['_backorders'] ) ? wc_clean( $data['_backorders'] ) : $backorders;
-		$stock_status       = ! empty( $data['_stock_status'] ) ? wc_clean( $data['_stock_status'] ) : $stock_status;
+		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders; // WPCS: input var ok, sanitization ok.
+		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status; // WPCS: input var ok, sanitization ok.
 
-		if ( ! empty( $data['_manage_stock'] ) ) {
-			$manage_stock = 'yes' === $data['_manage_stock'] && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+		if ( ! empty( $_REQUEST['_manage_stock'] ) ) { // WPCS: input var ok, sanitization ok.
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no'; // WPCS: input var ok, sanitization ok.
 		} else {
 			$manage_stock = $was_managing_stock;
 		}
 
-		$stock_amount = 'yes' === $manage_stock && ! empty( $data['change_stock'] ) && isset( $data['_stock'] ) ? wc_stock_amount( $data['_stock'] ) : $product->get_stock_quantity();
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) && isset( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity(); // WPCS: input var ok, sanitization ok.
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
@@ -1284,450 +641,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Manipulate shop order bulk actions.
-	 *
-	 * @param  array $actions List of actions.
-	 * @return array
-	 */
-	public function shop_order_bulk_actions( $actions ) {
-		if ( isset( $actions['edit'] ) ) {
-			unset( $actions['edit'] );
-		}
-
-		$actions['mark_processing'] = __( 'Mark processing', 'woocommerce' );
-		$actions['mark_on-hold']    = __( 'Mark on-hold', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Mark complete', 'woocommerce' );
-
-		return $actions;
-	}
-
-	/**
-	 * Handle shop order bulk actions.
-	 *
-	 * @since  3.0.0
-	 * @param  string $redirect_to URL to redirect to.
-	 * @param  string $action      Action name.
-	 * @param  array  $ids         List of ids.
-	 * @return string
-	 */
-	public function handle_shop_order_bulk_actions( $redirect_to, $action, $ids ) {
-		// Bail out if this is not a status-changing action.
-		if ( false === strpos( $action, 'mark_' ) ) {
-			return $redirect_to;
-		}
-
-		$order_statuses = wc_get_order_statuses();
-		$new_status     = substr( $action, 5 ); // Get the status name from action.
-		$report_action  = 'marked_' . $new_status;
-
-		// Sanity check: bail out if this is actually not a status, or is
-		// not a registered status.
-		if ( ! isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
-			return $redirect_to;
-		}
-
-		$changed = 0;
-		$ids = array_map( 'absint', $ids );
-
-		foreach ( $ids as $id ) {
-			$order = wc_get_order( $id );
-			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
-			do_action( 'woocommerce_order_edit_status', $id, $new_status );
-			$changed++;
-		}
-
-		$redirect_to = add_query_arg( array(
-			'post_type'    => 'shop_order',
-			$report_action => true,
-			'changed'      => $changed,
-			'ids'          => join( ',', $ids ),
-		), $redirect_to );
-
-		return esc_url_raw( $redirect_to );
-	}
-
-	/**
-	 * Show confirmation message that order status changed for number of orders.
-	 */
-	public function bulk_admin_notices() {
-		global $post_type, $pagenow;
-
-		// Bail out if not on shop order list page.
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type ) {
-			return;
-		}
-
-		$order_statuses = wc_get_order_statuses();
-
-		// Check if any status changes happened.
-		foreach ( $order_statuses as $slug => $name ) {
-			if ( isset( $_REQUEST[ 'marked_' . str_replace( 'wc-', '', $slug ) ] ) ) { // WPCS: input var ok, CSRF ok.
-
-				$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // WPCS: input var ok, CSRF ok.
-				/* translators: %s: orders count */
-				echo '<div class="updated"><p>' . esc_html( sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) ) ) . '</p></div>';
-
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Search custom fields as well as content.
-	 *
-	 * @param WP_Query $wp WP_Query data.
-	 */
-	public function shop_order_search_custom_fields( $wp ) {
-		global $pagenow;
-
-		if ( 'edit.php' !== $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] ) {
-			return;
-		}
-
-		$post_ids = wc_order_search( $wp->query_vars['s'] );
-
-		if ( ! empty( $post_ids ) ) {
-			// Remove "s" - we don't want to search order name.
-			unset( $wp->query_vars['s'] );
-
-			// so we know we're doing this.
-			$wp->query_vars['shop_order_search'] = true;
-
-			// Search by found posts.
-			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
-		}
-	}
-
-	/**
-	 * Change the label when searching orders.
-	 *
-	 * @param string $query Search query.
-	 * @return string
-	 */
-	public function shop_order_search_label( $query ) {
-		global $pagenow, $typenow;
-
-		if ( 'edit.php' !== $pagenow ) {
-			return $query;
-		}
-
-		if ( 'shop_order' !== $typenow ) {
-			return $query;
-		}
-
-		if ( ! get_query_var( 'shop_order_search' ) ) {
-			return $query;
-		}
-
-		return isset( $_GET['s'] ) ? wc_clean( wp_unslash( $_GET['s'] ) ) : ''; // WPCS: input var ok, CSRF ok.
-	}
-
-	/**
-	 * Query vars for custom searches.
-	 *
-	 * @param array $public_query_vars Public query vars.
-	 * @return array
-	 */
-	public function add_custom_query_var( $public_query_vars ) {
-		$public_query_vars[] = 'sku';
-		$public_query_vars[] = 'shop_order_search';
-
-		return $public_query_vars;
-	}
-
-	/**
-	 * Filters for post types.
-	 */
-	public function restrict_manage_posts() {
-		global $typenow;
-
-		if ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
-			$this->shop_order_filters();
-		} elseif ( 'product' === $typenow ) {
-			$this->product_filters();
-		} elseif ( 'shop_coupon' === $typenow ) {
-			$this->shop_coupon_filters();
-		}
-	}
-
-	/**
-	 * Show a category filter box.
-	 */
-	public function product_filters() {
-		global $wp_query;
-
-		// Category Filtering.
-		$categories_count = (int) wp_count_terms( 'product_cat' );
-		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
-			wc_product_dropdown_categories( array(
-				'option_select_text' => __( 'Filter by category', 'woocommerce' ),
-			) );
-		} else {
-
-			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
-			$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
-			?>
-			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
-				<?php if ( $current_category_slug && $current_category ) : ?>
-					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
-				<?php endif; ?>
-			</select>
-			<?php
-		}
-
-		// Type filtering.
-		$terms   = get_terms( 'product_type' );
-		$output  = '<select name="product_type" id="dropdown_product_type">';
-		$output .= '<option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
-
-		foreach ( $terms as $term ) {
-			$output .= '<option value="' . sanitize_title( $term->name ) . '" ';
-
-			if ( isset( $wp_query->query['product_type'] ) ) {
-				$output .= selected( $term->slug, $wp_query->query['product_type'], false );
-			}
-
-			$output .= '>';
-
-			switch ( $term->name ) {
-				case 'grouped':
-					$output .= esc_html__( 'Grouped product', 'woocommerce' );
-					break;
-				case 'external':
-					$output .= esc_html__( 'External/Affiliate product', 'woocommerce' );
-					break;
-				case 'variable':
-					$output .= esc_html__( 'Variable product', 'woocommerce' );
-					break;
-				case 'simple':
-					$output .= esc_html__( 'Simple product', 'woocommerce' );
-					break;
-				default:
-					// Assuming that we have other types in future.
-					$output .= esc_html( ucfirst( $term->name ) );
-					break;
-			}
-
-			$output .= '</option>';
-
-			if ( 'simple' === $term->name ) {
-				$output .= '<option value="downloadable" ';
-
-				if ( isset( $wp_query->query['product_type'] ) ) {
-					$output .= selected( 'downloadable', $wp_query->query['product_type'], false );
-				}
-
-				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Downloadable', 'woocommerce' ) . '</option>';
-
-				$output .= '<option value="virtual" ';
-
-				if ( isset( $wp_query->query['product_type'] ) ) {
-					$output .= selected( 'virtual', $wp_query->query['product_type'], false );
-				}
-
-				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Virtual', 'woocommerce' ) . '</option>';
-			}
-		}
-
-		$output .= '</select>';
-
-		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
-	}
-
-	/**
-	 * Show custom filters to filter coupons by type.
-	 */
-	public function shop_coupon_filters() {
-		$coupon_type = '';
-
-		if ( isset( $_GET['coupon_type'] ) ) { // WPCS: input var ok, CSRF ok.
-			$coupon_type = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // WPCS: input var ok, CSRF ok.
-		}
-
-		$types = wc_get_coupon_types();
-
-		echo '<select name="coupon_type" id="dropdown_shop_coupon_type">';
-		echo '<option value="">' . esc_html__( 'Show all types', 'woocommerce' ) . '</option>';
-		foreach ( $types as $name => $type ) {
-			echo '<option value="' . esc_attr( $name ) . '"' . selected( $name, $coupon_type, false ) . '>' . esc_html( $type ) . '</option>';
-		}
-		echo '</select>';
-	}
-
-	/**
-	 * Show custom filters to filter orders by status/customer.
-	 */
-	public function shop_order_filters() {
-		$user_string = '';
-		$user_id     = '';
-		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok, CSRF ok.
-			$user_id     = absint( $_GET['_customer_user'] ); // WPCS: input var ok, CSRF ok.
-			$user        = get_user_by( 'id', $user_id );
-			$user_string = sprintf(
-				/* translators: 1: user display name 2: user ID 3: user email */
-				__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-				$user->display_name,
-				absint( $user->ID ),
-				$user->user_email
-			);
-		}
-		?>
-		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
-			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( $user_string ) ); ?><option>
-		</select>
-		<?php
-	}
-
-	/**
-	 * Filters and sorting handler.
-	 *
-	 * @param  array $vars Request vars.
-	 * @return array
-	 */
-	public function request_query( $vars ) {
-		global $typenow, $wp_query, $wp_post_statuses;
-
-		if ( 'product' === $typenow ) {
-			// Sorting.
-			if ( isset( $vars['orderby'] ) ) {
-				if ( 'price' === $vars['orderby'] ) {
-					$vars = array_merge( $vars, array(
-						'meta_key'  => '_price', // WPCS: slow query ok.
-						'orderby'   => 'meta_value_num',
-					) );
-				}
-				if ( 'sku' === $vars['orderby'] ) {
-					$vars = array_merge( $vars, array(
-						'meta_key'  => '_sku', // WPCS: slow query ok.
-						'orderby'   => 'meta_value',
-					) );
-				}
-			}
-		} elseif ( 'shop_coupon' === $typenow ) {
-
-			if ( ! empty( $_GET['coupon_type'] ) ) { // WPCS: input var ok, CSRF ok.
-				$vars['meta_key']   = 'discount_type'; // WPCS: slow query ok.
-				$vars['meta_value'] = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // WPCS: input var ok, CSRF ok, slow query ok.
-			}
-		} elseif ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
-
-			// Filter the orders by the posted customer.
-			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) { // WPCS: input var ok, CSRF ok.
-				$vars['meta_query'] = array( // WPCS: slow query ok.
-					array(
-						'key'   => '_customer_user',
-						'value' => (int) $_GET['_customer_user'], // WPCS: input var ok, CSRF ok.
-						'compare' => '=',
-					),
-				);
-			}
-
-			// .
-			if ( isset( $vars['orderby'] ) ) {
-				if ( 'order_total' === $vars['orderby'] ) {
-					$vars = array_merge( $vars, array(
-						'meta_key'  => '_order_total', // WPCS: slow query ok.
-						'orderby'   => 'meta_value_num',
-					) );
-				}
-			}
-
-			// Status.
-			if ( ! isset( $vars['post_status'] ) ) {
-				$post_statuses = wc_get_order_statuses();
-
-				foreach ( $post_statuses as $status => $value ) {
-					if ( isset( $wp_post_statuses[ $status ] ) && false === $wp_post_statuses[ $status ]->show_in_admin_all_list ) {
-						unset( $post_statuses[ $status ] );
-					}
-				}
-
-				$vars['post_status'] = array_keys( $post_statuses );
-			}
-		}
-
-		return $vars;
-	}
-
-	/**
-	 * Filter the products in admin based on options.
-	 *
-	 * @param WP_Query $query The WP_Query instance.
-	 */
-	public function product_filters_query( $query ) {
-		global $typenow, $wp_query;
-
-		if ( 'product' === $typenow ) {
-
-			if ( isset( $query->query_vars['product_type'] ) ) {
-				// Subtypes.
-				if ( 'downloadable' === $query->query_vars['product_type'] ) {
-					$query->query_vars['product_type']  = '';
-					$query->is_tax = false;
-					$query->query_vars['meta_value']    = 'yes'; // WPCS: slow query ok.
-					$query->query_vars['meta_key']      = '_downloadable'; // WPCS: slow query ok.
-				} elseif ( 'virtual' === $query->query_vars['product_type'] ) {
-					$query->query_vars['product_type']  = '';
-					$query->is_tax = false;
-					$query->query_vars['meta_value']    = 'yes'; // WPCS: slow query ok.
-					$query->query_vars['meta_key']      = '_virtual'; // WPCS: slow query ok.
-				}
-			}
-
-			// Shipping classes.
-			if ( isset( $_GET['product_shipping_class'] ) && '0' === $_GET['product_shipping_class'] ) { // WPCS: input var okay, CSRF ok.
-				$query->query_vars['tax_query'][] = array(
-					'taxonomy' => 'product_shipping_class',
-					'field'    => 'id',
-					'terms'    => get_terms( 'product_shipping_class', array(
-						'fields' => 'ids',
-					) ),
-					'operator' => 'NOT IN',
-				);
-			}
-		}
-	}
-
-	/**
-	 * Search by SKU or ID for products.
-	 *
-	 * @param string $where Where to search.
-	 * @return string
-	 */
-	public function product_search( $where ) {
-		global $pagenow, $wpdb, $wp;
-
-		if ( 'edit.php' !== $pagenow || ! is_search() || ! isset( $wp->query_vars['s'] ) || 'product' !== $wp->query_vars['post_type'] ) {
-			return $where;
-		}
-
-		$search_ids = array();
-		$terms      = explode( ',', $wp->query_vars['s'] );
-
-		foreach ( $terms as $term ) {
-			if ( is_numeric( $term ) ) {
-				$search_ids[] = $term;
-			}
-
-			// Attempt to get a SKU.
-			$sku_to_id = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_parent FROM {$wpdb->posts} LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id WHERE meta_key='_sku' AND meta_value LIKE %s;", '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ) ); // WPCS: DB call ok, cache ok.
-			$sku_to_id = array_merge( wp_list_pluck( $sku_to_id, 'ID' ), wp_list_pluck( $sku_to_id, 'post_parent' ) );
-
-			if ( 0 < count( $sku_to_id ) ) {
-				$search_ids = array_merge( $search_ids, $sku_to_id );
-			}
-		}
-
-		$search_ids = array_filter( array_unique( array_map( 'absint', $search_ids ) ) );
-
-		if ( 0 < count( $search_ids ) ) {
-			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ')) OR ((', $where );
-		}
-
-		return $where;
-	}
-
-	/**
 	 * Disable the auto-save functionality for Orders.
 	 */
 	public function disable_autosave() {
@@ -1741,7 +654,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Output extra data on post forms.
 	 *
-	 * @param  WP_Post $post Post instance.
+	 * @param WP_Post $post Current post object.
 	 */
 	public function edit_form_top( $post ) {
 		echo '<input type="hidden" id="original_post_title" name="original_post_title" value="' . esc_attr( $post->post_title ) . '" />';
@@ -1750,8 +663,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Change title boxes in admin.
 	 *
-	 * @param  string  $text Title placeholder text.
-	 * @param  WP_Post $post Post instance.
+	 * @param string  $text Text to shown.
+	 * @param WP_Post $post Current post object.
 	 * @return string
 	 */
 	public function enter_title_here( $text, $post ) {
@@ -1763,14 +676,13 @@ class WC_Admin_Post_Types {
 				$text = esc_html__( 'Coupon code', 'woocommerce' );
 				break;
 		}
-
 		return $text;
 	}
 
 	/**
 	 * Print coupon description textarea field.
 	 *
-	 * @param WP_Post $post Post instance.
+	 * @param WP_Post $post Current post object.
 	 */
 	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
@@ -1783,8 +695,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param  array     $hidden An array of meta boxes hidden by default.
-	 * @param  WP_Screen $screen WP_Screen object of the current screen.
+	 * @param  array  $hidden Hidden boxes.
+	 * @param  object $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {
@@ -1810,59 +722,64 @@ class WC_Admin_Post_Types {
 		$current_visibility = $product_object->get_catalog_visibility();
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
+		?>
+		<div class="misc-pub-section" id="catalog-visibility">
+			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
 
-		echo '<div class="misc-pub-section" id="catalog-visibility">';
-		esc_html_e( 'Catalog visibility:', 'woocommerce' );
-		echo ' <strong id="catalog-visibility-display">';
-		echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
-		if ( 'yes' === $current_featured ) {
-			echo ', ' . esc_html__( 'Featured', 'woocommerce' );
-		}
-		echo '</strong>';
+			echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
-		echo '<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>';
-		echo '<div id="catalog-visibility-select" class="hide-if-js">';
-		echo '<input type="hidden" name="current_visibility" id="current_visibility" value="' . esc_attr( $current_visibility ) . '" />';
-		echo '<input type="hidden" name="current_featured" id="current_featured" value="' . esc_attr( $current_featured ) . '" />';
-		echo '<p>' . esc_html__( 'This setting determines which shop pages products will be listed on.', 'woocommerce' ) . '</p>';
+			if ( 'yes' === $current_featured ) {
+				echo ', ' . esc_html__( 'Featured', 'woocommerce' );
+			}
+			?></strong>
 
-		foreach ( $visibility_options as $name => $label ) {
-			echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
-		}
+			<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 
-		echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
-		echo '<p>';
-		echo '<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button">' . esc_html__( 'OK', 'woocommerce' ) . '</a>';
-		echo '<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js">' . esc_html__( 'Cancel', 'woocommerce' ) . '</a>';
-		echo '</p>';
-		echo '</div>';
-		echo '</div>';
+			<div id="catalog-visibility-select" class="hide-if-js">
+
+				<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
+				<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
+
+				<?php
+				echo '<p>' . esc_html__( 'This setting determines which shop pages products will be listed on.', 'woocommerce' ) . '</p>';
+
+				foreach ( $visibility_options as $name => $label ) {
+					echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
+				}
+
+				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
+				?>
+				<p>
+					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+				</p>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
-	 * Filter the directory for uploads.
+	 * Change upload dir for downloadable files.
 	 *
-	 * @param array $uploads Array of upload directory data with keys of 'path', 'url', 'subdir, 'basedir', and 'error'.
+	 * @param array $pathdata Array of paths.
 	 * @return array
 	 */
-	public function upload_dir( $uploads ) {
-		// Change upload dir for downloadable files.
-		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) { // WPCS: input var ok, CSRF ok.
+	public function upload_dir( $pathdata ) {
+		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) { // WPCS: CSRF ok, input var ok.
 
-			if ( empty( $uploads['subdir'] ) ) {
-				$uploads['path']   = $uploads['path'] . '/woocommerce_uploads';
-				$uploads['url']    = $uploads['url'] . '/woocommerce_uploads';
-				$uploads['subdir'] = '/woocommerce_uploads';
+			if ( empty( $pathdata['subdir'] ) ) {
+				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
+				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
+				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
-				$new_subdir = '/woocommerce_uploads' . $uploads['subdir'];
+				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
 
-				$uploads['path']   = str_replace( $uploads['subdir'], $new_subdir, $uploads['path'] );
-				$uploads['url']    = str_replace( $uploads['subdir'], $new_subdir, $uploads['url'] );
-				$uploads['subdir'] = str_replace( $uploads['subdir'], $new_subdir, $uploads['subdir'] );
+				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
 			}
 		}
-
-		return $uploads;
+		return $pathdata;
 	}
 
 	/**
@@ -1876,91 +793,21 @@ class WC_Admin_Post_Types {
 	 * Grant downloadable file access to any newly added files on any existing.
 	 * orders for this product that have previously been granted downloadable file access.
 	 *
-	 * @deprecated  2.2.0 Moved to WC_Post_Data class.
-	 * @param int   $product_id         Product identifier.
-	 * @param int   $variation_id       Optional product variation identifier.
-	 * @param array $downloadable_files Newly set files.
+	 * @param int   $product_id product identifier.
+	 * @param int   $variation_id optional product variation identifier.
+	 * @param array $downloadable_files newly set files.
+	 * @deprecated and moved to post-data class.
 	 */
 	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
 		WC_Post_Data::process_product_file_download_paths( $product_id, $variation_id, $downloadable_files );
 	}
 
 	/**
-	 * Disable DFW feature pointer.
-	 */
-	public function disable_dfw_feature_pointer() {
-		$screen = get_current_screen();
-
-		if ( $screen && 'product' === $screen->id && 'post' === $screen->base ) {
-			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
-		}
-	}
-
-	/**
-	 * Removes products, orders, and coupons from the list of post types that support "View Mode" switching.
-	 * View mode is seen on posts where you can switch between list or excerpt. Our post types don't support
-	 * it, so we want to hide the useless UI from the screen options tab.
-	 *
-	 * @since  2.6.0
-	 * @param  array $post_types Array of post types supporting view mode.
-	 * @return array             Array of post types supporting view mode, without products, orders, and coupons.
-	 */
-	public function disable_view_mode_options( $post_types ) {
-		unset( $post_types['product'], $post_types['shop_order'], $post_types['shop_coupon'] );
-		return $post_types;
-	}
-
-	/**
-	 * Show blank slate.
-	 *
-	 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
-	 */
-	public function maybe_render_blank_state( $which ) {
-		global $post_type;
-
-		if ( in_array( $post_type, array( 'shop_order', 'product', 'shop_coupon' ), true ) && 'bottom' === $which ) {
-			$counts = (array) wp_count_posts( $post_type );
-			unset( $counts['auto-draft'] );
-			$count  = array_sum( $counts );
-
-			if ( 0 < $count ) {
-				return;
-			}
-
-			echo '<div class="woocommerce-BlankState">';
-
-			switch ( $post_type ) {
-				case 'shop_order':
-					?>
-					<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?></h2>
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
-					<?php
-					break;
-				case 'shop_coupon':
-					?>
-					<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ); ?></h2>
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about coupons', 'woocommerce' ); ?></a>
-					<?php
-					break;
-				case 'product':
-					?>
-					<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Ready to start selling something awesome?', 'woocommerce' ); ?></h2>
-					<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php esc_html_e( 'Create your first product!', 'woocommerce' ); ?></a>
-					<a class="woocommerce-BlankState-cta button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>"><?php esc_html_e( 'Import products from a CSV file', 'woocommerce' ); ?></a>
-					<?php
-					break;
-			}
-
-			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions, .wrap .subsubsub  { display: none; } </style></div>';
-		}
-	}
-
-	/**
 	 * When editing the shop page, we should hide templates.
 	 *
-	 * @param array        $page_templates Array of page templates. Keys are filenames, values are translated names.
-	 * @param WP_Theme     $theme          The theme object.
-	 * @param WP_Post|null $post           The post being edited, provided for context, or null.
+	 * @param array   $page_templates Templates array.
+	 * @param string  $class Classname.
+	 * @param WP_Post $post The current post object.
 	 * @return array
 	 */
 	public function hide_cpt_archive_templates( $page_templates, $theme, $post ) {
@@ -1976,22 +823,15 @@ class WC_Admin_Post_Types {
 	/**
 	 * Show a notice above the CPT archive.
 	 *
-	 * @param WP_Post $post Post instance.
+	 * @param WP_Post $post The current post object.
 	 */
 	public function show_cpt_archive_notice( $post ) {
 		$shop_page_id = wc_get_page_id( 'shop' );
 
 		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
-			?>
-			<div class="notice notice-info">
-				<p>
-				<?php
-				/* translators: %s: documentation URL */
-				printf( esc_html__( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' );
-				?>
-				</p>
-			</div>
-			<?php
+			echo '<div class="notice notice-info">';
+			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
+			echo '</div>';
 		}
 	}
 
@@ -2025,3 +865,5 @@ class WC_Admin_Post_Types {
 		return $post_states;
 	}
 }
+
+new WC_Admin_Post_Types();

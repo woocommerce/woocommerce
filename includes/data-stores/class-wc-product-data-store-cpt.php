@@ -374,16 +374,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Read attributes from post meta.
 	 *
-	 * @param WC_Product
-	 * @since 3.0.0
+	 * @param WC_Product $product Product object.
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_values = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
 
-		if ( ! empty( $meta_values ) && is_array( $meta_values ) ) {
+		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes = array();
-			foreach ( $meta_values as $meta_value ) {
-				$id         = 0;
+			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
 				$meta_value = array_merge( array(
 					'name'         => '',
 					'value'        => '',
@@ -391,7 +389,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'is_visible'   => 0,
 					'is_variation' => 0,
 					'is_taxonomy'  => 0,
-				), (array) $meta_value );
+				), (array) $meta_attribute_value );
 
 				// Check if is a taxonomy attribute.
 				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
@@ -401,11 +399,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
 					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
 				} else {
+					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );
 				}
 
 				$attribute = new WC_Product_Attribute();
-
 				$attribute->set_id( $id );
 				$attribute->set_name( $meta_value['name'] );
 				$attribute->set_options( $options );
@@ -587,15 +585,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 */
 	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
 		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
+			$categories = $product->get_category_ids( 'edit' );
+
+			if ( empty( $categories ) && get_option( 'default_product_cat', 0 ) ) {
+				$categories = array( get_option( 'default_product_cat', 0 ) );
+			}
+
+			wp_set_post_terms( $product->get_id(), $categories, 'product_cat', false );
 		}
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );

@@ -51,6 +51,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	);
 
 	/**
+	 * Override the default constructor to set custom defaults.
+	 *
+	 * @param int|WC_Product|object $product Product to init.
+	 */
+	public function __construct( $product = 0 ) {
+		$this->data['tax_class'] = 'parent';
+		parent::__construct( $product );
+	}
+
+	/**
 	 * Prefix for action and filter hooks on data.
 	 *
 	 * @since  3.0.0

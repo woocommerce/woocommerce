@@ -26,6 +26,73 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected $prices_array = array();
 
 	/**
+	 * Read attributes from post meta.
+	 *
+	 * @param WC_Product $product Product object.
+	 */
+	protected function read_attributes( &$product ) {
+		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+
+		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
+			$attributes   = array();
+			$force_update = false;
+			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
+				$meta_value = array_merge( array(
+					'name'         => '',
+					'value'        => '',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				), (array) $meta_attribute_value );
+
+				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
+				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
+					global $wpdb;
+
+					$old_slug      = 'attribute_' . $meta_attribute_key;
+					$new_slug      = 'attribute_' . sanitize_title( $meta_value['name'] );
+					$old_meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s;", $old_slug ) ); // WPCS: db call ok, cache ok.
+
+					if ( $old_meta_rows ) {
+						foreach ( $old_meta_rows as $old_meta_row ) {
+							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+						}
+					}
+
+					$force_update = true;
+				}
+
+				// Check if is a taxonomy attribute.
+				if ( ! empty( $meta_value['is_taxonomy'] ) ) {
+					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
+						continue;
+					}
+					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
+					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+				} else {
+					$id      = 0;
+					$options = wc_get_text_attributes( $meta_value['value'] );
+				}
+
+				$attribute = new WC_Product_Attribute();
+				$attribute->set_id( $id );
+				$attribute->set_name( $meta_value['name'] );
+				$attribute->set_options( $options );
+				$attribute->set_position( $meta_value['position'] );
+				$attribute->set_visible( $meta_value['is_visible'] );
+				$attribute->set_variation( $meta_value['is_variation'] );
+				$attributes[] = $attribute;
+			}
+			$product->set_attributes( $attributes );
+
+			if ( $force_update ) {
+				$this->update_attributes( $product, true );
+			}
+		}
+	}
+
+	/**
 	 * Read product data.
 	 *
 	 * @since 3.0.0
@@ -58,14 +125,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children                = get_transient( $children_transient_name );
 
 		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
-			$all_args = $visible_only_args = array(
+			$all_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',
-				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
+				'orderby'     => array(
+					'menu_order' => 'ASC',
+					'ID'         => 'ASC',
+				),
 				'fields'      => 'ids',
-				'post_status' => 'publish',
+				'post_status' => array( 'publish', 'private' ),
 				'numberposts' => -1,
 			);
+
+			$visible_only_args                = $all_args;
+			$visible_only_args['post_status'] = 'publish';
+
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 				$visible_only_args['tax_query'][] = array(
 					'taxonomy' => 'product_visibility',
@@ -310,10 +384,24 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
+		return $this->child_has_stock_status( $product, 'instock' );
+	}
+
+	/**
+	 * Does a child have a stock status?
+	 *
+	 * @since 3.3.0
+	 * @param WC_Product $product Product object.
+	 * @param string $status 'instock', 'outofstock', or 'onbackorder'.
+	 * @return boolean
+	 */
+	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
-		$children            = $product->get_children();
-		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'outofstock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		return count( $children ) > $oufofstock_children;
+
+		$children             = $product->get_children();
+		$children_with_status = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = '" . esc_sql( $status ) . "' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
+
+		return (bool) $children_with_status;
 	}
 
 	/**
@@ -404,7 +492,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	public function sync_stock_status( &$product ) {
-		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		if ( $product->child_is_in_stock() ) {
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->child_is_on_backorder() ) {
+			$product->set_stock_status( 'onbackorder' );
+		} else {
+			$product->set_stock_status( 'outofstock' );
+		}
 	}
 
 	/**

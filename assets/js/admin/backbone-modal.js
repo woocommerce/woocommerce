@@ -9,8 +9,7 @@
 	 */
 	$.fn.WCBackboneModal = function( options ) {
 		return this.each( function() {
-            var WCeachBackboneModal = new $.WCBackboneModal( $( this ), options )
-			( WCeachBackboneModal() );
+			( new $.WCBackboneModal( $( this ), options ) );
 		});
 	};
 
@@ -25,12 +24,10 @@
 		var settings = $.extend( {}, $.WCBackboneModal.defaultOptions, options );
 
 		if ( settings.template ) {
-
-            var BackboneModal = new $.WCBackboneModal.View({
-                target: settings.template,
-                string: settings.variable
-            });
-            BackboneModal();
+			new $.WCBackboneModal.View({
+				target: settings.template,
+				string: settings.variable
+			});
 		}
 	};
 

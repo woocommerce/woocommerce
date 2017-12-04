@@ -31,6 +31,7 @@ class WC_Post_Data {
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
+		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -49,9 +50,6 @@ class WC_Post_Data {
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
-
-		// Download permissions
-		add_action( 'woocommerce_process_product_file_download_paths', array( __CLASS__, 'process_product_file_download_paths' ), 10, 3 );
 
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
@@ -110,6 +108,9 @@ class WC_Post_Data {
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
 			delete_transient( 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $id ) ) );
+		}
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ) ) ) {
+			self::delete_product_query_transients();
 		}
 	}
 
@@ -481,26 +482,13 @@ class WC_Post_Data {
 	/**
 	 * Update changed downloads.
 	 *
+	 * @deprecated 3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
 	 * @param array $downloads newly set files
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
-		if ( $variation_id ) {
-			$product_id = $variation_id;
-		}
-		$data_store = WC_Data_Store::load( 'customer-download' );
-
-		if ( $downloads ) {
-			foreach ( $downloads as $download ) {
-				$new_hash = md5( $download->get_file() );
-
-				if ( $download->get_previous_hash() && $download->get_previous_hash() !== $new_hash ) {
-					// Update permissions.
-					$data_store->update_download_id( $product_id, $download->get_previous_hash(), $new_hash );
-				}
-			}
-		}
+		wc_deprecated_function( __FUNCTION__, '3.3' );
 	}
 
 	/**
@@ -512,6 +500,27 @@ class WC_Post_Data {
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
+	}
+
+	/**
+	 * Ensure default category gets set.
+	 *
+	 * @since 3.3.0
+	 * @param int    $object_id Product ID.
+	 * @param array  $terms Terms array.
+	 * @param array  $tt_ids Term ids array.
+	 * @param string $taxonomy Taxonomy name.
+	 * @param bool   $append Are we appending or setting terms.
+	 */
+	public static function force_default_term( $object_id, $terms, $tt_ids, $taxonomy, $append ) {
+		if ( ! $append && 'product_cat' === $taxonomy && empty( $tt_ids ) && 'product' === get_post_type( $object_id ) ) {
+			$default_term = absint( get_option( 'default_product_cat', 0 ) );
+			$tt_ids       = array_map( 'absint', $tt_ids );
+
+			if ( $default_term && ! in_array( $default_term, $tt_ids, true ) ) {
+				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
+			}
+		}
 	}
 }
 

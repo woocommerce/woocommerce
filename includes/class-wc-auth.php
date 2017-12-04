@@ -192,7 +192,7 @@ class WC_Auth {
 		$callback_url = $this->get_formatted_url( $_REQUEST['callback_url'] );
 
 		if ( 0 !== stripos( $callback_url, 'https://' ) ) {
-			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
+			throw new Exception( __( 'The callback_url needs to be over SSL', 'woocommerce' ) );
 		}
 	}
 

@@ -29,6 +29,7 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
+		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 	}
 
@@ -534,6 +535,18 @@ class WC_Post_types {
 
 		foreach ( $order_statuses as $order_status => $values ) {
 			register_post_status( $order_status, $values );
+		}
+	}
+
+	/**
+	 * Flush rules if the event is queued.
+	 *
+	 * @since 3.3.0
+	 */
+	public static function maybe_flush_rewrite_rules() {
+		if ( 'true' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
+			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			self::flush_rewrite_rules();
 		}
 	}
 

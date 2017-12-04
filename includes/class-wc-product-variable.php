@@ -61,6 +61,17 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Get the add to cart button text description - used in aria tags.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function add_to_cart_description() {
+		/* translators: %s: Product title */
+		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( __( 'Select options for &ldquo;%s&rdquo;', 'woocommerce' ), $this->get_name() ), $this );
+	}
+
+	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
 	 * @param  bool $include_taxes Should taxes be included in the prices.
@@ -365,21 +376,21 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
-			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+			$this->data_store->sync_stock_status( $this );
 
-		// If backorders are enabled, always in stock.
-		} elseif ( 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'instock' );
+			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'onbackorder' );
 
-		// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
-		// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
 			$this->set_stock_status( 'instock' );
 
-		// Otherwise revert to status the children have.
+			// Otherwise revert to status the children have.
 		} else {
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
@@ -438,6 +449,16 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function child_is_in_stock() {
 		return $this->data_store->child_is_in_stock( $this );
+	}
+
+	/**
+	 * Is a child on backorder?
+	 *
+	 * @since 3.3.0
+	 * @return boolean
+	 */
+	public function child_is_on_backorder() {
+		return $this->data_store->child_has_stock_status( $this, 'onbackorder' );
 	}
 
 	/**

@@ -834,8 +834,8 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
 		try {
-			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) );
+			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // WPCS: sanitization ok.
 			$missing_attributes = array();
 			$variations         = array();
 			$adding_to_cart     = wc_get_product( $product_id );
@@ -873,18 +873,22 @@ class WC_Form_Handler {
 					continue;
 				}
 
-				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+				// Get valid value from variation data.
+				$taxonomy    = 'attribute_' . sanitize_title( $attribute['name'] );
+				$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
+				/**
+				 * If the attribute value was posted, check if it's valid.
+				 *
+				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
+				 */
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 					if ( $attribute['is_taxonomy'] ) {
 						// Don't use wc_clean as it destroys sanitized characters.
 						$value = sanitize_title( wp_unslash( $_REQUEST[ $taxonomy ] ) );
 					} else {
-						$value = wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) );
+						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
 					}
-
-					// Get valid value from variation data.
-					$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {
@@ -895,7 +899,7 @@ class WC_Form_Handler {
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
 					}
-				} else {
+				} elseif ( '' === $valid_value ) {
 					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 				}
 			}
@@ -970,7 +974,7 @@ class WC_Form_Handler {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ), wc_get_page_permalink( 'myaccount' ) ) );
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', remove_query_arg( 'wc_error', $redirect ), $user ), wc_get_page_permalink( 'myaccount' ) ) );
 					exit;
 				}
 			} catch ( Exception $e ) {

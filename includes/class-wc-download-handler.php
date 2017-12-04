@@ -72,13 +72,12 @@ class WC_Download_Handler {
 			$download->get_download_id(),
 			$download->get_order_id()
 		);
-		$count     = $download->get_download_count();
-		$remaining = $download->get_downloads_remaining();
-		$download->set_download_count( $count + 1 );
-		if ( '' !== $remaining ) {
-			$download->set_downloads_remaining( $remaining - 1 );
-		}
 		$download->save();
+
+		// Track the download in logs and change remaining/counts.
+		$current_user_id = get_current_user_id();
+		$ip_address = WC_Geolocation::get_ip_address();
+		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
 	}
@@ -360,7 +359,9 @@ class WC_Download_Handler {
 	 * @return 	bool Success or fail
 	 */
 	public static function readfile_chunked( $file ) {
-		$chunksize = 1024 * 1024;
+		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
+			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
+		}
 		$handle    = @fopen( $file, 'r' );
 
 		if ( false === $handle ) {
@@ -368,7 +369,7 @@ class WC_Download_Handler {
 		}
 
 		while ( ! @feof( $handle ) ) {
-			echo @fread( $handle, $chunksize );
+			echo @fread( $handle, (int) WC_CHUNK_SIZE );
 
 			if ( ob_get_length() ) {
 				ob_flush();

@@ -80,6 +80,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
+			'fields'              => 'ids',
 		);
 		$this->assertEquals( $expected, $shortcode->get_query_args() );
 
@@ -98,6 +99,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
+			'fields'              => 'ids',
 		);
 		$this->assertEquals( $expected2, $shortcode2->get_query_args() );
 
@@ -116,6 +118,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'post__in'            => array( '1', '2', '3' ),
+			'fields'              => 'ids',
 		);
 		$expected3['meta_query'][] = array(
 			'key'     => '_sku',
@@ -144,6 +147,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'posts_per_page'      => '12',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
+			'fields'              => 'ids',
 		);
 		$expected4['tax_query'][] = array(
 			'taxonomy' => 'product_cat',
@@ -173,6 +177,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'posts_per_page'      => '12',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected5, $shortcode5->get_query_args() );
@@ -193,6 +198,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'p'                   => '1',
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected6, $shortcode6->get_query_args() );
@@ -217,6 +223,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'post__in'            => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected7, $shortcode7->get_query_args() );
@@ -239,6 +246,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'meta_key'            => 'total_sales',
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected8, $shortcode8->get_query_args() );
@@ -262,6 +270,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'posts_per_page'      => 12,
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected9, $shortcode9->get_query_args() );
@@ -294,6 +303,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 					'include_children' => false,
 				),
 			) ),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected10, $shortcode10->get_query_args() );
@@ -324,6 +334,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 					'operator' => 'IN',
 				),
 			) ),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected11, $shortcode11->get_query_args() );
@@ -350,6 +361,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 					'include_children' => false,
 				),
 			),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected12, $shortcode12->get_query_args() );
@@ -382,6 +394,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 					'include_children' => false,
 				),
 			),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected13, $shortcode13->get_query_args() );
@@ -414,6 +427,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 					'include_children' => false,
 				),
 			),
+			'fields'              => 'ids',
 		);
 
 		$this->assertEquals( $expected14, $shortcode14->get_query_args() );

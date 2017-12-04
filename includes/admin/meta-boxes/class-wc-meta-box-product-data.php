@@ -191,7 +191,7 @@ class WC_Meta_Box_Product_Data {
 					$downloads[] = array(
 						'name'          => wc_clean( $file_names[ $i ] ),
 						'file'          => wp_unslash( trim( $file_urls[ $i ] ) ),
-						'previous_hash' => wc_clean( $file_hashes[ $i ] ),
+						'download_id'	=> wc_clean( $file_hashes[ $i ] ),
 					);
 				}
 			}
@@ -284,12 +284,18 @@ class WC_Meta_Box_Product_Data {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 
 					if ( ! is_null( $index ) ) {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
 					} else {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : '';
 					}
 
-					$value                        = $attribute->is_taxonomy() ? sanitize_title( $value ) : wc_clean( $value ); // Don't use wc_clean as it destroys sanitized characters in terms.
+					if ( $attribute->is_taxonomy() ) {
+						// Don't use wc_clean as it destroys sanitized characters.
+						$value = sanitize_title( $value );
+					} else {
+						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
+					}
+
 					$attributes[ $attribute_key ] = $value;
 				}
 			}

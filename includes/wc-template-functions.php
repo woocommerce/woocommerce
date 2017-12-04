@@ -4,9 +4,9 @@
  *
  * Functions for the templating system.
  *
- * @author   WooThemes
+ * @author   Automattic
  * @category Core
- * @package  WooCommerce/Functions
+ * @package  WooCommerce\Functions
  * @version  2.5.0
  */
 
@@ -33,11 +33,7 @@ function wc_template_redirect() {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 
-	} elseif (
-		isset( $wp->query_vars['customer-logout'] ) &&
-		! empty( $_REQUEST['_wpnonce'] ) &&
-		wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' )
-	) {
+	} elseif ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' ) ) { // WPCS: input var ok, CSRF ok.
 
 		// Logout.
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
@@ -97,8 +93,8 @@ add_action( 'template_redirect', 'wc_send_frame_options_header' );
  * @since 2.5.3
  */
 function wc_prevent_endpoint_indexing() {
-	if ( is_wc_endpoint_url() || isset( $_GET['download_file'] ) ) {
-		@header( 'X-Robots-Tag: noindex' );
+	if ( is_wc_endpoint_url() || isset( $_GET['download_file'] ) ) { // WPCS: input var ok, CSRF ok.
+		@header( 'X-Robots-Tag: noindex' ); // @codingStandardsIgnoreLine
 	}
 }
 add_action( 'template_redirect', 'wc_prevent_endpoint_indexing' );
@@ -142,7 +138,7 @@ function wc_setup_product_data( $post ) {
 		$the_post = $post;
 	}
 
-	if ( empty( $the_post->post_type ) || ! in_array( $the_post->post_type, array( 'product', 'product_variation' ) ) ) {
+	if ( empty( $the_post->post_type ) || ! in_array( $the_post->post_type, array( 'product', 'product_variation' ), true ) ) {
 		return;
 	}
 
@@ -156,8 +152,6 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 
 	/**
 	 * Reset the loop's index and columns when we're done outputting a product loop.
-	 *
-	 * @subpackage Loop
 	 */
 	function woocommerce_reset_loop() {
 		$GLOBALS['woocommerce_loop'] = array(
@@ -189,6 +183,7 @@ function wc_products_rss_feed() {
 
 		if ( $term ) {
 			$feed = add_query_arg( 'product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ) );
+			/* translators: %s: category name */
 			echo '<link rel="alternate" type="application/rss+xml"  title="' . esc_attr( sprintf( __( 'New products added to %s', 'woocommerce' ), $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
 		}
 	} elseif ( is_tax( 'product_tag' ) ) {
@@ -197,7 +192,8 @@ function wc_products_rss_feed() {
 
 		if ( $term ) {
 			$feed = add_query_arg( 'product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ) );
-			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf( esc_attr__( 'New products tagged %s', 'woocommerce' ), urlencode( $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
+			/* translators: %s: tag name */
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf( esc_attr__( 'New products tagged %s', 'woocommerce' ), rawurlencode( $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
 		}
 	}
 }
@@ -259,7 +255,7 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-demo-store';
 	}
 
-	foreach ( WC()->query->query_vars as $key => $value ) {
+	foreach ( WC()->query->get_query_vars() as $key => $value ) {
 		if ( is_wc_endpoint_url( $key ) ) {
 			$classes[] = 'woocommerce-' . sanitize_html_class( $key );
 		}
@@ -354,6 +350,7 @@ function wc_get_loop_class() {
 	}
 }
 
+
 /**
  * Get the classes for the product cat div.
  *
@@ -384,7 +381,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @return array
  */
 function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
-	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ) ) ) {
+	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ), true ) ) {
 		return $classes;
 	}
 
@@ -432,7 +429,8 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		}
 	}
 
-	if ( false !== ( $key = array_search( 'hentry', $classes ) ) ) {
+	$key = array_search( 'hentry', $classes, true );
+	if ( false !== $key ) {
 		unset( $classes[ $key ] );
 	}
 
@@ -451,7 +449,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
-		$values = $_GET;
+		$values = $_GET; // WPCS: input var ok, CSRF ok.
 	}
 	$html = '';
 
@@ -465,7 +463,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		if ( is_array( $value ) ) {
 			$html .= wc_query_string_form_fields( $value, $exclude, $key, true );
 		} else {
-			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+			$html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( wp_unslash( $value ) ) . '" />';
 		}
 	}
 
@@ -605,9 +603,11 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	function woocommerce_page_title( $echo = true ) {
 
 		if ( is_search() ) {
+			/* translators: %s: search query */
 			$page_title = sprintf( __( 'Search results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
 
 			if ( get_query_var( 'paged' ) ) {
+				/* translators: %s: page number */
 				$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
 			}
 		} elseif ( is_tax() ) {
@@ -704,39 +704,49 @@ if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 		<?php
 	}
 }
-/**
- * Insert the opening anchor tag for products in the loop.
- */
-function woocommerce_template_loop_product_link_open() {
-	echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
-}
-/**
- * Insert the opening anchor tag for products in the loop.
- */
-function woocommerce_template_loop_product_link_close() {
-	echo '</a>';
+
+if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_open() {
+		echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+	}
 }
 
-/**
- * Insert the opening anchor tag for categories in the loop.
- *
- * @param int|object|string $category Category ID, Object or String.
- */
-function woocommerce_template_loop_category_link_open( $category ) {
-	echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+if ( ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_close() {
+		echo '</a>';
+	}
 }
-/**
- * Insert the closing anchor tag for categories in the loop.
- */
-function woocommerce_template_loop_category_link_close() {
-	echo '</a>';
+
+if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
+	/**
+	 * Insert the opening anchor tag for categories in the loop.
+	 *
+	 * @param int|object|string $category Category ID, Object or String.
+	 */
+	function woocommerce_template_loop_category_link_open( $category ) {
+		echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+	}
 }
+
+if ( ! function_exists( 'woocommerce_template_loop_category_link_close' ) ) {
+	/**
+	 * Insert the closing anchor tag for categories in the loop.
+	 */
+	function woocommerce_template_loop_category_link_close() {
+		echo '</a>';
+	}
+}
+
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
 	 * Show an archive description on taxonomy archives.
-	 *
-	 * @subpackage	Archives
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_product_taxonomy() && 0 === absint( get_query_var( 'paged' ) ) ) {
@@ -776,8 +786,6 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	/**
 	 * Get the add to cart template for the loop.
 	 *
-	 * @subpackage    Loop
-	 *
 	 * @param array $args Arguments.
 	 */
 	function woocommerce_template_loop_add_to_cart( $args = array() ) {
@@ -787,10 +795,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$defaults = array(
 				'quantity' => 1,
 				'class'    => implode( ' ', array_filter( array(
-						'button',
-						'product_type_' . $product->get_type(),
-						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
-						$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
+					'button',
+					'product_type_' . $product->get_type(),
+					$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
+					$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
 				) ) ),
 			);
 
@@ -804,8 +812,6 @@ if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
 
 	/**
 	 * Get the product thumbnail for the loop.
-	 *
-	 * @subpackage	Loop
 	 */
 	function woocommerce_template_loop_product_thumbnail() {
 		echo woocommerce_get_product_thumbnail(); // WPCS: XSS ok.
@@ -815,8 +821,6 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 
 	/**
 	 * Get the product price for the loop.
-	 *
-	 * @subpackage	Loop
 	 */
 	function woocommerce_template_loop_price() {
 		wc_get_template( 'loop/price.php' );
@@ -826,8 +830,6 @@ if ( ! function_exists( 'woocommerce_template_loop_rating' ) ) {
 
 	/**
 	 * Display the average rating in the loop.
-	 *
-	 * @subpackage	Loop
 	 */
 	function woocommerce_template_loop_rating() {
 		wc_get_template( 'loop/rating.php' );
@@ -837,8 +839,6 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 
 	/**
 	 * Get the sale flash for the loop.
-	 *
-	 * @subpackage	Loop
 	 */
 	function woocommerce_show_product_loop_sale_flash() {
 		wc_get_template( 'loop/sale-flash.php' );
@@ -850,7 +850,6 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	/**
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
-	 * @subpackage	Loop
 	 * @param string $size (default: 'woocommerce_thumbnail').
 	 * @param int    $deprecated1 Deprecated since WooCommerce 2.0 (default: 0).
 	 * @param int    $deprecated2 Deprecated since WooCommerce 2.0 (default: 0).
@@ -967,8 +966,6 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 
 	/**
 	 * Output the product image before the single product summary.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_images() {
 		wc_get_template( 'single-product/product-image.php' );
@@ -978,8 +975,6 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 
 	/**
 	 * Output the product thumbnails.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_thumbnails() {
 		wc_get_template( 'single-product/product-thumbnails.php' );
@@ -990,8 +985,6 @@ if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 
 	/**
 	 * Output the product tabs.
-	 *
-	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_output_product_data_tabs() {
 		wc_get_template( 'single-product/tabs/tabs.php' );
@@ -1001,8 +994,6 @@ if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
 
 	/**
 	 * Output the product title.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_title() {
 		wc_get_template( 'single-product/title.php' );
@@ -1012,8 +1003,6 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 
 	/**
 	 * Output the product rating.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_rating() {
 		if ( post_type_supports( 'product', 'comments' ) ) {
@@ -1025,8 +1014,6 @@ if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 
 	/**
 	 * Output the product price.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_price() {
 		wc_get_template( 'single-product/price.php' );
@@ -1036,8 +1023,6 @@ if ( ! function_exists( 'woocommerce_template_single_excerpt' ) ) {
 
 	/**
 	 * Output the product short description (excerpt).
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_excerpt() {
 		wc_get_template( 'single-product/short-description.php' );
@@ -1047,8 +1032,6 @@ if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
 
 	/**
 	 * Output the product meta.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_meta() {
 		wc_get_template( 'single-product/meta.php' );
@@ -1058,8 +1041,6 @@ if ( ! function_exists( 'woocommerce_template_single_sharing' ) ) {
 
 	/**
 	 * Output the product sharing.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_sharing() {
 		wc_get_template( 'single-product/share.php' );
@@ -1069,8 +1050,6 @@ if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 
 	/**
 	 * Output the product sale flash.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_show_product_sale_flash() {
 		wc_get_template( 'single-product/sale-flash.php' );
@@ -1081,8 +1060,6 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 
 	/**
 	 * Trigger the single product add to cart action.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
@@ -1093,8 +1070,6 @@ if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
 
 	/**
 	 * Output the simple product add to cart area.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_simple_add_to_cart() {
 		wc_get_template( 'single-product/add-to-cart/simple.php' );
@@ -1104,8 +1079,6 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 
 	/**
 	 * Output the grouped product add to cart area.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
@@ -1125,8 +1098,6 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 
 	/**
 	 * Output the variable product add to cart area.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_variable_add_to_cart() {
 		global $product;
@@ -1149,8 +1120,6 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 
 	/**
 	 * Output the external product add to cart area.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_external_add_to_cart() {
 		global $product;
@@ -1220,8 +1189,6 @@ if ( ! function_exists( 'woocommerce_product_description_tab' ) ) {
 
 	/**
 	 * Output the description tab content.
-	 *
-	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_product_description_tab() {
 		wc_get_template( 'single-product/tabs/description.php' );
@@ -1231,8 +1198,6 @@ if ( ! function_exists( 'woocommerce_product_additional_information_tab' ) ) {
 
 	/**
 	 * Output the attributes tab content.
-	 *
-	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_product_additional_information_tab() {
 		wc_get_template( 'single-product/tabs/additional-information.php' );
@@ -1243,8 +1208,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	/**
 	 * Output the reviews tab content.
 	 *
-	 * @deprecated  2.4.0 Unused
-	 * @subpackage	Product/Tabs
+	 * @deprecated 2.4.0 Unused.
 	 */
 	function woocommerce_product_reviews_tab() {
 		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
@@ -1283,6 +1247,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		// Reviews tab - shows comments.
 		if ( comments_open() ) {
 			$tabs['reviews'] = array(
+				/* translators: %s: reviews count */
 				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), $product->get_review_count() ),
 				'priority' => 30,
 				'callback' => 'comments_template',
@@ -1305,7 +1270,7 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 
 		// Make sure the $tabs parameter is an array.
 		if ( ! is_array( $tabs ) ) {
-			trigger_error( 'Function woocommerce_sort_product_tabs() expects an array as the first parameter. Defaulting to empty array.' );
+			trigger_error( 'Function woocommerce_sort_product_tabs() expects an array as the first parameter. Defaulting to empty array.' ); // @codingStandardsIgnoreLine
 			$tabs = array();
 		}
 
@@ -1337,14 +1302,17 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	/**
 	 * Output the Review comments template.
 	 *
-	 * @subpackage	Product
 	 * @param WP_Comment $comment Comment object.
 	 * @param array      $args Arguments.
 	 * @param int        $depth Depth.
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment; // WPCS: override ok.
-		wc_get_template( 'single-product/review.php', array( 'comment' => $comment, 'args' => $args, 'depth' => $depth ) );
+		wc_get_template( 'single-product/review.php', array(
+			'comment' => $comment,
+			'args'    => $args,
+			'depth'   => $depth,
+		) );
 	}
 }
 
@@ -1400,15 +1368,13 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 
 	/**
 	 * Output the related products.
-	 *
-	 * @subpackage	Product
 	 */
 	function woocommerce_output_related_products() {
 
 		$args = array(
-			'posts_per_page' 	=> 4,
-			'columns' 			=> 4,
-			'orderby' 			=> 'rand',
+			'posts_per_page' => 4,
+			'columns'        => 4,
+			'orderby'        => 'rand',
 		);
 
 		woocommerce_related_products( apply_filters( 'woocommerce_output_related_products_args', $args ) );
@@ -1501,8 +1467,6 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 
 	/**
 	 * Output the cart shipping calculator.
-	 *
-	 * @subpackage	Cart
 	 */
 	function woocommerce_shipping_calculator() {
 		wc_get_template( 'cart/shipping-calculator.php' );
@@ -1513,8 +1477,6 @@ if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
 
 	/**
 	 * Output the cart totals.
-	 *
-	 * @subpackage	Cart
 	 */
 	function woocommerce_cart_totals() {
 		if ( is_checkout() ) {
@@ -1567,8 +1529,6 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 
 	/**
 	 * Output the proceed to checkout button.
-	 *
-	 * @subpackage	Cart
 	 */
 	function woocommerce_button_proceed_to_checkout() {
 		wc_get_template( 'cart/proceed-to-checkout-button.php' );
@@ -1579,8 +1539,6 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) 
 
 	/**
 	 * Output the view cart button.
-	 *
-	 * @subpackage	Cart
 	 */
 	function woocommerce_widget_shopping_cart_button_view_cart() {
 		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . esc_html__( 'View cart', 'woocommerce' ) . '</a>';
@@ -1591,8 +1549,6 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' )
 
 	/**
 	 * Output the proceed to checkout button.
-	 *
-	 * @subpackage	Cart
 	 */
 	function woocommerce_widget_shopping_cart_proceed_to_checkout() {
 		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward">' . esc_html__( 'Checkout', 'woocommerce' ) . '</a>';
@@ -1627,7 +1583,6 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	/**
 	 * Output the WooCommerce Login Form.
 	 *
-	 * @subpackage	Forms
 	 * @param array $args Arguments.
 	 */
 	function woocommerce_login_form( $args = array() ) {
@@ -1648,11 +1603,11 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 
 	/**
 	 * Output the WooCommerce Checkout Login Form.
-	 *
-	 * @subpackage	Checkout
 	 */
 	function woocommerce_checkout_login_form() {
-		wc_get_template( 'checkout/form-login.php', array( 'checkout' => WC()->checkout() ) );
+		wc_get_template( 'checkout/form-login.php', array(
+			'checkout' => WC()->checkout(),
+		) );
 	}
 }
 
@@ -1697,12 +1652,12 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	/**
 	 * Output the Order review table for the checkout.
 	 *
-	 * @subpackage    Checkout
-	 *
 	 * @param bool $deprecated Deprecated param.
 	 */
 	function woocommerce_order_review( $deprecated = false ) {
-		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+		wc_get_template( 'checkout/review-order.php', array(
+			'checkout' => WC()->checkout(),
+		) );
 	}
 }
 
@@ -1710,8 +1665,6 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 
 	/**
 	 * Output the Payment Methods on the checkout.
-	 *
-	 * @subpackage	Checkout
 	 */
 	function woocommerce_checkout_payment() {
 		if ( WC()->cart->needs_payment() ) {
@@ -1733,11 +1686,11 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 
 	/**
 	 * Output the Coupon form for the checkout.
-	 *
-	 * @subpackage	Checkout
 	 */
 	function woocommerce_checkout_coupon_form() {
-		wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) );
+		wc_get_template( 'checkout/form-coupon.php', array(
+			'checkout' => WC()->checkout(),
+		) );
 	}
 }
 
@@ -1860,12 +1813,11 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * Show subcategory thumbnails.
 	 *
 	 * @param mixed $category Category.
-	 * @subpackage	Loop
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
-		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
-		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
-		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+		$small_thumbnail_size = apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
+		$dimensions           = wc_get_image_size( $small_thumbnail_size );
+		$thumbnail_id         = get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
 			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
@@ -1874,7 +1826,8 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
 		} else {
 			$image        = wc_placeholder_img_src();
-			$image_srcset = $image_sizes = false;
+			$image_srcset = false;
+			$image_sizes  = false;
 		}
 
 		if ( $image ) {
@@ -1898,7 +1851,6 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	 * Displays order details in a table.
 	 *
 	 * @param mixed $order_id Order ID.
-	 * @subpackage	Orders
 	 */
 	function woocommerce_order_details_table( $order_id ) {
 		if ( ! $order_id ) {
@@ -1935,7 +1887,6 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * Display an 'order again' button on the view order page.
 	 *
 	 * @param object $order Order.
-	 * @subpackage	Orders
 	 */
 	function woocommerce_order_again_button( $order ) {
 		if ( ! $order || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! is_user_logged_in() ) {
@@ -1955,12 +1906,9 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	/**
 	 * Outputs a checkout/address form field.
 	 *
-	 * @subpackage    Forms
-	 *
 	 * @param string $key Key.
 	 * @param mixed  $args Arguments.
 	 * @param string $value (default: null).
-	 *
 	 * @return string
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
@@ -2005,7 +1953,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		// Custom attribute handling.
 		$custom_attributes         = array();
-		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'] );
+		$args['custom_attributes'] = array_filter( (array) $args['custom_attributes'], 'strlen' );
 
 		if ( $args['maxlength'] ) {
 			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
@@ -2037,8 +1985,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$field_container = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
 
 		switch ( $args['type'] ) {
-			case 'country' :
-
+			case 'country':
 				$countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
 				if ( 1 === count( $countries ) ) {
@@ -2062,7 +2009,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				}
 
 				break;
-			case 'state' :
+			case 'state':
 				/* Get country this state field is representing */
 				$for_country = isset( $args['country'] ) ? $args['country'] : WC()->checkout->get_value( 'billing_state' === $key ? 'billing_country' : 'shipping_country' );
 				$states      = WC()->countries->get_states( $for_country );
@@ -2091,30 +2038,27 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				}
 
 				break;
-			case 'textarea' :
-
+			case 'textarea':
 				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $value ) . '</textarea>';
 
 				break;
-			case 'checkbox' :
-
+			case 'checkbox':
 				$field = '<label class="checkbox ' . implode( ' ', $args['label_class'] ) . '" ' . implode( ' ', $custom_attributes ) . '>
 						<input type="' . esc_attr( $args['type'] ) . '" class="input-checkbox ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="1" ' . checked( $value, 1, false ) . ' /> '
 						 . $args['label'] . $required . '</label>';
 
 				break;
-			case 'password' :
-			case 'text' :
-			case 'email' :
-			case 'tel' :
-			case 'number' :
-
+			case 'password':
+			case 'text':
+			case 'email':
+			case 'tel':
+			case 'number':
 				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '"  value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
 				break;
-			case 'select' :
-
-				$options = $field = '';
+			case 'select':
+				$field   = '';
+				$options = '';
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {
@@ -2134,8 +2078,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				}
 
 				break;
-			case 'radio' :
-
+			case 'radio':
 				$label_id = current( array_keys( $args['options'] ) );
 
 				if ( ! empty( $args['options'] ) ) {
@@ -2151,7 +2094,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		if ( ! empty( $field ) ) {
 			$field_html = '';
 
-			if ( $args['label'] && 'checkbox' != $args['type'] ) {
+			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
 				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . $args['label'] . $required . '</label>';
 			}
 
@@ -2187,11 +2130,10 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 *
 	 * The default searchform uses html5.
 	 *
-	 * @subpackage	Forms
 	 * @param bool $echo (default: true).
 	 * @return string
 	 */
-	function get_product_search_form( $echo = true  ) {
+	function get_product_search_form( $echo = true ) {
 		global $product_search_form_index;
 
 		ob_start();
@@ -2269,7 +2211,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			'options'          => false,
 			'attribute'        => false,
 			'product'          => false,
-			'selected' 	       => false,
+			'selected'         => false,
 			'name'             => '',
 			'id'               => '',
 			'class'            => '',
@@ -2296,10 +2238,12 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( ! empty( $options ) ) {
 			if ( $product && taxonomy_exists( $attribute ) ) {
 				// Get terms if this is a taxonomy - ordered. We need the names too.
-				$terms = wc_get_product_terms( $product->get_id(), $attribute, array( 'fields' => 'all' ) );
+				$terms = wc_get_product_terms( $product->get_id(), $attribute, array(
+					'fields' => 'all',
+				) );
 
 				foreach ( $terms as $term ) {
-					if ( in_array( $term->slug, $options ) ) {
+					if ( in_array( $term->slug, $options, true ) ) {
 						$html .= '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
 				}
@@ -2366,7 +2310,11 @@ if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 	 */
 	function woocommerce_account_orders( $current_page ) {
 		$current_page    = empty( $current_page ) ? 1 : absint( $current_page );
-		$customer_orders = wc_get_orders( apply_filters( 'woocommerce_my_account_my_orders_query', array( 'customer' => get_current_user_id(), 'page' => $current_page, 'paginate' => true ) ) );
+		$customer_orders = wc_get_orders( apply_filters( 'woocommerce_my_account_my_orders_query', array(
+			'customer' => get_current_user_id(),
+			'page'     => $current_page,
+			'paginate' => true,
+		) ) );
 
 		wc_get_template(
 			'myaccount/orders.php',
@@ -2510,10 +2458,10 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 		$html    = '';
 		$args    = wp_parse_args( $args, array(
 			'before'    => '<ul class="wc-item-meta"><li>',
-			'after'		=> '</li></ul>',
-			'separator'	=> '</li><li>',
-			'echo'		=> true,
-			'autop'		=> false,
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'autop'     => false,
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
@@ -2555,7 +2503,9 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 			'show_url'  => false,
 		) );
 
-		if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $downloads = $item->get_item_downloads() ) ) {
+		$downloads = is_object( $item ) && $item->is_type( 'line_item' ) ? $item->get_item_downloads() : array();
+
+		if ( $downloads ) {
 			$i = 0;
 			foreach ( $downloads as $file ) {
 				$i ++;
@@ -2563,6 +2513,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 				if ( $args['show_url'] ) {
 					$strings[] = '<strong class="wc-item-download-label">' . esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
 				} else {
+					/* translators: %d: downloads count */
 					$prefix = count( $downloads ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
 					$strings[] = '<strong class="wc-item-download-label">' . $prefix . ':</strong> <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a>';
 				}

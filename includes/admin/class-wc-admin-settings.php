@@ -83,11 +83,11 @@ class WC_Admin_Settings {
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
 		self::check_download_folder_protection();
 
-		// Clear any unwanted data and flush rules
+		// Clear any unwanted data and flush rules on next init.
+		add_option( 'woocommerce_queue_flush_rewrite_rules', 'true' );
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 
 		do_action( 'woocommerce_settings_saved' );
 	}

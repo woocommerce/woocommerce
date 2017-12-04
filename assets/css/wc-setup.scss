@@ -602,6 +602,7 @@ body {
 .wc-wizard-service-enable input {
 	visibility: hidden;
 	position: relative;
+	cursor: pointer;
 
 	&:before {
 		content: "\f347"; // down chevron
