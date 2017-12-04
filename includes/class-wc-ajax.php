@@ -1664,9 +1664,6 @@ class WC_AJAX {
 			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
-			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
-				wp_delete_post( $refund->get_id(), true );
-			}
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 	}

@@ -1318,7 +1318,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_shipping_state( 'Boulder' );
 		$object->set_shipping_postcode( '00001' );
 		$object->set_shipping_country( 'US' );
-		$this->assertEquals( 'https://maps.google.com/maps?&q=34+Stonepants+avenue%2C+Rockville%2C+Bedrock%2C+Boulder%2C+00001%2C+US&z=16', $object->get_shipping_address_map_url() );
+		$this->assertEquals( 'https://maps.google.com/maps?&q=34%20Stonepants%20avenue%2C%20Rockville%2C%20Bedrock%2C%20Boulder%2C%2000001%2C%20US&z=16', $object->get_shipping_address_map_url() );
 	}
 
 	/**
@@ -1654,6 +1654,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	function test_get_remaining_refund_items() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 4, $object->get_remaining_refund_items() );
+	}
+
+	/**
+	 * Test that if an exception is thrown when creating a refund, the refund is deleted from database.
+	 */
+	function test_refund_exception() {
+		$order = WC_Helper_Order::create_order();
+		add_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
+		$refund = wc_create_refund( array(
+			'order_id'   => $order->get_id(),
+			'amount'     => $order->get_total(),
+			'line_items' => array(),
+		) );
+		remove_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
+		$this->assertEmpty( $order->get_refunds() );
 	}
 
 	/**
