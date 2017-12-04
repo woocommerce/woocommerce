@@ -85,7 +85,7 @@ class WC_Discounts {
 			$item->object        = $cart_item;
 			$item->product       = $cart_item['data'];
 			$item->quantity      = $cart_item['quantity'];
-			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
+			$item->price         = wc_add_number_precision_deep( $item->product->get_price() * $item->quantity );
 			$this->items[ $key ] = $item;
 		}
 
@@ -369,7 +369,7 @@ class WC_Discounts {
 				}
 			}
 
-			$discount       = min( $discounted_price, $discount );
+			$discount       = wc_cart_round_discount( min( $discounted_price, $discount ), 0 );
 			$cart_total     = $cart_total + $price_to_discount;
 			$total_discount = $total_discount + $discount;
 			$applied_count  = $applied_count + $apply_quantity;
