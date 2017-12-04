@@ -26,7 +26,13 @@ jQuery( function( $ ) {
 			href = $row.find( 'a.order-view' ).attr( 'href' );
 
 		if ( href.length ) {
-			window.location = href;
+			e.preventDefault();
+
+			if ( e.metaKey ) {
+				window.open( href, '_blank' );
+			} else {
+				window.location = href;
+			}
 		}
 	};
 

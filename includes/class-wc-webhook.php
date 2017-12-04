@@ -773,7 +773,12 @@ class WC_Webhook {
 				break;
 		}
 
+		$prev_post_status = $this->get_status();
+
 		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
+
+		do_action( 'woocommerce_webhook_updated_status', $this->id, $post_status, $prev_post_status );
+
 		clean_post_cache( $this->id );
 	}
 

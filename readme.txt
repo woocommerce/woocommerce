@@ -1,8 +1,8 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, claudiulodro, woothemes, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
-Requires at least: 4.5
-Tested up to: 4.8
+Requires at least: 4.7
+Tested up to: 4.9
 Stable tag: 3.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html

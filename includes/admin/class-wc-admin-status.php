@@ -115,7 +115,7 @@ class WC_Admin_Status {
 		}
 
 		// Bulk actions
-		if ( isset( $_GET['action'] ) && isset( $_GET['log'] ) ) {
+		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) {
 			self::log_table_bulk_actions();
 		}
 
@@ -315,9 +315,9 @@ class WC_Admin_Status {
 			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		$log_ids = array_map( 'absint', (array) $_GET['log'] );
+		$log_ids = array_map( 'absint', (array) $_REQUEST['log'] );
 
-		if ( 'delete' === $_GET['action'] || 'delete' === $_GET['action2'] ) {
+		if ( 'delete' === $_REQUEST['action'] || 'delete' === $_REQUEST['action2'] ) {
 			WC_Log_Handler_DB::delete( $log_ids );
 			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 			exit();

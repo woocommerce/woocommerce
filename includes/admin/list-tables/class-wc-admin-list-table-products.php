@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_List_Table_Products', false ) ) {
-	new WC_Admin_List_Table_Products();
 	return;
 }
 
@@ -233,7 +232,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo implode( ', ', $termlist ); // WPCS: XSS ok.
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
 		}
 	}
 
@@ -249,7 +248,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo implode( ', ', $termlist ); // WPCS: XSS ok.
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
 		}
 	}
 
@@ -301,23 +300,27 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
-		$current_category_slug = isset( $_REQUEST['product_cat'] ) ? wc_clean( wp_unslash( $_REQUEST['product_cat'] ) ): false; // WPCS: input var ok, sanitization ok.
-		$current_product_type  = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ): false; // WPCS: input var ok, sanitization ok.
-		$current_stock_status  = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ): false; // WPCS: input var ok, sanitization ok.
-		// @codingStandardsIgnoreStart
-		$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ): false;
-		// @codingStandardsIgnoreEnd
-		?>
-		<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
-			<?php if ( $current_category_slug && $current_category ) : ?>
-				<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
-			<?php endif; ?>
-		</select>
-		<?php
+		$categories_count = (int) wp_count_terms( 'product_cat' );
 
-		$terms   = get_terms( 'product_type' );
-		$output  = '<select name="product_type" id="dropdown_product_type">';
-		$output .= '<option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
+		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
+			wc_product_dropdown_categories( array(
+				'option_select_text' => __( 'Filter by category', 'woocommerce' ),
+			) );
+		} else {
+			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
+			$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
+			?>
+			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
+				<?php if ( $current_category_slug && $current_category ) : ?>
+					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
+				<?php endif; ?>
+			</select>
+			<?php
+		}
+
+		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
+		$terms                = get_terms( 'product_type' );
+		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
 
 		foreach ( $terms as $term ) {
 			$output .= '<option value="' . sanitize_title( $term->name ) . '" ';
@@ -365,12 +368,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$output .= '</select>';
 
+		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ): false; // WPCS: input var ok, sanitization ok.
+		$stock_statuses       = wc_get_product_stock_status_options();
+		$output              .= '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
-		$stock_statuses = wc_get_product_stock_status_options();
-		$output .= '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 		foreach ( $stock_statuses as $status => $label ) {
 			$output .= '<option ' . selected( $status, $current_stock_status, false ) . ' value="' . esc_attr( $status ) . '">' . esc_html( $label ) . '</option>';
 		}
+
 		$output .= '</select>';
 
 		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
@@ -501,5 +506,3 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		return $views;
 	}
 }
-
-new WC_Admin_List_Table_Products();

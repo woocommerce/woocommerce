@@ -218,7 +218,10 @@ class WC_Comments {
 			$stats = get_transient( 'wc_count_comments' );
 
 			if ( ! $stats ) {
-				$stats = array();
+				$stats = array(
+					'total_comments' => 0,
+					'all'            => 0,
+				);
 
 				$count = $wpdb->get_results( "
 					SELECT comment_approved, COUNT(*) AS num_comments
@@ -227,7 +230,6 @@ class WC_Comments {
 					GROUP BY comment_approved
 				", ARRAY_A );
 
-				$total = 0;
 				$approved = array(
 					'0'            => 'moderated',
 					'1'            => 'approved',
@@ -238,16 +240,17 @@ class WC_Comments {
 
 				foreach ( (array) $count as $row ) {
 					// Don't count post-trashed toward totals.
-					if ( 'post-trashed' !== $row['comment_approved'] && 'trash' !== $row['comment_approved'] ) {
-						$total += $row['num_comments'];
+					if ( ! in_array( $row['comment_approved'], array( 'post-trashed', 'trash', 'spam' ), true ) ) {
+						$stats['all']            += $row['num_comments'];
+						$stats['total_comments'] += $row['num_comments'];
+					} elseif ( ! in_array( $row['comment_approved'], array( 'post-trashed', 'trash' ), true ) ) {
+						$stats['total_comments'] += $row['num_comments'];
 					}
 					if ( isset( $approved[ $row['comment_approved'] ] ) ) {
 						$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
 					}
 				}
 
-				$stats['total_comments'] = $total;
-				$stats['all'] = $total;
 				foreach ( $approved as $key ) {
 					if ( empty( $stats[ $key ] ) ) {
 						$stats[ $key ] = 0;

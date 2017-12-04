@@ -99,6 +99,7 @@ class WC_Install {
 		'3.3.0' => array(
 			'wc_update_330_image_options',
 			'wc_update_330_product_stock_status',
+			'wc_update_330_set_default_product_cat',
 			'wc_update_330_db_version',
 		),
 	);
@@ -129,7 +130,7 @@ class WC_Install {
 	 * Init background updates
 	 */
 	public static function init_background_updater() {
-		include_once( dirname( __FILE__ ) . '/class-wc-background-updater.php' );
+		include_once dirname( __FILE__ ) . '/class-wc-background-updater.php';
 		self::$background_updater = new WC_Background_Updater();
 	}
 
@@ -203,7 +204,7 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function remove_admin_notices() {
-		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php' );
+		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php';
 		WC_Admin_Notices::remove_all_notices();
 	}
 
@@ -320,7 +321,8 @@ class WC_Install {
 
 	/**
 	 * Update DB version to current.
-	 * @param string $version
+	 *
+	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );
@@ -329,7 +331,8 @@ class WC_Install {
 
 	/**
 	 * Add more cron schedules.
-	 * @param  array $schedules
+	 *
+	 * @param  array $schedules List of WP scheduled cron jobs.
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
@@ -369,30 +372,32 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
-		include_once( dirname( __FILE__ ) . '/admin/wc-admin-functions.php' );
+		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
-		$pages = apply_filters( 'woocommerce_create_pages', array(
-			'shop' => array(
-				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
-				'content' => '',
-			),
-			'cart' => array(
-				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
-			),
-			'checkout' => array(
-				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
-			),
-			'myaccount' => array(
-				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
-				'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
-				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
-			),
-		) );
+		$pages = apply_filters(
+			'woocommerce_create_pages', array(
+				'shop'      => array(
+					'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
+					'content' => '',
+				),
+				'cart'      => array(
+					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
+					'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+				),
+				'checkout'  => array(
+					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
+					'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+				),
+				'myaccount' => array(
+					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
+					'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+				),
+			)
+		);
 
 		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
@@ -407,8 +412,8 @@ class WC_Install {
 	 * Sets up the default options used on the settings page.
 	 */
 	private static function create_options() {
-		// Include settings so that we can run through defaults
-		include_once( dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php' );
+		// Include settings so that we can run through defaults.
+		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 
@@ -434,7 +439,7 @@ class WC_Install {
 	 */
 	public static function create_terms() {
 		$taxonomies = array(
-			'product_type' => array(
+			'product_type'       => array(
 				'simple',
 				'grouped',
 				'variable',
@@ -455,9 +460,31 @@ class WC_Install {
 
 		foreach ( $taxonomies as $taxonomy => $terms ) {
 			foreach ( $terms as $term ) {
-				if ( ! get_term_by( 'name', $term, $taxonomy ) ) {
+				if ( ! get_term_by( 'name', $term, $taxonomy ) ) { // @codingStandardsIgnoreLine.
 					wp_insert_term( $term, $taxonomy );
 				}
+			}
+		}
+
+		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
+
+		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
+			$default_product_cat_id   = 0;
+			$default_product_cat_slug = sanitize_title( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) );
+			$default_product_cat      = get_term_by( 'slug', $default_product_cat_slug, 'product_cat' ); // @codingStandardsIgnoreLine.
+
+			if ( $default_product_cat ) {
+				$default_product_cat_id = absint( $default_product_cat->term_taxonomy_id );
+			} else {
+				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
+
+				if ( ! empty( $result['term_taxonomy_id'] ) ) {
+					$default_product_cat_id = absint( $result['term_taxonomy_id'] );
+				}
+			}
+
+			if ( $default_product_cat_id ) {
+				update_option( 'default_product_cat', $default_product_cat_id );
 			}
 		}
 	}
@@ -466,21 +493,21 @@ class WC_Install {
 	 * Set up the database tables which the plugin needs to function.
 	 *
 	 * Tables:
-	 *		woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
-	 *		woocommerce_termmeta - Term meta table - sadly WordPress does not have termmeta so we need our own
-	 *		woocommerce_downloadable_product_permissions - Table for storing user and guest download permissions.
-	 *			KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
-	 *		woocommerce_order_items - Order line items are stored in a table to make them easily queryable for reports
-	 *		woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
-	 *		woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
-	 *		woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
+	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
+	 *      woocommerce_termmeta - Term meta table - sadly WordPress does not have termmeta so we need our own
+	 *      woocommerce_downloadable_product_permissions - Table for storing user and guest download permissions.
+	 *          KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
+	 *      woocommerce_order_items - Order line items are stored in a table to make them easily queryable for reports
+	 *      woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
+	 *      woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
+	 *      woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
 	 */
 	private static function create_tables() {
 		global $wpdb;
 
 		$wpdb->hide_errors();
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		/**
 		 * Before updating with DBDELTA, remove any primary keys which could be
@@ -506,7 +533,7 @@ class WC_Install {
 	/**
 	 * Get Table schema.
 	 *
-	 * https://github.com/woocommerce/woocommerce/wiki/Database-Description/
+	 * See https://github.com/woocommerce/woocommerce/wiki/Database-Description/
 	 *
 	 * A note on indexes; Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
 	 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
@@ -714,56 +741,64 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles();
+			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
-		// Customer role
-		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 					=> true,
-		) );
+		// Customer role.
+		add_role(
+			'customer',
+			__( 'Customer', 'woocommerce' ),
+			array(
+				'read' => true,
+			)
+		);
 
-		// Shop manager role
-		add_role( 'shop_manager', __( 'Shop manager', 'woocommerce' ), array(
-			'level_9'                => true,
-			'level_8'                => true,
-			'level_7'                => true,
-			'level_6'                => true,
-			'level_5'                => true,
-			'level_4'                => true,
-			'level_3'                => true,
-			'level_2'                => true,
-			'level_1'                => true,
-			'level_0'                => true,
-			'read'                   => true,
-			'read_private_pages'     => true,
-			'read_private_posts'     => true,
-			'edit_users'             => true,
-			'edit_posts'             => true,
-			'edit_pages'             => true,
-			'edit_published_posts'   => true,
-			'edit_published_pages'   => true,
-			'edit_private_pages'     => true,
-			'edit_private_posts'     => true,
-			'edit_others_posts'      => true,
-			'edit_others_pages'      => true,
-			'publish_posts'          => true,
-			'publish_pages'          => true,
-			'delete_posts'           => true,
-			'delete_pages'           => true,
-			'delete_private_pages'   => true,
-			'delete_private_posts'   => true,
-			'delete_published_pages' => true,
-			'delete_published_posts' => true,
-			'delete_others_posts'    => true,
-			'delete_others_pages'    => true,
-			'manage_categories'      => true,
-			'manage_links'           => true,
-			'moderate_comments'      => true,
-			'upload_files'           => true,
-			'export'                 => true,
-			'import'                 => true,
-			'list_users'             => true,
-		) );
+		// Shop manager role.
+		add_role(
+			'shop_manager',
+			__( 'Shop manager', 'woocommerce' ),
+			array(
+				'level_9'                => true,
+				'level_8'                => true,
+				'level_7'                => true,
+				'level_6'                => true,
+				'level_5'                => true,
+				'level_4'                => true,
+				'level_3'                => true,
+				'level_2'                => true,
+				'level_1'                => true,
+				'level_0'                => true,
+				'read'                   => true,
+				'read_private_pages'     => true,
+				'read_private_posts'     => true,
+				'edit_users'             => true,
+				'edit_posts'             => true,
+				'edit_pages'             => true,
+				'edit_published_posts'   => true,
+				'edit_published_pages'   => true,
+				'edit_private_pages'     => true,
+				'edit_private_posts'     => true,
+				'edit_others_posts'      => true,
+				'edit_others_pages'      => true,
+				'publish_posts'          => true,
+				'publish_pages'          => true,
+				'delete_posts'           => true,
+				'delete_pages'           => true,
+				'delete_private_pages'   => true,
+				'delete_private_posts'   => true,
+				'delete_published_pages' => true,
+				'delete_published_posts' => true,
+				'delete_others_posts'    => true,
+				'delete_others_pages'    => true,
+				'manage_categories'      => true,
+				'manage_links'           => true,
+				'moderate_comments'      => true,
+				'upload_files'           => true,
+				'export'                 => true,
+				'import'                 => true,
+				'list_users'             => true,
+			)
+		);
 
 		$capabilities = self::get_core_capabilities();
 
@@ -780,7 +815,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 *
 	 * @return array
 	 */
-	 private static function get_core_capabilities() {
+	private static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
@@ -793,7 +828,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		foreach ( $capability_types as $capability_type ) {
 
 			$capabilities[ $capability_type ] = array(
-				// Post type
+				// Post type.
 				"edit_{$capability_type}",
 				"read_{$capability_type}",
 				"delete_{$capability_type}",
@@ -808,7 +843,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				"edit_private_{$capability_type}s",
 				"edit_published_{$capability_type}s",
 
-				// Terms
+				// Terms.
 				"manage_{$capability_type}_terms",
 				"edit_{$capability_type}_terms",
 				"delete_{$capability_type}_terms",
@@ -820,7 +855,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * woocommerce_remove_roles function.
+	 * Remove WooCommerce roles.
 	 */
 	public static function remove_roles() {
 		global $wp_roles;
@@ -830,7 +865,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles();
+			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
 		$capabilities = self::get_core_capabilities();
@@ -850,44 +885,45 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
-		// Bypass if filesystem is read-only and/or non-standard upload system is used
+		// Bypass if filesystem is read-only and/or non-standard upload system is used.
 		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
 			return;
 		}
 
-		// Install files and folders for uploading files and prevent hotlinking
+		// Install files and folders for uploading files and prevent hotlinking.
 		$upload_dir      = wp_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
 			array(
-				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file' 		=> 'index.html',
-				'content' 	=> '',
+				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
+				'file'    => 'index.html',
+				'content' => '',
 			),
 			array(
-				'base' 		=> WC_LOG_DIR,
-				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all',
+				'base'    => WC_LOG_DIR,
+				'file'    => '.htaccess',
+				'content' => 'deny from all',
 			),
 			array(
-				'base' 		=> WC_LOG_DIR,
-				'file' 		=> 'index.html',
-				'content' 	=> '',
+				'base'    => WC_LOG_DIR,
+				'file'    => 'index.html',
+				'content' => '',
 			),
 		);
 
 		if ( 'redirect' !== $download_method ) {
 			$files[] = array(
-				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all',
+				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
+				'file'    => '.htaccess',
+				'content' => 'deny from all',
 			);
 		}
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				if ( $file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ) ) {
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' );
+				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] );
 					fclose( $file_handle );
 				}
@@ -898,8 +934,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show action links on the plugin screen.
 	 *
-	 * @param	mixed $links Plugin Action links
-	 * @return	array
+	 * @param   mixed $links Plugin Action links.
+	 * @return  array
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
@@ -912,9 +948,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show row meta on the plugin screen.
 	 *
-	 * @param	mixed $links Plugin Row Meta
-	 * @param	mixed $file  Plugin Base file
-	 * @return	array
+	 * @param   mixed $links Plugin Row Meta.
+	 * @param   mixed $file  Plugin Base file.
+	 * @return  array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
 		if ( WC_PLUGIN_BASENAME == $file ) {
@@ -932,7 +968,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Uninstall tables when MU blog is deleted.
-	 * @param  array $tables
+	 *
+	 * @param  array $tables List of tables that will be deleted by WP.
 	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
@@ -957,7 +994,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Get slug from path
-	 * @param  string $key
+	 *
+	 * @param  string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 * @return string
 	 */
 	private static function format_plugin_slug( $key ) {
@@ -969,8 +1007,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Install a plugin from .org in the background via a cron job (used by
 	 * installer - opt in).
-	 * @param string $plugin_to_install_id
-	 * @param array $plugin_to_install
+	 *
+	 * @param string $plugin_to_install_id Plugin ID.
+	 * @param array  $plugin_to_install Plugin information.
+	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since 2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
@@ -978,14 +1018,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
-			require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 			WP_Filesystem();
 
-			$skin              = new Automatic_Upgrader_Skin;
+			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
 			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
 			$plugin_slug       = $plugin_to_install['repo-slug'];
@@ -993,7 +1033,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$installed         = false;
 			$activate          = false;
 
-			// See if the plugin is installed already
+			// See if the plugin is installed already.
 			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
 				$installed = true;
 				$activate  = ! is_plugin_active( $plugin );
@@ -1001,28 +1041,31 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			// Install this thing!
 			if ( ! $installed ) {
-				// Suppress feedback
+				// Suppress feedback.
 				ob_start();
 
 				try {
-					$plugin_information = plugins_api( 'plugin_information', array(
-						'slug'   => $plugin_to_install['repo-slug'],
-						'fields' => array(
-							'short_description' => false,
-							'sections'          => false,
-							'requires'          => false,
-							'rating'            => false,
-							'ratings'           => false,
-							'downloaded'        => false,
-							'last_updated'      => false,
-							'added'             => false,
-							'tags'              => false,
-							'homepage'          => false,
-							'donate_link'       => false,
-							'author_profile'    => false,
-							'author'            => false,
-						),
-					) );
+					$plugin_information = plugins_api(
+						'plugin_information',
+						array(
+							'slug'   => $plugin_to_install['repo-slug'],
+							'fields' => array(
+								'short_description' => false,
+								'sections'          => false,
+								'requires'          => false,
+								'rating'            => false,
+								'ratings'           => false,
+								'downloaded'        => false,
+								'last_updated'      => false,
+								'added'             => false,
+								'tags'              => false,
+								'homepage'          => false,
+								'donate_link'       => false,
+								'author_profile'    => false,
+								'author'            => false,
+							),
+						)
+					);
 
 					if ( is_wp_error( $plugin_information ) ) {
 						throw new Exception( $plugin_information->get_error_message() );
@@ -1041,17 +1084,19 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 						throw new Exception( $working_dir->get_error_message() );
 					}
 
-					$result = $upgrader->install_package( array(
-						'source'                      => $working_dir,
-						'destination'                 => WP_PLUGIN_DIR,
-						'clear_destination'           => false,
-						'abort_if_destination_exists' => false,
-						'clear_working'               => true,
-						'hook_extra'                  => array(
-							'type'   => 'plugin',
-							'action' => 'install',
-						),
-					) );
+					$result = $upgrader->install_package(
+						array(
+							'source'                      => $working_dir,
+							'destination'                 => WP_PLUGIN_DIR,
+							'clear_destination'           => false,
+							'abort_if_destination_exists' => false,
+							'clear_working'               => true,
+							'hook_extra'                  => array(
+								'type'   => 'plugin',
+								'action' => 'install',
+							),
+						)
+					);
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
@@ -1063,6 +1108,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
+							// translators: 1: plugin name, 2: error message, 3: URL to install plugin manually.
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
@@ -1071,13 +1117,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					);
 				}
 
-				// Discard feedback
+				// Discard feedback.
 				ob_end_clean();
 			}
 
 			wp_clean_plugins_cache();
 
-			// Activate this thing
+			// Activate this thing.
 			if ( $activate ) {
 				try {
 					$result = activate_plugin( $plugin );
@@ -1089,6 +1135,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
+							// translators: 1: plugin name, 2: URL to WP plugin page.
 							__( '%1$s was installed but could not be activated. <a href="%2$s">Please activate it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							admin_url( 'plugins.php' )
@@ -1102,7 +1149,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
 	 *
-	 * @param string $theme_slug
+	 * @param string $theme_slug Theme slug.
+	 * @throws Exception If unable to proceed with theme installation.
 	 * @since 3.1.0
 	 */
 	public static function theme_background_installer( $theme_slug ) {
@@ -1110,25 +1158,27 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
 
 		if ( ! empty( $theme_slug ) ) {
-			// Suppress feedback
+			// Suppress feedback.
 			ob_start();
 
 			try {
 				$theme = wp_get_theme( $theme_slug );
 
 				if ( ! $theme->exists() ) {
-					require_once( ABSPATH . 'wp-admin/includes/file.php' );
-					include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-					include_once( ABSPATH . 'wp-admin/includes/theme.php' );
+					require_once ABSPATH . 'wp-admin/includes/file.php';
+					include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+					include_once ABSPATH . 'wp-admin/includes/theme.php';
 
 					WP_Filesystem();
 
-					$skin     = new Automatic_Upgrader_Skin;
+					$skin     = new Automatic_Upgrader_Skin();
 					$upgrader = new Theme_Upgrader( $skin );
-					$api      = themes_api( 'theme_information', array(
-						'slug'   => $theme_slug,
-						'fields' => array( 'sections' => false ),
-					) );
+					$api      = themes_api(
+						'theme_information', array(
+							'slug'   => $theme_slug,
+							'fields' => array( 'sections' => false ),
+						)
+					);
 					$result   = $upgrader->install( $api->download_link );
 
 					if ( is_wp_error( $result ) ) {
@@ -1145,6 +1195,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				WC_Admin_Notices::add_custom_notice(
 					$theme_slug . '_install_error',
 					sprintf(
+						// translators: 1: theme slug, 2: error message, 3: URL to install theme manually.
 						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 						$theme_slug,
 						$e->getMessage(),
@@ -1153,7 +1204,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				);
 			}
 
-			// Discard feedback
+			// Discard feedback.
 			ob_end_clean();
 		}
 	}
