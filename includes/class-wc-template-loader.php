@@ -237,7 +237,16 @@ class WC_Template_Loader {
 		global $wp_query, $post;
 
 		$queried_object = get_queried_object();
-		$shortcode_args = array();
+		$args           = self::get_current_shop_view_args();
+		$shortcode_args = array(
+			'page'     => $args->page,
+			'columns'  => $args->columns,
+			'rows'     => $args->rows,
+			'orderby'  => '',
+			'order'    => '',
+			'paginate' => true,
+			'cache'    => false,
+		);
 
 		if ( is_product_category() ) {
 			$shortcode_args['category'] = sanitize_title( $queried_object->slug );

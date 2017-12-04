@@ -107,7 +107,7 @@ class WC_Customizer {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return is_woocommerce() || wc_post_content_has_shortcode( 'products' );
+		return is_woocommerce() || wc_post_content_has_shortcode( 'products' ) || ! current_theme_supports( 'woocommerce' );
 	}
 
 	/**
