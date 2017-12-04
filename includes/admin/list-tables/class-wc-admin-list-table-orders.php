@@ -324,6 +324,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				<div class="wc-backbone-modal-content">
 					<section class="wc-backbone-modal-main" role="main">
 						<header class="wc-backbone-modal-header">
+							<mark class="order-status status-{{ data.status }}"><span>{{ data.status_name }}</span></mark>
 							<h1><?php echo esc_html( sprintf( __( 'Order #%s', 'woocommerce' ), '{{ data.order_number }}' ) ); ?></h1>
 							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
@@ -573,6 +574,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 			'payment_via'                => $payment_via,
 			'shipping_via'               => $order->get_shipping_method(),
+			'status'                     => $order->get_status(),
+			'status_name'                => wc_get_order_status_name( $order->get_status() ),
 		), $order );
 	}
 

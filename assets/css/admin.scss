@@ -2049,49 +2049,57 @@ ul.wc_coupon_list_block {
 				background: url('../images/wpspin.gif') no-repeat center top;
 			}
 		}
-		.order-status {
-			display: inline-flex;
-			padding: 0px 1em;
-			line-height: 2.5em;
-			color: #777;
-			background: #E5E5E5;
-			border-radius: 4px;
-			border-bottom: 1px solid rgba(0,0,0,0.05);
-			margin: -.5em 0;
-			cursor: inherit !important;
-			white-space: nowrap;
+	}
+}
 
-			&.status-completed {
-				background: #C8D7E1;
-				color: #2e4453;
-			}
+.order-status {
+	display: inline-flex;
+	padding: 0px 1em;
+	line-height: 2.5em;
+	color: #777;
+	background: #E5E5E5;
+	border-radius: 4px;
+	border-bottom: 1px solid rgba(0,0,0,0.05);
+	margin: -.25em 0;
+	cursor: inherit !important;
+	white-space: nowrap;
 
-			&.status-on-hold {
-				background: #f8dda7;
-				color: #94660c;
-			}
+	&.status-completed {
+		background: #C8D7E1;
+		color: #2e4453;
+	}
 
-			&.status-failed {
-				background: #eba3a3;
-				color: #761919;
-			}
+	&.status-on-hold {
+		background: #f8dda7;
+		color: #94660c;
+	}
 
-			&.status-processing {
-				background: #C6E1C6;
-				color: #5B841B;
-			}
+	&.status-failed {
+		background: #eba3a3;
+		color: #761919;
+	}
 
-			&.status-trash {
-				background: #eba3a3;
-				color: #761919;
-			}
-		}
+	&.status-processing {
+		background: #C6E1C6;
+		color: #5B841B;
+	}
+
+	&.status-trash {
+		background: #eba3a3;
+		color: #761919;
 	}
 }
 
 .wc-order-preview {
+	.order-status {
+		float: right;
+		margin-right: 54px;
+	}
 	article {
 		padding: 0 !important;
+	}
+	.modal-close {
+		border-radius: 0;
 	}
 	.wc-order-preview-table {
 		width: 100%;
