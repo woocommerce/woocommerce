@@ -1549,6 +1549,44 @@ function wc_update_330_set_default_product_cat() {
 }
 
 /**
+ * Update product stock status to use the new onbackorder status.
+ */
+function wc_update_330_product_stock_status() {
+	global $wpdb;
+
+	if ( 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
+	}
+
+	$min_stock_amount = (int) get_option( 'woocommerce_notify_no_stock_amount', 0 );
+
+	// Get all products that have stock management enabled, stock less than or equal to min stock amount, and backorders enabled.
+	$post_ids = $wpdb->get_col( $wpdb->prepare( "
+		SELECT t1.post_id FROM $wpdb->postmeta t1
+		INNER JOIN $wpdb->postmeta t2
+			ON t1.post_id = t2.post_id
+			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
+			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
+		INNER JOIN $wpdb->postmeta t3
+			ON t2.post_id = t3.post_id
+			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
+		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+
+	if ( empty( $post_ids ) ) {
+		return;
+	}
+
+	$post_ids = array_map( 'absint', $post_ids );
+
+	// Set the status to onbackorder for those products.
+	$wpdb->query( "
+		UPDATE $wpdb->postmeta
+		SET meta_value = 'onbackorder'
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
+		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_330_db_version() {

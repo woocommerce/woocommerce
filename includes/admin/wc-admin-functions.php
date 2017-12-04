@@ -309,3 +309,24 @@ function wc_save_order_items( $order_id, $items ) {
 	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }
+
+/**
+ * Get HTML for some action buttons. Used in list tables.
+ *
+ * @since 3.3.0
+ * @param array $actions Actions to output.
+ * @return string
+ */
+function wc_render_action_buttons( $actions ) {
+	$actions_html = '';
+
+	foreach ( $actions as $action ) {
+		if ( isset( $action['group'] ) ) {
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
+		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%s %s" href="%s" title="%s">%s</a>', esc_attr( $action['action'] ), esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+		}
+	}
+
+	return $actions_html;
+}

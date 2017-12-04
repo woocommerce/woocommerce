@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( ! count( $variation_attributes ) ) : ?>
 
 			<div id="message" class="inline notice woocommerce-message">
-				<p><?php esc_html_e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ) ); ?></p>
 				<p><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
 			</div>
 
@@ -62,10 +62,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
-						<option value="toggle_manage_stock"><?php esc_html_e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
-						<option value="variable_stock"><?php esc_html_e( 'Stock', 'woocommerce' ); ?></option>
-                        <option value="variable_stock_status_instock"><?php esc_html_e( 'Set Status - In stock', 'woocommerce' ); ?></option>
-                        <option value="variable_stock_status_outofstock"><?php esc_html_e( 'Set Status - Out of stock', 'woocommerce' ); ?></option>
+						<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
+						<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
+                        <option value="variable_stock_status_instock"><?php _e( 'Set Status - In stock', 'woocommerce' ); ?></option>
+                        <option value="variable_stock_status_outofstock"><?php _e( 'Set Status - Out of stock', 'woocommerce' ); ?></option>
+                        <option value="variable_stock_status_onbackorder"><?php _e( 'Set Status - On backorder', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
 						<option value="variable_length"><?php esc_html_e( 'Length', 'woocommerce' ); ?></option>
