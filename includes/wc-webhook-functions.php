@@ -13,6 +13,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Process webhook delivery.
+ *
+ * @since 3.3.0
+ * @param WC_Webhook $webhook Webhook instance.
+ * @param array      $arg     Delivery arguments.
+ */
+function wc_webhook_process_delivery( $webhook, $arg ) {
+	// Webhooks are processed in the background by default
+	// so as to avoid delays or failures in delivery from affecting the
+	// user who triggered it.
+	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
+		// Deliver in background.
+		wp_schedule_single_event( time(), 'woocommerce_deliver_webhook_async', array( $webhook->get_id(), $arg ) );
+	} else {
+		// Deliver immediately.
+		$webhook->deliver( $arg );
+	}
+}
+add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10, 2 );
+
+/**
+ * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron.
+ * hook, see WC_Webhook::process().
+ *
+ * @since 2.2.0
+ * @param int   $webhook_id Webhook ID to deliver.
+ * @param mixed $arg        Hook argument.
+ */
+function wc_deliver_webhook_async( $webhook_id, $arg ) {
+	$webhook = new WC_Webhook( $webhook_id );
+	$webhook->deliver( $arg );
+}
+add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
+
+/**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
  * + starts with `action.woocommerce_` or `action.wc_`.
