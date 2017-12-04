@@ -1479,17 +1479,17 @@ function wc_get_rounding_precision() {
 }
 
 /**
- * Add precision to a number and return an int.
+ * Add precision to a number and return a number.
  *
  * @since  3.2.0
  * @param  float $value Number to add precision to.
  * @param  bool $round Should we round after adding precision?
- * @return int|float
+ * @return float
  */
 function wc_add_number_precision( $value, $round = true ) {
-	$precision = pow( 10, wc_get_price_decimals() );
-	$value     = $value * $precision;
-	return $round ? intval( round( $value ) ) : $value;
+	$cent_precision = pow( 10, wc_get_price_decimals() );
+	$value          = $value * $cent_precision;
+	return $round ? round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
 }
 
 /**
@@ -1500,8 +1500,8 @@ function wc_add_number_precision( $value, $round = true ) {
  * @return float
  */
 function wc_remove_number_precision( $value ) {
-	$precision = pow( 10, wc_get_price_decimals() );
-	return $value / $precision;
+	$cent_precision = pow( 10, wc_get_price_decimals() );
+	return $value / $cent_precision;
 }
 
 /**
