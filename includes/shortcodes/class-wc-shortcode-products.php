@@ -125,6 +125,7 @@ class WC_Shortcode_Products {
 			'attribute'      => '',        // Single attribute slug.
 			'terms'          => '',        // Comma separated term slugs.
 			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+			'tag'            => '',        // Comma separated tag slugs.
 			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'          => '',        // HTML class.
 			'page'           => 1,         // Page for pagination.
@@ -216,6 +217,9 @@ class WC_Shortcode_Products {
 		// Categories.
 		$this->set_categories_query_args( $query_args );
 
+		// Tags.
+		$this->set_tags_query_args( $query_args );
+
 		return apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
 	}
 
@@ -284,6 +288,23 @@ class WC_Shortcode_Products {
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
 				'field'    => 'slug',
 				'operator' => $this->attributes['cat_operator'],
+			);
+		}
+	}
+
+	/**
+	 * Set tags query args.
+	 *
+	 * @since 3.3.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_tags_query_args( &$query_args ) {
+		if ( ! empty( $this->attributes['tag'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['tag'] ) ),
+				'field'    => 'slug',
+				'operator' => 'IN',
 			);
 		}
 	}

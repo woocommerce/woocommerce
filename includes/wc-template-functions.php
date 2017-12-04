@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wc_template_redirect() {
 	global $wp_query, $wp;
 
-	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && wc_get_page_id( 'shop' ) == $_GET['page_id'] ) {
+	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && wc_get_page_id( 'shop' ) === absint( $_GET['page_id'] ) && get_post_type_archive_link( 'product' ) ) {
 
 		// When default permalinks are enabled, redirect shop page to post type archive url.
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
