@@ -18,19 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Session_Handler extends WC_Session {
 
 	/** @var string cookie name */
-	private $_cookie;
+	protected $_cookie;
 
 	/** @var string session due to expire timestamp */
-	private $_session_expiring;
+	protected $_session_expiring;
 
 	/** @var string session expiration timestamp */
-	private $_session_expiration;
+	protected $_session_expiration;
 
 	/** $var bool Bool based on whether a cookie exists **/
-	private $_has_cookie = false;
+	protected $_has_cookie = false;
 
 	/** @var string Custom session table name */
-	private $_table;
+	protected $_table;
 
 	/**
 	 * Constructor for the session class.
