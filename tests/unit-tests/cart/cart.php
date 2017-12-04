@@ -7,6 +7,21 @@
 class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
+	 * Clean up after test.
+	 */
+	public function tearDown() {
+		global $wpdb;
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC()->session->set( 'chosen_shipping_methods', array() );
+		WC_Helper_Shipping::delete_simple_flat_rate();
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+	}
+
+	/**
 	 * Test some discount logic which has caused issues in the past.
 	 * Tickets:
 	 * 	https://github.com/woocommerce/woocommerce/issues/10573
