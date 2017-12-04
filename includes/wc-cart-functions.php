@@ -371,7 +371,7 @@ function wc_cart_round_discount( $value, $precision ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {
 		// Fake it in PHP 5.2.
-		if ( 2 === WC_DISCOUNT_ROUNDING_MODE && strstr( $value, '.' ) ) {
+		if ( 2 === WC_DISCOUNT_ROUNDING_MODE && false !== strstr( (string) $value, '.' ) ) {
 			$value    = (string) $value;
 			$value    = explode( '.', $value );
 			$value[1] = substr( $value[1], 0, $precision + 1 );
