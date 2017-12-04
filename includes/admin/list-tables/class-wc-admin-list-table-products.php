@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_List_Table_Products', false ) ) {
-	new WC_Admin_List_Table_Products();
 	return;
 }
 
@@ -485,5 +484,3 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		return $views;
 	}
 }
-
-new WC_Admin_List_Table_Products();

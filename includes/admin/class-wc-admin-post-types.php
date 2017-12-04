@@ -90,12 +90,15 @@ class WC_Admin_Post_Types {
 		switch ( $screen_id ) {
 			case 'edit-shop_order' :
 				include_once( 'list-tables/class-wc-admin-list-table-orders.php' );
+				new WC_Admin_List_Table_Orders();
 				break;
 			case 'edit-shop_coupon' :
 				include_once( 'list-tables/class-wc-admin-list-table-coupons.php' );
+				new WC_Admin_List_Table_Coupons();
 				break;
 			case 'edit-product' :
 				include_once( 'list-tables/class-wc-admin-list-table-products.php' );
+				new WC_Admin_List_Table_Products();
 				break;
 		}
 	}

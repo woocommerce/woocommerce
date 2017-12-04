@@ -134,18 +134,27 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'init_tooltips', function() {
-			var tiptip_args = {
+			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
 				'fadeOut': 50,
 				'delay': 200
-			};
+			} );
 
-			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
+			$( '.column-wc_actions .wc-action-button' ).tipTip( {
+				'fadeIn': 50,
+				'fadeOut': 50,
+				'delay': 200
+			} );
 
 			// Add tiptip to parent element for widefat tables
 			$( '.parent-tips' ).each( function() {
-				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
+				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( {
+					'attribute': 'data-tip',
+					'fadeIn': 50,
+					'fadeOut': 50,
+					'delay': 200
+				} ).css( 'cursor', 'help' );
 			});
 		});
 
