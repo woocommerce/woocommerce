@@ -221,7 +221,7 @@ function wc_trim_zeros( $price ) {
  * @return double
  */
 function wc_round_tax_total( $value, $precision = null ) {
-	$precision = is_null( $precision ) ? wc_get_price_decimals() : absint( $precision );
+	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() );
