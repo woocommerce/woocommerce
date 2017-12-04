@@ -397,6 +397,137 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test a rounding issue on prices that are entered inclusive tax and shipping is used.
+	 * See: #17970.
+	 *
+	 * @since 3.2.6
+	 */
+	public function test_inclusive_tax_rounding() {
+		global $wpdb;
+
+		// Store is set to enter product prices inclusive tax.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// 19% tax.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create a flat rate method.
+		$flat_rate_settings = array(
+			'enabled'      => 'yes',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => '4.12',
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		update_option( 'woocommerce_flat_rate', array() );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->load_shipping_methods();
+
+		// We need this to have the calculate_totals() method calculate totals.
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Create the product and add it to the cart.
+		$product = new WC_Product_Simple;
+		$product->set_regular_price( '149.14' );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Set the flat_rate shipping method
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '154.04', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+		$this->assertEquals( '24.59', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC_Helper_Product::delete_product( $product->get_id() );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Delete the flat rate method
+		WC()->session->set( 'chosen_shipping_methods', array() );
+		delete_option( 'woocommerce_flat_rate_settings' );
+		delete_option( 'woocommerce_flat_rate' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->unregister_shipping_methods();
+	}
+
+	/**
+	 * Test a rounding issue on prices that are entered exclusive tax.
+	 * See: #17970.
+	 *
+	 * @since 3.2.6
+	 */
+	public function test_exclusive_tax_rounding() {
+		global $wpdb;
+
+		// todo remove this line when previous test stops failing.
+		WC()->cart->empty_cart();
+
+		// Store is set to enter product prices excluding tax.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// 20% tax.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Add 2 products whose retail prices (inc tax) are: £65, £50.
+		// Their net prices are therefore: £54.1666667 and £41.6666667.
+		$product1 = new WC_Product_Simple;
+		$product1->set_regular_price( '54.1666667' );
+		$product1->save();
+
+		$product2 = new WC_Product_Simple;
+		$product2->set_regular_price( '41.6666667' );
+		$product2->save();
+
+		WC()->cart->add_to_cart( $product1->get_id(), 1 );
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '115.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC_Helper_Product::delete_product( $product1->get_id() );
+		WC_Helper_Product::delete_product( $product2->get_id() );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
 	 * Test get_remove_url.
 	 *
 	 * @since 2.3
