@@ -101,6 +101,7 @@ class WC_Install {
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
 			'wc_update_330_db_version',
+			'wc_update_330_clear_transients',
 		),
 	);
 
