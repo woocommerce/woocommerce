@@ -35,14 +35,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</li>
 			<?php endforeach; ?>
 		</ul>
+
+		<?php if ( isset( $_GET['search'] ) ) : ?>
+			<h1 class="search-form-title" >
+				Showing Search results for:
+				<strong><?php echo esc_html( $_GET['search'] ); ?></strong>
+			</h1>
+		<?php endif; ?>
+
 		<form class="search-form" method="GET">
 			<button type="submit">
 				<span class="dashicons dashicons-search"></span>
 			</button>
 			<input type="text" name="search" value="" placeholder="Enter a search term and press enter">
 			<input type="hidden" name="page" value="wc-addons">
-			<?php $page_section = isset( $_GET['section'] ) ? $_GET['section'] : ''; ?>
-			<?php $page_section = '_featured' === $page_section ? '' : $page_section; ?>
+			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? $_GET['section'] : '_all'; ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
 		</form>
 		<?php if ( '_featured' === $current_section ) : ?>

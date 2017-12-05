@@ -116,7 +116,7 @@ class WC_Admin_Addons {
 	 */
 	public static function get_sections() {
 		$addon_sections = get_transient( 'wc_addons_sections' );
-		if ( false === ( $addon_sections ) ) {
+		// if ( false === ( $addon_sections ) ) {
 			$raw_sections = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories'
 			);
@@ -126,7 +126,7 @@ class WC_Admin_Addons {
 					set_transient( 'wc_addons_sections', $addon_sections, WEEK_IN_SECONDS );
 				}
 			}
-		}
+		// }
 
 		apply_filters( 'woocommerce_addons_sections', $addon_sections );
 
