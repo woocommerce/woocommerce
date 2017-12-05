@@ -506,12 +506,12 @@ class WC_Shortcode_Products {
 			}
 
 			$ids = array(
-				'ids' => wp_parse_id_list( $products->posts ),
-				'per_page' => $products->get( 'posts_per_page' ),
-				'found_posts' => $products->found_posts,
+				'ids'           => wp_parse_id_list( $products->posts ),
+				'per_page'      => $products->get( 'posts_per_page' ),
+				'found_posts'   => $products->found_posts,
 				'max_num_pages' => $products->max_num_pages,
-				'current' => max( 1, $products->get( 'paged', 1 ) ),
-				'is_search' => intval( $products->is_search() ),
+				'current'       => max( 1, $products->get( 'paged', 1 ) ),
+				'is_search'     => intval( $products->is_search() ),
 			);
 
 			if ( $cache ) {
