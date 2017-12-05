@@ -1362,7 +1362,7 @@ class WC_Admin_Setup_Wizard {
 			// @codingStandardsIgnoreStart
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
-					$settings[ $setting_id ] = 'yes' === $settings['enabled']
+					$settings[ $setting_id ] = 'yes' === $settings['enabled'] && isset( $_POST[ $gateway_id . '_' . $setting_id ] )
 						? wc_clean( wp_unslash( $_POST[ $gateway_id . '_' . $setting_id ] ) )
 						: false;
 				}
