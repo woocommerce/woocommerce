@@ -17,13 +17,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Returns the url to the lost password endpoint url.
  *
- * @access public
- * @param  string $default_url
+ * @param  string $default_url Default lost password URL.
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
+	// Avoid loading too early.
+	if ( ! did_action( 'init' ) ) {
+		return $default_url;
+	}
+
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
-	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], network_admin_url() ) ) {
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok.
 		return $default_url;
 	}
 
