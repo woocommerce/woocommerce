@@ -84,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
-					<span class="displaying-num"><?php printf( esc_html( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ) ); ?></span>
+					<span class="displaying-num"><?php echo esc_html( sprintf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ) ); ?></span>
 					<span class="expand-close">
 						(<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>)
 					</span>
