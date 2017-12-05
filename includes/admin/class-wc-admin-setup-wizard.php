@@ -1075,6 +1075,23 @@ class WC_Admin_Setup_Wizard {
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_ec_description,
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+				'settings'    => array(
+					'reroute_requests' => array(
+						'label'       => __( 'Set up Express Checkout payments for me', 'woocommerce' ),
+						'type'        => 'checkbox',
+						'value'       => 'yes',
+						'placeholder' => '',
+						'required'    => false,
+					),
+					'api_subject' => array(
+						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll authenticate payments for you. To claim a payment, you'll need to have a PayPal Business account or create one later. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'required'    => true,
+					),
+				),
 			),
 			'paypal' => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
