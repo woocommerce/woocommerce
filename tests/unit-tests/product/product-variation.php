@@ -8,7 +8,6 @@
 /**
  * Class Product_Variation.
  *
- * @package WooCommerce\Tests\Product
  * @since 3.0
  */
 class WC_Tests_Product_Variation extends WC_Unit_Test_Case {

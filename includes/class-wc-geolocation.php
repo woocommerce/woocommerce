@@ -21,11 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Geolocation {
 
-	/** URL to the geolocation database we're using */
-	const GEOLITE_DB      = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
+	/**
+	 * GeoLite IPv4 DB.
+	 */
+	const GEOLITE_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
+
+	/**
+	 * GeoLite IPv6 DB.
+	 */
 	const GEOLITE_IPV6_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoIPv6.dat.gz';
 
-	/** @var array API endpoints for looking up user IP address */
+	/**
+	 * API endpoints for looking up user IP address.
+	 *
+	 * @var array
+	 */
 	private static $ip_lookup_apis = array(
 		'icanhazip'         => 'http://icanhazip.com',
 		'ipify'             => 'http://api.ipify.org/',
@@ -35,7 +45,11 @@ class WC_Geolocation {
 		'ip.appspot'        => 'http://ip.appspot.com',
 	);
 
-	/** @var array API endpoints for geolocating an IP address */
+	/**
+	 * API endpoints for geolocating an IP address
+	 *
+	 * @var array
+	 */
 	private static $geoip_apis = array(
 		'freegeoip'  => 'https://freegeoip.net/json/%s',
 		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
@@ -46,7 +60,7 @@ class WC_Geolocation {
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it
+		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
 		if ( 'geolocation' === get_option( 'woocommerce_default_customer_address' ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
 			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
 		}
@@ -55,8 +69,9 @@ class WC_Geolocation {
 
 	/**
 	 * Maybe trigger a DB update for the first time.
-	 * @param  string $new_value
-	 * @param  string $old_value
+	 *
+	 * @param  string $new_value New value.
+	 * @param  string $old_value Old value.
 	 * @return string
 	 */
 	public static function maybe_update_database( $new_value, $old_value ) {
@@ -67,45 +82,19 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Check if is a valid IP address.
-	 *
-	 * @since  3.0.6
-	 * @param  string $ip_address IP address.
-	 * @return string|bool The valid IP address, otherwise false.
-	 */
-	private static function is_ip_address( $ip_address ) {
-		// WP 4.7+ only.
-		if ( function_exists( 'rest_is_ip_address' ) ) {
-			return rest_is_ip_address( $ip_address );
-		}
-
-		// Support for WordPress 4.4 to 4.6.
-		if ( ! class_exists( 'Requests_IPv6', false ) ) {
-			include_once( dirname( __FILE__ ) . '/vendor/class-requests-ipv6.php' );
-		}
-
-		$ipv4_pattern = '/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/';
-
-		if ( ! preg_match( $ipv4_pattern, $ip_address ) && ! Requests_IPv6::check_ipv6( $ip_address ) ) {
-			return false;
-		}
-
-		return $ip_address;
-	}
-
-	/**
 	 * Get current user IP Address.
+	 *
 	 * @return string
 	 */
 	public static function get_ip_address() {
-		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
-			return $_SERVER['HTTP_X_REAL_IP'];
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) { // WPCS: input var ok, CSRF ok.
+			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );  // WPCS: input var ok, CSRF ok.
+		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) { // WPCS: input var ok, CSRF ok.
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			return (string) self::is_ip_address( trim( current( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) );
-		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			return $_SERVER['REMOTE_ADDR'];
+			return (string) rest_is_ip_address( trim( current( explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) { // @codingStandardsIgnoreLine
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ); // @codingStandardsIgnoreLine
 		}
 		return '';
 	}
@@ -114,6 +103,7 @@ class WC_Geolocation {
 	 * Get user IP Address using an external service.
 	 * This is used mainly as a fallback for users on localhost where
 	 * get_ip_address() will be a local IP and non-geolocatable.
+	 *
 	 * @return string
 	 */
 	public static function get_external_ip_address() {
@@ -148,8 +138,9 @@ class WC_Geolocation {
 
 	/**
 	 * Geolocate an IP address.
-	 * @param  string $ip_address
-	 * @param  bool   $fallback If true, fallbacks to alternative IP detection (can be slower).
+	 *
+	 * @param  string $ip_address   IP Address.
+	 * @param  bool   $fallback     If true, fallbacks to alternative IP detection (can be slower).
 	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
@@ -158,19 +149,19 @@ class WC_Geolocation {
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
 		if ( false === $country_code ) {
-			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
-			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
-				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
-			// WP.com VIP has a variable available.
-			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) {
-				$country_code = sanitize_text_field( strtoupper( $_SERVER['GEOIP_COUNTRY_CODE'] ) );
-			// VIP Go has a variable available also.
-			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) {
-				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_X_COUNTRY_CODE'] ) );
+			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview).
+			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) { // WPCS: input var ok, CSRF ok.
+				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) ); // WPCS: input var ok, CSRF ok.
+			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
+				// WP.com VIP has a variable available.
+				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
+			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
+				// VIP Go has a variable available also.
+				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
-				if ( self::is_IPv6( $ip_address ) ) {
+				if ( self::is_ipv6( $ip_address ) ) {
 					$database = self::get_local_database_path( 'v6' );
 				} else {
 					$database = self::get_local_database_path();
@@ -185,7 +176,7 @@ class WC_Geolocation {
 				}
 
 				if ( ! $country_code && $fallback ) {
-					// May be a local environment - find external IP
+					// May be a local environment - find external IP.
 					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
 				}
 			}
@@ -199,11 +190,12 @@ class WC_Geolocation {
 
 	/**
 	 * Path to our local db.
-	 * @param  string $version
+	 *
+	 * @param  string $version Version.
 	 * @return string
 	 */
 	public static function get_local_database_path( $version = 'v4' ) {
-		$version    = ( 'v4' == $version ) ? '' : 'v6';
+		$version    = 'v4' === $version ? '' : 'v6';
 		$upload_dir = wp_upload_dir();
 
 		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoIP' . $version . '.dat', $version );
@@ -220,7 +212,7 @@ class WC_Geolocation {
 			return;
 		}
 
-		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		require_once ABSPATH . 'wp-admin/includes/file.php';
 
 		$tmp_databases = array(
 			'v4' => download_url( self::GEOLITE_DB ),
@@ -229,20 +221,20 @@ class WC_Geolocation {
 
 		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {
 			if ( ! is_wp_error( $tmp_database_path ) ) {
-				$gzhandle = @gzopen( $tmp_database_path, 'r' );
-				$handle   = @fopen( self::get_local_database_path( $tmp_database_version ), 'w' );
+				$gzhandle = @gzopen( $tmp_database_path, 'r' ); // @codingStandardsIgnoreLine
+				$handle   = @fopen( self::get_local_database_path( $tmp_database_version ), 'w' ); // @codingStandardsIgnoreLine
 
 				if ( $gzhandle && $handle ) {
-					while ( $string = gzread( $gzhandle, 4096 ) ) {
-						fwrite( $handle, $string, strlen( $string ) );
+					while ( $string = gzread( $gzhandle, 4096 ) ) { // @codingStandardsIgnoreLine
+						fwrite( $handle, $string, strlen( $string ) ); // @codingStandardsIgnoreLine
 					}
 					gzclose( $gzhandle );
 					$s_array = fstat( $handle );
-					fclose( $handle );
+					fclose( $handle ); // @codingStandardsIgnoreLine
 					if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
 						$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
 						// Delete empty DB, we do not want to keep empty files around.
-						@unlink( self::get_local_database_path( $tmp_database_version ) );
+						@unlink( self::get_local_database_path( $tmp_database_version ) ); // @codingStandardsIgnoreLine
 						// Reschedule download of DB.
 						wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 						wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
@@ -250,7 +242,7 @@ class WC_Geolocation {
 				} else {
 					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
 				}
-				@unlink( $tmp_database_path );
+				@unlink( $tmp_database_path ); // @codingStandardsIgnoreLine
 			} else {
 				$logger->notice(
 					'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
@@ -262,17 +254,18 @@ class WC_Geolocation {
 
 	/**
 	 * Use MAXMIND GeoLite database to geolocation the user.
-	 * @param  string $ip_address
+	 *
+	 * @param  string $ip_address IP address.
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address ) {
 		if ( ! class_exists( 'WC_Geo_IP', false ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-geo-ip.php' );
+			include_once WC_ABSPATH . 'includes/class-wc-geo-ip.php';
 		}
 
 		$gi = new WC_Geo_IP();
 
-		if ( self::is_IPv6( $ip_address ) ) {
+		if ( self::is_ipv6( $ip_address ) ) {
 			$database = self::get_local_database_path( 'v6' );
 			if ( ! self::get_file_size( $database ) ) {
 				return false;
@@ -301,14 +294,14 @@ class WC_Geolocation {
 	 * @return bool|int
 	 */
 	private static function get_file_size( $filename ) {
-		$handle   = @fopen( $filename, 'r' );
-		$s_array  = fstat( $handle );
-		@fclose( $handle );
+		$handle   = @fopen( $filename, 'r' );  // @codingStandardsIgnoreLine
+		$s_array  = fstat( $handle );  // @codingStandardsIgnoreLine
+		@fclose( $handle );  // @codingStandardsIgnoreLine
 		if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
 			$logger = wc_get_logger();
 			$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
 			// Delete the file as we do not want to keep empty files around.
-			@unlink( $filename );
+			@unlink( $filename ); // @codingStandardsIgnoreLine
 			return false;
 		}
 		return $s_array['size'];
@@ -316,7 +309,8 @@ class WC_Geolocation {
 
 	/**
 	 * Use APIs to Geolocate the user.
-	 * @param  string $ip_address
+	 *
+	 * @param  string $ip_address IP address.
 	 * @return string|bool
 	 */
 	private static function geolocate_via_api( $ip_address ) {
@@ -333,21 +327,21 @@ class WC_Geolocation {
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
-						case 'ipinfo.io' :
+						case 'ipinfo.io':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
-						break;
-						case 'ip-api.com' :
+							break;
+						case 'ip-api.com':
 							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->countryCode ) ? $data->countryCode : '';
-						break;
-						case 'freegeoip' :
+							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
+							break;
+						case 'freegeoip':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country_code ) ? $data->country_code : '';
-						break;
-						default :
+							break;
+						default:
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );
-						break;
+							break;
 					}
 
 					$country_code = sanitize_text_field( strtoupper( $country_code ) );
@@ -369,10 +363,10 @@ class WC_Geolocation {
 	 *
 	 * @since  2.4.0
 	 *
-	 * @param  string $ip_address
+	 * @param  string $ip_address IP Address.
 	 * @return bool
 	 */
-	private static function is_IPv6( $ip_address ) {
+	private static function is_ipv6( $ip_address ) {
 		return false !== filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
 	}
 }

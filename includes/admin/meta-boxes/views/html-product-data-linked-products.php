@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="options_group show_if_grouped">
 		<p class="form-field">
-			<label for="grouped_products"><?php _e( 'Grouped products', 'woocommerce' ); ?></label>
+			<label for="grouped_products"><?php esc_html_e( 'Grouped products', 'woocommerce' ); ?></label>
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="grouped_products" name="grouped_products[]" data-sortable="true" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 					$product_ids = $product_object->get_children( 'edit' );
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="options_group">
 		<p class="form-field">
-			<label for="upsell_ids"><?php _e( 'Upsells', 'woocommerce' ); ?></label>
+			<label for="upsell_ids"><?php esc_html_e( 'Upsells', 'woocommerce' ); ?></label>
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="upsell_ids" name="upsell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 					$product_ids = $product_object->get_upsell_ids( 'edit' );
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</p>
 
 		<p class="form-field hide_if_grouped hide_if_external">
-			<label for="crosssell_ids"><?php _e( 'Cross-sells', 'woocommerce' ); ?></label>
+			<label for="crosssell_ids"><?php esc_html_e( 'Cross-sells', 'woocommerce' ); ?></label>
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="crosssell_ids" name="crosssell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 					$product_ids = $product_object->get_cross_sell_ids( 'edit' );

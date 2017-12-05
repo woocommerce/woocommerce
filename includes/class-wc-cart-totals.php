@@ -227,7 +227,7 @@ final class WC_Cart_Totals {
 			$item->taxable                 = 'taxable' === $cart_item['data']->get_tax_status();
 			$item->price_includes_tax      = wc_prices_include_tax();
 			$item->quantity                = $cart_item['quantity'];
-			$item->price                   = wc_add_number_precision_deep( $cart_item['data']->get_price() ) * $cart_item['quantity'];
+			$item->price                   = wc_add_number_precision_deep( $cart_item['data']->get_price() * $cart_item['quantity'] );
 			$item->product                 = $cart_item['data'];
 			$item->tax_rates               = $this->get_item_tax_rates( $item );
 			$this->items[ $cart_item_key ] = $item;
@@ -423,7 +423,7 @@ final class WC_Cart_Totals {
 	 * @return object
 	 */
 	protected function remove_item_base_taxes( $item ) {
-		if ( $item->price_includes_tax ) {
+		if ( $item->price_includes_tax && $item->taxable ) {
 			$base_tax_rates           = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
 			// Work out a new base price without the shop's base tax.
@@ -449,7 +449,7 @@ final class WC_Cart_Totals {
 	 * @return object
 	 */
 	protected function adjust_non_base_location_price( $item ) {
-		if ( $item->price_includes_tax ) {
+		if ( $item->price_includes_tax && $item->taxable ) {
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
 			if ( $item->tax_rates !== $base_tax_rates ) {

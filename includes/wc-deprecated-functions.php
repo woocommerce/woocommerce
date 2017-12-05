@@ -4,10 +4,10 @@
  *
  * Where functions come to die.
  *
- * @author 	WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @author   Automattic
+ * @category Core
+ * @package  WooCommerce\Functions
+ * @version  3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,17 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Runs a deprecated action with notice only if used.
  *
- * @since  3.0.0
- * @param  string $action
- * @param  array $args
- * @param  string $deprecated_in
- * @param  string $replacement
+ * @since 3.0.0
+ * @param string $tag         The name of the action hook.
+ * @param array  $args        Array of additional function arguments to be passed to do_action().
+ * @param string $version     The version of WooCommerce that deprecated the hook.
+ * @param string $replacement The hook that should have been used.
+ * @param string $message     A message regarding the change.
  */
-function wc_do_deprecated_action( $action, $args, $deprecated_in, $replacement ) {
-	if ( has_action( $action ) ) {
-		wc_deprecated_function( 'Action: ' . $action, $deprecated_in, $replacement );
-		do_action_ref_array( $action, $args );
+function wc_do_deprecated_action( $tag, $args, $version, $replacement = null, $message = null ) {
+	if ( ! has_action( $tag ) ) {
+		return;
 	}
+
+	wc_deprecated_hook( $tag, $version, $replacement, $message );
+	do_action_ref_array( $tag, $args );
 }
 
 /**
@@ -47,6 +50,31 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
 		error_log( $log_string );
 	} else {
 		_deprecated_function( $function, $version, $replacement );
+	}
+	// @codingStandardsIgnoreEnd
+}
+
+/**
+ * Wrapper for deprecated hook so we can apply some extra logic.
+ *
+ * @since 3.3.0
+ * @param string $hook        The hook that was used.
+ * @param string $version     The version of WordPress that deprecated the hook.
+ * @param string $replacement The hook that should have been used.
+ * @param string $message     A message regarding the change.
+ */
+function wc_deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
+	// @codingStandardsIgnoreStart
+	if ( is_ajax() ) {
+		do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
+
+		$message    = empty( $message ) ? '' : ' ' . $message;
+		$log_string = "{$hook} is deprecated since version {$version}";
+		$log_string .= $replacement ? "! Use {$replacement} instead." : ' with no alternative available.';
+
+		error_log( $log_string . $message );
+	} else {
+		_deprecated_hook( $hook, $version, $replacement, $message );
 	}
 	// @codingStandardsIgnoreEnd
 }
