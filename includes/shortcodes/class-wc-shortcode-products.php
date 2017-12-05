@@ -225,7 +225,8 @@ class WC_Shortcode_Products {
 		// Always query only IDs.
 		$query_args['fields'] = 'ids';
 
-		return $query_args;	}
+		return $query_args;
+	}
 
 	/**
 	 * Set skus query args.
