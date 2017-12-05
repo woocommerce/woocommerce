@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td>
 						<input type="hidden" name="update_existing" value="0" />
 						<input type="checkbox" id="woocommerce-importer-update-existing" name="update_existing" value="1" />
-						<label for="woocommerce-importer-update-existing"><?php esc_html_e( 'If a product being imported matches an existing product by ID or SKU, update the existing product rather than creating a new product or skipping the row.', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-update-existing"><?php esc_html_e( 'Existing products that match by ID or SKU will be updated. Products that do not exist will be skipped.', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
