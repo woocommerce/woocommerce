@@ -76,6 +76,9 @@ final class WC_Cart_Session {
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
 			$cart = array();
+		} elseif ( is_array( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
+			$cart                = array_merge( $saved_cart['cart'], $cart );
+			$update_cart_session = true;
 		}
 
 		if ( is_array( $cart ) ) {
