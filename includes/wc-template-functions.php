@@ -878,9 +878,9 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 
 		$query = $GLOBALS['wp_query'];
 		$default_args = array(
-			'total' => $query->found_posts,
+			'total'    => $query->found_posts,
 			'per_page' => $query->get( 'posts_per_page' ),
-			'current' => max( 1, $query->get( 'paged', 1 ) ),
+			'current'  => max( 1, $query->get( 'paged', 1 ) ),
 		);
 		$args = wp_parse_args( $args, $default_args );
 
@@ -933,8 +933,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 		wc_get_template( 'loop/orderby.php', array(
 			'catalog_orderby_options' => $catalog_orderby_options,
-			'orderby' => $orderby,
-			'show_default_orderby' => $show_default_orderby,
+			'orderby'                 => $orderby,
+			'show_default_orderby'    => $show_default_orderby,
 		) );
 	}
 }
@@ -950,7 +950,7 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 		$query = $GLOBALS['wp_query'];
 
 		$default_args = array(
-			'total' => $query->max_num_pages,
+			'total'   => $query->max_num_pages,
 			'current' => max( 1, $query->get( 'paged', 1 ) ),
 		);
 		$args = wp_parse_args( $args, $default_args );
