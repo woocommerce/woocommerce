@@ -409,8 +409,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
+				$attribute_id = 0;
+
 				// Get ID if is a global attribute.
-				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
+				if ( ! empty( $attribute['taxonomy'] ) ) {
+					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+				}
 
 				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
@@ -578,7 +582,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
-	 * @param  string $name Attribute name.
+	 * @param  string $raw_name Attribute name.
 	 * @return int
 	 */
 	protected function get_attribute_taxonomy_id( $raw_name ) {
