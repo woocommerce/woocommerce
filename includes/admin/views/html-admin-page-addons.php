@@ -25,8 +25,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
-			<?php foreach ( $sections as $section_id => $section ) : ?>
-				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php echo ( end( $section_keys ) !== $section_id ) ? ' |' : ''; ?></li>
+			<?php foreach ( $sections as $section ) : ?>
+				<li>
+					<a
+						class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
+						href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ); ?>">
+						<?php echo esc_html( $section->label ); ?>
+					</a>
+				</li>
 			<?php endforeach; ?>
 		</ul>
 		<form class="search-form" method="GET">
@@ -36,17 +42,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="text" name="search" value="" placeholder="Enter a search term and press enter">
 			<input type="hidden" name="page" value="wc-addons">
 			<?php $page_section = isset( $_GET['section'] ) ? $_GET['section'] : ''; ?>
-			<?php $page_section = 'featured' === $page_section ? '' : $page_section; ?>
+			<?php $page_section = '_featured' === $page_section ? '' : $page_section; ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
 		</form>
-		<?php if ( 'featured' === $current_section ) : ?>
+		<?php if ( '_featured' === $current_section ) : ?>
 			<div class="addons-featured">
 				<?php
 					$featured = WC_Admin_Addons::get_featured();
 				?>
 			</div>
 		<?php endif; ?>
-		<?php if ( 'featured' !== $current_section && $addons ) : ?>
+		<?php if ( '_featured' !== $current_section && $addons ) : ?>
 			<?php if ( 'shipping_methods' === $current_section ) : ?>
 				<div class="addons-shipping-methods">
 					<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
@@ -91,7 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
 
-	<?php if ( 'Storefront' !== $theme['Name'] && 'featured' !== $current_section ) : ?>
+	<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 		<div class="storefront">
 			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.png" alt="Storefront" /></a>
 			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
