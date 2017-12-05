@@ -55,7 +55,7 @@ class WC_Shipping_Zones {
 	 * @return WC_Shipping_Zone|bool
 	 */
 	public static function get_zone_by( $by = 'zone_id', $id = 0 ) {
-                $zone_id = false ;
+		$zone_id = false;
                 
 		switch ( $by ) {
 			case 'zone_id' :
