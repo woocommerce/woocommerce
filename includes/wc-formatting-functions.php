@@ -80,7 +80,7 @@ function wc_sanitize_permalink( $value ) {
 		$value = '';
 	}
 
-	$value = esc_url_raw( $value );
+	$value = esc_url_raw( trim( $value ) );
 	$value = str_replace( 'http://', '', $value );
 	return untrailingslashit( $value );
 }
