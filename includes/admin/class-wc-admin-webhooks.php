@@ -59,6 +59,7 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to update Webhooks', 'woocommerce' ) );
 		}
 
+		$errors     = array();
 		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;  // WPCS: input var okay, CSRF ok.
 		$webhook    = new WC_Webhook( $webhook_id );
 
@@ -102,7 +103,7 @@ class WC_Admin_Webhooks {
 
 			switch ( $_POST['webhook_topic'] ) { // WPCS: input var okay, CSRF ok.
 				case 'custom':
-					if ( ! empty( $_POST['webhook_custom_topic'] ) ) { // WPCS: input var okay, CSRF ok.
+					if ( ! empty( $_POST['webhook_custom_topic'] ) && false !== strpos( $_POST['webhook_custom_topic'], '.' ) ) { // WPCS: input var okay, CSRF ok, sanitization ok.
 						list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_custom_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
 					}
 					break;
@@ -120,6 +121,8 @@ class WC_Admin_Webhooks {
 
 			if ( wc_is_webhook_valid_topic( $topic ) ) {
 				$webhook->set_topic( $topic );
+			} else {
+				$errors[] = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
 			}
 		}
 
@@ -130,9 +133,12 @@ class WC_Admin_Webhooks {
 
 		// Run actions.
 		do_action( 'woocommerce_webhook_options_save', $webhook->get_id() );
-
-		// Ping the webhook at the first time that is activated.
-		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) { // WPCS: input var okay, CSRF ok.
+		if ( $errors ) {
+			// Redirect to webhook edit page to avoid settings save actions.
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( implode( '|', $errors ) ) ) );
+			exit();
+		} elseif ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) { // WPCS: input var okay, CSRF ok.
+			// Ping the webhook at the first time that is activated.
 			$result = $webhook->deliver_ping();
 
 			if ( is_wp_error( $result ) ) {
@@ -235,7 +241,7 @@ class WC_Admin_Webhooks {
 			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			include( 'settings/views/html-webhooks-edit.php' );
+			include 'settings/views/html-webhooks-edit.php';
 			return;
 		}
 
@@ -262,7 +268,9 @@ class WC_Admin_Webhooks {
 		}
 
 		if ( isset( $_GET['error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); // WPCS: input var okay, CSRF ok.
+			foreach ( explode( '|', sanitize_text_field( wp_unslash( $_GET['error'] ) ) ) as $message ) { // WPCS: input var okay, CSRF ok.
+				WC_Admin_Settings::add_error( trim( $message ) );
+			}
 		}
 	}
 

@@ -2,7 +2,7 @@
 /**
  * Admin View: Edit Webhooks
  *
- * @package WooCommerce\Admin\Webhooks\Views
+ * @package WooCommerce/Admin/Webhooks/Views
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -57,24 +57,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
 							$topics = apply_filters( 'woocommerce_webhook_topics', array(
-								''                  => __( 'Select an option&hellip;', 'woocommerce' ),
-								'coupon.created'    => __( 'Coupon created', 'woocommerce' ),
-								'coupon.updated'    => __( 'Coupon updated', 'woocommerce' ),
-								'coupon.deleted'    => __( 'Coupon deleted', 'woocommerce' ),
-								'coupon.restored'   => __( 'Coupon restored', 'woocommerce' ),
-								'customer.created'  => __( 'Customer created', 'woocommerce' ),
-								'customer.updated'  => __( 'Customer updated', 'woocommerce' ),
-								'customer.deleted'  => __( 'Customer deleted', 'woocommerce' ),
-								'order.created'     => __( 'Order created', 'woocommerce' ),
-								'order.updated'     => __( 'Order updated', 'woocommerce' ),
-								'order.deleted'     => __( 'Order deleted', 'woocommerce' ),
-								'order.restored'    => __( 'Order restored', 'woocommerce' ),
-								'product.created'   => __( 'Product created', 'woocommerce' ),
-								'product.updated'   => __( 'Product updated', 'woocommerce' ),
-								'product.deleted'   => __( 'Product deleted', 'woocommerce' ),
-								'product.restored'  => __( 'Product restored', 'woocommerce' ),
-								'action'            => __( 'Action', 'woocommerce' ),
-								'custom'            => __( 'Custom', 'woocommerce' ),
+								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
+								'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
+								'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
+								'coupon.deleted'   => __( 'Coupon deleted', 'woocommerce' ),
+								'coupon.restored'  => __( 'Coupon restored', 'woocommerce' ),
+								'customer.created' => __( 'Customer created', 'woocommerce' ),
+								'customer.updated' => __( 'Customer updated', 'woocommerce' ),
+								'customer.deleted' => __( 'Customer deleted', 'woocommerce' ),
+								'order.created'    => __( 'Order created', 'woocommerce' ),
+								'order.updated'    => __( 'Order updated', 'woocommerce' ),
+								'order.deleted'    => __( 'Order deleted', 'woocommerce' ),
+								'order.restored'   => __( 'Order restored', 'woocommerce' ),
+								'product.created'  => __( 'Product created', 'woocommerce' ),
+								'product.updated'  => __( 'Product updated', 'woocommerce' ),
+								'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
+								'product.restored' => __( 'Product restored', 'woocommerce' ),
+								'action'           => __( 'Action', 'woocommerce' ),
 							) );
 
 							foreach ( $topics as $topic_slug => $topic_name ) :
@@ -91,15 +90,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</th>
 				<td class="forminp">
 					<input name="webhook_action_event" id="webhook_action_event" type="text" class="input-text regular-input" value="<?php echo esc_attr( $topic_data['event'] ); ?>" />
-				</td>
-			</tr>
-			<tr valign="top" id="webhook-custom-topic-wrap">
-				<th scope="row" class="titledesc">
-					<label for="webhook_custom_topic"><?php esc_html_e( 'Custom topic', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'Enter the custom topic that will trigger this webhook.', 'woocommerce' ) ); ?>
-				</th>
-				<td class="forminp">
-					<input name="webhook_custom_topic" id="webhook_custom_topic" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_topic() ); ?>" />
 				</td>
 			</tr>
 			<tr valign="top">
@@ -195,16 +185,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	jQuery( function ( $ ) {
 		$( '#webhook-options' ).find( '#webhook_topic' ).on( 'change', function() {
 			var current            = $( this ).val(),
-				action_event_field = $( '#webhook-options' ).find( '#webhook-action-event-wrap' ),
-				custom_topic_field = $( '#webhook-options' ).find( '#webhook-custom-topic-wrap' );
+				action_event_field = $( '#webhook-options' ).find( '#webhook-action-event-wrap' );
 
 			action_event_field.hide();
-			custom_topic_field.hide();
 
 			if ( 'action' === current ) {
 				action_event_field.show();
-			} else if ( 'custom' === current ) {
-				custom_topic_field.show();
 			}
 		}).change();
 	});
