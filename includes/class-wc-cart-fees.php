@@ -69,8 +69,8 @@ final class WC_Cart_Fees {
 	 * Register methods for this object on the appropriate WordPress hooks.
 	 */
 	public function init() {
-		add_action( 'woocommerce_cart_emptied', array( $this, 'remove_all_fees' ) );
-		add_action( 'woocommerce_cart_reset', array( $this, 'remove_all_fees' ) );
+		add_action( 'woocommerce_cart_emptied', array( $this, 'remove_all_cart_fees' ), 1 );
+		add_action( 'woocommerce_cart_reset', array( $this, 'remove_all_cart_fees' ), 1 );
 	}
 
 	/**
@@ -150,5 +150,16 @@ final class WC_Cart_Fees {
 	 */
 	private function generate_id( $fee ) {
 		return sanitize_title( $fee->name );
+	}
+
+	/**
+	 * Remove all fees belonging to a specific cart.
+	 *
+	 * @since 3.3.0
+	 */
+	public function remove_all_cart_fees( $cart ) {
+		if ( $this->cart === $cart ) {
+			$this->remove_all_fees();
+		}
 	}
 }
