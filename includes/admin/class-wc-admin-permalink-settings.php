@@ -99,7 +99,8 @@ class WC_Admin_Permalink_Settings {
 	 * Show the settings.
 	 */
 	public function settings() {
-		echo wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), home_url( '/' ) ) );
+		/* translators: %s: Home URL */
+		echo wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) );
 
 		// Get shop page
 		$shop_page_id   = wc_get_page_id( 'shop' );
