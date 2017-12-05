@@ -1018,22 +1018,32 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna country supported
+	 * Is Klarna Checkout country supported
 	 *
 	 * @param string $country_code Country code.
 	 */
-	protected function is_klarna_supported_country( $country_code ) {
-		$klarna_supported_countries = array(
-			'DK',
-			'FI',
-			'IS',
-			'NO',
-			'SE',
-			'DE',
-			'AT',
-			'CH',
+	protected function is_klarna_checkout_supported_country( $country_code ) {
+		$supported_countries = array(
+			'SE', //Sweden
+			'FI', //Finland
+			'NO', //Norway
+			'NL', //Netherlands
 		);
-		return in_array( $country_code, $klarna_supported_countries, true );
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is Klarna Payments country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_klarna_payments_supported_country( $country_code ) {
+		$supported_countries = array(
+			'DK', //Denmark
+			'DE', //Germany
+			'AT', //Austria
+		);
+		return in_array( $country_code, $supported_countries, true );
 	}
 
 	/**
@@ -1072,7 +1082,8 @@ class WC_Admin_Setup_Wizard {
 	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
 		$can_stripe = $this->is_stripe_supported_country( $country );
-		$should_display_klarna = $this->is_klarna_supported_country( $country );
+		$should_display_klarna_checkout = $this->is_klarna_checkout_supported_country( $country );
+		$should_display_klarna_payments = $this->is_klarna_payments_supported_country( $country );
 		$should_display_square = $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' );
 		$user_email = $this->get_current_user_email();
 
@@ -1088,8 +1099,12 @@ class WC_Admin_Setup_Wizard {
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
-		$klarna_description = '<p>' . sprintf(
-			__( 'Pay directly at the checkout. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+		$klarna_checkout_description = '<p>' . sprintf(
+			__( 'Pay now, pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/klarna/'
+		) . '</p>';
+		$klarna_payments_description = '<p>' . sprintf(
+			__( 'Pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/klarna/'
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
@@ -1120,8 +1135,8 @@ class WC_Admin_Setup_Wizard {
 					'required'    => true,
 				),
 			),
-			'enabled' => $can_stripe && ! ( $should_display_klarna || $should_display_square ),
-			'featured' => ! ( $should_display_klarna || $should_display_square ),
+			'enabled' => $can_stripe && ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
+			'featured' => ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
 		);
 		$braintree_paypal = array(
 			'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
@@ -1134,7 +1149,7 @@ class WC_Admin_Setup_Wizard {
 			'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 			'description' => $paypal_ec_description,
 			'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
-			'enabled'     => $should_display_klarna || $should_display_square,
+			'enabled'     => $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square,
 		);
 		$paypal = array(
 			'name'        => __( 'PayPal Standard', 'woocommerce' ),
@@ -1150,13 +1165,21 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 		);
-		$klarna = array(
-			'name'        => __( 'Klarna', 'woocommerce' ),
-			'description' => $klarna_description,
+		$klarna_checkout = array(
+			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+			'description' => $klarna_checkout_description,
 			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 			'class'       => 'klarna-logo',
 			'enabled'     => true,
-			'repo-slug'   => 'woocommerce-gateway-klarna',
+			'repo-slug'   => 'klarna-checkout-for-woocommerce',
+		);
+		$klarna_payments = array(
+			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+			'description' => $klarna_payments_description,
+			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+			'class'       => 'klarna-logo',
+			'enabled'     => true,
+			'repo-slug'   => 'klarna-payments-for-woocommerce',
 		);
 		$square = array(
 			'name'        => __( 'Square', 'woocommerce' ),
@@ -1184,9 +1207,17 @@ class WC_Admin_Setup_Wizard {
 			unset( $gateways['braintree_paypal'] );
 		}
 
-		if ( $should_display_klarna ) {
+		if ( $should_display_klarna_checkout ) {
 			$gateways = array(
-				'klarna'           => $klarna,
+				'klarna_checkout'  => $klarna_checkout,
+				'ppec_paypal'      => $ppec_paypal,
+				'stripe'           => $stripe,
+			);
+		}
+
+		if ( $should_display_klarna_payments ) {
+			$gateways = array(
+				'klarna_payments'  => $klarna_payments,
 				'ppec_paypal'      => $ppec_paypal,
 				'stripe'           => $stripe,
 			);
@@ -1204,7 +1235,8 @@ class WC_Admin_Setup_Wizard {
 			unset( $gateways['braintree_paypal'] );
 			unset( $gateways['ppec_paypal'] );
 			unset( $gateways['stripe'] );
-			unset( $gateways['klarna'] );
+			unset( $gateways['klarna_checkout'] );
+			unset( $gateways['klarna_payments'] );
 			unset( $gateways['square'] );
 		}
 
