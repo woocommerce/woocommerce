@@ -869,21 +869,19 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	/**
 	 * Output the result count text (Showing x - x of x results).
 	 *
-	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
+	 * @param array $args Pass an associative array of parameters. Uses this if passed, otherwise uses global $wp_query.
 	 */
-	function woocommerce_result_count( $query = null ) {
-		if ( ! is_a( $query, 'WP_Query' ) ) {
-			$query = $GLOBALS['wp_query'];
-		}
+	function woocommerce_result_count( $args = array() ) {
+		$query = $GLOBALS['wp_query'];
 
 		if ( ! woocommerce_products_will_display() ) {
 			return;
 		}
 
 		$args = array(
-			'total'    => $query->found_posts,
-			'per_page' => $query->get( 'posts_per_page' ),
-			'current'  => max( 1, $query->get( 'paged', 1 ) ),
+			'total'    => isset( $args['found_posts'] ) ? intval( $args['found_posts'] ) : $query->found_posts,
+			'per_page' => isset( $args['per_page'] ) ? intval( $args['per_page'] ) : $query->get( 'posts_per_page' ),
+			'current'  => isset( $args['paged'] ) ? intval( $args['paged'] ) : max( 1, $query->get( 'paged', 1 ) ),
 		);
 
 		wc_get_template( 'loop/result-count.php', $args );
@@ -895,12 +893,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	/**
 	 * Output the product sorting options.
 	 *
-	 * @param WP_Query $query Pass a query object or use global.
+	 * @param array $args Pass an associative array of parameters. Uses this if passed, otherwise uses global $wp_query.
 	 */
-	function woocommerce_catalog_ordering( $query = null ) {
-		if ( ! is_a( $query, 'WP_Query' ) ) {
-			$query = $GLOBALS['wp_query'];
-		}
+	function woocommerce_catalog_ordering( $args = array() ) {
+		$query = $GLOBALS['wp_query'];
 
 		if ( ! woocommerce_products_will_display() ) {
 			return;
@@ -917,7 +913,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		if ( $query->is_search() ) {
+		if ( isset( $args['is_search'] ) ? $args['is_search'] : $query->is_search() ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 			unset( $catalog_orderby_options['menu_order'] );
 			if ( 'menu_order' === $orderby ) {
@@ -942,16 +938,14 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	/**
 	 * Output the pagination.
 	 *
-	 * @param WP_Query $query Pass a query object or use global to pull pagination info.
+	 * @param array $args Pass an associative array of parameters. Uses this if passed, otherwise uses global $wp_query.
 	 */
-	function woocommerce_pagination( $query = null ) {
-		if ( ! is_a( $query, 'WP_Query' ) ) {
-			$query = $GLOBALS['wp_query'];
-		}
+	function woocommerce_pagination( $args = array() ) {
+		$query = $GLOBALS['wp_query'];
 
 		$args = array(
-			'total'   => $query->max_num_pages,
-			'current' => max( 1, $query->get( 'paged', 1 ) ),
+			'total'   => isset( $args['max_num_pages'] ) ? intval( $args['max_num_pages'] ) : $query->max_num_pages,
+			'current' => isset( $args['current'] ) ? intval( $args['current'] ) : max( 1, $query->get( 'paged', 1 ) ),
 		);
 
 		wc_get_template( 'loop/pagination.php', $args );

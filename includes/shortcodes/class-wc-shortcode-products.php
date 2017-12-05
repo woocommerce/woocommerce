@@ -504,10 +504,18 @@ class WC_Shortcode_Products {
 			} else {
 				$products = new WP_Query( $this->query_args );
 			}
-			$ids = wp_parse_id_list( $products->posts );
+
+			$ids = array(
+				'ids' => wp_parse_id_list( $products->posts ),
+				'per_page' => $products->get( 'posts_per_page' ),
+				'found_posts' => $products->found_posts,
+				'max_num_pages' => $products->max_num_pages,
+				'current' => max( 1, $products->get( 'paged', 1 ) ),
+				'is_search' => intval( $products->is_search() ),
+			);
 
 			if ( $cache ) {
-				set_transient( $transient_name, $products, DAY_IN_SECONDS * 30 );
+				set_transient( $transient_name, $ids, DAY_IN_SECONDS * 30 );
 			}
 		}
 		// Remove ordering query arguments.
@@ -534,10 +542,10 @@ class WC_Shortcode_Products {
 
 		ob_start();
 
-		if ( $products_ids ) {
+		if ( $products_ids && $products_ids['ids'] ) {
 			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', $products_ids );
-			update_object_term_cache( $products_ids, 'product' );
+			update_meta_cache( 'post', $products_ids['ids'] );
+			update_object_term_cache( $products_ids['ids'], 'product' );
 
 			$original_post = $GLOBALS['post'];
 
@@ -550,7 +558,7 @@ class WC_Shortcode_Products {
 
 			woocommerce_product_loop_start();
 
-			foreach ( $products_ids as $product_id ) {
+			foreach ( $products_ids['ids'] as $product_id ) {
 				$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
 				setup_postdata( $GLOBALS['post'] );
 
