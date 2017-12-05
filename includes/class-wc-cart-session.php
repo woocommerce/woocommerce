@@ -71,12 +71,12 @@ final class WC_Cart_Session {
 		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
 		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
 
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
+		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) { // @codingStandardsIgnoreLine
 			$cart                = $saved_cart['cart'];
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
 			$cart = array();
-		} elseif ( is_array( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
+		} elseif ( is_array( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) { // @codingStandardsIgnoreLine
 			$cart                = array_merge( $saved_cart['cart'], $cart );
 			$update_cart_session = true;
 		}
@@ -100,7 +100,9 @@ final class WC_Cart_Session {
 
 					} else {
 						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data          = array_merge( $values, array( 'data' => $product ) );
+						$session_data          = array_merge( $values, array(
+							'data' => $product,
+						) );
 						$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
 
 						// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
@@ -183,7 +185,9 @@ final class WC_Cart_Session {
 	 */
 	public function persistent_cart_update() {
 		if ( get_current_user_id() ) {
-			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array( 'cart' => $this->get_cart_for_session() ) );
+			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+				'cart' => $this->get_cart_for_session(),
+			) );
 		}
 	}
 
