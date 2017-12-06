@@ -449,6 +449,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'download_id'           => $result->download_id,
 				'product_id'            => $_product->get_id(),
 				'product_name'          => $_product->get_name(),
+				'product_url'           => $_product->is_visible() ? $_product->get_permalink() : '', // Since 3.3.0.
 				'download_name'         => $download_name,
 				'order_id'              => $order->get_id(),
 				'order_key'             => $order->get_order_key(),

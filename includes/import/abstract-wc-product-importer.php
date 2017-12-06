@@ -133,7 +133,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	public function get_params() {
 		return $this->params;
 	}
-	
+
 	/**
 	 * Get file pointer position from the last read.
 	 *
@@ -418,8 +418,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
+				$attribute_id = 0;
+
 				// Get ID if is a global attribute.
-				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
+				if ( ! empty( $attribute['taxonomy'] ) ) {
+					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+				}
 
 				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
@@ -503,7 +507,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  int    $product_id Product ID.
 	 * @return int
 	 */
-	protected function get_attachment_id_from_url( $url, $product_id ) {
+	public function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
 		}
@@ -587,10 +591,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
-	 * @param  string $name Attribute name.
+	 * @param  string $raw_name Attribute name.
 	 * @return int
 	 */
-	protected function get_attribute_taxonomy_id( $raw_name ) {
+	public function get_attribute_taxonomy_id( $raw_name ) {
 		global $wpdb, $wc_product_attributes;
 
 		// These are exported as labels, so convert the label to a name if possible first.
@@ -725,5 +729,25 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function explode_values_formatter( $value ) {
 		return trim( str_replace( '::separator::', ',', $value ) );
+	}
+
+	/**
+	 * The exporter prepends a ' to fields that start with a - which causes
+	 * issues with negative numbers. This removes the ' if the input is still a valid
+	 * number after removal.
+	 *
+	 * @since 3.3.0
+	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @return string
+	 */
+	protected function unescape_negative_number( $value ) {
+		if ( 0 === strpos( $value, "'-" ) ) {
+			$unescaped = substr_replace( $value, '', 0, 1 );
+			if ( is_numeric( $unescaped ) ) {
+				return $unescaped;
+			}
+		}
+
+		return $value;
 	}
 }

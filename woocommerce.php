@@ -6,8 +6,6 @@
  * Version: 3.3-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
- * Requires at least: 4.5
- * Tested up to: 4.7
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/

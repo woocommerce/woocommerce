@@ -82,6 +82,21 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Throws an exception with an optional message and code.
+	 *
+	 * Note: can't use `throwException` as that's reserved.
+	 *
+	 * @since 3.3-dev
+	 * @param string $message
+	 * @param int    $code
+	 * @throws \Exception
+	 */
+	public function throwAnException( $message = null, $code = null ) {
+		$message = $message ? $message : "We're all doomed!";
+		throw new Exception( $message, $code );
+	}
+
+	/**
 	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
 	 *
 	 * @since  2.2

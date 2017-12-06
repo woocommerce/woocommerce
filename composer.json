@@ -9,7 +9,7 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "0.13.1",
+    "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
     "woocommerce/woocommerce-git-hooks": "1.0.3",
     "wimg/php-compatibility": "^8.0",
@@ -27,6 +27,22 @@
     ],
     "post-update-cmd": [
       "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p --standard=./phpcs.ruleset.xml"
+    ],
+    "phpcbf": [
+      "phpcbf -p --standard=./phpcs.ruleset.xml"
     ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
   }
 }

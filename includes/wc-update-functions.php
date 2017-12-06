@@ -50,21 +50,22 @@ function wc_update_200_file_paths() {
  */
 function wc_update_200_permalinks() {
 	// Setup default permalinks if shop page is defined.
-	$permalinks 	= get_option( 'woocommerce_permalinks' );
-	$shop_page_id 	= wc_get_page_id( 'shop' );
+	$permalinks   = get_option( 'woocommerce_permalinks' );
+	$shop_page_id = wc_get_page_id( 'shop' );
 
 	if ( empty( $permalinks ) && $shop_page_id > 0 ) {
 
-		$base_slug 		= $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
+		$base_slug = $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
 
-		$category_base 	= get_option( 'woocommerce_prepend_shop_page_to_urls' ) == 'yes' ? trailingslashit( $base_slug ) : '';
-		$category_slug 	= get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
-		$tag_slug 		= get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
+		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) == 'yes' ? trailingslashit( $base_slug ) : '';
+		$category_slug = get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
+		$tag_slug      = get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
 
 		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
 			$product_base = trailingslashit( $base_slug );
 		} else {
-			if ( ( $product_slug = get_option( 'woocommerce_product_slug' ) ) !== false && ! empty( $product_slug ) ) {
+			$product_slug = get_option( 'woocommerce_product_slug' );
+			if ( false !== $product_slug && ! empty( $product_slug ) ) {
 				$product_base = trailingslashit( $product_slug );
 			} else {
 				$product_base = trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
@@ -76,10 +77,10 @@ function wc_update_200_permalinks() {
 		}
 
 		$permalinks = array(
-			'product_base' 		=> untrailingslashit( $product_base ),
-			'category_base' 	=> untrailingslashit( $category_base . $category_slug ),
-			'attribute_base' 	=> untrailingslashit( $category_base ),
-			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug ),
+			'product_base'   => untrailingslashit( $product_base ),
+			'category_base'  => untrailingslashit( $category_base . $category_slug ),
+			'attribute_base' => untrailingslashit( $category_base ),
+			'tag_base'       => untrailingslashit( $category_base . $tag_slug ),
 		);
 
 		update_option( 'woocommerce_permalinks', $permalinks );
@@ -119,7 +120,7 @@ function wc_update_200_taxrates() {
 	global $wpdb;
 
 	// Update tax rates.
-	$loop = 0;
+	$loop      = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
 	if ( $tax_rates ) {
@@ -210,7 +211,7 @@ function wc_update_200_taxrates() {
 }
 
 /**
- * Upadte order item line items for 2.0
+ * Update order item line items for 2.0
  *
  * @return void
  */
@@ -219,10 +220,9 @@ function wc_update_200_line_items() {
 
 	// Now its time for the massive update to line items - move them to the new DB tables.
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'.
-	$order_item_rows = $wpdb->get_results( "
-		SELECT meta_value, post_id FROM {$wpdb->postmeta}
-		WHERE meta_key = '_order_items'
-	" );
+	$order_item_rows = $wpdb->get_results(
+		"SELECT meta_value, post_id FROM {$wpdb->postmeta} WHERE meta_key = '_order_items'"
+	);
 
 	foreach ( $order_item_rows as $order_item_row ) {
 
@@ -231,21 +231,24 @@ function wc_update_200_line_items() {
 		foreach ( $order_items as $order_item ) {
 
 			if ( ! isset( $order_item['line_total'] ) && isset( $order_item['taxrate'] ) && isset( $order_item['cost'] ) ) {
-				$order_item['line_tax'] 			= number_format( ( $order_item['cost'] * $order_item['qty'] ) * ( $order_item['taxrate'] / 100 ), 2, '.', '' );
-				$order_item['line_total'] 			= $order_item['cost'] * $order_item['qty'];
-				$order_item['line_subtotal_tax'] 	= $order_item['line_tax'];
-				$order_item['line_subtotal'] 		= $order_item['line_total'];
+				$order_item['line_tax']          = number_format( ( $order_item['cost'] * $order_item['qty'] ) * ( $order_item['taxrate'] / 100 ), 2, '.', '' );
+				$order_item['line_total']        = $order_item['cost'] * $order_item['qty'];
+				$order_item['line_subtotal_tax'] = $order_item['line_tax'];
+				$order_item['line_subtotal']     = $order_item['line_total'];
 			}
 
-			$order_item['line_tax'] 			= isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
-			$order_item['line_total']			= isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
-			$order_item['line_subtotal_tax'] 	= isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
-			$order_item['line_subtotal'] 		= isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
+			$order_item['line_tax']          = isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
+			$order_item['line_total']        = isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
+			$order_item['line_subtotal_tax'] = isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
+			$order_item['line_subtotal']     = isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
 
-			$item_id = wc_add_order_item( $order_item_row->post_id, array(
-				 'order_item_name' 		=> $order_item['name'],
-				 'order_item_type' 		=> 'line_item',
-			) );
+			$item_id = wc_add_order_item(
+				$order_item_row->post_id,
+				array(
+					'order_item_name' => $order_item['name'],
+					'order_item_type' => 'line_item',
+				)
+			);
 
 			 // Add line item meta.
 			if ( $item_id ) {
@@ -274,19 +277,25 @@ function wc_update_200_line_items() {
 
 				// Insert meta rows at once.
 				if ( count( $meta_rows ) > 0 ) {
-					$wpdb->query( $wpdb->prepare( "
-						INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( order_item_id, meta_key, meta_value )
-						VALUES " . implode( ',', $meta_rows ) . ';
-                    ', $order_item_row->post_id ) );
+					$wpdb->query(
+						$wpdb->prepare(
+							"INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( order_item_id, meta_key, meta_value )
+							VALUES " . implode( ',', $meta_rows ) . ';', // @codingStandardsIgnoreLine
+							$order_item_row->post_id
+						)
+					);
 				}
 
 				// Delete from DB (rename).
-				$wpdb->query( $wpdb->prepare( "
-					UPDATE {$wpdb->postmeta}
-					SET meta_key = '_order_items_old'
-					WHERE meta_key = '_order_items'
-					AND post_id = %d
-				", $order_item_row->post_id ) );
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta}
+						SET meta_key = '_order_items_old'
+						WHERE meta_key = '_order_items'
+						AND post_id = %d",
+						$order_item_row->post_id
+					)
+				);
 			}
 
 			unset( $meta_rows, $item_id, $order_item );
@@ -295,10 +304,10 @@ function wc_update_200_line_items() {
 
 	// Do the same kind of update for order_taxes - move to lines.
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'.
-	$order_tax_rows = $wpdb->get_results( "
-		SELECT meta_value, post_id FROM {$wpdb->postmeta}
-		WHERE meta_key = '_order_taxes'
-	" );
+	$order_tax_rows = $wpdb->get_results(
+		"SELECT meta_value, post_id FROM {$wpdb->postmeta}
+		WHERE meta_key = '_order_taxes'"
+	);
 
 	foreach ( $order_tax_rows as $order_tax_row ) {
 
@@ -311,10 +320,12 @@ function wc_update_200_line_items() {
 					continue;
 				}
 
-				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
-					 'order_item_name' 		=> $order_tax['label'],
-					 'order_item_type' 		=> 'tax',
-				) );
+				$item_id = wc_add_order_item(
+					$order_tax_row->post_id, array(
+						'order_item_name' => $order_tax['label'],
+						'order_item_type' => 'tax',
+					)
+				);
 
 				 // Add line item meta.
 				if ( $item_id ) {
@@ -324,12 +335,15 @@ function wc_update_200_line_items() {
 				}
 
 				// Delete from DB (rename).
-				$wpdb->query( $wpdb->prepare( "
-					UPDATE {$wpdb->postmeta}
-					SET meta_key = '_order_taxes_old'
-					WHERE meta_key = '_order_taxes'
-					AND post_id = %d
-				", $order_tax_row->post_id ) );
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta}
+						SET meta_key = '_order_taxes_old'
+						WHERE meta_key = '_order_taxes'
+						AND post_id = %d",
+						$order_tax_row->post_id
+					)
+				);
 
 				unset( $tax_amount );
 			}
@@ -347,11 +361,13 @@ function wc_update_200_images() {
 	// cleaning up afterwards like nice people do.
 	foreach ( array( 'catalog', 'single', 'thumbnail' ) as $value ) {
 
-		$old_settings = array_filter( array(
-			'width' => get_option( 'woocommerce_' . $value . '_image_width' ),
-			'height' => get_option( 'woocommerce_' . $value . '_image_height' ),
-			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' ),
-		) );
+		$old_settings = array_filter(
+			array(
+				'width'  => get_option( 'woocommerce_' . $value . '_image_width' ),
+				'height' => get_option( 'woocommerce_' . $value . '_image_height' ),
+				'crop'   => get_option( 'woocommerce_' . $value . '_image_crop' ),
+			)
+		);
 
 		if ( ! empty( $old_settings ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ) {
 
@@ -521,8 +537,8 @@ function wc_update_220_shipping() {
  */
 function wc_update_220_order_status() {
 	global $wpdb;
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -530,11 +546,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'pending%';
-		"
+		AND	term.slug LIKE 'pending%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -542,11 +557,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'processing%';
-		"
+		AND	term.slug LIKE 'processing%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -554,11 +568,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'on-hold%';
-		"
+		AND	term.slug LIKE 'on-hold%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -566,11 +579,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'completed%';
-		"
+		AND	term.slug LIKE 'completed%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -578,11 +590,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'cancelled%';
-		"
+		AND	term.slug LIKE 'cancelled%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -590,11 +601,10 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'refunded%';
-		"
+		AND	term.slug LIKE 'refunded%';"
 	);
-	$wpdb->query( "
-		UPDATE {$wpdb->posts} as posts
+	$wpdb->query(
+		"UPDATE {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_id
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -602,8 +612,7 @@ function wc_update_220_order_status() {
 		WHERE posts.post_type = 'shop_order'
 		AND posts.post_status = 'publish'
 		AND tax.taxonomy = 'shop_order_status'
-		AND	term.slug LIKE 'failed%';
-		"
+		AND	term.slug LIKE 'failed%';"
 	);
 }
 
@@ -615,15 +624,15 @@ function wc_update_220_order_status() {
 function wc_update_220_variations() {
 	global $wpdb;
 	// Update variations which manage stock.
-	$update_variations = $wpdb->get_results( "
-		SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent FROM {$wpdb->posts} as posts
+	$update_variations = $wpdb->get_results(
+		"SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent FROM {$wpdb->posts} as posts
 		LEFT OUTER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id AND postmeta.meta_key = '_stock'
 		LEFT OUTER JOIN {$wpdb->postmeta} as postmeta2 ON posts.ID = postmeta2.post_id AND postmeta2.meta_key = '_manage_stock'
 		WHERE posts.post_type = 'product_variation'
 		AND postmeta.meta_value IS NOT NULL
 		AND postmeta.meta_value != ''
-		AND postmeta2.meta_value IS NULL
-	" );
+		AND postmeta2.meta_value IS NULL"
+	);
 
 	foreach ( $update_variations as $variation ) {
 		$parent_backorders = get_post_meta( $variation->variation_parent, '_backorders', true );
@@ -735,10 +744,15 @@ function wc_update_240_shipping_methods() {
 			$has_classes                      = count( WC()->shipping->get_shipping_classes() ) > 0;
 			$cost_key                         = $has_classes ? 'no_class_cost' : 'cost';
 			$min_fee                          = $shipping_method->get_option( 'minimum_fee' );
-			$math_cost_strings                = array( 'cost' => array(), 'no_class_cost' => array() );
-			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
+			$math_cost_strings                = array(
+				'cost'          => array(),
+				'no_class_cost' => array(),
+			);
 
-			if ( $fee = $shipping_method->get_option( 'fee' ) ) {
+			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
+			$fee = $shipping_method->get_option( 'fee' );
+
+			if ( $fee ) {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
@@ -747,7 +761,9 @@ function wc_update_240_shipping_methods() {
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
 
-			if ( $flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) ) ) {
+			$flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) );
+
+			if ( $flat_rates ) {
 				foreach ( $flat_rates as $shipping_class => $rate ) {
 					$rate_key = 'class_cost_' . $shipping_class;
 					if ( $rate['cost'] || $rate['fee'] ) {
@@ -798,7 +814,7 @@ function wc_update_240_api_keys() {
 
 	// Get user data.
 	foreach ( $api_users as $_user ) {
-		$user = get_userdata( $_user->user_id );
+		$user        = get_userdata( $_user->user_id );
 		$apps_keys[] = array(
 			'user_id'         => $user->ID,
 			'permissions'     => $user->woocommerce_api_key_permissions,
@@ -844,12 +860,14 @@ function wc_update_240_webhooks() {
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
 	 */
-	$order_update_webhooks = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'meta_key'       => '_topic',
-		'meta_value'     => 'order.updated',
-	) );
+	$order_update_webhooks = get_posts(
+		array(
+			'posts_per_page' => -1,
+			'post_type'      => 'shop_webhook',
+			'meta_key'       => '_topic',
+			'meta_value'     => 'order.updated',
+		)
+	);
 	foreach ( $order_update_webhooks as $order_update_webhook ) {
 		$webhook = new WC_Webhook( $order_update_webhook->ID );
 		$webhook->set_topic( 'order.updated' );
@@ -867,11 +885,13 @@ function wc_update_240_refunds() {
 	 * Refunds for full refunded orders.
 	 * Update fully refunded orders to ensure they have a refund line item so reports add up.
 	 */
-	$refunded_orders = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_order',
-		'post_status'    => array( 'wc-refunded' ),
-	) );
+	$refunded_orders = get_posts(
+		array(
+			'posts_per_page' => -1,
+			'post_type'      => 'shop_order',
+			'post_status'    => array( 'wc-refunded' ),
+		)
+	);
 
 	// Ensure emails are disabled during this update routine.
 	remove_all_actions( 'woocommerce_order_status_refunded_notification' );
@@ -881,22 +901,27 @@ function wc_update_240_refunds() {
 
 	foreach ( $refunded_orders as $refunded_order ) {
 		$order_total    = get_post_meta( $refunded_order->ID, '_order_total', true );
-		$refunded_total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( postmeta.meta_value )
-			FROM $wpdb->postmeta AS postmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			WHERE postmeta.meta_key = '_refund_amount'
-			AND postmeta.post_id = posts.ID
-		", $refunded_order->ID ) );
+		$refunded_total = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( postmeta.meta_value )
+				FROM $wpdb->postmeta AS postmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+				WHERE postmeta.meta_key = '_refund_amount'
+				AND postmeta.post_id = posts.ID",
+				$refunded_order->ID
+			)
+		);
 
 		if ( $order_total > $refunded_total ) {
-			wc_create_refund( array(
-				'amount'     => $order_total - $refunded_total,
-				'reason'     => __( 'Order fully refunded', 'woocommerce' ),
-				'order_id'   => $refunded_order->ID,
-				'line_items' => array(),
-				'date'       => $refunded_order->post_modified,
-			) );
+			wc_create_refund(
+				array(
+					'amount'     => $order_total - $refunded_total,
+					'reason'     => __( 'Order fully refunded', 'woocommerce' ),
+					'order_id'   => $refunded_order->ID,
+					'line_items' => array(),
+					'date'       => $refunded_order->post_modified,
+				)
+			);
 		}
 	}
 
@@ -921,13 +946,13 @@ function wc_update_241_variations() {
 	global $wpdb;
 
 	// Select variations that don't have any _stock_status implemented on WooCommerce 2.2.
-	$update_variations = $wpdb->get_results( "
-		SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent
+	$update_variations = $wpdb->get_results(
+		"SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent
 		FROM {$wpdb->posts} as posts
 		LEFT OUTER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id AND postmeta.meta_key = '_stock_status'
 		WHERE posts.post_type = 'product_variation'
-		AND postmeta.meta_value IS NULL
-	" );
+		AND postmeta.meta_value IS NULL"
+	);
 
 	foreach ( $update_variations as $variation ) {
 		// Get the parent _stock_status.
@@ -1065,11 +1090,13 @@ function wc_update_260_zone_methods() {
 
 			// Move data.
 			foreach ( $old_methods as $old_method ) {
-				$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
-					'zone_id'      => $old_method->zone_id,
-					'method_id'    => $old_method->shipping_method_type,
-					'method_order' => $old_method->shipping_method_order,
-				) );
+				$wpdb->insert(
+					$wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
+						'zone_id'      => $old_method->zone_id,
+						'method_id'    => $old_method->shipping_method_type,
+						'method_order' => $old_method->shipping_method_order,
+					)
+				);
 
 				$new_instance_id = $wpdb->insert_id;
 
@@ -1130,13 +1157,13 @@ function wc_update_260_refunds() {
 	/**
 	 * Refund item qty should be negative.
 	 */
-	$wpdb->query( "
-	UPDATE {$wpdb->prefix}woocommerce_order_itemmeta as item_meta
-	LEFT JOIN {$wpdb->prefix}woocommerce_order_items as items ON item_meta.order_item_id = items.order_item_id
-	LEFT JOIN {$wpdb->posts} as posts ON items.order_id = posts.ID
-	SET item_meta.meta_value = item_meta.meta_value * -1
-	WHERE item_meta.meta_value > 0 AND item_meta.meta_key = '_qty' AND posts.post_type = 'shop_order_refund'
-	" );
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}woocommerce_order_itemmeta as item_meta
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_items as items ON item_meta.order_item_id = items.order_item_id
+		LEFT JOIN {$wpdb->posts} as posts ON items.order_id = posts.ID
+		SET item_meta.meta_value = item_meta.meta_value * -1
+		WHERE item_meta.meta_value > 0 AND item_meta.meta_key = '_qty' AND posts.post_type = 'shop_order_refund'"
+	);
 }
 
 /**
@@ -1158,12 +1185,14 @@ function wc_update_300_webhooks() {
 	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
 	 * and woocommerce_product_bulk_edit_save hooks.
 	 */
-	$product_update_webhooks = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'meta_key'       => '_topic',
-		'meta_value'     => 'product.updated',
-	) );
+	$product_update_webhooks = get_posts(
+		array(
+			'posts_per_page' => -1,
+			'post_type'      => 'shop_webhook',
+			'meta_key'       => '_topic',
+			'meta_value'     => 'product.updated',
+		)
+	);
 	foreach ( $product_update_webhooks as $product_update_webhook ) {
 		$webhook = new WC_Webhook( $product_update_webhook->ID );
 		$webhook->set_topic( 'product.updated' );
@@ -1197,12 +1226,14 @@ function wc_update_300_grouped_products() {
 	foreach ( $parents as $parent_id ) {
 		$parent = wc_get_product( $parent_id );
 		if ( $parent && $parent->is_type( 'grouped' ) ) {
-			$children_ids = get_posts( array(
-				'post_parent'    => $parent_id,
-				'posts_per_page' => -1,
-				'post_type'      => 'product',
-				'fields'         => 'ids',
-			) );
+			$children_ids = get_posts(
+				array(
+					'post_parent'    => $parent_id,
+					'posts_per_page' => -1,
+					'post_type'      => 'product',
+					'fields'         => 'ids',
+				)
+			);
 			update_post_meta( $parent_id, '_children', $children_ids );
 
 			// Update children to remove the parent.
@@ -1241,39 +1272,57 @@ function wc_update_300_product_visibility() {
 
 	WC_Install::create_terms();
 
-	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
+	$featured_term = get_term_by( 'name', 'featured', 'product_visibility' );
+
+	if ( $featured_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_taxonomy_id ) );
 	}
 
-	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
+	$exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' );
+
+	if ( $exclude_search_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_taxonomy_id ) );
 	}
 
-	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+	$exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' );
+
+	if ( $exclude_catalog_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
 	}
 
-	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
+	$outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' );
+
+	if ( $outofstock_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_taxonomy_id ) );
 	}
 
-	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
+	$rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' );
+
+	if ( $rating_term ) {
 		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_taxonomy_id ) );
 	}
 }
@@ -1373,12 +1422,10 @@ function wc_update_320_mexican_states() {
 	foreach ( $mx_states as $old => $new ) {
 		$wpdb->query(
 			$wpdb->prepare(
-				"
-					UPDATE $wpdb->postmeta
-					SET meta_value = %s
-		 			WHERE meta_key IN ( '_billing_state', '_shipping_state' )
-		 			AND meta_value = %s
-				",
+				"UPDATE $wpdb->postmeta
+				SET meta_value = %s
+				WHERE meta_key IN ( '_billing_state', '_shipping_state' )
+				AND meta_value = %s",
 				$new, $old
 			)
 		);
@@ -1433,8 +1480,82 @@ function wc_update_330_image_options() {
 }
 
 /**
+ * Assign default cat to all products with no cats.
+ */
+function wc_update_330_set_default_product_cat() {
+	global $wpdb;
+
+	$default_category = get_option( 'default_product_cat', 0 );
+
+	if ( $default_category ) {
+		$result = $wpdb->query( $wpdb->prepare( "
+			INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
+			SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
+			LEFT JOIN
+				(
+					SELECT object_id FROM {$wpdb->term_relationships} term_relationships
+					LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+					WHERE term_taxonomy.taxonomy = 'product_cat'
+				) AS tax_query
+			ON posts.ID = tax_query.object_id
+			WHERE posts.post_type = 'product'
+			AND tax_query.object_id IS NULL
+		", $default_category ) );
+		wp_cache_flush();
+		delete_transient( 'wc_term_counts' );
+		wp_update_term_count_now( array( $default_category ), 'product_cat' );
+	}
+}
+
+/**
+ * Update product stock status to use the new onbackorder status.
+ */
+function wc_update_330_product_stock_status() {
+	global $wpdb;
+
+	if ( 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
+	}
+
+	$min_stock_amount = (int) get_option( 'woocommerce_notify_no_stock_amount', 0 );
+
+	// Get all products that have stock management enabled, stock less than or equal to min stock amount, and backorders enabled.
+	$post_ids = $wpdb->get_col( $wpdb->prepare( "
+		SELECT t1.post_id FROM $wpdb->postmeta t1
+		INNER JOIN $wpdb->postmeta t2
+			ON t1.post_id = t2.post_id
+			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
+			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
+		INNER JOIN $wpdb->postmeta t3
+			ON t2.post_id = t3.post_id
+			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
+		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+
+	if ( empty( $post_ids ) ) {
+		return;
+	}
+
+	$post_ids = array_map( 'absint', $post_ids );
+
+	// Set the status to onbackorder for those products.
+	$wpdb->query( "
+		UPDATE $wpdb->postmeta
+		SET meta_value = 'onbackorder'
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
+		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_330_db_version() {
 	WC_Install::update_db_version( '3.3.0' );
+}
+
+/**
+ * Clear addons page transients
+ */
+function wc_update_330_clear_transients() {
+	delete_transient( 'wc_addons_sections' );
+	delete_transient( 'wc_addons_featured' );
 }

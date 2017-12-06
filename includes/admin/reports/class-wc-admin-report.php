@@ -658,8 +658,12 @@ class WC_Admin_Report {
 			return;
 		}
 
-		if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( $_GET['wc_reports_nonce'], 'custom_range' ) ) {
-			wp_safe_redirect( remove_query_arg( array( 'start_date', 'end_date', 'range', 'wc_reports_nonce' ) ) );
+		if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['wc_reports_nonce'] ), 'custom_range' ) ) { // WPCS: input var ok, CSRF ok.
+			wp_die(
+				/* translators: %1$s: open link, %2$s: close link */
+				sprintf( esc_html__( 'This report link has expired. %1$sClick here to view the filtered report%2$s.', 'woocommerce' ), '<a href="' . esc_url( wp_nonce_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'custom_range', 'wc_reports_nonce' ) ) . '">', '</a>' ), // @codingStandardsIgnoreLine.
+				esc_attr__( 'Confirm navigation', 'woocommerce' )
+			);
 			exit;
 		}
 	}

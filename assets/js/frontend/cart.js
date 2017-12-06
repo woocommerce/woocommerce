@@ -181,8 +181,6 @@ jQuery( function( $ ) {
 
 		/**
 		 * Handles when a shipping method is selected.
-		 *
-		 * @param {Object} evt The JQuery event.
 		 */
 		shipping_method_selected: function() {
 			var shipping_methods = {};

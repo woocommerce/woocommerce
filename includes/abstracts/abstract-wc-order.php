@@ -708,7 +708,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
 	}
 
 	/**
@@ -1599,7 +1599,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 		$subtotal    = 0;
-
+		
 		if ( ! $compound ) {
 			foreach ( $this->get_items() as $item ) {
 				$subtotal += $item->get_subtotal();

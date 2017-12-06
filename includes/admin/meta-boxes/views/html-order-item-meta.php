@@ -18,8 +18,9 @@ $hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', arr
 ?><div class="view">
 	<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
 		<table cellspacing="0" class="display_meta">
-			<?php foreach ( $meta_data as $meta_id => $meta ) :
-				if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+			<?php
+			foreach ( $meta_data as $meta_id => $meta ) :
+				if ( in_array( $meta->key, $hidden_order_itemmeta, true ) ) {
 					continue;
 				}
 				?>
@@ -35,8 +36,9 @@ $hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', arr
 	<table class="meta" cellspacing="0">
 		<tbody class="meta_items">
 			<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
-				<?php foreach ( $meta_data as $meta_id => $meta ) :
-					if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+				<?php
+				foreach ( $meta_data as $meta_id => $meta ) :
+					if ( in_array( $meta->key, $hidden_order_itemmeta, true ) ) {
 						continue;
 					}
 					?>
@@ -52,7 +54,7 @@ $hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', arr
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="4"><button class="add_order_item_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
+				<td colspan="4"><button class="add_order_item_meta button"><?php esc_html_e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
 			</tr>
 		</tfoot>
 	</table>
