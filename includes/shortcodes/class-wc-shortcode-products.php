@@ -533,14 +533,9 @@ class WC_Shortcode_Products {
 	 * @return string
 	 */
 	protected function product_loop() {
-		global $woocommerce_loop;
-
-		$columns                       = absint( $this->attributes['columns'] );
-		$classes                       = $this->get_wrapper_classes( $columns );
-		$woocommerce_loop['columns']   = $columns;
-		$woocommerce_loop['name']      = $this->type;
-		$woocommerce_loop['shortcode'] = true;
-		$products                      = $this->get_query_results();
+		$columns  = absint( $this->attributes['columns'] );
+		$classes  = $this->get_wrapper_classes( $columns );
+		$products = $this->get_query_results();
 
 		ob_start();
 
@@ -549,55 +544,53 @@ class WC_Shortcode_Products {
 			update_meta_cache( 'post', $products->ids );
 			update_object_term_cache( $products->ids, 'product' );
 
+			// Setup the loop.
+			wc_setup_loop( array(
+				'columns'      => $columns,
+				'name'         => $this->type,
+				'is_shortcode' => true,
+				'is_search'    => false,
+				'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
+				'total'        => $products->total,
+				'total_pages'  => $products->total_pages,
+				'per_page'     => $products->per_page,
+				'current_page' => $products->current_page,
+			) );
+
 			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
-
-			if ( true === wc_string_to_bool( $this->attributes['paginate'] ) ) {
-				woocommerce_result_count( array(
-					'total'    => $products->total,
-					'per_page' => $products->per_page,
-					'current'  => $products->current_page,
-				) );
-				woocommerce_catalog_ordering();
-			}
+			do_action( 'woocommerce_before_shop_loop' );
 
 			woocommerce_product_loop_start();
 
-			foreach ( $products->ids as $product_id ) {
-				$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
-				setup_postdata( $GLOBALS['post'] );
+			if ( wc_get_loop_prop( 'total' ) ) {
+				foreach ( $products->ids as $product_id ) {
+					$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
+					setup_postdata( $GLOBALS['post'] );
 
-				// Set custom product visibility when quering hidden products.
-				add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+					// Set custom product visibility when quering hidden products.
+					add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
 
-				// Render product template.
-				wc_get_template_part( 'content', 'product' );
+					// Render product template.
+					wc_get_template_part( 'content', 'product' );
 
-				// Restore product visibility.
-				remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+					// Restore product visibility.
+					remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+				}
 			}
 
 			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
-			if ( true === wc_string_to_bool( $this->attributes['paginate'] ) ) {
-				woocommerce_pagination( array(
-					'total'   => $products->total_pages,
-					'current' => $products->current_page,
-					'base'    => esc_url_raw( add_query_arg( 'product-page', '%#%', false ) ),
-					'format'  => '?product-page=%#%',
-				) );
-			}
-
+			do_action( 'woocommerce_after_shop_loop' );
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 
 			wp_reset_postdata();
+			wc_reset_loop();
 		} else {
 			do_action( "woocommerce_shortcode_{$this->type}_loop_no_results", $this->attributes );
 		}
-
-		woocommerce_reset_loop();
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
 	}
