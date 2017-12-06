@@ -1400,7 +1400,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function is_visible() {
 		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
 
-		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+		if ( 'trash' === $this->get_status() ) {
+			$visible = false;
+		} elseif ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
 			$visible = false;
 		}
 
