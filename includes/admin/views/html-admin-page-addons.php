@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( isset( $_GET['search'] ) ) : ?>
 			<h1 class="search-form-title" >
-				Showing Search results for:
+				<?php _e( 'Showing Search results for:', 'woocommerce' ); ?>
 				<strong><?php echo esc_html( $_GET['search'] ); ?></strong>
 			</h1>
 		<?php endif; ?>
@@ -47,7 +47,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<button type="submit">
 				<span class="dashicons dashicons-search"></span>
 			</button>
-			<input type="text" name="search" value="" placeholder="Enter a search term and press enter">
+			<input
+				type="text"
+				name="search"
+				value="<?php echo esc_html( $_GET['search'] ); ?>"
+				placeholder="<?php _e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
 			<input type="hidden" name="page" value="wc-addons">
 			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? $_GET['section'] : '_all'; ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
