@@ -1078,7 +1078,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 				'settings'    => array(
 					'reroute_requests' => array(
-						'label'       => __( 'Set up Express Checkout payments for me', 'woocommerce' ),
+						'label'       => __( 'Defer linking PayPal account until payment received', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
 						'placeholder' => '',
