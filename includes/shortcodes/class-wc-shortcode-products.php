@@ -175,7 +175,7 @@ class WC_Shortcode_Products {
 		);
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
-			$this->attributes['page'] = get_query_var( 'paged', 1 );
+			$this->attributes['page'] = get_query_var( 'product-page', 1 );
 		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
@@ -488,42 +488,42 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get products data.
+	 * Run the query and return an array of data, including queried ids and pagination information.
 	 *
 	 * @since  3.3.0
-	 * @return array See $data variable for keys and contents.
+	 * @return object Object with the following props; ids, per_page, found_posts, max_num_pages, current_page
 	 */
-	protected function get_products_data() {
+	protected function get_query_results() {
 		$transient_name = $this->get_transient_name();
-		$cache          = true === wc_string_to_bool( $this->attributes['cache'] );
+		$cache          = wc_string_to_bool( $this->attributes['cache'] ) === true;
 		$data           = $cache ? get_transient( $transient_name ) : false;
+
 		if ( false === $data ) {
 			if ( 'top_rated_products' === $this->type ) {
 				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-				$products = new WP_Query( $this->query_args );
+				$query = new WP_Query( $this->query_args );
 				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 			} else {
-				$products = new WP_Query( $this->query_args );
+				$query = new WP_Query( $this->query_args );
 			}
 
-			$data = array(
-				'ids'           => wp_parse_id_list( $products->posts ),
-				'per_page'      => $products->get( 'posts_per_page' ),
-				'found_posts'   => $products->found_posts,
-				'max_num_pages' => $products->max_num_pages,
-				'current'       => max( 1, $products->get( 'paged', 1 ) ),
-				'is_search'     => intval( $products->is_search() ),
+			$results = (object) array(
+				'ids'          => wp_parse_id_list( $query->posts ),
+				'total'        => (int) $query->found_posts,
+				'total_pages'  => (int) $query->max_num_pages,
+				'per_page'     => (int) $query->get( 'posts_per_page' ),
+				'current_page' => (int) max( 1, $query->get( 'paged', 1 ) ),
 			);
 
 			if ( $cache ) {
-				set_transient( $transient_name, $data, DAY_IN_SECONDS * 30 );
+				set_transient( $transient_name, $results, DAY_IN_SECONDS * 30 );
 			}
 		}
 		// Remove ordering query arguments.
 		if ( ! empty( $this->attributes['category'] ) ) {
 			WC()->query->remove_ordering_args();
 		}
-		return $data;
+		return $results;
 	}
 
 	/**
@@ -535,18 +535,19 @@ class WC_Shortcode_Products {
 	protected function product_loop() {
 		global $woocommerce_loop;
 
-		$columns                     = absint( $this->attributes['columns'] );
-		$classes                     = $this->get_wrapper_classes( $columns );
-		$woocommerce_loop['columns'] = $columns;
-		$woocommerce_loop['name']    = $this->type;
-		$products_data               = $this->get_products_data();
+		$columns                       = absint( $this->attributes['columns'] );
+		$classes                       = $this->get_wrapper_classes( $columns );
+		$woocommerce_loop['columns']   = $columns;
+		$woocommerce_loop['name']      = $this->type;
+		$woocommerce_loop['shortcode'] = true;
+		$products                      = $this->get_query_results();
 
 		ob_start();
 
-		if ( $products_data && $products_data['ids'] ) {
+		if ( $products && $products->ids ) {
 			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', $products_data['ids'] );
-			update_object_term_cache( $products_data['ids'], 'product' );
+			update_meta_cache( 'post', $products->ids );
+			update_object_term_cache( $products->ids, 'product' );
 
 			$original_post = $GLOBALS['post'];
 
@@ -554,16 +555,16 @@ class WC_Shortcode_Products {
 
 			if ( true === wc_string_to_bool( $this->attributes['paginate'] ) ) {
 				woocommerce_result_count( array(
-					'total'    => intval( $products_data['found_posts'] ),
-					'per_page' => intval( $products_data['per_page'] ),
-					'current'  => intval( $products_data['current'] ),
+					'total'    => $products->total,
+					'per_page' => $products->per_page,
+					'current'  => $products->current_page,
 				) );
-				woocommerce_catalog_ordering( (bool) $products_data['is_search'] );
+				woocommerce_catalog_ordering();
 			}
 
 			woocommerce_product_loop_start();
 
-			foreach ( $products_data['ids'] as $product_id ) {
+			foreach ( $products->ids as $product_id ) {
 				$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
 				setup_postdata( $GLOBALS['post'] );
 
@@ -582,9 +583,11 @@ class WC_Shortcode_Products {
 
 			if ( true === wc_string_to_bool( $this->attributes['paginate'] ) ) {
 				woocommerce_pagination( array(
-					'total'   => intval( $products_data['max_num_pages'] ),
-					'current' => intval( $products_data['current'] ),
-				), '?product-page=%#%' );
+					'total'   => $products->total_pages,
+					'current' => $products->current_page,
+					'base'    => esc_url_raw( add_query_arg( 'product-page', '%#%', false ) ),
+					'format'  => '?product-page=%#%',
+				) );
 			}
 
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );

@@ -875,14 +875,20 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		if ( ! woocommerce_products_will_display() ) {
 			return;
 		}
+		if ( empty( $args ) ) {
+			$query = $GLOBALS['wp_query'];
+			$args  = array(
+				'total'    => $query->found_posts,
+				'per_page' => $query->get( 'posts_per_page' ),
+				'current'  => max( 1, $query->get( 'paged', 1 ) ),
+			);
+		}
 
-		$query = $GLOBALS['wp_query'];
-		$default_args = array(
-			'total'    => $query->found_posts,
-			'per_page' => $query->get( 'posts_per_page' ),
-			'current'  => max( 1, $query->get( 'paged', 1 ) ),
-		);
-		$args = wp_parse_args( $args, $default_args );
+		$args = wp_parse_args( $args, array(
+			'total'    => 0,
+			'per_page' => 0,
+			'current'  => 0,
+		) );
 
 		wc_get_template( 'loop/result-count.php', $args );
 	}
@@ -892,10 +898,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 	/**
 	 * Output the product sorting options.
-	 *
-	 * @param null|bool $is_search Whether this is the catalog ordering for search results. Default is set from global $query.
 	 */
-	function woocommerce_catalog_ordering( $is_search = null ) {
+	function woocommerce_catalog_ordering() {
 		if ( ! woocommerce_products_will_display() ) {
 			return;
 		}
@@ -911,11 +915,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		if ( null === $is_search ) {
-			$is_search = $query->is_search();
-		}
-
-		if ( $is_search ) {
+		if ( ! is_shortcode_loop() && $GLOBALS['wp_query']->is_search() ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 			unset( $catalog_orderby_options['menu_order'] );
 			if ( 'menu_order' === $orderby ) {
@@ -947,13 +947,20 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	 * @param array $args Pass an associative array of parameters. Uses this if passed, otherwise uses global $wp_query.
 	 */
 	function woocommerce_pagination( $args = array() ) {
-		$query = $GLOBALS['wp_query'];
+		if ( empty( $args ) ) {
+			$query = $GLOBALS['wp_query'];
+			$args  = array(
+				'total'   => $query->max_num_pages,
+				'current' => max( 1, $query->get( 'paged', 1 ) ),
+			);
+		}
 
-		$default_args = array(
-			'total'   => $query->max_num_pages,
-			'current' => max( 1, $query->get( 'paged', 1 ) ),
-		);
-		$args = wp_parse_args( $args, $default_args );
+		$args = wp_parse_args( $args, array(
+			'total'   => 1,
+			'current' => 1,
+			'base'    => esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) ),
+			'format'  => '',
+		) );
 
 		wc_get_template( 'loop/pagination.php', $args );
 	}
@@ -1703,7 +1710,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		if ( is_search() || is_filtered() || is_paged() ) {
+		if ( is_search() || is_filtered() || is_paged() || is_shortcode_loop() ) {
 			return true;
 		}
 
