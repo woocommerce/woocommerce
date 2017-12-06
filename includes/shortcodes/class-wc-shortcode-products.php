@@ -496,9 +496,9 @@ class WC_Shortcode_Products {
 	protected function get_query_results() {
 		$transient_name = $this->get_transient_name();
 		$cache          = wc_string_to_bool( $this->attributes['cache'] ) === true;
-		$data           = $cache ? get_transient( $transient_name ) : false;
+		$results        = $cache ? get_transient( $transient_name ) : false;
 
-		if ( false === $data ) {
+		if ( false === $results ) {
 			if ( 'top_rated_products' === $this->type ) {
 				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 				$query = new WP_Query( $this->query_args );
