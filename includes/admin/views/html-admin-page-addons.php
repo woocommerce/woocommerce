@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input
 				type="text"
 				name="search"
-				value="<?php echo esc_html( $_GET['search'] ); ?>"
+				value="<?php echo esc_attr( isset( $_GET['search'] ) ? $_GET['search'] : '' ); ?>"
 				placeholder="<?php _e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
 			<input type="hidden" name="page" value="wc-addons">
 			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? $_GET['section'] : '_all'; ?>
@@ -93,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<li class="product">
 					<a href="<?php echo esc_attr( $addon->link ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>
-							<img src="<?php echo esc_attr( $addon->image ); ?>"/>
+							<img src="<?php echo esc_url( $addon->image ); ?>"/>
 						<?php else : ?>
 							<h2><?php echo esc_html( $addon->title ); ?></h2>
 						<?php endif; ?>
