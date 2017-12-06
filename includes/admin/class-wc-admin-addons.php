@@ -40,17 +40,6 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Build transient name
-	 *
-	 * @param array $args
-	 *
-	 * @return string transient name
-	 */
-	public static function build_transient_name( $args ) {
-		return 'wc_addons_extensions_' . md5( json_encode( $args ) );
-	}
-
-	/**
 	 * Build url parameter string
 	 *
 	 * @param  string $category
