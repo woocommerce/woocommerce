@@ -1169,15 +1169,17 @@ class WC_Admin_Setup_Wizard {
 		$klarna_checkout = array(
 			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
 			'description' => $klarna_checkout_description,
-			'image'       => WC()->plugin_url() . '/assets/images/klarna.png',
+			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 			'enabled'     => true,
+			'class'       => 'klarna-logo',
 			'repo-slug'   => 'klarna-checkout-for-woocommerce',
 		);
 		$klarna_payments = array(
 			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
 			'description' => $klarna_payments_description,
-			'image'       => WC()->plugin_url() . '/assets/images/klarna.png',
+			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 			'enabled'     => true,
+			'class'       => 'klarna-logo',
 			'repo-slug'   => 'klarna-payments-for-woocommerce',
 		);
 		$square = array(
