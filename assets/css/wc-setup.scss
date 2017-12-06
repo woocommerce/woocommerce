@@ -515,8 +515,24 @@ body {
 		}
 	}
 
+	&.paypal-logo .wc-wizard-service-name img {
+		max-width: 87px;
+	}
+
+	&.klarna-logo .wc-wizard-service-name {
+		background: #3c3c3c;
+
+		img {
+			max-width: 87px;
+		}
+	}
+
 	&.square-logo .wc-wizard-service-name {
 		background: #000000;
+
+		img {
+			max-width: 95px;
+		}
 	}
 
 	.wc-wizard-service-description {

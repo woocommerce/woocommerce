@@ -1147,6 +1147,7 @@ class WC_Admin_Setup_Wizard {
 		$ppec_paypal = array(
 			'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 			'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
+			'class'       => 'paypal-logo',
 			'description' => $paypal_ec_description,
 			'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			'enabled'     => $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square,
