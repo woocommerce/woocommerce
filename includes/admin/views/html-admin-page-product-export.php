@@ -24,7 +24,7 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 			<header>
 				<span class="spinner is-active"></span>
 				<h2><?php esc_html_e( 'Export products to a CSV file', 'woocommerce' ); ?></h2>
-				<p><?php esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' ); ?></p>
+				<p><?php esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products (Note: draft products are not exported, but the variations of draft variable products are).', 'woocommerce' ); ?></p>
 			</header>
 			<section>
 				<table class="form-table woocommerce-exporter-options">
