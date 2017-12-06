@@ -1028,10 +1028,6 @@ class WC_Admin_Setup_Wizard {
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
-		$paypal_bt_description = '<p>' . sprintf(
-			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/'
-		) . '</p>';
 		$paypal_ec_description = '<p>' . sprintf(
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
