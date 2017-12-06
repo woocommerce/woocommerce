@@ -1342,11 +1342,11 @@ class WC_Admin_Setup_Wizard {
 
 		if (
 			(
-				// Install WooCommerce Services with Stripe to enable deferred account creation
+				// Install WooCommerce Services with Stripe to enable deferred account creation.
 				! empty( $_POST['wc-wizard-service-stripe-enabled'] ) &&
 				! empty( $_POST['stripe_create_account'] )
 			) || (
-				// Install WooCommerce Services with PayPal EC to enable proxied payments
+				// Install WooCommerce Services with PayPal EC to enable proxied payments.
 				! empty( $_POST['wc-wizard-service-ppec_paypal-enabled'] ) &&
 				! empty( $_POST['ppec_paypal_reroute_requests'] )
 			)
