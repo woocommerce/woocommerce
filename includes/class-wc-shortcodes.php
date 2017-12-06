@@ -151,8 +151,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_categories( $atts ) {
-		global $woocommerce_loop;
-
 		if ( isset( $atts['number'] ) ) {
 			$atts['limit'] = $atts['number'];
 		}
@@ -202,7 +200,8 @@ class WC_Shortcodes {
 		}
 
 		$columns = absint( $atts['columns'] );
-		$woocommerce_loop['columns'] = $columns;
+
+		wc_set_loop_prop( 'columns', $columns );
 
 		ob_start();
 

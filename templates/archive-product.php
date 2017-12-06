@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.0
+ * @version     3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -61,7 +61,6 @@ if ( have_posts() ) :
 	do_action( 'woocommerce_before_shop_loop' );
 
 	woocommerce_product_loop_start();
-	woocommerce_product_subcategories();
 
 	while ( have_posts() ) :
 		the_post();

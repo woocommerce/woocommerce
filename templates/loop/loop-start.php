@@ -15,9 +15,5 @@
  * @package 	WooCommerce/Templates
  * @version     3.3.0
  */
-
-global $woocommerce_loop;
-
-$columns = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : wc_get_default_products_per_row();
 ?>
-<ul class="products columns-<?php echo esc_attr( $columns ); ?>">
+<ul class="products columns-<?php echo esc_attr( wc_get_loop_prop( 'columns' ) ); ?>">
