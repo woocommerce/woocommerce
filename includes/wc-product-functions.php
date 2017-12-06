@@ -1015,7 +1015,7 @@ function wc_get_product_tag_list( $product_id, $sep = ', ', $before = '', $after
  * @return bool
  */
 function wc_products_array_filter_visible( $product ) {
-	return $product && is_a( $product, 'WC_Product' ) && $product->is_visible();
+	return $product && is_a( $product, 'WC_Product' ) && $product->is_visible() && 'publish' === $product->get_status();
 }
 
 /**
